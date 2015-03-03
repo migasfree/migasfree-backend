@@ -1,0 +1,356 @@
+# -*- coding: utf-8 -*-
+
+# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+import os
+
+from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
+from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
+
+from migasfree.core.models import Attribute
+
+from .models import *
+
+
+def add_computer_search_fields(fields_list):
+    for field in settings.MIGASFREE_COMPUTER_SEARCH_FIELDS:
+        fields_list.append("computer__%s" % field)
+
+    return tuple(fields_list)
+
+
+class ComputerAdmin(admin.ModelAdmin):
+    list_display = (
+        '__str__',
+        'project',
+        'ip_address',
+        'login_user',
+        'last_accurate_connection',
+    )
+    list_per_page = 25
+    ordering = (settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0],)
+    list_filter = ('project__name', 'login_date')
+    search_fields = settings.MIGASFREE_COMPUTER_SEARCH_FIELDS + (
+        'login_user', 'login_user__fullname'
+    )
+
+    readonly_fields = (
+        'name',
+        'uuid',
+        'project',
+        'created_at',
+        'last_accurate_connection',
+        'ip_address',
+        'login_date',
+        'login_user',
+        'login_attributes',
+        'software_inventory',
+        'software_history',
+    )
+
+    fieldsets = (
+        (_('General'), {
+            'fields': (
+                'uuid',
+                'name',
+                'project',
+                'created_at',
+                'last_accurate_connection',
+                'ip_address',
+                'last_hardware_capture',
+                'status',
+            )
+        }),
+        (_('Login'), {
+            'fields': ('login_date', 'login_user', 'login_attributes')
+        }),
+        (_('Software'), {
+            'classes': ('collapse',),
+            'fields': (
+                'software_inventory',
+                'software_history',
+            )
+        }),
+        (_('Tags'), {
+            'fields': ('tags',)
+        }),
+        #(_('Devices'), {
+        #    'fields': ('logical_devices',)
+        #}),
+    )
+
+    """
+    actions = ['delete_selected']
+
+    def delete_selected(self, request, objs):
+        if not self.has_delete_permission(request):
+            raise PermissionDenied
+
+        return render(
+            request,
+            'computer_confirm_delete_selected.html',
+            {
+                'object_list': ', '.join(
+                    objs.values_list(
+                        settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0], flat=True
+                    )
+                )
+            }
+        )
+
+    delete_selected.short_description = _("Delete selected %(verbose_name_plural)s")
+    """
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        '''
+        if db_field.name == "logical_devices":
+            kwargs['widget'] = FilteredSelectMultiple(
+                db_field.verbose_name,
+                (db_field.name in self.filter_vertical)
+            )
+            return db_field.formfield(**kwargs)
+        '''
+
+        if db_field.name == "login_attributes":
+            kwargs["queryset"] = Attribute.objects.filter(
+                property_att__enabled=True
+            )
+            return db_field.formfield(**kwargs)
+
+        return super(ComputerAdmin, self).formfield_for_manytomany(
+            db_field, request, **kwargs
+        )
+
+    def has_add_permission(self, request):
+        return False
+
+admin.site.register(Computer, ComputerAdmin)
+
+
+class PackageAdmin(admin.ModelAdmin):
+    list_display = ('fullname', 'project')
+    ordering = ('name', 'version', 'project')
+    list_filter = ('project',)
+    search_fields = ('name', 'version', 'fullname')
+    readonly_fields = (
+        'fullname', 'name',
+        'version', 'architecture', 'project'
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+admin.site.register(Package, PackageAdmin)
+
+
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'computer', 'created_at', 'text',)
+    ordering = ('created_at',)
+    list_filter = ('created_at',)
+    search_fields = ('computer', 'text', 'created_at',)
+    readonly_fields = ('computer', 'text', 'created_at')
+    exclude = ('computer',)
+
+    def has_add_permission(self, request):
+        return False
+
+admin.site.register(Message, MessageAdmin)
+
+
+class ErrorAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'computer',
+        'project',
+        'checked',
+        'created_at',
+        'truncate_desc',
+    )
+    list_filter = ('checked', 'created_at', 'project__name')
+    #list_editable = ('checked',)  # TODO
+    ordering = ('-created_at', 'computer',)
+    search_fields = add_computer_search_fields(['created_at', 'description'])
+    readonly_fields = ('computer', 'project', 'created_at', 'description')
+    exclude = ('computer',)
+
+    actions = ['checked_ok']
+
+    def checked_ok(self, request, queryset):
+        for error in queryset:
+            error.checked = True
+            error.save()
+
+        return redirect(request.get_full_path())
+
+    checked_ok.short_description = _("Checking is O.K.")
+
+    def has_add_permission(self, request):
+        return False
+
+admin.site.register(Error, ErrorAdmin)
+
+
+class FaultDefinitionAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'enabled',
+        'list_included_attributes', 'list_excluded_attributes',
+        'list_users'
+    )
+    list_filter = ('enabled',)
+    ordering = ('name',)
+    search_fields = ('name',)
+    filter_horizontal = ('included_attributes',)
+
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'description', 'enabled', 'language', 'code')
+        }),
+        (_('Atributtes'), {
+            'classes': ('collapse',),
+            'fields': ('included_attributes', 'excluded_attributes')
+        }),
+        (_('Users'), {
+            'classes': ('collapse',),
+            'fields': ('users',)
+        }),
+    )
+
+admin.site.register(FaultDefinition, FaultDefinitionAdmin)
+
+
+class UserFaultFilter(SimpleListFilter):
+    title = _('User')
+    parameter_name = 'user'
+
+    def lookups(self, request, model_admin):
+        return Fault.USER_FILTER_CHOICES
+
+    def queryset(self, request, queryset):
+        me = request.user.id
+        if self.value() == 'me':
+            return queryset.filter(
+                Q(fault_definition__users__id=me)
+                | Q(fault_definition__users=None)
+            )
+        elif self.value() == 'only_me':
+            return queryset.filter(fault_definition__users__id=me)
+        elif self.value() == 'others':
+            return queryset.exclude(
+                fault_definition__users__id=me
+            ).exclude(fault_definition__users=None)
+        elif self.value() == 'unassigned':
+            return queryset.filter(fault_definition__users=None)
+
+
+class FaultAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'computer',
+        'project',
+        'checked',
+        'created_at',
+        'result',
+        'fault_definition',
+        #'list_users'  # performance improvement
+    )
+    list_filter = (
+        UserFaultFilter,
+        'checked', 'created_at', 'project__name', 'fault_definition'
+    )
+    ordering = ('-created_at', 'computer',)
+    search_fields = add_computer_search_fields(
+        ['created_at', 'fault_definition__name']
+    )
+    readonly_fields = (
+        'computer', 'fault_definition', 'project', 'created_at', 'result'
+    )
+    exclude = ('computer',)
+
+    actions = ['checked_ok']
+
+    def checked_ok(self, request, queryset):
+        for fault in queryset:
+            fault.checked = True
+            fault.save()
+
+        return redirect(request.get_full_path())
+
+    checked_ok.short_description = _("Checking is O.K.")
+
+    def has_add_permission(self, request):
+        return False
+
+admin.site.register(Fault, FaultAdmin)
+
+
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('name', 'fullname',)
+    ordering = ('name',)
+    search_fields = ('name', 'fullname')
+    readonly_fields = ('name', 'fullname')
+
+    def has_add_permission(self, request):
+        return False
+
+admin.site.register(User, UserAdmin)
+
+
+class MigrationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'computer', 'project', 'created_at')
+    list_select_related = ('computer', 'project',)
+    list_filter = ('created_at', 'project__name', 'project__platform__name',)
+    search_fields = add_computer_search_fields(['created_at'])
+    readonly_fields = ('computer', 'project', 'created_at')
+    exclude = ("computer",)
+    actions = None
+
+    def has_add_permission(self, request):
+        return False
+
+admin.site.register(Migration, MigrationAdmin)
+
+
+class AccurateConnectionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'computer', 'user', 'created_at', 'project')
+    list_filter = ('created_at', )
+    search_fields = add_computer_search_fields(['created_at', 'user__name'])
+    readonly_fields = (
+        'computer', 'user', 'project', 'created_at', 'start_date', 'consumer'
+    )
+    exclude = ('computer',)
+    actions = None
+
+    def has_add_permission(self, request):
+        return False
+
+admin.site.register(AccurateConnection, AccurateConnectionAdmin)
+
+
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'created_at', 'message', 'checked')
+    list_filter = ('checked', 'created_at')
+    ordering = ('-created_at',)
+    search_fields = ('message',)
+    readonly_fields = ('created_at', 'message')
+
+    def has_add_permission(self, request):
+        return False
+
+admin.site.register(Notification, NotificationAdmin)
