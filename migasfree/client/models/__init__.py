@@ -27,4 +27,4 @@ from .user import User
 from .message import Message
 from .notification import Notification
 from .migration import Migration
-from .accurate_connection import AccurateConnection
+from .synchronization import Synchronization
