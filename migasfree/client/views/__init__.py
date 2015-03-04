@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from .safe import SafeComputerViewSet, SafeAccurateConnectionView
+from .safe import SafeComputerViewSet, SafeSynchronizationView
 from .public import PackagerKeysView, ProjectKeysView
 from .token import (
     ComputerViewSet, ErrorViewSet, FaultViewSet,
