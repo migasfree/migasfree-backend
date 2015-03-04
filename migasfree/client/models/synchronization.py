@@ -27,7 +27,7 @@ from .user import User
 
 
 @python_2_unicode_compatible
-class AccurateConnection(models.Model):
+class Synchronization(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     start_date = models.DateTimeField(
@@ -59,9 +59,9 @@ class AccurateConnection(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        super(AccurateConnection, self).save(*args, **kwargs)
+        super(Synchronization, self).save(*args, **kwargs)
 
-        self.computer.last_accurate_connection = self.created_at
+        self.computer.sync_end_date = self.created_at
         self.computer.save()
 
     def __str__(self):
@@ -69,5 +69,5 @@ class AccurateConnection(models.Model):
 
     class Meta:
         app_label = 'client'
-        verbose_name = _("Accurate Connection")
-        verbose_name_plural = _("Accurate Connections")
+        verbose_name = _("Synchronization")
+        verbose_name_plural = _("Synchronizations")
