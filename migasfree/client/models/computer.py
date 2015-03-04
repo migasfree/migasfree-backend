@@ -113,11 +113,6 @@ class Computer(models.Model):
         editable=False
     )
 
-    last_accurate_connection = models.DateTimeField(
-        verbose_name=_("last accurate connection date"),
-        null=True,
-    )
-
     last_hardware_capture = models.DateTimeField(
         verbose_name=_("last hardware capture"),
         null=True,
@@ -132,22 +127,27 @@ class Computer(models.Model):
         related_name='tags'
     )
 
-    login_date = models.DateTimeField(
-        verbose_name=_('login date'),
+    sync_start_date = models.DateTimeField(
+        verbose_name=_('sync start date'),
         null=True,
     )
 
-    login_user = models.ForeignKey(
+    sync_end_date = models.DateTimeField(
+        verbose_name=_("sync end date"),
+        null=True,
+    )
+
+    sync_user = models.ForeignKey(
         User,
-        verbose_name=_("login user"),
+        verbose_name=_("sync user"),
         null=True,
     )
 
-    login_attributes = models.ManyToManyField(
+    sync_attributes = models.ManyToManyField(
         Attribute,
         null=True,
         blank=True,
-        verbose_name=_("login attributes"),
+        verbose_name=_("sync attributes"),
         help_text=_("attributes sent")
     )
 
@@ -178,7 +178,7 @@ class Computer(models.Model):
 
     def get_all_attributes(self):
         return list(self.tags.values_list('id', flat=True)) \
-            + list(self.login_attributes.values_list('id', flat=True))
+            + list(self.sync_attributes.values_list('id', flat=True))
 
     def remove_device_copy(self, logical_id):
         try:
@@ -202,8 +202,8 @@ class Computer(models.Model):
 
     def login(self):
         return '%s@%s' % (
-            self.login_user.name,
-            self.computer.__unicode__()
+            self.sync_user.name,
+            self.computer.__str__()
         )
 
     def change_status(self, status):
