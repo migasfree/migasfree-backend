@@ -157,7 +157,7 @@ class SafeConnectionMixin(object):
         return {'msg': msg}
 
 
-class SafeAccurateConnectionView(SafeConnectionMixin, views.APIView):
+class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
     def post(self, request, format=None):
         """
         claims = {
@@ -172,14 +172,14 @@ class SafeAccurateConnectionView(SafeConnectionMixin, views.APIView):
 
         data = {
             'computer': computer.id,
-            'user': computer.login_user.id,
+            'user': computer.sync_user.id,
             'project': self.project.id,
             'start_date': claims.get('start_date'),
             'consumer': claims.get('consumer')
         }
-        serializer = serializers.AccurateConnectionSerializer(data=data)
+        serializer = serializers.SynchronizationSerializer(data=data)
         if serializer.is_valid():
-            accurate_connection = serializer.save()
+            synchronization = serializer.save()
 
             return Response(
                 self.create_response(serializer.data),
@@ -301,9 +301,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             'uuid': '01020304050607080910111213141516',
             'name': 'PC12345',
             'ip_address': '192.168.1.33',
-            'login_user': 'inigo',
-            'login_fullname': 'Íñigo Montoya',
-            'login_attributes': {
+            'sync_user': 'inigo',
+            'sync_fullname': 'Íñigo Montoya',
+            'sync_attributes': {
                     'NET': '192.168.1.0/24',  # prefix: value
                     ...,
             }
@@ -321,17 +321,17 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
         user = get_user_or_create(
-            claims.get('login_user'), claims.get('login_fullname')
+            claims.get('sync_user'), claims.get('sync_fullname')
             # claims.get('ip_address')  # TODO for notification
         )
 
-        computer.login_attributes.clear()
+        computer.sync_attributes.clear()
 
         # features
-        for key, value in claims.get('login_attributes').iteritems():
+        for key, value in claims.get('sync_attributes').iteritems():
             prop = Property.objects.get(prefix=key)
             for att_id in Attribute.process_kind_property(prop, value):
-                computer.login_attributes.add(att_id)
+                computer.sync_attributes.add(att_id)
 
         # tags
         for tag in computer.tags.all().filter(property_att__enabled=True):
@@ -346,14 +346,14 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             user=user.name
         )
         for id in att_id:
-            computer.login_attributes.add(id)
+            computer.sync_attributes.add(id)
 
         update(computer,
             uuid=claims.get('uuid'),
             name=claims.get('name'),
             ip_address=claims.get('ip_address'),
-            login_user=user,
-            login_date=datetime.now()
+            sync_user=user,
+            sync_start_date=datetime.now()
         )
 
         serializer = serializers.ComputerSerializer(computer)
