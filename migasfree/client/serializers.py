@@ -65,9 +65,9 @@ class NotificationSerializer(serializers.ModelSerializer):
         fields = ('id', 'created_at', 'message', 'checked')
 
 
-class AccurateConnectionSerializer(serializers.ModelSerializer):
+class SynchronizationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.AccurateConnection
+        model = models.Synchronization
         fields = (
             'id', 'created_at', 'computer', 'user', 'project',
             'start_date', 'consumer'
