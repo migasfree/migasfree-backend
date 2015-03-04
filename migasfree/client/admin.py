@@ -84,15 +84,15 @@ class ComputerAdmin(admin.ModelAdmin):
                 'sync_attributes',
             )
         }),
+        (_('Tags'), {
+            'fields': ('tags',)
+        }),
         (_('Software'), {
-            'classes': ('collapse',),
+            'classes': ('grp-collapse grp-closed',),
             'fields': (
                 'software_inventory',
                 'software_history',
             )
-        }),
-        (_('Tags'), {
-            'fields': ('tags',)
         }),
         #(_('Devices'), {
         #    'fields': ('logical_devices',)
@@ -227,11 +227,11 @@ class FaultDefinitionAdmin(admin.ModelAdmin):
             'fields': ('name', 'description', 'enabled', 'language', 'code')
         }),
         (_('Atributtes'), {
-            'classes': ('collapse',),
+            'classes': ('grp-collapse grp-closed',),
             'fields': ('included_attributes', 'excluded_attributes')
         }),
         (_('Users'), {
-            'classes': ('collapse',),
+            'classes': ('grp-collapse grp-closed',),
             'fields': ('users',)
         }),
     )
