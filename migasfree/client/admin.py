@@ -40,14 +40,14 @@ class ComputerAdmin(admin.ModelAdmin):
         '__str__',
         'project',
         'ip_address',
-        'login_user',
-        'last_accurate_connection',
+        'sync_user',
+        'sync_end_date',
     )
     list_per_page = 25
     ordering = (settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0],)
-    list_filter = ('project__name', 'login_date')
+    list_filter = ('project__name', 'sync_start_date')
     search_fields = settings.MIGASFREE_COMPUTER_SEARCH_FIELDS + (
-        'login_user', 'login_user__fullname'
+        'sync_user', 'sync_user__fullname'
     )
 
     readonly_fields = (
@@ -55,11 +55,11 @@ class ComputerAdmin(admin.ModelAdmin):
         'uuid',
         'project',
         'created_at',
-        'last_accurate_connection',
         'ip_address',
-        'login_date',
-        'login_user',
-        'login_attributes',
+        'sync_start_date',
+        'sync_user',
+        'sync_attributes',
+        'sync_end_date',
         'software_inventory',
         'software_history',
     )
@@ -71,14 +71,18 @@ class ComputerAdmin(admin.ModelAdmin):
                 'name',
                 'project',
                 'created_at',
-                'last_accurate_connection',
                 'ip_address',
                 'last_hardware_capture',
                 'status',
             )
         }),
-        (_('Login'), {
-            'fields': ('login_date', 'login_user', 'login_attributes')
+        (_('Synchronization'), {
+            'fields': (
+                'sync_start_date',
+                'sync_end_date',
+                'sync_user',
+                'sync_attributes',
+            )
         }),
         (_('Software'), {
             'classes': ('collapse',),
@@ -127,7 +131,7 @@ class ComputerAdmin(admin.ModelAdmin):
             return db_field.formfield(**kwargs)
         '''
 
-        if db_field.name == "login_attributes":
+        if db_field.name == "sync_attributes":
             kwargs["queryset"] = Attribute.objects.filter(
                 property_att__enabled=True
             )
@@ -327,7 +331,7 @@ class MigrationAdmin(admin.ModelAdmin):
 admin.site.register(Migration, MigrationAdmin)
 
 
-class AccurateConnectionAdmin(admin.ModelAdmin):
+class SynchronizationAdmin(admin.ModelAdmin):
     list_display = ('id', 'computer', 'user', 'created_at', 'project')
     list_filter = ('created_at', )
     search_fields = add_computer_search_fields(['created_at', 'user__name'])
@@ -340,7 +344,7 @@ class AccurateConnectionAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-admin.site.register(AccurateConnection, AccurateConnectionAdmin)
+admin.site.register(Synchronization, SynchronizationAdmin)
 
 
 class NotificationAdmin(admin.ModelAdmin):
