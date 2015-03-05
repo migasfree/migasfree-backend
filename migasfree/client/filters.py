@@ -58,6 +58,7 @@ class FaultFilter(filters.FilterSet):
     created_at = filters.DateTimeFilter(name='created_at', lookup_type='gte')
 
     """
+    # TODO override filter_queryset (http://www.django-rest-framework.org/api-guide/filtering/)
     user = filters.ChoiceFilter(
         choices=Fault.USER_FILTER_CHOICES,
         label=_('User'),
