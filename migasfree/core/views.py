@@ -45,7 +45,7 @@ from .serializers import (
     ScheduleSerializer,
     PackageSerializer, RepositorySerializer,
 )
-from .filters import RepositoryFilter
+from .filters import RepositoryFilter, PackageFilter
 from .permissions import PublicPermission, IsAdminOrIsSelf
 
 
@@ -133,6 +133,7 @@ class PackageViewSet(mixins.CreateModelMixin,
         viewsets.GenericViewSet):
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
+    filter_class = PackageFilter
     parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
 
 
