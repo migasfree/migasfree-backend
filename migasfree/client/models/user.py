@@ -26,7 +26,7 @@ class User(models.Model):
     name = models.CharField(
         verbose_name=_("name"),
         max_length=50,
-        unique=True
+        null=False
     )
 
     fullname = models.CharField(
@@ -45,3 +45,4 @@ class User(models.Model):
         app_label = 'client'
         verbose_name = _("User")
         verbose_name_plural = _("Users")
+        unique_together = (('name', 'fullname'),)
