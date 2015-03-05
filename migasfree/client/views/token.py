@@ -25,7 +25,9 @@ from rest_framework.response import Response
 from rest_framework_filters import backends
 
 from .. import models, serializers
-from ..filters import PackageFilter, ErrorFilter, NotificationFilter
+from ..filters import (
+    PackageFilter, ErrorFilter, NotificationFilter, FaultFilter
+)
 
 
 class ComputerViewSet(
@@ -105,9 +107,8 @@ class ErrorViewSet(
 ):
     queryset = models.Error.objects.all()
     serializer_class = serializers.ErrorSerializer
-    filter_backends = (
-        filters.OrderingFilter, backends.DjangoFilterBackend, ErrorFilter
-    )
+    filter_class = ErrorFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
@@ -117,6 +118,8 @@ class FaultViewSet(
 ):
     queryset = models.Fault.objects.all()
     serializer_class = serializers.FaultSerializer
+    filter_class = FaultFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
 
 
 class PackageViewSet(
@@ -124,9 +127,8 @@ class PackageViewSet(
 ):
     queryset = models.Package.objects.all()
     serializer_class = serializers.PackageSerializer
-    filter_backends = (
-        filters.OrderingFilter, backends.DjangoFilterBackend, PackageFilter
-    )
+    filter_class = PackageFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('fullname',)
 
@@ -136,8 +138,7 @@ class NotificationViewSet(
 ):
     queryset = models.Notification.objects.all()
     serializer_class = serializers.NotificationSerializer
-    filter_backends = (
-        filters.OrderingFilter, backends.DjangoFilterBackend, NotificationFilter
-    )
+    filter_class = NotificationFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
