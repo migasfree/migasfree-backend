@@ -40,7 +40,7 @@ class Migration(models.Model):
     )
 
     def __str__(self):
-        return '%s - %s' % (self.computer.__str__(), self.project)
+        return '%s (%s)' % (self.computer.__str__(), self.project)
 
     class Meta:
         app_label = 'client'
