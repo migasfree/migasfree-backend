@@ -18,7 +18,7 @@
 
 import rest_framework_filters as filters
 
-from .models import Repository
+from .models import Repository, Package
 
 
 class RepositoryFilter(filters.FilterSet):
@@ -27,4 +27,12 @@ class RepositoryFilter(filters.FilterSet):
         fields = {
             'project__id': ['exact'],
             'enabled': ['exact'],
+        }
+
+
+class PackageFilter(filters.FilterSet):
+    class Meta:
+        model = Package
+        fields = {
+            'repository__id': ['exact'],
         }
