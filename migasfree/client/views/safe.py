@@ -37,7 +37,7 @@ from .. import models, serializers
 
 
 def get_user_or_create(name, fullname, ip_address=None):
-    user = models.User.objects.filter(name=name)
+    user = models.User.objects.filter(name=name, fullname=fullname)
     if not user:
         user = models.User.objects.create(name=name, fullname=fullname)
 
