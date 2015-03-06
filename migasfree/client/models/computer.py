@@ -16,6 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+
+from celery import shared_task
+#from celery.contrib.methods import task_method
+#from celery.contrib.methods import task
 from datetime import datetime
 
 from django.db import models
@@ -220,6 +225,8 @@ class Computer(models.Model):
             self.software_history = history + '\n\n' + self.software_history
             self.save()
 
+    """
+    @shared_task(filter=task_method, queue='default')
     def update_software_inventory(self, inventory):
         if inventory and type(inventory) == list:
             pkgs = []
@@ -253,6 +260,46 @@ class Computer(models.Model):
             self.software_inventory.clear()
             self.software_inventory = pkgs
             self.save()
+    """
+
+    @staticmethod
+    @shared_task(queue='default')
+    def update_software_inventory(id, inventory):
+        computer = Computer.objects.get(pk=id)
+
+        if inventory and type(inventory) == list:
+            pkgs = []
+            new_pkgs = []
+            for package in inventory:
+                if package:
+                    # name_version_architecture.ext convention
+                    try:
+                        name, version, architecture = package.split('_')
+                    except:
+                        continue
+                    architecture = architecture.split('.')[0]
+                    try:
+                        pkgs.append(Package.objects.get(
+                            fullname=package, project__id=computer.project.id
+                        ))
+                    except:
+                        new_pkgs.append(
+                            Package(
+                                fullname=package,
+                                name=name, version=version,
+                                architecture=architecture,
+                                project=computer.project
+                            )
+                        )
+
+            if new_pkgs:
+                bulk = Package.objects.bulk_create(new_pkgs)
+                objs = Package.objects.filter(fullname__in=bulk)
+                [pkgs.append(x) for x in objs]
+
+            computer.software_inventory.clear()
+            computer.software_inventory = pkgs
+            computer.save()
 
     @staticmethod
     def replacement(source, target):
