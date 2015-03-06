@@ -783,13 +783,11 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             )
 
         computer.update_software_history(claims.get('history'))
-        computer.update_software_inventory(claims.get('inventory'))
-
-        serializer = serializers.ComputerSerializer(computer)
+        computer.update_software_inventory.delay(computer.id, claims.get('inventory'))
 
         return Response(
-            self.create_response(serializer.data),
-            status=status.HTTP_201_CREATED
+            self.create_response(trans('Data received')),
+            status=status.HTTP_200_OK
         )
 
     @list_route(methods=['post'])
