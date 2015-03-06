@@ -23,9 +23,8 @@ import os
 from celery import Celery
 from django.conf import settings
 
-# FIXME development or production
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'migasfree.settings.development')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'migasfree.settings.production')
 
 app = Celery('migasfree')
 app.config_from_object('django.conf:settings')
-app.autodiscover_tasks(lambda: settings.INSTALLED_APPS) #, related_name="deferred")
+app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
