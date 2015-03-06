@@ -98,6 +98,10 @@ class Package(models.Model):
             for chunk in f.chunks():
                 destination.write(chunk)
 
+    @staticmethod
+    def orphaned():
+        return Package.objects.filter(repository__id=None).count()
+
     def create_dir(self):
         _path = os.path.join(
             settings.MIGASFREE_PUBLIC_DIR,
