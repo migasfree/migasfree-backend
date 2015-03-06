@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+
 import os
 import shutil
 import datetime
@@ -29,6 +31,7 @@ from django.db.models import Q
 from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
+from celery import shared_task
 
 from migasfree.utils import time_horizon
 
@@ -149,8 +152,8 @@ class Repository(models.Model):
 
         super(Repository, self).save(*args, **kwargs)
 
-    #@shared_task(queue = 'repository')
     @staticmethod
+    @shared_task(queue='repository')
     def remove_repository_metadata(repo_id, old_slug=''):
         _repo = Repository.objects.get(id=repo_id)
 
@@ -173,8 +176,8 @@ class Repository(models.Model):
         )
         shutil.rmtree(_destination, ignore_errors=True)
 
-    #@shared_task(queue = 'repository')
     @staticmethod
+    @shared_task(queue='repository')
     def create_repository_metadata(repo_id):
         _repo = Repository.objects.get(id=repo_id)
 
