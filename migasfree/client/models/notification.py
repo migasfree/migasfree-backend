@@ -36,6 +36,10 @@ class Notification(models.Model):
         default=False,
     )
 
+    @staticmethod
+    def unchecked():
+        return Notification.objects.filter(checked=0).count()
+
     def save(self, *args, **kwargs):
         self.message = self.message.replace("\r\n", "\n")
         super(Notification, self).save(*args, **kwargs)
