@@ -18,6 +18,7 @@
 
 from .migasfree import *
 from .base import *
+from .celery import *
 from .functions import secret_key
 
 # production environment
