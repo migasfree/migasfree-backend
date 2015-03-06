@@ -33,7 +33,7 @@ from migasfree.core.models import (
     Project, Repository, Property, Attribute, BasicAttribute
 )
 
-from .. import models, serializers
+from .. import models, serializers, tasks
 
 
 def get_user_or_create(name, fullname, ip_address=None):
@@ -783,7 +783,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             )
 
         computer.update_software_history(claims.get('history'))
-        computer.update_software_inventory.delay(computer.id, claims.get('inventory'))
+        tasks.update_software_inventory.delay(
+            computer.id, claims.get('inventory')
+        )
 
         return Response(
             self.create_response(trans('Data received')),
