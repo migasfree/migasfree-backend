@@ -77,6 +77,10 @@ class Fault(models.Model):
 
     objects = FaultManager()
 
+    @staticmethod
+    def unchecked():
+        return Fault.objects.filter(checked=0).count()
+
     def list_users(self):
         return self.fault_definition.list_users()
 
