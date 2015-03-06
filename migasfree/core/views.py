@@ -136,6 +136,21 @@ class PackageViewSet(mixins.CreateModelMixin,
     filter_class = PackageFilter
     parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
 
+    @list_route(methods=['get'])
+    def orphaned(self, request, pk=None):
+        """
+        Returns packages that are not in any repository
+        """
+        serializer = PackageSerializer(
+            Package.objects.filter(repository__id=None),
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
 
 class RepositoryViewSet(viewsets.ModelViewSet):
     queryset = Repository.objects.all()
