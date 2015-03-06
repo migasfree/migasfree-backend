@@ -21,6 +21,8 @@ from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
+from . import tasks
+
 from .validators import (
     MimetypeValidator, validate_package_name, validate_project_pms
 )
@@ -170,27 +172,27 @@ class RepositorySerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(read_only=True)
 
     def create(self, validated_data):
-        _repo = super(RepositorySerializer, self).create(validated_data)
-        Repository.create_repository_metadata(_repo.id)
-        return _repo
+        repo = super(RepositorySerializer, self).create(validated_data)
+        tasks.create_repository_metadata.delay(repo.id)
+        return repo
 
     def update(self, instance, validated_data):
-        _old_obj = self.Meta.model.objects.get(id=instance.id)
-        _old_pkgs = sorted(_old_obj.available_packages.values_list('id', flat=True))
-        _old_name = _old_obj.name
+        old_obj = self.Meta.model.objects.get(id=instance.id)
+        old_pkgs = sorted(old_obj.available_packages.values_list('id', flat=True))
+        old_name = old_obj.name
 
         #https://github.com/tomchristie/django-rest-framework/issues/2442
         instance = super(RepositorySerializer, self).update(
             instance, validated_data
         )
-        _new_pkgs = sorted(instance.available_packages.values_list('id', flat=True))
+        new_pkgs = sorted(instance.available_packages.values_list('id', flat=True))
 
-        if cmp(_old_pkgs, _new_pkgs) != 0 or _old_name != validated_data['name']:
-            Repository.create_repository_metadata(instance.id)
+        if cmp(old_pkgs, new_pkgs) != 0 or old_name != validated_data['name']:
+            tasks.create_repository_metadata.delay(instance.id)
 
-            if _old_name != validated_data['name']:
-                Repository.remove_repository_metadata(
-                    instance.id, _old_obj.slug
+            if old_name != validated_data['name']:
+                tasks.remove_repository_metadata.delay(
+                    instance.id, old_obj.slug
                 )
 
         return instance
