@@ -58,6 +58,10 @@ class Error(models.Model):
         else:
             return self.description[:250] + ' ...'
 
+    @staticmethod
+    def unchecked():
+        return Error.objects.filter(checked=0).count()
+
     def save(self, *args, **kwargs):
         self.description = self.description.replace("\r\n", "\n")
         super(Error, self).save(*args, **kwargs)
