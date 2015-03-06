@@ -31,6 +31,8 @@ from django.conf import settings
 from import_export import resources, fields, widgets
 from import_export.admin import ImportExportActionModelAdmin
 
+from . import tasks
+
 from .models import *
 from .forms import PackageForm, RepositoryForm, ClientPropertyForm
 
@@ -275,10 +277,10 @@ class RepositoryAdmin(admin.ModelAdmin):
                     sorted(obj.available_packages.values_list('id', flat=True)),  # packages before
                     sorted(packages_after)
                 ) != 0) or (new_slug != old_slug):
-            Repository.create_repository_metadata(obj.id)
+            tasks.create_repository_metadata.delay(obj.id)
 
             # delete old repository when name (slug) has changed
             if new_slug != old_slug and not is_new:
-                Repository.remove_repository_metadata(obj.id, old_slug)
+                tasks.remove_repository_metadata.delay(obj.id, old_slug)
 
 admin.site.register(Repository, RepositoryAdmin)
