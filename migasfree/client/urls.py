@@ -32,7 +32,7 @@ public_patterns = patterns('',
 )
 
 safe_patterns = patterns('',
-    url(r'^synchronization/$', SafeSynchronizationView.as_view())
+    url(r'^synchronizations/$', SafeSynchronizationView.as_view())
 )
 
 urlpatterns = patterns('',
