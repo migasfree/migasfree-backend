@@ -26,15 +26,33 @@ REDIS_PORT = 6379
 REDIS_DB = 0
 
 BROKER_URL = 'redis://%s:%d/%d' % (REDIS_HOST, REDIS_PORT, REDIS_DB)
+
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_DEFAULT_QUEUE = 'default'
 
-#CELERY_IMPORTS = ('migasfree.client.tasks',)
+CELERY_IMPORTS = (
+    'migasfree.stats.tasks',
+    'migasfree.core.tasks',
+    'migasfree.client.tasks',
+)
 CELERYBEAT_SCHEDULE = {
-    'status': {
-        'task': 'xxxx',
+    'alerts': {
+        'task': 'migasfree.stats.tasks.alerts',
         'schedule': timedelta(seconds=10)
     }
 }
+
+# django-redis
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": BROKER_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
