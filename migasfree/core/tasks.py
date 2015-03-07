@@ -62,12 +62,12 @@ def create_repository_metadata(repo_id):
 
     con = get_redis_connection('default')
     con.hmset(
-        'repos:%d' % repo.id, {
+        'migasfree:repos:%d' % repo.id, {
             'name': repo.name,
             'project': repo.project.name
         }
     )
-    con.sadd('watch:repos', repo.id)
+    con.sadd('migasfree:watch:repos', repo.id)
 
     exec('from migasfree.core.pms import %s' % repo.project.pms)
     pms = eval('%s.%s' % (
@@ -133,7 +133,7 @@ def create_repository_metadata(repo_id):
     shutil.copytree(source, target, symlinks=True)
     shutil.rmtree(tmp_path)
 
-    con.hdel('repos:%d' % repo.id, '*')
-    con.srem('watch:repos', repo.id)
+    con.hdel('migasfree:repos:%d' % repo.id, '*')
+    con.srem('migasfree:watch:repos', repo.id)
 
     return (ret, output if ret == 0 else error)
