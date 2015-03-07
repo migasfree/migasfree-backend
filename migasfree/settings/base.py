@@ -129,6 +129,7 @@ INSTALLED_APPS = (
     'import_export',
     'migasfree.core',
     'migasfree.client',
+    'migasfree.stats',
 )
 
 REST_FRAMEWORK = {
