@@ -25,6 +25,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets, mixins, status, views
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
+from django_redis import get_redis_connection
 
 from migasfree.utils import uuid_change_format, trans
 from migasfree.model_update import update
@@ -34,6 +35,30 @@ from migasfree.core.models import (
 )
 
 from .. import models, serializers, tasks
+
+import logging
+logger = logging.getLogger('migasfree')
+
+
+def add_computer_message(computer, message):
+    con = get_redis_connection('default')
+    con.hmset(
+        'migasfree:msg:%d' % computer.id, {
+            'date': datetime.now(),
+            'name': computer.__str__(),
+            'project': computer.project.name,
+            'ip': computer.ip_address,
+            'user': computer.sync_user.fullname,
+            'msg': message
+        }
+    )
+    con.sadd('migasfree:watch:msg', computer.id)
+
+
+def remove_computer_messages(id):
+    con = get_redis_connection('default')
+    con.hdel('migasfree:msg:%d' % id, '*')
+    con.srem('migasfree:watch:msg', id)
 
 
 def get_user_or_create(name, fullname, ip_address=None):
@@ -86,11 +111,11 @@ def is_computer_changed(computer, name, project, ip_address, uuid):
 
 
 def get_computer(uuid, name):
-    # logger.debug('uuid: %s, name: %s' % (uuid, name))
+    logger.debug('uuid: %s, name: %s' % (uuid, name))
 
     try:
         computer = models.Computer.objects.get(uuid=uuid)
-        # logger.debug('computer found by uuid')
+        logger.debug('computer found by uuid')
 
         return computer
     except models.Computer.DoesNotExist:
@@ -100,7 +125,7 @@ def get_computer(uuid, name):
         computer = models.Computer.objects.get(
             uuid=uuid_change_format(uuid)
         )
-        # logger.debug('computer found by uuid (endian format changed)')
+        logger.debug('computer found by uuid (endian format changed)')
 
         return computer
     except models.Computer.DoesNotExist:
@@ -108,7 +133,7 @@ def get_computer(uuid, name):
 
     try:
         computer = models.Computer.objects.get(name=name)
-        # logger.debug('computer found by name')
+        logger.debug('computer found by name')
 
         return computer
     except models.Computer.DoesNotExist, models.Computer.MultipleObjectsReturned:
@@ -135,7 +160,7 @@ class SafeConnectionMixin(object):
             decrypt_key=settings.MIGASFREE_PRIVATE_KEY,
             verify_key='%s.pub' % self.project.slug
         )
-        print 'get_claims', claims  # DEBUG
+        logger.debug('get_claims: %s' % claims)
         return claims
 
     def create_response(self, data):
@@ -148,7 +173,7 @@ class SafeConnectionMixin(object):
         if not self.project:
             raise ObjectDoesNotExist(_('No project to sign message'))
 
-        print 'create_response', data  # DEBUG
+        logger.debug('create_response: %s' % data)
         msg = secure.wrap(data,
             sign_key=settings.MIGASFREE_PRIVATE_KEY,
             encrypt_key='%s.pri' % self.project.slug
@@ -180,6 +205,8 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
         serializer = serializers.SynchronizationSerializer(data=data)
         if serializer.is_valid():
             synchronization = serializer.save()
+
+            remove_computer_messages(computer.id)
 
             return Response(
                 self.create_response(serializer.data),
@@ -376,9 +403,14 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
+        add_computer_message(computer, trans('Getting repositories...'))
+
         repos = Repository.available_repos(
             computer.project.id, computer.get_all_attributes()
         ).values_list('slug', flat=True)
+
+        add_computer_message(computer, trans('Sending repositories...'))
+
         if repos:
             return Response(
                 self.create_response(list(repos)),
@@ -407,9 +439,14 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
+        add_computer_message(computer, trans('Getting fault definitions...'))
+
         definitions = models.FaultDefinition.enabled_for_attributes(
             computer.get_all_attributes()
         )
+
+        add_computer_message(computer, trans('Sending fault definitions...'))
+
         if definitions:
             return Response(
                 self.create_response(definitions),  # FIXME not serialized!!!
@@ -436,6 +473,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
+        add_computer_message(computer, trans('Getting faults...'))
+
         ret = []
         for name, result in claims.get('faults').iteritems():
             try:
@@ -447,6 +486,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 obj = models.Fault.objects.create(computer, definition, result)
                 serializer = serializers.FaultSerializer(obj)
                 ret.append(serializer.data)
+
+        add_computer_message(computer, trans('Sending faults response...'))
 
         return Response(
             self.create_response(list(ret)),
@@ -467,7 +508,12 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims['computer'] = computer.id
         claims['project'] = self.project.id
 
+        add_computer_message(computer, trans('Getting errors...'))
+
         serializer = serializers.ErrorSerializer(data=claims)
+
+        add_computer_message(computer, trans('Sending errors response...'))
+
         if serializer.is_valid():
             error = serializer.save()
             return Response(
@@ -776,6 +822,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
+        add_computer_message(computer, trans('Getting software...'))
+
         if 'inventory' not in claims and 'history' not in claims:
             return Response(
                 self.create_response(trans('Bad request')),
@@ -786,6 +834,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         tasks.update_software_inventory.delay(
             computer.id, claims.get('inventory')
         )
+
+        add_computer_message(computer, trans('Sending software response...'))
 
         return Response(
             self.create_response(trans('Data received')),
