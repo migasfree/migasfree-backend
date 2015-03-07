@@ -40,6 +40,40 @@ import logging
 logger = logging.getLogger('migasfree')
 
 
+def update_stats(sync):
+    # are not unique computers!!!
+    con = get_redis_connection('default')
+
+    con.incr('migasfree:stats:years:%04d' % sync.created_at.year)
+    con.incr('migasfree:stats:%d:years:%04d' % (
+        sync.project.id, sync.created_at.year
+    ))
+
+    con.incr('migasfree:stats:months:%04d%02d' % (
+        sync.created_at.year, sync.created_at.month
+    ))
+    con.incr('migasfree:stats:%d:months:%04d%02d' % (
+        sync.project.id, sync.created_at.year, sync.created_at.month
+    ))
+
+    con.incr('migasfree:stats:days:%04d%02d%02d' % (
+        sync.created_at.year, sync.created_at.month, sync.created_at.day
+    ))
+    con.incr('migasfree:stats:%d:days:%04d%02d%02d' % (
+        sync.project.id, sync.created_at.year,
+        sync.created_at.month, sync.created_at.day
+    ))
+
+    con.incr('migasfree:stats:hours:%04d%02d%02d%02d' % (
+        sync.created_at.year, sync.created_at.month,
+        sync.created_at.day, sync.created_at.hour
+    ))
+    con.incr('migasfree:stats:%d:hours:%04d%02d%02d%02d' % (
+        sync.project.id, sync.created_at.year, sync.created_at.month,
+        sync.created_at.day, sync.created_at.hour
+    ))
+
+
 def add_computer_message(computer, message):
     con = get_redis_connection('default')
     con.hmset(
@@ -207,6 +241,7 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
             synchronization = serializer.save()
 
             remove_computer_messages(computer.id)
+            update_stats(synchronization)
 
             return Response(
                 self.create_response(serializer.data),
