@@ -319,10 +319,11 @@ admin.site.register(Migration, MigrationAdmin)
 
 class SynchronizationAdmin(admin.ModelAdmin):
     list_display = ('id', 'computer', 'user', 'created_at', 'project')
-    list_filter = ('created_at', )
+    list_filter = ('created_at', 'pms_status_ok')
     search_fields = add_computer_search_fields(['created_at', 'user__name'])
     readonly_fields = (
-        'computer', 'user', 'project', 'created_at', 'start_date', 'consumer'
+        'computer', 'user', 'project', 'created_at',
+        'start_date', 'consumer', 'pms_status_ok'
     )
     exclude = ('computer',)
     actions = None

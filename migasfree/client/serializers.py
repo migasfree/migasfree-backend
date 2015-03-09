@@ -70,5 +70,5 @@ class SynchronizationSerializer(serializers.ModelSerializer):
         model = models.Synchronization
         fields = (
             'id', 'created_at', 'computer', 'user', 'project',
-            'start_date', 'consumer'
+            'start_date', 'consumer', 'pms_status_ok'
         )

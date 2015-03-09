@@ -311,21 +311,30 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
         claims = {
             "id": id,
             "start_date": datetime,
-            "consumer": string
+            "consumer": string,
+            "pms_status_ok": true|false
         }
         """
 
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
+        add_computer_message(computer, trans('Getting synchronization...'))
+
         data = {
             'computer': computer.id,
             'user': computer.sync_user.id,
             'project': self.project.id,
             'start_date': claims.get('start_date'),
-            'consumer': claims.get('consumer')
+            'consumer': claims.get('consumer'),
+            'pms_status_ok': claims.get('pms_status_ok', False),
         }
         serializer = serializers.SynchronizationSerializer(data=data)
+
+        add_computer_message(
+            computer, trans('Sending synchronization response...')
+        )
+
         if serializer.is_valid():
             synchronization = serializer.save()
 
