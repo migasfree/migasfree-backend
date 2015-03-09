@@ -19,7 +19,8 @@
 from django.conf.urls import patterns, include, url
 
 from .views import (
-    PackagerKeysView, ProjectKeysView, SafeSynchronizationView
+    PackagerKeysView, ProjectKeysView, SafeSynchronizationView,
+    SafeEndOfTransmissionView,
 )
 
 keys_patterns = patterns('',
@@ -32,7 +33,8 @@ public_patterns = patterns('',
 )
 
 safe_patterns = patterns('',
-    url(r'^synchronizations/$', SafeSynchronizationView.as_view())
+    url(r'^eot/$', SafeEndOfTransmissionView.as_view()),
+    url(r'^synchronizations/$', SafeSynchronizationView.as_view()),
 )
 
 urlpatterns = patterns('',
