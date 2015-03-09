@@ -58,6 +58,12 @@ class Synchronization(models.Model):
         null=True
     )
 
+    pms_status_ok = models.BooleanField(
+        verbose_name=_('PMS status OK'),
+        default=False,
+        help_text=_('indicates the status of transactions with PMS')
+    )
+
     def save(self, *args, **kwargs):
         super(Synchronization, self).save(*args, **kwargs)
 
