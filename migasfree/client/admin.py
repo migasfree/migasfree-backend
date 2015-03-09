@@ -163,20 +163,6 @@ class PackageAdmin(admin.ModelAdmin):
 admin.site.register(Package, PackageAdmin)
 
 
-class MessageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'computer', 'created_at', 'text',)
-    ordering = ('created_at',)
-    list_filter = ('created_at',)
-    search_fields = ('computer', 'text', 'created_at',)
-    readonly_fields = ('computer', 'text', 'created_at')
-    exclude = ('computer',)
-
-    def has_add_permission(self, request):
-        return False
-
-admin.site.register(Message, MessageAdmin)
-
-
 class ErrorAdmin(admin.ModelAdmin):
     list_display = (
         'id',

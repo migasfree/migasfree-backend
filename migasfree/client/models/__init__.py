@@ -24,7 +24,6 @@ from .fault_definition import FaultDefinition
 from .fault import Fault
 
 from .user import User
-from .message import Message
 from .notification import Notification
 from .migration import Migration
 from .synchronization import Synchronization
