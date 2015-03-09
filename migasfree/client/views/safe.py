@@ -41,37 +41,108 @@ logger = logging.getLogger('migasfree')
 
 
 def update_stats(sync):
-    # are not unique computers!!!
     con = get_redis_connection('default')
 
-    con.incr('migasfree:stats:years:%04d' % sync.created_at.year)
-    con.incr('migasfree:stats:%d:years:%04d' % (
-        sync.project.id, sync.created_at.year
-    ))
+    if not con.sismember(
+        'migasfree:watch:stats:years:%04d' % sync.created_at.year,
+        sync.computer.id
+    ):
+        con.incr('migasfree:stats:years:%04d' % sync.created_at.year)
+        con.sadd(
+            'migasfree:watch:stats:years:%04d' % sync.created_at.year,
+            sync.computer.id
+        )
+        con.incr('migasfree:stats:%d:years:%04d' % (
+            sync.project.id, sync.created_at.year
+        ))
+        con.sadd(
+            'migasfree:watch:stats:%d:years:%04d' % (
+                sync.project.id, sync.created_at.year
+            ),
+            sync.computer.id
+        )
 
-    con.incr('migasfree:stats:months:%04d%02d' % (
-        sync.created_at.year, sync.created_at.month
-    ))
-    con.incr('migasfree:stats:%d:months:%04d%02d' % (
-        sync.project.id, sync.created_at.year, sync.created_at.month
-    ))
+    if not con.sismember(
+        'migasfree:watch:stats:months:%04d%02d' % (
+            sync.created_at.year, sync.created_at.month
+        ),
+        sync.computer.id
+    ):
+        con.incr('migasfree:stats:months:%04d%02d' % (
+            sync.created_at.year, sync.created_at.month
+        ))
+        con.sadd(
+            'migasfree:watch:stats:months:%04d%02d' % (
+                sync.created_at.year, sync.created_at.month
+            ),
+            sync.computer.id
+        )
+        con.incr('migasfree:stats:%d:months:%04d%02d' % (
+            sync.project.id, sync.created_at.year, sync.created_at.month
+        ))
+        con.sadd(
+            'migasfree:watch:stats:%d:months:%04d%02d' % (
+                sync.project.id, sync.created_at.year, sync.created_at.month
+            ),
+            sync.computer.id
+        )
 
-    con.incr('migasfree:stats:days:%04d%02d%02d' % (
-        sync.created_at.year, sync.created_at.month, sync.created_at.day
-    ))
-    con.incr('migasfree:stats:%d:days:%04d%02d%02d' % (
-        sync.project.id, sync.created_at.year,
-        sync.created_at.month, sync.created_at.day
-    ))
+    if not con.sismember(
+        'migasfree:watch:stats:days:%04d%02d%02d' % (
+            sync.created_at.year, sync.created_at.month, sync.created_at.day
+        ),
+        sync.computer.id
+    ):
+        con.incr('migasfree:stats:days:%04d%02d%02d' % (
+            sync.created_at.year, sync.created_at.month, sync.created_at.day
+        ))
+        con.sadd(
+            'migasfree:watch:stats:days:%04d%02d%02d' % (
+                sync.created_at.year, sync.created_at.month, sync.created_at.day
+            ),
+            sync.computer.id
+        )
+        con.incr('migasfree:stats:%d:days:%04d%02d%02d' % (
+            sync.project.id, sync.created_at.year,
+            sync.created_at.month, sync.created_at.day
+        ))
+        con.sadd(
+            'migasfree:watch:stats:%d:days:%04d%02d%02d' % (
+                sync.project.id, sync.created_at.year,
+                sync.created_at.month, sync.created_at.day
+            ),
+            sync.computer.id
+        )
 
-    con.incr('migasfree:stats:hours:%04d%02d%02d%02d' % (
-        sync.created_at.year, sync.created_at.month,
-        sync.created_at.day, sync.created_at.hour
-    ))
-    con.incr('migasfree:stats:%d:hours:%04d%02d%02d%02d' % (
-        sync.project.id, sync.created_at.year, sync.created_at.month,
-        sync.created_at.day, sync.created_at.hour
-    ))
+    if not con.sismember(
+        'migasfree:watch:stats:hours:%04d%02d%02d%02d' % (
+            sync.created_at.year, sync.created_at.month,
+            sync.created_at.day, sync.created_at.hour
+        ),
+        sync.computer.id
+    ):
+        con.incr('migasfree:stats:hours:%04d%02d%02d%02d' % (
+            sync.created_at.year, sync.created_at.month,
+            sync.created_at.day, sync.created_at.hour
+        ))
+        con.sadd(
+            'migasfree:watch:stats:hours:%04d%02d%02d%02d' % (
+                sync.created_at.year, sync.created_at.month,
+                sync.created_at.day, sync.created_at.hour
+            ),
+            sync.computer.id
+        )
+        con.incr('migasfree:stats:%d:hours:%04d%02d%02d%02d' % (
+            sync.project.id, sync.created_at.year, sync.created_at.month,
+            sync.created_at.day, sync.created_at.hour
+        ))
+        con.sadd(
+            'migasfree:watch:stats:%d:hours:%04d%02d%02d%02d' % (
+                sync.project.id, sync.created_at.year, sync.created_at.month,
+                sync.created_at.day, sync.created_at.hour
+            ),
+            sync.computer.id
+        )
 
 
 def add_computer_message(computer, message):
@@ -216,6 +287,24 @@ class SafeConnectionMixin(object):
         return {'msg': msg}
 
 
+class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
+    def post(self, request, format=None):
+        """
+        claims = {"id": id}
+
+        Returns 200 if ok, 404 if computer not found
+        """
+        claims = self.get_claims(request.data)
+        computer = get_object_or_404(models.Computer, id=claims.get('id'))
+
+        remove_computer_messages(computer.id)
+
+        return Response(
+            self.create_response(trans('EOT OK')),
+            status=status.HTTP_200_OK
+        )
+
+
 class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
     def post(self, request, format=None):
         """
@@ -240,7 +329,6 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
         if serializer.is_valid():
             synchronization = serializer.save()
 
-            remove_computer_messages(computer.id)
             update_stats(synchronization)
 
             return Response(
@@ -343,7 +431,12 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
+        add_computer_message(computer, trans('Getting properties...'))
+
         properties = Property.enabled_client_properties()
+
+        add_computer_message(computer, trans('Sending properties...'))
+
         if properties:
             return Response(
                 self.create_response(properties),
@@ -373,6 +466,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         """
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
+
+        add_computer_message(computer, trans('Getting attributes...'))
 
         is_computer_changed(
             computer,
@@ -419,6 +514,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
         serializer = serializers.ComputerSerializer(computer)
+
+        add_computer_message(computer, trans('Sending attributes response...'))
 
         return Response(
             self.create_response(serializer.data),
@@ -575,9 +672,13 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
+        add_computer_message(computer, trans('Getting mandatory packages...'))
+
         pkgs = Repository.available_repos(
             computer.project.id, computer.get_all_attributes()
         ).values_list('packages_to_install', 'packages_to_remove')
+
+        add_computer_message(computer, trans('Sending mandatory packages...'))
 
         if pkgs:
             install = []
@@ -615,13 +716,13 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
+
+        add_computer_message(computer, trans('Getting assigned tags...'))
+
         tags = computer.tags.all()
-        """
-        response = {
-            'tags': [tag.__str__() for tag in tags]
-        }
-        """
         response = list([tag.__str__() for tag in tags])
+
+        add_computer_message(computer, trans('Sending assigned tags...'))
 
         return Response(
             self.create_response(response),
@@ -647,6 +748,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
+        add_computer_message(computer, trans('Getting available tags...'))
+
         available = {}
         for repos in Repository.objects.filter(
             project__id=computer.project.id
@@ -660,6 +763,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 value = tag.__str__()
                 if value not in available[tag.property_att.name]:
                     available[tag.property_att.name].append(value)
+
+        add_computer_message(computer, trans('Sending available tags...'))
 
         if not available:
             return Response(
@@ -689,6 +794,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
+
+        add_computer_message(computer, trans('Getting tags...'))
 
         computer_tags_ids = computer.tags.all().values_list('id', flat=True)
         tags = claims.get('tags')
@@ -782,6 +889,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             "remove": remove,
         }
 
+        add_computer_message(computer, trans('Sending tags...'))
+
         return Response(
             self.create_response(ret),
             status=status.HTTP_200_OK
@@ -805,12 +914,16 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
+        add_computer_message(computer, trans('Getting label...'))
+
         ret = {
             'uuid': computer.uuid,
             'name': computer.name,
             'search': computer.__str__(),
             'helpdesk': settings.MIGASFREE_HELP_DESK,
         }
+
+        add_computer_message(computer, trans('Sending label...'))
 
         return Response(
             self.create_response(ret),
@@ -830,6 +943,10 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
+        add_computer_message(
+            computer, trans('Getting hardware capture is required...')
+        )
+
         if computer.last_hardware_capture:
             capture = (datetime.now() > (
                 computer.last_hardware_capture + timedelta(
@@ -838,6 +955,10 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             )
         else:
             capture = True
+
+        add_computer_message(
+            computer, trans('Sending hardware capture response...')
+        )
 
         return Response(
             self.create_response({'capture': capture}),
