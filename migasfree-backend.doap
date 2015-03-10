@@ -1,0 +1,37 @@
+<Project xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns:gnome="http://api.gnome.org/doap-extensions#"
+         xmlns="http://usefulinc.com/ns/doap#">
+
+    <name xml:lang="en">migasfree-backend</name>
+
+    <shortdesc xml:lang="en">
+        migasfree is a very simple, but effective, systems management system
+    </shortdesc>
+
+    <homepage rdf:resource="http://www.migasfree.org/" />
+
+    <maintainer>
+        <foaf:Person>
+            <foaf:name>Alberto Gacías</foaf:name>
+            <foaf:mbox rdf:resource="mailto:alberto@migasfree.org" />
+        </foaf:Person>
+    </maintainer>
+
+    <developer>
+        <foaf:Person>
+            <foaf:name>Jose Antonio Chavarría</foaf:name>
+            <foaf:mbox rdf:resource="mailto:jachavar@gmail.com" />
+        </foaf:Person>
+    </developer>
+
+    <license rdf:resource="http://spdx.org/licenses/GPL-3.0+" />
+
+    <repository>
+        <GitRepository>
+            <location rdf:resource="https://github.com/migasfree/migasfree-backend.git"/>
+            <browse rdf:resource="https://github.com/migasfree/migasfree-backend/"/>
+        </GitRepository>
+    </repository>
+</Project>
