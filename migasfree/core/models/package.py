@@ -113,6 +113,10 @@ class Package(models.Model):
         if not os.path.exists(_path):
             os.makedirs(_path)
 
+    def update_store(self, store):
+        self.store = store
+        self.save()
+
     def __str__(self):
         return _('%s at project %s') % (self.name, self.project.name)
 
