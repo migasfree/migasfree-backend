@@ -26,8 +26,8 @@ TEMPLATE_DEBUG = DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
-MIGASFREE_DB_DIR = '/usr/share/migasfree-server'
-MIGASFREE_PUBLIC_DIR = '/var/migasfree/pub'
+MIGASFREE_DB_DIR = '/usr/share/migasfree-backend'
+MIGASFREE_PUBLIC_DIR = '/var/migasfree-backend/pub'
 MIGASFREE_KEYS_PATH = os.path.join(MIGASFREE_DB_DIR, 'keys')
 
 SECRET_KEY = secret_key(MIGASFREE_KEYS_PATH)
@@ -35,7 +35,7 @@ SECRET_KEY = secret_key(MIGASFREE_KEYS_PATH)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'migasfree',
+        'NAME': 'migasfree-backend',
         'USER': 'migasfree',
         'PASSWORD': 'migasfree',
         'HOST': '',
@@ -44,6 +44,6 @@ DATABASES = {
 }
 
 try:
-    execfile('/etc/migasfree-server/settings.py', globals(), locals())
+    execfile('/etc/migasfree-backend/settings.py', globals(), locals())
 except IOError:
     pass
