@@ -1,0 +1,9 @@
+# http://docs.python.org/distutils/sourcedist.html#the-manifest-in-template
+
+include AUTHORS LICENSE README.md VERSION MANIFEST.in migasfree-backend.doap
+include bin/*
+include requirements/*
+include migasfree/core/fixtures/*
+include migasfree/client/fixtures/*
+recursive-include migasfree *.py
+recursive-include migasfree/locale *.mo
