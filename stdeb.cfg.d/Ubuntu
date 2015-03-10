@@ -1,0 +1,11 @@
+# Config file used by stdeb when building a Debian source package.
+
+# http://pypi.python.org/pypi/stdeb/0.5.0#stdeb-cfg-configuration-file
+
+[migasfree-backend]
+Source: migasfree-backend
+Package: migasfree-backend
+Maintainer: Alberto Gacías <alberto@migasfree.org>
+Debian-Version = 1
+Build-Depends = python (>=2.7), python-setuptools
+Depends = python-django (>=1.7.5), curl, rpm, dpkg-dev, createrepo, python-docutils, python-dateutil, gnupg, haveged, python-gpgme, postgresql, python-psycopg2
