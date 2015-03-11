@@ -18,6 +18,7 @@
 
 from django.conf import settings
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import ObjectDoesNotExist
 
 from migasfree import secure
 
@@ -64,8 +65,8 @@ class SafeConnectionMixin(object):
             'msg': jwt
         }
         """
-        if not self.project:
-            raise ObjectDoesNotExist(_('No project to sign message'))
+        if not self.project and not self.encrypt_key:
+            raise ObjectDoesNotExist(_('No key to sign message'))
 
         logger.debug('create_response: %s' % data)
         if not self.encrypt_key:
