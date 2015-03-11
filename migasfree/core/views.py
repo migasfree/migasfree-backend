@@ -16,9 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from django.conf import settings
 from django.apps import apps
 from django.db.models import Q
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.core import signing
 from django.utils.translation import ugettext_lazy as _
 # from django.contrib.auth.models import User, Group
@@ -29,6 +30,8 @@ from rest_framework import (
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 from rest_framework_filters import backends
+
+from migasfree.core.mixins import SafeConnectionMixin
 
 from .models import (
     Platform, Project, Store,
@@ -48,6 +51,12 @@ from .serializers import (
 from .filters import RepositoryFilter, PackageFilter
 from .permissions import PublicPermission, IsAdminOrIsSelf
 
+
+class SafePackagerConnectionMixin(SafeConnectionMixin):
+    decrypt_key = settings.MIGASFREE_PRIVATE_KEY
+    sign_key = settings.MIGASFREE_PUBLIC_KEY
+    verify_key = settings.MIGASFREE_PACKAGER_PUB_KEY
+    encrypt_key = settings.MIGASFREE_PACKAGER_PRI_KEY
 
 '''
 class UserViewSet(viewsets.ModelViewSet):
@@ -207,3 +216,67 @@ class AuthViewSet(viewsets.ViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 '''
+
+
+def get_store_or_create(name, project):
+    store = Store.objects.filter(name=name, project=project)
+    if not store:
+        return Store.objects.create(name=name, project=project)
+    else:
+        return store[0]
+
+
+class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
+    #parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
+
+    def create(self, request, format=None):
+        """
+        claims = {
+            'project': project_name,
+            'store': store_name,
+            'is_package': true|false
+        }
+        """
+
+        claims = self.get_claims(request.data)
+        print claims  # DEBUG
+        project = get_object_or_404(Project, name=claims.get('project'))
+
+        store = get_store_or_create(claims.get('store'), project)
+
+        _file = request.FILES.get('package')
+        print _file  # DEBUG
+
+        if claims.get('is_package'):
+            package = Package.objects.filter(name=_file.name, project=project)
+            if package:
+                package[0].update_store(store)
+            else:
+                package = Package.objects.create(
+                    name=_file.name,
+                    project=project,
+                    store=store,
+                    file_list=[_file]
+                )
+        else:
+            target = os.path.join(
+                settings.MIGASFREE_PUBLIC_DIR,
+                project.slug,
+                'stores',
+                store.slug,
+                _file.name
+            )
+            Package.handle_uploaded_file(_file, target)
+
+        return Response(
+            self.create_response(trans('Data received')),
+            status=status.HTTP_200_OK
+        )
+
+    """
+    cmd_packager = (
+        "upload_server_package", -> safe/packages/
+        "upload_server_set", -> safe/packages/set/
+        "create_repositories_of_packageset" -> safe/packages/repos/
+    )
+    """
