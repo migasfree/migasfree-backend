@@ -20,7 +20,7 @@ from django.conf.urls import patterns, include, url
 from django.conf.urls.static import static
 from django.conf import settings
 
-from core.routers import router
+from core.routers import router, safe_router as core_safe_router
 from client.routers import router as client_router, safe_router as client_safe_router
 
 from django.contrib import admin
@@ -33,6 +33,7 @@ urlpatterns = patterns('',
     url(r'^api/v1/token/', include(router.urls)),
     url(r'^api/v1/token/', include(client_router.urls)),
     url(r'^api/v1/safe/', include(client_safe_router.urls)),
+    url(r'^api/v1/safe/', include(core_safe_router.urls)),
     url(r'^api/v1/', include('migasfree.client.urls')),
 
     url(r'^token-auth/$', 'rest_framework.authtoken.views.obtain_auth_token'),
