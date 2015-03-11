@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
 from django.conf import settings
 from django.apps import apps
 from django.db.models import Q
@@ -32,6 +34,7 @@ from rest_framework.response import Response
 from rest_framework_filters import backends
 
 from migasfree.core.mixins import SafeConnectionMixin
+from migasfree.utils import trans
 
 from .models import (
     Platform, Project, Store,
@@ -54,9 +57,10 @@ from .permissions import PublicPermission, IsAdminOrIsSelf
 
 class SafePackagerConnectionMixin(SafeConnectionMixin):
     decrypt_key = settings.MIGASFREE_PRIVATE_KEY
-    sign_key = settings.MIGASFREE_PUBLIC_KEY
     verify_key = settings.MIGASFREE_PACKAGER_PUB_KEY
-    encrypt_key = settings.MIGASFREE_PACKAGER_PRI_KEY
+
+    sign_key = settings.MIGASFREE_PRIVATE_KEY
+    encrypt_key = settings.MIGASFREE_PACKAGER_PUB_KEY
 
 '''
 class UserViewSet(viewsets.ModelViewSet):
@@ -227,7 +231,7 @@ def get_store_or_create(name, project):
 
 
 class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
-    #parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
 
     def create(self, request, format=None):
         """
@@ -244,8 +248,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
 
         store = get_store_or_create(claims.get('store'), project)
 
-        _file = request.FILES.get('package')
-        print _file  # DEBUG
+        _file = request.FILES.get('file')
 
         if claims.get('is_package'):
             package = Package.objects.filter(name=_file.name, project=project)
@@ -258,15 +261,15 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                     store=store,
                     file_list=[_file]
                 )
-        else:
-            target = os.path.join(
-                settings.MIGASFREE_PUBLIC_DIR,
-                project.slug,
-                'stores',
-                store.slug,
-                _file.name
-            )
-            Package.handle_uploaded_file(_file, target)
+
+        target = os.path.join(
+            settings.MIGASFREE_PUBLIC_DIR,
+            project.slug,
+            'stores',
+            store.slug,
+            _file.name
+        )
+        Package.handle_uploaded_file(_file, target)
 
         return Response(
             self.create_response(trans('Data received')),
@@ -275,7 +278,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
 
     """
     cmd_packager = (
-        "upload_server_package", -> safe/packages/
+      + "upload_server_package", -> safe/packages/
         "upload_server_set", -> safe/packages/set/
         "create_repositories_of_packageset" -> safe/packages/repos/
     )
