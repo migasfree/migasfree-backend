@@ -68,3 +68,7 @@ MIGASFREE_PROGRAMMING_LANGUAGES = (
 # Server Keys
 MIGASFREE_PUBLIC_KEY = 'migasfree-server.pub'
 MIGASFREE_PRIVATE_KEY = 'migasfree-server.pri'
+
+# Packager Keys
+MIGASFREE_PACKAGER_PUB_KEY = 'migasfree-packager.pub'
+MIGASFREE_PACKAGER_PRI_KEY = 'migasfree-packager.pri'
