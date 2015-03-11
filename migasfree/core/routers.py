@@ -35,3 +35,11 @@ router.register(r'repos', views.RepositoryViewSet)
 #router.register(r'auth', views.AuthViewSet, base_name='auth')
 #router.register(r'accounts', views.UserViewSet)
 #router.register(r'account-groups', views.GroupViewSet)
+
+safe_router = routers.DefaultRouter()
+
+safe_router.register(
+    r'packages',
+    views.SafePackageViewSet,
+    base_name='safe_packages'
+)
