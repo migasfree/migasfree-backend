@@ -35,9 +35,9 @@ SECRET_KEY = secret_key(MIGASFREE_KEYS_PATH)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'migasfree-backend',
-        'USER': 'migasfree',
-        'PASSWORD': 'migasfree',
+        'NAME': 'migasfree_backend',
+        'USER': 'migasfree_backend',
+        'PASSWORD': 'migasfree_backend',
         'HOST': '',
         'PORT': '',
     }
