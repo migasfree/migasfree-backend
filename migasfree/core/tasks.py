@@ -18,6 +18,9 @@
 
 from __future__ import absolute_import
 
+import os
+import shutil
+
 from celery import shared_task
 from celery.exceptions import Ignore
 from django_redis import get_redis_connection
@@ -86,7 +89,7 @@ def create_repository_metadata(repo_id):
         repo.project.slug,
         'stores'
     )
-    slug_tmp_path = os.path.join(
+    _slug_tmp_path = os.path.join(
         settings.MIGASFREE_PUBLIC_DIR,
         repo.project.slug,
         'tmp',
@@ -95,10 +98,10 @@ def create_repository_metadata(repo_id):
 
     if _slug_tmp_path.endswith('/'):
         # remove trailing slash for replacing in template
-        slug_tmp_path = slug_tmp_path[:-1]
+        _slug_tmp_path = _slug_tmp_path[:-1]
 
     pkg_tmp_path = os.path.join(
-        slug_tmp_path,
+        _slug_tmp_path,
         repo.slug,
         'PKGS'
     )
@@ -115,7 +118,7 @@ def create_repository_metadata(repo_id):
             )
 
     ret, output, error = pms.create_repository(
-        repo.slug, slug_tmp_path
+        repo.slug, _slug_tmp_path
     )
 
     source = os.path.join(
