@@ -30,6 +30,7 @@ from django_redis import get_redis_connection
 from migasfree.utils import uuid_change_format, trans
 from migasfree.model_update import update
 from migasfree import secure
+from migasfree.core.mixins import SafeConnectionMixin
 from migasfree.core.models import (
     Project, Repository, Property, Attribute, BasicAttribute
 )
@@ -245,48 +246,6 @@ def get_computer(uuid, name):
         return None
 
 
-class SafeConnectionMixin(object):
-    project = None
-
-    def get_claims(self, data):
-        """
-        Decrypt and verify data
-        data = {
-            'msg': jwt,
-            'project': project_name
-        }
-        """
-        msg = data.get('msg')
-        self.project = get_object_or_404(
-            Project, name=data.get('project')
-        )
-        claims = secure.unwrap(
-            msg,
-            decrypt_key=settings.MIGASFREE_PRIVATE_KEY,
-            verify_key='%s.pub' % self.project.slug
-        )
-        logger.debug('get_claims: %s' % claims)
-        return claims
-
-    def create_response(self, data):
-        """
-        Sign and encrypt data
-        Returns: {
-            'msg': jwt
-        }
-        """
-        if not self.project:
-            raise ObjectDoesNotExist(_('No project to sign message'))
-
-        logger.debug('create_response: %s' % data)
-        msg = secure.wrap(data,
-            sign_key=settings.MIGASFREE_PRIVATE_KEY,
-            encrypt_key='%s.pri' % self.project.slug
-        )
-
-        return {'msg': msg}
-
-
 class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
     def post(self, request, format=None):
         """
@@ -403,7 +362,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
 
-        if 'uuid' not in claims.keys() or 'name' not in claims.keys():
+        if not claims or 'uuid' not in claims.keys() or 'name' not in claims.keys():
             return Response(
                 self.create_response(trans('Malformed claims')),
                 status=status.HTTP_400_BAD_REQUEST
