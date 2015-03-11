@@ -96,7 +96,7 @@ def create_default_users():
             "client.fault", "client.faultdefinition", "client.migration",
             "client.notification",
             "core.project", "core.package", "core.repository", "core.store",
-            "client.message", "client.update",
+            "client.synchronization",
             "core.platform", "core.property",
         ]
         add_read_perms(reader, tables)
@@ -131,7 +131,7 @@ def create_default_users():
         checker.name = "Computer Checker"
         checker.save()
         tables = [
-            "client.error", "client.fault", "client.message", "client.update"
+            "client.error", "client.fault", "client.synchronization"
         ]
         add_all_perms(checker, tables)
         checker.save()
@@ -159,7 +159,7 @@ def create_default_users():
         configurator.save()
         tables = [
             "client.faultdefinition", "core.property", "core.project",
-            "client.message", "client.update", "core.platform",
+            "client.synchronization", "core.platform",
             "client.migration", "client.notification",
         ]
         add_all_perms(configurator, tables)
@@ -192,7 +192,9 @@ def sequence_reset():
             _file.write(commands.getvalue())
             _file.flush()
 
-        cmd = "su postgres -c 'psql migasfree -f %s' -" % _filename
+        cmd = "su postgres -c 'psql %s -f %s' -" % (
+            settings.DATABASES.get('default').get('NAME'), _filename
+        )
         (out, err) = run(cmd)
         if out != 0:
             print(err)
