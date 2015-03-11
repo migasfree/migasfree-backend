@@ -48,3 +48,18 @@ if settings.DEBUG and settings.MEDIA_ROOT is not None:
         document_root=settings.MEDIA_ROOT,
         show_indexes=True
     )
+
+# initial dabatase setup
+
+from django.core import management
+from django.db import connection
+
+from .fixtures import create_initial_data
+
+if not connection.introspection.table_names():
+    management.call_command(
+        'migrate',
+        interactive=False,
+        verbosity=1
+    )
+    create_initial_data()
