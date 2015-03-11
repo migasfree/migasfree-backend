@@ -114,6 +114,7 @@ class Package(models.Model):
             os.makedirs(_path)
 
     def update_store(self, store):
+        # FIXME move to new directory?
         self.store = store
         self.save()
 
