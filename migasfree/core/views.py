@@ -54,6 +54,8 @@ from .serializers import (
 from .filters import RepositoryFilter, PackageFilter
 from .permissions import PublicPermission, IsAdminOrIsSelf
 
+from . import tasks
+
 
 class SafePackagerConnectionMixin(SafeConnectionMixin):
     decrypt_key = settings.MIGASFREE_PRIVATE_KEY
@@ -231,8 +233,6 @@ def get_store_or_create(name, project):
 
 
 class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
-    parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
-
     def create(self, request, format=None):
         """
         claims = {
@@ -243,7 +243,6 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         """
 
         claims = self.get_claims(request.data)
-        print claims  # DEBUG
         project = get_object_or_404(Project, name=claims.get('project'))
 
         store = get_store_or_create(claims.get('store'), project)
@@ -276,10 +275,96 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    """
-    cmd_packager = (
-      + "upload_server_package", -> safe/packages/
-        "upload_server_set", -> safe/packages/set/
-        "create_repositories_of_packageset" -> safe/packages/repos/
-    )
-    """
+    @list_route(methods=['post'], url_path='set')
+    def packageset(self, request, format=None):
+        """
+        claims = {
+            'project': project_name,
+            'store': store_name,
+            'packageset': string,
+            'path': string
+        }
+        """
+
+        claims = self.get_claims(request.data)
+        project = get_object_or_404(Project, name=claims.get('project'))
+
+        store = get_store_or_create(claims.get('store'), project)
+
+        _file = request.FILES.get('file')
+
+        target = os.path.join(
+            settings.MIGASFREE_PUBLIC_DIR,
+            project.slug,
+            'stores',
+            store.slug,
+            claims.get('packageset'),
+            _file.name
+        )
+
+        package = Package.objects.filter(
+            name=claims.get('packageset'), project=project
+        )
+        if package:
+            package[0].update_store(store)
+        else:
+            package = Package.objects.create(
+                name=claims.get('packageset'),
+                project=project,
+                store=store,
+                file_list=[_file]
+            )
+
+        Package.handle_uploaded_file(_file, target)
+
+        # if exists path move it
+        if claims.get('path'):
+            dst = os.path.join(
+                settings.MIGASFREE_PUBLIC_DIR,
+                project.slug,
+                'stores',
+                store.slug,
+                claims.get('packageset'),
+                claims.get('path'),
+                _file.name
+            )
+            try:
+                os.makedirs(os.path.dirname(dst))
+            except:
+                pass
+            os.rename(target, dst)
+
+        return Response(
+            self.create_response(trans('Data received')),
+            status=status.HTTP_200_OK
+        )
+
+    @list_route(methods=['post'], url_path='repos')
+    def create_repository(self, request, format=None):
+        """
+        claims = {
+            'project': project_name,
+            'packageset': name,
+        }
+        """
+
+        claims = self.get_claims(request.data)
+        if not claims or 'project' not in claims or 'packageset' not in claims:
+            return Response(
+                self.create_response(trans('Malformed claims')),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        project = get_object_or_404(Project, name=claims.get('project'))
+        package = get_object_or_404(
+            Package, name=claims.get('packageset'), project=project
+        )
+
+        repos = Repository.objects.filter(available_packages__id=package.id)
+        for repo in repos:
+            tasks.create_repository_metadata.delay(repo.id)
+
+        return Response(
+            self.create_response(trans('Data received')),
+            status=status.HTTP_200_OK
+        )
