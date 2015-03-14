@@ -226,6 +226,10 @@ class Computer(models.Model):
             self.software_inventory = pkgs
             self.save()
 
+    def update_last_hardware_capture(self):
+        self.last_hardware_capture = datetime.now()
+        self.save()
+
     @staticmethod
     def replacement(source, target):
         source.tags, target.tags = target.tags, source.tags
