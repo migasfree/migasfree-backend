@@ -38,13 +38,13 @@ class Node(models.Model):
         verbose_name=_("computer")
     )
 
-    level = width = models.IntegerField(
-        _("width"),
+    level = models.IntegerField(
+        verbose_name=_("level"),
         null=False
     )
 
     width = models.IntegerField(
-        _("width"),
+        verbose_name=_("width"),
         null=True
     )
 
@@ -55,92 +55,93 @@ class Node(models.Model):
     )  # This is the field "id" in lshw
 
     class_name = models.TextField(
-        _("class"),
+        verbose_name=_("class"),
         null=False,
         blank=True
     )  # This is the field "class" in lshw
 
     enabled = models.BooleanField(
-        _("enabled"),
+        verbose_name=_("enabled"),
         default=False,
     )
 
     claimed = models.BooleanField(
-        _("claimed"),
+        verbose_name=_("claimed"),
         default=False,
     )
 
     description = models.TextField(
-        _("description"),
+        verbose_name=_("description"),
         null=True,
         blank=True
     )
 
     vendor = models.TextField(
-        _("vendor"),
+        verbose_name=_("vendor"),
         null=True,
         blank=True
     )
 
     product = models.TextField(
-        _("product"),
+        verbose_name=_("product"),
         null=True,
         blank=True
     )
 
     version = models.TextField(
-        _("version"),
+        verbose_name=_("version"),
         null=True,
         blank=True
     )
 
     serial = models.TextField(
-        _("serial"),
+        verbose_name=_("serial"),
         null=True,
         blank=True
     )
 
     bus_info = models.TextField(
-        _("bus info"),
+        verbose_name=_("bus info"),
         null=True,
         blank=True
     )
 
     physid = models.TextField(
-        _("physid"),
+        verbose_name=_("physid"),
         null=True,
         blank=True
     )
 
     slot = models.TextField(
-        _("slot"),
+        verbose_name=_("slot"),
         null=True,
         blank=True
     )
 
     size = models.BigIntegerField(
-        _("size"),
+        verbose_name=_("size"),
         null=True
     )
 
     capacity = models.BigIntegerField(
-        _("capacity"),
+        verbose_name=_("capacity"),
         null=True
     )
 
     clock = models.IntegerField(
-        _("clock"),
+        verbose_name=_("clock"),
         null=True
     )
 
     dev = models.TextField(
-        _("dev"),
+        verbose_name=_("dev"),
         null=True,
         blank=True
     )
 
+    # TODO check if it is presentation (and remove)
     icon = models.TextField(
-        _("icon"),
+        verbose_name=_("icon"),
         null=True,
         blank=True
     )
