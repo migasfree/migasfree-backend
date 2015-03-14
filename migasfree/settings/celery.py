@@ -36,6 +36,7 @@ CELERY_IMPORTS = (
     'migasfree.stats.tasks',
     'migasfree.core.tasks',
     'migasfree.client.tasks',
+    'migasfree.hardware.tasks',
 )
 CELERYBEAT_SCHEDULE = {
     'alerts': {
