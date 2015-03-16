@@ -154,7 +154,7 @@ def add_computer_message(computer, message):
             'name': computer.__str__(),
             'project': computer.project.name,
             'ip': computer.ip_address,
-            'user': computer.sync_user.fullname,
+            'user': computer.sync_user,
             'msg': message
         }
     )
