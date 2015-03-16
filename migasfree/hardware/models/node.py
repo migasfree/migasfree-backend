@@ -139,13 +139,6 @@ class Node(models.Model):
         blank=True
     )
 
-    # TODO check if it is presentation (and remove)
-    icon = models.TextField(
-        verbose_name=_("icon"),
-        null=True,
-        blank=True
-    )
-
     def __str__(self):
         return self.product
 
