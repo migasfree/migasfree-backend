@@ -70,68 +70,6 @@ def save_computer_hardware(computer_id, node, parent=None, level=1):
     if "dev" in node:
         n.dev = node["dev"]
 
-    #set icons
-    if n.product is not None:
-        if n.class_name == "system" and n.product == "VirtualBox ()":
-            n.icon = "virtualbox.png"
-
-        if n.class_name == "system" \
-        and n.product == "VMware Virtual Platform ()":
-            n.icon = "vmplayer.png"
-
-    if n.bus_info is not None:
-        if n.class_name == "processor" and "cpu@" in n.bus_info:
-            n.icon = "cpu.png"
-
-    if n.class_name == "display":
-        n.icon = "display.png"
-
-    if n.description is not None:
-#    if n.class_name=="system" and n.description.lower() in ["notebook"]:
-#      n.icon="laptop.png"
-
-        if n.class_name == "memory" \
-        and n.description.lower() == "system memory":
-            n.icon = "memory.png"
-
-        if n.class_name == "bus" and n.description.lower() == "motherboard":
-            n.icon = "motherboard.png"
-
-        if n.class_name == "memory" and n.description.lower() == "bios":
-            n.icon = "chip.png"
-
-        if n.class_name == "network" \
-        and n.description.lower() == "ethernet interface":
-            n.icon = "network.png"
-
-        if n.class_name == "network" \
-        and n.description.lower() == "wireless interface":
-            n.icon = "radio.png"
-
-        if n.class_name == "multimedia" \
-        and n.description.lower() \
-        in ["audio device", "multimedia audio controller"]:
-            n.icon = "audio.png"
-
-        if n.class_name == "bus" and n.description.lower() == "smbus":
-            n.icon = "serial.png"
-
-        if n.class_name == "bus" and n.description.lower() == "usb controller":
-            n.icon = "usb.png"
-
-        if n.name is not None:
-            if n.class_name == "disk" and n.name.lower() == "disk":
-                n.icon = "disc.png"
-
-            if n.class_name == "disk" and n.name.lower() == "cdrom":
-                n.icon = "cd.png"
-
-        if n.class_name == "power" and n.name.lower() == "battery":
-            n.icon = "battery.png"
-
-        if n.class_name == "storage" and n.name.lower() == "scsi":
-            n.icon = "scsi.png"
-
     n.save()
     level += 3
 
@@ -166,23 +104,4 @@ def save_computer_hardware(computer_id, node, parent=None, level=1):
                     c.name = x
                     c.save()
         elif e == "resource":
-            print(e, node[e])
-        else:
-            pass
-
-    if n.class_name == "system":
-        try:
-            chassis = Configuration.objects.get(name="chassis", node__id=n.id)
-            chassis_name = chassis.value.lower()
-            if chassis_name == "notebook":
-                n.icon = "laptop.png"
-
-            if chassis_name == "low-profile":
-                n.icon = "desktopcomputer.png"
-
-            if chassis_name == "mini-tower":
-                n.icon = "towercomputer.png"
-
-            n.save()
-        except:
-            pass
+            print(e, node[e])  # FIXME ???
