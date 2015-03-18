@@ -152,7 +152,7 @@ class PackageViewSet(mixins.CreateModelMixin,
     parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
 
     @list_route(methods=['get'])
-    def orphaned(self, request, pk=None):
+    def orphaned(self, request):
         """
         Returns packages that are not in any repository
         """
@@ -174,6 +174,16 @@ class RepositoryViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-start_date',)
+
+    @detail_route(methods=['get'])
+    def metadata(self, request, pk=None):
+        repo = get_object_or_404(Repository, pk=pk)
+        tasks.create_repository_metadata.delay(pk)
+
+        return Response(
+            {'detail': trans('Operation received')},
+            status=status.HTTP_200_OK
+        )
 
 '''
 def get_token_for_user(user, scope):
