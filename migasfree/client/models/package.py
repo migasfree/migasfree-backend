@@ -23,9 +23,23 @@ from django.utils.translation import ugettext_lazy as _
 from migasfree.core.models import Project
 
 
+class PackageManager(models.Manager):
+    def create(self, fullname, name, version, architecture, project):
+        package = Package(
+            fullname=package,
+            name=name,
+            version=version,
+            architecture=architecture,
+            project=project
+        )
+        package.save()
+
+        return package
+
+
 @python_2_unicode_compatible
 class Package(models.Model):
-    # packages installed in computers
+    """packages installed in computers"""
 
     fullname = models.CharField(
         verbose_name=_('fullname'),
@@ -60,6 +74,22 @@ class Package(models.Model):
         verbose_name=_("project"),
         related_name='+'
     )
+
+    @staticmethod
+    def normalized_name(package_name):
+        name = version = architecture = None
+
+        # name_version_architecture.ext convention
+        try:
+            name, version, architecture = package_name.split('_')
+        except:
+            if package_name.count('_') > 2:
+                slices = package_name.split('_', 1)
+                name = slices[0]
+                version, architecture = slices[1].rsplit('_', 1)
+                architecture = architecture.split('.')[0]
+
+        return (name, version, architecture)
 
     def __str__(self):
         return self.fullname
