@@ -34,38 +34,24 @@ def update_software_inventory(computer_id, inventory):
 
     if inventory and type(inventory) == list:
         pkgs = []
-        new_pkgs = []
         for package in inventory:
             if package:
-                # name_version_architecture.ext convention
-                try:
-                    name, version, architecture = package.split('_')
-                except:
-                    if package.count('_') > 2:
-                        slices = package.split('_', 1)
-                        name = slices[0]
-                        version, architecture = slices[1].rsplit('_', 1)
-                    else:
-                        continue
+                name, version, architecture = Package.normalized_name(package)
+                if not name:
+                    continue
 
-                architecture = architecture.split('.')[0]
                 try:
                     pkgs.append(Package.objects.get(
                         fullname=package, project__id=computer.project.id
                     ))
                 except:
-                    new_pkgs.append(
-                        Package(
-                            fullname=package,
-                            name=name, version=version,
-                            architecture=architecture,
-                            project=computer.project
-                        )
-                    )
+                    pkgs.append(Package.objects.create(
+                        fullname=package,
+                        name=name,
+                        version=version,
+                        architecture=architecture,
+                        project=computer.project
+                    ))
 
-        if new_pkgs:
-            bulk = Package.objects.bulk_create(new_pkgs)
-            objs = Package.objects.filter(fullname__in=bulk)
-            [pkgs.append(x) for x in objs]
-
-        computer.update_software_inventory(pkgs)
+        if pkgs:
+            computer.update_software_inventory(pkgs)
