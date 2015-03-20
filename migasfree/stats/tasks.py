@@ -92,7 +92,7 @@ def add_generating_repos(con):
             'target': 'server',
             'level': 'info',
             'result': result,
-            'api': '/api/v1/token/repos/generating/'  # TODO??? reverse
+            'api': '/api/v1/token/releases/generating/'  # TODO??? reverse
         }
     )
     con.sadd('migasfree:watch:chk', 'repos')
