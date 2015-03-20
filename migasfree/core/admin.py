@@ -208,7 +208,7 @@ admin.site.register(Package, PackageAdmin)
 
 class ReleaseAdmin(admin.ModelAdmin):
     form = ReleaseForm
-    list_display = ('name', 'enabled', 'start_date',)
+    list_display = ('name', 'project', 'enabled', 'start_date',)
     list_select_related = ('schedule',)
     list_filter = ('enabled', 'project__name',)
     ordering = ('name',)
