@@ -34,7 +34,7 @@ from import_export.admin import ImportExportActionModelAdmin
 from . import tasks
 
 from .models import *
-from .forms import PackageForm, RepositoryForm, ClientPropertyForm
+from .forms import PackageForm, ReleaseForm, ClientPropertyForm
 
 admin.site.register(Platform)
 
@@ -206,8 +206,8 @@ class PackageAdmin(admin.ModelAdmin):
 admin.site.register(Package, PackageAdmin)
 
 
-class RepositoryAdmin(admin.ModelAdmin):
-    form = RepositoryForm
+class ReleaseAdmin(admin.ModelAdmin):
+    form = ReleaseForm
     list_display = ('name', 'enabled', 'start_date',)
     list_select_related = ('schedule',)
     list_filter = ('enabled', 'project__name',)
@@ -257,14 +257,14 @@ class RepositoryAdmin(admin.ModelAdmin):
 
             return db_field.formfield(**kwargs)
 
-        return super(RepositoryAdmin, self).formfield_for_manytomany(
+        return super(ReleaseAdmin, self).formfield_for_manytomany(
             db_field, request, **kwargs
         )
 
     def save_model(self, request, obj, form, change):
         is_new = (obj.pk is None)
         packages_after = form.cleaned_data['available_packages']
-        super(RepositoryAdmin, self).save_model(request, obj, form, change)
+        super(ReleaseAdmin, self).save_model(request, obj, form, change)
 
         old_slug = form.initial.get('slug')
         new_slug = obj.slug
@@ -283,4 +283,4 @@ class RepositoryAdmin(admin.ModelAdmin):
             if new_slug != old_slug and not is_new:
                 tasks.remove_repository_metadata.delay(obj.id, old_slug)
 
-admin.site.register(Repository, RepositoryAdmin)
+admin.site.register(Release, ReleaseAdmin)

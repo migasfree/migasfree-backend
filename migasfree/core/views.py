@@ -41,7 +41,7 @@ from .models import (
     ServerProperty, ClientProperty,
     ServerAttribute, ClientAttribute,
     Schedule,
-    Package, Repository,
+    Package, Release,
 )
 from .serializers import (
     #UserSerializer, GroupSerializer,
@@ -49,9 +49,9 @@ from .serializers import (
     ServerPropertySerializer, ClientPropertySerializer,
     ServerAttributeSerializer, ClientAttributeSerializer,
     ScheduleSerializer,
-    PackageSerializer, RepositorySerializer,
+    PackageSerializer, ReleaseSerializer,
 )
-from .filters import RepositoryFilter, PackageFilter
+from .filters import ReleaseFilter, PackageFilter
 from .permissions import PublicPermission, IsAdminOrIsSelf
 
 from . import tasks
@@ -154,10 +154,10 @@ class PackageViewSet(mixins.CreateModelMixin,
     @list_route(methods=['get'])
     def orphaned(self, request):
         """
-        Returns packages that are not in any repository
+        Returns packages that are not in any release
         """
         serializer = PackageSerializer(
-            Package.objects.filter(repository__id=None),
+            Package.objects.filter(release__id=None),
             many=True
         )
 
@@ -167,17 +167,17 @@ class PackageViewSet(mixins.CreateModelMixin,
         )
 
 
-class RepositoryViewSet(viewsets.ModelViewSet):
-    queryset = Repository.objects.all()
-    serializer_class = RepositorySerializer
-    filter_class = RepositoryFilter
+class ReleaseViewSet(viewsets.ModelViewSet):
+    queryset = Release.objects.all()
+    serializer_class = ReleaseSerializer
+    filter_class = ReleaseFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-start_date',)
 
     @detail_route(methods=['get'])
     def metadata(self, request, pk=None):
-        repo = get_object_or_404(Repository, pk=pk)
+        release = get_object_or_404(Release, pk=pk)
         tasks.create_repository_metadata.delay(pk)
 
         return Response(
@@ -370,9 +370,9 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             Package, name=claims.get('packageset'), project=project
         )
 
-        repos = Repository.objects.filter(available_packages__id=package.id)
-        for repo in repos:
-            tasks.create_repository_metadata.delay(repo.id)
+        releases = Release.objects.filter(available_packages__id=package.id)
+        for release in releases:
+            tasks.create_repository_metadata.delay(release.id)
 
         return Response(
             self.create_response(trans('Data received')),

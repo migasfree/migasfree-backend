@@ -32,7 +32,7 @@ from .models import (
     ServerProperty, ClientProperty,
     Attribute, ServerAttribute, ClientAttribute,
     Schedule, ScheduleDelay,
-    Package, Repository,
+    Package, Release,
 )
 
 
@@ -168,13 +168,13 @@ class PackageSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'project', 'store', 'files')
 
 
-class RepositorySerializer(serializers.ModelSerializer):
+class ReleaseSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(read_only=True)
 
     def create(self, validated_data):
-        repo = super(RepositorySerializer, self).create(validated_data)
-        tasks.create_repository_metadata.delay(repo.id)
-        return repo
+        release = super(ReleaseSerializer, self).create(validated_data)
+        tasks.create_repository_metadata.delay(release.id)
+        return release
 
     def update(self, instance, validated_data):
         old_obj = self.Meta.model.objects.get(id=instance.id)
@@ -182,7 +182,7 @@ class RepositorySerializer(serializers.ModelSerializer):
         old_name = old_obj.name
 
         #https://github.com/tomchristie/django-rest-framework/issues/2442
-        instance = super(RepositorySerializer, self).update(
+        instance = super(ReleaseSerializer, self).update(
             instance, validated_data
         )
         new_pkgs = sorted(instance.available_packages.values_list('id', flat=True))
@@ -209,7 +209,7 @@ class RepositorySerializer(serializers.ModelSerializer):
         return data
 
     class Meta:
-        model = Repository
+        model = Release
         fields = (
             'id', 'name', 'slug', 'enabled', 'project', 'comment',
             'available_packages', 'packages_to_install', 'packages_to_remove',

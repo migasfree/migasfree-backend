@@ -21,7 +21,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 
-from .models import Package, Repository, ClientProperty
+from .models import Package, Release, ClientProperty
 from .validators import MimetypeValidator
 from .pms import get_available_mimetypes
 from .fields import MultiFileField
@@ -68,13 +68,13 @@ class PackageForm(forms.ModelForm):
         model = Package
 
 
-class RepositoryForm(forms.ModelForm):
+class ReleaseForm(forms.ModelForm):
     class Meta:
-        model = Repository
+        model = Release
 
     def clean(self):
         # http://stackoverflow.com/questions/7986510/django-manytomany-model-validation
-        cleaned_data = super(RepositoryForm, self).clean()
+        cleaned_data = super(ReleaseForm, self).clean()
 
         for item in cleaned_data.get('available_packages'):
             if item.project.id != cleaned_data['project'].id:

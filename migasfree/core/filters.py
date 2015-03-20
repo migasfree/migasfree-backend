@@ -18,12 +18,12 @@
 
 import rest_framework_filters as filters
 
-from .models import Repository, Package
+from .models import Release, Package
 
 
-class RepositoryFilter(filters.FilterSet):
+class ReleaseFilter(filters.FilterSet):
     class Meta:
-        model = Repository
+        model = Release
         fields = {
             'project__id': ['exact'],
             'enabled': ['exact'],
@@ -34,5 +34,5 @@ class PackageFilter(filters.FilterSet):
     class Meta:
         model = Package
         fields = {
-            'repository__id': ['exact'],
+            'release__id': ['exact'],
         }

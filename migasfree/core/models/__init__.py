@@ -29,4 +29,4 @@ from .schedule import Schedule
 from .schedule_delay import ScheduleDelay
 
 from .package import Package, PackageManager
-from .repository import Repository
+from .release import Release

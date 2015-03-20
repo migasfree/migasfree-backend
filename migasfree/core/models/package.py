@@ -104,7 +104,7 @@ class Package(models.Model):
 
     @staticmethod
     def orphaned():
-        return Package.objects.filter(repository__id=None).count()
+        return Package.objects.filter(release__id=None).count()
 
     def create_dir(self):
         _path = os.path.join(

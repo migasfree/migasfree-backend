@@ -44,11 +44,11 @@ from .schedule import Schedule
 
 
 @python_2_unicode_compatible
-class Repository(models.Model):
+class Release(models.Model):
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
         default=True,
-        help_text=_("if you uncheck this field, repository is disabled for all"
+        help_text=_("if you uncheck this field, release is disabled for all"
             " computers.")
     )
 
@@ -152,7 +152,7 @@ class Repository(models.Model):
         self.default_included_packages = self.default_included_packages.replace("\r\n", "\n")
         self.default_excluded_packages = self.default_excluded_packages.replace("\r\n", "\n")
 
-        super(Repository, self).save(*args, **kwargs)
+        super(Release, self).save(*args, **kwargs)
 
     @staticmethod
     def available_repos(project_id, attributes):
@@ -160,7 +160,7 @@ class Repository(models.Model):
         Return available repositories for a project and attributes list
         """
         # 1.- all repositories by attribute
-        attributed = Repository.objects.filter(project__id=project_id).filter(
+        attributed = Release.objects.filter(project__id=project_id).filter(
             enabled=True
         ).filter(
             included_attributes__id__in=attributes
@@ -168,7 +168,7 @@ class Repository(models.Model):
         lst = list(attributed)
 
         # 2.- all repositories by schedule
-        scheduled = Repository.objects.filter(project__id=project_id).filter(
+        scheduled = Release.objects.filter(project__id=project_id).filter(
             enabled=True
         ).filter(schedule__scheduledelay__attributes__id__in=attributes).extra(
             select={'delay': "core_scheduledelay.delay"}
@@ -179,7 +179,7 @@ class Repository(models.Model):
                 lst.append(repo.id)
 
         # 3.- excluded attributtes
-        repos = Repository.objects.filter(id__in=lst).filter(
+        repos = Release.objects.filter(id__in=lst).filter(
             ~Q(excluded_attributes__id__in=attributes)
         )
 
@@ -187,21 +187,21 @@ class Repository(models.Model):
 
     class Meta:
         app_label = 'core'
-        verbose_name = _('Repository')
-        verbose_name_plural = _('Repositories')
+        verbose_name = _('Release')
+        verbose_name_plural = _('Releases')
         unique_together = (('name', 'project'),)
 
 
-@receiver(pre_save, sender=Repository)
-def pre_save_repository(sender, instance, **kwargs):
+@receiver(pre_save, sender=Release)
+def pre_save_release(sender, instance, **kwargs):
     if instance.id:
-        old_obj = Repository.objects.get(pk=instance.id)
+        old_obj = Release.objects.get(pk=instance.id)
         if old_obj.project.id != instance.project.id:
             raise ValidationError(_('Is not allowed change project'))
 
 
-@receiver(pre_delete, sender=Repository)
-def pre_delete_repository(sender, instance, **kwargs):
+@receiver(pre_delete, sender=Release)
+def pre_delete_release(sender, instance, **kwargs):
     mod = import_module('migasfree.core.pms.%s' % instance.project.pms)
     pms = getattr(mod, instance.project.pms.capitalize())()
 

@@ -32,7 +32,7 @@ from migasfree.model_update import update
 from migasfree import secure
 from migasfree.core.mixins import SafeConnectionMixin
 from migasfree.core.models import (
-    Project, Repository, Property, Attribute, BasicAttribute
+    Project, Release, Property, Attribute, BasicAttribute
 )
 
 from .. import models, serializers, tasks
@@ -505,7 +505,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, trans('Getting repositories...'))
 
-        repos = Repository.available_repos(
+        repos = Release.available_repos(
             computer.project.id, computer.get_all_attributes()
         ).values_list('slug', flat=True)
 
@@ -642,7 +642,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, trans('Getting mandatory packages...'))
 
-        pkgs = Repository.available_repos(
+        pkgs = Release.available_repos(
             computer.project.id, computer.get_all_attributes()
         ).values_list('packages_to_install', 'packages_to_remove')
 
@@ -719,10 +719,10 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         add_computer_message(computer, trans('Getting available tags...'))
 
         available = {}
-        for repos in Repository.objects.filter(
+        for release in Release.objects.filter(
             project__id=computer.project.id
         ).filter(enabled=True):
-            for tag in repos.included_attributes.filter(
+            for tag in release.included_attributes.filter(
                 property_att__sort='server'
             ).filter(property_att__enabled=True):
                 if tag.property_att.name not in available.keys():
@@ -790,7 +790,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         remove = []
 
         # Old Repositories
-        repos = Repository.available_repos(
+        repos = Release.available_repos(
             computer.project.id, old_tags
         )
         pkgs = repos.values_list(
@@ -820,7 +820,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 default_excluded_packages.split('\n') if x]
 
         # New Repositories
-        repos = Repository.available_repos(
+        repos = Release.available_repos(
             computer.project.id,
             new_tags + intersection_tags
         )
