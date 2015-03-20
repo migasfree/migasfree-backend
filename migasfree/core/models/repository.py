@@ -22,6 +22,8 @@ import os
 import shutil
 import datetime
 
+from importlib import import_module
+
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.encoding import python_2_unicode_compatible
@@ -200,17 +202,14 @@ def pre_save_repository(sender, instance, **kwargs):
 
 @receiver(pre_delete, sender=Repository)
 def pre_delete_repository(sender, instance, **kwargs):
-    exec('from migasfree.core.pms import %s' % instance.project.pms)
-    _pms = eval('%s.%s' % (
-        instance.project.pms,
-        instance.project.pms.capitalize()
-    ))()
+    mod = import_module('migasfree.core.pms.%s' % instance.project.pms)
+    pms = getattr(mod, instance.project.pms.capitalize())()
 
-    _path = os.path.join(
+    path = os.path.join(
         settings.MIGASFREE_PUBLIC_DIR,
         instance.project.slug,
-        _pms.relative_path,
+        pms.relative_path,
         instance.slug
     )
-    if os.path.exists(_path):
-        shutil.rmtree(_path)
+    if os.path.exists(path):
+        shutil.rmtree(path)

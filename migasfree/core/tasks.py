@@ -41,11 +41,8 @@ def remove_repository_metadata(repo_id, old_slug=''):
     else:
         slug = repo.slug
 
-    exec('from migasfree.core.pms import %s' % repo.project.pms)
-    pms = eval('%s.%s' % (
-        repo.project.pms,
-        repo.project.pms.capitalize()
-    ))()
+    mod = import_module('migasfree.core.pms.%s' % repo.project.pms)
+    pms = getattr(mod, repo.project.pms.capitalize())()
 
     destination = os.path.join(
         settings.MIGASFREE_PUBLIC_DIR,
@@ -72,12 +69,8 @@ def create_repository_metadata(repo_id):
     )
     con.sadd('migasfree:watch:repos', repo.id)
 
-    exec('from migasfree.core.pms import %s' % repo.project.pms)
-    pms = eval('%s.%s' % (
-        repo.project.pms,
-        repo.project.pms.capitalize()
-    ))()
-
+    mod = import_module('migasfree.core.pms.%s' % repo.project.pms)
+    pms = getattr(mod, repo.project.pms.capitalize())()
 
     tmp_path = os.path.join(
         settings.MIGASFREE_PUBLIC_DIR,
