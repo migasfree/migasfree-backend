@@ -25,6 +25,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django.template import Context, Template
 from django.conf import settings
+from django.db import transaction
 
 from migasfree.core.models import Project, ServerAttribute, Attribute
 
@@ -220,6 +221,7 @@ class Computer(models.Model):
             self.software_history = history + '\n\n' + self.software_history
             self.save()
 
+    @transaction.commit_on_success
     def update_software_inventory(self, pkgs):
         if pkgs:
             self.software_inventory.clear()
