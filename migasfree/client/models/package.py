@@ -58,7 +58,7 @@ class Package(models.Model):
 
     version = models.CharField(
         verbose_name=_('version'),
-        max_length=20,
+        max_length=40,
         null=False,
         unique=False
     )
