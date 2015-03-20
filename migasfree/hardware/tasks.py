@@ -70,7 +70,7 @@ def save_computer_hardware(computer_id, node, parent=None, level=1):
     if "dev" in node:
         n.dev = node["dev"]
 
-    n.save()
+    n.save()  # FIXME ModelManager
     level += 3
 
     for e in node:
@@ -83,25 +83,23 @@ def save_computer_hardware(computer_id, node, parent=None, level=1):
                 c.node = n
                 c.name = x
                 c.description = node[e][x]
-                c.save()
+                c.save()  # FIXME ModelManager
         elif e == "configuration":
             for x in node[e]:
                 c = Configuration()
                 c.node = n
                 c.name = x
                 c.value = node[e][x]
-                c.save()
+                c.save()  # FIXME ModelManager
         elif e == "logicalname":
             if type(node[e]) == unicode:
                 c = LogicalName()
                 c.node = n
                 c.name = node[e]
-                c.save()
+                c.save()  # FIXME ModelManager
             else:
                 for x in node[e]:
                     c = LogicalName()
                     c.node = n
                     c.name = x
-                    c.save()
-        elif e == "resource":
-            print(e, node[e])  # FIXME ???
+                    c.save()  # FIXME ModelManager
