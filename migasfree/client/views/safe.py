@@ -163,7 +163,8 @@ def add_computer_message(computer, message):
 
 def remove_computer_messages(id):
     con = get_redis_connection('default')
-    con.hdel('migasfree:msg:%d' % id, '*')
+    keys = con.hkeys('migasfree:msg:%d' % id)
+    con.hdel('migasfree:msg:%d' % id, *keys)
     con.srem('migasfree:watch:msg', id)
 
 
