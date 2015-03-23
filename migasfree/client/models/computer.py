@@ -18,14 +18,14 @@
 
 from datetime import datetime
 
-from django.db import models
+from django.db import models, transaction
+from django.db.models import Count
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django.template import Context, Template
 from django.conf import settings
-from django.db import transaction
 
 from migasfree.core.models import Project, ServerAttribute, Attribute
 
@@ -220,6 +220,18 @@ class Computer(models.Model):
         if history:
             self.software_history = history + '\n\n' + self.software_history
             self.save()
+
+    @staticmethod
+    def group_by_project():
+        return Computer.objects.values('project__name', 'project__id').annotate(
+            count=Count('id')
+        )
+
+    @staticmethod
+    def group_by_platform():
+        return Computer.objects.values(
+            'project__platform__name', 'project__platform__id'
+        ).annotate(count=Count('id'))
 
     @transaction.commit_on_success
     def update_software_inventory(self, pkgs):
