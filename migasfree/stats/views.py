@@ -24,10 +24,10 @@ from dateutil import relativedelta
 from django.shortcuts import get_object_or_404
 from django_redis import get_redis_connection
 from rest_framework import viewsets, status
-from rest_framework.decorators import list_route
+from rest_framework.decorators import list_route, detail_route
 from rest_framework.response import Response
 
-from migasfree.core.models import Project
+from migasfree.core.models import Project, Release
 from migasfree.client.models import Computer
 
 from . import validators
@@ -71,7 +71,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
                 value = 0
             stats.append([i, int(value)])
 
-        return Response({'stats': stats}, status=status.HTTP_200_OK)
+        return Response(stats, status=status.HTTP_200_OK)
 
     @list_route(methods=['get'])
     def monthly(self, request, format=None):
@@ -107,7 +107,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
                 value = 0
             stats.append([int('%04d%02d' % (i[0], i[1])), int(value)])
 
-        return Response({'stats': stats}, status=status.HTTP_200_OK)
+        return Response(stats, status=status.HTTP_200_OK)
 
     @list_route(methods=['get'])
     def daily(self, request, format=None):
@@ -146,7 +146,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
                 int(value)
             ])
 
-        return Response({'stats': stats}, status=status.HTTP_200_OK)
+        return Response(stats, status=status.HTTP_200_OK)
 
     @list_route(methods=['get'])
     def hourly(self, request, format=None):
@@ -187,20 +187,78 @@ class SyncStatsViewSet(viewsets.ViewSet):
             ])
             begin += hour
 
-        return Response({'stats': stats}, status=status.HTTP_200_OK)
+        return Response(stats, status=status.HTTP_200_OK)
 
 
 class ComputerStatsViewSet(viewsets.ViewSet):
     @list_route(methods=['get'])
     def projects(self, request, format=None):
         return Response(
-            {'stats': Computer.group_by_project()},
+            Computer.group_by_project(),
             status=status.HTTP_200_OK
         )
 
     @list_route(methods=['get'])
     def platforms(self, request, format=None):
         return Response(
-            {'stats': Computer.group_by_platform()},
+            Computer.group_by_platform(),
+            status=status.HTTP_200_OK
+        )
+
+
+class ReleaseStatsViewSet(viewsets.ViewSet):
+    @detail_route(methods=['get'], url_path='computers/assigned')
+    def assigned_computers(self, request, pk=None):
+        release = get_object_or_404(Release, pk=pk)
+
+        con = get_redis_connection('default')
+        response = con.smembers('migasfree:releases:%d:computers' % release.id)
+
+        return Response(
+            list(response),
+            status=status.HTTP_200_OK
+        )
+
+    @detail_route(methods=['get'], url_path='computers/status/ok')
+    def computers_with_ok_status(self, request, pk=None):
+        release = get_object_or_404(Release, pk=pk)
+
+        con = get_redis_connection('default')
+        response = con.smembers('migasfree:releases:%d:ok' % release.id)
+
+        return Response(
+            list(response),
+            status=status.HTTP_200_OK
+        )
+
+    @detail_route(methods=['get'], url_path='computers/status/error')
+    def computers_with_error_status(self, request, pk=None):
+        release = get_object_or_404(Release, pk=pk)
+
+        con = get_redis_connection('default')
+        response = con.smembers('migasfree:releases:%d:error' % release.id)
+
+        return Response(
+            list(response),
+            status=status.HTTP_200_OK
+        )
+
+    @detail_route(methods=['get'])
+    def timeline(self, request, pk=None):
+        release = get_object_or_404(Release, pk=pk)
+
+        con = get_redis_connection('default')
+        assigned = con.smembers('migasfree:releases:%d:computers' % release.id)
+        ok_status = con.smembers('migasfree:releases:%d:ok' % release.id)
+        error_status = con.smembers('migasfree:releases:%d:error' % release.id)
+
+        response = {
+            'assigned': assigned,
+            'ok': ok_status,
+            'error': error_status
+        }
+
+        return Response(
+            response,
             status=status.HTTP_200_OK
         )
