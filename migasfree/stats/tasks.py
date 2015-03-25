@@ -93,7 +93,7 @@ def add_generating_repos(con):
             'target': 'server',
             'level': 'info',
             'result': result,
-            'api': '/api/v1/token/releases/generating/'  # TODO??? reverse
+            'api': '/api/v1/token/repos/generating/'  # TODO??? reverse
         }
     )
     con.sadd('migasfree:watch:chk', 'repos')
@@ -115,7 +115,10 @@ def alerts():
 
 
 def assigned_computers_to_release(release_id):
-    release = Release.objects.get(pk=release_id)
+    try:
+        release = Release.objects.get(pk=release_id)
+    except:
+        return
 
     computers = set(Computer.objects.filter(
         Q(project=release.project) & (
@@ -140,13 +143,13 @@ def assigned_computers_to_release(release_id):
         )
     ).values_list('id', flat=True)))
 
-    print computers  # DEBUG
-    #refresh redis  # TODO
-    # call in relesease.save  # TODO
+    con = get_redis_connection('default')
+    key = 'migasfree:releases:%d:computers' % release_id
+    con.delete(key)
+    con.sadd(key, list(computers))
 
 
 @shared_task(queue='default')
 def computers_releases():
-    pass  # TODO
-    # for releases:
-    #    assigned_computers_to_release(id)
+    for release in Release.objects.all():
+        assigned_computers_to_release(release.id)
