@@ -19,8 +19,9 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
+from django_redis import get_redis_connection
 
-from migasfree.core.models import Project
+from migasfree.core.models import Project, Release
 
 from .computer import Computer
 from .user import User
@@ -69,6 +70,20 @@ class Synchronization(models.Model):
 
         self.computer.sync_end_date = self.created_at
         self.computer.save()
+
+        releases = Release.available_repos(
+            self.computer.project.id, self.computer.get_all_attributes()
+        ).values_list('id', flat=True)
+
+        con = get_redis_connection('default')
+        for release_id in releases:
+            con.sadd(
+                'migasfree:releases:%d:%s' % (
+                    release_id,
+                    'ok' if self.pms_status_ok else 'error'
+                ),
+                self.computer.id,
+            )
 
     def __str__(self):
         return '%s %s' % (self.computer.__str__(), self.created_at)
