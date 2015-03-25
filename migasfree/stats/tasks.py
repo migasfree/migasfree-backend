@@ -18,13 +18,14 @@
 
 from __future__ import absolute_import
 
+from django.db.models import Q
 from celery import shared_task
 from celery.exceptions import Ignore
 from django_redis import get_redis_connection
 from rest_framework.reverse import reverse
 
-from migasfree.core.models import Package
-from migasfree.client.models import Notification, Fault, Error
+from migasfree.core.models import Package, Release
+from migasfree.client.models import Notification, Fault, Error, Computer
 
 from ..utils import trans as _
 
@@ -111,3 +112,41 @@ def alerts():
     # add_delayed_computers(con)
 
     logger.debug(con.smembers('migasfree:watch:chk'))
+
+
+def assigned_computers_to_release(release_id):
+    release = Release.objects.get(pk=release_id)
+
+    computers = set(Computer.objects.filter(
+        Q(project=release.project) & (
+            Q(sync_attributes__id__in=release.included_attributes.all())
+            | Q(tags__id__in=release.included_attributes.all())
+        )
+    ).values_list('id', flat=True))
+
+    if release.schedule and release.schedule.scheduledelay_set:
+        for delay in release.schedule.scheduledelay_set.all():
+            computers = computers.union(set(Computer.objects.filter(
+                Q(project=release.project) & (
+                    Q(sync_attributes__id__in=delay.attributes.all())
+                    | Q(tags__id__in=delay.attributes.all())
+                )
+            ).values_list('id', flat=True)))
+
+    computers = computers.difference(set(Computer.objects.filter(
+        Q(project=release.project) & (
+            Q(sync_attributes__id__in=release.excluded_attributes.all())
+            | Q(tags__id__in=release.excluded_attributes.all())
+        )
+    ).values_list('id', flat=True)))
+
+    print computers  # DEBUG
+    #refresh redis  # TODO
+    # call in relesease.save  # TODO
+
+
+@shared_task(queue='default')
+def computers_releases():
+    pass  # TODO
+    # for releases:
+    #    assigned_computers_to_release(id)
