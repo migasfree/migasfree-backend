@@ -33,6 +33,7 @@ from django.db.models import Q
 from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
+from django_redis import get_redis_connection
 from celery import shared_task
 
 from migasfree.utils import time_horizon
@@ -154,6 +155,12 @@ class Release(models.Model):
 
         super(Release, self).save(*args, **kwargs)
 
+        try:
+            from migasfree.stats import tasks
+            tasks.assigned_computers_to_release(self.id)
+        except:
+            pass
+
     @staticmethod
     def available_repos(project_id, attributes):
         """
@@ -199,6 +206,12 @@ def pre_save_release(sender, instance, **kwargs):
         if old_obj.project.id != instance.project.id:
             raise ValidationError(_('Is not allowed change project'))
 
+        if instance.available_packages != old_obj.available_packages \
+        or instance.packages_to_install != old_obj.packages_to_install \
+        or instance.packages_to_remove != old_obj.packages_to_remove:
+            con = get_redis_connection('default')
+            con.delete('migasfree:releases:%d:computers' % instance.id)
+
 
 @receiver(pre_delete, sender=Release)
 def pre_delete_release(sender, instance, **kwargs):
@@ -213,3 +226,6 @@ def pre_delete_release(sender, instance, **kwargs):
     )
     if os.path.exists(path):
         shutil.rmtree(path)
+
+    con = get_redis_connection('default')
+    con.delete('migasfree:releases:%d:computers' % instance.id)
