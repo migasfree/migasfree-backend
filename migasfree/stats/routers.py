@@ -26,3 +26,6 @@ router.register(r'stats/syncs', views.SyncStatsViewSet, base_name='stats-syncs')
 router.register(
     r'stats/computers', views.ComputerStatsViewSet, base_name='stats-computers'
 )
+router.register(
+    r'stats/releases', views.ReleaseStatsViewSet, base_name='stats-releases'
+)
