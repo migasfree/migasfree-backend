@@ -146,7 +146,8 @@ def assigned_computers_to_release(release_id):
     con = get_redis_connection('default')
     key = 'migasfree:releases:%d:computers' % release_id
     con.delete(key)
-    con.sadd(key, list(computers))
+    if computers:
+        [con.sadd(key, computer_id) for computer_id in list(computers)]
 
 
 @shared_task(queue='default')
