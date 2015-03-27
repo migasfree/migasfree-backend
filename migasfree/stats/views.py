@@ -248,14 +248,16 @@ class ReleaseStatsViewSet(viewsets.ViewSet):
         release = get_object_or_404(Release, pk=pk)
 
         con = get_redis_connection('default')
-        assigned = con.smembers('migasfree:releases:%d:computers' % release.id)
-        ok_status = con.smembers('migasfree:releases:%d:ok' % release.id)
-        error_status = con.smembers('migasfree:releases:%d:error' % release.id)
 
         response = {
-            'assigned': assigned,
-            'ok': ok_status,
-            'error': error_status
+            'computers': {
+                'assigned': con.scard(
+                    'migasfree:releases:%d:computers' % release.id
+                ),
+                'ok': con.scard('migasfree:releases:%d:ok' % release.id),
+                'error': con.scard('migasfree:releases:%d:error' % release.id)
+            },
+            'schedule': release.schedule_timeline()
         }
 
         return Response(
