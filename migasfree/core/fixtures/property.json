@@ -113,7 +113,7 @@
             "kind": "N",
             "sort": "client",
             "language": "bash",
-            "code": "netcalc(){\n    local IFS='.' ip i\n    local -a oct msk\n\t\n    read -ra oct <<<\"$1\"\n    read -ra msk <<<\"$2\"\n\n    for i in ${!oct[@]}; do\n        ip+=( \"$(( oct[i] & msk[i] ))\" )\n    done\n    \n    echo \"${ip[*]}\"\n}\n\nbcastcalc(){\n    local IFS='.' ip i\n    local -a oct msk\n\t\n    read -ra oct <<<\"$1\"\n    read -ra msk <<<\"$2\"\n\n    for i in ${!oct[@]}; do\n        ip+=( \"$(( oct[i] + ( 255 - ( oct[i] | msk[i] ) ) ))\" )\n    done\n\n    echo \"${ip[*]}\"\n}\n\nmask2cidr() {\n    nbits=0\n    IFS=.\n    for dec in $1 ; do\n        case $dec in\n            255) let nbits+=8;;\n            254) let nbits+=7 ; break ;;\n            252) let nbits+=6 ; break ;;\n            248) let nbits+=5 ; break ;;\n            240) let nbits+=4 ; break ;;\n            224) let nbits+=3 ; break ;;\n            192) let nbits+=2 ; break ;;\n            128) let nbits+=1 ; break ;;\n            0);;\n            *) echo \"Error: $dec is not recognised\"; exit 1\n        esac\n    done\n    echo \"$nbits\"\n}\n\n_INFO=$(ip addr | grep 'state UP' -A2)\n\n_IP=$(echo -e \"$_INFO\" | tail -n1 | awk '{print $2}' | cut -f1 -d'/')\n_DEV=$(echo -e \"$_INFO\" | head -n1 | awk '{print $2}' | cut -f1 -d':')\n_MASK=$(LC_ALL=C ifconfig | grep 'Mask:'| grep -v '127.0.0.1' | cut -d: -f4 | awk '{ print $1}')\n\n_NET=$(netcalc \"$_IP\" \"$_MASK\")\n_BITS=$(mask2cidr $_MASK)\n\necho $_NET/$_BITS"
+            "code": "_IP=$(LC_ALL=C ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')\nLC_ALL=C ip route | grep $_IP | cut -d' ' -f1"
         }
     },
     {
@@ -126,7 +126,7 @@
             "kind": "-",
             "sort": "client",
             "language": "python",
-            "code": "import subprocess\nimport platform\n\n_platform = platform.system()\nif _platform == 'Linux':\n    cmd_linux = \"\"\"r=''\n      if [ $(lspci -n | sed -n 1p | awk '{print $2}') = 'Class' ]\nthen\n        dev=$(lspci -n | awk '{print $4}')\n      else\n        dev=$(lspci -n | awk '{print $3}')\n      fi\n      for l in $dev\n      do\n        n=$(lspci -d $l | awk '{for (i = 2; i <=NF;++i) print $i}' | tr \"\\n\" \" \" | sed 's/,//g')\n        r=\"$r$l~$n,\"\n      done\n      echo $r\"\"\"\n    (out, err) = subprocess.Popen(cmd_linux, stdout=subprocess.PIPE, shell=True).communicate()\n    print out,\n\nelif _platform == 'Windows':\n    print 'none',\n\nelse:\n    print 'none',"
+            "code": "import subprocess\nimport platform\n\n_platform = platform.system()\nif _platform == 'Linux':\n    cmd_linux = \"\"\"r=''\n      if [ $(lspci -n | sed -n 1p | awk '{print $2}') = 'Class' ]\nthen\n        dev=$(lspci -n | awk '{print $4}')\n      else\n        dev=$(lspci -n | awk '{print $3}')\n      fi\n      for l in $dev\n      do\n        n=$(lspci -d $l | awk '{for (i = 2; i <=NF;++i) print $i}' | tr \"\\n\" \" \" | sed 's/,//g')\n        r=\"$r$l~$n,\"\n      done\n      echo $r\"\"\"\n    (out, err) = subprocess.Popen(cmd_linux, stdout=subprocess.PIPE, shell=True).communicate()\n    print out,\nelse:\n    print 'none',"
         }
     }
 ]
