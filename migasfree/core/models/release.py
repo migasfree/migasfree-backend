@@ -42,6 +42,7 @@ from .project import Project
 from .package import Package
 from .attribute import Attribute
 from .schedule import Schedule
+from .schedule_delay import ScheduleDelay
 
 
 @python_2_unicode_compatible
@@ -142,6 +143,38 @@ class Release(models.Model):
 
     def __str__(self):
         return self.name
+
+    def schedule_timeline(self):
+        if self.schedule is None:
+            return None
+
+        delays = ScheduleDelay.objects.filter(
+            schedule__id=self.schedule.id
+        ).order_by('delay')
+
+        if len(delays) == 0:
+            return None
+
+        end_date = time_horizon(self.start_date, delays.reverse()[0].delay)
+        begin_date = time_horizon(self.start_date, delays[0].delay)
+
+        delta = end_date - begin_date
+        progress = datetime.datetime.now() - datetime.datetime.combine(
+            begin_date, datetime.datetime.min.time()
+        )
+
+        if delta.days > 0:
+            percent = float(progress.days) / delta.days * 100
+            if percent > 100:
+                percent = 100
+        else:
+            percent = 100
+
+        return {
+            'begin_date': str(begin_date),
+            'end_date': str(end_date),
+            'percent': '%d' % int(percent)
+        }
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
