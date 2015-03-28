@@ -506,7 +506,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, trans('Getting repositories...'))
 
-        repos = Release.available_repos(
+        repos = Release.available_releases(
             computer.project.id, computer.get_all_attributes()
         ).values_list('slug', flat=True)
 
@@ -643,7 +643,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, trans('Getting mandatory packages...'))
 
-        pkgs = Release.available_repos(
+        pkgs = Release.available_releases(
             computer.project.id, computer.get_all_attributes()
         ).values_list('packages_to_install', 'packages_to_remove')
 
@@ -791,7 +791,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         remove = []
 
         # Old Repositories
-        repos = Release.available_repos(
+        repos = Release.available_releases(
             computer.project.id, old_tags
         )
         pkgs = repos.values_list(
@@ -821,7 +821,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 default_excluded_packages.split('\n') if x]
 
         # New Repositories
-        repos = Release.available_repos(
+        repos = Release.available_releases(
             computer.project.id,
             new_tags + intersection_tags
         )

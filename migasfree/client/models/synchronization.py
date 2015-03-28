@@ -71,7 +71,7 @@ class Synchronization(models.Model):
         self.computer.sync_end_date = self.created_at
         self.computer.save()
 
-        releases = Release.available_repos(
+        releases = Release.available_releases(
             self.computer.project.id, self.computer.get_all_attributes()
         ).values_list('id', flat=True)
 
