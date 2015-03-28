@@ -18,7 +18,12 @@
 
 from __future__ import absolute_import
 
+import time
+
+from datetime import datetime, timedelta
+
 from django.db.models import Q
+from django.conf import settings
 from celery import shared_task
 from celery.exceptions import Ignore
 from django_redis import get_redis_connection
@@ -33,7 +38,8 @@ import logging
 logger = logging.getLogger('celery')
 
 
-def add_orphaned_packages(con):
+def add_orphaned_packages():
+    con = get_redis_connection('default')
     con.hmset(
         'migasfree:chk:orphaned', {
             'msg': _('Orphaned Package/Set'),
@@ -46,7 +52,8 @@ def add_orphaned_packages(con):
     con.sadd('migasfree:watch:chk', 'orphaned')
 
 
-def add_unchecked_notifications(con):
+def add_unchecked_notifications():
+    con = get_redis_connection('default')
     con.hmset(
         'migasfree:chk:notifications', {
             'msg': _('Unchecked Notifications'),
@@ -59,7 +66,8 @@ def add_unchecked_notifications(con):
     con.sadd('migasfree:watch:chk', 'notifications')
 
 
-def add_unchecked_faults(con):
+def add_unchecked_faults():
+    con = get_redis_connection('default')
     con.hmset(
         'migasfree:chk:faults', {
             'msg': _('Unchecked Faults'),
@@ -72,7 +80,8 @@ def add_unchecked_faults(con):
     con.sadd('migasfree:watch:chk', 'faults')
 
 
-def add_unchecked_errors(con):
+def add_unchecked_errors():
+    con = get_redis_connection('default')
     con.hmset(
         'migasfree:chk:errors', {
             'msg': _('Unchecked Errors'),
@@ -85,7 +94,8 @@ def add_unchecked_errors(con):
     con.sadd('migasfree:watch:chk', 'errors')
 
 
-def add_generating_repos(con):
+def add_generating_repos():
+    con = get_redis_connection('default')
     result = con.scard('migasfree:watch:repos')
     con.hmset(
         'migasfree:chk:repos', {
@@ -99,17 +109,69 @@ def add_generating_repos(con):
     con.sadd('migasfree:watch:chk', 'repos')
 
 
+def add_synchronizing_computers():
+    con = get_redis_connection('default')
+
+    result = 0
+    delayed_time = datetime.now() - timedelta(
+        seconds=settings.MIGASFREE_SECONDS_MESSAGE_ALERT
+    )
+
+    computers = con.smembers('migasfree:watch:msg')
+    for computer_id in computers:
+        date = con.hget('migasfree:msg:%s' % computer_id, 'date')
+        if datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f') > delayed_time:
+            result += 1
+
+    con.hmset(
+        'migasfree:chk:syncs', {
+            'msg': _('Synchronizing Computers Now'),
+            'target': 'computer',
+            'level': 'info',
+            'result': result,
+            'api': '/api/v1/token/computers/synchronizing/'  # TODO??? reverse
+        }
+    )
+    con.sadd('migasfree:watch:chk', 'syncs')
+
+
+def add_delayed_computers():
+    con = get_redis_connection('default')
+
+    result = 0
+    delayed_time = datetime.now() - timedelta(
+        seconds=settings.MIGASFREE_SECONDS_MESSAGE_ALERT
+    )
+
+    computers = con.smembers('migasfree:watch:msg')
+    for computer_id in computers:
+        date = con.hget('migasfree:msg:%s' % computer_id, 'date')
+        if datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f') <= delayed_time:
+            result += 1
+
+    con.hmset(
+        'migasfree:chk:delayed', {
+            'msg': _('Delayed Computers'),
+            'target': 'computer',
+            'level': 'critical',
+            'result': result,
+            'api': '/api/v1/token/computers/delayed/'  # TODO??? reverse
+        }
+    )
+    con.sadd('migasfree:watch:chk', 'delayed')
+
+
 @shared_task(queue='default')
 def alerts():
     con = get_redis_connection('default')
 
-    add_orphaned_packages(con)
-    add_unchecked_notifications(con)
-    add_unchecked_faults(con)
-    add_unchecked_errors(con)
-    add_generating_repos(con)
-    # add_synchronizing_computers(con)
-    # add_delayed_computers(con)
+    add_orphaned_packages()
+    add_unchecked_notifications()
+    add_unchecked_faults()
+    add_unchecked_errors()
+    add_generating_repos()
+    add_synchronizing_computers()
+    add_delayed_computers()
 
     logger.debug(con.smembers('migasfree:watch:chk'))
 
