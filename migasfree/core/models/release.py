@@ -195,11 +195,11 @@ class Release(models.Model):
             pass
 
     @staticmethod
-    def available_repos(project_id, attributes):
+    def available_releases(project_id, attributes):
         """
         Return available repositories for a project and attributes list
         """
-        # 1.- all repositories by attribute
+        # 1.- all releases by attribute
         attributed = Release.objects.filter(project__id=project_id).filter(
             enabled=True
         ).filter(
@@ -207,23 +207,24 @@ class Release(models.Model):
         ).values_list('id', flat=True)
         lst = list(attributed)
 
-        # 2.- all repositories by schedule
+        # 2.- all releases by schedule
         scheduled = Release.objects.filter(project__id=project_id).filter(
             enabled=True
         ).filter(schedule__scheduledelay__attributes__id__in=attributes).extra(
             select={'delay': "core_scheduledelay.delay"}
         )
 
-        for repo in scheduled:
-            if time_horizon(repo.start_date, repo.delay) <= datetime.now().date():
-                lst.append(repo.id)
+        for release in scheduled:
+            if time_horizon(release.start_date, release.delay) <= \
+            datetime.datetime.now().date():
+                lst.append(release.id)
 
         # 3.- excluded attributtes
-        repos = Release.objects.filter(id__in=lst).filter(
+        releases = Release.objects.filter(id__in=lst).filter(
             ~Q(excluded_attributes__id__in=attributes)
         )
 
-        return repos
+        return releases
 
     class Meta:
         app_label = 'core'
