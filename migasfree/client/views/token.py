@@ -16,10 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from datetime import datetime, timedelta
+
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
+from django_redis import get_redis_connection
 from rest_framework import viewsets, exceptions, status, mixins, filters
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_filters import backends
@@ -100,6 +104,53 @@ class ComputerViewSet(
         models.Computer.replacement(source, target)
 
         return Response(status=status.HTTP_200_OK)
+
+
+    @list_route(methods=['get'])
+    def synchronizing(self, request, format=None):
+        con = get_redis_connection('default')
+
+        result = []
+        delayed_time = datetime.now() - timedelta(
+            seconds=settings.MIGASFREE_SECONDS_MESSAGE_ALERT
+        )
+
+        computers = con.smembers('migasfree:watch:msg')
+        for computer_id in computers:
+            date = con.hget('migasfree:msg:%s' % computer_id, 'date')
+            if datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f') > delayed_time:
+                result.append(computer_id)
+
+        sync_computers = models.Computer.objects.filter(pk__in=result)
+
+        serializer = serializers.ComputerSerializer(sync_computers, many=True)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @list_route(methods=['get'])
+    def delayed(self, request, format=None):
+        con = get_redis_connection('default')
+
+        result = []
+        delayed_time = datetime.now() - timedelta(
+            seconds=settings.MIGASFREE_SECONDS_MESSAGE_ALERT
+        )
+
+        computers = con.smembers('migasfree:watch:msg')
+        for computer_id in computers:
+            date = con.hget('migasfree:msg:%s' % computer_id, 'date')
+            if datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f') <= delayed_time:
+                result.append(computer_id)
+
+        delayed_computers = models.Computer.objects.filter(pk__in=result)
+
+        serializer = serializers.ComputerSerializer(delayed_computers, many=True)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
 
 class ErrorViewSet(
