@@ -103,7 +103,7 @@ def add_generating_repos():
             'target': 'server',
             'level': 'info',
             'result': result,
-            'api': '/api/v1/token/repos/generating/'  # TODO??? reverse
+            'api': reverse('release-generating')
         }
     )
     con.sadd('migasfree:watch:chk', 'repos')
@@ -129,7 +129,7 @@ def add_synchronizing_computers():
             'target': 'computer',
             'level': 'info',
             'result': result,
-            'api': '/api/v1/token/computers/synchronizing/'  # TODO??? reverse
+            'api': reverse('computer-synchronizing')
         }
     )
     con.sadd('migasfree:watch:chk', 'syncs')
@@ -155,7 +155,7 @@ def add_delayed_computers():
             'target': 'computer',
             'level': 'critical',
             'result': result,
-            'api': '/api/v1/token/computers/delayed/'  # TODO??? reverse
+            'api': reverse('computer-delayed')
         }
     )
     con.sadd('migasfree:watch:chk', 'delayed')
