@@ -25,6 +25,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core import signing
 from django.utils.translation import ugettext_lazy as _
 # from django.contrib.auth.models import User, Group
+from django_redis import get_redis_connection
 from rest_framework import (
     viewsets, parsers, status, mixins,
     exceptions, filters
@@ -182,6 +183,21 @@ class ReleaseViewSet(viewsets.ModelViewSet):
 
         return Response(
             {'detail': trans('Operation received')},
+            status=status.HTTP_200_OK
+        )
+
+    @list_route(methods=['get'])
+    def generating(self, request, format=None):
+        con = get_redis_connection('default')
+        result = con.smembers('migasfree:watch:repos')
+
+        serializer = ReleaseSerializer(
+            Release.objects.filter(pk__in=result),
+            many=True
+        )
+
+        return Response(
+            serializer.data,
             status=status.HTTP_200_OK
         )
 
