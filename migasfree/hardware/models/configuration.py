@@ -23,6 +23,18 @@ from django.utils.encoding import python_2_unicode_compatible
 from .node import Node
 
 
+class ConfigurationManager(models.Manager):
+    def create(self, node, name, value):
+        obj = Configuration(
+            node=node,
+            name=name,
+            value=value
+        )
+        obj.save()
+
+        return obj
+
+
 @python_2_unicode_compatible
 class Configuration(models.Model):
     node = models.ForeignKey(
@@ -41,6 +53,8 @@ class Configuration(models.Model):
         null=True,
         blank=True
     )
+
+    objects = ConfigurationManager()
 
     def __str__(self):
         return self.name

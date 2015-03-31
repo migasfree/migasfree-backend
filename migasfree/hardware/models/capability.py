@@ -23,6 +23,18 @@ from django.utils.encoding import python_2_unicode_compatible
 from .node import Node
 
 
+class CapabilityManager(models.Manager):
+    def create(self, node, name, description):
+        obj = Capability(
+            node=node,
+            name=name,
+            description=description
+        )
+        obj.save()
+
+        return obj
+
+
 @python_2_unicode_compatible
 class Capability(models.Model):
     node = models.ForeignKey(
@@ -41,6 +53,8 @@ class Capability(models.Model):
         null=True,
         blank=True
     )
+
+    objects = CapabilityManager()
 
     def __str__(self):
         return self.name

@@ -23,6 +23,17 @@ from django.utils.encoding import python_2_unicode_compatible
 from .node import Node
 
 
+class LogicalNameManager(models.Manager):
+    def create(self, node, name):
+        obj = LogicalName(
+            node=node,
+            name=name
+        )
+        obj.save()
+
+        return obj
+
+
 @python_2_unicode_compatible
 class LogicalName(models.Model):
     node = models.ForeignKey(
@@ -35,6 +46,8 @@ class LogicalName(models.Model):
         null=False,
         blank=True
     )  # This is the field "logicalname" in lshw
+
+    objects = LogicalNameManager()
 
     def __str__(self):
         return self.name

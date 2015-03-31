@@ -23,6 +23,35 @@ from django.utils.encoding import python_2_unicode_compatible
 from migasfree.client.models import Computer
 
 
+class NodeManager(models.Manager):
+    def create(self, data):
+        obj = Node(
+            parent=data.get('parent'),
+            computer=data.get('computer'),
+            level=data.get('level'),
+            width=data.get('width'),
+            name=data.get('name'),
+            class_name=data.get('class_name'),
+            enabled=data.get('enabled', False),
+            claimed=data.get('claimed', False),
+            description=data.get('description'),
+            vendor=data.get('vendor'),
+            product=data.get('product'),
+            version=data.get('version'),
+            serial=data.get('serial'),
+            bus_info=data.get('bus_info'),
+            physid=data.get('physid'),
+            slot=data.get('slot'),
+            size=data.get('size'),
+            capacity=data.get('capacity'),
+            clock=data.get('clock'),
+            dev=data.get('dev')
+        )
+        obj.save()
+
+        return obj
+
+
 @python_2_unicode_compatible
 class Node(models.Model):
     parent = models.ForeignKey(
@@ -139,8 +168,10 @@ class Node(models.Model):
         blank=True
     )
 
+    objects = NodeManager()
+
     def __str__(self):
-        return self.product
+        return self.product or u''
 
     class Meta:
         app_label = 'hardware'
