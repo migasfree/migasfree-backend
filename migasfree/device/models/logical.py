@@ -1,18 +1,32 @@
 # -*- coding: utf-8 *-*
 
+# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
-from .models import (
-    Device,
-    Feature,
-    Driver,
-)
+from .device import Device
+from .feature import Feature
+from .driver import Driver
 
 
 @python_2_unicode_compatible
-class DeviceLogical(models.Model):
+class Logical(models.Model):
     device = models.ForeignKey(
         Device,
         verbose_name=_("device")
@@ -23,10 +37,10 @@ class DeviceLogical(models.Model):
         verbose_name=_("feature")
     )
 
-    def datadict(self, version):
+    def datadict(self, project):
         try:
             driver = Driver.objects.filter(
-                version__id=version.id,
+                project__id=project.id,
                 model__id=self.device.model.id,
                 feature__id=self.feature.id
             )[0]
