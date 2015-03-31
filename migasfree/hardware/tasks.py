@@ -30,76 +30,46 @@ from .models import Node, Capability, LogicalName, Configuration
 
 @shared_task(queue='default')
 def save_computer_hardware(computer_id, node, parent=None, level=1):
-    computer = Computer.objects.get(id=computer_id)
+    n = Node.objects.create({
+        'parent': parent,
+        'computer': Computer.objects.get(id=computer_id),
+        'level': level,
+        'name': str(node.get('id')),
+        'class_name': node.get('class'),
+        'enabled': node.get('enabled', False),
+        'claimed': node.get('claimed', False),
+        'description': node.get('description'),
+        'vendor': node.get('vendor'),
+        'product': node.get('product'),
+        'version': node.get('version'),
+        'serial': node.get('serial'),
+        'bus_info': node.get('businfo'),
+        'physid': node.get('physid'),
+        'slot': node.get('slot'),
+        'size': node.get('size'),
+        'capacity': node.get('capacity'),
+        'clock': node.get('clock'),
+        'width': node.get('width'),
+        'dev': node.get('dev')
+    })
 
-    n = Node()
-    n.parent = parent
-    n.computer = computer
-    n.level = level
-    n.name = str(node.get('id'))
-    n.class_name = node.get('class')
-
-    if "enabled" in node:
-        n.enabled = node["enabled"]
-    if "claimed" in node:
-        n.claimed = node["claimed"]
-    if "description" in node:
-        n.description = node["description"]
-    if "vendor" in node:
-        n.vendor = node["vendor"]
-    if "product" in node:
-        n.product = node["product"]
-    if "version" in node:
-        n.version = node["version"]
-    if "serial" in node:
-        n.serial = node["serial"]
-    if "businfo" in node:
-        n.bus_info = node["businfo"]
-    if "physid" in node:
-        n.physid = node["physid"]
-    if "slot" in node:
-        n.slot = node["slot"]
-    if "size" in node:
-        n.size = int(node["size"])
-    if "capacity" in node:
-        n.capacity = node["capacity"]
-    if "clock" in node:
-        n.clock = node["clock"]
-    if "width" in node:
-        n.width = node["width"]
-    if "dev" in node:
-        n.dev = node["dev"]
-
-    n.save()  # FIXME ModelManager
-    level += 3
+    level += 3  # FIXME ???
 
     for e in node:
-        if e == "children":
+        if e == 'children':
             for x in node[e]:
                 save_computer_hardware(computer_id, x, n, level)
-        elif e == "capabilities":
+        elif e == 'capabilities':
             for x in node[e]:
-                c = Capability()
-                c.node = n
-                c.name = x
-                c.description = node[e][x]
-                c.save()  # FIXME ModelManager
-        elif e == "configuration":
+                Capability.objects.create(
+                    node=n, name=x, description=node[e][x]
+                )
+        elif e == 'configuration':
             for x in node[e]:
-                c = Configuration()
-                c.node = n
-                c.name = x
-                c.value = node[e][x]
-                c.save()  # FIXME ModelManager
-        elif e == "logicalname":
+                Configuration.objects.create(node=n, name=x, value=node[e][x])
+        elif e == 'logicalname':
             if type(node[e]) == unicode:
-                c = LogicalName()
-                c.node = n
-                c.name = node[e]
-                c.save()  # FIXME ModelManager
+                LogicalName.objects.create(node=n, name=node[e])
             else:
                 for x in node[e]:
-                    c = LogicalName()
-                    c.node = n
-                    c.name = x
-                    c.save()  # FIXME ModelManager
+                    LogicalName.objects.create(node=n, name=x)
