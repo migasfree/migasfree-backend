@@ -22,17 +22,19 @@ from .models import Release, Package
 
 
 class ReleaseFilter(filters.FilterSet):
+    included_attributes = filters.CharFilter(
+        name='included_attributes__value', lookup_type='contains'
+    )
+    available_packages = filters.CharFilter(
+        name='available_packages__name', lookup_type='contains'
+    )
+
     class Meta:
         model = Release
-        fields = {
-            'project__id': ['exact'],
-            'enabled': ['exact'],
-        }
+        fields = ['project__id', 'enabled']
 
 
 class PackageFilter(filters.FilterSet):
     class Meta:
         model = Package
-        fields = {
-            'release__id': ['exact'],
-        }
+        fields = ['release__id']
