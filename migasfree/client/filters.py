@@ -20,7 +20,7 @@ import rest_framework_filters as filters
 
 from django.utils.translation import ugettext_lazy as _
 
-from .models import Package, Error, Notification, Fault
+from .models import Package, Error, Notification, Fault, Computer
 
 
 class PackageFilter(filters.FilterSet):
@@ -89,4 +89,12 @@ class FaultFilter(filters.FilterSet):
             'checked': ['exact'],
             'created_at': ['lt', 'gte'],
             'fault_definition__id': ['exact'],
+        }
+
+
+class ComputerFilter(filters.FilterSet):
+    class Meta:
+        model = Computer
+        fields = {
+            'project__id': ['exact'],
         }
