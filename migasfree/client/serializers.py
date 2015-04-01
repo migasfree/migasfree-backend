@@ -23,6 +23,13 @@ from . import models
 
 
 class ComputerSerializer(serializers.ModelSerializer):
+    software_inventory = serializers.HyperlinkedIdentityField(
+        view_name='computer-software/inventory'
+    )
+    software_history = serializers.HyperlinkedIdentityField(
+        view_name='computer-software/history'
+    )
+
     class Meta:
         model = models.Computer
         fields = (
