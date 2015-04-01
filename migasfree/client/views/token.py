@@ -30,7 +30,7 @@ from rest_framework_filters import backends
 
 from .. import models, serializers
 from ..filters import (
-    PackageFilter, ErrorFilter, NotificationFilter, FaultFilter
+    PackageFilter, ErrorFilter, NotificationFilter, FaultFilter, ComputerFilter
 )
 
 
@@ -39,6 +39,8 @@ class ComputerViewSet(
 ):
     queryset = models.Computer.objects.all()
     serializer_class = serializers.ComputerSerializer
+    filter_class = ComputerFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
 
     """
     def update(request, *args, **kwargs):
@@ -49,8 +51,8 @@ class ComputerViewSet(
         pass
     """
 
-    @detail_route(methods=['get'])
-    def packages(self, request, pk=None):
+    @detail_route(methods=['get'], url_path='software/inventory')
+    def software_inventory(self, request, pk=None):
         """
         Returns installed packages in a computer
         """
@@ -59,8 +61,21 @@ class ComputerViewSet(
         serializer = serializers.PackageSerializer(
             computer.software_inventory.all(), many=True
         )
+
         return Response(
             serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @detail_route(methods=['get'], url_path='software/history')
+    def software_history(self, request, pk=None):
+        """
+        Returns software history of a computer
+        """
+        computer = get_object_or_404(models.Computer, pk=pk)
+
+        return Response(
+            computer.software_history,
             status=status.HTTP_200_OK
         )
 
@@ -104,7 +119,6 @@ class ComputerViewSet(
         models.Computer.replacement(source, target)
 
         return Response(status=status.HTTP_200_OK)
-
 
     @list_route(methods=['get'])
     def synchronizing(self, request, format=None):
