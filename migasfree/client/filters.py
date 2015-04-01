@@ -24,38 +24,31 @@ from .models import Package, Error, Notification, Fault, Computer
 
 
 class PackageFilter(filters.FilterSet):
+    fullname = filters.CharFilter(name='fullname', lookup_type='contains')
+    project = filters.CharFilter(name='project__id', lookup_type='exact')
+
     class Meta:
         model = Package
-        fields = {
-            'project__id': ['exact'],
-        }
 
 
 class ErrorFilter(filters.FilterSet):
-    created_at = filters.DateTimeFilter(name='created_at', lookup_type='gte')
+    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
 
     class Meta:
         model = Error
-        fields = {
-            'project__id': ['exact'],
-            'checked': ['exact'],
-            'created_at': ['lt', 'gte'],
-        }
+        fields = ['project__id', 'checked']
 
 
 class NotificationFilter(filters.FilterSet):
-    created_at = filters.DateTimeFilter(name='created_at', lookup_type='gte')
+    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
 
     class Meta:
         model = Notification
-        fields = {
-            'checked': ['exact'],
-            'created_at': ['lt', 'gte'],
-        }
+        fields = ['checked']
 
 
 class FaultFilter(filters.FilterSet):
-    created_at = filters.DateTimeFilter(name='created_at', lookup_type='gte')
+    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
 
     """
     # TODO override filter_queryset (http://www.django-rest-framework.org/api-guide/filtering/)
@@ -84,17 +77,19 @@ class FaultFilter(filters.FilterSet):
 
     class Meta:
         model = Fault
-        fields = {
-            'project__id': ['exact'],
-            'checked': ['exact'],
-            'created_at': ['lt', 'gte'],
-            'fault_definition__id': ['exact'],
-        }
+        fields = ['project__id', 'checked', 'fault_definition__id']
 
 
 class ComputerFilter(filters.FilterSet):
+    platform = filters.CharFilter(name='project__platform__id')
+    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
+    software_inventory = filters.CharFilter(
+        name='software_inventory__fullname', lookup_type='contains'
+    )
+    sync_attributes = filters.CharFilter(
+        name='sync_attributes__value', lookup_type='contains'
+    )
+
     class Meta:
         model = Computer
-        fields = {
-            'project__id': ['exact'],
-        }
+        fields = ['project__id']
