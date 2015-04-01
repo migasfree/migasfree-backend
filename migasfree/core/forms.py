@@ -76,7 +76,7 @@ class ReleaseForm(forms.ModelForm):
         # http://stackoverflow.com/questions/7986510/django-manytomany-model-validation
         cleaned_data = super(ReleaseForm, self).clean()
 
-        for item in cleaned_data.get('available_packages'):
+        for item in cleaned_data.get('available_packages', []):
             if item.project.id != cleaned_data['project'].id:
                 raise ValidationError(
                     _('Package %s must belong to the project %s') % (
