@@ -181,7 +181,7 @@ class ScheduleDelayline(admin.TabularInline):
 
 
 class ScheduleAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description',)
+    list_display = ('name', 'description', 'number_delays')
     inlines = [ScheduleDelayline, ]
     extra = 0
 
