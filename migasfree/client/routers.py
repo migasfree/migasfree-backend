@@ -27,6 +27,7 @@ router.register(r'errors', views.ErrorViewSet)
 router.register(r'faults', views.FaultViewSet)
 router.register(r'notifications', views.NotificationViewSet)
 router.register(r'computers-packages', views.PackageViewSet)
+router.register(r'migrations', views.MigrationViewSet)
 
 safe_router = routers.DefaultRouter()
 
