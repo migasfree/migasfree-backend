@@ -35,7 +35,7 @@ class ComputerSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'uuid', 'name', 'project', 'ip_address',
             'software_inventory', 'software_history', 'tags',
-            'status'
+            'status', 'hardware'
         )
 
 
@@ -79,3 +79,9 @@ class SynchronizationSerializer(serializers.ModelSerializer):
             'id', 'created_at', 'computer', 'user', 'project',
             'start_date', 'consumer', 'pms_status_ok'
         )
+
+
+class MigrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Migration
+        fields = ('id', 'created_at', 'computer', 'project')
