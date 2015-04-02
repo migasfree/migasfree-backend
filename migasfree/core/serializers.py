@@ -117,7 +117,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Schedule
-        fields = ('id', 'name', 'description', 'delays')
+        fields = ('id', 'name', 'description', 'number_delays', 'delays')
 
 
 class PackageSerializer(serializers.ModelSerializer):
