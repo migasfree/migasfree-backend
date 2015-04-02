@@ -20,7 +20,7 @@ import rest_framework_filters as filters
 
 from django.utils.translation import ugettext_lazy as _
 
-from .models import Package, Error, Notification, Fault, Computer
+from .models import Package, Error, Notification, Fault, Computer, Migration
 
 
 class PackageFilter(filters.FilterSet):
@@ -36,7 +36,7 @@ class ErrorFilter(filters.FilterSet):
 
     class Meta:
         model = Error
-        fields = ['project__id', 'checked']
+        fields = ['project__id', 'checked', 'computer__id']
 
 
 class NotificationFilter(filters.FilterSet):
@@ -77,7 +77,9 @@ class FaultFilter(filters.FilterSet):
 
     class Meta:
         model = Fault
-        fields = ['project__id', 'checked', 'fault_definition__id']
+        fields = [
+            'project__id', 'checked', 'fault_definition__id', 'computer__id'
+        ]
 
 
 class ComputerFilter(filters.FilterSet):
@@ -92,4 +94,12 @@ class ComputerFilter(filters.FilterSet):
 
     class Meta:
         model = Computer
-        fields = ['project__id']
+        fields = ['project__id', 'status']
+
+
+class MigrationFilter(filters.FilterSet):
+    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
+
+    class Meta:
+        model = Migration
+        fields = ['project__id', 'computer__id']
