@@ -212,7 +212,7 @@ class ReleaseAdmin(admin.ModelAdmin):
     list_select_related = ('schedule',)
     list_filter = ('enabled', 'project__name',)
     ordering = ('name',)
-    search_fields = ('name', 'packages__name',)
+    search_fields = ('name', 'available_packages__name',)
 
     fieldsets = (
         (_('General'), {
