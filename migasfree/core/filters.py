@@ -31,7 +31,7 @@ class ReleaseFilter(filters.FilterSet):
 
     class Meta:
         model = Release
-        fields = ['project__id', 'enabled']
+        fields = ['project__id', 'enabled', 'schedule__id']
 
 
 class PackageFilter(filters.FilterSet):
