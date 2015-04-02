@@ -30,7 +30,8 @@ from rest_framework_filters import backends
 
 from .. import models, serializers
 from ..filters import (
-    PackageFilter, ErrorFilter, NotificationFilter, FaultFilter, ComputerFilter
+    PackageFilter, ErrorFilter, NotificationFilter, FaultFilter,
+    ComputerFilter, MigrationFilter
 )
 
 
@@ -41,6 +42,7 @@ class ComputerViewSet(
     serializer_class = serializers.ComputerSerializer
     filter_class = ComputerFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    paginate_by = 100  # FIXME constant
 
     """
     def update(request, *args, **kwargs):
@@ -176,6 +178,7 @@ class ErrorViewSet(
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
+    paginate_by = 100  # FIXME constant
 
 
 class FaultViewSet(
@@ -185,6 +188,9 @@ class FaultViewSet(
     serializer_class = serializers.FaultSerializer
     filter_class = FaultFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('-created_at',)
+    paginate_by = 100  # FIXME constant
 
 
 class PackageViewSet(
@@ -207,3 +213,16 @@ class NotificationViewSet(
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
+    paginate_by = 100  # FIXME constant
+
+
+class MigrationViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    queryset = models.Migration.objects.all()
+    serializer_class = serializers.MigrationSerializer
+    filter_class = MigrationFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('-created_at',)
+    paginate_by = 100  # FIXME constant
