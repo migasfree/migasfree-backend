@@ -24,7 +24,7 @@ from django.utils.translation import ugettext_lazy as _
 @python_2_unicode_compatible
 class Schedule(models.Model):
     name = models.CharField(
-        _('name'),
+        verbose_name=_('name'),
         max_length=50,
         null=False,
         blank=False,
@@ -32,10 +32,15 @@ class Schedule(models.Model):
     )
 
     description = models.TextField(
-        _('description'),
+        verbose_name=_('description'),
         null=True,
         blank=True
     )
+
+    def number_delays(self):
+        return self.scheduledelay_set.count()
+
+    number_delays.short_description = _("Number of delays")
 
     def __str__(self):
         return self.name
