@@ -207,6 +207,12 @@ class Computer(models.Model):
             self.computer.__str__()
         )
 
+    def hardware(self):
+        try:
+            return self.node_set.get(computer=self.id, parent=None).__str__()
+        except:
+            return ''
+
     def change_status(self, status):
         if status not in dict(self.STATUS_CHOICES).keys():
             return False
