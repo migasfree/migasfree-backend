@@ -26,7 +26,9 @@ from .attribute import Attribute
 
 @python_2_unicode_compatible
 class ScheduleDelay(models.Model):
-    delay = models.IntegerField(_("delay"))
+    delay = models.IntegerField(
+        verbose_name=_("delay")
+    )
 
     schedule = models.ForeignKey(
         Schedule,
