@@ -18,7 +18,7 @@
 
 import rest_framework_filters as filters
 
-from .models import Release, Package
+from .models import Release, Package, ClientAttribute, ServerAttribute
 
 
 class ReleaseFilter(filters.FilterSet):
@@ -37,4 +37,16 @@ class ReleaseFilter(filters.FilterSet):
 class PackageFilter(filters.FilterSet):
     class Meta:
         model = Package
-        fields = ['release__id']
+        fields = ['release__id', 'store__id']
+
+
+class ClientAttributeFilter(filters.FilterSet):
+    class Meta:
+        model = ClientAttribute
+        fields = ['property_att__id']
+
+
+class ServerAttributeFilter(filters.FilterSet):
+    class Meta:
+        model = ServerAttribute
+        fields = ['property_att__id']
