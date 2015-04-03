@@ -52,7 +52,10 @@ from .serializers import (
     ScheduleSerializer,
     PackageSerializer, ReleaseSerializer,
 )
-from .filters import ReleaseFilter, PackageFilter
+from .filters import (
+    ReleaseFilter, PackageFilter,
+    ClientAttributeFilter, ServerAttributeFilter,
+)
 from .permissions import PublicPermission, IsAdminOrIsSelf
 
 from . import tasks
@@ -130,11 +133,15 @@ class ClientPropertyViewSet(viewsets.ModelViewSet):
 class ServerAttributeViewSet(viewsets.ModelViewSet):
     queryset = ServerAttribute.objects.filter(property_att__sort='server')
     serializer_class = ServerAttributeSerializer
+    filter_class = ServerAttributeFilter
+    paginate_by = 100  # FIXME constant
 
 
 class ClientAttributeViewSet(viewsets.ModelViewSet):
     queryset = ClientAttribute.objects.filter(property_att__sort='client')
     serializer_class = ClientAttributeSerializer
+    filter_class = ClientAttributeFilter
+    paginate_by = 100  # FIXME constant
 
 
 class ScheduleViewSet(viewsets.ModelViewSet):
@@ -151,6 +158,7 @@ class PackageViewSet(mixins.CreateModelMixin,
     serializer_class = PackageSerializer
     filter_class = PackageFilter
     parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
+    paginate_by = 100  # FIXME constant
 
     @list_route(methods=['get'])
     def orphaned(self, request):
@@ -175,6 +183,7 @@ class ReleaseViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-start_date',)
+    paginate_by = 100  # FIXME constant
 
     @detail_route(methods=['get'])
     def metadata(self, request, pk=None):
