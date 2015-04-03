@@ -64,10 +64,11 @@ admin.site.register(Project, ProjectAdmin)
 
 
 class StoreAdmin(admin.ModelAdmin):
+    list_display = ('name', 'project')
     list_filter = ('project__name',)
     search_fields = ('name',)
-    prepopulated_fields = {'slug': ('name',)}
     read_only_fields = ('slug',)
+    fields = ('name', 'project')
 
 admin.site.register(Store, StoreAdmin)
 
@@ -88,7 +89,7 @@ class ClientPropertyFilter(SimpleListFilter):
 
 class ClientPropertyAdmin(admin.ModelAdmin):
     form = ClientPropertyForm
-    list_display = ('name', 'enabled', 'kind')
+    list_display = ('name', 'prefix', 'enabled', 'kind')
     list_filter = ('enabled', ClientPropertyFilter)
     ordering = ('name',)
     search_fields = ('name', 'prefix',)
@@ -96,7 +97,6 @@ class ClientPropertyAdmin(admin.ModelAdmin):
         'prefix', 'name', 'enabled',
         'language', 'code', 'kind',
     )
-    # actions = None
 
 admin.site.register(ClientProperty, ClientPropertyAdmin)
 
@@ -116,7 +116,7 @@ class ServerPropertyFilter(SimpleListFilter):
 
 
 class ServerPropertyAdmin(admin.ModelAdmin):
-    list_display = ('prefix', 'enabled')
+    list_display = ('name', 'prefix', 'enabled', 'kind')
     fields = ('prefix', 'name', 'kind', 'enabled')
     list_filter = (ServerPropertyFilter,)
 
