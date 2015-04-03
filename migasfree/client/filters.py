@@ -20,7 +20,9 @@ import rest_framework_filters as filters
 
 from django.utils.translation import ugettext_lazy as _
 
-from .models import Package, Error, Notification, Fault, Computer, Migration
+from .models import (
+    Package, Error, Notification, FaultDefinition, Fault, Computer, Migration
+)
 
 
 class PackageFilter(filters.FilterSet):
@@ -45,6 +47,12 @@ class NotificationFilter(filters.FilterSet):
     class Meta:
         model = Notification
         fields = ['checked']
+
+
+class FaultDefinitionFilter(filters.FilterSet):
+    class Meta:
+        model = FaultDefinition
+        fields = ['included_attributes__id', 'excluded_attributes__id']
 
 
 class FaultFilter(filters.FilterSet):
