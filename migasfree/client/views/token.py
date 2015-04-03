@@ -30,7 +30,8 @@ from rest_framework_filters import backends
 
 from .. import models, serializers
 from ..filters import (
-    PackageFilter, ErrorFilter, NotificationFilter, FaultFilter,
+    PackageFilter, ErrorFilter, NotificationFilter,
+    FaultDefinitionFilter, FaultFilter,
     ComputerFilter, MigrationFilter
 )
 
@@ -226,3 +227,9 @@ class MigrationViewSet(
     ordering_fields = '__all__'
     ordering = ('-created_at',)
     paginate_by = 100  # FIXME constant
+
+
+class FaultDefinitionViewSet(viewsets.ModelViewSet):
+    queryset = models.FaultDefinition.objects.all()
+    serializer_class = serializers.FaultDefinitionSerializer
+    filter_class = FaultDefinitionFilter
