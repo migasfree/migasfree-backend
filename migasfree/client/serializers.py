@@ -48,6 +48,16 @@ class ErrorSerializer(serializers.ModelSerializer):
         )
 
 
+class FaultDefinitionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.FaultDefinition
+        fields = (
+            'id', 'name', 'enabled', 'description',
+            'language', 'code', 'included_attributes', 'excluded_attributes',
+            'users'
+        )
+
+
 class FaultSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Fault
