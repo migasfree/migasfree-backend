@@ -62,6 +62,7 @@ class ComputerAdmin(admin.ModelAdmin):
         'sync_end_date',
         'software_inventory',
         'software_history',
+        'hardware',
     )
 
     fieldsets = (
@@ -73,6 +74,7 @@ class ComputerAdmin(admin.ModelAdmin):
                 'created_at',
                 'ip_address',
                 'last_hardware_capture',
+                'hardware',
                 'status',
             )
         }),
