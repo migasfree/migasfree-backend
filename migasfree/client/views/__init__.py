@@ -21,6 +21,7 @@ from .safe import (
 )
 from .public import PackagerKeysView, ProjectKeysView
 from .token import (
-    ComputerViewSet, ErrorViewSet, FaultViewSet,
+    ComputerViewSet, ErrorViewSet,
+    FaultDefinitionViewSet, FaultViewSet,
     PackageViewSet, NotificationViewSet, MigrationViewSet
 )
