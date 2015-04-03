@@ -24,6 +24,7 @@ router = routers.DefaultRouter()
 
 router.register(r'computers', views.ComputerViewSet)
 router.register(r'errors', views.ErrorViewSet)
+router.register(r'faults-definitions', views.FaultDefinitionViewSet)
 router.register(r'faults', views.FaultViewSet)
 router.register(r'notifications', views.NotificationViewSet)
 router.register(r'computers-packages', views.PackageViewSet)
