@@ -482,7 +482,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             sync_start_date=datetime.now()
         )
 
-        serializer = serializers.ComputerSerializer(computer)
+        serializer = serializers.ComputerSerializer(
+            computer, context={'request': request}
+        )
 
         add_computer_message(computer, trans('Sending attributes response...'))
 
