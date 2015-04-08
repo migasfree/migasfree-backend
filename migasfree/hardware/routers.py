@@ -20,6 +20,15 @@ from rest_framework import routers
 
 from . import views
 
+router = routers.DefaultRouter()
+
+router.register(
+    r'computers',
+    views.HardwareComputerViewSet,
+    base_name='computers-hardware'
+)
+router.register(r'hardware', views.HardwareViewSet)
+
 safe_router = routers.DefaultRouter()
 
 safe_router.register(
