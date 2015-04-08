@@ -18,16 +18,45 @@
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
-from rest_framework import viewsets, status
-from rest_framework.decorators import list_route
+from rest_framework import viewsets, status, filters, mixins
+from rest_framework.decorators import list_route, detail_route
 from rest_framework.response import Response
+from rest_framework_filters import backends
 
 from migasfree.core.mixins import SafeConnectionMixin
 from migasfree.client.models import Computer
 from migasfree.utils import trans
 
 from .models import Node
-from . import tasks
+from .filters import NodeFilter
+from . import tasks, serializers
+
+
+class HardwareComputerViewSet(viewsets.ViewSet):
+    @detail_route(methods=['get'])
+    def hardware(self, request, pk=None):
+        computer = get_object_or_404(Computer, pk=pk)
+        nodes = Node.objects.filter(computer=computer).order_by('id')
+
+        serializer = serializers.NodeSerializer(nodes, many=True)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class HardwareViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    queryset = Node.objects.all()
+    serializer_class = serializers.NodeSerializer
+    filter_class = NodeFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('id',)
+    paginate_by = 100  # FIXME constant
+
+    # example cpu list: bus_info='cpu@' or bus_info='cpu@0'
 
 
 class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
