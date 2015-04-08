@@ -16,13 +16,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import magic
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
+from ..utils import write_file
 from .pms import get_available_pms
+
+
+def build_magic():
+    # http://www.zak.co.il/tddpirate/2013/03/03/the-python-module-for-file-type-identification-called-magic-is-not-standardized/
+    try:
+        my_magic = magic.open(magic.MAGIC_MIME_TYPE)
+        my_magic.load()
+    except AttributeError, e:
+        my_magic = magic.Magic(mime=True)
+        my_magic.file = my_magic.from_file
+
+    return my_magic
 
 
 class MimetypeValidator(object):
@@ -30,11 +45,17 @@ class MimetypeValidator(object):
         self.mimetypes = mimetypes
 
     def __call__(self, value):
+        my_magic = build_magic()
+
         if type(value) is not list:
             value = [value]
         try:
             for item in value:
-                mime = magic.from_buffer(item.read(1024), mime=True)
+                tmp_file = os.path.join(settings.MIGASFREE_TMP_DIR, item.name)
+                write_file(tmp_file, item.read(1024))  # only header
+                mime = my_magic.file(tmp_file)
+                os.remove(tmp_file)
+
                 if not mime in self.mimetypes:
                     raise ValidationError(
                         _('%s is not an acceptable file type') % item
