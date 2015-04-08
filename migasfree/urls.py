@@ -24,7 +24,9 @@ from core.routers import router, safe_router as core_safe_router
 from client.routers import (
     router as client_router, safe_router as client_safe_router
 )
-from hardware.routers import safe_router as hardware_safe_router
+from hardware.routers import (
+    router as hardware_router, safe_router as hardware_safe_router
+)
 from stats.routers import router as stats_router
 
 from django.contrib import admin
@@ -37,6 +39,7 @@ urlpatterns = patterns('',
     url(r'^api/v1/token/', include(router.urls)),
     url(r'^api/v1/token/', include(client_router.urls)),
     url(r'^api/v1/token/', include(stats_router.urls)),
+    url(r'^api/v1/token/', include(hardware_router.urls)),
     url(r'^api/v1/safe/', include(client_safe_router.urls)),
     url(r'^api/v1/safe/', include(core_safe_router.urls)),
     url(r'^api/v1/safe/', include(hardware_safe_router.urls)),
