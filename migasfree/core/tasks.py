@@ -25,8 +25,9 @@ from celery import shared_task
 from celery.exceptions import Ignore
 from django_redis import get_redis_connection
 from django.conf import settings
+from importlib import import_module
 
-from .models import Release
+from .models import Release, Package
 
 
 @shared_task(queue='repository')
@@ -39,7 +40,7 @@ def remove_repository_metadata(release_id, old_slug=''):
     if old_slug:
         slug = old_slug
     else:
-        slug = repo.slug
+        slug = release.slug
 
     mod = import_module('migasfree.core.pms.%s' % release.project.pms)
     pms = getattr(mod, release.project.pms.capitalize())()
