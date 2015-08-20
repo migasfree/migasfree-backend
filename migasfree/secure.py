@@ -135,7 +135,7 @@ def gpg_get_key(name):
             os.makedirs(gpghome, 0o700)
             # create a blank configuration file
             write_file(os.path.join(gpghome, 'gpg.conf'), '')
-            #os.chmod(os.path.join(gpghome, 'gpg.conf'), 0o600)
+            os.chmod(os.path.join(gpghome, 'gpg.conf'), 0o600)
 
         # create a context
         ctx = gpgme.Context()
@@ -155,5 +155,6 @@ Expire-Date: 0
         keydata = BytesIO()
         ctx.export(name, keydata)
         write_file(_file, keydata.getvalue())
+        os.chmod(_file, 0o600)
 
     return read_file(_file)
