@@ -41,64 +41,54 @@ class Apt(Pms):
         '''
 
         _cmd = '''
+_NAME=%(name)s
 cd %(path)s
+mkdir -p $_NAME/PKGS/binary-i386/
+mkdir -p $_NAME/PKGS/binary-amd64/
 cd ..
 
-DIST=%(name)s
+dpkg-scanpackages -m dists/$_NAME/PKGS > dists/$_NAME/PKGS/binary-i386/Packages
+gzip -9c dists/$_NAME/PKGS/binary-i386/Packages > dists/$_NAME/PKGS/binary-i386/Packages.gz
 
-ARCHS="i386 amd64 source"
+dpkg-scanpackages -m dists/$_NAME/PKGS > dists/$_NAME/PKGS/binary-amd64/Packages
+gzip -9c dists/$_NAME/PKGS/binary-i386/Packages > dists/$_NAME/PKGS/binary-amd64/Packages.gz
 
-mkdir .cache
-
-mkdir -p dists/$DIST/PKGS/binary-amd64
-mkdir -p dists/$DIST/PKGS/binary-i386
-mkdir -p dists/$DIST/PKGS/source
-
-    cat > apt-ftparchive.conf <<EOF
-Dir {
-    ArchiveDir ".";
-    CacheDir "./.cache";
-};
-
-Default {
-    Packages::Compress ". gzip bzip2";
-    Contents::Compress ". gzip bzip2";
-};
-
-TreeDefault {
-    BinCacheDB "packages-\$(SECTION)-\$(ARCH).db";
-    Directory "dists/$DIST/\$(SECTION)";
-    SrcDirectory "dists/$DIST/\$(SECTION)";
-    Packages "\$(DIST)/\$(SECTION)/binary-\$(ARCH)/Packages";
-    Contents "\$(DIST)/Contents-\$(ARCH)";
-};
-
-Tree "dists/$DIST" {
-    Sections "PKGS";
-    Architectures "$ARCHS";
+function SUM {
+  echo $1
+  _FILES=$(find  -type f| sed 's/^.\///'|sort)
+  for _FILE in $_FILES
+    do
+     _SIZE=$(printf "%%16d\\n" $(ls -l $_FILE|cut -d ' ' -f5))
+     _MD5=$($2 $_FILE|cut -d ' ' -f1) $()
+     echo " $_MD5" "$_SIZE" "$_FILE"
+    done
 }
-EOF
 
-apt-ftparchive generate apt-ftparchive.conf 2> ./err
-if [ $? != 0 ]
-then
-    cat ./err >&2
-fi
-rm ./err
+function create_release {
+  _F="/var/tmp/Release"
+  rm Release 2>/dev/null || :
+  rm Release.gpg 2>/dev/null || :
+  touch Release
+  rm $_F 2>/dev/null || :
+  echo "Architectures: i386 amd64" > $_F
+  echo "Codename: $_NAME" >> $_F
+  echo "Components: PKGS" >> $_F
+  echo "Date: $(date -u '+%%a, %%d %%b %%Y %%H:%%M:%%S UTC')"  >> $_F
+  echo "Label: migasfree  Repository" >> $_F
+  echo "Origin: migasfree" >> $_F
+  echo "Suite: $_NAME" >> $_F
+  SUM "MD5Sum:" "md5sum"  >> $_F
+  SUM "SHA1:" "sha1sum"  >> $_F
+  SUM "SHA256:" "sha256sum"  >> $_F
+  SUM "SHA512:" "sha512sum"  >> $_F
+  mv $_F Release
+  gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg --clearsign -o InRelease Release
+  gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg -abs -o Release.gpg Release
+}
 
-cat > apt-release.conf <<EOF
-APT::FTPArchive::Release::Codename "$DIST";
-APT::FTPArchive::Release::Origin "migasfree";
-APT::FTPArchive::Release::Components "PKGS";
-APT::FTPArchive::Release::Label "migasfree $DISTRO Repository";
-APT::FTPArchive::Release::Architectures "$ARCHS";
-APT::FTPArchive::Release::Suite "$DIST";
-EOF
-
-apt-ftparchive -c apt-release.conf release dists/$DIST > dists/$DIST/Release
-gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg -abs -o dists/$DIST/Release.gpg dists/$DIST/Release
-rm -rf apt-release.conf apt-ftparchive.conf
-        ''' % {
+cd dists/$_NAME
+create_release
+''' % {
             'path': path,
             'name': name,
             'keys_path': settings.MIGASFREE_KEYS_PATH
