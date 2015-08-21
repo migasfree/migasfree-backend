@@ -213,10 +213,12 @@ class ReleaseAdmin(admin.ModelAdmin):
     list_filter = ('enabled', 'project__name',)
     ordering = ('name',)
     search_fields = ('name', 'available_packages__name',)
+    read_only_fields = ('slug',)
+    prepopulated_fields = {'slug': ('name',)}
 
     fieldsets = (
         (_('General'), {
-            'fields': ('name', 'enabled', 'project', 'comment')
+            'fields': ('name', 'slug', 'enabled', 'project', 'comment')
         }),
         (_('What (Packages)'), {
             'classes': ('collapse',),
