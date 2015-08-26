@@ -27,9 +27,12 @@ from migasfree.client.models import Computer
 
 from .models import Node, Capability, LogicalName, Configuration
 
+MAXINT = 9223372036854775807  # sys.maxint = (2**63) - 1
+
 
 @shared_task(queue='default')
 def save_computer_hardware(computer_id, node, parent=None, level=1):
+    size = node.get('size')
     n = Node.objects.create({
         'parent': parent,
         'computer': Computer.objects.get(id=computer_id),
@@ -46,7 +49,7 @@ def save_computer_hardware(computer_id, node, parent=None, level=1):
         'bus_info': node.get('businfo'),
         'physid': node.get('physid'),
         'slot': node.get('slot'),
-        'size': node.get('size'),
+        'size': size if (size <= MAXINT and size >= -MAXINT - 1) else 0,
         'capacity': node.get('capacity'),
         'clock': node.get('clock'),
         'width': node.get('width'),
