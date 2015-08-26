@@ -19,7 +19,7 @@
 from .safe import (
     SafeComputerViewSet, SafeSynchronizationView, SafeEndOfTransmissionView,
 )
-from .public import PackagerKeysView, ProjectKeysView
+from .public import PackagerKeysView, ProjectKeysView, RepositoriesKeysView
 from .token import (
     ComputerViewSet, ErrorViewSet,
     FaultDefinitionViewSet, FaultViewSet,
