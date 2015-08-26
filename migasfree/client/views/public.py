@@ -166,3 +166,14 @@ class ProjectKeysView(views.APIView):
             "migasfree-server.pub": pub_server_key,
             "migasfree-client.pri": priv_project_key
         })
+
+
+class RepositoriesKeysView(views.APIView):
+    def post(self, request, format=None):
+        """
+        Return the repositories public key
+        """
+        return Response(
+            secure.gpg_get_key('migasfree-repository'),
+            content_type='text/plain'
+        )
