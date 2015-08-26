@@ -19,13 +19,14 @@
 from django.conf.urls import patterns, include, url
 
 from .views import (
-    PackagerKeysView, ProjectKeysView, SafeSynchronizationView,
-    SafeEndOfTransmissionView,
+    PackagerKeysView, ProjectKeysView, RepositoriesKeysView,
+    SafeSynchronizationView, SafeEndOfTransmissionView,
 )
 
 keys_patterns = patterns('',
     url(r'^packager/$', PackagerKeysView.as_view()),
     url(r'^project/$', ProjectKeysView.as_view()),
+    url(r'^repositories/$', RepositoriesKeysView.as_view()),
 )
 
 public_patterns = patterns('',
