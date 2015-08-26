@@ -324,6 +324,17 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         claims['project'] = self.project.id
 
+        computer = get_computer(claims.get('uuid'), claims.get('name'))
+        if computer:
+            serializer = serializers.ComputerSerializer(
+                computer,
+                context={'request': request}
+            )
+            return Response(
+                self.create_response(serializer.data),
+                status=status.HTTP_200_OK
+            )
+
         serializer = serializers.ComputerSerializer(data=claims)
         if serializer.is_valid():
             computer = serializer.save()
