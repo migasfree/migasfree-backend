@@ -160,21 +160,24 @@ class Computer(models.Model):
             self._actions = None
 
         self._actions = []
-        _template = Template(settings.MIGASFREE_REMOTE_ADMIN_LINK)
-        _context = {"computer": self}
-        for n in _template.nodelist:
+        template = Template(settings.MIGASFREE_REMOTE_ADMIN_LINK)
+        context = {'computer': self}
+        for node in template.nodelist:
             try:
-                _token = n.filter_expression.token
-                if not _token.startswith("computer"):
-                    _context[_token] = self.login().attributes.get(
-                        property_att__prefix=_token
-                    ).value
+                token = node.filter_expression.token
+                if not token.startswith('computer'):
+                    context[token] = ','.join(list(
+                        self.sync_attributes.filter(
+                            property_att__prefix=token
+                        ).values_list('value', flat=True)
+                    ))
             except:
                 pass
-        _remote_admin = _template.render(Context(_context))
 
-        for element in _remote_admin.split(" "):
-            protocol = element.split("://")[0]
+        remote_admin = template.render(Context(context))
+
+        for element in remote_admin.split(' '):
+            protocol = element.split('://')[0]
             self._actions.append([protocol, element])
 
     def get_all_attributes(self):
@@ -204,7 +207,7 @@ class Computer(models.Model):
     def login(self):
         return '%s@%s' % (
             self.sync_user.name,
-            self.computer.__str__()
+            self.__str__()
         )
 
     def hardware(self):
