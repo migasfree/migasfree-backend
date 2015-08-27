@@ -35,53 +35,56 @@ class Apt(Pms):
             'application/vnd.debian.binary-package',
         ]
 
-    def create_repository(self, name, path):
+    def create_repository(self, name, path, arch):
         '''
-        (int, string, string) create_repository(string name, string path)
+        (int, string, string) create_repository(
+            string name, string path, string arch
+        )
         '''
 
         _cmd = '''
 _NAME=%(name)s
 cd %(path)s
-mkdir -p $_NAME/PKGS/binary-i386/
-mkdir -p $_NAME/PKGS/binary-amd64/
+mkdir -p $_NAME/PKGS/binary-%(arch)s/
 cd ..
 
-dpkg-scanpackages -m dists/$_NAME/PKGS > dists/$_NAME/PKGS/binary-i386/Packages
-gzip -9c dists/$_NAME/PKGS/binary-i386/Packages > dists/$_NAME/PKGS/binary-i386/Packages.gz
-
-dpkg-scanpackages -m dists/$_NAME/PKGS > dists/$_NAME/PKGS/binary-amd64/Packages
-gzip -9c dists/$_NAME/PKGS/binary-i386/Packages > dists/$_NAME/PKGS/binary-amd64/Packages.gz
+dpkg-scanpackages -m dists/$_NAME/PKGS > dists/$_NAME/PKGS/binary-%(arch)s/Packages
+gzip -9c dists/$_NAME/PKGS/binary-%(arch)s/Packages > dists/$_NAME/PKGS/binary-%(arch)s/Packages.gz
 
 function SUM {
   echo $1
   _FILES=$(find  -type f| sed 's/^.\///'|sort)
   for _FILE in $_FILES
     do
-     _SIZE=$(printf "%%16d\\n" $(ls -l $_FILE|cut -d ' ' -f5))
-     _MD5=$($2 $_FILE|cut -d ' ' -f1) $()
-     echo " $_MD5" "$_SIZE" "$_FILE"
+      _SIZE=$(printf "%%16d\\n" $(ls -l $_FILE|cut -d ' ' -f5))
+      _MD5=$($2 $_FILE|cut -d ' ' -f1) $()
+      echo " $_MD5" "$_SIZE" "$_FILE"
     done
 }
 
 function create_release {
   _F="/var/tmp/Release"
+
   rm Release 2>/dev/null || :
   rm Release.gpg 2>/dev/null || :
   touch Release
   rm $_F 2>/dev/null || :
-  echo "Architectures: i386 amd64" > $_F
+
+  echo "Architectures: %(arch)s" > $_F
   echo "Codename: $_NAME" >> $_F
   echo "Components: PKGS" >> $_F
   echo "Date: $(date -u '+%%a, %%d %%b %%Y %%H:%%M:%%S UTC')"  >> $_F
   echo "Label: migasfree  Repository" >> $_F
   echo "Origin: migasfree" >> $_F
   echo "Suite: $_NAME" >> $_F
-  SUM "MD5Sum:" "md5sum"  >> $_F
-  SUM "SHA1:" "sha1sum"  >> $_F
-  SUM "SHA256:" "sha256sum"  >> $_F
-  SUM "SHA512:" "sha512sum"  >> $_F
+
+  SUM "MD5Sum:" "md5sum" >> $_F
+  SUM "SHA1:" "sha1sum" >> $_F
+  SUM "SHA256:" "sha256sum" >> $_F
+  SUM "SHA512:" "sha512sum" >> $_F
+
   mv $_F Release
+
   gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg --clearsign -o InRelease Release
   gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg -abs -o Release.gpg Release
 }
@@ -91,6 +94,7 @@ create_release
 ''' % {
             'path': path,
             'name': name,
+            'arch': arch,
             'keys_path': settings.MIGASFREE_KEYS_PATH
         }
 

@@ -43,13 +43,13 @@ class Project(models.Model):
     """
 
     name = models.CharField(
-        _("name"),
+        verbose_name=_("name"),
         max_length=50,
         unique=True
     )
 
     slug = models.SlugField(
-        _("slug"),
+        verbose_name=_("slug"),
         max_length=50,
         unique=True
     )
@@ -61,8 +61,13 @@ class Project(models.Model):
         validators=[validate_project_pms]
     )
 
+    architecture = models.CharField(
+        verbose_name=_("architecture"),
+        max_length=10
+    )
+
     autoregister = models.BooleanField(
-        _("autoregister"),
+        verbose_name=_("autoregister"),
         default=False,
         help_text=_("Is not needed a user for register the computer in \
                      database and get the keys.")

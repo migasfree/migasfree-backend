@@ -48,12 +48,13 @@ def get_platform_or_create(platform_name, ip_address=None):
         return platform[0]
 
 
-def add_project(project_name, pms, platform, ip_address=None):
+def add_project(project_name, pms, platform, architecture, ip_address=None):
     project = Project.objects.create(
         name=project_name,
         pms=pms,
         autoregister=settings.MIGASFREE_AUTOREGISTER,
-        platform=platform
+        platform=platform,
+        architecture=architecture
     )
 
     if ip_address:
@@ -100,7 +101,7 @@ class PackagerKeysView(views.APIView):
 class ProjectKeysView(views.APIView):
     permission_classes = (permissions.IsClient,)
 
-    def get_object(self, name, pms, platform_name, ip_address):
+    def get_object(self, name, pms, platform_name, architecture, ip_address):
         try:
             return Project.objects.get(name=name)
         except Project.DoesNotExist:
@@ -111,7 +112,7 @@ class ProjectKeysView(views.APIView):
             if not platform:
                 raise HttpResponseForbidden
 
-            project = add_project(name, pms, platform, ip_address)
+            project = add_project(name, pms, platform, architecture, ip_address)
             if not project:
                 raise HttpResponseForbidden
 
@@ -123,6 +124,7 @@ class ProjectKeysView(views.APIView):
             "project": "Vitalinux",
             "pms": "apt",
             "platform": "Linux",
+            "architecture": "i386",
             "username": "admin",
             "password": "admin"
         }
@@ -136,6 +138,7 @@ class ProjectKeysView(views.APIView):
         project_name = request.data.get('project')
         pms = request.data.get('pms')
         platform_name = request.data.get('platform')
+        architecture = request.data.get('architecture')
 
         # FIXME why not validate model in create method?
         available_pms = dict(get_available_pms()).keys()
@@ -144,7 +147,9 @@ class ProjectKeysView(views.APIView):
                 'error': trans('PMS must be one of %s' % str(available_pms))
             })
 
-        project = self.get_object(project_name, pms, platform_name, ip_address)
+        project = self.get_object(
+            project_name, pms, platform_name, architecture, ip_address
+        )
 
         priv_project_key_file = os.path.join(
             settings.MIGASFREE_KEYS_PATH, "%s.pri" % project.slug

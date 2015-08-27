@@ -44,9 +44,11 @@ class Pms:
 
         return self.name
 
-    def create_repository(self, name, path):
+    def create_repository(self, name, path, arch):
         '''
-        (int, string, string) create_repository(string name, string path)
+        (int, string, string) create_repository(
+            string name, string path, string arch
+        )
         '''
 
         raise NotImplementedError

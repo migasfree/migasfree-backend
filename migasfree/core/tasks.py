@@ -112,7 +112,7 @@ def create_repository_metadata(release_id):
             )
 
     ret, output, error = pms.create_repository(
-        release.slug, slug_tmp_path
+        release.slug, slug_tmp_path, release.project.architecture
     )
 
     source = os.path.join(

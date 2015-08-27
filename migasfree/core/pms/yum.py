@@ -33,9 +33,11 @@ class Yum(Pms):
             'application/x-redhat-package-manager'
         ]
 
-    def create_repository(self, name, path):
+    def create_repository(self, name, path, arch):
         '''
-        (int, string, string) create_repository(string name, string path)
+        (int, string, string) create_repository(
+            string name, string path, string arch
+        )
         '''
 
         _cmd = '''
