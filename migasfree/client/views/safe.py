@@ -335,7 +335,10 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 status=status.HTTP_200_OK
             )
 
-        serializer = serializers.ComputerSerializer(data=claims)
+        serializer = serializers.ComputerSerializer(
+            data=claims,
+            context={'request': request}
+        )
         if serializer.is_valid():
             computer = serializer.save()
 
@@ -520,7 +523,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         add_computer_message(computer, trans('Getting repositories...'))
 
         repos = Release.available_releases(
-            computer.project.id, computer.get_all_attributes()
+            computer, computer.get_all_attributes()
         ).values_list('slug', flat=True)
 
         add_computer_message(computer, trans('Sending repositories...'))
@@ -657,7 +660,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         add_computer_message(computer, trans('Getting mandatory packages...'))
 
         pkgs = Release.available_releases(
-            computer.project.id, computer.get_all_attributes()
+            computer, computer.get_all_attributes()
         ).values_list('packages_to_install', 'packages_to_remove')
 
         add_computer_message(computer, trans('Sending mandatory packages...'))
@@ -804,9 +807,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         remove = []
 
         # Old Repositories
-        repos = Release.available_releases(
-            computer.project.id, old_tags
-        )
+        repos = Release.available_releases(computer, old_tags)
         pkgs = repos.values_list(
             'packages_to_install',
             'default_preincluded_packages',
@@ -835,7 +836,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         # New Repositories
         repos = Release.available_releases(
-            computer.project.id,
+            computer,
             new_tags + intersection_tags
         )
         pkgs = repos.values_list(

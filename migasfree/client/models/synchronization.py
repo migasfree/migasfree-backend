@@ -72,7 +72,7 @@ class Synchronization(models.Model):
         self.computer.save()
 
         releases = Release.available_releases(
-            self.computer.project.id, self.computer.get_all_attributes()
+            self.computer, self.computer.get_all_attributes()
         ).values_list('id', flat=True)
 
         con = get_redis_connection('default')

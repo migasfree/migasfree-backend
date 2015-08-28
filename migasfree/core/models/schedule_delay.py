@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.db import models
+from django.core.validators import MinValueValidator
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
@@ -40,6 +41,12 @@ class ScheduleDelay(models.Model):
         null=True,
         blank=True,
         verbose_name=_("attributes")
+    )
+
+    duration = models.IntegerField(
+        verbose_name=_("duration"),
+        default=1,
+        validators=[MinValueValidator(1),]
     )
 
     def __str__(self):

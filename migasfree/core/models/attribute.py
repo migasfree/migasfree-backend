@@ -217,13 +217,6 @@ class BasicAttribute(Attribute):
             )
             att_id.append(obj.id)
 
-        if 'MID' in properties.keys() and 'id' in kwargs:
-            obj = Attribute.objects.create(
-                Property.objects.get(pk=properties['MID']),
-                "%02d" % (kwargs['id'] % 100)
-            )
-            att_id.append(obj.id)
-
         if 'PLT' in properties.keys() and 'platform' in kwargs:
             obj = Attribute.objects.create(
                 Property.objects.get(pk=properties['PLT']),

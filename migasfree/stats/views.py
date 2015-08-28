@@ -205,6 +205,15 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @list_route(methods=['get'], url_path='attributes/count')
+    def attributes_count(self, request, format=None):
+        attributes = request.query_params.getlist('attributes')
+        project_id = request.query_params.get('project_id', None)
+
+        return Response(
+            Computer.count_by_attributes(attributes, project_id),
+            status=status.HTTP_200_OK
+        )
 
 class ReleaseStatsViewSet(viewsets.ViewSet):
     @detail_route(methods=['get'], url_path='computers/assigned')

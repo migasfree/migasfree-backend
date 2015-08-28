@@ -144,6 +144,22 @@ class Release(models.Model):
     def __str__(self):
         return self.name
 
+    def get_percent(self, begin_date, end_date):
+        delta = end_date - begin_date
+        progress = datetime.datetime.now() - datetime.datetime.combine(
+            begin_date, datetime.datetime.min.time()
+        )
+
+        percent = 0
+        if delta.days > 0:
+            percent = float(progress.days) / delta.days * 100
+            if percent > 100:
+                percent = 100
+        else:
+            percent = 100
+
+        return percent
+
     def schedule_timeline(self):
         if self.schedule is None:
             return None
@@ -155,25 +171,16 @@ class Release(models.Model):
         if len(delays) == 0:
             return None
 
-        end_date = time_horizon(self.start_date, delays.reverse()[0].delay)
         begin_date = time_horizon(self.start_date, delays[0].delay)
-
-        delta = end_date - begin_date
-        progress = datetime.datetime.now() - datetime.datetime.combine(
-            begin_date, datetime.datetime.min.time()
+        end_date = time_horizon(
+            self.start_date,
+            delays.reverse()[0].delay + delays.reverse()[0].duration
         )
-
-        if delta.days > 0:
-            percent = float(progress.days) / delta.days * 100
-            if percent > 100:
-                percent = 100
-        else:
-            percent = 100
 
         return {
             'begin_date': str(begin_date),
             'end_date': str(end_date),
-            'percent': '%d' % int(percent)
+            'percent': '%d' % self.get_percent(begin_date, end_date)
         }
 
     def save(self, *args, **kwargs):
@@ -195,12 +202,14 @@ class Release(models.Model):
             pass
 
     @staticmethod
-    def available_releases(project_id, attributes):
+    def available_releases(computer, attributes):
         """
-        Return available repositories for a project and attributes list
+        Return available repositories for a computer and attributes list
         """
         # 1.- all releases by attribute
-        attributed = Release.objects.filter(project__id=project_id).filter(
+        attributed = Release.objects.filter(
+            project__id=computer.project.id
+        ).filter(
             enabled=True
         ).filter(
             included_attributes__id__in=attributes
@@ -208,16 +217,25 @@ class Release(models.Model):
         lst = list(attributed)
 
         # 2.- all releases by schedule
-        scheduled = Release.objects.filter(project__id=project_id).filter(
+        scheduled = Release.objects.filter(
+            project__id=computer.project.id
+        ).filter(
             enabled=True
         ).filter(schedule__scheduledelay__attributes__id__in=attributes).extra(
-            select={'delay': "core_scheduledelay.delay"}
+            select={
+                'delay': 'core_scheduledelay.delay',
+                'duration': 'core_scheduledelay.duration'
+            }
         )
 
         for release in scheduled:
-            if time_horizon(release.start_date, release.delay) <= \
-            datetime.datetime.now().date():
-                lst.append(release.id)
+            for duration in range(0, release.duration):
+                if computer.id % release.duration == duration:
+                    if time_horizon(
+                        release.start_date, release.delay + duration
+                    ) <= datetime.datetime.now().date():
+                        lst.append(release.id)
+                        break
 
         # 3.- excluded attributtes
         releases = Release.objects.filter(id__in=lst).filter(

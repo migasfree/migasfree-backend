@@ -242,6 +242,18 @@ class Computer(models.Model):
             'project__platform__name', 'project__platform__id'
         ).annotate(count=Count('id'))
 
+    @staticmethod
+    def count_by_attributes(attributes_id, project_id=None):
+        if project_id:
+            return Computer.objects.filter(
+                sync_attributes__id__in=attributes_id,
+                project__id=project_id
+            ).count()
+        else:
+            return Computer.objects.filter(
+                sync_attributes__id__in=attributes_id
+            ).count()
+
     @transaction.commit_on_success
     def update_software_inventory(self, pkgs):
         if pkgs:
