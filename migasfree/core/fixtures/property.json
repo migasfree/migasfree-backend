@@ -100,7 +100,7 @@
             "kind": "N",
             "sort": "client",
             "language": "bash",
-            "code": "_IP=$(LC_ALL=C ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1 -d'/')\nLC_ALL=C ip route | grep $_IP | cut -d' ' -f1"
+            "code": "_IP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')\nLC_ALL=C ip route | grep $_IP | cut -d' ' -f1"
         }
     },
     {
