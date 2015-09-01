@@ -3,8 +3,8 @@
         "pk": 1,
         "model": "core.property",
         "fields": {
-            "prefix": "ALL",
-            "name": "All Systems",
+            "prefix": "SET",
+            "name": "Set of Attributes",
             "enabled": true,
             "kind": "N",
             "sort": "basic",

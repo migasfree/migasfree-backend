@@ -24,6 +24,7 @@ from .property import Property, ServerProperty, ClientProperty, BasicProperty
 from .attribute import (
     Attribute, ServerAttribute, ClientAttribute, BasicAttribute
 )
+from .set_of_attributes import SetOfAttributes
 
 from .schedule import Schedule
 from .schedule_delay import ScheduleDelay

@@ -174,6 +174,12 @@ class ServerAttributeAdmin(admin.ModelAdmin):
 admin.site.register(ServerAttribute, ServerAttributeAdmin)
 
 
+class SetOfAttributesAdmin(admin.ModelAdmin):
+    model = SetOfAttributes
+
+admin.site.register(SetOfAttributes, SetOfAttributesAdmin)
+
+
 class ScheduleDelayline(admin.TabularInline):
     model = ScheduleDelay
     extra = 0

@@ -32,7 +32,7 @@ from migasfree.model_update import update
 from migasfree import secure
 from migasfree.core.mixins import SafeConnectionMixin
 from migasfree.core.models import (
-    Project, Release, Property, Attribute, BasicAttribute
+    Project, Release, Property, Attribute, BasicAttribute, SetOfAttributes
 )
 
 from .. import models, serializers, tasks
@@ -485,6 +485,11 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             platform=computer.project.platform.name,
             user=user.name
         )
+        for id in att_id:
+            computer.sync_attributes.add(id)
+
+        # set of attributes
+        att_id = SetOfAttributes.process(computer.get_all_attributes())
         for id in att_id:
             computer.sync_attributes.add(id)
 

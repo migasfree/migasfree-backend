@@ -203,9 +203,9 @@ class BasicAttribute(Attribute):
 
         att_id = []
 
-        if 'ALL' in properties.keys():
+        if 'SET' in properties.keys():
             obj = Attribute.objects.create(
-                Property.objects.get(pk=properties['ALL']),
+                Property.objects.get(pk=properties['SET']),
                 'All Systems'
             )
             att_id.append(obj.id)
