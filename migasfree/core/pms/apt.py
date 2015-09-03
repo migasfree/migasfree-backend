@@ -44,20 +44,24 @@ class Apt(Pms):
 
         _cmd = '''
 _NAME=%(name)s
-cd %(path)s
-mkdir -p $_NAME/PKGS/binary-%(arch)s/
-cd ..
+_ARCHS=("%(arch)s")
+for _ARCH in ${_ARCHS[@]}
+do
+  cd %(path)s
+  mkdir -p $_NAME/PKGS/binary-$_ARCH/
+  cd ..
 
-dpkg-scanpackages -m dists/$_NAME/PKGS > dists/$_NAME/PKGS/binary-%(arch)s/Packages
-gzip -9c dists/$_NAME/PKGS/binary-%(arch)s/Packages > dists/$_NAME/PKGS/binary-%(arch)s/Packages.gz
+  dpkg-scanpackages -m dists/$_NAME/PKGS > dists/$_NAME/PKGS/binary-$_ARCH/Packages
+  gzip -9c dists/$_NAME/PKGS/binary-$_ARCH/Packages > dists/$_NAME/PKGS/binary-$_ARCH/Packages.gz
+done
 
 function SUM {
   echo $1
-  _FILES=$(find  -type f| sed 's/^.\///'|sort)
+  _FILES=$(find  -type f | sed 's/^.\///' | sort)
   for _FILE in $_FILES
     do
-      _SIZE=$(printf "%%16d\\n" $(ls -l $_FILE|cut -d ' ' -f5))
-      _MD5=$($2 $_FILE|cut -d ' ' -f1) $()
+      _SIZE=$(printf "%%16d\\n" $(ls -l $_FILE | cut -d ' ' -f5))
+      _MD5=$($2 $_FILE | cut -d ' ' -f1) $()
       echo " $_MD5" "$_SIZE" "$_FILE"
     done
 }
@@ -73,7 +77,7 @@ function create_release {
   echo "Architectures: %(arch)s" > $_F
   echo "Codename: $_NAME" >> $_F
   echo "Components: PKGS" >> $_F
-  echo "Date: $(date -u '+%%a, %%d %%b %%Y %%H:%%M:%%S UTC')"  >> $_F
+  echo "Date: $(date -u '+%%a, %%d %%b %%Y %%H:%%M:%%S UTC')" >> $_F
   echo "Label: migasfree  Repository" >> $_F
   echo "Origin: migasfree" >> $_F
   echo "Suite: $_NAME" >> $_F

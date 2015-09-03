@@ -63,7 +63,7 @@ class Project(models.Model):
 
     architecture = models.CharField(
         verbose_name=_("architecture"),
-        max_length=10
+        max_length=20
     )
 
     autoregister = models.BooleanField(
