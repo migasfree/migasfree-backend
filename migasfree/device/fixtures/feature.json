@@ -1,0 +1,16 @@
+[
+    {
+        "pk": 1,
+        "model": "device.feature",
+        "fields": {
+            "name": "STANDARD"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "device.feature",
+        "fields": {
+            "name": "COLOUR"
+        }
+    }
+]

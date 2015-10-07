@@ -53,6 +53,7 @@ class Logical(models.Model):
             self.device.connection.devicetype.name: {
                 'feature': self.feature.name,
                 'id': self.id,
+                'manufacturer': self.device.model.manufacturer.name
             }
         }
 
@@ -66,10 +67,11 @@ class Logical(models.Model):
         return ret
 
     def __str__(self):
-        return '%s__%s__%s__%s' % (
-            self.device.name,
+        return '%s__%s__%s__%s__%s' % (
+            self.device.model.manufacturer.name,
             self.device.model.name,
             self.feature.name,
+            self.device.name,
             str(self.id)
         )
 

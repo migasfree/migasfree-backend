@@ -1,0 +1,47 @@
+[
+    {
+        "pk": 1,
+        "model": "device.connection",
+        "fields": {
+            "name": "USB",
+            "fields": "NAME",
+            "device_type": 1
+        }
+    },
+    {
+        "pk": 2,
+        "model": "device.connection",
+        "fields": {
+            "name": "LPT",
+            "fields": "PORT,NAME",
+            "device_type": 1
+        }
+    },
+    {
+        "pk": 3,
+        "model": "device.connection",
+        "fields": {
+            "name": "TCP",
+            "fields": "IP,LOCATION,PORT,NAME",
+            "device_type": 1
+        }
+    },
+    {
+        "pk": 4,
+        "model": "device.connection",
+        "fields": {
+            "name": "LPD",
+            "fields": "IP,LOCATION,PORT,NAME",
+            "device_type": 1
+        }
+    },
+    {
+        "pk": 5,
+        "model": "device.connection",
+        "fields": {
+            "name": "SRL",
+            "fields": "PORT,NAME",
+            "device_type": 1
+        }
+    }
+]

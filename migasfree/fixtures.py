@@ -90,14 +90,14 @@ def create_default_users():
         reader.save()
         tables = [
             "client.computer", "client.user", "core.attribute", "client.error",
-            #"device", "deviceconnection", "devicemanufacturer", "devicemodel",
-            #"devicetype",
             "core.schedule", "core.scheduledelay",
             "client.fault", "client.faultdefinition", "client.migration",
             "client.notification",
             "core.project", "core.package", "core.release", "core.store",
             "client.synchronization",
             "core.platform", "core.property",
+            "device.device", "device.connection", "device.manufacturer",
+            "device.model", "device.type",
         ]
         add_read_perms(reader, tables)
         reader.save()
@@ -137,19 +137,17 @@ def create_default_users():
         checker.save()
 
     # GROUP DEVICE INSTALLER
-    """
     device_installer = Group.objects.filter(name='Device installer')
     if not device_installer:
         device_installer = Group()
         device_installer.name = "Device installer"
         device_installer.save()
         tables = [
-            "device_connection", "device_manufacturer",
-            "device_model", "device_type"
+            "device.connection", "device.manufacturer",
+            "device.model", "device.type"
         ]
         add_all_perms(device_installer, tables)
         device_installer.save()
-    """
 
     # GROUP CONFIGURATOR
     configurator = Group.objects.filter(name='Configurator')
@@ -169,7 +167,7 @@ def create_default_users():
     create_user("admin")
     create_user("packager", [reader, packager])
     create_user("configurator", [reader, configurator])
-    #create_user("installer", [reader, device_installer])
+    create_user("installer", [reader, device_installer])
     create_user("liberator", [reader, liberator])
     create_user("checker", [reader, checker])
     create_user("reader", [reader])
@@ -181,7 +179,7 @@ def sequence_reset():
     os.environ['DJANGO_COLORS'] = 'nocolor'
     django.core.management.call_command(
         'sqlsequencereset',
-        'core client',  # TODO device hardware
+        'core client device hardware',
         stdout=commands
     )
 
@@ -211,6 +209,9 @@ def create_initial_data():
         'core.schedule.json',
         'core.schedule_delay.json',
         'client.fault_definition.json',
+        'device.type.json',
+        'device.feature.json',
+        'device.connection.json',
     ]
     for fixture in fixtures:
         app, name, ext = fixture.split('.')

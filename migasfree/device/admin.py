@@ -84,6 +84,13 @@ class LogicalAdmin(admin.ModelAdmin):
     fields = ("device", "feature")  #, "computers")
     list_select_related = ('device', 'feature',)
     list_display = ('device', 'feature')
+    search_fields = (
+        'id',
+        'device__name',
+        'device__model__name',
+        'device__model__manufacturer__name',
+        'feature__name',
+    )
 
 admin.site.register(Logical, LogicalAdmin)
 
@@ -96,7 +103,7 @@ class LogicalInline(admin.TabularInline):
 
 
 class DeviceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'model')
+    list_display = ('name', 'model', 'connection')
     list_filter = ('model',)
     search_fields = ('name', 'model__name', 'model__manufacturer__name')
     fields = ('name', 'model', 'connection', 'data')
