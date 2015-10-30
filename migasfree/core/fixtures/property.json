@@ -113,7 +113,7 @@
             "kind": "-",
             "sort": "client",
             "language": "python",
-            "code": "import subprocess\nimport platform\n\n_platform = platform.system()\nif _platform == 'Linux':\n    cmd_linux = \"\"\"r=''\n      if [ $(lspci -n | sed -n 1p | awk '{print $2}') = 'Class' ]\nthen\n        dev=$(lspci -n | awk '{print $4}')\n      else\n        dev=$(lspci -n | awk '{print $3}')\n      fi\n      for l in $dev\n      do\n        n=$(lspci -d $l | awk '{for (i = 2; i <=NF;++i) print $i}' | tr \"\\n\" \" \" | sed 's/,//g')\n        r=\"$r$l~$n,\"\n      done\n      echo $r\"\"\"\n    (out, err) = subprocess.Popen(cmd_linux, stdout=subprocess.PIPE, shell=True).communicate()\n    print out,\nelse:\n    print 'none',"
+            "code": "import subprocess\nimport platform\nimport os\n\n_platform = platform.system()\nif _platform == 'Linux':\n    if os.path.exists('/proc/bus/pci'):\n        cmd_linux=\"\"\"r=''\n      if [ $(lspci -n | sed -n 1p | awk '{print $2}') = 'Class' ]; then\n        dev=$(lspci -n | awk '{print $4}')\n      else\n        dev=$(lspci -n | awk '{print $3}')\n      fi\n      for l in $dev\n      do\n        n=$(lspci -d $l | awk '{for (i = 2; i <= NF; ++i) print $i}' | tr \"\\n\" \" \" | sed 's/,//g')\n        r=\"$r$l~$n,\"\n      done\n      echo $r\"\"\"\n        (out, err) = subprocess.Popen(cmd_linux, stdout=subprocess.PIPE, shell=True).communicate()\n        print out,\n    else:\n        print 'none',\nelse:\n    print 'none',"
         }
     }
 ]
