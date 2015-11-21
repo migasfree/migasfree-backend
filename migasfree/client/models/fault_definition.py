@@ -60,7 +60,6 @@ class FaultDefinition(models.Model):
 
     included_attributes = models.ManyToManyField(
         Attribute,
-        null=True,
         blank=True,
         verbose_name=_("included")
     )
@@ -68,14 +67,12 @@ class FaultDefinition(models.Model):
     excluded_attributes = models.ManyToManyField(
         Attribute,
         related_name="ExcludeAttributeFaultDefinition",
-        null=True,
         blank=True,
         verbose_name=_("excluded")
     )
 
     users = models.ManyToManyField(
         User,
-        null=True,
         blank=True,
         verbose_name=_("users")
     )
