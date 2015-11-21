@@ -38,7 +38,6 @@ class ScheduleDelay(models.Model):
 
     attributes = models.ManyToManyField(
         Attribute,
-        null=True,
         blank=True,
         verbose_name=_("attributes")
     )
