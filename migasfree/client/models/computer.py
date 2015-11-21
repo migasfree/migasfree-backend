@@ -20,7 +20,7 @@ from datetime import datetime
 
 from django.db import models, transaction
 from django.db.models import Count
-from django.db.models.signals import m2m_changed, pre_save
+from django.db.models.signals import m2m_changed, pre_save, post_save
 from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -44,6 +44,20 @@ class UnproductiveManager(models.Manager):
     def get_query_set(self):
         return super(UnproductiveManager, self).get_queryset().exclude(
             status__in=Computer.PRODUCTIVE_STATUS
+        )
+
+
+class SubscribedManager(models.Manager):
+    def get_query_set(self):
+        return super(SubscribedManager, self).get_queryset().exclude(
+            status='unsubscribed'
+        )
+
+
+class UnsubscribedManager(models.Manager):
+    def get_query_set(self):
+        return super(UnsubscribedManager, self).get_queryset().filter(
+            status='unsubscribed'
         )
 
 
@@ -169,6 +183,8 @@ class Computer(models.Model):
     objects = models.Manager()
     productives = ProductiveManager()
     unproductives = UnproductiveManager()
+    subscribed = SubscribedManager()
+    unsubscribed = UnsubscribedManager()
 
     def __init__(self, *args, **kwargs):
         super(Computer, self).__init__(*args, **kwargs)
@@ -243,9 +259,6 @@ class Computer(models.Model):
 
         return True
 
-    def is_productive(self):
-        return self.status in self.PRODUCTIVE_STATUS
-
     def update_software_history(self, history):
         if history:
             self.software_history = history + '\n\n' + self.software_history
@@ -299,12 +312,6 @@ class Computer(models.Model):
             settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0]
         ))
 
-    def save(self, *args, **kwargs):
-        if 'available' == self.status:
-            self.tags.clear()
-
-        super(Computer, self).save(*args, **kwargs)
-
     class Meta:
         app_label = 'client'
         verbose_name = _("Computer")
@@ -328,3 +335,12 @@ def pre_save_computer(sender, instance, **kwargs):
         old_obj = Computer.objects.get(pk=instance.id)
         if old_obj.status != instance.status:
             StatusLog.objects.create(instance)
+
+
+@receiver(post_save, sender=Computer)
+def post_save_computer(sender, instance, created, **kwargs):
+    if created:
+        StatusLog.objects.create(instance)
+    if  instance.status == 'available':  # clear tags and devices_logical
+        instance.tags.clear()
+        instance.devices_logical.clear()
