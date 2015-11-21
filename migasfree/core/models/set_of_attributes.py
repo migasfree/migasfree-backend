@@ -38,7 +38,6 @@ class SetOfAttributes(models.Model):
 
     included_attributes = models.ManyToManyField(
         Attribute,
-        null=True,
         blank=True,
         verbose_name=_("included")
     )
@@ -46,7 +45,6 @@ class SetOfAttributes(models.Model):
     excluded_attributes = models.ManyToManyField(
         Attribute,
         related_name="ExcludedAttributesGroup",
-        null=True,
         blank=True,
         verbose_name=_("excluded")
     )
