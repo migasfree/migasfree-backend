@@ -103,6 +103,11 @@ class Attribute(models.Model):
     def prefix_value(self):
         return self.__str__()
 
+    def update_description(self, new_value):
+        if self.description != new_value:
+            self.description = new_value
+            self.save()
+
     def delete(self, *args, **kwargs):
         # Not allowed delete atributte of basic properties
         if self.property_att.sort != 'basic':
@@ -213,8 +218,10 @@ class BasicAttribute(Attribute):
         if 'CID' in properties.keys() and 'id' in kwargs:
             obj = Attribute.objects.create(
                 Property.objects.get(pk=properties['CID']),
-                str(kwargs['id'])
+                str(kwargs['id']),
+                '%d~%s' % (kwargs['id'], kwargs['description'])
             )
+            obj.update_description(kwargs['description'])
             att_id.append(obj.id)
 
         if 'PLT' in properties.keys() and 'platform' in kwargs:

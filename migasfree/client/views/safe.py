@@ -483,7 +483,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             ip_address=claims.get('ip_address'),
             project=computer.project.name,
             platform=computer.project.platform.name,
-            user=user.name
+            user=user.name,
+            description=computer.get_description()
         )
         for id in att_id:
             computer.sync_attributes.add(id)
