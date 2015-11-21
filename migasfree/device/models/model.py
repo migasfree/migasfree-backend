@@ -46,7 +46,6 @@ class Model(models.Model):
 
     connections = models.ManyToManyField(
         Connection,
-        null=True,
         blank=True,
         verbose_name=_("connections")
     )
