@@ -3,16 +3,16 @@
 
 import operator
 
-from django.db.models.expressions import F, ExpressionNode
+from django.db.models.expressions import F, Expression
 
 EXPRESSION_NODE_CALLBACKS = {
-    ExpressionNode.ADD: operator.add,
-    ExpressionNode.SUB: operator.sub,
-    ExpressionNode.MUL: operator.mul,
-    ExpressionNode.DIV: operator.div,
-    ExpressionNode.MOD: operator.mod,
-    # ExpressionNode.AND: operator.and_,
-    # ExpressionNode.OR: operator.or_,
+    Expression.ADD: operator.add,
+    Expression.SUB: operator.sub,
+    Expression.MUL: operator.mul,
+    Expression.DIV: operator.div,
+    Expression.MOD: operator.mod,
+    # Expression.AND: operator.and_,
+    # Expression.OR: operator.or_,
 }
 
 
