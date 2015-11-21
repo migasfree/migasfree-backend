@@ -255,13 +255,13 @@ class Computer(models.Model):
 
     @staticmethod
     def group_by_project():
-        return Computer.objects.values('project__name', 'project__id').annotate(
-            count=Count('id')
-        )
+        return Computer.productives.values(
+            'project__name', 'project__id'
+        ).annotate(count=Count('id'))
 
     @staticmethod
     def group_by_platform():
-        return Computer.objects.values(
+        return Computer.productives.values(
             'project__platform__name', 'project__platform__id'
         ).annotate(count=Count('id'))
 
