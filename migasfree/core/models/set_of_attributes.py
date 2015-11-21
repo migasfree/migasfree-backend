@@ -21,9 +21,10 @@ from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
-from migasfree.core.models import Property, Attribute
+from . import Property, Attribute
 
 
+# FIXME https://docs.djangoproject.com/en/1.8/ref/contrib/gis/
 @python_2_unicode_compatible
 class SetOfAttributes(models.Model):
     name = models.CharField(
@@ -47,6 +48,18 @@ class SetOfAttributes(models.Model):
         related_name="ExcludedAttributesGroup",
         blank=True,
         verbose_name=_("excluded")
+    )
+
+    longitude = models.FloatField(
+        verbose_name=_("longitude"),
+        null=True,
+        blank=True
+    )
+
+    latitude = models.FloatField(
+        verbose_name=_("latitude"),
+        null=True,
+        blank=True
     )
 
     def __str__(self):

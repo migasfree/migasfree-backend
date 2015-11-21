@@ -25,7 +25,9 @@ from .property import Property
 
 
 class AttributeManager(models.Manager):
-    def create(self, property_att, value, description=None):
+    def create(self, property_att, value,
+        description=None, longitude=None, latitude=None
+    ):
         """
         if value = "text~other", description = "other"
         """
@@ -42,6 +44,8 @@ class AttributeManager(models.Manager):
         attribute.property_att = property_att
         attribute.value = value
         attribute.description = description
+        attribute.longitude = longitude
+        attribute.latitude = latitude
         attribute.save()
 
         return attribute
@@ -74,6 +78,7 @@ class AttributeManager(models.Manager):
         return None
 
 
+# FIXME https://docs.djangoproject.com/en/1.8/ref/contrib/gis/
 @python_2_unicode_compatible
 class Attribute(models.Model):
     property_att = models.ForeignKey(
@@ -88,6 +93,18 @@ class Attribute(models.Model):
 
     description = models.TextField(
         verbose_name=_("description"),
+        null=True,
+        blank=True
+    )
+
+    longitude = models.FloatField(
+        verbose_name=_("longitude"),
+        null=True,
+        blank=True
+    )
+
+    latitude = models.FloatField(
+        verbose_name=_("latitude"),
         null=True,
         blank=True
     )
