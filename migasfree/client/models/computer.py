@@ -33,6 +33,20 @@ from .package import Package
 from .user import User
 
 
+class ProductiveManager(models.Manager):
+    def get_query_set(self):
+        return super(ProductiveManager, self).get_queryset().filter(
+            status__in=Computer.PRODUCTIVE_STATUS
+        )
+
+
+class UnproductiveManager(models.Manager):
+    def get_query_set(self):
+        return super(UnproductiveManager, self).get_queryset().exclude(
+            status__in=Computer.PRODUCTIVE_STATUS
+        )
+
+
 @python_2_unicode_compatible
 class Computer(models.Model):
     STATUS_CHOICES = (
@@ -42,6 +56,8 @@ class Computer(models.Model):
         ('unsubscribed', _('Unsubscribed')),
         ('unknown', _('Unknown')),
     )
+
+    PRODUCTIVE_STATUS = ['intended', 'reserved', 'unknown']
 
     uuid = models.CharField(
         verbose_name=_("uuid"),
@@ -152,6 +168,10 @@ class Computer(models.Model):
         help_text=_("attributes sent")
     )
 
+    objects = models.Manager()
+    productives = ProductiveManager()
+    unproductives = UnproductiveManager()
+
     def __init__(self, *args, **kwargs):
         super(Computer, self).__init__(*args, **kwargs)
 
@@ -217,13 +237,16 @@ class Computer(models.Model):
             return ''
 
     def change_status(self, status):
-        if status not in dict(self.STATUS_CHOICES).keys():
+        if status not in list(dict(self.STATUS_CHOICES).keys()):
             return False
 
         self.status = status
         self.save()
 
         return True
+
+    def is_productive(self):
+        return self.status in self.PRODUCTIVE_STATUS
 
     def update_software_history(self, history):
         if history:
