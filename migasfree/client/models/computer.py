@@ -51,10 +51,11 @@ class UnproductiveManager(models.Manager):
 class Computer(models.Model):
     STATUS_CHOICES = (
         ('intended', _('Intended')),
-        ('available', _('Available')),
         ('reserved', _('Reserved')),
-        ('unsubscribed', _('Unsubscribed')),
         ('unknown', _('Unknown')),
+        ('in repair', _('In repair')),
+        ('available', _('Available')),
+        ('unsubscribed', _('Unsubscribed')),
     )
 
     PRODUCTIVE_STATUS = ['intended', 'reserved', 'unknown']
