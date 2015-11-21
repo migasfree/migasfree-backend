@@ -53,17 +53,11 @@ class SetOfAttributes(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        try:
-            Attribute.objects.get(
-                property_att=Property.objects.get(prefix='SET', sort='basic'),
-                value=self.name
-            )
-        except:
-            # new attribute if not exists
-            Attribute.objects.create(
-                Property.objects.get(prefix='SET', sort='basic'),
-                self.name
-            )
+        Attribute.objects.get_or_create(
+            property_att=Property.objects.get(prefix='SET', sort='basic'),
+            value=self.name,
+            defaults={'description': ''}
+        )
 
         super(SetOfAttributes, self).save(*args, **kwargs)
 
