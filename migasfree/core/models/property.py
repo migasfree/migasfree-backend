@@ -40,30 +40,30 @@ class Property(models.Model):
     PREFIX_LEN = 3
 
     prefix = models.CharField(
-        _("prefix"),
+        verbose_name=_("prefix"),
         max_length=PREFIX_LEN,
         unique=True
     )
 
     name = models.CharField(
-        _("name"),
+        verbose_name=_("name"),
         max_length=50
     )
 
     enabled = models.BooleanField(
-        _("enabled"),
+        verbose_name=_("enabled"),
         default=True,
     )
 
     kind = models.CharField(
-        _("kind"),
+        verbose_name=_("kind"),
         max_length=1,
         default='N',
         choices=KIND_CHOICES
     )
 
     sort = models.CharField(
-        _("kind"),
+        verbose_name=_("sort"),
         max_length=10,
         default='client',
         choices=SORT_CHOICES
