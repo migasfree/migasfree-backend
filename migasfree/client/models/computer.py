@@ -277,7 +277,7 @@ class Computer(models.Model):
                 sync_attributes__id__in=attributes_id
             ).count()
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def update_software_inventory(self, pkgs):
         if pkgs:
             self.software_inventory.clear()
