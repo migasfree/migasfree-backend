@@ -27,7 +27,10 @@ from django.utils.translation import ugettext_lazy as _
 from django.template import Context, Template
 from django.conf import settings
 
-from migasfree.core.models import Project, ServerAttribute, Attribute
+from migasfree.utils import swap_m2m
+from migasfree.core.models import (
+    Project, ServerAttribute, Attribute, BasicProperty
+)
 
 from .package import Package
 from .user import User
@@ -301,11 +304,44 @@ class Computer(models.Model):
 
     @staticmethod
     def replacement(source, target):
-        source.tags, target.tags = target.tags, source.tags
+        swap_m2m(source.tags, target.tags)
+        swap_m2m(source.devices_logical, target.devices_logical)
+
+        source_cid = source.get_cid_attribute()
+        target_cid = target.get_cid_attribute()
+        swap_m2m(source_cid.faultdef_set, target_cid.faultdef_set)
+        swap_m2m(source_cid.repository_set, target_cid.repository_set)
+        swap_m2m(source_cid.ExcludeAttribute, target_cid.ExcludeAttribute)
+        swap_m2m(source_cid.attributeset_set, target_cid.attributeset_set)
+        swap_m2m(
+            source_cid.ExcludeAttributeGroup, target_cid.ExcludeAttributeGroup
+        )
+        swap_m2m(source_cid.scheduledelay_set, target_cid.scheduledelay_set)
+
         source.status, target.status = target.status, source.status
 
         source.save()
         target.save()
+
+    def get_cid_attribute(self):
+        prop = BasicProperty.objects.get(prefix='CID')
+        cid_att, created = Attribute.objects.get_or_create(
+            property_att=prop,
+            value=str(self.id),
+            defaults={'description': self.get_cid_description()}
+        )
+
+        return cid_att
+
+    def get_cid_description(self):
+        desc = list(settings.MIGASFREE_COMPUTER_SEARCH_FIELDS)
+        if 'id' in desc:
+            desc.remove('id')
+
+        return '(%s)' % ', '.join(str(self.__getattribute__(x)) for x in desc)
+
+    def display(self):
+        return 'CID-%d %s' % (self.id, self.get_cid_description())
 
     def __str__(self):
         return str(self.__getattribute__(
@@ -341,6 +377,14 @@ def pre_save_computer(sender, instance, **kwargs):
 def post_save_computer(sender, instance, created, **kwargs):
     if created:
         StatusLog.objects.create(instance)
-    if  instance.status == 'available':  # clear tags and devices_logical
+    if instance.status in ['available', 'unsubscribed']:
         instance.tags.clear()
         instance.devices_logical.clear()
+
+        cid = instance.get_cid_attribute()
+        cid.faultdef_set.clear()
+        cid.repository_set.clear()
+        cid.ExcludeAttribute.clear()
+        cid.attributeset_set.clear()
+        cid.ExcludeAttributeGroup.clear()
+        cid.scheduledelay_set.clear()
