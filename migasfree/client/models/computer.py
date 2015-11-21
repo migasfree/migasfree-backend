@@ -100,7 +100,6 @@ class Computer(models.Model):
 
     software_inventory = models.ManyToManyField(
         Package,
-        null=True,
         blank=True,
         verbose_name=_("software inventory"),
     )
@@ -138,7 +137,6 @@ class Computer(models.Model):
 
     tags = models.ManyToManyField(
         ServerAttribute,
-        null=True,
         blank=True,
         verbose_name=_("tags"),
         related_name='tags'
@@ -162,7 +160,6 @@ class Computer(models.Model):
 
     sync_attributes = models.ManyToManyField(
         Attribute,
-        null=True,
         blank=True,
         verbose_name=_("sync attributes"),
         help_text=_("attributes sent")
