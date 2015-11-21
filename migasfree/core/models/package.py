@@ -27,7 +27,6 @@ from django.conf import settings
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
-# from migasfree.utils import trans
 from .project import Project
 from .store import Store
 
@@ -64,7 +63,7 @@ class PackageManager(models.Manager):
 @python_2_unicode_compatible
 class Package(models.Model):
     name = models.CharField(
-        _("name"),
+        verbose_name=_("name"),
         max_length=100
     )
 
