@@ -75,7 +75,6 @@ class Release(models.Model):
 
     available_packages = models.ManyToManyField(
         Package,
-        null=True,
         blank=True,
         verbose_name=_('available'),
         help_text=_('If a computer has installed one of these packages it will'
@@ -98,7 +97,6 @@ class Release(models.Model):
 
     included_attributes = models.ManyToManyField(
         Attribute,
-        null=True,
         blank=True,
         verbose_name=_("included")
     )
@@ -106,7 +104,6 @@ class Release(models.Model):
     excluded_attributes = models.ManyToManyField(
         Attribute,
         related_name="ExcludeAttribute",
-        null=True,
         blank=True,
         verbose_name=_("excluded")
     )
