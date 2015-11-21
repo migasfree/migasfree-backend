@@ -81,10 +81,6 @@ def execute(cmd, verbose=False, interactive=False):
     return (_process.returncode, _output, _error)
 
 
-def trans(text):
-    return unicode(_(text))
-
-
 def write_file(filename, content):
     '''
     bool write_file(string filename, string content)
@@ -180,3 +176,11 @@ def swap_m2m(source_field, target_field):
     target_field.clear()
     for item in source_m2m:
         target_field.add(item)
+
+
+def remove_empty_elements_from_dict(dic):
+    for (k, v) in list(dic.items()):
+        if not v:
+            del dic[k]
+
+    return dic
