@@ -92,11 +92,12 @@ class LogicalForm(forms.ModelForm):
 
     class Meta:
         model = Logical
+        fields = ['device', 'feature']
 
 
 class LogicalAdmin(admin.ModelAdmin):
     form = LogicalForm
-    fields = ("device", "feature")  #, "computers")
+    fields = ('device', 'feature')  #, 'computers')
     list_select_related = ('device', 'feature',)
     list_display = ('device', 'feature')
     ordering = ('device__name', 'feature__name')
