@@ -23,11 +23,11 @@ from django.db.models import Count
 from django.db.models.signals import m2m_changed, pre_save, post_save
 from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 from django.template import Context, Template
 from django.conf import settings
 
-from migasfree.utils import swap_m2m
+from migasfree.utils import swap_m2m, remove_empty_elements_from_dict
 from migasfree.core.models import (
     Project, ServerAttribute, Attribute, BasicProperty
 )
@@ -342,6 +342,36 @@ class Computer(models.Model):
 
     def display(self):
         return 'CID-%d %s' % (self.id, self.get_cid_description())
+
+    def get_replacement_info(self):
+        cid = self.get_cid_attribute()
+
+        return remove_empty_elements_from_dict({
+            ugettext("Computer"): self.display(),
+            ugettext("Status"): ugettext(self.status),
+            ugettext("Tags"): ', '.join(str(x) for x in self.tags.all()),
+            ugettext("Devices"): ', '.join(
+                str(x) for x in self.devices_logical.all()
+            ),
+            ugettext("Faults"): ', '.join(
+                str(x) for x in cid.faultdef_set.all()
+            ),
+            ugettext("Releases"): ', '.join(
+                str(x) for x in cid.repository_set.all()
+            ),
+            ugettext("Releases (excluded)"): ', '.join(
+                str(x) for x in cid.ExcludeAttribute.all()
+            ),
+            ugettext("Sets"): ', '.join(
+                str(x) for x in cid.attributeset_set.all()
+            ),
+            ugettext("Sets (excluded)"): ', '.join(
+                str(x) for x in cid.ExcludeAttributeGroup.all()
+            ),
+            ugettext("Delays"): ', '.join(
+                str(x) for x in cid.scheduledelay_set.all()
+            ),
+        })
 
     def __str__(self):
         return str(self.__getattribute__(
