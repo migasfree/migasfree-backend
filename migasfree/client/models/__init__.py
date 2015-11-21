@@ -17,6 +17,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from .computer import Computer
+from .status_log import StatusLog
+
 from .package import Package
 from .error import Error
 

@@ -20,7 +20,7 @@ from datetime import datetime
 
 from django.db import models, transaction
 from django.db.models import Count
-from django.db.models.signals import m2m_changed
+from django.db.models.signals import m2m_changed, pre_save
 from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -318,3 +318,13 @@ def computers_changed(sender, **kwargs):
         for computer in Computer.objects.filter(pk__in=kwargs['pk_set']):
             computer.remove_device_copy(kwargs['instance'].id)
 '''
+
+from .status_log import StatusLog
+
+
+@receiver(pre_save, sender=Computer)
+def pre_save_computer(sender, instance, **kwargs):
+    if instance.id:
+        old_obj = Computer.objects.get(pk=instance.id)
+        if old_obj.status != instance.status:
+            StatusLog.objects.create(instance)

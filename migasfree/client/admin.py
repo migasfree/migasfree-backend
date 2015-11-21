@@ -347,3 +347,18 @@ class NotificationAdmin(admin.ModelAdmin):
         return False
 
 admin.site.register(Notification, NotificationAdmin)
+
+
+class StatusLogAdmin(admin.ModelAdmin):
+    list_display = ('id', 'status', 'created_at')
+    list_select_related = ('computer', )
+    list_filter = ('created_at', 'status')
+    search_fields = add_computer_search_fields(['created_at'])
+    readonly_fields = ('status', 'created_at')
+    exclude = ('computer',)
+    actions = None
+
+    def has_add_permission(self, request):
+        return False
+
+admin.site.register(StatusLog, StatusLogAdmin)
