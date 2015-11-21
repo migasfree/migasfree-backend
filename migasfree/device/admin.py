@@ -26,13 +26,28 @@ from .models import (
     Driver, Logical, Model, Device
 )
 
-admin.site.register(Type)
-admin.site.register(Feature)
-admin.site.register(Manufacturer)
+
+class TypeAdmin(admin.ModelAdmin):
+    ordering = ('name',)
+
+admin.site.register(Type, TypeAdmin)
+
+
+class FeatureAdmin(admin.ModelAdmin):
+    ordering = ('name',)
+
+admin.site.register(Feature, FeatureAdmin)
+
+
+class ManufacturerAdmin(admin.ModelAdmin):
+    ordering = ('name',)
+
+admin.site.register(Manufacturer, ManufacturerAdmin)
 
 
 class ConnectionAdmin(admin.ModelAdmin):
     list_select_related = ('device_type',)
+    ordering = ('device_type__name', 'name')
 
 admin.site.register(Connection, ConnectionAdmin)
 
@@ -84,6 +99,7 @@ class LogicalAdmin(admin.ModelAdmin):
     fields = ("device", "feature")  #, "computers")
     list_select_related = ('device', 'feature',)
     list_display = ('device', 'feature')
+    ordering = ('device__name', 'feature__name')
     search_fields = (
         'id',
         'device__name',
@@ -107,6 +123,7 @@ class DeviceAdmin(admin.ModelAdmin):
     list_filter = ('model',)
     search_fields = ('name', 'model__name', 'model__manufacturer__name')
     fields = ('name', 'model', 'connection', 'data')
+    ordering = ('name',)
 
     inlines = [LogicalInline]
 
@@ -132,13 +149,14 @@ admin.site.register(Device, DeviceAdmin)
 class DriverInline(admin.TabularInline):
     model = Driver
     fields = ('project', 'feature', 'name', 'packages_to_install')
-    ordering = ['project', 'feature']
+    ordering = ('project', 'feature')
     extra = 1
 
 
 class ModelAdmin(admin.ModelAdmin):
     list_display = ('name', 'manufacturer', 'device_type')
     list_filter = ('device_type', 'manufacturer')
+    ordering = ('device_type__name', 'manufacturer__name', 'name')
     search_fields = (
         'name',
         'manufacturer__name',
