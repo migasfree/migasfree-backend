@@ -23,7 +23,7 @@ from django.apps import apps
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from django.core import signing
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 # from django.contrib.auth.models import User, Group
 from django_redis import get_redis_connection
 from rest_framework import (
@@ -35,7 +35,6 @@ from rest_framework.response import Response
 from rest_framework_filters import backends
 
 from migasfree.core.mixins import SafeConnectionMixin
-from migasfree.utils import trans
 
 from .models import (
     Platform, Project, Store,
@@ -191,7 +190,7 @@ class ReleaseViewSet(viewsets.ModelViewSet):
         tasks.create_repository_metadata.delay(pk)
 
         return Response(
-            {'detail': trans('Operation received')},
+            {'detail': ugettext('Operation received')},
             status=status.HTTP_200_OK
         )
 
@@ -306,7 +305,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         Package.handle_uploaded_file(_file, target)
 
         return Response(
-            self.create_response(trans('Data received')),
+            self.create_response(ugettext('Data received')),
             status=status.HTTP_200_OK
         )
 
@@ -370,7 +369,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             os.rename(target, dst)
 
         return Response(
-            self.create_response(trans('Data received')),
+            self.create_response(ugettext('Data received')),
             status=status.HTTP_200_OK
         )
 
@@ -386,7 +385,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         if not claims or 'project' not in claims or 'packageset' not in claims:
             return Response(
-                self.create_response(trans('Malformed claims')),
+                self.create_response(ugettext('Malformed claims')),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -400,6 +399,6 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             tasks.create_repository_metadata.delay(release.id)
 
         return Response(
-            self.create_response(trans('Data received')),
+            self.create_response(ugettext('Data received')),
             status=status.HTTP_200_OK
         )

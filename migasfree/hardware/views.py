@@ -17,7 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 from rest_framework import viewsets, status, filters, mixins
 from rest_framework.decorators import list_route, detail_route
 from rest_framework.response import Response
@@ -25,7 +25,6 @@ from rest_framework_filters import backends
 
 from migasfree.core.mixins import SafeConnectionMixin
 from migasfree.client.models import Computer
-from migasfree.utils import trans
 
 from .models import Node
 from .filters import NodeFilter
@@ -72,7 +71,7 @@ class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         if not claims or 'id' not in claims or 'hardware' not in claims:
             return Response(
-                self.create_response(trans('Malformed claims')),
+                self.create_response(ugettext('Malformed claims')),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -83,6 +82,6 @@ class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
         computer.update_last_hardware_capture()
 
         return Response(
-            self.create_response(trans('Data received')),
+            self.create_response(ugettext('Data received')),
             status=status.HTTP_200_OK
         )

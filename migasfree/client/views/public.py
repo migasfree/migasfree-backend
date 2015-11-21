@@ -19,12 +19,12 @@
 import os
 
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 from django.http import HttpResponseForbidden
 from rest_framework import views
 from rest_framework.response import Response
 
-from migasfree.utils import get_client_ip, read_file, trans
+from migasfree.utils import get_client_ip, read_file
 from migasfree.core.pms import get_available_pms
 from migasfree import secure
 from migasfree.core.models import Platform, Project
@@ -144,7 +144,7 @@ class ProjectKeysView(views.APIView):
         available_pms = dict(get_available_pms()).keys()
         if pms not in available_pms:
             return Response({
-                'error': trans('PMS must be one of %s' % str(available_pms))
+                'error': ugettext('PMS must be one of %s' % str(available_pms))
             })
 
         project = self.get_object(

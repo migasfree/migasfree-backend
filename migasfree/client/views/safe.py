@@ -20,14 +20,14 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets, mixins, status, views
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
 from django_redis import get_redis_connection
 
-from migasfree.utils import uuid_change_format, trans
+from migasfree.utils import uuid_change_format
 from migasfree.model_update import update
 from migasfree import secure
 from migasfree.core.mixins import SafeConnectionMixin
@@ -260,7 +260,7 @@ class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
         remove_computer_messages(computer.id)
 
         return Response(
-            self.create_response(trans('EOT OK')),
+            self.create_response(ugettext('EOT OK')),
             status=status.HTTP_200_OK
         )
 
@@ -279,7 +279,7 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        add_computer_message(computer, trans('Getting synchronization...'))
+        add_computer_message(computer, ugettext('Getting synchronization...'))
 
         data = {
             'computer': computer.id,
@@ -292,7 +292,7 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
         serializer = serializers.SynchronizationSerializer(data=data)
 
         add_computer_message(
-            computer, trans('Sending synchronization response...')
+            computer, ugettext('Sending synchronization response...')
         )
 
         if serializer.is_valid():
@@ -379,14 +379,14 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         if not claims or 'uuid' not in claims.keys() or 'name' not in claims.keys():
             return Response(
-                self.create_response(trans('Malformed claims')),
+                self.create_response(ugettext('Malformed claims')),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         computer = get_computer(claims['uuid'], claims['name'])
         if not computer:
             return Response(
-                self.create_response(trans('Computer not found')),
+                self.create_response(ugettext('Computer not found')),
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -414,11 +414,11 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        add_computer_message(computer, trans('Getting properties...'))
+        add_computer_message(computer, ugettext('Getting properties...'))
 
         properties = Property.enabled_client_properties()
 
-        add_computer_message(computer, trans('Sending properties...'))
+        add_computer_message(computer, ugettext('Sending properties...'))
 
         if properties:
             return Response(
@@ -450,7 +450,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        add_computer_message(computer, trans('Getting attributes...'))
+        add_computer_message(computer, ugettext('Getting attributes...'))
 
         is_computer_changed(
             computer,
@@ -506,7 +506,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             computer, context={'request': request}
         )
 
-        add_computer_message(computer, trans('Sending attributes response...'))
+        add_computer_message(computer, ugettext('Sending attributes response...'))
 
         return Response(
             self.create_response(serializer.data),
@@ -526,13 +526,13 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        add_computer_message(computer, trans('Getting repositories...'))
+        add_computer_message(computer, ugettext('Getting repositories...'))
 
         repos = Release.available_releases(
             computer, computer.get_all_attributes()
         ).values_list('slug', flat=True)
 
-        add_computer_message(computer, trans('Sending repositories...'))
+        add_computer_message(computer, ugettext('Sending repositories...'))
 
         if repos:
             return Response(
@@ -541,7 +541,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             )
 
         return Response(
-            self.create_response(trans('There are not available repositories')),
+            self.create_response(
+                ugettext('There are not available repositories')
+            ),
             status=status.HTTP_404_NOT_FOUND
         )
 
@@ -562,13 +564,13 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        add_computer_message(computer, trans('Getting fault definitions...'))
+        add_computer_message(computer, ugettext('Getting fault definitions...'))
 
         definitions = models.FaultDefinition.enabled_for_attributes(
             computer.get_all_attributes()
         )
 
-        add_computer_message(computer, trans('Sending fault definitions...'))
+        add_computer_message(computer, ugettext('Sending fault definitions...'))
 
         if definitions:
             return Response(
@@ -596,7 +598,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        add_computer_message(computer, trans('Getting faults...'))
+        add_computer_message(computer, ugettext('Getting faults...'))
 
         ret = []
         for name, result in claims.get('faults').iteritems():
@@ -610,7 +612,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 serializer = serializers.FaultSerializer(obj)
                 ret.append(serializer.data)
 
-        add_computer_message(computer, trans('Sending faults response...'))
+        add_computer_message(computer, ugettext('Sending faults response...'))
 
         return Response(
             self.create_response(list(ret)),
@@ -631,11 +633,11 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims['computer'] = computer.id
         claims['project'] = self.project.id
 
-        add_computer_message(computer, trans('Getting errors...'))
+        add_computer_message(computer, ugettext('Getting errors...'))
 
         serializer = serializers.ErrorSerializer(data=claims)
 
-        add_computer_message(computer, trans('Sending errors response...'))
+        add_computer_message(computer, ugettext('Sending errors response...'))
 
         if serializer.is_valid():
             error = serializer.save()
@@ -663,13 +665,19 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        add_computer_message(computer, trans('Getting mandatory packages...'))
+        add_computer_message(
+            computer,
+            ugettext('Getting mandatory packages...')
+        )
 
         pkgs = Release.available_releases(
             computer, computer.get_all_attributes()
         ).values_list('packages_to_install', 'packages_to_remove')
 
-        add_computer_message(computer, trans('Sending mandatory packages...'))
+        add_computer_message(
+            computer,
+            ugettext('Sending mandatory packages...')
+        )
 
         if pkgs:
             install = []
@@ -690,7 +698,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         return Response(
             self.create_response(
-                trans('There are not available mandatory packages')
+                ugettext('There are not available mandatory packages')
             ),
             status=status.HTTP_404_NOT_FOUND
         )
@@ -708,12 +716,12 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        add_computer_message(computer, trans('Getting assigned tags...'))
+        add_computer_message(computer, ugettext('Getting assigned tags...'))
 
         tags = computer.tags.all()
         response = list([tag.__str__() for tag in tags])
 
-        add_computer_message(computer, trans('Sending assigned tags...'))
+        add_computer_message(computer, ugettext('Sending assigned tags...'))
 
         return Response(
             self.create_response(response),
@@ -739,7 +747,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        add_computer_message(computer, trans('Getting available tags...'))
+        add_computer_message(computer, ugettext('Getting available tags...'))
 
         available = {}
         for release in Release.objects.filter(
@@ -755,11 +763,11 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 if value not in available[tag.property_att.name]:
                     available[tag.property_att.name].append(value)
 
-        add_computer_message(computer, trans('Sending available tags...'))
+        add_computer_message(computer, ugettext('Sending available tags...'))
 
         if not available:
             return Response(
-                self.create_response(trans('There are not available tags')),
+                self.create_response(ugettext('There are not available tags')),
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -786,14 +794,14 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        add_computer_message(computer, trans('Getting tags...'))
+        add_computer_message(computer, ugettext('Getting tags...'))
 
         computer_tags_ids = computer.tags.all().values_list('id', flat=True)
         tags = claims.get('tags')
         tag_objs = Attribute.objects.filter_by_prefix_value(tags)
         if not tag_objs:
             return Response(
-                self.create_response(trans('Invalid tags')),
+                self.create_response(ugettext('Invalid tags')),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -878,7 +886,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             "remove": remove,
         }
 
-        add_computer_message(computer, trans('Sending tags...'))
+        add_computer_message(computer, ugettext('Sending tags...'))
 
         return Response(
             self.create_response(ret),
@@ -903,7 +911,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        add_computer_message(computer, trans('Getting label...'))
+        add_computer_message(computer, ugettext('Getting label...'))
 
         ret = {
             'uuid': computer.uuid,
@@ -912,7 +920,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             'helpdesk': settings.MIGASFREE_HELP_DESK,
         }
 
-        add_computer_message(computer, trans('Sending label...'))
+        add_computer_message(computer, ugettext('Sending label...'))
 
         return Response(
             self.create_response(ret),
@@ -933,7 +941,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
         add_computer_message(
-            computer, trans('Getting hardware capture is required...')
+            computer, ugettext('Getting hardware capture is required...')
         )
 
         if computer.last_hardware_capture:
@@ -946,7 +954,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             capture = True
 
         add_computer_message(
-            computer, trans('Sending hardware capture response...')
+            computer, ugettext('Sending hardware capture response...')
         )
 
         return Response(
@@ -967,11 +975,11 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        add_computer_message(computer, trans('Getting software...'))
+        add_computer_message(computer, ugettext('Getting software...'))
 
         if 'inventory' not in claims and 'history' not in claims:
             return Response(
-                self.create_response(trans('Bad request')),
+                self.create_response(ugettext('Bad request')),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -980,10 +988,10 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             computer.id, claims.get('inventory')
         )
 
-        add_computer_message(computer, trans('Sending software response...'))
+        add_computer_message(computer, ugettext('Sending software response...'))
 
         return Response(
-            self.create_response(trans('Data received')),
+            self.create_response(ugettext('Data received')),
             status=status.HTTP_200_OK
         )
 
