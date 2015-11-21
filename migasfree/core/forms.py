@@ -66,11 +66,13 @@ class PackageForm(forms.ModelForm):
 
     class Meta:
         model = Package
+        fields = ['name', 'project', 'store']
 
 
 class ReleaseForm(forms.ModelForm):
     class Meta:
         model = Release
+        exclude = ['slug']
 
     def clean(self):
         # http://stackoverflow.com/questions/7986510/django-manytomany-model-validation
@@ -88,6 +90,11 @@ class ReleaseForm(forms.ModelForm):
 class ClientPropertyForm(forms.ModelForm):
     class Meta:
         model = ClientProperty
+        fields = [
+            'prefix', 'name', 'enabled',
+            'kind', 'sort',
+            'language', 'code'
+        ]
 
     def __init__(self, *args, **kwargs):
         super(ClientPropertyForm, self).__init__(*args, **kwargs)
