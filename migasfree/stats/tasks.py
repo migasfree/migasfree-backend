@@ -24,6 +24,7 @@ from datetime import datetime, timedelta
 
 from django.db.models import Q
 from django.conf import settings
+from django.utils.translation import ugettext
 from celery import shared_task
 from celery.exceptions import Ignore
 from django_redis import get_redis_connection
@@ -31,8 +32,6 @@ from rest_framework.reverse import reverse
 
 from migasfree.core.models import Package, Release
 from migasfree.client.models import Notification, Fault, Error, Computer
-
-from ..utils import trans as _
 
 import logging
 logger = logging.getLogger('celery')
@@ -42,7 +41,7 @@ def add_orphaned_packages():
     con = get_redis_connection('default')
     con.hmset(
         'migasfree:chk:orphaned', {
-            'msg': _('Orphaned Package/Set'),
+            'msg': ugettext('Orphaned Package/Set'),
             'target': 'server',
             'level': 'warning',
             'result': Package.orphaned(),
@@ -56,7 +55,7 @@ def add_unchecked_notifications():
     con = get_redis_connection('default')
     con.hmset(
         'migasfree:chk:notifications', {
-            'msg': _('Unchecked Notifications'),
+            'msg': ugettext('Unchecked Notifications'),
             'target': 'server',
             'level': 'warning',
             'result': Notification.unchecked(),
@@ -70,7 +69,7 @@ def add_unchecked_faults():
     con = get_redis_connection('default')
     con.hmset(
         'migasfree:chk:faults', {
-            'msg': _('Unchecked Faults'),
+            'msg': ugettext('Unchecked Faults'),
             'target': 'computer',
             'level': 'critical',
             'result': Fault.unchecked(),
@@ -84,7 +83,7 @@ def add_unchecked_errors():
     con = get_redis_connection('default')
     con.hmset(
         'migasfree:chk:errors', {
-            'msg': _('Unchecked Errors'),
+            'msg': ugettext('Unchecked Errors'),
             'target': 'computer',
             'level': 'critical',
             'result': Error.unchecked(),
@@ -99,7 +98,7 @@ def add_generating_repos():
     result = con.scard('migasfree:watch:repos')
     con.hmset(
         'migasfree:chk:repos', {
-            'msg': _('Generating Repositories'),
+            'msg': ugettext('Generating Repositories'),
             'target': 'server',
             'level': 'info',
             'result': result,
@@ -125,7 +124,7 @@ def add_synchronizing_computers():
 
     con.hmset(
         'migasfree:chk:syncs', {
-            'msg': _('Synchronizing Computers Now'),
+            'msg': ugettext('Synchronizing Computers Now'),
             'target': 'computer',
             'level': 'info',
             'result': result,
@@ -151,7 +150,7 @@ def add_delayed_computers():
 
     con.hmset(
         'migasfree:chk:delayed', {
-            'msg': _('Delayed Computers'),
+            'msg': ugettext('Delayed Computers'),
             'target': 'computer',
             'level': 'critical',
             'result': result,
