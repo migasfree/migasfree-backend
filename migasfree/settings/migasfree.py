@@ -16,6 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+"""
+Django settings for migasfree project
+
+Please, don't edit this file
+Override or include settings at MIGASFREE_SETTINGS_OVERRIDE file
+"""
+
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -29,6 +36,7 @@ MIGASFREE_SECONDS_MESSAGE_ALERT = 1800
 MIGASFREE_ORGANIZATION = 'My Organization'
 MIGASFREE_HELP_DESK = "Put here how you want to be found"
 
+MIGASFREE_SETTINGS_OVERRIDE = '/etc/migasfree-backend/settings.py'
 MIGASFREE_APP_DIR = BASE_DIR
 MIGASFREE_PROJECT_DIR = os.path.dirname(MIGASFREE_APP_DIR)
 MIGASFREE_TMP_DIR = '/tmp'

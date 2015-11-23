@@ -44,6 +44,6 @@ DATABASES = {
 }
 
 try:
-    execfile('/etc/migasfree-backend/settings.py', globals(), locals())
+    execfile(MIGASFREE_SETTINGS_OVERRIDE, globals(), locals())
 except IOError:
     pass
