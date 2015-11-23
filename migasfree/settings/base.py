@@ -16,13 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Django settings for migasfree project
-
-Please, don't edit this file
-Override or include settings at /etc/migasfree-server/settings.py
-"""
-
 import os
 
 import django
@@ -30,8 +23,8 @@ import django.conf.global_settings as DEFAULT_SETTINGS
 
 from .migasfree import BASE_DIR, MIGASFREE_TMP_DIR
 
-if django.VERSION < (1, 7, 5, 'final'):
-    print('Migasfree requires Django 1.7.5. Please, update it.')
+if django.VERSION < (1, 8, 0, 'final'):
+    print('Migasfree requires Django 1.8.0 at least. Please, update it.')
     exit(1)
 
 ADMINS = (
