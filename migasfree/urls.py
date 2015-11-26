@@ -69,6 +69,13 @@ from .fixtures import create_initial_data
 if not connection.introspection.table_names():
     management.call_command(
         'migrate',
+        'auth',
+        interactive=False,
+        verbosity=1
+    )
+
+    management.call_command(
+        'migrate',
         interactive=False,
         verbosity=1
     )
