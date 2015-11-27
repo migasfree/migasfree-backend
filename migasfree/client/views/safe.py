@@ -484,7 +484,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             project=computer.project.name,
             platform=computer.project.platform.name,
             user=user.name,
-            description=computer.get_description()
+            description=computer.get_cid_description()
         )
         for id in att_id:
             computer.sync_attributes.add(id)
