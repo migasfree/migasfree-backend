@@ -23,7 +23,7 @@ class CannotResolve(Exception):
 def _resolve(instance, node):
     if isinstance(node, F):
         return getattr(instance, node.name)
-    elif isinstance(node, ExpressionNode):
+    elif isinstance(node, Expression):
         return _resolve(instance, node)
     return node
 
@@ -52,7 +52,7 @@ def update(instance, **kwargs):
     # as the DB could have been updated by another thread. callers should
     # retrieve a new copy of the object if up-to-date values are required
     for k,v in kwargs.iteritems():
-        if isinstance(v, ExpressionNode):
+        if isinstance(v, Expression):
             v = resolve_expression_node(instance, v)
         setattr(instance, k, v)
 
