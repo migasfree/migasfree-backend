@@ -70,7 +70,7 @@ class SafeConnectionMixin(object):
 
         logger.debug('create_response: %s' % data)
         if not self.encrypt_key:
-            self.encrypt_key = '%s.pri' % self.project.slug
+            self.encrypt_key = '%s.pub' % self.project.slug
         msg = secure.wrap(data,
             sign_key=self.sign_key,
             encrypt_key=self.encrypt_key
