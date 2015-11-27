@@ -46,7 +46,7 @@ def verify(jwt, pub_key):
     jwk = {'k': rsa_key.exportKey('PEM')}
     try:
         jwe = jose.deserialize_compact(jwt)
-        return jose.verify(jwe, jwk)
+        return jose.verify(jwe, jwk, alg='RS256')  # Asymmetric!!!
     except:
         # DEBUG
         import sys, traceback
