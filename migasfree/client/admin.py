@@ -19,6 +19,7 @@
 import os
 
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.contrib.admin import SimpleListFilter
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
@@ -172,7 +173,7 @@ class ErrorAdmin(admin.ModelAdmin):
         'project',
         'checked',
         'created_at',
-        'truncate_desc',
+        'truncated_desc',
     )
     list_filter = ('checked', 'created_at', 'project__name')
     #list_editable = ('checked',)  # TODO
@@ -185,8 +186,7 @@ class ErrorAdmin(admin.ModelAdmin):
 
     def checked_ok(self, request, queryset):
         for error in queryset:
-            error.checked = True
-            error.save()
+            error.checked_ok()
 
         return redirect(request.get_full_path())
 
@@ -279,8 +279,7 @@ class FaultAdmin(admin.ModelAdmin):
 
     def checked_ok(self, request, queryset):
         for fault in queryset:
-            fault.checked = True
-            fault.save()
+            fault.checked_ok()
 
         return redirect(request.get_full_path())
 
