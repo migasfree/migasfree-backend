@@ -27,6 +27,13 @@ from migasfree.core.models import Project
 from .computer import Computer
 
 
+class UncheckedManager(models.Manager):
+    def get_query_set(self):
+        return super(UncheckedManager, self).get_queryset().filter(
+            checked=0
+        )
+
+
 @python_2_unicode_compatible
 class Error(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -52,15 +59,24 @@ class Error(models.Model):
         verbose_name=_("project")
     )
 
-    def truncate_desc(self):
+    objects = models.Manager()
+    unchecked = UncheckedManager()
+
+    def truncated_desc(self):
         if len(self.description) <= 250:  #FIXME constant
             return self.description
         else:
             return self.description[:250] + ' ...'
 
+    truncated_desc.short_description = _("Truncated description")
+
     @staticmethod
     def unchecked():
         return Error.objects.filter(checked=0).count()
+
+    def checked_ok(self):
+        self.checked = True
+        self.save()
 
     def save(self, *args, **kwargs):
         self.description = self.description.replace("\r\n", "\n")
