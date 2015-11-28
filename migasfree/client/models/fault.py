@@ -26,6 +26,13 @@ from .computer import Computer
 from .fault_definition import FaultDefinition
 
 
+class UncheckedManager(models.Manager):
+    def get_query_set(self):
+        return super(UncheckedManager, self).get_queryset().filter(
+            checked=0
+        )
+
+
 class FaultManager(models.Manager):
     def create(self, computer, definition, result):
         fault = Fault()
@@ -76,10 +83,15 @@ class Fault(models.Model):
     )
 
     objects = FaultManager()
+    unchecked = UncheckedManager()
 
     @staticmethod
     def unchecked():
         return Fault.objects.filter(checked=0).count()
+
+    def checked_ok(self):
+        self.checked = True
+        self.save()
 
     def list_users(self):
         return self.fault_definition.list_users()
