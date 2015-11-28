@@ -305,16 +305,17 @@ class Computer(models.Model):
     @staticmethod
     def replacement(source, target):
         swap_m2m(source.tags, target.tags)
-        swap_m2m(source.logical_devices, target.logical_devices)
+        # swap_m2m(source.logical_devices, target.logical_devices)  # TODO
 
         source_cid = source.get_cid_attribute()
         target_cid = target.get_cid_attribute()
-        swap_m2m(source_cid.faultdef_set, target_cid.faultdef_set)
-        swap_m2m(source_cid.repository_set, target_cid.repository_set)
+        swap_m2m(source_cid.faultdefinition_set, target_cid.faultdefinition_set)
+        swap_m2m(source_cid.release_set, target_cid.release_set)
         swap_m2m(source_cid.ExcludeAttribute, target_cid.ExcludeAttribute)
-        swap_m2m(source_cid.attributeset_set, target_cid.attributeset_set)
+        swap_m2m(source_cid.setofattributes_set, target_cid.setofattributes_set)
         swap_m2m(
-            source_cid.ExcludeAttributeGroup, target_cid.ExcludeAttributeGroup
+            source_cid.ExcludedAttributesGroup,
+            target_cid.ExcludedAttributesGroup
         )
         swap_m2m(source_cid.scheduledelay_set, target_cid.scheduledelay_set)
 
@@ -346,27 +347,30 @@ class Computer(models.Model):
     def get_replacement_info(self):
         cid = self.get_cid_attribute()
 
+        '''  # TODO
+        ugettext("Devices"): ', '.join(
+            str(x) for x in self.logical_devices.all()
+        ),
+        '''
+
         return remove_empty_elements_from_dict({
             ugettext("Computer"): self.display(),
             ugettext("Status"): ugettext(self.status),
             ugettext("Tags"): ', '.join(str(x) for x in self.tags.all()),
-            ugettext("Devices"): ', '.join(
-                str(x) for x in self.logical_devices.all()
-            ),
             ugettext("Faults"): ', '.join(
-                str(x) for x in cid.faultdef_set.all()
+                str(x) for x in cid.faultdefinition_set.all()
             ),
             ugettext("Releases"): ', '.join(
-                str(x) for x in cid.repository_set.all()
+                str(x) for x in cid.release_set.all()
             ),
             ugettext("Releases (excluded)"): ', '.join(
                 str(x) for x in cid.ExcludeAttribute.all()
             ),
             ugettext("Sets"): ', '.join(
-                str(x) for x in cid.attributeset_set.all()
+                str(x) for x in cid.setofattributes_set.all()
             ),
             ugettext("Sets (excluded)"): ', '.join(
-                str(x) for x in cid.ExcludeAttributeGroup.all()
+                str(x) for x in cid.ExcludedAttributesGroup.all()
             ),
             ugettext("Delays"): ', '.join(
                 str(x) for x in cid.scheduledelay_set.all()
@@ -410,12 +414,12 @@ def post_save_computer(sender, instance, created, **kwargs):
 
     if instance.status in ['available', 'unsubscribed']:
         instance.tags.clear()
-        instance.logical_devices.clear()
+        # instance.logical_devices.clear()  # TODO
 
         cid = instance.get_cid_attribute()
-        cid.faultdef_set.clear()
-        cid.repository_set.clear()
+        cid.faultdefinition_set.clear()
+        cid.release_set.clear()
         cid.ExcludeAttribute.clear()
-        cid.attributeset_set.clear()
-        cid.ExcludeAttributeGroup.clear()
+        cid.setofattributes_set.clear()
+        cid.ExcludedAttributesGroup.clear()
         cid.scheduledelay_set.clear()
