@@ -39,6 +39,7 @@ def add_computer_search_fields(fields_list):
 class ComputerAdmin(admin.ModelAdmin):
     list_display = (
         '__str__',
+        'status',
         'project',
         'ip_address',
         'sync_user',
