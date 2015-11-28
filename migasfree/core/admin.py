@@ -50,6 +50,7 @@ class ProjectResource(resources.ModelResource):
         fields = ('name', 'pms', 'autoregister', 'platform__name')
 
 
+@admin.register(Project)
 class ProjectAdmin(ImportExportActionModelAdmin):
     resource_class = ProjectResource
     list_display = (
@@ -60,17 +61,14 @@ class ProjectAdmin(ImportExportActionModelAdmin):
     )
     prepopulated_fields = {'slug': ('name',)}
 
-admin.site.register(Project, ProjectAdmin)
 
-
+@admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
     list_display = ('name', 'project')
     list_filter = ('project__name',)
     search_fields = ('name',)
     read_only_fields = ('slug',)
     fields = ('name', 'project')
-
-admin.site.register(Store, StoreAdmin)
 
 
 class ClientPropertyFilter(SimpleListFilter):
@@ -87,6 +85,7 @@ class ClientPropertyFilter(SimpleListFilter):
             return queryset.filter(sort='client')
 
 
+@admin.register(ClientProperty)
 class ClientPropertyAdmin(admin.ModelAdmin):
     form = ClientPropertyForm
     list_display = ('name', 'prefix', 'enabled', 'kind')
@@ -97,8 +96,6 @@ class ClientPropertyAdmin(admin.ModelAdmin):
         'prefix', 'name', 'enabled',
         'language', 'code', 'kind',
     )
-
-admin.site.register(ClientProperty, ClientPropertyAdmin)
 
 
 class ServerPropertyFilter(SimpleListFilter):
@@ -115,12 +112,11 @@ class ServerPropertyFilter(SimpleListFilter):
             return queryset.filter(sort='server')
 
 
+@admin.register(ServerProperty)
 class ServerPropertyAdmin(admin.ModelAdmin):
     list_display = ('name', 'prefix', 'enabled', 'kind')
     fields = ('prefix', 'name', 'kind', 'enabled')
     list_filter = (ServerPropertyFilter,)
-
-admin.site.register(ServerProperty, ServerPropertyAdmin)
 
 
 class ClientAttributeFilter(SimpleListFilter):
@@ -129,7 +125,9 @@ class ClientAttributeFilter(SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return [
-            (c.id, c.name) for c in Property.objects.filter(Q(sort='client') | Q(sort='basic'))
+            (c.id, c.name) for c in Property.objects.filter(
+                Q(sort='client') | Q(sort='basic')
+            )
         ]
 
     def queryset(self, request, queryset):
@@ -139,6 +137,7 @@ class ClientAttributeFilter(SimpleListFilter):
             return queryset
 
 
+@admin.register(ClientAttribute)
 class ClientAttributeAdmin(admin.ModelAdmin):
     list_display = ('id', 'property_att', 'value', 'description')
     list_select_related = ('property_att',)
@@ -146,8 +145,6 @@ class ClientAttributeAdmin(admin.ModelAdmin):
     ordering = ('property_att', 'value',)
     search_fields = ('value', 'description')
     readonly_fields = ('property_att', 'value',)
-
-admin.site.register(ClientAttribute, ClientAttributeAdmin)
 
 
 class ServerAttributeFilter(SimpleListFilter):
@@ -164,6 +161,7 @@ class ServerAttributeFilter(SimpleListFilter):
             return queryset
 
 
+@admin.register(ServerAttribute)
 class ServerAttributeAdmin(admin.ModelAdmin):
     list_display = ('value', 'description', 'property_att')
     fields = ('property_att', 'value', 'description')
@@ -171,13 +169,10 @@ class ServerAttributeAdmin(admin.ModelAdmin):
     ordering = ('property_att', 'value',)
     search_fields = ('value', 'description')
 
-admin.site.register(ServerAttribute, ServerAttributeAdmin)
 
-
+@admin.register(SetOfAttributes)
 class SetOfAttributesAdmin(admin.ModelAdmin):
     model = SetOfAttributes
-
-admin.site.register(SetOfAttributes, SetOfAttributesAdmin)
 
 
 class ScheduleDelayline(admin.TabularInline):
@@ -186,14 +181,14 @@ class ScheduleDelayline(admin.TabularInline):
     ordering = ('delay',)
 
 
+@admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'number_delays')
     inlines = [ScheduleDelayline, ]
     extra = 0
 
-admin.site.register(Schedule, ScheduleAdmin)
 
-
+@admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
     form = PackageForm
 
@@ -209,9 +204,7 @@ class PackageAdmin(admin.ModelAdmin):
         Package.objects.create(obj.name, obj.project, obj.store, file_list)
 
 
-admin.site.register(Package, PackageAdmin)
-
-
+@admin.register(Release)
 class ReleaseAdmin(admin.ModelAdmin):
     form = ReleaseForm
     list_display = ('name', 'project', 'enabled', 'start_date',)
@@ -282,7 +275,9 @@ class ReleaseAdmin(admin.ModelAdmin):
         # or name (slug) is changed (to avoid client errors)
         if ((is_new and len(packages_after) == 0)
                 or cmp(
-                    sorted(obj.available_packages.values_list('id', flat=True)),  # packages before
+                    sorted(
+                        obj.available_packages.values_list('id', flat=True)
+                    ),  # packages before
                     sorted(packages_after)
                 ) != 0) or (new_slug != old_slug):
             tasks.create_repository_metadata.delay(obj.id)
@@ -290,5 +285,3 @@ class ReleaseAdmin(admin.ModelAdmin):
             # delete old repository when name (slug) has changed
             if new_slug != old_slug and not is_new:
                 tasks.remove_repository_metadata.delay(obj.id, old_slug)
-
-admin.site.register(Release, ReleaseAdmin)

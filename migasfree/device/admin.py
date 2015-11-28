@@ -27,35 +27,30 @@ from .models import (
 )
 
 
+@admin.register(Type)
 class TypeAdmin(admin.ModelAdmin):
     ordering = ('name',)
 
-admin.site.register(Type, TypeAdmin)
 
-
+@admin.register(Feature)
 class FeatureAdmin(admin.ModelAdmin):
     ordering = ('name',)
 
-admin.site.register(Feature, FeatureAdmin)
 
-
+@admin.register(Manufacturer)
 class ManufacturerAdmin(admin.ModelAdmin):
     ordering = ('name',)
 
-admin.site.register(Manufacturer, ManufacturerAdmin)
 
-
+@admin.register(Connection)
 class ConnectionAdmin(admin.ModelAdmin):
     list_select_related = ('device_type',)
     ordering = ('device_type__name', 'name')
 
-admin.site.register(Connection, ConnectionAdmin)
 
-
+@admin.register(Driver)
 class DriverAdmin(admin.ModelAdmin):
     list_display = ('id', 'model', 'project', 'feature')
-
-admin.site.register(Driver, DriverAdmin)
 
 
 class LogicalForm(forms.ModelForm):
@@ -95,6 +90,7 @@ class LogicalForm(forms.ModelForm):
         fields = ['device', 'feature']
 
 
+@admin.register(Logical)
 class LogicalAdmin(admin.ModelAdmin):
     form = LogicalForm
     fields = ('device', 'feature')  #, 'computers')
@@ -109,8 +105,6 @@ class LogicalAdmin(admin.ModelAdmin):
         'feature__name',
     )
 
-admin.site.register(Logical, LogicalAdmin)
-
 
 class LogicalInline(admin.TabularInline):
     model = Logical
@@ -119,6 +113,7 @@ class LogicalInline(admin.TabularInline):
     extra = 0
 
 
+@admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
     list_display = ('name', 'model', 'connection')
     list_filter = ('model',)
@@ -144,8 +139,6 @@ class DeviceAdmin(admin.ModelAdmin):
                 )
                 logical.save()
 
-admin.site.register(Device, DeviceAdmin)
-
 
 class DriverInline(admin.TabularInline):
     model = Driver
@@ -154,6 +147,7 @@ class DriverInline(admin.TabularInline):
     extra = 1
 
 
+@admin.register(Model)
 class ModelAdmin(admin.ModelAdmin):
     list_display = ('name', 'manufacturer', 'device_type')
     list_filter = ('device_type', 'manufacturer')
@@ -164,5 +158,3 @@ class ModelAdmin(admin.ModelAdmin):
         'connections__devicetype__name'
     )
     inlines = [DriverInline]
-
-admin.site.register(Model, ModelAdmin)

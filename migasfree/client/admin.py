@@ -36,6 +36,7 @@ def add_computer_search_fields(fields_list):
     return tuple(fields_list)
 
 
+@admin.register(Computer)
 class ComputerAdmin(admin.ModelAdmin):
     list_display = (
         '__str__',
@@ -148,9 +149,8 @@ class ComputerAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-admin.site.register(Computer, ComputerAdmin)
 
-
+@admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
     list_display = ('fullname', 'project')
     ordering = ('name', 'version', 'project')
@@ -164,9 +164,8 @@ class PackageAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-admin.site.register(Package, PackageAdmin)
 
-
+@admin.register(Error)
 class ErrorAdmin(admin.ModelAdmin):
     list_display = (
         'id',
@@ -196,9 +195,8 @@ class ErrorAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-admin.site.register(Error, ErrorAdmin)
 
-
+@admin.register(FaultDefinition)
 class FaultDefinitionAdmin(admin.ModelAdmin):
     list_display = (
         'name',
@@ -225,8 +223,6 @@ class FaultDefinitionAdmin(admin.ModelAdmin):
         }),
     )
 
-admin.site.register(FaultDefinition, FaultDefinitionAdmin)
-
 
 class UserFaultFilter(SimpleListFilter):
     title = _('User')
@@ -252,6 +248,7 @@ class UserFaultFilter(SimpleListFilter):
             return queryset.filter(fault_definition__users=None)
 
 
+@admin.register(Fault)
 class FaultAdmin(admin.ModelAdmin):
     list_display = (
         'id',
@@ -289,9 +286,8 @@ class FaultAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-admin.site.register(Fault, FaultAdmin)
 
-
+@admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ('name', 'fullname',)
     ordering = ('name',)
@@ -301,9 +297,8 @@ class UserAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-admin.site.register(User, UserAdmin)
 
-
+@admin.register(Migration)
 class MigrationAdmin(admin.ModelAdmin):
     list_display = ('id', 'computer', 'project', 'created_at')
     list_select_related = ('computer', 'project',)
@@ -316,9 +311,8 @@ class MigrationAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-admin.site.register(Migration, MigrationAdmin)
 
-
+@admin.register(Synchronization)
 class SynchronizationAdmin(admin.ModelAdmin):
     list_display = ('id', 'computer', 'user', 'created_at', 'project')
     list_filter = ('created_at', 'pms_status_ok')
@@ -333,9 +327,8 @@ class SynchronizationAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-admin.site.register(Synchronization, SynchronizationAdmin)
 
-
+@admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ('id', 'created_at', 'message', 'checked')
     list_filter = ('checked', 'created_at')
@@ -346,9 +339,8 @@ class NotificationAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-admin.site.register(Notification, NotificationAdmin)
 
-
+@admin.register(StatusLog)
 class StatusLogAdmin(admin.ModelAdmin):
     list_display = ('id', 'status', 'created_at')
     list_select_related = ('computer', )
@@ -360,5 +352,3 @@ class StatusLogAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
-
-admin.site.register(StatusLog, StatusLogAdmin)
