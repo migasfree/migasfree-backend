@@ -305,7 +305,7 @@ class Computer(models.Model):
     @staticmethod
     def replacement(source, target):
         swap_m2m(source.tags, target.tags)
-        swap_m2m(source.devices_logical, target.devices_logical)
+        swap_m2m(source.logical_devices, target.logical_devices)
 
         source_cid = source.get_cid_attribute()
         target_cid = target.get_cid_attribute()
@@ -351,7 +351,7 @@ class Computer(models.Model):
             ugettext("Status"): ugettext(self.status),
             ugettext("Tags"): ', '.join(str(x) for x in self.tags.all()),
             ugettext("Devices"): ', '.join(
-                str(x) for x in self.devices_logical.all()
+                str(x) for x in self.logical_devices.all()
             ),
             ugettext("Faults"): ', '.join(
                 str(x) for x in cid.faultdef_set.all()
@@ -407,9 +407,10 @@ def pre_save_computer(sender, instance, **kwargs):
 def post_save_computer(sender, instance, created, **kwargs):
     if created:
         StatusLog.objects.create(instance)
+
     if instance.status in ['available', 'unsubscribed']:
         instance.tags.clear()
-        instance.devices_logical.clear()
+        instance.logical_devices.clear()
 
         cid = instance.get_cid_attribute()
         cid.faultdef_set.clear()
