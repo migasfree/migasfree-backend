@@ -34,7 +34,7 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 from rest_framework_filters import backends
 
-from ..mixins import SafeConnectionMixin
+from .mixins import SafeConnectionMixin
 
 from .models import (
     Platform, Project, Store,
