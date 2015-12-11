@@ -66,13 +66,17 @@ class PackageForm(forms.ModelForm):
 
     class Meta:
         model = Package
-        fields = ['name', 'project', 'store']
+        fields = '__all__'
 
 
 class ReleaseForm(forms.ModelForm):
     class Meta:
         model = Release
-        exclude = ['slug']
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(ReleaseForm, self).__init__(*args, **kwargs)
+        self.fields['slug'].widget.attrs['readonly'] = True
 
     def clean(self):
         # http://stackoverflow.com/questions/7986510/django-manytomany-model-validation
@@ -90,11 +94,7 @@ class ReleaseForm(forms.ModelForm):
 class ClientPropertyForm(forms.ModelForm):
     class Meta:
         model = ClientProperty
-        fields = [
-            'prefix', 'name', 'enabled',
-            'kind', 'sort',
-            'language', 'code'
-        ]
+        fields = '__all__'
 
     def __init__(self, *args, **kwargs):
         super(ClientPropertyForm, self).__init__(*args, **kwargs)
