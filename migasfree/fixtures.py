@@ -27,6 +27,8 @@ import django.core.management
 from StringIO import StringIO
 
 from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth.management import create_permissions
+from django.apps import apps
 from django.conf import settings
 
 
@@ -201,6 +203,11 @@ def sequence_reset():
 
 
 def create_initial_data():
+    perms = Permission.objects.filter(pk=1)
+    if not perms:
+        for app in apps.get_app_configs():
+            create_permissions(app, None, 2)
+
     create_default_users()
 
     fixtures = [
@@ -223,5 +230,6 @@ def create_initial_data():
                 'fixtures',
                 '{0}.{1}'.format(name, ext)
             ),
+            interactive=False,
             verbosity=1
         )
