@@ -30,4 +30,4 @@ from .schedule import Schedule
 from .schedule_delay import ScheduleDelay
 
 from .package import Package, PackageManager
-from .release import Release
+from .deployment import Deployment

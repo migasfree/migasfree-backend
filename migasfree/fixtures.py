@@ -93,7 +93,7 @@ def create_default_users():
             "core.schedule", "core.scheduledelay",
             "client.fault", "client.faultdefinition", "client.migration",
             "client.notification",
-            "core.project", "core.package", "core.release", "core.store",
+            "core.project", "core.package", "core.deployment", "core.store",
             "client.synchronization",
             "core.platform", "core.property",
             "device.device", "device.connection", "device.manufacturer",
@@ -109,7 +109,7 @@ def create_default_users():
         liberator.name = "Liberator"
         liberator.save()
         tables = [
-            "core.release", "core.schedule", "core.scheduledelay"
+            "core.deployment", "core.schedule", "core.scheduledelay"
         ]
         add_all_perms(liberator, tables)
         liberator.save()

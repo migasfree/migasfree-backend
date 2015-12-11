@@ -43,8 +43,8 @@ CELERYBEAT_SCHEDULE = {
         'task': 'migasfree.stats.tasks.alerts',
         'schedule': timedelta(seconds=10)
     },
-    'computers_releases': {
-        'task': 'migasfree.stats.tasks.computers_releases',
+    'computers_deployments': {
+        'task': 'migasfree.stats.tasks.computers_deployments',
         'schedule': crontab(hour=0, minute=1)
     }
 }

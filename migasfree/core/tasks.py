@@ -27,27 +27,27 @@ from django_redis import get_redis_connection
 from django.conf import settings
 from importlib import import_module
 
-from .models import Release, Package
+from .models import Deployment, Package
 
 
 @shared_task(queue='repository')
-def remove_repository_metadata(release_id, old_slug=''):
+def remove_repository_metadata(deployment_id, old_slug=''):
     try:
-        release = Release.objects.get(id=release_id)
+        deploy = Deployment.objects.get(id=deployment_id)
     except:
         raise Ignore()
 
     if old_slug:
         slug = old_slug
     else:
-        slug = release.slug
+        slug = deploy.slug
 
-    mod = import_module('migasfree.core.pms.%s' % release.project.pms)
-    pms = getattr(mod, release.project.pms.capitalize())()
+    mod = import_module('migasfree.core.pms.%s' % deploy.project.pms)
+    pms = getattr(mod, deploy.project.pms.capitalize())()
 
     destination = os.path.join(
         settings.MIGASFREE_PUBLIC_DIR,
-        release.project.slug,
+        deploy.project.slug,
         pms.relative_path,
         slug
     )
@@ -55,37 +55,37 @@ def remove_repository_metadata(release_id, old_slug=''):
 
 
 @shared_task(queue='repository')
-def create_repository_metadata(release_id):
+def create_repository_metadata(deployment_id):
     try:
-        release = Release.objects.get(id=release_id)
+        deploy = Deployment.objects.get(id=deployment_id)
     except:
         raise Ignore()
 
     con = get_redis_connection('default')
     con.hmset(
-        'migasfree:repos:%d' % release.id, {
-            'name': release.name,
-            'project': release.project.name
+        'migasfree:repos:%d' % deploy.id, {
+            'name': deploy.name,
+            'project': deploy.project.name
         }
     )
-    con.sadd('migasfree:watch:repos', release.id)
+    con.sadd('migasfree:watch:repos', deploy.id)
 
-    mod = import_module('migasfree.core.pms.%s' % release.project.pms)
-    pms = getattr(mod, release.project.pms.capitalize())()
+    mod = import_module('migasfree.core.pms.%s' % deploy.project.pms)
+    pms = getattr(mod, deploy.project.pms.capitalize())()
 
     tmp_path = os.path.join(
         settings.MIGASFREE_PUBLIC_DIR,
-        release.project.slug,
+        deploy.project.slug,
         'tmp'
     )
     stores_path = os.path.join(
         settings.MIGASFREE_PUBLIC_DIR,
-        release.project.slug,
+        deploy.project.slug,
         'stores'
     )
     slug_tmp_path = os.path.join(
         settings.MIGASFREE_PUBLIC_DIR,
-        release.project.slug,
+        deploy.project.slug,
         'tmp',
         pms.relative_path
     )
@@ -96,15 +96,15 @@ def create_repository_metadata(release_id):
 
     pkg_tmp_path = os.path.join(
         slug_tmp_path,
-        release.slug,
+        deploy.slug,
         'PKGS'
     )
     if not os.path.exists(pkg_tmp_path):
         os.makedirs(pkg_tmp_path)
 
-    for pkg_id in release.available_packages.values_list('id', flat=True):
+    for pkg_id in deploy.available_packages.values_list('id', flat=True):
         pkg = Package.objects.get(id=pkg_id)
-        dst = os.path.join(slug_tmp_path, release.slug, 'PKGS', pkg.name)
+        dst = os.path.join(slug_tmp_path, deploy.slug, 'PKGS', pkg.name)
         if not os.path.lexists(dst):
             os.symlink(
                 os.path.join(stores_path, pkg.store.slug, pkg.name),
@@ -112,25 +112,25 @@ def create_repository_metadata(release_id):
             )
 
     ret, output, error = pms.create_repository(
-        release.slug, slug_tmp_path, release.project.architecture
+        deploy.slug, slug_tmp_path, deploy.project.architecture
     )
 
     source = os.path.join(
         tmp_path,
         pms.relative_path,
-        release.slug
+        deploy.slug
     )
     target = os.path.join(
         settings.MIGASFREE_PUBLIC_DIR,
-        release.project.slug,
+        deploy.project.slug,
         pms.relative_path,
-        release.slug
+        deploy.slug
     )
     shutil.rmtree(target, ignore_errors=True)
     shutil.copytree(source, target, symlinks=True)
     shutil.rmtree(tmp_path)
 
-    con.hdel('migasfree:repos:%d' % release.id, '*')
-    con.srem('migasfree:watch:repos', release.id)
+    con.hdel('migasfree:repos:%d' % deploy.id, '*')
+    con.srem('migasfree:watch:repos', deploy.id)
 
     return (ret, output if ret == 0 else error)

@@ -18,10 +18,10 @@
 
 import rest_framework_filters as filters
 
-from .models import Release, Package, ClientAttribute, ServerAttribute
+from .models import Deployment, Package, ClientAttribute, ServerAttribute
 
 
-class ReleaseFilter(filters.FilterSet):
+class DeploymentFilter(filters.FilterSet):
     included_attributes = filters.CharFilter(
         name='included_attributes__value', lookup_type='contains'
     )
@@ -30,14 +30,14 @@ class ReleaseFilter(filters.FilterSet):
     )
 
     class Meta:
-        model = Release
+        model = Deployment
         fields = ['project__id', 'enabled', 'schedule__id']
 
 
 class PackageFilter(filters.FilterSet):
     class Meta:
         model = Package
-        fields = ['release__id', 'store__id']
+        fields = ['deployment__id', 'store__id']
 
 
 class ClientAttributeFilter(filters.FilterSet):

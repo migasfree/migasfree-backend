@@ -21,7 +21,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 
-from .models import Package, Release, ClientProperty
+from .models import Package, Deployment, ClientProperty
 from .validators import MimetypeValidator
 from .pms import get_available_mimetypes
 from .fields import MultiFileField
@@ -69,18 +69,14 @@ class PackageForm(forms.ModelForm):
         fields = '__all__'
 
 
-class ReleaseForm(forms.ModelForm):
+class DeploymentForm(forms.ModelForm):
     class Meta:
-        model = Release
+        model = Deployment
         fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super(ReleaseForm, self).__init__(*args, **kwargs)
-        self.fields['slug'].widget.attrs['readonly'] = True
 
     def clean(self):
         # http://stackoverflow.com/questions/7986510/django-manytomany-model-validation
-        cleaned_data = super(ReleaseForm, self).clean()
+        cleaned_data = super(DeploymentForm, self).clean()
 
         for item in cleaned_data.get('available_packages', []):
             if item.project.id != cleaned_data['project'].id:

@@ -47,11 +47,11 @@ from .schedule_delay import ScheduleDelay
 
 
 @python_2_unicode_compatible
-class Release(models.Model):
+class Deployment(models.Model):
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
         default=True,
-        help_text=_("if you uncheck this field, release is disabled for all"
+        help_text=_("if you uncheck this field, deployment is disabled for all"
             " computers.")
     )
 
@@ -191,21 +191,21 @@ class Release(models.Model):
         self.default_included_packages = self.default_included_packages.replace("\r\n", "\n")
         self.default_excluded_packages = self.default_excluded_packages.replace("\r\n", "\n")
 
-        super(Release, self).save(*args, **kwargs)
+        super(Deployment, self).save(*args, **kwargs)
 
         try:
             from migasfree.stats import tasks
-            tasks.assigned_computers_to_release(self.id)
+            tasks.assigned_computers_to_deployment(self.id)
         except:
             pass
 
     @staticmethod
-    def available_releases(computer, attributes):
+    def available_deployments(computer, attributes):
         """
-        Return available repositories for a computer and attributes list
+        Return available deployments for a computer and attributes list
         """
-        # 1.- all releases by attribute
-        attributed = Release.objects.filter(
+        # 1.- all deployments by attribute
+        attributed = Deployment.objects.filter(
             project__id=computer.project.id
         ).filter(
             enabled=True
@@ -214,8 +214,8 @@ class Release(models.Model):
         ).values_list('id', flat=True)
         lst = list(attributed)
 
-        # 2.- all releases by schedule
-        scheduled = Release.objects.filter(
+        # 2.- all deployments by schedule
+        scheduled = Deployment.objects.filter(
             project__id=computer.project.id
         ).filter(
             enabled=True
@@ -226,33 +226,33 @@ class Release(models.Model):
             }
         )
 
-        for release in scheduled:
-            for duration in range(0, release.duration):
-                if computer.id % release.duration == duration:
+        for deploy in scheduled:
+            for duration in range(0, deploy.duration):
+                if computer.id % deploy.duration == duration:
                     if time_horizon(
-                        release.start_date, release.delay + duration
+                        deploy.start_date, deploy.delay + duration
                     ) <= datetime.datetime.now().date():
-                        lst.append(release.id)
+                        lst.append(deploy.id)
                         break
 
         # 3.- excluded attributtes
-        releases = Release.objects.filter(id__in=lst).filter(
+        deployments = Deployment.objects.filter(id__in=lst).filter(
             ~Q(excluded_attributes__id__in=attributes)
         )
 
-        return releases
+        return deployments
 
     class Meta:
         app_label = 'core'
-        verbose_name = _('Release')
-        verbose_name_plural = _('Releases')
+        verbose_name = _('Deployment')
+        verbose_name_plural = _('Deployments')
         unique_together = (('name', 'project'),)
 
 
-@receiver(pre_save, sender=Release)
-def pre_save_release(sender, instance, **kwargs):
+@receiver(pre_save, sender=Deployment)
+def pre_save_deployment(sender, instance, **kwargs):
     if instance.id:
-        old_obj = Release.objects.get(pk=instance.id)
+        old_obj = Deployment.objects.get(pk=instance.id)
         if old_obj.project.id != instance.project.id:
             raise ValidationError(_('Is not allowed change project'))
 
@@ -260,11 +260,11 @@ def pre_save_release(sender, instance, **kwargs):
         or instance.packages_to_install != old_obj.packages_to_install \
         or instance.packages_to_remove != old_obj.packages_to_remove:
             con = get_redis_connection('default')
-            con.delete('migasfree:releases:%d:computers' % instance.id)
+            con.delete('migasfree:deployments:%d:computers' % instance.id)
 
 
-@receiver(pre_delete, sender=Release)
-def pre_delete_release(sender, instance, **kwargs):
+@receiver(pre_delete, sender=Deployment)
+def pre_delete_deployment(sender, instance, **kwargs):
     mod = import_module('migasfree.core.pms.%s' % instance.project.pms)
     pms = getattr(mod, instance.project.pms.capitalize())()
 
@@ -278,4 +278,4 @@ def pre_delete_release(sender, instance, **kwargs):
         shutil.rmtree(path)
 
     con = get_redis_connection('default')
-    con.delete('migasfree:releases:%d:computers' % instance.id)
+    con.delete('migasfree:deployments:%d:computers' % instance.id)

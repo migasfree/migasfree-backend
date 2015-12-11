@@ -30,7 +30,7 @@ from celery.exceptions import Ignore
 from django_redis import get_redis_connection
 from rest_framework.reverse import reverse
 
-from migasfree.core.models import Package, Release
+from migasfree.core.models import Package, Deployment
 from migasfree.client.models import Notification, Fault, Error, Computer
 
 import logging
@@ -102,7 +102,7 @@ def add_generating_repos():
             'target': 'server',
             'level': 'info',
             'result': result,
-            'api': reverse('release-generating')
+            'api': reverse('deployment-generating')
         }
     )
     con.sadd('migasfree:watch:chk', 'repos')
@@ -175,43 +175,43 @@ def alerts():
     logger.debug(con.smembers('migasfree:watch:chk'))
 
 
-def assigned_computers_to_release(release_id):
+def assigned_computers_to_deployment(deployment_id):
     try:
-        release = Release.objects.get(pk=release_id)
+        deploy = Deployment.objects.get(pk=deployment_id)
     except:
         return
 
     computers = set(Computer.objects.filter(
-        Q(project=release.project) & (
-            Q(sync_attributes__id__in=release.included_attributes.all())
-            | Q(tags__id__in=release.included_attributes.all())
+        Q(project=deploy.project) & (
+            Q(sync_attributes__id__in=deploy.included_attributes.all())
+            | Q(tags__id__in=deploy.included_attributes.all())
         )
     ).values_list('id', flat=True))
 
-    if release.schedule and release.schedule.scheduledelay_set:
-        for delay in release.schedule.scheduledelay_set.all():
+    if deploy.schedule and deploy.schedule.scheduledelay_set:
+        for delay in deploy.schedule.scheduledelay_set.all():
             computers = computers.union(set(Computer.objects.filter(
-                Q(project=release.project) & (
+                Q(project=deploy.project) & (
                     Q(sync_attributes__id__in=delay.attributes.all())
                     | Q(tags__id__in=delay.attributes.all())
                 )
             ).values_list('id', flat=True)))
 
     computers = computers.difference(set(Computer.objects.filter(
-        Q(project=release.project) & (
-            Q(sync_attributes__id__in=release.excluded_attributes.all())
-            | Q(tags__id__in=release.excluded_attributes.all())
+        Q(project=deploy.project) & (
+            Q(sync_attributes__id__in=deploy.excluded_attributes.all())
+            | Q(tags__id__in=deploy.excluded_attributes.all())
         )
     ).values_list('id', flat=True)))
 
     con = get_redis_connection('default')
-    key = 'migasfree:releases:%d:computers' % release_id
+    key = 'migasfree:deployments:%d:computers' % deployment_id
     con.delete(key)
     if computers:
         [con.sadd(key, computer_id) for computer_id in list(computers)]
 
 
 @shared_task(queue='default')
-def computers_releases():
-    for release in Release.objects.all():
-        assigned_computers_to_release(release.id)
+def computers_deployments():
+    for deploy in Deployment.objects.all():
+        assigned_computers_to_deployment(deploy.id)

@@ -27,5 +27,7 @@ router.register(
     r'stats/computers', views.ComputerStatsViewSet, base_name='stats-computers'
 )
 router.register(
-    r'stats/releases', views.ReleaseStatsViewSet, base_name='stats-releases'
+    r'stats/deployments',
+    views.DeploymentStatsViewSet,
+    base_name='stats-deployments'
 )

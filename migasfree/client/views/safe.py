@@ -32,7 +32,7 @@ from migasfree.model_update import update
 from migasfree import secure
 from migasfree.core.mixins import SafeConnectionMixin
 from migasfree.core.models import (
-    Project, Release, Property, Attribute, BasicAttribute, SetOfAttributes
+    Project, Deployment, Property, Attribute, BasicAttribute, SetOfAttributes
 )
 
 from .. import models, serializers, tasks
@@ -528,7 +528,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, ugettext('Getting repositories...'))
 
-        repos = Release.available_releases(
+        repos = Deployment.available_deployments(
             computer, computer.get_all_attributes()
         ).values_list('slug', flat=True)
 
@@ -670,7 +670,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             ugettext('Getting mandatory packages...')
         )
 
-        pkgs = Release.available_releases(
+        pkgs = Deployment.available_deployments(
             computer, computer.get_all_attributes()
         ).values_list('packages_to_install', 'packages_to_remove')
 
@@ -750,10 +750,10 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         add_computer_message(computer, ugettext('Getting available tags...'))
 
         available = {}
-        for release in Release.objects.filter(
+        for deploy in Deployment.objects.filter(
             project__id=computer.project.id
         ).filter(enabled=True):
-            for tag in release.included_attributes.filter(
+            for tag in deploy.included_attributes.filter(
                 property_att__sort='server'
             ).filter(property_att__enabled=True):
                 if tag.property_att.name not in available.keys():
@@ -821,7 +821,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         remove = []
 
         # Old Repositories
-        repos = Release.available_releases(computer, old_tags)
+        repos = Deployment.available_deployments(computer, old_tags)
         pkgs = repos.values_list(
             'packages_to_install',
             'default_preincluded_packages',
@@ -849,7 +849,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 default_excluded_packages.split('\n') if x]
 
         # New Repositories
-        repos = Release.available_releases(
+        repos = Deployment.available_deployments(
             computer,
             new_tags + intersection_tags
         )

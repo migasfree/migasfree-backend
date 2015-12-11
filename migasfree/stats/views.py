@@ -27,7 +27,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import list_route, detail_route
 from rest_framework.response import Response
 
-from migasfree.core.models import Project, Release
+from migasfree.core.models import Project, Deployment
 from migasfree.client.models import Computer
 
 from . import validators
@@ -215,13 +215,15 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-class ReleaseStatsViewSet(viewsets.ViewSet):
+class DeploymentStatsViewSet(viewsets.ViewSet):
     @detail_route(methods=['get'], url_path='computers/assigned')
     def assigned_computers(self, request, pk=None):
-        release = get_object_or_404(Release, pk=pk)
+        deploy = get_object_or_404(Deployment, pk=pk)
 
         con = get_redis_connection('default')
-        response = con.smembers('migasfree:releases:%d:computers' % release.id)
+        response = con.smembers(
+            'migasfree:deployments:%d:computers' % deploy.id
+        )
 
         return Response(
             list(response),
@@ -230,10 +232,10 @@ class ReleaseStatsViewSet(viewsets.ViewSet):
 
     @detail_route(methods=['get'], url_path='computers/status/ok')
     def computers_with_ok_status(self, request, pk=None):
-        release = get_object_or_404(Release, pk=pk)
+        deploy = get_object_or_404(Deployment, pk=pk)
 
         con = get_redis_connection('default')
-        response = con.smembers('migasfree:releases:%d:ok' % release.id)
+        response = con.smembers('migasfree:deployments:%d:ok' % deploy.id)
 
         return Response(
             list(response),
@@ -242,10 +244,10 @@ class ReleaseStatsViewSet(viewsets.ViewSet):
 
     @detail_route(methods=['get'], url_path='computers/status/error')
     def computers_with_error_status(self, request, pk=None):
-        release = get_object_or_404(Release, pk=pk)
+        deploy = get_object_or_404(Deployment, pk=pk)
 
         con = get_redis_connection('default')
-        response = con.smembers('migasfree:releases:%d:error' % release.id)
+        response = con.smembers('migasfree:deployments:%d:error' % deploy.id)
 
         return Response(
             list(response),
@@ -254,19 +256,19 @@ class ReleaseStatsViewSet(viewsets.ViewSet):
 
     @detail_route(methods=['get'])
     def timeline(self, request, pk=None):
-        release = get_object_or_404(Release, pk=pk)
+        deploy = get_object_or_404(Deployment, pk=pk)
 
         con = get_redis_connection('default')
 
         response = {
             'computers': {
                 'assigned': con.scard(
-                    'migasfree:releases:%d:computers' % release.id
+                    'migasfree:deployments:%d:computers' % deploy.id
                 ),
-                'ok': con.scard('migasfree:releases:%d:ok' % release.id),
-                'error': con.scard('migasfree:releases:%d:error' % release.id)
+                'ok': con.scard('migasfree:deployments:%d:ok' % deploy.id),
+                'error': con.scard('migasfree:deployments:%d:error' % deploy.id)
             },
-            'schedule': release.schedule_timeline()
+            'schedule': deploy.schedule_timeline()
         }
 
         return Response(

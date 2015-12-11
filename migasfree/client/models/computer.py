@@ -311,7 +311,7 @@ class Computer(models.Model):
         source_cid = source.get_cid_attribute()
         target_cid = target.get_cid_attribute()
         swap_m2m(source_cid.faultdefinition_set, target_cid.faultdefinition_set)
-        swap_m2m(source_cid.release_set, target_cid.release_set)
+        swap_m2m(source_cid.deployment_set, target_cid.deployment_set)
         swap_m2m(source_cid.ExcludeAttribute, target_cid.ExcludeAttribute)
         swap_m2m(source_cid.setofattributes_set, target_cid.setofattributes_set)
         swap_m2m(
@@ -361,10 +361,10 @@ class Computer(models.Model):
             ugettext("Faults"): ', '.join(
                 str(x) for x in cid.faultdefinition_set.all()
             ),
-            ugettext("Releases"): ', '.join(
-                str(x) for x in cid.release_set.all()
+            ugettext("Deployments"): ', '.join(
+                str(x) for x in cid.deployment_set.all()
             ),
-            ugettext("Releases (excluded)"): ', '.join(
+            ugettext("Deployments (excluded)"): ', '.join(
                 str(x) for x in cid.ExcludeAttribute.all()
             ),
             ugettext("Sets"): ', '.join(
@@ -419,7 +419,7 @@ def post_save_computer(sender, instance, created, **kwargs):
 
         cid = instance.get_cid_attribute()
         cid.faultdefinition_set.clear()
-        cid.release_set.clear()
+        cid.deployment_set.clear()
         cid.ExcludeAttribute.clear()
         cid.setofattributes_set.clear()
         cid.ExcludedAttributesGroup.clear()

@@ -32,7 +32,7 @@ from .models import (
     ServerProperty, ClientProperty,
     Attribute, ServerAttribute, ClientAttribute,
     Schedule, ScheduleDelay,
-    Package, Release,
+    Package, Deployment,
 )
 
 
@@ -168,24 +168,28 @@ class PackageSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'project', 'store', 'files')
 
 
-class ReleaseSerializer(serializers.ModelSerializer):
+class DeploymentSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(read_only=True)
 
     def create(self, validated_data):
-        release = super(ReleaseSerializer, self).create(validated_data)
-        tasks.create_repository_metadata.delay(release.id)
-        return release
+        deploy = super(DeploymentSerializer, self).create(validated_data)
+        tasks.create_repository_metadata.delay(deploy.id)
+        return deploy
 
     def update(self, instance, validated_data):
         old_obj = self.Meta.model.objects.get(id=instance.id)
-        old_pkgs = sorted(old_obj.available_packages.values_list('id', flat=True))
+        old_pkgs = sorted(
+            old_obj.available_packages.values_list('id', flat=True)
+        )
         old_name = old_obj.name
 
         #https://github.com/tomchristie/django-rest-framework/issues/2442
-        instance = super(ReleaseSerializer, self).update(
+        instance = super(DeploymentSerializer, self).update(
             instance, validated_data
         )
-        new_pkgs = sorted(instance.available_packages.values_list('id', flat=True))
+        new_pkgs = sorted(
+            instance.available_packages.values_list('id', flat=True)
+        )
 
         if cmp(old_pkgs, new_pkgs) != 0 or old_name != validated_data['name']:
             tasks.create_repository_metadata.delay(instance.id)
@@ -209,7 +213,7 @@ class ReleaseSerializer(serializers.ModelSerializer):
         return data
 
     class Meta:
-        model = Release
+        model = Deployment
         fields = (
             'id', 'name', 'slug', 'enabled', 'project', 'comment',
             'available_packages', 'packages_to_install', 'packages_to_remove',

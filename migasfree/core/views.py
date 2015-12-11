@@ -34,14 +34,14 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 from rest_framework_filters import backends
 
-from migasfree.core.mixins import SafeConnectionMixin
+from ..mixins import SafeConnectionMixin
 
 from .models import (
     Platform, Project, Store,
     ServerProperty, ClientProperty,
     ServerAttribute, ClientAttribute,
     Schedule,
-    Package, Release,
+    Package, Deployment,
 )
 from .serializers import (
     #UserSerializer, GroupSerializer,
@@ -49,10 +49,10 @@ from .serializers import (
     ServerPropertySerializer, ClientPropertySerializer,
     ServerAttributeSerializer, ClientAttributeSerializer,
     ScheduleSerializer,
-    PackageSerializer, ReleaseSerializer,
+    PackageSerializer, DeploymentSerializer,
 )
 from .filters import (
-    ReleaseFilter, PackageFilter,
+    DeploymentFilter, PackageFilter,
     ClientAttributeFilter, ServerAttributeFilter,
 )
 from .permissions import PublicPermission, IsAdminOrIsSelf
@@ -162,10 +162,10 @@ class PackageViewSet(mixins.CreateModelMixin,
     @list_route(methods=['get'])
     def orphaned(self, request):
         """
-        Returns packages that are not in any release
+        Returns packages that are not in any deployment
         """
         serializer = PackageSerializer(
-            Package.objects.filter(release__id=None),
+            Package.objects.filter(deployment__id=None),
             many=True
         )
 
@@ -175,10 +175,10 @@ class PackageViewSet(mixins.CreateModelMixin,
         )
 
 
-class ReleaseViewSet(viewsets.ModelViewSet):
-    queryset = Release.objects.all()
-    serializer_class = ReleaseSerializer
-    filter_class = ReleaseFilter
+class DeploymentViewSet(viewsets.ModelViewSet):
+    queryset = Deployment.objects.all()
+    serializer_class = DeploymentSerializer
+    filter_class = DeploymentFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-start_date',)
@@ -186,7 +186,7 @@ class ReleaseViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get'])
     def metadata(self, request, pk=None):
-        release = get_object_or_404(Release, pk=pk)
+        deploy = get_object_or_404(Deployment, pk=pk)
         tasks.create_repository_metadata.delay(pk)
 
         return Response(
@@ -199,8 +199,8 @@ class ReleaseViewSet(viewsets.ModelViewSet):
         con = get_redis_connection('default')
         result = con.smembers('migasfree:watch:repos')
 
-        serializer = ReleaseSerializer(
-            Release.objects.filter(pk__in=result),
+        serializer = DeploymentSerializer(
+            Deployment.objects.filter(pk__in=result),
             many=True
         )
 
@@ -386,9 +386,11 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             Package, name=claims.get('packageset'), project=project
         )
 
-        releases = Release.objects.filter(available_packages__id=package.id)
-        for release in releases:
-            tasks.create_repository_metadata.delay(release.id)
+        deployments = Deployment.objects.filter(
+            available_packages__id=package.id
+        )
+        for deploy in deployments:
+            tasks.create_repository_metadata.delay(deploy.id)
 
         return Response(
             self.create_response(ugettext('Data received')),
