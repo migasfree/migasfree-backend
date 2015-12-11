@@ -26,6 +26,7 @@ from importlib import import_module
 
 from django.db import models
 from django.template.defaultfilters import slugify
+from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
@@ -116,7 +117,7 @@ class Release(models.Model):
     )
 
     start_date = models.DateField(
-        default=datetime.date.today(),
+        default=timezone.now,
         verbose_name=_('start date')
     )
 
