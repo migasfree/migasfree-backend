@@ -23,8 +23,8 @@ import django.conf.global_settings as DEFAULT_SETTINGS
 
 from .migasfree import BASE_DIR, MIGASFREE_TMP_DIR
 
-if django.VERSION < (1, 8, 0, 'final'):
-    print('Migasfree requires Django 1.8.0 at least. Please, update it.')
+if django.VERSION < (1, 9, 0, 'final'):
+    print('Migasfree requires Django 1.9.0 at least. Please, update it.')
     exit(1)
 
 ADMINS = (
@@ -77,12 +77,6 @@ LOCALE_PATHS = (
 
 ADMIN_SITE_ROOT_URL = '/admin/'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
-
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -91,11 +85,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = DEFAULT_SETTINGS.TEMPLATE_CONTEXT_PROCESSORS + (
-    'django.core.context_processors.request',
-    'django.contrib.messages.context_processors.messages',
 )
 
 DEFAULT_CHARSET = 'utf-8'
