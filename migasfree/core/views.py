@@ -258,14 +258,6 @@ class AuthViewSet(viewsets.ViewSet):
 '''
 
 
-def get_store_or_create(name, project):
-    store = Store.objects.filter(name=name, project=project)
-    if not store:
-        return Store.objects.create(name=name, project=project)
-    else:
-        return store[0]
-
-
 class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
     def create(self, request, format=None):
         """
@@ -279,7 +271,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         project = get_object_or_404(Project, name=claims.get('project'))
 
-        store = get_store_or_create(claims.get('store'), project)
+        store, _ = Store.objects.get_or_create(claims.get('store'), project)
 
         _file = request.FILES.get('file')
 
@@ -323,7 +315,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         project = get_object_or_404(Project, name=claims.get('project'))
 
-        store = get_store_or_create(claims.get('store'), project)
+        store, _ = Store.objects.get_or_create(claims.get('store'), project)
 
         _file = request.FILES.get('file')
 
