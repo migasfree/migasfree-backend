@@ -34,21 +34,23 @@ class AttributeManager(models.Manager):
         if '~' in value:
             value, description = value.split('~')
 
+        value = value.replace('\n', '')  # clean field
+
         queryset = Attribute.objects.filter(
             property_att=property_att, value=value
         )
         if queryset.exists():
             return queryset[0]
 
-        attribute = Attribute()
-        attribute.property_att = property_att
-        attribute.value = value
-        attribute.description = description
-        attribute.longitude = longitude
-        attribute.latitude = latitude
-        attribute.save()
+        obj = Attribute()
+        obj.property_att = property_att
+        obj.value = value
+        obj.description = description
+        obj.longitude = longitude
+        obj.latitude = latitude
+        obj.save()
 
-        return attribute
+        return obj
 
     @staticmethod
     def filter_by_prefix_value(tags):
