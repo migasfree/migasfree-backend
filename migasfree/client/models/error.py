@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -83,11 +83,7 @@ class Error(models.Model):
         super(Error, self).save(*args, **kwargs)
 
     def __str__(self):
-        return '%s - %s - %s' % (
-            str(self.id),
-            self.computer.__str__(),
-            str(self.created_at)
-        )
+        return '%s (%s)' % (self.computer, self.created_at)
 
     class Meta:
         app_label = 'client'
