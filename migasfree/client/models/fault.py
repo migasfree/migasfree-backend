@@ -27,7 +27,7 @@ from .fault_definition import FaultDefinition
 
 
 class UncheckedManager(models.Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return super(UncheckedManager, self).get_queryset().filter(
             checked=0
         )
@@ -35,14 +35,14 @@ class UncheckedManager(models.Manager):
 
 class FaultManager(models.Manager):
     def create(self, computer, definition, result):
-        fault = Fault()
-        fault.computer = computer
-        fault.project = computer.project
-        fault.fault_definition = definition
-        fault.result = result
-        fault.save()
+        obj = Fault()
+        obj.computer = computer
+        obj.project = computer.project
+        obj.fault_definition = definition
+        obj.result = result
+        obj.save()
 
-        return fault
+        return obj
 
 
 @python_2_unicode_compatible

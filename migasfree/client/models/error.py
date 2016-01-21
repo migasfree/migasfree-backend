@@ -28,7 +28,7 @@ from .computer import Computer
 
 
 class UncheckedManager(models.Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return super(UncheckedManager, self).get_queryset().filter(
             checked=0
         )

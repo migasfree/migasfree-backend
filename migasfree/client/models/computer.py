@@ -37,28 +37,28 @@ from .user import User
 
 
 class ProductiveManager(models.Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return super(ProductiveManager, self).get_queryset().filter(
             status__in=Computer.PRODUCTIVE_STATUS
         )
 
 
 class UnproductiveManager(models.Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return super(UnproductiveManager, self).get_queryset().exclude(
             status__in=Computer.PRODUCTIVE_STATUS
         )
 
 
 class SubscribedManager(models.Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return super(SubscribedManager, self).get_queryset().exclude(
             status='unsubscribed'
         )
 
 
 class UnsubscribedManager(models.Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return super(UnsubscribedManager, self).get_queryset().filter(
             status='unsubscribed'
         )
