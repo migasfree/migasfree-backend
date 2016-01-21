@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 from django.db import models
 from django.db.models import Q
+from django.conf import settings
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
@@ -114,10 +115,11 @@ class Attribute(models.Model):
     objects = AttributeManager()
 
     def __str__(self):
-        return '%s-%s' % (
-            self.property_att.prefix,
-            self.value,
-        )
+        if self.property_att.prefix == 'CID' and \
+        settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] != 'id':
+            return '%s (CID-%s)' % (self.description, self.value)
+        else:
+            return '%s-%s' % (self.property_att.prefix, self.value)
 
     def prefix_value(self):
         return self.__str__()
