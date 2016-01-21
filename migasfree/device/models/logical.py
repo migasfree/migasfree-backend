@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ class Logical(models.Model):
         verbose_name=_("feature")
     )
 
-    def datadict(self, project):
+    def data_to_dict(self, project):
         try:
             driver = Driver.objects.filter(
                 project__id=project.id,
@@ -45,9 +45,9 @@ class Logical(models.Model):
                 feature__id=self.feature.id
             )[0]
             if driver:
-                dictdriver = driver.datadict()
+                driver_dict = driver.data_to_dict()
         except:
-            dictdriver = {}
+            driver_dict = {}
 
         ret = {
             self.device.connection.devicetype.name: {
@@ -57,22 +57,22 @@ class Logical(models.Model):
             }
         }
 
-        dictdevice = self.device.datadict()
-        for key, value in dictdevice.items():
+        device_dict = self.device.data_to_dict()
+        for key, value in device_dict.items():
             ret[self.device.connection.devicetype.name][key] = value
 
-        for key, value in dictdriver.items():
+        for key, value in driver_dict.items():
             ret[self.device.connection.devicetype.name][key] = value
 
         return ret
 
     def __str__(self):
-        return '%s__%s__%s__%s__%s' % (
+        return '%s__%s__%s__%s__%d' % (
             self.device.model.manufacturer.name,
             self.device.model.name,
             self.feature.name,
             self.device.name,
-            str(self.id)
+            self.id
         )
 
     class Meta:
