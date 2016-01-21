@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
 from .project import Project
-# from migasfree.server.functions import trans
 
 
 @python_2_unicode_compatible
@@ -38,12 +37,12 @@ class Store(models.Model):
     """
 
     name = models.CharField(
-        _("name"),
+        verbose_name=_("name"),
         max_length=50
     )
 
     slug = models.SlugField(
-        _("slug"),
+        verbose_name=_("slug"),
         max_length=50,
         unique=True
     )
