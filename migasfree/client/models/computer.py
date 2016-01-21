@@ -265,7 +265,10 @@ class Computer(models.Model):
 
     def update_software_history(self, history):
         if history:
-            self.software_history = history + '\n\n' + self.software_history
+            if self.software_history:
+                self.software_history = history + '\n\n' + self.software_history
+            else:
+                self.software_history = history
             self.save()
 
     @staticmethod
