@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -56,9 +56,11 @@ class Driver(models.Model):
         blank=True
     )
 
-    def datadict(self):
+    def data_to_dict(self):
         lst_install = []
-        for p in self.packages_to_install.replace("\r", " ").replace("\n", " ").split(" "):
+        for p in self.packages_to_install.replace("\r", " ").replace(
+            "\n", " "
+        ).split(" "):
             if p != '' and p != 'None':
                 lst_install.append(p)
 
@@ -68,11 +70,13 @@ class Driver(models.Model):
         }
 
     def save(self, *args, **kwargs):
-        self.packages_to_install = self.packages_to_install.replace("\r\n", "\n")
+        self.packages_to_install = self.packages_to_install.replace(
+            "\r\n", "\n"
+        )
         super(Driver, self).save(*args, **kwargs)
 
     def __str__(self):
-        return '%s' % (str(self.name).split("/")[-1])
+        return self.name.split("/")[-1]
 
     class Meta:
         app_label = 'device'
