@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -340,10 +340,13 @@ class Computer(models.Model):
         if 'id' in desc:
             desc.remove('id')
 
-        return '(%s)' % ', '.join(str(self.__getattribute__(x)) for x in desc)
+        return str(self.__getattribute__(desc[0]))
 
     def display(self):
-        return 'CID-%d %s' % (self.id, self.get_cid_description())
+        if settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] == "id":
+            return 'CID-%d' % self.id
+        else:
+            return '%s (CID-%d)' % (self.get_cid_description(), self.id)
 
     def get_replacement_info(self):
         cid = self.get_cid_attribute()
