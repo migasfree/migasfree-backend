@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,12 +25,12 @@ from .computer import Computer
 
 class StatusLogManager(models.Manager):
     def create(self, computer):
-        sl = StatusLog()
-        sl.computer = computer
-        sl.status = computer.status
-        sl.save()
+        obj = StatusLog()
+        obj.computer = computer
+        obj.status = computer.status
+        obj.save()
 
-        return sl
+        return obj
 
 
 @python_2_unicode_compatible
@@ -56,7 +56,7 @@ class StatusLog(models.Model):
     objects = StatusLogManager()
 
     def __str__(self):
-        return '%s: %s' % (self.computer.__str__(), self.status)
+        return '%s (%s)' % (self.computer, self.status)
 
     class Meta:
         app_label = 'client'
