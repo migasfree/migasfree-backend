@@ -192,13 +192,12 @@ class Computer(models.Model):
     def __init__(self, *args, **kwargs):
         super(Computer, self).__init__(*args, **kwargs)
 
-        if settings.MIGASFREE_REMOTE_ADMIN_LINK == '' \
-        or settings.MIGASFREE_REMOTE_ADMIN_LINK is None:
+        if not settings.MIGASFREE_REMOTE_ADMIN_LINK:
             self._actions = None
             return
 
         self._actions = []
-        template = Template(settings.MIGASFREE_REMOTE_ADMIN_LINK)
+        template = Template(' '.join(settings.MIGASFREE_REMOTE_ADMIN_LINK))
         context = {'computer': self}
         for node in template.nodelist:
             try:
