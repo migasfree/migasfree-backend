@@ -49,3 +49,5 @@ INSTALLED_APPS = ('debug_toolbar', 'django_extensions') + INSTALLED_APPS
 INTERNAL_IPS = ("127.0.0.1",)
 
 MIDDLEWARE_CLASSES += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
+
+CORS_ORIGIN_ALLOW_ALL = True

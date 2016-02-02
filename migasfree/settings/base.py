@@ -79,6 +79,7 @@ ADMIN_SITE_ROOT_URL = '/admin/'
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -107,6 +108,7 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'rest_framework_filters',
+    'corsheaders',
     'djoser',
     'import_export',
     'migasfree.core',
