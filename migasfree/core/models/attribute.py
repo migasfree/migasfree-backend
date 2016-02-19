@@ -35,7 +35,7 @@ class AttributeManager(models.Manager):
         if '~' in value:
             value, description = value.split('~')
 
-        value = value.replace('\n', '')  # clean field
+        value = value.strip()  # clean field
 
         queryset = Attribute.objects.filter(
             property_att=property_att, value=value
