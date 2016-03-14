@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,13 +44,14 @@ class ManufacturerAdmin(admin.ModelAdmin):
 
 @admin.register(Connection)
 class ConnectionAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'fields')
     list_select_related = ('device_type',)
-    ordering = ('device_type__name', 'name')
+    ordering = ('device_type__name', 'name', 'fields')
 
 
 @admin.register(Driver)
 class DriverAdmin(admin.ModelAdmin):
-    list_display = ('id', 'model', 'project', 'feature')
+    list_display = ('name', 'model', 'project', 'feature')
 
 
 class LogicalForm(forms.ModelForm):
@@ -93,7 +94,7 @@ class LogicalForm(forms.ModelForm):
 @admin.register(Logical)
 class LogicalAdmin(admin.ModelAdmin):
     form = LogicalForm
-    fields = ('device', 'feature')  #, 'computers')
+    fields = ('device', 'feature', 'name')  #, 'computers')
     list_select_related = ('device', 'feature',)
     list_display = ('device', 'feature')
     ordering = ('device__name', 'feature__name')
@@ -109,15 +110,15 @@ class LogicalAdmin(admin.ModelAdmin):
 class LogicalInline(admin.TabularInline):
     model = Logical
     form = LogicalForm
-    fields = ("feature", )  # "computers")
+    fields = ('feature', 'name')  # "computers")
     extra = 0
 
 
 @admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'model', 'connection')
+    list_display = ('name', 'location', 'model', 'connection')
     list_filter = ('model',)
-    search_fields = ('name', 'model__name', 'model__manufacturer__name')
+    search_fields = ('name', 'model__name', 'model__manufacturer__name', 'data')
     fields = ('name', 'model', 'connection', 'data')
     ordering = ('name',)
 
@@ -133,11 +134,10 @@ class DeviceAdmin(admin.ModelAdmin):
             if Logical.objects.filter(
                 Q(device__id=device.id) & Q(feature=feature)
             ).count() == 0:
-                logical = device.logical_set.create(
+                device.logical_set.create(
                     device=device,
                     feature=feature
                 )
-                logical.save()
 
 
 class DriverInline(admin.TabularInline):

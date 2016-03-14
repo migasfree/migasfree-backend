@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,5 +36,5 @@ class Feature(models.Model):
 
     class Meta:
         app_label = 'device'
-        verbose_name = _("Device (Feature)")
-        verbose_name_plural = _("Device (Feature)")
+        verbose_name = _("Feature")
+        verbose_name_plural = _("Features")

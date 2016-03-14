@@ -80,6 +80,6 @@ class Driver(models.Model):
 
     class Meta:
         app_label = 'device'
-        verbose_name = _("Device (Driver)")
-        verbose_name_plural = _("Device (Driver)")
+        verbose_name = _("Driver")
+        verbose_name_plural = _("Drivers")
         unique_together = (("model", "project", "feature"),)

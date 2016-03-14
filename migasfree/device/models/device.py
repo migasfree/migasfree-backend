@@ -53,6 +53,10 @@ class Device(models.Model):
         default="{}"
     )
 
+    def location(self):
+        data = json.loads(self.data)
+        return data.get('LOCATION', '')
+
     def data_to_dict(self):
         return {
             'name': self.name,
@@ -63,8 +67,31 @@ class Device(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        data = json.loads(self.data)
+        if 'NAME' in data:
+            data['NAME'] = data['NAME'].replace(' ', '_')
+            self.data = json.dumps(data)
+
+        super(Device, self).save(*args, **kwargs)
+
     class Meta:
         app_label = 'device'
         verbose_name = _("Device")
         verbose_name_plural = _("Devices")
         unique_together = (("connection", "name"),)
+
+
+''' TODO
+@receiver(pre_save, sender=Device)
+def pre_save_device(sender, instance, **kwargs):
+    if instance.id:
+        old_obj = Device.objects.get(pk=instance.id)
+        if old_obj.data != instance.data or \
+        old_obj.name != instance.name or \
+        old_obj.connection.id != instance.connection.id or \
+        old_obj.model.id != instance.model.id:
+            for logical_device in instance.devicelogical_set.all():
+                for computer in logical_device.computer_set.all():
+                    computer.remove_device_copy(logical_device.id)
+'''

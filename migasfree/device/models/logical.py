@@ -25,6 +25,14 @@ from .feature import Feature
 from .driver import Driver
 
 
+class LogicalManager(models.Manager):
+    def create(self, device, feature, name=None):
+        obj = Logical(device=device, feature=feature, name=name)
+        obj.save()
+
+        return obj
+
+
 @python_2_unicode_compatible
 class Logical(models.Model):
     device = models.ForeignKey(
@@ -36,6 +44,19 @@ class Logical(models.Model):
         Feature,
         verbose_name=_("feature")
     )
+
+    name = models.CharField(
+        verbose_name=_('name'),
+        max_length=50,
+        null=True,
+        blank=True,
+        unique=False
+    )
+
+    objects = LogicalManager()
+
+    def get_name(self):
+        return self.name if self.name else self.feature.name
 
     def data_to_dict(self, project):
         try:
@@ -75,8 +96,14 @@ class Logical(models.Model):
             self.id
         )
 
+    def save(self, *args, **kwargs):
+        if isinstance(self.name, basestring):
+            self.name = self.name.replace(" ", "_")
+
+        super(Logical, self).save(*args, **kwargs)
+
     class Meta:
         app_label = 'device'
-        verbose_name = _("Device (Logical)")
-        verbose_name_plural = _("Device (Logical)")
+        verbose_name = _("Device Logica)")
+        verbose_name_plural = _("Devices Logical")
         unique_together = (("device", "feature"),)
