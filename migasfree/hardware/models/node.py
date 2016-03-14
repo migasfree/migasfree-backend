@@ -26,7 +26,9 @@ from migasfree.client.models import Computer
 
 
 def validate_mac(mac):
-    return  len(mac) == 17 and len(re.findall(r':', mac)) == 5
+    return isinstance(mac, basestring) and \
+        len(mac) == 17 and \
+        len(re.findall(r':', mac)) == 5
 
 
 class NodeManager(models.Manager):
