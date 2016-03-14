@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,11 +16,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import re
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
 from migasfree.client.models import Computer
+
+
+def validate_mac(mac):
+    return  len(mac) == 17 and len(re.findall(r':', mac)) == 5
 
 
 class NodeManager(models.Manager):
@@ -54,6 +60,17 @@ class NodeManager(models.Manager):
 
 @python_2_unicode_compatible
 class Node(models.Model):
+    # Detect Virtual Machine with lshw:
+    # http://techglimpse.com/xen-kvm-virtualbox-vm-detection-command/
+    VIRTUAL_MACHINES = {
+        'innotek GmbH': 'virtualbox',
+        'Red Hat': 'openstack',
+        'Supermicro': 'kvm host',
+        'Xen': 'xen',
+        'Bochs': 'kvm',
+        'VMware, Inc.': 'vmware'
+    }
+
     parent = models.ForeignKey(
         'self',
         blank=True,
@@ -170,8 +187,91 @@ class Node(models.Model):
 
     objects = NodeManager()
 
+    def get_product(self):
+        return self.VIRTUAL_MACHINES.get(self.vendor, self.product)
+
     def __str__(self):
-        return self.product or u''
+        return self.product if self.description and 'lshw' in self.description \
+            else '%s: %s' % (self.description, self.product)
+
+    @staticmethod
+    def get_is_vm(computer_id):
+        query = Node.objects.filter(
+            computer=computer_id,
+        ).filter(parent_id__isnull=True)
+        if query.count() == 1:
+            if query[0].vendor in list(Node.VIRTUAL_MACHINES.keys()):
+                return True
+
+        return False
+
+    @staticmethod
+    def get_ram(computer_id):
+        query = Node.objects.filter(
+            computer=computer_id,
+            name='memory',
+            classname='memory'
+        )
+        if query.count() == 1:
+            size = query[0].size
+        else:
+            size = Node.objects.filter(
+                computer=computer_id,
+                classname='memory'
+            ).filter(
+                name__startswith='bank:'
+            ).aggregate(
+                models.Sum('size')
+            )['size__sum']
+
+        return size
+
+    @staticmethod
+    def get_cpu(computer_id):
+        query = Node.objects.filter(
+            computer=computer_id,
+            classname='processor'
+        ).filter(
+            models.Q(description='CPU') | models.Q(name__startswith='cpu:0')
+        )
+        if query.count() == 1:
+            product = query[0].product
+            for item in ['(R)', '(TM)', '@', 'CPU']:
+                product = product.replace(item, '')
+
+            return product.strip()
+        elif query.count() == 0:
+            return ''
+        else:
+            return _('error')
+
+    @staticmethod
+    def get_mac_address(computer_id):
+        ''' returns all addresses in only string without any separator '''
+        query = Node.objects.filter(
+            computer=computer_id,
+            name='network',
+            classname='network'
+        )
+        lst = []
+        for iface in query:
+            if validate_mac(iface.serial):
+                lst.append(iface.serial.upper().replace(':', ''))
+
+        return ''.join(lst)
+
+    @staticmethod
+    def get_storage(computer_id):
+        query = Node.objects.filter(
+            computer=computer_id,
+            name='disk',
+            classname='disk',
+            size__gt=0
+        )
+
+        capacity = [item.size for item in query]
+
+        return (query.count(), sum(capacity))
 
     class Meta:
         app_label = 'hardware'

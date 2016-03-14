@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -80,6 +80,7 @@ class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
         Node.objects.filter(computer=computer).delete()
         tasks.save_computer_hardware.delay(computer.id, claims.get('hardware'))
         computer.update_last_hardware_capture()
+        computer.update_hardware_resume()
 
         return Response(
             self.create_response(ugettext('Data received')),

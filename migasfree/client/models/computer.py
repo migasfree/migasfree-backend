@@ -77,6 +77,11 @@ class Computer(models.Model):
 
     PRODUCTIVE_STATUS = ['intended', 'reserved', 'unknown']
 
+    MACHINE_CHOICES = (
+        ('P', _('Physical')),
+        ('V', _('Virtual')),
+    )
+
     uuid = models.CharField(
         verbose_name=_("uuid"),
         max_length=36,
@@ -181,6 +186,56 @@ class Computer(models.Model):
         blank=True,
         verbose_name=_("sync attributes"),
         help_text=_("attributes sent")
+    )
+
+    product = models.CharField(
+        verbose_name=_("product"),
+        max_length=80,
+        null=True,
+        blank=True,
+        unique=False
+    )
+
+    machine = models.CharField(
+        verbose_name=_("machine"),
+        max_length=1,
+        null=False,
+        choices=MACHINE_CHOICES,
+        default='P'
+    )
+
+    cpu = models.CharField(
+        verbose_name=_("CPU"),
+        max_length=50,
+        null=True,
+        blank=True,
+        unique=False
+    )
+
+    ram = models.BigIntegerField(
+        verbose_name=_("RAM"),
+        null=True,
+        blank=True
+    )
+
+    storage = models.BigIntegerField(
+        verbose_name=_("storage"),
+        null=True,
+        blank=True
+    )
+
+    disks = models.SmallIntegerField(
+        verbose_name=_("disks"),
+        null=True,
+        blank=True
+    )
+
+    mac_address = models.CharField(
+        verbose_name=_("MAC address"),
+        max_length=60,  # size for 5
+        null=True,
+        blank=True,
+        unique=False
     )
 
     objects = models.Manager()
@@ -303,6 +358,24 @@ class Computer(models.Model):
 
     def update_last_hardware_capture(self):
         self.last_hardware_capture = datetime.now()
+        self.save()
+
+    def update_hardware_resume(self):
+        from migasfree.hardware.models import Node
+
+        try:
+            self.product = Node.objects.get(
+                computer=self.id, parent=None
+            ).get_product()
+        except:
+            self.product = None
+
+        self.machine = 'V' if Node.get_is_vm(self.id) else 'P'
+        self.cpu = Node.get_cpu(self.id)
+        self.ram = Node.get_ram(self.id)
+        self.disks, self.storage = Node.get_storage(self.id)
+        self.mac_address = Node.get_mac_address(self.id)
+
         self.save()
 
     @staticmethod

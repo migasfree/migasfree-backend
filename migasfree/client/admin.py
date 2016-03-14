@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -66,19 +66,35 @@ class ComputerAdmin(admin.ModelAdmin):
         'software_inventory',
         'software_history',
         'hardware',
+        'machine',
+        'cpu',
+        'ram',
+        'storage',
+        'disks',
+        'mac_address',
     )
 
     fieldsets = (
         (_('General'), {
             'fields': (
-                'uuid',
+                'status',
                 'name',
                 'project',
                 'created_at',
                 'ip_address',
+            )
+        }),
+        (_('Hardware'), {
+            'fields': (
                 'last_hardware_capture',
                 'hardware',
-                'status',
+                'uuid',
+                'machine',
+                'cpu',
+                'ram',
+                'storage',
+                'disks',
+                'mac_address',
             )
         }),
         (_('Synchronization'), {
