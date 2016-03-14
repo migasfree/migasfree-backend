@@ -32,6 +32,13 @@ class Migration(migrations.Migration):
                 ('last_hardware_capture', models.DateTimeField(blank=True, null=True, verbose_name='last hardware capture')),
                 ('sync_start_date', models.DateTimeField(null=True, verbose_name='sync start date')),
                 ('sync_end_date', models.DateTimeField(null=True, verbose_name='sync end date')),
+                ('cpu', models.CharField(blank=True, max_length=50, null=True, verbose_name='CPU')),
+                ('disks', models.SmallIntegerField(blank=True, null=True, verbose_name='disks')),
+                ('mac_address', models.CharField(blank=True, max_length=60, null=True, verbose_name='MAC address')),
+                ('machine', models.CharField(choices=[(b'P', 'Physical'), (b'V', 'Virtual')], default=b'P', max_length=1, verbose_name='machine')),
+                ('product', models.CharField(blank=True, max_length=80, null=True, verbose_name='product')),
+                ('ram', models.BigIntegerField(blank=True, null=True, verbose_name='RAM')),
+                ('storage', models.BigIntegerField(blank=True, null=True, verbose_name='storage')),
                 ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.Project', verbose_name='project')),
             ],
             options={
