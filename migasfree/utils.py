@@ -179,8 +179,4 @@ def swap_m2m(source_field, target_field):
 
 
 def remove_empty_elements_from_dict(dic):
-    for (k, v) in list(dic.items()):
-        if not v:
-            del dic[k]
-
-    return dic
+    return dict((k, v) for k, v in dic.iteritems() if v)
