@@ -297,9 +297,9 @@ class Computer(models.Model):
             pass
 
     def login(self):
-        return '%s@%s' % (
+        return u'%s (%s)' % (
             self.sync_user.name,
-            self.__str__()
+            self.sync_user.fullname.strip()
         )
 
     def hardware(self):
