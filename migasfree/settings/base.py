@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@ import django.conf.global_settings as DEFAULT_SETTINGS
 
 from .migasfree import BASE_DIR, MIGASFREE_TMP_DIR
 
-if django.VERSION < (1, 9, 1, 'final'):
-    print('Migasfree requires Django 1.9.1 at least. Please, update it.')
+if django.VERSION < (1, 9, 4, 'final'):
+    print('Migasfree requires Django 1.9.4 at least. Please, update it.')
     exit(1)
 
 ADMINS = (
