@@ -104,6 +104,6 @@ class Logical(models.Model):
 
     class Meta:
         app_label = 'device'
-        verbose_name = _("Device Logica)")
+        verbose_name = _("Device Logical")
         verbose_name_plural = _("Devices Logical")
         unique_together = (("device", "feature"),)
