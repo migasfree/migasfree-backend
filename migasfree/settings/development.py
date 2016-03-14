@@ -24,7 +24,8 @@ from .celery import *
 from .functions import secret_key
 
 # development environment
-TEMPLATE_DEBUG = DEBUG = True
+DEBUG = True
+TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 
 MIGASFREE_DB_DIR = os.path.dirname(MIGASFREE_PROJECT_DIR)
 MIGASFREE_PUBLIC_DIR = os.path.join(MIGASFREE_PROJECT_DIR, 'pub')

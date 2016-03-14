@@ -181,3 +181,13 @@ PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.MD5PasswordHasher',
     'django.contrib.auth.hashers.CryptPasswordHasher',
 )
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+
+TEMPLATES = [
+    {
+        'OPTIONS': {
+            'debug': False,
+        }
+    }
+]
