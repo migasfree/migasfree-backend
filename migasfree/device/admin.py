@@ -19,7 +19,6 @@
 from django.contrib import admin
 from django import forms
 from django.db import models
-from django.db.models import Q
 
 from .models import (
     Type, Feature, Manufacturer, Connection,
@@ -132,7 +131,8 @@ class DeviceAdmin(admin.ModelAdmin):
             driver__model__id=device.model.id
         ).distinct():
             if Logical.objects.filter(
-                Q(device__id=device.id) & Q(feature=feature)
+                device__id=device.id,
+                feature=feature
             ).count() == 0:
                 device.logical_set.create(
                     device=device,
