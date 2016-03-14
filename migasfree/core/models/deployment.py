@@ -240,7 +240,7 @@ class Deployment(models.Model):
         # 3.- excluded attributtes
         deployments = Deployment.objects.filter(id__in=lst).filter(
             ~Q(excluded_attributes__id__in=attributes)
-        )
+        ).order_by('name')
 
         return deployments
 
