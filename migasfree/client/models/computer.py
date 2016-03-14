@@ -417,12 +417,6 @@ class Computer(models.Model):
 
         return str(self.__getattribute__(desc[0]))
 
-    def display(self):
-        if settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] == "id":
-            return 'CID-%d' % self.id
-        else:
-            return '%s (CID-%d)' % (self.get_cid_description(), self.id)
-
     def get_replacement_info(self):
         cid = self.get_cid_attribute()
 
@@ -433,7 +427,7 @@ class Computer(models.Model):
         '''
 
         return remove_empty_elements_from_dict({
-            ugettext("Computer"): self.display(),
+            ugettext("Computer"): self.__str__(),
             ugettext("Status"): ugettext(self.status),
             ugettext("Tags"): ', '.join(str(x) for x in self.tags.all()),
             ugettext("Faults"): ', '.join(
@@ -457,9 +451,10 @@ class Computer(models.Model):
         })
 
     def __str__(self):
-        return str(self.__getattribute__(
-            settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0]
-        ))
+        if settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] == "id":
+            return 'CID-%d' % self.id
+        else:
+            return '%s (CID-%d)' % (self.get_cid_description(), self.id)
 
     class Meta:
         app_label = 'client'
