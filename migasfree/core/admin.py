@@ -195,6 +195,7 @@ class PackageAdmin(admin.ModelAdmin):
     list_display = ('name', 'project', 'store')
     list_display_links = None
     list_filter = ('project__name', 'store',)
+    list_select_related = ('project',)
     list_per_page = 25
     search_fields = ('name', 'store__name',)
     ordering = ('name',)
