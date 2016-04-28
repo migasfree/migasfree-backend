@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -98,8 +98,8 @@ class FaultDefinition(models.Model):
             Q(enabled=True) &
             Q(included_attributes__id__in=attributes) &
             ~Q(excluded_attributes__id__in=attributes)
-        ).values('language', 'name', 'code'))
-        # FIXME .distinct('id') NOT supported in sqlite
+        ).distinct().values('language', 'name', 'code'))
+        # NOTE .distinct('id') NOT supported in sqlite
 
     def save(self, *args, **kwargs):
         self.code = self.code.replace("\r\n", "\n")
