@@ -23,8 +23,8 @@ import django.conf.global_settings as DEFAULT_SETTINGS
 
 from .migasfree import BASE_DIR, MIGASFREE_TMP_DIR
 
-if django.VERSION < (1, 9, 4, 'final'):
-    print('Migasfree requires Django 1.9.4 at least. Please, update it.')
+if django.VERSION < (1, 9, 6, 'final'):
+    print('Migasfree requires Django 1.9.6 at least. Please, update it.')
     exit(1)
 
 ADMINS = (
