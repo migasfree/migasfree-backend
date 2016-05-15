@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -86,7 +86,8 @@ class ComputerViewSet(
     def status(self, request, pk=None):
         """
         Input: {
-            'status': 'available' | 'reserved' | 'unsubscribed' | 'unkown' | 'intended'
+            'status': 'available' | 'reserved' | 'unsubscribed'
+                | 'unknown' | 'intended'
         }
         Changes computer status
         """
@@ -182,35 +183,19 @@ class ErrorViewSet(
     paginate_by = 100  # FIXME constant
 
 
+class FaultDefinitionViewSet(viewsets.ModelViewSet):
+    queryset = models.FaultDefinition.objects.all()
+    serializer_class = serializers.FaultDefinitionSerializer
+    filter_class = FaultDefinitionFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+
+
 class FaultViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
     queryset = models.Fault.objects.all()
     serializer_class = serializers.FaultSerializer
     filter_class = FaultFilter
-    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
-    ordering_fields = '__all__'
-    ordering = ('-created_at',)
-    paginate_by = 100  # FIXME constant
-
-
-class PackageViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
-):
-    queryset = models.Package.objects.all()
-    serializer_class = serializers.PackageSerializer
-    filter_class = PackageFilter
-    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
-    ordering_fields = '__all__'
-    ordering = ('fullname',)
-
-
-class NotificationViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
-):
-    queryset = models.Notification.objects.all()
-    serializer_class = serializers.NotificationSerializer
-    filter_class = NotificationFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
@@ -229,7 +214,24 @@ class MigrationViewSet(
     paginate_by = 100  # FIXME constant
 
 
-class FaultDefinitionViewSet(viewsets.ModelViewSet):
-    queryset = models.FaultDefinition.objects.all()
-    serializer_class = serializers.FaultDefinitionSerializer
-    filter_class = FaultDefinitionFilter
+class NotificationViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    queryset = models.Notification.objects.all()
+    serializer_class = serializers.NotificationSerializer
+    filter_class = NotificationFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('-created_at',)
+    paginate_by = 100  # FIXME constant
+
+
+class PackageViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    queryset = models.Package.objects.all()
+    serializer_class = serializers.PackageSerializer
+    filter_class = PackageFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('fullname',)
