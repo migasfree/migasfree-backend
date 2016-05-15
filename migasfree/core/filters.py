@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,12 +18,17 @@
 
 import rest_framework_filters as filters
 
-from .models import Deployment, Package, ClientAttribute, ServerAttribute
+from .models import (
+    Deployment, Package, ClientAttribute, ServerAttribute, Project, Store,
+)
 
 
 class DeploymentFilter(filters.FilterSet):
     included_attributes = filters.CharFilter(
         name='included_attributes__value', lookup_type='contains'
+    )
+    excluded_attributes = filters.CharFilter(
+        name='excluded_attributes__value', lookup_type='contains'
     )
     available_packages = filters.CharFilter(
         name='available_packages__name', lookup_type='contains'
@@ -40,6 +45,12 @@ class PackageFilter(filters.FilterSet):
         fields = ['deployment__id', 'store__id']
 
 
+class ProjectFilter(filters.FilterSet):
+    class Meta:
+        model = Project
+        fields = ['platform__id']
+
+
 class ClientAttributeFilter(filters.FilterSet):
     class Meta:
         model = ClientAttribute
@@ -50,3 +61,9 @@ class ServerAttributeFilter(filters.FilterSet):
     class Meta:
         model = ServerAttribute
         fields = ['property_att__id']
+
+
+class StoreFilter(filters.FilterSet):
+    class Meta:
+        model = Store
+        fields = ['project__id']
