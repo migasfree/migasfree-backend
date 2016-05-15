@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,12 +25,22 @@ from .models import (
 )
 
 
-class PackageFilter(filters.FilterSet):
-    fullname = filters.CharFilter(name='fullname', lookup_type='contains')
-    project = filters.CharFilter(name='project__id', lookup_type='exact')
+class ComputerFilter(filters.FilterSet):
+    platform = filters.CharFilter(name='project__platform__id')
+    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
+    software_inventory = filters.CharFilter(
+        name='software_inventory__fullname', lookup_type='contains'
+    )
+    sync_attributes = filters.CharFilter(
+        name='sync_attributes__value', lookup_type='contains'
+    )
+    mac_address = filters.CharFilter(
+        name='mac_address', lookup_type='icontains'
+    )
 
     class Meta:
-        model = Package
+        model = Computer
+        fields = ['project__id', 'status', 'name']
 
 
 class ErrorFilter(filters.FilterSet):
@@ -41,18 +51,12 @@ class ErrorFilter(filters.FilterSet):
         fields = ['project__id', 'checked', 'computer__id']
 
 
-class NotificationFilter(filters.FilterSet):
-    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
-
-    class Meta:
-        model = Notification
-        fields = ['checked']
-
-
 class FaultDefinitionFilter(filters.FilterSet):
     class Meta:
         model = FaultDefinition
-        fields = ['included_attributes__id', 'excluded_attributes__id']
+        fields = [
+            'included_attributes__id', 'excluded_attributes__id', 'enabled'
+        ]
 
 
 class FaultFilter(filters.FilterSet):
@@ -90,24 +94,25 @@ class FaultFilter(filters.FilterSet):
         ]
 
 
-class ComputerFilter(filters.FilterSet):
-    platform = filters.CharFilter(name='project__platform__id')
-    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
-    software_inventory = filters.CharFilter(
-        name='software_inventory__fullname', lookup_type='contains'
-    )
-    sync_attributes = filters.CharFilter(
-        name='sync_attributes__value', lookup_type='contains'
-    )
-
-    class Meta:
-        model = Computer
-        fields = ['project__id', 'status']
-
-
 class MigrationFilter(filters.FilterSet):
     created_at = filters.DateFilter(name='created_at', lookup_type='gte')
 
     class Meta:
         model = Migration
         fields = ['project__id', 'computer__id']
+
+
+class NotificationFilter(filters.FilterSet):
+    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
+
+    class Meta:
+        model = Notification
+        fields = ['checked']
+
+
+class PackageFilter(filters.FilterSet):
+    fullname = filters.CharFilter(name='fullname', lookup_type='contains')
+    project = filters.CharFilter(name='project__id', lookup_type='exact')
+
+    class Meta:
+        model = Package
