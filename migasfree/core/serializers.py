@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 class PlatformSerializer(serializers.ModelSerializer):
     class Meta:
         model = Platform
-        fields = ('id', 'name')
+        fields = '__all__'
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -63,7 +63,10 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ('id', 'name', 'pms', 'autoregister', 'platform')
+        fields = (
+            'id', 'name', 'pms',
+            'architecture', 'autoregister', 'platform'
+        )
 
 
 class StoreSerializer(serializers.ModelSerializer):
@@ -214,11 +217,4 @@ class DeploymentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Deployment
-        fields = (
-            'id', 'name', 'slug', 'enabled', 'project', 'comment',
-            'available_packages', 'packages_to_install', 'packages_to_remove',
-            'included_attributes', 'excluded_attributes',
-            'start_date', 'schedule',
-            'default_preincluded_packages', 'default_included_packages',
-            'default_excluded_packages'
-        )
+        fields = '__all__'
