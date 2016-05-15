@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,63 +35,48 @@ class ComputerSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'uuid', 'name', 'project', 'ip_address',
             'software_inventory', 'software_history', 'tags',
-            'status', 'hardware'
+            'status', 'product', 'machine', 'cpu', 'ram',
+            'storage', 'disks', 'mac_address'
         )
 
 
 class ErrorSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Error
-        fields = (
-            'id', 'computer', 'project',
-            'description', 'checked', 'created_at'
-        )
+        fields = '__all__'
 
 
 class FaultDefinitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FaultDefinition
-        fields = (
-            'id', 'name', 'enabled', 'description',
-            'language', 'code', 'included_attributes', 'excluded_attributes',
-            'users'
-        )
+        fields = '__all__'
 
 
 class FaultSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Fault
-        fields = (
-            'id', 'computer', 'project',
-            'fault_definition', 'result', 'checked', 'created_at'
-        )
-
-
-class PackageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Package
-        fields = (
-            'id', 'fullname', 'name', 'version',
-            'architecture', 'project'
-        )
-
-
-class NotificationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Notification
-        fields = ('id', 'created_at', 'message', 'checked')
-
-
-class SynchronizationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Synchronization
-        fields = (
-            'id', 'created_at', 'computer', 'user', 'project',
-            'start_date', 'consumer', 'pms_status_ok'
-        )
+        fields = '__all__'
 
 
 class MigrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Migration
-        fields = ('id', 'created_at', 'computer', 'project')
+        fields = '__all__'
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Notification
+        fields = '__all__'
+
+
+class PackageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Package
+        fields = '__all__'
+
+
+class SynchronizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Synchronization
+        fields = '__all__'
