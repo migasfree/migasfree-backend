@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ from .serializers import (
     PackageSerializer, DeploymentSerializer,
 )
 from .filters import (
-    DeploymentFilter, PackageFilter,
+    DeploymentFilter, PackageFilter, ProjectFilter, StoreFilter,
     ClientAttributeFilter, ServerAttributeFilter,
 )
 from .permissions import PublicPermission, IsAdminOrIsSelf
@@ -111,12 +111,15 @@ class PlatformViewSet(viewsets.ModelViewSet):
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = (PublicPermission,)
+    filter_class = ProjectFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
 
 
 class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
+    filter_class = StoreFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
 
 
 class ServerPropertyViewSet(viewsets.ModelViewSet):
