@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -388,6 +388,16 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             return Response(
                 self.create_response(ugettext('Computer not found')),
                 status=status.HTTP_404_NOT_FOUND
+            )
+
+        if computer.project.id != self.project.id:
+            return Response(
+                self.create_response(
+                    ugettext(
+                        'Unexpected Computer Project (%s). Expected %s'
+                    ) % (self.project.name, computer.project.name)
+                ),
+                status=status.HTTP_403_FORBIDDEN
             )
 
         return Response(
