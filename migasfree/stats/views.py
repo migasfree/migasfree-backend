@@ -60,7 +60,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
 
         key = 'migasfree:stats:years'
         if project_id:
-            project = get_object_or_404(Project, pk=project_id)
+            get_object_or_404(Project, pk=project_id)
             key = 'migasfree:stats:%d:years' % int(project_id)
 
         con = get_redis_connection('default')
