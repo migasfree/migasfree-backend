@@ -47,7 +47,7 @@ class MimetypeValidator(object):
     def __call__(self, value):
         my_magic = build_magic()
 
-        if type(value) is not list:
+        if not isinstance(value, list):
             value = [value]
         try:
             for item in value:
