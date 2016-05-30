@@ -21,7 +21,6 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets, status, views
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
@@ -29,10 +28,9 @@ from django_redis import get_redis_connection
 
 from migasfree.utils import uuid_change_format
 from migasfree.model_update import update
-from migasfree import secure
 from migasfree.core.mixins import SafeConnectionMixin
 from migasfree.core.models import (
-    Project, Deployment, Property, Attribute, BasicAttribute, SetOfAttributes
+    Deployment, Property, Attribute, BasicAttribute, SetOfAttributes
 )
 
 from .. import models, serializers, tasks
@@ -650,7 +648,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         add_computer_message(computer, ugettext('Sending errors response...'))
 
         if serializer.is_valid():
-            error = serializer.save()
+            serializer.save()
             return Response(
                 self.create_response(serializer.data),
                 status=status.HTTP_201_CREATED
