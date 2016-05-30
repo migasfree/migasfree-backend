@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-
 from django.contrib import admin
 from django.shortcuts import redirect
 from django.contrib.admin import SimpleListFilter
