@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ def save_computer_hardware(computer_id, node, parent=None, level=1):
             for x in node[e]:
                 Configuration.objects.create(node=n, name=x, value=node[e][x])
         elif e == 'logicalname':
-            if type(node[e]) == unicode:
+            if isinstance(node[e], unicode):
                 LogicalName.objects.create(node=n, name=node[e])
             else:
                 for x in node[e]:
