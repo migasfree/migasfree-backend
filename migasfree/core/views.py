@@ -19,9 +19,7 @@
 import os
 
 from django.conf import settings
-from django.apps import apps
-from django.db.models import Q
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.core import signing
 from django.utils.translation import ugettext, ugettext_lazy as _
 # from django.contrib.auth.models import User, Group
