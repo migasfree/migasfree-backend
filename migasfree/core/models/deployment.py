@@ -35,7 +35,6 @@ from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 from django_redis import get_redis_connection
-from celery import shared_task
 
 from migasfree.utils import time_horizon
 
