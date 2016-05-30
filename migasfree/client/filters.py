@@ -18,7 +18,7 @@
 
 import rest_framework_filters as filters
 
-from django.utils.translation import ugettext_lazy as _
+# from django.utils.translation import ugettext_lazy as _
 
 from .models import (
     Package, Error, Notification, FaultDefinition, Fault, Computer, Migration
