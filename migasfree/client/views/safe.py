@@ -688,14 +688,12 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
         if pkgs:
-            install = []
-            remove = []
             for install_item, remove_item in pkgs:
                 if install_item:
-                    [install.append(x) for x in install_item.split('\n') if x]
+                    install = [x for x in install_item.split('\n') if x]
 
                 if remove_item:
-                    [remove.append(x) for x in remove_item.split('\n') if x]
+                    remove = [x for x in remove_item.split('\n') if x]
 
             response = {'install': install, 'remove': remove}
 
