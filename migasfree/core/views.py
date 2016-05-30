@@ -20,7 +20,7 @@ import os
 
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from django.core import signing
+# from django.core import signing
 from django.utils.translation import ugettext, ugettext_lazy as _
 # from django.contrib.auth.models import User, Group
 from django_redis import get_redis_connection
@@ -42,7 +42,7 @@ from .models import (
     Package, Deployment,
 )
 from .serializers import (
-    #UserSerializer, GroupSerializer,
+    # UserSerializer, GroupSerializer,
     PlatformSerializer, ProjectSerializer, StoreSerializer,
     ServerPropertySerializer, ClientPropertySerializer,
     ServerAttributeSerializer, ClientAttributeSerializer,
@@ -53,7 +53,7 @@ from .filters import (
     DeploymentFilter, PackageFilter, ProjectFilter, StoreFilter,
     ClientAttributeFilter, ServerAttributeFilter,
 )
-from .permissions import PublicPermission, IsAdminOrIsSelf
+from .permissions import IsAdminOrIsSelf
 
 from . import tasks
 
@@ -187,7 +187,7 @@ class DeploymentViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get'])
     def metadata(self, request, pk=None):
-        deploy = get_object_or_404(Deployment, pk=pk)
+        get_object_or_404(Deployment, pk=pk)
         tasks.create_repository_metadata.delay(pk)
 
         return Response(
