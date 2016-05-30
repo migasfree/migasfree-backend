@@ -124,7 +124,7 @@ class DeviceAdmin(admin.ModelAdmin):
     inlines = [LogicalInline]
 
     def save_related(self, request, form, formsets, change):
-        super(type(self), self).save_related(request, form, formsets, change)
+        super(DeviceAdmin, self).save_related(request, form, formsets, change)
         device = form.instance
 
         for feature in Feature.objects.filter(
