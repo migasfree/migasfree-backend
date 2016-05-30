@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import re
-
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
@@ -63,7 +61,7 @@ class Error(models.Model):
     unchecked = UncheckedManager()
 
     def truncated_desc(self):
-        if len(self.description) <= 250:  #FIXME constant
+        if len(self.description) <= 250:  # FIXME constant
             return self.description
         else:
             return self.description[:250] + ' ...'
