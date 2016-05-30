@@ -22,7 +22,6 @@ from django.db.models import Q
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.contrib.auth.models import User
-from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
