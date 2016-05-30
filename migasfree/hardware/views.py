@@ -17,7 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext
 from rest_framework import viewsets, status, filters, mixins
 from rest_framework.decorators import list_route, detail_route
 from rest_framework.response import Response
