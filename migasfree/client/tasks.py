@@ -31,7 +31,7 @@ def update_software_inventory(computer_id, inventory):
     except:
         raise Ignore()
 
-    if inventory and type(inventory) == list:
+    if inventory and isinstance(inventory, list):
         pkgs = []
         for package in inventory:
             if package:
