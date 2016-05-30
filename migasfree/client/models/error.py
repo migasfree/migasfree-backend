@@ -69,7 +69,7 @@ class Error(models.Model):
     truncated_desc.short_description = _("Truncated description")
 
     @staticmethod
-    def unchecked():
+    def unchecked_count():
         return Error.objects.filter(checked=0).count()
 
     def checked_ok(self):

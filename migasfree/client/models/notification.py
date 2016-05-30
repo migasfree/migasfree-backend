@@ -37,7 +37,7 @@ class Notification(models.Model):
     )
 
     @staticmethod
-    def unchecked():
+    def unchecked_count():
         return Notification.objects.filter(checked=0).count()
 
     def save(self, *args, **kwargs):

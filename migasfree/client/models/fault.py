@@ -86,7 +86,7 @@ class Fault(models.Model):
     unchecked = UncheckedManager()
 
     @staticmethod
-    def unchecked():
+    def unchecked_count():
         return Fault.objects.filter(checked=0).count()
 
     def checked_ok(self):
