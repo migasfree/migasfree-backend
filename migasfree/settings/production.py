@@ -22,7 +22,8 @@ from .celery import *
 from .functions import secret_key
 
 # production environment
-TEMPLATE_DEBUG = DEBUG = False
+DEBUG = False
+TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 
 ALLOWED_HOSTS = ['*']
 
