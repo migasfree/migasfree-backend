@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,7 +38,10 @@ def run(cmd):
     return (out, err)
 
 
-def create_user(name, groups=[]):
+def create_user(name, groups=None):
+    if groups is None:
+        groups = []
+
     user = User.objects.filter(username=name)
     if not user:
         user = User()
@@ -54,7 +57,10 @@ def create_user(name, groups=[]):
         user.save()
 
 
-def add_read_perms(group, tables=[]):
+def add_read_perms(group, tables=None):
+    if tables is None:
+        tables = []
+
     for table in tables:
         app, name = table.split('.')
         group.permissions.add(
@@ -65,7 +71,10 @@ def add_read_perms(group, tables=[]):
         )
 
 
-def add_all_perms(group, tables=[]):
+def add_all_perms(group, tables=None):
+    if tables is None:
+        tables = []
+
     for table in tables:
         app, name = table.split('.')
         group.permissions.add(
