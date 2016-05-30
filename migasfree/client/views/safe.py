@@ -22,7 +22,7 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import viewsets, mixins, status, views
+from rest_framework import viewsets, status, views
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
 from django_redis import get_redis_connection
