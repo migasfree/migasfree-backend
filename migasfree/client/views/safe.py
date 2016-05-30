@@ -494,13 +494,13 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             user=user.name,
             description=computer.get_cid_description()
         )
-        for id in att_id:
-            computer.sync_attributes.add(id)
+        for item in att_id:
+            computer.sync_attributes.add(item)
 
         # set of attributes
         att_id = SetOfAttributes.process(computer.get_all_attributes())
-        for id in att_id:
-            computer.sync_attributes.add(id)
+        for item in att_id:
+            computer.sync_attributes.add(item)
 
         update(computer,
             uuid=claims.get('uuid'),
