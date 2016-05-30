@@ -150,7 +150,7 @@ class PackageSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         file_list = validated_data['files']
-        if type(file_list) != 'list':
+        if not isinstance(file_list, list):
             file_list = [file_list]  # always mutiple files
 
         validate_package_name(validated_data['name'], file_list)
