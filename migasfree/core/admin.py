@@ -16,15 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-
 from django.db.models import Q
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
-from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
 
 from import_export import resources, fields, widgets
 from import_export.admin import ImportExportActionModelAdmin
