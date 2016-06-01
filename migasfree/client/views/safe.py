@@ -241,7 +241,10 @@ def get_computer(uuid, name):
         logger.debug('computer found by name')
 
         return computer
-    except models.Computer.DoesNotExist, models.Computer.MultipleObjectsReturned:
+    except (
+        models.Computer.DoesNotExist,
+        models.Computer.MultipleObjectsReturned
+    ):
         return None
 
 
