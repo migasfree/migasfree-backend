@@ -41,7 +41,8 @@ CELERY_IMPORTS = (
 CELERYBEAT_SCHEDULE = {
     'alerts': {
         'task': 'migasfree.stats.tasks.alerts',
-        'schedule': timedelta(seconds=10)
+        'schedule': timedelta(seconds=10),
+        'options': {'expires': 8}
     },
     'computers_deployments': {
         'task': 'migasfree.stats.tasks.computers_deployments',
