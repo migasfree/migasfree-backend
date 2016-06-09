@@ -212,14 +212,14 @@ class Node(models.Model):
         query = Node.objects.filter(
             computer=computer_id,
             name='memory',
-            classname='memory'
+            class_name='memory'
         )
         if query.count() == 1:
             size = query[0].size
         else:
             size = Node.objects.filter(
                 computer=computer_id,
-                classname='memory'
+                class_name='memory'
             ).filter(
                 name__startswith='bank:'
             ).aggregate(
@@ -232,7 +232,7 @@ class Node(models.Model):
     def get_cpu(computer_id):
         query = Node.objects.filter(
             computer=computer_id,
-            classname='processor'
+            class_name='processor'
         ).filter(
             models.Q(description='CPU') | models.Q(name__startswith='cpu:0')
         )
@@ -253,7 +253,7 @@ class Node(models.Model):
         query = Node.objects.filter(
             computer=computer_id,
             name='network',
-            classname='network'
+            class_name='network'
         )
         lst = []
         for iface in query:
@@ -267,7 +267,7 @@ class Node(models.Model):
         query = Node.objects.filter(
             computer=computer_id,
             name='disk',
-            classname='disk',
+            class_name='disk',
             size__gt=0
         )
 
