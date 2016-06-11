@@ -116,7 +116,7 @@ class Attribute(models.Model):
 
     def __str__(self):
         if self.property_att.prefix == 'CID' and \
-        settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] != 'id':
+                settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] != 'id':
             return '%s (CID-%s)' % (self.description, self.value)
         else:
             return '%s-%s' % (self.property_att.prefix, self.value)
@@ -274,7 +274,6 @@ class BasicAttribute(Attribute):
             att_id.append(obj.id)
 
         return att_id
-
 
     class Meta:
         verbose_name = _("Basic Attribute")
