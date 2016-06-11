@@ -51,7 +51,7 @@ class Deployment(models.Model):
         verbose_name=_('enabled'),
         default=True,
         help_text=_("if you uncheck this field, deployment is disabled for all"
-            " computers.")
+                    " computers.")
     )
 
     name = models.CharField(
@@ -147,7 +147,6 @@ class Deployment(models.Model):
             begin_date, datetime.datetime.min.time()
         )
 
-        percent = 0
         if delta.days > 0:
             percent = float(progress.days) / delta.days * 100
             if percent > 100:
@@ -236,7 +235,7 @@ class Deployment(models.Model):
                         lst.append(deploy.id)
                         break
 
-        # 3.- excluded attributtes
+        # 3.- excluded attributes
         deployments = Deployment.objects.filter(id__in=lst).filter(
             ~Q(excluded_attributes__id__in=attributes)
         ).order_by('name')
@@ -258,8 +257,8 @@ def pre_save_deployment(sender, instance, **kwargs):
             raise ValidationError(_('Is not allowed change project'))
 
         if instance.available_packages != old_obj.available_packages \
-        or instance.packages_to_install != old_obj.packages_to_install \
-        or instance.packages_to_remove != old_obj.packages_to_remove:
+                or instance.packages_to_install != old_obj.packages_to_install \
+                or instance.packages_to_remove != old_obj.packages_to_remove:
             con = get_redis_connection('default')
             con.delete('migasfree:deployments:%d:computers' % instance.id)
 
