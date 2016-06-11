@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -81,11 +81,11 @@ class Property(models.Model):
         null=True,
         blank=True,
         help_text=_("This code will execute in the client computer, and it must"
-        " put in the standard output the value of the attribute correspondent"
-        " to this property.<br>The format of this value is 'name~description',"
-        " where 'description' is optional.<br><b>Example of code:</b>"
-        "<br>#Create a attribute with the name of computer from bash<br>"
-        " echo $HOSTNAME")
+                    " put in the standard output the value of the attribute correspondent"
+                    " to this property.<br>The format of this value is 'name~description',"
+                    " where 'description' is optional.<br><b>Example of code:</b>"
+                    "<br>#Create a attribute with the name of computer from bash<br>"
+                    " echo $HOSTNAME")
     )
 
     def __str__(self):
