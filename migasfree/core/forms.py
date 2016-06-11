@@ -26,15 +26,15 @@ from .validators import MimetypeValidator
 from .pms import get_available_mimetypes
 from .fields import MultiFileField
 
-#TODO https://github.com/Chive/django-multiupload
-#TODO https://github.com/blueimp/jQuery-File-Upload/wiki
-#TODO https://github.com/sigurdga/django-jquery-file-upload
-#TODO https://github.com/digi604/django-smart-selects (project -> store)
+# TODO https://github.com/Chive/django-multiupload
+# TODO https://github.com/blueimp/jQuery-File-Upload/wiki
+# TODO https://github.com/sigurdga/django-jquery-file-upload
+# TODO https://github.com/digi604/django-smart-selects (project -> store)
 
 
 class PackageForm(forms.ModelForm):
     package_file = MultiFileField(
-        maximum_file_size = 1024*1024*50,  # FIXME to settings.py
+        maximum_file_size=1024*1024*50,  # FIXME to settings.py
         required=False,
         validators=[MimetypeValidator(get_available_mimetypes())]
     )
