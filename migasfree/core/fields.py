@@ -59,7 +59,7 @@ class MultiFileField(forms.FileField):
                     'num_files': num_files
                 }
             )
-        elif self.max_num and  num_files > self.max_num:
+        elif self.max_num and num_files > self.max_num:
             raise ValidationError(
                 self.error_messages['max_num'] % {
                     'max_num': self.max_num,
