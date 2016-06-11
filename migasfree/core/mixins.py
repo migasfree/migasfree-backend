@@ -19,6 +19,7 @@
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import ugettext_lazy as _
 
 from migasfree import secure
 
@@ -71,7 +72,8 @@ class SafeConnectionMixin(object):
         logger.debug('create_response: %s' % data)
         if not self.encrypt_key:
             self.encrypt_key = '%s.pub' % self.project.slug
-        msg = secure.wrap(data,
+        msg = secure.wrap(
+            data,
             sign_key=self.sign_key,
             encrypt_key=self.encrypt_key
         )
