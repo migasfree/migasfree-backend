@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from django.db.models import Q
 from django.contrib import admin
 from django.shortcuts import redirect
 from django.contrib.admin import SimpleListFilter
@@ -113,9 +114,9 @@ class ComputerAdmin(admin.ModelAdmin):
                 'software_history',
             )
         }),
-        #(_('Devices'), {
+        # (_('Devices'), {
         #    'fields': ('logical_devices',)
-        #}),
+        # }),
     )
 
     """
@@ -190,7 +191,7 @@ class ErrorAdmin(admin.ModelAdmin):
         'truncated_desc',
     )
     list_filter = ('checked', 'created_at', 'project__name')
-    #list_editable = ('checked',)  # TODO
+    # list_editable = ('checked',)  # TODO
     ordering = ('-created_at', 'computer',)
     search_fields = add_computer_search_fields(['created_at', 'description'])
     readonly_fields = ('computer', 'project', 'created_at', 'description')
@@ -199,8 +200,8 @@ class ErrorAdmin(admin.ModelAdmin):
     actions = ['checked_ok']
 
     def checked_ok(self, request, queryset):
-        for error in queryset:
-            error.checked_ok()
+        for item in queryset:
+            item.checked_ok()
 
         return redirect(request.get_full_path())
 
@@ -249,8 +250,8 @@ class UserFaultFilter(SimpleListFilter):
         me = request.user.id
         if self.value() == 'me':
             return queryset.filter(
-                Q(fault_definition__users__id=me)
-                | Q(fault_definition__users=None)
+                Q(fault_definition__users__id=me) |
+                Q(fault_definition__users=None)
             )
         elif self.value() == 'only_me':
             return queryset.filter(fault_definition__users__id=me)
@@ -272,7 +273,7 @@ class FaultAdmin(admin.ModelAdmin):
         'created_at',
         'result',
         'fault_definition',
-        #'list_users'  # performance improvement
+        # 'list_users'  # performance improvement
     )
     list_filter = (
         UserFaultFilter,
@@ -290,8 +291,8 @@ class FaultAdmin(admin.ModelAdmin):
     actions = ['checked_ok']
 
     def checked_ok(self, request, queryset):
-        for fault in queryset:
-            fault.checked_ok()
+        for item in queryset:
+            item.checked_ok()
 
         return redirect(request.get_full_path())
 
