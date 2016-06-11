@@ -24,15 +24,17 @@ import select
 
 from datetime import timedelta
 
+from django.conf import settings
+
 
 def execute(cmd, verbose=False, interactive=False):
-    '''
+    """
     (int, string, string) execute(
         string cmd,
         bool verbose=False,
         bool interactive=True
     )
-    '''
+    """
 
     if verbose:
         print(cmd)
@@ -76,13 +78,13 @@ def execute(cmd, verbose=False, interactive=False):
     if not interactive and _output_buffer:
         _output = _output_buffer
 
-    return (_process.returncode, _output, _error)
+    return _process.returncode, _output, _error
 
 
 def write_file(filename, content):
-    '''
+    """
     bool write_file(string filename, string content)
-    '''
+    """
 
     _file = None
     try:
