@@ -14,6 +14,7 @@ class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('core', '0001_initial'),
+        ('device', '0001_initial'),
     ]
 
     operations = [
@@ -28,7 +29,8 @@ class Migration(migrations.Migration):
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('ip_address', models.GenericIPAddressField(blank=True, null=True, verbose_name='ip address')),
                 ('software_history', models.TextField(blank=True, default=b'', null=True, verbose_name='software history')),
-                ('logical_devices_copy', models.TextField(editable=False, null=True, verbose_name='logical devices copy')),
+                ('logical_devices_assigned', models.ManyToManyField(blank=True, related_name='local_devices_assigned', to='device.Logical', verbose_name='logical devices assigned')),
+                ('logical_devices_installed', models.ManyToManyField(blank=True, editable=False, related_name='local_devices_installed', to='device.Logical', verbose_name='logical devices installed')),
                 ('last_hardware_capture', models.DateTimeField(blank=True, null=True, verbose_name='last hardware capture')),
                 ('sync_start_date', models.DateTimeField(null=True, verbose_name='sync start date')),
                 ('sync_end_date', models.DateTimeField(null=True, verbose_name='sync end date')),
