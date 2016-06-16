@@ -134,22 +134,20 @@ class Computer(models.Model):
         blank=True
     )
 
-    #TODO
-    '''
-    logical_devices = models.ManyToManyField(
+    logical_devices_assigned = models.ManyToManyField(
         # http://python.6.x6.nabble.com/many-to-many-between-apps-td5026629.html
         'device.Logical',
-        null=True,
         blank=True,
-        verbose_name=_("logical devices"),
+        verbose_name=_("logical devices assigned"),
+        related_name='local_devices_assigned',
     )
-    '''
 
-    logical_devices_copy = models.TextField(
-        verbose_name=_("logical devices copy"),
-        null=True,
-        blank=False,
-        editable=False
+    logical_devices_installed = models.ManyToManyField(
+        'device.Logical',
+        blank=True,
+        verbose_name=_("logical devices installed"),
+        related_name='local_devices_installed',
+        editable=False,
     )
 
     last_hardware_capture = models.DateTimeField(
@@ -276,25 +274,11 @@ class Computer(models.Model):
         return list(self.tags.values_list('id', flat=True)) \
             + list(self.sync_attributes.values_list('id', flat=True))
 
-    def remove_device_copy(self, logical_id):
-        try:
-            lst = self.devices_copy.split(',')
-            if logical_id in lst:
-                lst.remove(logical_id)
-                self.devices_copy = ','.join(lst)
-                self.save()
-        except:
-            pass
+    def remove_installed_device(self, logical_id):  # FIXME delete?
+        self.logical_devices_installed.remove(logical_id)
 
-    def append_device_copy(self, logical_id):
-        try:
-            lst = self.devices_copy.split(',')
-            if logical_id not in lst:
-                lst.append(logical_id)
-                self.devices_copy = ','.join(lst)
-                self.save()
-        except:
-            pass
+    def append_installed_device(self, logical_id):  # FIXME delete?
+        self.logical_devices_installed.add(logical_id)
 
     def login(self):
         return u'%s (%s)' % (
@@ -381,7 +365,7 @@ class Computer(models.Model):
     @staticmethod
     def replacement(source, target):
         swap_m2m(source.tags, target.tags)
-        # swap_m2m(source.logical_devices, target.logical_devices)  # TODO
+        swap_m2m(source.logical_devices_assigned, target.logical_devices_assigned)
 
         source_cid = source.get_cid_attribute()
         target_cid = target.get_cid_attribute()
@@ -420,12 +404,6 @@ class Computer(models.Model):
     def get_replacement_info(self):
         cid = self.get_cid_attribute()
 
-        '''  # TODO
-        ugettext("Devices"): ', '.join(
-            str(x) for x in self.logical_devices.all()
-        ),
-        '''
-
         return remove_empty_elements_from_dict({
             ugettext("Computer"): self.__str__(),
             ugettext("Status"): ugettext(self.status),
@@ -448,6 +426,9 @@ class Computer(models.Model):
             ugettext("Delays"): ', '.join(
                 str(x) for x in cid.scheduledelay_set.all()
             ),
+            ugettext("Devices"): ', '.join(
+                str(x) for x in self.logical_devices_assigned.all()
+            ),
         })
 
     def __str__(self):
@@ -461,14 +442,6 @@ class Computer(models.Model):
         verbose_name = _("Computer")
         verbose_name_plural = _("Computers")
 
-#TODO
-'''
-@receiver(m2m_changed, sender=Computer.logical_devices.through)
-def computers_changed(sender, **kwargs):
-    if kwargs['action'] == 'post_add':
-        for computer in Computer.objects.filter(pk__in=kwargs['pk_set']):
-            computer.remove_device_copy(kwargs['instance'].id)
-'''
 
 from .status_log import StatusLog
 
@@ -488,7 +461,7 @@ def post_save_computer(sender, instance, created, **kwargs):
 
     if instance.status in ['available', 'unsubscribed']:
         instance.tags.clear()
-        # instance.logical_devices.clear()  # TODO
+        instance.logical_devices_assigned.clear()
 
         cid = instance.get_cid_attribute()
         cid.faultdefinition_set.clear()
