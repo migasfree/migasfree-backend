@@ -114,9 +114,9 @@ class ComputerAdmin(admin.ModelAdmin):
                 'software_history',
             )
         }),
-        # (_('Devices'), {
-        #    'fields': ('logical_devices',)
-        # }),
+        (_('Devices'), {
+            'fields': ('logical_devices_assigned',)
+        }),
     )
 
     """
@@ -143,7 +143,7 @@ class ComputerAdmin(admin.ModelAdmin):
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         '''
-        if db_field.name == "logical_devices":
+        if db_field.name == "logical_devices_assigned":
             kwargs['widget'] = FilteredSelectMultiple(
                 db_field.verbose_name,
                 (db_field.name in self.filter_vertical)
