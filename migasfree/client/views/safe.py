@@ -32,6 +32,7 @@ from migasfree.core.mixins import SafeConnectionMixin
 from migasfree.core.models import (
     Deployment, Property, Attribute, BasicAttribute, SetOfAttributes
 )
+from migasfree.device.models import Logical
 
 from .. import models, serializers, tasks
 
@@ -837,7 +838,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             'default_included_packages'
         )
         for packages_to_install, default_preincluded_packages, \
-        default_included_packages in pkgs:
+                default_included_packages in pkgs:
             if packages_to_install:
                 [remove.append(x) for x in packages_to_install.split('\n') if x]
             if default_preincluded_packages:
@@ -1010,11 +1011,120 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = {'id': 1}
 
         Returns: {
-            "install": ["one", "two"],
-            "remove": ["three"]
+            "install": [
+                {
+                    "printer": {
+                        "id": 99,
+                        "name": "xxxx",
+                        "model": "xxxx",
+                        "driver": "xxxx",
+                        "feature": "xxxx",
+                        "manufacturer": "xxxx",
+                        "packages": ["pkg1", "pkg2"],
+                        connection: {}
+                    }
+                },
+                {
+                    "printer": {
+                        ...
+                    }
+                }
+            ],
+            "remove": [
+                {"printer": id1},
+                {"printer": id2},
+                ...
+            ]
         }
         """
 
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
-        # TODO to devices app views.py
+
+        # logger.debug('logical_devices_assigned', computer.logical_devices_assigned)
+        # logger.debug('logical_devices_installed', computer.logical_devices_installed)
+        # print computer.logical_devices_assigned.values()  # DEBUG
+        # print computer.logical_devices_installed.values()  # DEBUG
+
+        """
+        lst_dev_remove = []
+        lst_dev_install = []
+        chk_devices = Mmcheck(
+            o_computer.devices_logical,
+            o_computer.devices_copy
+        )
+        logger.debug('devices_logical %s' % vl2s(o_computer.devices_logical))
+        logger.debug('devices_copy %s' % o_computer.devices_copy)
+        if chk_devices.changed():
+            # remove devices
+            lst_diff = list_difference(
+                s2l(o_computer.devices_copy),
+                s2l(chk_devices.mms())
+            )
+            logger.debug('list diff: %s' % lst_diff)
+            for item_id in lst_diff:
+                try:
+                    dev_logical = DeviceLogical.objects.get(id=item_id)
+                    lst_dev_remove.append({
+                        dev_logical.device.connection.devicetype.name: item_id
+                    })
+                except ObjectDoesNotExist:
+                    # maybe device_logical has been deleted
+                    # FIXME hardcoded values
+                    lst_dev_remove.append({'printer': item_id})
+
+            # install devices
+            lst_diff = list_difference(
+                s2l(chk_devices.mms()),
+                s2l(o_computer.devices_copy)
+            )
+            for item_id in lst_diff:
+                try:
+                    device_logical = DeviceLogical.objects.get(id=item_id)
+                    lst_dev_install.append(
+                        device_logical.datadict(o_computer.version)
+                    )
+                except ObjectDoesNotExist:
+                    pass
+
+        logger.debug('install devices: %s' % lst_dev_install)
+        logger.debug('remove devices: %s' % lst_dev_remove)
+
+        retdata = {}
+        retdata["devices"] = {
+            "remove": lst_dev_remove,
+            "install": lst_dev_install
+        }
+        """
+
+        # DEBUG
+        return Response(
+            self.create_response(ugettext('Data received')),
+            status=status.HTTP_200_OK
+        )
+
+    @list_route(methods=['post'], url_path='devices/changes')
+    def devices_changes(self, request, format=None):
+        """
+        claims = {
+            'id': 1,
+            'installed': [id1, id2, ..., idN],
+            'removed': [id1, id2, ..., idN]
+        }
+        """
+
+        claims = self.get_claims(request.data)
+        computer = get_object_or_404(models.Computer, id=claims.get('id'))
+        installed = claims.get('installed')
+        removed = claims.get('removed')
+
+        for logical_id in installed:
+            computer.logical_devices_installed.add(logical_id)
+
+        for logical_id in removed:
+            computer.logical_devices_installed.remove(logical_id)
+
+        return Response(
+            self.create_response(ugettext('Data received')),
+            status=status.HTTP_200_OK
+        )
