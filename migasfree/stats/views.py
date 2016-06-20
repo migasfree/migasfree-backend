@@ -93,7 +93,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
 
         key = 'migasfree:stats:months'
         if project_id:
-            project = get_object_or_404(Project, pk=project_id)
+            get_object_or_404(Project, pk=project_id)
             key = 'migasfree:stats:%d:months' % int(project_id)
 
         con = get_redis_connection('default')
@@ -130,7 +130,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
 
         key = 'migasfree:stats:days'
         if project_id:
-            project = get_object_or_404(Project, pk=project_id)
+            get_object_or_404(Project, pk=project_id)
             key = 'migasfree:stats:%d:days' % int(project_id)
 
         con = get_redis_connection('default')
@@ -170,7 +170,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
 
         key = 'migasfree:stats:hours'
         if project_id:
-            project = get_object_or_404(Project, pk=project_id)
+            get_object_or_404(Project, pk=project_id)
             key = 'migasfree:stats:%d:hours' % int(project_id)
 
         con = get_redis_connection('default')
@@ -214,6 +214,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             Computer.count_by_attributes(attributes, project_id),
             status=status.HTTP_200_OK
         )
+
 
 class DeploymentStatsViewSet(viewsets.ViewSet):
     @detail_route(methods=['get'], url_path='computers/assigned')
