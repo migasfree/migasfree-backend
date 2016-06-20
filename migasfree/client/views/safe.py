@@ -18,6 +18,7 @@
 
 from datetime import datetime, timedelta
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -160,11 +161,11 @@ def add_computer_message(computer, message):
     con.sadd('migasfree:watch:msg', computer.id)
 
 
-def remove_computer_messages(id):
+def remove_computer_messages(computer_id):
     con = get_redis_connection('default')
-    keys = con.hkeys('migasfree:msg:%d' % id)
-    con.hdel('migasfree:msg:%d' % id, *keys)
-    con.srem('migasfree:watch:msg', id)
+    keys = con.hkeys('migasfree:msg:%d' % computer_id)
+    con.hdel('migasfree:msg:%d' % computer_id, *keys)
+    con.srem('migasfree:watch:msg', computer_id)
 
 
 def get_user_or_create(name, fullname, ip_address=None):
@@ -506,7 +507,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         for item in att_id:
             computer.sync_attributes.add(item)
 
-        update(computer,
+        update(
+            computer,
             uuid=claims.get('uuid'),
             name=claims.get('name'),
             ip_address=claims.get('ip_address'),
@@ -692,6 +694,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
         if pkgs:
+            install = []
+            remove = []
             for install_item, remove_item in pkgs:
                 if install_item:
                     install = [x for x in install_item.split('\n') if x]
@@ -842,11 +846,11 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             if packages_to_install:
                 [remove.append(x) for x in packages_to_install.split('\n') if x]
             if default_preincluded_packages:
-                [remove.append(x) for x in \
-                default_preincluded_packages.split('\n') if x]
+                [remove.append(x) for x in
+                    default_preincluded_packages.split('\n') if x]
             if default_included_packages:
-                [remove.append(x) for x in \
-                default_included_packages.split('\n') if x]
+                [remove.append(x) for x in
+                    default_included_packages.split('\n') if x]
 
         pkgs = repos.values_list(
             'packages_to_remove', 'default_excluded_packages'
@@ -855,8 +859,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             if packages_to_remove:
                 [install.append(x) for x in packages_to_remove.split('\n') if x]
             if default_excluded_packages:
-                [install.append(x) for x in \
-                default_excluded_packages.split('\n') if x]
+                [install.append(x) for x in
+                    default_excluded_packages.split('\n') if x]
 
         # New Repositories
         repos = Deployment.available_deployments(
@@ -870,25 +874,25 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             if packages_to_remove:
                 [remove.append(x) for x in packages_to_remove.split('\n') if x]
             if default_excluded_packages:
-                [remove.append(x) for x in \
-                default_excluded_packages.split('\n') if x]
+                [remove.append(x) for x in
+                    default_excluded_packages.split('\n') if x]
 
         pkgs = repos.values_list(
             'packages_to_install', 'default_included_packages'
         )
         for packages_to_install, default_included_packages in pkgs:
             if packages_to_install:
-                [install.append(x) for x in \
-                packages_to_install.split('\n') if x]
+                [install.append(x) for x in
+                    packages_to_install.split('\n') if x]
             if default_included_packages:
-                [install.append(x) for x in \
-                default_included_packages.split('\n') if x]
+                [install.append(x) for x in
+                    default_included_packages.split('\n') if x]
 
         pkgs = repos.values_list('default_preincluded_packages')
         for default_preincluded_packages in pkgs:
             if default_preincluded_packages:
-                [preinstall.append(x) for x in \
-                default_preincluded_packages.split('\n') if x]
+                [preinstall.append(x) for x in
+                    default_preincluded_packages.split('\n') if x]
 
         ret = {
             "preinstall": preinstall,
@@ -1041,65 +1045,49 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        # logger.debug('logical_devices_assigned', computer.logical_devices_assigned)
-        # logger.debug('logical_devices_installed', computer.logical_devices_installed)
-        # print computer.logical_devices_assigned.values()  # DEBUG
-        # print computer.logical_devices_installed.values()  # DEBUG
+        logical_devices_assigned = computer.logical_devices_assigned.values_list('id', flat=True)
+        logical_devices_installed = computer.logical_devices_installed.values_list('id', flat=True)
+        logger.debug('logical_devices_assigned: %s', logical_devices_assigned)
+        logger.debug('logical_devices_installed: %s', logical_devices_installed)
 
-        """
-        lst_dev_remove = []
-        lst_dev_install = []
-        chk_devices = Mmcheck(
-            o_computer.devices_logical,
-            o_computer.devices_copy
-        )
-        logger.debug('devices_logical %s' % vl2s(o_computer.devices_logical))
-        logger.debug('devices_copy %s' % o_computer.devices_copy)
-        if chk_devices.changed():
-            # remove devices
-            lst_diff = list_difference(
-                s2l(o_computer.devices_copy),
-                s2l(chk_devices.mms())
-            )
-            logger.debug('list diff: %s' % lst_diff)
-            for item_id in lst_diff:
+        devices_to_install = []
+        devices_to_remove = []
+
+        if cmp(logical_devices_assigned, logical_devices_installed) != 0:
+            # remove logical devices
+            diff = list(set(logical_devices_installed) - set(logical_devices_assigned))
+            logger.debug('list to remove: %s', diff)
+            for item in diff:
                 try:
-                    dev_logical = DeviceLogical.objects.get(id=item_id)
-                    lst_dev_remove.append({
-                        dev_logical.device.connection.devicetype.name: item_id
+                    logical_device = Logical.objects.get(pk=item)
+                    devices_to_remove.append({
+                        logical_device.device.connection.device_type.name: item
                     })
                 except ObjectDoesNotExist:
-                    # maybe device_logical has been deleted
+                    # maybe logical device has been deleted
                     # FIXME hardcoded values
-                    lst_dev_remove.append({'printer': item_id})
+                    devices_to_remove.append({'PRINTER': item})
 
-            # install devices
-            lst_diff = list_difference(
-                s2l(chk_devices.mms()),
-                s2l(o_computer.devices_copy)
-            )
-            for item_id in lst_diff:
+            # install logical devices
+            diff = list(set(logical_devices_assigned) - set(logical_devices_installed))
+            logger.debug('list to install: %s', diff)
+            for item in diff:
                 try:
-                    device_logical = DeviceLogical.objects.get(id=item_id)
-                    lst_dev_install.append(
-                        device_logical.datadict(o_computer.version)
-                    )
+                    logical_device = Logical.objects.get(pk=item)
+                    devices_to_install.append(logical_device.data_to_dict(computer.project))
                 except ObjectDoesNotExist:
                     pass
 
-        logger.debug('install devices: %s' % lst_dev_install)
-        logger.debug('remove devices: %s' % lst_dev_remove)
+        logger.debug('devices to install: %s', devices_to_install)
+        logger.debug('devices to remove: %s', devices_to_remove)
 
-        retdata = {}
-        retdata["devices"] = {
-            "remove": lst_dev_remove,
-            "install": lst_dev_install
+        response = {
+            'install': devices_to_install,
+            'remove': devices_to_remove
         }
-        """
 
-        # DEBUG
         return Response(
-            self.create_response(ugettext('Data received')),
+            self.create_response(response),
             status=status.HTTP_200_OK
         )
 
