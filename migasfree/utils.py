@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
 # Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
@@ -36,6 +35,8 @@ def execute(cmd, verbose=False, interactive=False):
     )
     """
 
+    _output_buffer = ''
+
     if verbose:
         print(cmd)
 
@@ -54,7 +55,6 @@ def execute(cmd, verbose=False, interactive=False):
             stdout=subprocess.PIPE
         )
 
-        _output_buffer = ''
         if verbose:
             fcntl.fcntl(
                 _process.stdout.fileno(),
@@ -142,16 +142,18 @@ def uuid_change_format(uuid):
     """
     if len(uuid) == 36:
         return "%s%s%s%s-%s%s-%s%s-%s-%s" % (
-                uuid[6:8],
-                uuid[4:6],
-                uuid[2:4],
-                uuid[0:2],
-                uuid[11:13],
-                uuid[9:11],
-                uuid[16:18],
-                uuid[14:16],
-                uuid[19:23],
-                uuid[24:36])
+            uuid[6:8],
+            uuid[4:6],
+            uuid[2:4],
+            uuid[0:2],
+            uuid[11:13],
+            uuid[9:11],
+            uuid[16:18],
+            uuid[14:16],
+            uuid[19:23],
+            uuid[24:36]
+        )
+
     return uuid
 
 
@@ -159,7 +161,7 @@ def time_horizon(date, delay):
     """
     No weekends
     """
-    weekday = int(date.strftime("%w"))  # [0(Sunday),6]
+    weekday = int(date.strftime("%w"))  # [0(Sunday), 6]
     delta = delay + (((delay + weekday - 1) / 5) * 2)
 
     return date + timedelta(days=delta)
