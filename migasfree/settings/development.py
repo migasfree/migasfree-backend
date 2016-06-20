@@ -26,6 +26,9 @@ from .functions import secret_key
 # development environment
 DEBUG = True
 TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
+LOGGING['loggers']['migasfree']['level'] = 'DEBUG'
+LOGGING['handlers']['console']['level'] = 'DEBUG'
+LOGGING['handlers']['file']['level'] = 'DEBUG'
 
 MIGASFREE_DB_DIR = os.path.dirname(MIGASFREE_PROJECT_DIR)
 MIGASFREE_PUBLIC_DIR = os.path.join(MIGASFREE_PROJECT_DIR, 'pub')
