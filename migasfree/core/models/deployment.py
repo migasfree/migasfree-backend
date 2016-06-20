@@ -78,7 +78,7 @@ class Deployment(models.Model):
         blank=True,
         verbose_name=_('available'),
         help_text=_('If a computer has installed one of these packages it will'
-            ' be updated')
+                    ' be updated')
     )
 
     packages_to_install = models.TextField(
@@ -141,7 +141,8 @@ class Deployment(models.Model):
     def __str__(self):
         return self.name
 
-    def get_percent(self, begin_date, end_date):
+    @staticmethod
+    def get_percent(begin_date, end_date):
         delta = end_date - begin_date
         progress = datetime.datetime.now() - datetime.datetime.combine(
             begin_date, datetime.datetime.min.time()
