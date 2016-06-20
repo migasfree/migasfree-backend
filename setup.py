@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,38 +38,39 @@ PATH = os.path.dirname(__file__)
 README = open(os.path.join(PATH, 'README.md')).read()
 VERSION = open(os.path.join(PATH, 'VERSION')).read().splitlines()[0]
 
-REQUIRES = filter(lambda s: len(s) > 0,
-    open(os.path.join(PATH, 'requirements', 'base.txt')).read().split('\n'))
+REQUIRES = filter(
+    lambda s: len(s) > 0,
+    open(os.path.join(PATH, 'requirements', 'base.txt')).read().split('\n')
+)
 
 from setuptools import setup, find_packages
 from distutils.command.install_data import install_data
 
 
 class InstallData(install_data):
-    def run(self):
-        # self.data_files.extend(self._find_pub_files())
-        self.data_files.extend(self._find_other_files())
-        self.data_files.extend(self._find_doc_files())
-        install_data.run(self)
-
-    def _find_pub_files(self):
+    @staticmethod
+    def _find_pub_files():
         data_files = []
 
         for root, dirs, files in os.walk('pub'):
             if 'source' in root:
                 continue  # exclude SVG files
+
             final_files = []
             for archive in files:
                 final_files.append(os.path.join(root, archive))
 
             data_files.append(
-                ('/var/%s' % os.path.join('migasfree-backend', root),
-                final_files)
+                (
+                    '/var/%s' % os.path.join('migasfree-backend', root),
+                    final_files
+                )
             )
 
         return data_files
 
-    def _find_other_files(self):
+    @staticmethod
+    def _find_other_files():
         data_files = []
 
         for directory in ['packages']:
@@ -79,13 +80,16 @@ class InstallData(install_data):
                     final_files.append(os.path.join(root, archive))
 
                 data_files.append(
-                    ('/usr/share/%s' % os.path.join('migasfree-backend', root),
-                    final_files)
+                    (
+                        '/usr/share/%s' % os.path.join('migasfree-backend', root),
+                        final_files
+                    )
                 )
 
         return data_files
 
-    def _find_doc_files(self):
+    @staticmethod
+    def _find_doc_files():
         data_files = []
 
         for root, dirs, files in os.walk('doc'):
@@ -111,6 +115,13 @@ class InstallData(install_data):
             )
 
         return data_files
+
+    def run(self):
+        # self.data_files.extend(self._find_pub_files())
+        self.data_files.extend(self._find_other_files())
+        self.data_files.extend(self._find_doc_files())
+        install_data.run(self)
+
 
 setup(
     name='migasfree-backend',
@@ -138,7 +149,7 @@ setup(
         ('/usr/share/doc/migasfree-backend', [
             'AUTHORS',
             'LICENSE',
-            #'INSTALL',
+            # 'INSTALL',  # TODO
             'MANIFEST.in',
             'README.md',
             'VERSION',
