@@ -20,7 +20,7 @@ from datetime import datetime
 
 from django.db import models, transaction
 from django.db.models import Count
-from django.db.models.signals import m2m_changed, pre_save, post_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -273,12 +273,6 @@ class Computer(models.Model):
     def get_all_attributes(self):
         return list(self.tags.values_list('id', flat=True)) \
             + list(self.sync_attributes.values_list('id', flat=True))
-
-    def remove_installed_device(self, logical_id):  # FIXME delete?
-        self.logical_devices_installed.remove(logical_id)
-
-    def append_installed_device(self, logical_id):  # FIXME delete?
-        self.logical_devices_installed.add(logical_id)
 
     def login(self):
         return u'%s (%s)' % (
