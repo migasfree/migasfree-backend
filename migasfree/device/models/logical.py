@@ -59,6 +59,7 @@ class Logical(models.Model):
         return self.name if self.name else self.feature.name
 
     def data_to_dict(self, project):
+        driver_dict = {}
         try:
             driver = Driver.objects.filter(
                 project__id=project.id,
@@ -68,7 +69,7 @@ class Logical(models.Model):
             if driver:
                 driver_dict = driver.data_to_dict()
         except:
-            driver_dict = {}
+            pass
 
         ret = {
             self.device.connection.device_type.name: {
