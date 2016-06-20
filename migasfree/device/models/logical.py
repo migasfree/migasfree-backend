@@ -71,7 +71,7 @@ class Logical(models.Model):
             driver_dict = {}
 
         ret = {
-            self.device.connection.devicetype.name: {
+            self.device.connection.device_type.name: {
                 'feature': self.get_name(),
                 'id': self.id,
                 'manufacturer': self.device.model.manufacturer.name
@@ -80,10 +80,10 @@ class Logical(models.Model):
 
         device_dict = self.device.data_to_dict()
         for key, value in list(device_dict.items()):
-            ret[self.device.connection.devicetype.name][key] = value
+            ret[self.device.connection.device_type.name][key] = value
 
         for key, value in list(driver_dict.items()):
-            ret[self.device.connection.devicetype.name][key] = value
+            ret[self.device.connection.device_type.name][key] = value
 
         return ret
 
