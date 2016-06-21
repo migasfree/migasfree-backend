@@ -33,7 +33,9 @@ from stats.routers import router as stats_router
 from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
+
     url(r'^grappelli/', include('grappelli.urls')),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),
@@ -52,7 +54,7 @@ urlpatterns = patterns('',
     url(r'^token-auth-jwt/', 'rest_framework_jwt.views.obtain_jwt_token'),
 
     url(r'^docs/', include('rest_framework_swagger.urls')),
-    #url(r'^auth/', include('djoser.urls')),
+    # url(r'^auth/', include('djoser.urls')),
 )
 
 if settings.DEBUG and settings.MEDIA_ROOT is not None:
@@ -62,7 +64,7 @@ if settings.DEBUG and settings.MEDIA_ROOT is not None:
         show_indexes=True
     )
 
-# initial dabatase setup
+# initial database setup
 
 from django.core import management
 from django.db import connection
