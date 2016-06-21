@@ -19,6 +19,8 @@
 import json
 
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
@@ -82,16 +84,14 @@ class Device(models.Model):
         unique_together = (("connection", "name"),)
 
 
-''' TODO
 @receiver(pre_save, sender=Device)
 def pre_save_device(sender, instance, **kwargs):
     if instance.id:
         old_obj = Device.objects.get(pk=instance.id)
         if old_obj.data != instance.data or \
-        old_obj.name != instance.name or \
-        old_obj.connection.id != instance.connection.id or \
-        old_obj.model.id != instance.model.id:
-            for logical_device in instance.devicelogical_set.all():
-                for computer in logical_device.computer_set.all():
-                    computer.remove_device_copy(logical_device.id)
-'''
+                old_obj.name != instance.name or \
+                old_obj.connection.id != instance.connection.id or \
+                old_obj.model.id != instance.model.id:
+            for logical_device in instance.logical_set.all():
+                for computer in logical_device.logical_devices_assigned.all():
+                    computer.logical_devices_installed.remove(logical_device.id)
