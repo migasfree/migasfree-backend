@@ -101,6 +101,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
 '''
 
+
 class PlatformViewSet(viewsets.ModelViewSet):
     queryset = Platform.objects.all()
     serializer_class = PlatformSerializer
@@ -149,11 +150,13 @@ class ScheduleViewSet(viewsets.ModelViewSet):
     serializer_class = ScheduleSerializer
 
 
-class PackageViewSet(mixins.CreateModelMixin,
+class PackageViewSet(
+        mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         mixins.DestroyModelMixin,
         mixins.ListModelMixin,
-        viewsets.GenericViewSet):
+        viewsets.GenericViewSet
+):
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
     filter_class = PackageFilter
@@ -281,7 +284,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             if package:
                 package[0].update_store(store)
             else:
-                package = Package.objects.create(
+                Package.objects.create(
                     name=_file.name,
                     project=project,
                     store=store,
@@ -335,7 +338,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         if package:
             package[0].update_store(store)
         else:
-            package = Package.objects.create(
+            Package.objects.create(
                 name=claims.get('packageset'),
                 project=project,
                 store=store,
@@ -357,7 +360,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             )
             try:
                 os.makedirs(os.path.dirname(dst))
-            except:
+            except OSError:
                 pass
             os.rename(target, dst)
 
