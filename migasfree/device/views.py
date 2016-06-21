@@ -16,11 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext
-from rest_framework import viewsets, status, filters, mixins
-from rest_framework.decorators import list_route, detail_route
-from rest_framework.response import Response
+from rest_framework import viewsets, filters
 from rest_framework_filters import backends
 
 from .models import (
