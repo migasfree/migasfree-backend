@@ -139,14 +139,14 @@ class Computer(models.Model):
         'device.Logical',
         blank=True,
         verbose_name=_("logical devices assigned"),
-        related_name='local_devices_assigned',
+        related_name='logical_devices_assigned',
     )
 
     logical_devices_installed = models.ManyToManyField(
         'device.Logical',
         blank=True,
         verbose_name=_("logical devices installed"),
-        related_name='local_devices_installed',
+        related_name='logical_devices_installed',
         editable=False,
     )
 
