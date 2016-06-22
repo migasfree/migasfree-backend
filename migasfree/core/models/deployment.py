@@ -220,7 +220,7 @@ class Deployment(models.Model):
             project__id=computer.project.id
         ).filter(
             enabled=True
-        ).filter(schedule__scheduledelay__attributes__id__in=attributes).extra(
+        ).filter(schedule__delays__attributes__id__in=attributes).extra(
             select={
                 'delay': 'core_scheduledelay.delay',
                 'duration': 'core_scheduledelay.duration'
