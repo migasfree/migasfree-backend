@@ -82,14 +82,14 @@ class Package(models.Model):
         # name_version_architecture.ext convention
         try:
             name, version, architecture = package_name.split('_')
-        except:
+        except ValueError:
             if package_name.count('_') > 2:
                 slices = package_name.split('_', 1)
                 name = slices[0]
                 version, architecture = slices[1].rsplit('_', 1)
                 architecture = architecture.split('.')[0]
 
-        return (name, version, architecture)
+        return name, version, architecture
 
     def __str__(self):
         return self.fullname
