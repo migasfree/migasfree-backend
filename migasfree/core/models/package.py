@@ -145,6 +145,6 @@ def delete_package(sender, instance, **kwargs):
             if os.path.isfile(_path):
                 os.remove(_path)
             else:
-                shutil.rmtree(_path)
-        except:
+                shutil.rmtree(_path, ignore_errors=True)
+        except OSError:
             pass
