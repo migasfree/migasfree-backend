@@ -18,7 +18,6 @@
 
 from django.contrib import admin
 from django import forms
-from django.db import models
 
 from .models import (
     Type, Feature, Manufacturer, Connection,
@@ -54,37 +53,6 @@ class DriverAdmin(admin.ModelAdmin):
 
 
 class LogicalForm(forms.ModelForm):
-    """
-    x = make_ajax_form(Computer, {'devices_logical': 'computer'})
-
-    computers = x.logical
-    computers.label = _('Computers')
-
-    def __init__(self, *args, **kwargs):
-        super(LogicalForm, self).__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
-            lst = []
-            for computer in self.instance.computer_set.all():
-                lst.append(computer.id)
-            self.fields['computers'].initial = lst
-
-    def save(self, commit=True):
-        instance = forms.ModelForm.save(self, False)
-        old_save_m2m = self.save_m2m
-
-        def save_m2m():
-            old_save_m2m()
-            instance.computer_set.clear()
-            for computer in self.cleaned_data['computers']:
-                instance.computer_set.add(computer)
-
-        self.save_m2m = save_m2m
-        if commit:
-            instance.save()
-            self.save_m2m()
-        return instance
-    """
-
     class Meta:
         model = Logical
         fields = ['device', 'feature']
@@ -93,7 +61,7 @@ class LogicalForm(forms.ModelForm):
 @admin.register(Logical)
 class LogicalAdmin(admin.ModelAdmin):
     form = LogicalForm
-    fields = ('device', 'feature', 'name')  #, 'computers')
+    fields = ('device', 'feature', 'name')  # 'computers')
     list_select_related = ('device', 'feature',)
     list_display = ('device', 'feature')
     ordering = ('device__name', 'feature__name')
