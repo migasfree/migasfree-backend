@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -33,9 +33,7 @@ from stats.routers import router as stats_router
 from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns(
-    '',
-
+urlpatterns = [
     url(r'^grappelli/', include('grappelli.urls')),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),
@@ -55,7 +53,7 @@ urlpatterns = patterns(
 
     url(r'^docs/', include('rest_framework_swagger.urls')),
     # url(r'^auth/', include('djoser.urls')),
-)
+]
 
 if settings.DEBUG and settings.MEDIA_ROOT is not None:
     urlpatterns += static(
