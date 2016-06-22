@@ -26,7 +26,8 @@ from .property import Property
 
 
 class AttributeManager(models.Manager):
-    def create(self, property_att, value,
+    def create(
+        self, property_att, value,
         description=None, longitude=None, latitude=None
     ):
         """
@@ -62,7 +63,7 @@ class AttributeManager(models.Manager):
         for tag in tags:
             try:
                 prefix, value = tag.split('-', 1)
-            except:
+            except ValueError:
                 continue
 
             qs.append(Q(property_att__prefix=prefix, value=value))

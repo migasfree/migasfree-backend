@@ -618,7 +618,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         for name, result in claims.get('faults').iteritems():
             try:
                 definition = models.FaultDefinition.objects.get(name=name)
-            except:
+            except ObjectDoesNotExist:
                 continue
 
             if result != '':  # something went wrong

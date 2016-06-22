@@ -21,6 +21,7 @@ from __future__ import absolute_import
 from datetime import datetime, timedelta
 
 from django.db.models import Q
+from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.utils.translation import ugettext
 from celery import shared_task
@@ -175,7 +176,7 @@ def alerts():
 def assigned_computers_to_deployment(deployment_id):
     try:
         deploy = Deployment.objects.get(pk=deployment_id)
-    except:
+    except ObjectDoesNotExist:
         return
 
     computers = set(Computer.objects.filter(
