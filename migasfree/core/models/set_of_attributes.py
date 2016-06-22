@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -78,12 +78,12 @@ class SetOfAttributes(models.Model):
     def item_at_index(lst, item, before=-1):
         try:
             id_before = lst.index(before)
-        except:
+        except ValueError:
             id_before = -1
 
         try:
             id_item = lst.index(item)
-        except:
+        except ValueError:
             id_item = -1
 
         if id_item == -1:
