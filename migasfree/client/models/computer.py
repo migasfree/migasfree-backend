@@ -371,7 +371,7 @@ class Computer(models.Model):
             source_cid.ExcludedAttributesGroup,
             target_cid.ExcludedAttributesGroup
         )
-        swap_m2m(source_cid.scheduledelay_set, target_cid.scheduledelay_set)
+        swap_m2m(source_cid.delays, target_cid.delays)
 
         source.status, target.status = target.status, source.status
 
@@ -418,7 +418,7 @@ class Computer(models.Model):
                 str(x) for x in cid.ExcludedAttributesGroup.all()
             ),
             ugettext("Delays"): ', '.join(
-                str(x) for x in cid.scheduledelay_set.all()
+                str(x) for x in cid.delays.all()
             ),
             ugettext("Devices"): ', '.join(
                 str(x) for x in self.logical_devices_assigned.all()
@@ -463,4 +463,4 @@ def post_save_computer(sender, instance, created, **kwargs):
         cid.ExcludeAttribute.clear()
         cid.setofattributes_set.clear()
         cid.ExcludedAttributesGroup.clear()
-        cid.scheduledelay_set.clear()
+        cid.delays.clear()

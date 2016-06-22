@@ -186,8 +186,8 @@ def assigned_computers_to_deployment(deployment_id):
         )
     ).values_list('id', flat=True))
 
-    if deploy.schedule and deploy.schedule.scheduledelay_set:
-        for delay in deploy.schedule.scheduledelay_set.all():
+    if deploy.schedule and deploy.schedule.delays:
+        for delay in deploy.schedule.delays.all():
             computers = computers.union(set(Computer.objects.filter(
                 Q(project=deploy.project) & (
                     Q(sync_attributes__id__in=delay.attributes.all())

@@ -125,7 +125,7 @@ class Migration(migrations.Migration):
                 ('delay', models.IntegerField(verbose_name='delay')),
                 ('duration', models.IntegerField(default=1, validators=[django.core.validators.MinValueValidator(1)], verbose_name='duration')),
                 ('attributes', models.ManyToManyField(blank=True, to='core.Attribute', verbose_name='attributes')),
-                ('schedule', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.Schedule', verbose_name='schedule')),
+                ('schedule', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.Schedule', related_name='delays', verbose_name='schedule')),
             ],
             options={
                 'verbose_name': 'Schedule Delay',

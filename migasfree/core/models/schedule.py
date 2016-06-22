@@ -38,7 +38,7 @@ class Schedule(models.Model):
     )
 
     def number_delays(self):
-        return self.scheduledelay_set.count()
+        return self.delays.count()
 
     number_delays.short_description = _("Number of delays")
 

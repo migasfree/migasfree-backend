@@ -33,6 +33,7 @@ class ScheduleDelay(models.Model):
 
     schedule = models.ForeignKey(
         Schedule,
+        related_name='delays',
         verbose_name=_("schedule")
     )
 
