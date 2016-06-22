@@ -18,6 +18,7 @@
 
 from __future__ import absolute_import
 
+from django.core.exceptions import ObjectDoesNotExist
 from celery import shared_task
 from celery.exceptions import Ignore
 
@@ -43,7 +44,7 @@ def update_software_inventory(computer_id, inventory):
                     pkgs.append(Package.objects.get(
                         fullname=package, project__id=computer.project.id
                     ))
-                except:
+                except ObjectDoesNotExist:
                     pkgs.append(Package.objects.create(
                         fullname=package,
                         name=name,
