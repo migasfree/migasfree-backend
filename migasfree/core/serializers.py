@@ -56,9 +56,26 @@ class PlatformSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ProjectInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ('id', 'name')
+
+
 class ProjectSerializer(serializers.ModelSerializer):
+    platform = PlatformSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Project
+        fields = (
+            'id', 'name', 'pms',
+            'architecture', 'autoregister', 'platform'
+        )
+
+
+class ProjectWriteSerializer(serializers.ModelSerializer):
     def init(self, *args, **kwargs):
-        super(ProjectSerializer, self).__init__(*args, **kwargs)
+        super(ProjectWriteSerializer, self).__init__(*args, **kwargs)
         self.fields['pms'].validators.append(validate_project_pms)
 
     class Meta:
@@ -70,15 +87,37 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
 class StoreSerializer(serializers.ModelSerializer):
+    project = ProjectInfoSerializer(many=False, read_only=True)
+
     class Meta:
         model = Store
         fields = ('id', 'name', 'project')
+
+
+class StoreWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Store
+        fields = ('id', 'name', 'project')
+
+
+class ServerPropertyInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServerProperty
+        fields = ('id', 'prefix', 'name')
 
 
 class ServerPropertySerializer(serializers.ModelSerializer):
     class Meta:
         model = ServerProperty
         fields = ('id', 'prefix', 'name', 'kind', 'enabled')
+
+
+class ClientPropertyInfoSerializer(serializers.ModelSerializer):
+    code = serializers.CharField(allow_blank=False)
+
+    class Meta:
+        model = ClientProperty
+        fields = ('id', 'prefix', 'name')
 
 
 class ClientPropertySerializer(serializers.ModelSerializer):
@@ -96,12 +135,28 @@ class AttributeSerializer(serializers.ModelSerializer):
 
 
 class ServerAttributeSerializer(serializers.ModelSerializer):
+    property_att = ServerPropertyInfoSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = ServerAttribute
+        fields = ('id', 'property_att', 'value', 'description')
+
+
+class ServerAttributeWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServerAttribute
         fields = ('id', 'property_att', 'value', 'description')
 
 
 class ClientAttributeSerializer(serializers.ModelSerializer):
+    property_att = ServerPropertyInfoSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = ServerAttribute
+        fields = ('id', 'property_att', 'value', 'description')
+
+
+class ClientAttributeWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClientAttribute
         fields = ('id', 'property_att', 'value', 'description')
@@ -151,7 +206,7 @@ class PackageSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         file_list = validated_data['files']
         if not isinstance(file_list, list):
-            file_list = [file_list]  # always mutiple files
+            file_list = [file_list]  # always multiple files
 
         validate_package_name(validated_data['name'], file_list)
         if validated_data['name'] == '' and len(file_list) == 1:
@@ -186,7 +241,7 @@ class DeploymentSerializer(serializers.ModelSerializer):
         )
         old_name = old_obj.name
 
-        #https://github.com/tomchristie/django-rest-framework/issues/2442
+        # https://github.com/tomchristie/django-rest-framework/issues/2442
         instance = super(DeploymentSerializer, self).update(
             instance, validated_data
         )

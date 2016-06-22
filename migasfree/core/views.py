@@ -43,9 +43,11 @@ from .models import (
 )
 from .serializers import (
     # UserSerializer, GroupSerializer,
-    PlatformSerializer, ProjectSerializer, StoreSerializer,
+    PlatformSerializer, ProjectSerializer, ProjectWriteSerializer,
+    StoreSerializer, StoreWriteSerializer,
     ServerPropertySerializer, ClientPropertySerializer,
-    ServerAttributeSerializer, ClientAttributeSerializer,
+    ServerAttributeSerializer, ServerAttributeWriteSerializer,
+    ClientAttributeSerializer, ClientAttributeWriteSerializer,
     ScheduleSerializer,
     PackageSerializer, DeploymentSerializer,
 )
@@ -113,12 +115,24 @@ class ProjectViewSet(viewsets.ModelViewSet):
     filter_class = ProjectFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
 
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update':
+            return ProjectWriteSerializer
+
+        return ProjectSerializer
+
 
 class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
     filter_class = StoreFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update':
+            return StoreWriteSerializer
+
+        return StoreSerializer
 
 
 class ServerPropertyViewSet(viewsets.ModelViewSet):
@@ -137,12 +151,24 @@ class ServerAttributeViewSet(viewsets.ModelViewSet):
     filter_class = ServerAttributeFilter
     paginate_by = 100  # FIXME constant
 
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update':
+            return ServerAttributeWriteSerializer
+
+        return ServerAttributeSerializer
+
 
 class ClientAttributeViewSet(viewsets.ModelViewSet):
     queryset = ClientAttribute.objects.filter(property_att__sort='client')
     serializer_class = ClientAttributeSerializer
     filter_class = ClientAttributeFilter
     paginate_by = 100  # FIXME constant
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update':
+            return ClientAttributeWriteSerializer
+
+        return ClientAttributeSerializer
 
 
 class ScheduleViewSet(viewsets.ModelViewSet):
