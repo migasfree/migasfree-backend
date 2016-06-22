@@ -80,13 +80,13 @@ class SyncStatsViewSet(viewsets.ViewSet):
         begin = request.query_params.get('begin')
         try:
             begin = datetime.strptime(begin, fmt)
-        except:
+        except ValueError:
             begin = datetime.now()
 
         end = request.query_params.get('end')
         try:
             end = datetime.strptime(end, fmt)
-        except:
+        except ValueError:
             end = datetime.now() + relativedelta.relativedelta(months=1)
 
         project_id = request.query_params.get('project_id')
@@ -117,13 +117,13 @@ class SyncStatsViewSet(viewsets.ViewSet):
         begin = request.query_params.get('begin')
         try:
             begin = datetime.strptime(begin, fmt)
-        except:
+        except ValueError:
             begin = datetime(now[0], now[1], now[2])
 
         end = request.query_params.get('end')
         try:
             end = datetime.strptime(end, fmt)
-        except:
+        except ValueError:
             end = datetime(now[0], now[1], now[2]) + timedelta(days=1)
 
         project_id = request.query_params.get('project_id')
@@ -157,13 +157,13 @@ class SyncStatsViewSet(viewsets.ViewSet):
         begin = request.query_params.get('begin')
         try:
             begin = datetime.strptime(begin, fmt)
-        except:
+        except ValueError:
             begin = datetime(now[0], now[1], now[2], now[3])
 
         end = request.query_params.get('end')
         try:
             end = datetime.strptime(end, fmt)
-        except:
+        except ValueError:
             end = datetime(now[0], now[1], now[2], now[3]) + hour
 
         project_id = request.query_params.get('project_id')
