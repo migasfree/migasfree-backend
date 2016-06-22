@@ -52,7 +52,7 @@ class InstallData(install_data):
     def _find_pub_files():
         data_files = []
 
-        for root, dirs, files in os.walk('pub'):
+        for root, _, files in os.walk('pub'):
             if 'source' in root:
                 continue  # exclude SVG files
 
@@ -74,7 +74,7 @@ class InstallData(install_data):
         data_files = []
 
         for directory in ['packages']:
-            for root, dirs, files in os.walk(directory):
+            for root, _, files in os.walk(directory):
                 final_files = []
                 for archive in files:
                     final_files.append(os.path.join(root, archive))
@@ -92,7 +92,7 @@ class InstallData(install_data):
     def _find_doc_files():
         data_files = []
 
-        for root, dirs, files in os.walk('doc'):
+        for root, _, files in os.walk('doc'):
             # first level does not matter
             if root == 'doc':
                 continue
