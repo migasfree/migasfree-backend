@@ -301,7 +301,10 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         project = get_object_or_404(Project, name=claims.get('project'))
 
-        store, _ = Store.objects.get_or_create(claims.get('store'), project)
+        store, _ = Store.objects.get_or_create(
+            name=claims.get('store'),
+            project=project
+        )
 
         _file = request.FILES.get('file')
 
@@ -344,8 +347,12 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
         project = get_object_or_404(Project, name=claims.get('project'))
+        packageset = os.path.basename(claims.get('packageset'))
 
-        store, _ = Store.objects.get_or_create(claims.get('store'), project)
+        store, _ = Store.objects.get_or_create(
+            name=claims.get('store'),
+            project=project
+        )
 
         _file = request.FILES.get('file')
 
@@ -354,18 +361,19 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             project.slug,
             'stores',
             store.slug,
-            claims.get('packageset'),
+            packageset,
             _file.name
         )
 
         package = Package.objects.filter(
-            name=claims.get('packageset'), project=project
+            name=packageset, project=project
         )
         if package:
             package[0].update_store(store)
         else:
+            print 'creating package...'
             Package.objects.create(
-                name=claims.get('packageset'),
+                name=packageset,
                 project=project,
                 store=store,
                 file_list=[_file]
@@ -380,7 +388,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                 project.slug,
                 'stores',
                 store.slug,
-                claims.get('packageset'),
+                packageset,
                 claims.get('path'),
                 _file.name
             )
@@ -413,7 +421,9 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
 
         project = get_object_or_404(Project, name=claims.get('project'))
         package = get_object_or_404(
-            Package, name=claims.get('packageset'), project=project
+            Package,
+            name=os.path.basename(claims.get('packageset')),
+            project=project
         )
 
         deployments = Deployment.objects.filter(
