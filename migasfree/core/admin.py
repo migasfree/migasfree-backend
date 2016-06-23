@@ -186,7 +186,7 @@ class PackageAdmin(admin.ModelAdmin):
     form = PackageForm
 
     list_display = ('name', 'project', 'store')
-    list_display_links = None
+    # list_display_links = None
     list_filter = ('project__name', 'store',)
     list_select_related = ('project',)
     list_per_page = 25
