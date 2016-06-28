@@ -27,6 +27,12 @@ class ConnectionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class DeviceInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Device
+        fields = ('id', 'name')
+
+
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Device
@@ -46,6 +52,15 @@ class FeatureSerializer(serializers.ModelSerializer):
 
 
 class LogicalSerializer(serializers.ModelSerializer):
+    device = DeviceInfoSerializer(many=False, read_only=True)
+    feature = FeatureSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = models.Logical
+        fields = '__all__'
+
+
+class LogicalWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Logical
         fields = '__all__'
