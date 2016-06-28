@@ -67,6 +67,12 @@ class LogicalViewSet(viewsets.ModelViewSet):
     ordering = ('device__name',)
     paginate_by = 100  # FIXME constant
 
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update':
+            return serializers.LogicalWriteSerializer
+
+        return serializers.LogicalSerializer
+
 
 class ManufacturerViewSet(viewsets.ModelViewSet):
     queryset = Manufacturer.objects.all()
