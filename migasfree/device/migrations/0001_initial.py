@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('device', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='device.Device', verbose_name='device')),
                 ('feature', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='device.Feature', verbose_name='feature')),
-                ('name', models.CharField(blank=True, max_length=50, null=True, verbose_name='name')),
+                ('alternative_feature_name', models.CharField(blank=True, max_length=50, null=True, verbose_name='alternative feature name')),
             ],
             options={
                 'verbose_name': 'Device Logical',

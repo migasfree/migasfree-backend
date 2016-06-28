@@ -45,8 +45,8 @@ class Logical(models.Model):
         verbose_name=_("feature")
     )
 
-    name = models.CharField(
-        verbose_name=_('name'),
+    alternative_feature_name = models.CharField(
+        verbose_name=_('alternative feature name'),
         max_length=50,
         null=True,
         blank=True,
