@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,9 +23,9 @@ from migasfree.utils import execute
 
 
 class Apt(Pms):
-    '''
+    """
     PMS for apt based systems (Debian, Ubuntu, Mint, ...)
-    '''
+    """
 
     def __init__(self):
         self.name = 'apt'
@@ -36,11 +36,11 @@ class Apt(Pms):
         ]
 
     def create_repository(self, name, path, arch):
-        '''
+        """
         (int, string, string) create_repository(
             string name, string path, string arch
         )
-        '''
+        """
 
         _cmd = '''
 _NAME=%(name)s
@@ -55,14 +55,14 @@ do
   gzip -9c dists/$_NAME/PKGS/binary-$_ARCH/Packages > dists/$_NAME/PKGS/binary-$_ARCH/Packages.gz
 done
 
-function SUM {
+function calculate_hash {
   echo $1
   _FILES=$(find  -type f | sed 's/^.\///' | sort)
   for _FILE in $_FILES
     do
       _SIZE=$(printf "%%16d\\n" $(ls -l $_FILE | cut -d ' ' -f5))
-      _MD5=$($2 $_FILE | cut -d ' ' -f1) $()
-      echo " $_MD5" "$_SIZE" "$_FILE"
+      _HASH=$($2 $_FILE | cut -d ' ' -f1) $()
+      echo " $_HASH" "$_SIZE" "$_FILE"
     done
 }
 
@@ -78,14 +78,14 @@ function create_deploy {
   echo "Codename: $_NAME" >> $_F
   echo "Components: PKGS" >> $_F
   echo "Date: $(date -u '+%%a, %%d %%b %%Y %%H:%%M:%%S UTC')" >> $_F
-  echo "Label: migasfree  Repository" >> $_F
+  echo "Label: migasfree repository" >> $_F
   echo "Origin: migasfree" >> $_F
   echo "Suite: $_NAME" >> $_F
 
-  SUM "MD5Sum:" "md5sum" >> $_F
-  SUM "SHA1:" "sha1sum" >> $_F
-  SUM "SHA256:" "sha256sum" >> $_F
-  SUM "SHA512:" "sha512sum" >> $_F
+  calculate_hash "MD5Sum:" "md5sum" >> $_F
+  calculate_hash "SHA1:" "sha1sum" >> $_F
+  calculate_hash "SHA256:" "sha256sum" >> $_F
+  calculate_hash "SHA512:" "sha512sum" >> $_F
 
   mv $_F deploy
 
@@ -105,9 +105,9 @@ create_deploy
         return execute(_cmd)
 
     def package_info(self, package):
-        '''
+        """
         string package_info(string package)
-        '''
+        """
 
         _cmd = '''
 echo "****INFO****"
