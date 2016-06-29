@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,9 +21,9 @@ from migasfree.utils import execute
 
 
 class Yum(Pms):
-    '''
+    """
     PMS for yum based systems (Fedora, Red Hat, CentOS, ...)
-    '''
+    """
 
     def __init__(self):
         self.name = 'yum'
@@ -34,17 +34,17 @@ class Yum(Pms):
         ]
 
     def create_repository(self, name, path, arch):
-        '''
+        """
         (int, string, string) create_repository(
             string name, string path, string arch
         )
-        '''
+        """
 
         _cmd = '''
 _DIR=%(path)s/%(name)s
 rm -rf $_DIR/repodata
 rm -rf $_DIR/checksum
-createrepo -s sha -c checksum $_DIR
+createrepo --cachedir checksum $_DIR
         ''' % {
             'path': path,
             'name': name,
@@ -53,9 +53,9 @@ createrepo -s sha -c checksum $_DIR
         return execute(_cmd)
 
     def package_info(self, package):
-        '''
+        """
         string package_info(string package)
-        '''
+        """
 
         _cmd = '''
 echo ****INFO****
