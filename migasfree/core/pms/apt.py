@@ -59,11 +59,11 @@ function calculate_hash {
   echo $1
   _FILES=$(find  -type f | sed 's/^.\///' | sort)
   for _FILE in $_FILES
-    do
-      _SIZE=$(printf "%%16d\\n" $(ls -l $_FILE | cut -d ' ' -f5))
-      _HASH=$($2 $_FILE | cut -d ' ' -f1) $()
-      echo " $_HASH" "$_SIZE" "$_FILE"
-    done
+  do
+    _SIZE=$(printf "%%16d\\n" $(ls -l $_FILE | cut -d ' ' -f5))
+    _HASH=$($2 $_FILE | cut -d ' ' -f1) $()
+    echo " $_HASH" "$_SIZE" "$_FILE"
+  done
 }
 
 function create_deploy {
@@ -78,7 +78,7 @@ function create_deploy {
   echo "Codename: $_NAME" >> $_F
   echo "Components: PKGS" >> $_F
   echo "Date: $(date -u '+%%a, %%d %%b %%Y %%H:%%M:%%S UTC')" >> $_F
-  echo "Label: migasfree repository" >> $_F
+  echo "Label: migasfree $_NAME repository" >> $_F
   echo "Origin: migasfree" >> $_F
   echo "Suite: $_NAME" >> $_F
 
