@@ -141,7 +141,7 @@ class ComputerAdmin(admin.ModelAdmin):
     delete_selected.short_description = _("Delete selected %(verbose_name_plural)s")
     """
 
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         '''
         if db_field.name == "logical_devices_assigned":
             kwargs['widget'] = FilteredSelectMultiple(

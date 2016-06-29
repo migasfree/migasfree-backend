@@ -244,7 +244,7 @@ class DeploymentAdmin(admin.ModelAdmin):
         }),
     )
 
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == "included_attributes":
             kwargs["queryset"] = Attribute.objects.filter(
                 property_att__enabled=True
