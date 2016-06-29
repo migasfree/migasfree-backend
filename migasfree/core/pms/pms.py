@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,45 +17,36 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
-class Pms:
-    '''
+class Pms(object):
+    """
     PMS: Package Management System
     Interface class
     Abstract methods
-    '''
+    """
 
-    @property
-    def name(self):
-        # Package Management System name
-        raise NotImplementedError
-
-    @property
-    def relative_path(self):
-        raise NotImplementedError
-
-    @property
-    def mimetype(self):
-        raise NotImplementedError
+    name = ''  # Package Management System name
+    relative_path = ''
+    mimetype = ''
 
     def __unicode__(self):
-        '''
+        """
         string __unicode__(void)
-        '''
+        """
 
         return self.name
 
     def create_repository(self, name, path, arch):
-        '''
+        """
         (int, string, string) create_repository(
             string name, string path, string arch
         )
-        '''
+        """
 
         raise NotImplementedError
 
     def package_info(self, package):
-        '''
+        """
         string package_info(string package)
-        '''
+        """
 
         raise NotImplementedError
