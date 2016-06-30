@@ -67,14 +67,14 @@ function calculate_hash {
 }
 
 function create_deploy {
-  _F="/var/tmp/deploy"
+  _F="$(mktemp /var/tmp/deploy-XXXXX)"
 
-  rm deploy 2>/dev/null || :
-  rm deploy.gpg 2>/dev/null || :
-  touch deploy
+  rm Release 2>/dev/null || :
+  rm Release.gpg 2>/dev/null || :
+  touch Release
   rm $_F 2>/dev/null || :
 
-  echo "Architectures: %(arch)s" > $_F
+  echo "Architectures: ${_ARCHS[@]}" > $_F
   echo "Codename: $_NAME" >> $_F
   echo "Components: PKGS" >> $_F
   echo "Date: $(date -u '+%%a, %%d %%b %%Y %%H:%%M:%%S UTC')" >> $_F
@@ -87,10 +87,10 @@ function create_deploy {
   calculate_hash "SHA256:" "sha256sum" >> $_F
   calculate_hash "SHA512:" "sha512sum" >> $_F
 
-  mv $_F deploy
+  mv $_F Release
 
-  gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg --clearsign -o InRelease deploy
-  gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg -abs -o Release.gpg deploy
+  gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg --clearsign -o InRelease Release
+  gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg -abs -o Release.gpg Release
 }
 
 cd dists/$_NAME
