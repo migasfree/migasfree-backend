@@ -56,7 +56,7 @@ class MimetypeValidator(object):
                 mime = my_magic.file(tmp_file)
                 os.remove(tmp_file)
 
-                if not mime in self.mimetypes:
+                if mime not in self.mimetypes:
                     raise ValidationError(
                         _('%s is not an acceptable file type') % item
                     )
