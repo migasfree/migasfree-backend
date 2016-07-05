@@ -87,18 +87,15 @@ def create_repository_metadata(deployment_id):
                 dst
             )
 
+    source = os.path.join(slug_tmp_path, deploy.slug)
     ret, output, error = deploy.pms.create_repository(
-        path=os.path.join(slug_tmp_path, deploy.slug),
+        path=source,
         arch=deploy.project.architecture
     )
 
-    source = os.path.join(
-        tmp_path,
-        deploy.pms.relative_path,
-        deploy.slug
-    )
     target = deploy.path()
     shutil.rmtree(target, ignore_errors=True)
+
     shutil.copytree(source, target, symlinks=True)
     shutil.rmtree(tmp_path)
 
