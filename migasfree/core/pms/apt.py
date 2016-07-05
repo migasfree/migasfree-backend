@@ -37,10 +37,10 @@ class Apt(Pms):
             'application/vnd.debian.binary-package',
         ]
 
-    def create_repository(self, name, path, arch):
+    def create_repository(self, path, arch):
         """
         (int, string, string) create_repository(
-            string name, string path, string arch
+            string path, string arch
         )
         """
 
@@ -99,7 +99,7 @@ cd dists/$_NAME
 create_deploy
 ''' % {
             'path': path,
-            'name': name,
+            'name': os.path.basename(path),
             'arch': arch,
             'keys_path': settings.MIGASFREE_KEYS_PATH
         }

@@ -35,10 +35,10 @@ class Pms(object):
 
         return self.name
 
-    def create_repository(self, name, path, arch):
+    def create_repository(self, path, arch):
         """
         (int, string, string) create_repository(
-            string name, string path, string arch
+            string path, string arch
         )
         """
 

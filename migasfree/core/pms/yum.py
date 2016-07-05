@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
 from .pms import Pms
 from migasfree.utils import execute
 
@@ -33,10 +35,10 @@ class Yum(Pms):
             'application/x-redhat-package-manager'
         ]
 
-    def create_repository(self, name, path, arch):
+    def create_repository(self, path, arch):
         """
         (int, string, string) create_repository(
-            string name, string path, string arch
+            string path, string arch
         )
         """
 
@@ -47,7 +49,7 @@ rm -rf $_DIR/checksum
 createrepo --cachedir checksum $_DIR
         ''' % {
             'path': path,
-            'name': name,
+            'name': os.path.basename(path),
         }
 
         return execute(_cmd)

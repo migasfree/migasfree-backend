@@ -88,7 +88,8 @@ def create_repository_metadata(deployment_id):
             )
 
     ret, output, error = deploy.pms.create_repository(
-        deploy.slug, slug_tmp_path, deploy.project.architecture
+        path=os.path.join(slug_tmp_path, deploy.slug),
+        arch=deploy.project.architecture
     )
 
     source = os.path.join(
