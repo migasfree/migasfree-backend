@@ -24,9 +24,8 @@ import shutil
 from celery import shared_task
 from celery.exceptions import Ignore
 from django_redis import get_redis_connection
-from importlib import import_module
 
-from .models import Deployment, Package, Project, Store
+from .models import Deployment, Package, Store
 
 
 @shared_task(queue='repository')
