@@ -242,16 +242,14 @@ class Deployment(models.Model):
 
         return deployments
 
-    def pms_path(self):
+    def pms(self):
         mod = import_module('migasfree.core.pms.%s' % self.project.pms)
-        pms = getattr(mod, self.project.pms.capitalize())()
-
-        return pms.relative_path
+        return getattr(mod, self.project.pms.capitalize())()
 
     def path(self, name=None):
         return os.path.join(
             Project.path(self.project.slug),
-            self.pms_path(),
+            self.pms.relative_path,
             name if name else self.slug
         )
 
