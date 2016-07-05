@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
 from django.conf import settings
 
 from .pms import Pms
@@ -29,7 +31,7 @@ class Apt(Pms):
 
     def __init__(self):
         self.name = 'apt'
-        self.relative_path = 'repos/dists'
+        self.relative_path = os.path.join('repos', 'dists')
         self.mimetype = [
             'application/x-debian-package',
             'application/vnd.debian.binary-package',
