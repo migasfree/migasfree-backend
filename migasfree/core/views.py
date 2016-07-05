@@ -320,13 +320,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                     file_list=[_file]
                 )
 
-        target = os.path.join(
-            settings.MIGASFREE_PUBLIC_DIR,
-            project.slug,
-            'stores',
-            store.slug,
-            _file.name
-        )
+        target = Package.path(project.slug, store.slug, _file.name)
         Package.handle_uploaded_file(_file, target)
 
         return Response(
@@ -357,10 +351,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         _file = request.FILES.get('file')
 
         target = os.path.join(
-            settings.MIGASFREE_PUBLIC_DIR,
-            project.slug,
-            'stores',
-            store.slug,
+            Store.path(project.slug, store.slug),
             packageset,
             _file.name
         )
@@ -371,7 +362,6 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         if package:
             package[0].update_store(store)
         else:
-            print 'creating package...'
             Package.objects.create(
                 name=packageset,
                 project=project,
@@ -384,10 +374,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         # if exists path move it
         if claims.get('path'):
             dst = os.path.join(
-                settings.MIGASFREE_PUBLIC_DIR,
-                project.slug,
-                'stores',
-                store.slug,
+                Store.path(project.slug, store.slug),
                 packageset,
                 claims.get('path'),
                 _file.name
