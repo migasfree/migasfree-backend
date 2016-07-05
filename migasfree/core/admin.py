@@ -168,7 +168,7 @@ class SetOfAttributesAdmin(admin.ModelAdmin):
     model = SetOfAttributes
 
 
-class ScheduleDelayline(admin.TabularInline):
+class ScheduleDelayLine(admin.TabularInline):
     model = ScheduleDelay
     extra = 0
     ordering = ('delay',)
@@ -177,7 +177,7 @@ class ScheduleDelayline(admin.TabularInline):
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'number_delays')
-    inlines = [ScheduleDelayline, ]
+    inlines = [ScheduleDelayLine, ]
     extra = 0
 
 
@@ -221,7 +221,7 @@ class DeploymentAdmin(admin.ModelAdmin):
                 'packages_to_remove',
             )
         }),
-        (_('To whom (Atributtes)'), {
+        (_('To whom (Attributes)'), {
             'classes': ('collapse',),
             'fields': (
                 'included_attributes',
