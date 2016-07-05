@@ -29,7 +29,6 @@ from django.template.defaultfilters import slugify
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
-from django.conf import settings
 from django.db.models import Q
 from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
@@ -243,6 +242,19 @@ class Deployment(models.Model):
 
         return deployments
 
+    def pms_path(self):
+        mod = import_module('migasfree.core.pms.%s' % self.project.pms)
+        pms = getattr(mod, self.project.pms.capitalize())()
+
+        return pms.relative_path
+
+    def path(self, name=None):
+        return os.path.join(
+            Project.path(self.project.slug),
+            self.pms_path(),
+            name if name else self.slug
+        )
+
     class Meta:
         app_label = 'core'
         verbose_name = _('Deployment')
@@ -266,15 +278,7 @@ def pre_save_deployment(sender, instance, **kwargs):
 
 @receiver(pre_delete, sender=Deployment)
 def pre_delete_deployment(sender, instance, **kwargs):
-    mod = import_module('migasfree.core.pms.%s' % instance.project.pms)
-    pms = getattr(mod, instance.project.pms.capitalize())()
-
-    path = os.path.join(
-        settings.MIGASFREE_PUBLIC_DIR,
-        instance.project.slug,
-        pms.relative_path,
-        instance.slug
-    )
+    path = instance.path()
     if os.path.exists(path):
         shutil.rmtree(path)
 
