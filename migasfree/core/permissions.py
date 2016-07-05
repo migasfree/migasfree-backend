@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ class PublicPermission(permissions.BasePermission):
 
 class IsAdminOrIsSelf(permissions.BasePermission):
     def has_permission(self, request, view):
-        # allow user to list all users if logged in user is supersuser
+        # allow user to list all users if logged in user is superuser
         return view.action == 'retrieve' or request.user.is_superuser
 
     def has_object_permission(self, request, view, obj):
