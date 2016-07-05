@@ -80,22 +80,34 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
-    def _create_dirs(self):
-        _repos = os.path.join(
+    @staticmethod
+    def path(name):
+        return os.path.join(settings.MIGASFREE_PUBLIC_DIR, name)
+
+    @staticmethod
+    def repositories_path(name):
+        return os.path.join(
             settings.MIGASFREE_PUBLIC_DIR,
-            self.slug,
+            name,
             'repos'
         )
-        if not os.path.exists(_repos):
-            os.makedirs(_repos)
 
-        _stores = os.path.join(
+    @staticmethod
+    def stores_path(name):
+        return os.path.join(
             settings.MIGASFREE_PUBLIC_DIR,
-            self.slug,
+            name,
             'stores'
         )
-        if not os.path.exists(_stores):
-            os.makedirs(_stores)
+
+    def _create_dirs(self):
+        repos = self.repositories_path(self.slug)
+        if not os.path.exists(repos):
+            os.makedirs(repos)
+
+        stores = self.stores_path(self.slug)
+        if not os.path.exists(stores):
+            os.makedirs(stores)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
@@ -115,6 +127,6 @@ class Project(models.Model):
 
 @receiver(pre_delete, sender=Project)
 def delete_project(sender, instance, **kwargs):
-    _path = os.path.join(settings.MIGASFREE_PUBLIC_DIR, instance.slug)
-    if os.path.exists(_path):
-        shutil.rmtree(_path)
+    path = Project.path(instance.slug)
+    if os.path.exists(path):
+        shutil.rmtree(path)
