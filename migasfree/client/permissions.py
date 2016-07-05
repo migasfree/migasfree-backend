@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,7 +45,8 @@ class IsClient(permissions.BasePermission):
         if not user:
             return False
 
-        return (user.has_perm('core.change_platform')
-            and user.has_perm('core.change_project')
-            and user.has_perm('client.change_computer')
+        return (
+            user.has_perm('core.change_platform') and
+            user.has_perm('core.change_project') and
+            user.has_perm('client.change_computer')
         )
