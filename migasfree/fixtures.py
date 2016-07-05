@@ -33,9 +33,13 @@ from django.conf import settings
 
 
 def run(cmd):
-    (out, err) = subprocess.Popen(cmd,
-        stdout=subprocess.PIPE, shell=True).communicate()
-    return (out, err)
+    out, err = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        shell=True
+    ).communicate()
+
+    return out, err
 
 
 def create_user(name, groups=None):
@@ -57,35 +61,24 @@ def create_user(name, groups=None):
         user.save()
 
 
-def add_read_perms(group, tables=None):
+def add_perms(group, tables=None, all_perms=True):
     if tables is None:
         tables = []
 
-    for table in tables:
-        app, name = table.split('.')
-        group.permissions.add(
-            Permission.objects.get(
-                codename="change_%s" % name,
-                content_type__app_label=app
-            ).id
-        )
-
-
-def add_all_perms(group, tables=None):
-    if tables is None:
-        tables = []
+    perms = ['change_%s']
+    if all_perms:
+        perms.append('add_%s')
+        perms.append('delete_%s')
 
     for table in tables:
         app, name = table.split('.')
-        group.permissions.add(
-            Permission.objects.get(codename="add_%s" % name,
-            content_type__app_label=app).id)
-        group.permissions.add(
-            Permission.objects.get(codename="change_%s" % name,
-            content_type__app_label=app).id)
-        group.permissions.add(
-            Permission.objects.get(codename="delete_%s" % name,
-            content_type__app_label=app).id)
+        for pattern in perms:
+            group.permissions.add(
+                Permission.objects.get(
+                    codename=pattern % name,
+                    content_type__app_label=app
+                ).id
+            )
 
 
 def create_default_users():
@@ -93,7 +86,7 @@ def create_default_users():
     Create default Groups and Users
     """
 
-    # GROUP READER
+    # reader group
     reader = Group.objects.filter(name='Reader')
     if not reader:
         reader = Group()
@@ -110,10 +103,10 @@ def create_default_users():
             "device.device", "device.connection", "device.manufacturer",
             "device.model", "device.type",
         ]
-        add_read_perms(reader, tables)
+        add_perms(reader, tables, all_perms=False)
         reader.save()
 
-    # GROUP LIBERATOR
+    # liberator group
     liberator = Group.objects.filter(name='Liberator')
     if not liberator:
         liberator = Group()
@@ -122,20 +115,20 @@ def create_default_users():
         tables = [
             "core.deployment", "core.schedule", "core.scheduledelay"
         ]
-        add_all_perms(liberator, tables)
+        add_perms(liberator, tables)
         liberator.save()
 
-    # GROUP PACKAGER
+    # packager group
     packager = Group.objects.filter(name='Packager')
     if not packager:
         packager = Group()
         packager.name = "Packager"
         packager.save()
         tables = ["core.package", "core.store"]
-        add_all_perms(packager, tables)
+        add_perms(packager, tables)
         packager.save()
 
-    # GROUP COMPUTER CHECKER
+    # computer checker group
     checker = Group.objects.filter(name='Computer Checker')
     if not checker:
         checker = Group()
@@ -144,10 +137,10 @@ def create_default_users():
         tables = [
             "client.error", "client.fault", "client.synchronization"
         ]
-        add_all_perms(checker, tables)
+        add_perms(checker, tables)
         checker.save()
 
-    # GROUP DEVICE INSTALLER
+    # device installer group
     device_installer = Group.objects.filter(name='Device installer')
     if not device_installer:
         device_installer = Group()
@@ -157,10 +150,10 @@ def create_default_users():
             "device.connection", "device.manufacturer",
             "device.model", "device.type"
         ]
-        add_all_perms(device_installer, tables)
+        add_perms(device_installer, tables)
         device_installer.save()
 
-    # GROUP CONFIGURATOR
+    # configurator group
     configurator = Group.objects.filter(name='Configurator')
     if not configurator:
         configurator = Group()
@@ -171,10 +164,10 @@ def create_default_users():
             "client.synchronization", "core.platform",
             "client.migration", "client.notification",
         ]
-        add_all_perms(configurator, tables)
+        add_perms(configurator, tables)
         configurator.save()
 
-    # CREATE DEFAULT USERS
+    # default users
     create_user("admin")
     create_user("packager", [reader, packager])
     create_user("configurator", [reader, configurator])
@@ -195,7 +188,7 @@ def sequence_reset():
     )
 
     if settings.DATABASES.get('default').get('ENGINE') == \
-    'django.db.backends.postgresql_psycopg2':
+            'django.db.backends.postgresql_psycopg2':
         _filename = tempfile.mkstemp()[1]
         with open(_filename, "w") as _file:
             _file.write(commands.getvalue())
@@ -204,7 +197,7 @@ def sequence_reset():
         cmd = "su postgres -c 'psql %s -f %s' -" % (
             settings.DATABASES.get('default').get('NAME'), _filename
         )
-        (out, err) = run(cmd)
+        out, err = run(cmd)
         if out != 0:
             print(err)
 
