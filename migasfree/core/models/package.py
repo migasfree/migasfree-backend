@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
-from django.conf import settings
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
@@ -33,12 +32,7 @@ from .store import Store
 
 class PackageManager(models.Manager):
     def create(self, name, project, store, file_list):
-        target = os.path.join(
-            settings.MIGASFREE_PUBLIC_DIR,
-            project.slug,
-            'stores',
-            store.slug,
-        )
+        target = Store.path(project.slug, store.slug)
         if len(file_list) > 1 or name != str(file_list[0]):
             target = os.path.join(target, name)
 
@@ -105,16 +99,14 @@ class Package(models.Model):
     def orphaned():
         return Package.objects.filter(deployment__id=None).count()
 
+    @staticmethod
+    def path(project_name, store_name, name):
+        return os.path.join(Store.path(project_name, store_name), name)
+
     def create_dir(self):
-        _path = os.path.join(
-            settings.MIGASFREE_PUBLIC_DIR,
-            self.project.slug,
-            'stores',
-            self.store.slug,
-            self.name
-        )
-        if not os.path.exists(_path):
-            os.makedirs(_path)
+        path = self.path(self.project.slug, self.store.slug, self.name)
+        if not os.path.exists(path):
+            os.makedirs(path)
 
     def update_store(self, store):
         # FIXME move to new directory?
@@ -133,18 +125,16 @@ class Package(models.Model):
 
 @receiver(pre_delete, sender=Package)
 def delete_package(sender, instance, **kwargs):
-    _path = os.path.join(
-        settings.MIGASFREE_PUBLIC_DIR,
+    path = Package.path(
         instance.project.slug,
-        'stores',
         instance.store.slug,
         instance.name
     )
-    if os.path.exists(_path):
+    if os.path.exists(path):
         try:
-            if os.path.isfile(_path):
-                os.remove(_path)
+            if os.path.isfile(path):
+                os.remove(path)
             else:
-                shutil.rmtree(_path, ignore_errors=True)
+                shutil.rmtree(path, ignore_errors=True)
         except OSError:
             pass
