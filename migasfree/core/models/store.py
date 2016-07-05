@@ -52,15 +52,19 @@ class Store(models.Model):
         verbose_name=_("project")
     )
 
-    def _create_dir(self):
-        _path = os.path.join(
+    @staticmethod
+    def path(project_name, name):
+        return os.path.join(
             settings.MIGASFREE_PUBLIC_DIR,
-            self.project.slug,
+            project_name,
             'stores',
-            self.slug
+            name
         )
-        if not os.path.exists(_path):
-            os.makedirs(_path)
+
+    def _create_dir(self):
+        path = self.path(self.project.slug, self.slug)
+        if not os.path.exists(path):
+            os.makedirs(path)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
@@ -80,11 +84,6 @@ class Store(models.Model):
 
 @receiver(pre_delete, sender=Store)
 def delete_store(sender, instance, **kwargs):
-    _path = os.path.join(
-        settings.MIGASFREE_PUBLIC_DIR,
-        instance.project.slug,
-        'stores',
-        instance.slug
-    )
-    if os.path.exists(_path):
-        shutil.rmtree(_path)
+    path = Store.path(instance.project.slug, instance.slug)
+    if os.path.exists(path):
+        shutil.rmtree(path)
