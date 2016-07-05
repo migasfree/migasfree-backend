@@ -63,7 +63,7 @@ def create_repository_metadata(deployment_id):
     stores_path = Store.path(deploy.project.slug, '')[:-1]  # remove trailing slash
     slug_tmp_path = os.path.join(
         tmp_path,
-        deploy.pms_path()
+        deploy.pms.relative_path
     )
 
     if slug_tmp_path.endswith('/'):
@@ -87,13 +87,13 @@ def create_repository_metadata(deployment_id):
                 dst
             )
 
-    ret, output, error = pms.create_repository(
+    ret, output, error = deploy.pms.create_repository(
         deploy.slug, slug_tmp_path, deploy.project.architecture
     )
 
     source = os.path.join(
         tmp_path,
-        deploy.pms_path(),
+        deploy.pms.relative_path,
         deploy.slug
     )
     target = deploy.path()
