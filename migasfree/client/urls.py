@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,30 +16,30 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 
 from .views import (
     PackagerKeysView, ProjectKeysView, RepositoriesKeysView,
     SafeSynchronizationView, SafeEndOfTransmissionView,
 )
 
-keys_patterns = patterns('',
+keys_patterns = [
     url(r'^packager/$', PackagerKeysView.as_view()),
     url(r'^project/$', ProjectKeysView.as_view()),
     url(r'^repositories/$', RepositoriesKeysView.as_view()),
-)
+]
 
-public_patterns = patterns('',
+public_patterns = [
     url(r'keys/', include(keys_patterns)),
-)
+]
 
-safe_patterns = patterns('',
+safe_patterns = [
     url(r'^eot/$', SafeEndOfTransmissionView.as_view()),
     url(r'^synchronizations/$', SafeSynchronizationView.as_view()),
-)
+]
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'public/', include(public_patterns)),
     url(r'safe/', include(safe_patterns)),
     # url(r'token/', include(token_patterns)),
-)
+]
