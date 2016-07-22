@@ -19,6 +19,8 @@
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.conf import settings
+from rest_framework.authtoken import views
+from rest_framework_jwt import views as jwt_views
 
 from core.routers import router, safe_router as core_safe_router
 from client.routers import (
@@ -48,8 +50,8 @@ urlpatterns = [
     url(r'^api/v1/safe/', include(hardware_safe_router.urls)),
     url(r'^api/v1/', include('migasfree.client.urls')),
 
-    url(r'^token-auth/$', 'rest_framework.authtoken.views.obtain_auth_token'),
-    url(r'^token-auth-jwt/', 'rest_framework_jwt.views.obtain_jwt_token'),
+    url(r'^token-auth/$', views.obtain_auth_token),
+    url(r'^token-auth-jwt/', jwt_views.obtain_jwt_token),
 
     url(r'^docs/', include('rest_framework_swagger.urls')),
     # url(r'^auth/', include('djoser.urls')),
