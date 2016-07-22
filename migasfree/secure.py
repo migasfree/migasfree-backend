@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -103,8 +103,8 @@ def check_keys_path():
 def generate_rsa_keys(name='migasfree-server'):
     check_keys_path()
 
-    private_pem = os.path.join(settings.MIGASFREE_KEYS_PATH, "%s.pri" % name)
-    public_pem = os.path.join(settings.MIGASFREE_KEYS_PATH, "%s.pub" % name)
+    private_pem = os.path.join(settings.MIGASFREE_KEYS_PATH, '{}.pri'.format(name))
+    public_pem = os.path.join(settings.MIGASFREE_KEYS_PATH, '{}.pub'.format(name))
 
     key = RSA.generate(2048)
     write_file(public_pem, key.publickey().exportKey('PEM'))
@@ -126,16 +126,16 @@ def gpg_get_key(name):
     Return keys gpg and if not exists it is created
     """
 
-    gpghome = os.path.join(settings.MIGASFREE_KEYS_PATH, ".gnupg")
-    _file = os.path.join(gpghome, "%s.gpg" % name)
+    gpg_home = os.path.join(settings.MIGASFREE_KEYS_PATH, '.gnupg')
+    _file = os.path.join(gpg_home, '{}.gpg'.format(name))
 
     if not os.path.exists(_file):
-        os.environ['GNUPGHOME'] = gpghome
-        if not os.path.exists(gpghome):
-            os.makedirs(gpghome, 0o700)
+        os.environ['GNUPGHOME'] = gpg_home
+        if not os.path.exists(gpg_home):
+            os.makedirs(gpg_home, 0o700)
             # create a blank configuration file
-            write_file(os.path.join(gpghome, 'gpg.conf'), '')
-            os.chmod(os.path.join(gpghome, 'gpg.conf'), 0o600)
+            write_file(os.path.join(gpg_home, 'gpg.conf'), '')
+            os.chmod(os.path.join(gpg_home, 'gpg.conf'), 0o600)
 
         # create a context
         ctx = gpgme.Context()
@@ -152,9 +152,9 @@ Expire-Date: 0
 
         # export and save
         ctx.armor = True
-        keydata = BytesIO()
-        ctx.export(name, keydata)
-        write_file(_file, keydata.getvalue())
+        key_data = BytesIO()
+        ctx.export(name, key_data)
+        write_file(_file, key_data.getvalue())
         os.chmod(_file, 0o600)
 
     return read_file(_file)
