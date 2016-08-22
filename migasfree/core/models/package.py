@@ -81,7 +81,9 @@ class Package(models.Model):
 
         queryset = Package.objects.filter(
             name=self.name
-        ).filter(project__id=self.project.id)
+        ).filter(
+            project__id=self.project.id
+        ).filter(~models.Q(id=self.id))
         if queryset.exists():
             raise ValidationError(_('Duplicated name at project'))
 
