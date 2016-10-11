@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@ router.register(r'faults', views.FaultViewSet)
 router.register(r'notifications', views.NotificationViewSet)
 router.register(r'computers-packages', views.PackageViewSet)
 router.register(r'migrations', views.MigrationViewSet)
+router.register(r'status-logs', views.StatusLogViewSet)
+router.register(r'syncs', views.SynchronizationViewSet)
 
 safe_router = routers.DefaultRouter()
 
