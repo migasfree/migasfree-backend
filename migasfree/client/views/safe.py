@@ -960,7 +960,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         if computer.last_hardware_capture:
             capture = (datetime.now() > (
-                computer.last_hardware_capture + timedelta(
+                computer.last_hardware_capture.replace(tzinfo=None) + timedelta(
                     days=settings.MIGASFREE_HW_PERIOD
                 ))
             )
