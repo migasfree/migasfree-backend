@@ -18,28 +18,19 @@
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import python_2_unicode_compatible
 from django_redis import get_redis_connection
 
 from migasfree.core.models import Project, Deployment
 
-from .computer import Computer
+from .event import Event
 from .user import User
 
 
-@python_2_unicode_compatible
-class Synchronization(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-
+class Synchronization(Event):
     start_date = models.DateTimeField(
         verbose_name=_('start date connection'),
         null=True,
         blank=True
-    )
-
-    computer = models.ForeignKey(
-        Computer,
-        verbose_name=_("computer")
     )
 
     user = models.ForeignKey(
@@ -84,9 +75,6 @@ class Synchronization(models.Model):
                 ),
                 self.computer.id,
             )
-
-    def __str__(self):
-        return '%s (%s)' % (self.computer, self.created_at)
 
     class Meta:
         app_label = 'client'

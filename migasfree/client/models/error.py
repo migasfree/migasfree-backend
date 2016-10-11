@@ -18,11 +18,10 @@
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import python_2_unicode_compatible
 
 from migasfree.core.models import Project
 
-from .computer import Computer
+from .event import Event
 
 
 class UncheckedManager(models.Manager):
@@ -32,15 +31,7 @@ class UncheckedManager(models.Manager):
         )
 
 
-@python_2_unicode_compatible
-class Error(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    computer = models.ForeignKey(
-        Computer,
-        verbose_name=_("computer")
-    )
-
+class Error(Event):
     description = models.TextField(
         verbose_name=_("description"),
         null=True,
@@ -79,9 +70,6 @@ class Error(models.Model):
     def save(self, *args, **kwargs):
         self.description = self.description.replace("\r\n", "\n")
         super(Error, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return '%s (%s)' % (self.computer, self.created_at)
 
     class Meta:
         app_label = 'client'

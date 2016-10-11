@@ -22,25 +22,18 @@ from django.utils.encoding import python_2_unicode_compatible
 
 from migasfree.core.models import Project
 
-from .computer import Computer
+from .event import Event
 
 
 @python_2_unicode_compatible
-class Migration(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    computer = models.ForeignKey(
-        Computer,
-        verbose_name=_("computer"),
-    )
-
+class Migration(Event):
     project = models.ForeignKey(
         Project,
         verbose_name=_("project")
     )
 
     def __str__(self):
-        return '%s (%s) %s' % (self.computer, self.created_at, self.project)
+        return '{} ({}) {}'.format(self.computer, self.created_at, self.project)
 
     class Meta:
         app_label = 'client'

@@ -17,10 +17,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from .computer import Computer
+from .event import Event
 
 
 class StatusLogManager(models.Manager):
@@ -33,13 +33,7 @@ class StatusLogManager(models.Manager):
         return obj
 
 
-@python_2_unicode_compatible
-class StatusLog(models.Model):
-    computer = models.ForeignKey(
-        Computer,
-        verbose_name=_("computer"),
-    )
-
+class StatusLog(Event):
     status = models.CharField(
         verbose_name=_('status'),
         max_length=20,
@@ -48,15 +42,7 @@ class StatusLog(models.Model):
         default='intended'
     )
 
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name=_('date')
-    )
-
     objects = StatusLogManager()
-
-    def __str__(self):
-        return '%s (%s)' % (self.computer, self.status)
 
     class Meta:
         app_label = 'client'
