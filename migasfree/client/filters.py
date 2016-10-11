@@ -21,7 +21,8 @@ import rest_framework_filters as filters
 # from django.utils.translation import ugettext_lazy as _
 
 from .models import (
-    Package, Error, Notification, FaultDefinition, Fault, Computer, Migration
+    Package, Error, Notification, FaultDefinition, Fault,
+    Computer, Migration, StatusLog, Synchronization,
 )
 
 
@@ -45,6 +46,7 @@ class ComputerFilter(filters.FilterSet):
 
 class ErrorFilter(filters.FilterSet):
     created_at = filters.DateFilter(name='created_at', lookup_type='gte')
+    created_at__lt = filters.DateFilter(name='created_at', lookup_expr='lt')
 
     class Meta:
         model = Error
@@ -61,6 +63,7 @@ class FaultDefinitionFilter(filters.FilterSet):
 
 class FaultFilter(filters.FilterSet):
     created_at = filters.DateFilter(name='created_at', lookup_type='gte')
+    created_at__lt = filters.DateFilter(name='created_at', lookup_expr='lt')
 
     """
     # TODO override filter_queryset (http://www.django-rest-framework.org/api-guide/filtering/)
@@ -96,6 +99,7 @@ class FaultFilter(filters.FilterSet):
 
 class MigrationFilter(filters.FilterSet):
     created_at = filters.DateFilter(name='created_at', lookup_type='gte')
+    created_at__lt = filters.DateFilter(name='created_at', lookup_expr='lt')
 
     class Meta:
         model = Migration
@@ -116,3 +120,21 @@ class PackageFilter(filters.FilterSet):
 
     class Meta:
         model = Package
+
+
+class StatusLogFilter(filters.FilterSet):
+    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
+    created_at__lt = filters.DateFilter(name='created_at', lookup_expr='lt')
+
+    class Meta:
+        model = StatusLog
+        fields = ['computer__id']
+
+
+class SynchronizationFilter(filters.FilterSet):
+    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
+    created_at__lt = filters.DateFilter(name='created_at', lookup_expr='lt')
+
+    class Meta:
+        model = Synchronization
+        fields = ['project__id', 'computer__id']
