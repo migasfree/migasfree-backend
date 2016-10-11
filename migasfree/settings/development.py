@@ -43,8 +43,12 @@ MEDIA_ROOT = MIGASFREE_PUBLIC_DIR
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(MIGASFREE_DB_DIR, 'migasfree-backend.db'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'migasfree',
+        'USER': 'migasfree',
+        'PASSWORD': 'migasfree',
+        'HOST': '',
+        'PORT': '',
     }
 }
 
