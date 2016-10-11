@@ -32,8 +32,8 @@ from migasfree.device import serializers as device_serializers
 from .. import models, serializers
 from ..filters import (
     PackageFilter, ErrorFilter, NotificationFilter,
-    FaultDefinitionFilter, FaultFilter,
-    ComputerFilter, MigrationFilter
+    FaultDefinitionFilter, FaultFilter, ComputerFilter,
+    MigrationFilter, StatusLogFilter, SynchronizationFilter,
 )
 
 
@@ -291,3 +291,25 @@ class PackageViewSet(
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('fullname',)
+
+
+class StatusLogViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    queryset = models.StatusLog.objects.all()
+    serializer_class = serializers.StatusLogSerializer
+    filter_class = StatusLogFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('-created_at',)
+
+
+class SynchronizationViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    queryset = models.Synchronization.objects.all()
+    serializer_class = serializers.SynchronizationSerializer
+    filter_class = SynchronizationFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('-created_at',)
