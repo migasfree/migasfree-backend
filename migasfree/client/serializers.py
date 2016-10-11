@@ -75,6 +75,17 @@ class PackageSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class StatusLogSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
+
+    def get_status(self, obj):
+        return obj.get_status_display()
+
+    class Meta:
+        model = models.StatusLog
+        fields = '__all__'
+
+
 class SynchronizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Synchronization
