@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,5 +23,6 @@ from .public import PackagerKeysView, ProjectKeysView, RepositoriesKeysView
 from .token import (
     ComputerViewSet, ErrorViewSet,
     FaultDefinitionViewSet, FaultViewSet,
-    PackageViewSet, NotificationViewSet, MigrationViewSet
+    PackageViewSet, NotificationViewSet, MigrationViewSet,
+    StatusLogViewSet, SynchronizationViewSet,
 )
