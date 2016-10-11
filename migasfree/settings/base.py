@@ -126,6 +126,7 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
         'rest_framework_filters.backends.DjangoFilterBackend',
     ),
+    'DATETIME_FORMAT': '%c',
 }
 
 # http://docs.python.org/2/howto/logging-cookbook.html
