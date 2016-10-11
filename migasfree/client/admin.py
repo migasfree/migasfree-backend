@@ -47,7 +47,7 @@ class ComputerAdmin(admin.ModelAdmin):
     )
     list_per_page = 25
     ordering = (settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0],)
-    list_filter = ('project__name', 'sync_start_date', 'status')
+    list_filter = ('project__name', 'sync_start_date', 'status', 'machine')
     search_fields = settings.MIGASFREE_COMPUTER_SEARCH_FIELDS + (
         'sync_user', 'sync_user__fullname'
     )
