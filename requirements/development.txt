@@ -1,8 +1,8 @@
 -r base.txt # includes the base.txt requirements file
 
 django-debug-toolbar==1.5
-django-extensions==1.6.7
+django-extensions==1.7.4
 six==1.10.0
-sqlparse==0.2.0
-pydot==1.2.2
-pyparsing==2.1.5
+sqlparse==0.2.1
+pydot==1.2.3
+pyparsing==2.1.10
