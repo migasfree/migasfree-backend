@@ -49,7 +49,9 @@ class ConnectionAdmin(admin.ModelAdmin):
 
 @admin.register(Driver)
 class DriverAdmin(admin.ModelAdmin):
-    list_display = ('name', 'model', 'project', 'feature')
+    list_display = ('__str__', 'model', 'project', 'feature')
+    list_display_links = ('__str__',)
+    list_filter = ('project', 'model')
 
 
 class LogicalForm(forms.ModelForm):
