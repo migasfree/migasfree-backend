@@ -219,8 +219,7 @@ class Node(models.Model):
         else:
             size = Node.objects.filter(
                 computer=computer_id,
-                class_name='memory'
-            ).filter(
+                class_name='memory',
                 name__startswith='bank:'
             ).aggregate(
                 models.Sum('size')
@@ -249,7 +248,7 @@ class Node(models.Model):
 
     @staticmethod
     def get_mac_address(computer_id):
-        ''' returns all addresses in only string without any separator '''
+        """ returns all addresses in only string without any separator """
         query = Node.objects.filter(
             computer=computer_id,
             name='network',
@@ -273,7 +272,7 @@ class Node(models.Model):
 
         capacity = [item.size for item in query]
 
-        return (query.count(), sum(capacity))
+        return query.count(), sum(capacity)
 
     class Meta:
         app_label = 'hardware'
