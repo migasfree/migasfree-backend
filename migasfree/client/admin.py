@@ -220,7 +220,6 @@ class FaultDefinitionAdmin(admin.ModelAdmin):
         'list_users'
     )
     list_filter = ('enabled',)
-    ordering = ('name',)
     search_fields = ('name',)
     filter_horizontal = ('included_attributes',)
 

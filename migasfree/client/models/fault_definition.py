@@ -113,3 +113,4 @@ class FaultDefinition(models.Model):
         app_label = 'client'
         verbose_name = _("Fault Definition")
         verbose_name_plural = _("Fault Definitions")
+        ordering = ['name']
