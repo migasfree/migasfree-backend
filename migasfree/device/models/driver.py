@@ -83,3 +83,4 @@ class Driver(models.Model):
         verbose_name = _("Driver")
         verbose_name_plural = _("Drivers")
         unique_together = (("model", "project", "feature"),)
+        ordering = ['model', 'name']

@@ -62,3 +62,4 @@ class Model(models.Model):
         verbose_name = _("Model")
         verbose_name_plural = _("Models")
         unique_together = (("device_type", "manufacturer", "name"),)
+        ordering = ['manufacturer', 'name']

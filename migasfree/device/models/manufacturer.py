@@ -38,3 +38,4 @@ class Manufacturer(models.Model):
         app_label = 'device'
         verbose_name = _("Manufacturer")
         verbose_name_plural = _("Manufacturers")
+        ordering = ['name']
