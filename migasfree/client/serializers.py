@@ -18,6 +18,7 @@
 
 from rest_framework import serializers
 
+from ..core.serializers import ClientAttributeSerializer
 from . import models
 
 
@@ -90,3 +91,18 @@ class SynchronizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Synchronization
         fields = '__all__'
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.User
+        fields = '__all__'
+
+
+class ComputerSyncSerializer(serializers.ModelSerializer):
+    sync_user = UserSerializer(many=False, read_only=True)
+    sync_attributes = ClientAttributeSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = models.Computer
+        fields = ('sync_start_date', 'sync_end_date', 'sync_user', 'sync_attributes')

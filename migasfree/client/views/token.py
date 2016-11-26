@@ -226,6 +226,37 @@ class ComputerViewSet(
 
         return Response(status=status.HTTP_201_CREATED)
 
+    @detail_route(methods=['get'])
+    def sync(self, request, pk=None):
+        """
+        :returns
+            {
+                "date": "Y-m-d H:M:s",
+                "user": {
+                    "id": x,
+                    "name": "xxx",
+                    "fullname": "xxxxx"
+                },
+                "attributes": [
+                    {
+                        "id": x,
+                        "value": "xxx",
+                        "description": "xxxxx",
+                        "total_computers"; xx,
+                        "property_att": {
+                            "id": x,
+                            "prefix": "xxx"
+                        }
+                    },
+                    ...
+                ]
+            }
+        """
+        computer = get_object_or_404(models.Computer, pk=pk)
+        serializer = serializers.ComputerSyncSerializer(computer)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class ErrorViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
