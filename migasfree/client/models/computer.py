@@ -463,4 +463,4 @@ def post_save_computer(sender, instance, created, **kwargs):
         cid.ExcludeAttribute.clear()
         cid.setofattributes_set.clear()
         cid.ExcludedAttributesGroup.clear()
-        cid.delays.clear()
+        cid.scheduledelay_set.clear()
