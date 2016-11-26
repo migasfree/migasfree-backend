@@ -27,7 +27,7 @@ from rest_framework.decorators import list_route
 from rest_framework.response import Response
 from django_redis import get_redis_connection
 
-from migasfree.utils import uuid_change_format
+from migasfree.utils import uuid_change_format, get_client_ip
 from migasfree.model_update import update
 from migasfree.core.mixins import SafeConnectionMixin
 from migasfree.core.models import (
@@ -391,6 +391,23 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             return Response(
                 self.create_response(ugettext('Computer not found')),
                 status=status.HTTP_404_NOT_FOUND
+            )
+
+        if computer.status == 'unsubscribed':
+            models.Error.objects.create(
+                computer,
+                computer.project,
+                "{} - {} - {}".format(
+                    get_client_ip(request),
+                    'id',
+                    ugettext('Unsubscribed computer')
+                )
+            )
+            return Response(
+                self.create_response(
+                    ugettext('Unsubscribed computer')
+                ),
+                status=status.HTTP_403_FORBIDDEN
             )
 
         if computer.project.id != self.project.id:

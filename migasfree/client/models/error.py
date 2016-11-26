@@ -31,6 +31,17 @@ class UncheckedManager(models.Manager):
         )
 
 
+class ErrorManager(models.Manager):
+    def create(self, computer, project, description):
+        obj = Error()
+        obj.computer = computer
+        obj.project = project
+        obj.description = description
+        obj.save()
+
+        return obj
+
+
 class Error(Event):
     description = models.TextField(
         verbose_name=_("description"),
@@ -48,7 +59,7 @@ class Error(Event):
         verbose_name=_("project")
     )
 
-    objects = models.Manager()
+    objects = ErrorManager()
     unchecked = UncheckedManager()
 
     def truncated_desc(self):
