@@ -258,6 +258,7 @@ class Deployment(models.Model):
         verbose_name = _('Deployment')
         verbose_name_plural = _('Deployments')
         unique_together = (('name', 'project'),)
+        ordering = ['project__name', 'name']
 
 
 @receiver(pre_save, sender=Deployment)
