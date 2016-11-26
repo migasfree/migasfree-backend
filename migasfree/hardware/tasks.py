@@ -56,7 +56,7 @@ def save_computer_hardware(computer_id, node, parent=None, level=1):
         'dev': node.get('dev')
     })
 
-    level += 3  # FIXME ???
+    level += 1
 
     for e in node:
         if e == 'children':
