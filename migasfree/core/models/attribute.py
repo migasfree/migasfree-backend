@@ -178,6 +178,7 @@ class Attribute(models.Model):
         verbose_name = _("Attribute")
         verbose_name_plural = _("Attributes")
         unique_together = (("property_att", "value"),)
+        ordering = ['property_att__prefix', 'value']
 
 
 class ServerAttributeManager(AttributeManager):

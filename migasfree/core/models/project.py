@@ -123,6 +123,7 @@ class Project(models.Model):
         app_label = 'core'
         verbose_name = _("Project")
         verbose_name_plural = _("Projects")
+        ordering = ['name']
 
 
 @receiver(pre_delete, sender=Project)

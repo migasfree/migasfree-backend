@@ -106,6 +106,7 @@ class Property(models.Model):
         app_label = 'core'
         verbose_name = _("Property")
         verbose_name_plural = _("Properties")
+        ordering = ['name']
 
 
 class ServerProperty(Property):
