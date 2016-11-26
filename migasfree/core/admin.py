@@ -202,7 +202,7 @@ class PackageAdmin(admin.ModelAdmin):
 @admin.register(Deployment)
 class DeploymentAdmin(admin.ModelAdmin):
     form = DeploymentForm
-    list_display = ('name', 'project', 'enabled', 'start_date',)
+    list_display = ('project', 'name', 'enabled', 'start_date',)
     list_select_related = ('schedule',)
     list_filter = ('enabled', 'project__name',)
     ordering = ('name',)
