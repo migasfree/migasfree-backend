@@ -177,6 +177,7 @@ class ScheduleDelayLine(admin.TabularInline):
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'number_delays')
+    ordering = ('name',)
     inlines = [ScheduleDelayLine, ]
     extra = 0
 
