@@ -54,13 +54,13 @@ class ProjectFilter(filters.FilterSet):
 class ClientAttributeFilter(filters.FilterSet):
     class Meta:
         model = ClientAttribute
-        fields = ['property_att__id']
+        fields = ['property_att__id', 'property_att__prefix', 'value']
 
 
 class ServerAttributeFilter(filters.FilterSet):
     class Meta:
         model = ServerAttribute
-        fields = ['property_att__id']
+        fields = ['property_att__id', 'property_att__prefix', 'value']
 
 
 class StoreFilter(filters.FilterSet):
