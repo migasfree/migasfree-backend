@@ -96,7 +96,7 @@ class Computer(models.Model):
         max_length=20,
         null=False,
         choices=STATUS_CHOICES,
-        default='intended'
+        default=settings.MIGASFREE_DEFAULT_COMPUTER_STATUS
     )
 
     name = models.CharField(
