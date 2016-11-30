@@ -78,8 +78,7 @@ def create_repository_metadata(deployment_id):
     if not os.path.exists(pkg_tmp_path):
         os.makedirs(pkg_tmp_path)
 
-    for pkg_id in deploy.available_packages.values_list('id', flat=True):
-        pkg = Package.objects.get(id=pkg_id)
+    for pkg in deploy.available_packages.all():
         dst = os.path.join(pkg_tmp_path, pkg.name)
         if not os.path.lexists(dst):
             os.symlink(
