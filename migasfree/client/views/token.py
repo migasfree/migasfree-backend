@@ -28,7 +28,6 @@ from rest_framework.response import Response
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_filters import backends
 
-from migasfree.device import serializers as device_serializers
 from .. import models, serializers
 from ..filters import (
     PackageFilter, ErrorFilter, NotificationFilter,

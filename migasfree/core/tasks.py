@@ -24,15 +24,16 @@ import shutil
 from celery import shared_task
 from celery.exceptions import Ignore
 from django_redis import get_redis_connection
+from django.core.exceptions import ObjectDoesNotExist
 
-from .models import Deployment, Package, Store
+from .models import Deployment, Store
 
 
 @shared_task(queue='repository')
 def remove_repository_metadata(deployment_id, old_slug=''):
     try:
         deploy = Deployment.objects.get(id=deployment_id)
-    except:
+    except ObjectDoesNotExist:
         raise Ignore()
 
     if old_slug:
