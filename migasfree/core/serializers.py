@@ -260,7 +260,7 @@ class DeploymentSerializer(serializers.ModelSerializer):
         return instance
 
     def validate(self, data):
-        for item in data.get('available_packages'):
+        for item in data.get('available_packages', []):
             if item.project.id != data['project'].id:
                 raise serializers.ValidationError(
                     _('Package %s must belong to the project %s') % (
