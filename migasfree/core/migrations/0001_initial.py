@@ -161,6 +161,7 @@ class Migration(migrations.Migration):
                 ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.Project', verbose_name='project')),
             ],
             options={
+                'ordering': ['name', 'project'],
                 'verbose_name': 'Store',
                 'verbose_name_plural': 'Stores',
             },
