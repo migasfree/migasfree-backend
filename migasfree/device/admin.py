@@ -63,7 +63,7 @@ class LogicalForm(forms.ModelForm):
 @admin.register(Logical)
 class LogicalAdmin(admin.ModelAdmin):
     form = LogicalForm
-    fields = ('device', 'feature', 'name')  # 'computers')
+    fields = ('device', 'feature', 'name', 'attributes')
     list_select_related = ('device', 'feature',)
     list_display = ('device', 'feature')
     ordering = ('device__name', 'feature__name')
@@ -79,7 +79,7 @@ class LogicalAdmin(admin.ModelAdmin):
 class LogicalInline(admin.TabularInline):
     model = Logical
     form = LogicalForm
-    fields = ('feature', 'name')  # "computers")
+    fields = ('feature', 'name', 'attributes')
     extra = 0
 
 

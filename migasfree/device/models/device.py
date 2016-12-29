@@ -19,8 +19,6 @@
 import json
 
 from django.db import models
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
@@ -51,7 +49,6 @@ class Device(models.Model):
     data = models.TextField(
         verbose_name=_("data"),
         null=True,
-        blank=False,
         default="{}"
     )
 
@@ -59,7 +56,7 @@ class Device(models.Model):
         data = json.loads(self.data)
         return data.get('LOCATION', '')
 
-    def data_to_dict(self):
+    def as_dict(self):
         return {
             'name': self.name,
             'model': self.model.name,
@@ -82,16 +79,3 @@ class Device(models.Model):
         verbose_name = _("Device")
         verbose_name_plural = _("Devices")
         unique_together = (("connection", "name"),)
-
-
-@receiver(pre_save, sender=Device)
-def pre_save_device(sender, instance, **kwargs):
-    if instance.id:
-        old_obj = Device.objects.get(pk=instance.id)
-        if old_obj.data != instance.data or \
-                old_obj.name != instance.name or \
-                old_obj.connection.id != instance.connection.id or \
-                old_obj.model.id != instance.model.id:
-            for logical_device in instance.logical_set.all():
-                for computer in logical_device.logical_devices_assigned.all():
-                    computer.logical_devices_installed.remove(logical_device.id)

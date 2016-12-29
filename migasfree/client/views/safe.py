@@ -33,7 +33,6 @@ from migasfree.core.mixins import SafeConnectionMixin
 from migasfree.core.models import (
     Deployment, Property, Attribute, BasicAttribute, SetOfAttributes
 )
-from migasfree.device.models import Logical
 
 from .. import models, serializers, tasks
 
@@ -1032,7 +1031,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = {'id': 1}
 
         Returns: {
-            "install": [
+            "logical": [
                 {
                     "printer": {
                         "id": 99,
@@ -1050,86 +1049,33 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                         ...
                     }
                 }
-            ],
-            "remove": [
-                {"printer": id1},
-                {"printer": id2},
                 ...
-            ]
+            ],
+            "default": int
         }
         """
 
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        logical_devices_assigned = computer.logical_devices_assigned.values_list('id', flat=True)
-        logical_devices_installed = computer.logical_devices_installed.values_list('id', flat=True)
-        logger.debug('logical_devices_assigned: %s', logical_devices_assigned)
-        logger.debug('logical_devices_installed: %s', logical_devices_installed)
+        logical_devices = []
+        for device in computer.logical_devices():
+            logical_devices.append(device.as_dict(computer.project))
 
-        devices_to_install = []
-        devices_to_remove = []
+        if computer.default_logical_device:
+            default_logical_device = computer.default_logical_device.id
+        else:
+            default_logical_device = 0
 
-        if cmp(logical_devices_assigned, logical_devices_installed) != 0:
-            # remove logical devices
-            diff = list(set(logical_devices_installed) - set(logical_devices_assigned))
-            logger.debug('list to remove: %s', diff)
-            for item in diff:
-                try:
-                    logical_device = Logical.objects.get(pk=item)
-                    devices_to_remove.append({
-                        logical_device.device.connection.device_type.name: item
-                    })
-                except ObjectDoesNotExist:
-                    # maybe logical device has been deleted
-                    # FIXME hardcoded values
-                    devices_to_remove.append({'PRINTER': item})
-
-            # install logical devices
-            diff = list(set(logical_devices_assigned) - set(logical_devices_installed))
-            logger.debug('list to install: %s', diff)
-            for item in diff:
-                try:
-                    logical_device = Logical.objects.get(pk=item)
-                    devices_to_install.append(logical_device.data_to_dict(computer.project))
-                except ObjectDoesNotExist:
-                    pass
-
-        logger.debug('devices to install: %s', devices_to_install)
-        logger.debug('devices to remove: %s', devices_to_remove)
+        logger.debug('logical devices: %s', logical_devices)
+        logger.debug('default logical device: %d', default_logical_device)
 
         response = {
-            'install': devices_to_install,
-            'remove': devices_to_remove
+            'logical': logical_devices,
+            'default': default_logical_device,
         }
 
         return Response(
             self.create_response(response),
-            status=status.HTTP_200_OK
-        )
-
-    @list_route(methods=['post'], url_path='devices/changes')
-    def devices_changes(self, request, format=None):
-        """
-        claims = {
-            'id': 1,
-            'installed': [id1, id2, ..., idN],
-            'removed': [id1, id2, ..., idN]
-        }
-        """
-
-        claims = self.get_claims(request.data)
-        computer = get_object_or_404(models.Computer, id=claims.get('id'))
-        installed = claims.get('installed')
-        removed = claims.get('removed')
-
-        for logical_id in installed:
-            computer.logical_devices_installed.add(logical_id)
-
-        for logical_id in removed:
-            computer.logical_devices_installed.remove(logical_id)
-
-        return Response(
-            self.create_response(ugettext('Data received')),
             status=status.HTTP_200_OK
         )

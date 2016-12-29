@@ -20,6 +20,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
+from migasfree.core.models import Attribute
+
 from .device import Device
 from .feature import Feature
 from .driver import Driver
@@ -53,12 +55,19 @@ class Logical(models.Model):
         unique=False
     )
 
+    attributes = models.ManyToManyField(
+        Attribute,
+        blank=True,
+        verbose_name=_("attributes"),
+        help_text=_("Assigned Attributes")
+    )
+
     objects = LogicalManager()
 
     def get_name(self):
         return self.name if self.name else self.feature.name
 
-    def data_to_dict(self, project):
+    def as_dict(self, project):
         driver_dict = {}
         try:
             driver = Driver.objects.filter(
@@ -67,8 +76,8 @@ class Logical(models.Model):
                 feature__id=self.feature.id
             )[0]
             if driver:
-                driver_dict = driver.data_to_dict()
-        except:
+                driver_dict = driver.as_dict()
+        except IndexError:
             pass
 
         ret = {
@@ -79,7 +88,7 @@ class Logical(models.Model):
             }
         }
 
-        device_dict = self.device.data_to_dict()
+        device_dict = self.device.as_dict()
         for key, value in list(device_dict.items()):
             ret[self.device.connection.device_type.name][key] = value
 

@@ -20,10 +20,12 @@ from django.db.models import Q
 from django.contrib import admin
 from django.shortcuts import redirect
 from django.contrib.admin import SimpleListFilter
+from django.core.urlresolvers import resolve
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 
 from migasfree.core.models import Attribute
+from migasfree.device.models import Logical
 
 from .models import *
 
@@ -71,6 +73,7 @@ class ComputerAdmin(admin.ModelAdmin):
         'storage',
         'disks',
         'mac_address',
+        'my_logical_devices',
     )
 
     fieldsets = (
@@ -115,7 +118,7 @@ class ComputerAdmin(admin.ModelAdmin):
             )
         }),
         (_('Devices'), {
-            'fields': ('logical_devices_assigned',)
+            'fields': ('my_logical_devices', 'default_logical_device',)
         }),
     )
 
@@ -141,16 +144,13 @@ class ComputerAdmin(admin.ModelAdmin):
     delete_selected.short_description = _("Delete selected %(verbose_name_plural)s")
     """
 
-    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
-        '''
-        if db_field.name == "logical_devices_assigned":
-            kwargs['widget'] = FilteredSelectMultiple(
-                db_field.verbose_name,
-                (db_field.name in self.filter_vertical)
-            )
-            return db_field.formfield(**kwargs)
-        '''
+    def my_logical_devices(self, obj):
+        return ' '.join([item.__str__() for item in obj.logical_devices()])
 
+    my_logical_devices.allow_tags = True
+    my_logical_devices.short_description = _('Logical Devices')
+
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == "sync_attributes":
             kwargs["queryset"] = Attribute.objects.filter(
                 property_att__enabled=True
@@ -159,6 +159,19 @@ class ComputerAdmin(admin.ModelAdmin):
 
         return super(ComputerAdmin, self).formfield_for_manytomany(
             db_field, request, **kwargs
+        )
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        if db_field.name == "default_logical_device":
+            args = resolve(request.path).args
+            computer = Computer.objects.get(pk=args[0])
+            kwargs['queryset'] = Logical.objects.filter(
+                pk__in=[x.id for x in computer.logical_devices()]
+            )
+        return super(ComputerAdmin, self).formfield_for_foreignkey(
+            db_field,
+            request,
+            **kwargs
         )
 
     def has_add_permission(self, request):

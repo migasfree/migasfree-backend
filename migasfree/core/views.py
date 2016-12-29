@@ -34,6 +34,9 @@ from rest_framework_filters import backends
 
 from .mixins import SafeConnectionMixin
 
+from migasfree.device.models import Logical
+from migasfree.device.serializers import LogicalSerializer
+
 from .models import (
     Platform, Project, Store,
     ServerProperty, ClientProperty,
@@ -169,6 +172,73 @@ class ClientAttributeViewSet(viewsets.ModelViewSet):
             return ClientAttributeWriteSerializer
 
         return ClientAttributeSerializer
+
+    @detail_route(methods=['get', 'put', 'patch'], url_path='logical-devices')
+    def logical_devices(self, request, pk=None):
+        """
+        GET
+            returns: [
+                {
+                    "id": 112,
+                    "device": {
+                        "id": 6,
+                        "name": "19940"
+                    },
+                    "feature": {
+                        "id": 2,
+                        "name": "Color"
+                    },
+                    "name": ""
+                },
+                {
+                    "id": 7,
+                    "device": {
+                        "id": 6,
+                        "name": "19940"
+                    },
+                    "feature": {
+                        "id": 1,
+                        "name": "BN"
+                    },
+                    "name": ""
+                }
+            ]
+
+        PUT, PATCH
+            input: [id1, id2, idN]
+
+            returns: status code 201
+        """
+
+        attribute = get_object_or_404(ClientAttribute, pk=pk)
+        logical_devices = attribute.devicelogical_set.all()
+
+        if request.method == 'GET':
+            serializer = LogicalSerializer(
+                logical_devices,
+                many=True
+            )
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        if request.method == 'PATCH':  # append cid attribute to logical devices
+            for device_id in request.data:
+                device = get_object_or_404(Logical, pk=device_id)
+                if not device in logical_devices:
+                    device.attributes.add(pk)
+
+            return Response(status=status.HTTP_201_CREATED)
+
+        if request.method == 'PUT':  # replace cid attribute in logical devices
+            for device in logical_devices:
+                if device in logical_devices:
+                    device.attributes.remove(pk)
+
+            for device_id in request.data:
+                device = get_object_or_404(Logical, pk=device_id)
+                device.attributes.add(pk)
+
+            return Response(status=status.HTTP_201_CREATED)
 
 
 class ScheduleViewSet(viewsets.ModelViewSet):

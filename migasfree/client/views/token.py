@@ -171,61 +171,6 @@ class ComputerViewSet(
             status=status.HTTP_200_OK
         )
 
-    @detail_route(methods=['get', 'put', 'patch'], url_path='logical-devices-assigned')
-    def logical_devices_assigned(self, request, pk=None):
-        """
-        GET
-            returns: [
-                {
-                    "id": 112,
-                    "device": {
-                        "id": 6,
-                        "name": "19940"
-                    },
-                    "feature": {
-                        "id": 2,
-                        "name": "Color"
-                    },
-                    "alternative_feature_name": null
-                },
-                {
-                    "id": 7,
-                    "device": {
-                        "id": 6,
-                        "name": "19940"
-                    },
-                    "feature": {
-                        "id": 1,
-                        "name": "BN"
-                    },
-                    "alternative_feature_name": null
-                }
-            ]
-
-        PUT, PATCH
-            input: [id1, id2, idN]
-
-            returns: status code 201
-        """
-
-        computer = get_object_or_404(models.Computer, pk=pk)
-
-        if request.method == 'GET':
-            serializer = device_serializers.LogicalSerializer(
-                computer.logical_devices_assigned.all(),
-                many=True
-            )
-
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        if request.method == 'PUT':  # replace logical devices assigned in computer
-            computer.logical_devices_assigned.clear()
-
-        for item in request.data:
-            computer.logical_devices_assigned.add(item)
-
-        return Response(status=status.HTTP_201_CREATED)
-
     @detail_route(methods=['get'])
     def sync(self, request, pk=None):
         """

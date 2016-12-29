@@ -22,6 +22,7 @@ from django.db import models, transaction
 from django.db.models import Count
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.template import Context, Template
@@ -31,6 +32,7 @@ from migasfree.utils import swap_m2m, remove_empty_elements_from_dict
 from migasfree.core.models import (
     Project, ServerAttribute, Attribute, BasicProperty
 )
+from migasfree.device.models import Logical
 
 from .package import Package
 from .user import User
@@ -134,20 +136,11 @@ class Computer(models.Model):
         blank=True
     )
 
-    logical_devices_assigned = models.ManyToManyField(
-        # http://python.6.x6.nabble.com/many-to-many-between-apps-td5026629.html
-        'device.Logical',
+    default_logical_device = models.ForeignKey(
+        Logical,
+        null=True,
         blank=True,
-        verbose_name=_("logical devices assigned"),
-        related_name='logical_devices_assigned',
-    )
-
-    logical_devices_installed = models.ManyToManyField(
-        'device.Logical',
-        blank=True,
-        verbose_name=_("logical devices installed"),
-        related_name='logical_devices_installed',
-        editable=False,
+        verbose_name=_("default logical device")
     )
 
     last_hardware_capture = models.DateTimeField(
@@ -237,8 +230,8 @@ class Computer(models.Model):
     )
 
     objects = models.Manager()
-    productives = ProductiveManager()
-    unproductives = UnproductiveManager()
+    productive = ProductiveManager()
+    unproductive = UnproductiveManager()
     subscribed = SubscribedManager()
     unsubscribed = UnsubscribedManager()
 
@@ -283,7 +276,7 @@ class Computer(models.Model):
     def hardware(self):
         try:
             return self.node_set.get(computer=self.id, parent=None).__str__()
-        except:
+        except ObjectDoesNotExist:
             return ''
 
     def change_status(self, status):
@@ -345,7 +338,7 @@ class Computer(models.Model):
             self.product = Node.objects.get(
                 computer=self.id, parent=None
             ).get_product()
-        except:
+        except ObjectDoesNotExist:
             self.product = None
 
         self.machine = 'V' if Node.get_is_vm(self.id) else 'P'
@@ -356,13 +349,32 @@ class Computer(models.Model):
 
         self.save()
 
+    def logical_devices(self, attributes=None):
+        if not attributes:
+            attributes = self.sync_attributes.values_list('id', flat=True)
+
+        devices = []
+        for att in attributes:
+            for logical_device in Logical.objects.filter(
+                attributes__id=att
+            ):
+                devices.append(logical_device)
+
+        return devices
+
+    logical_devices.allow_tags = True
+    logical_devices.short_description = _('Logical Devices')
+
     @staticmethod
     def replacement(source, target):
         swap_m2m(source.tags, target.tags)
-        swap_m2m(source.logical_devices_assigned, target.logical_devices_assigned)
+        source.default_logical_device, target.default_logical_device = (
+            target.default_logical_device, source.default_logical_device
+        )
 
         source_cid = source.get_cid_attribute()
         target_cid = target.get_cid_attribute()
+        swap_m2m(source_cid.devicelogical_set, target_cid.devicelogical_set)
         swap_m2m(source_cid.faultdefinition_set, target_cid.faultdefinition_set)
         swap_m2m(source_cid.deployment_set, target_cid.deployment_set)
         swap_m2m(source_cid.ExcludeAttribute, target_cid.ExcludeAttribute)
@@ -420,9 +432,10 @@ class Computer(models.Model):
             ugettext("Delays"): ', '.join(
                 str(x) for x in cid.delays.all()
             ),
-            ugettext("Devices"): ', '.join(
-                str(x) for x in self.logical_devices_assigned.all()
+            ugettext("Logical devices"): ', '.join(
+                str(x) for x in self.logical_devices()
             ),
+            ugettext("Default logical device"): self.default_logical_device.__str__(),
         })
 
     def __str__(self):
@@ -455,9 +468,9 @@ def post_save_computer(sender, instance, created, **kwargs):
 
     if instance.status in ['available', 'unsubscribed']:
         instance.tags.clear()
-        instance.logical_devices_assigned.clear()
 
         cid = instance.get_cid_attribute()
+        cid.devicelogical_set.clear()
         cid.faultdefinition_set.clear()
         cid.deployment_set.clear()
         cid.ExcludeAttribute.clear()

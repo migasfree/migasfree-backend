@@ -56,7 +56,7 @@ class Driver(models.Model):
         blank=True
     )
 
-    def data_to_dict(self):
+    def as_dict(self):
         lst_install = []
         for p in self.packages_to_install.replace("\r", " ").replace(
             "\n", " "
