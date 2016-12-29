@@ -80,6 +80,7 @@ class Store(models.Model):
         verbose_name = _('Store')
         verbose_name_plural = _('Stores')
         unique_together = (('name', 'project'),)
+        ordering = ['name', 'project']
 
 
 @receiver(pre_delete, sender=Store)
