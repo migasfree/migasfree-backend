@@ -182,12 +182,17 @@ class Deployment(models.Model):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
 
-        self.packages_to_install = self.packages_to_install.replace("\r\n", "\n")
-        self.packages_to_remove = self.packages_to_remove.replace("\r\n", "\n")
+        if self.packages_to_install:
+            self.packages_to_install = self.packages_to_install.replace("\r\n", "\n")
+        if self.packages_to_remove:
+            self.packages_to_remove = self.packages_to_remove.replace("\r\n", "\n")
 
-        self.default_preincluded_packages = self.default_preincluded_packages.replace("\r\n", "\n")
-        self.default_included_packages = self.default_included_packages.replace("\r\n", "\n")
-        self.default_excluded_packages = self.default_excluded_packages.replace("\r\n", "\n")
+        if self.default_preincluded_packages:
+            self.default_preincluded_packages = self.default_preincluded_packages.replace("\r\n", "\n")
+        if self.default_included_packages:
+            self.default_included_packages = self.default_included_packages.replace("\r\n", "\n")
+        if self.default_excluded_packages:
+            self.default_excluded_packages = self.default_excluded_packages.replace("\r\n", "\n")
 
         super(Deployment, self).save(*args, **kwargs)
 
