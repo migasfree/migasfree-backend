@@ -82,7 +82,7 @@ class ClientPropertyFilter(SimpleListFilter):
 class ClientPropertyAdmin(admin.ModelAdmin):
     form = ClientPropertyForm
     list_display = ('name', 'prefix', 'enabled', 'kind')
-    list_filter = ('enabled', ClientPropertyFilter)
+    list_filter = ('enabled', 'kind', ClientPropertyFilter)
     ordering = ('name',)
     search_fields = ('name', 'prefix',)
     fields = (
