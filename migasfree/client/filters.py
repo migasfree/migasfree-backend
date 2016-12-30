@@ -41,7 +41,10 @@ class ComputerFilter(filters.FilterSet):
 
     class Meta:
         model = Computer
-        fields = ['project__id', 'status', 'name', 'uuid']
+        fields = [
+            'project__id', 'status', 'name',
+            'uuid', 'sync_attributes__id',
+        ]
 
 
 class ErrorFilter(filters.FilterSet):
