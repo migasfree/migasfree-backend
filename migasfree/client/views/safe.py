@@ -261,6 +261,12 @@ class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
 
         remove_computer_messages(computer.id)
 
+        if computer.status == 'available':
+            models.Notification.create(
+                _('Computer [%s] with available status, has been synchronized')
+                % computer.__str__()
+            )
+
         return Response(
             self.create_response(ugettext('EOT OK')),
             status=status.HTTP_200_OK
