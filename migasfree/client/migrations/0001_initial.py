@@ -39,9 +39,8 @@ class Migration(migrations.Migration):
                 ('storage', models.BigIntegerField(blank=True, null=True, verbose_name='storage')),
                 ('disks', models.SmallIntegerField(blank=True, null=True, verbose_name='disks')),
                 ('mac_address', models.CharField(blank=True, max_length=60, null=True, verbose_name='MAC address')),
-                ('logical_devices_assigned', models.ManyToManyField(blank=True, related_name='logical_devices_assigned', to='device.Logical', verbose_name='logical devices assigned')),
-                ('logical_devices_installed', models.ManyToManyField(blank=True, editable=False, related_name='logical_devices_installed', to='device.Logical', verbose_name='logical devices installed')),
                 ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.Project', verbose_name='project')),
+                ('default_logical_device', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='device.Logical', verbose_name='default logical device')),
             ],
             options={
                 'verbose_name': 'Computer',

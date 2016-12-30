@@ -71,6 +71,7 @@ class Migration(migrations.Migration):
                 ('alternative_feature_name', models.CharField(blank=True, max_length=50, null=True, verbose_name='alternative feature name')),
                 ('device', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='device.Device', verbose_name='device')),
                 ('feature', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='device.Feature', verbose_name='feature')),
+                ('attributes', models.ManyToManyField(blank=True, help_text='Assigned Attributes', to='core.Attribute', verbose_name='attributes')),
             ],
             options={
                 'verbose_name': 'Device Logical',
