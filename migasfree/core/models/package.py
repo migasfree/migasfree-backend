@@ -115,6 +115,10 @@ class Package(models.Model):
         self.store = store
         self.save()
 
+    def save(self, *args, **kwargs):
+        self.create_dir()
+        super(Package, self).save(*args, **kwargs)
+
     def __str__(self):
         return _('%s at project %s') % (self.name, self.project.name)
 
