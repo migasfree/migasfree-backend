@@ -46,7 +46,7 @@ class Connection(models.Model):
     )
 
     def __str__(self):
-        return '(%s) %s' % (self.device_type.name, self.name)
+        return self.name
 
     class Meta:
         app_label = 'device'
