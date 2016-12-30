@@ -42,7 +42,7 @@ class ManufacturerAdmin(admin.ModelAdmin):
 
 @admin.register(Connection)
 class ConnectionAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'fields')
+    list_display = ('__str__', 'device_type', 'fields')
     list_select_related = ('device_type',)
     ordering = ('device_type__name', 'name', 'fields')
 
