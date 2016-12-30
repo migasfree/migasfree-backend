@@ -193,8 +193,8 @@ class Node(models.Model):
         return self.VIRTUAL_MACHINES.get(self.vendor, self.product)
 
     def __str__(self):
-        return self.product if self.description and 'lshw' in self.description \
-            else '%s: %s' % (self.description, self.product)
+        text = self.get_product()
+        return text if text else ''
 
     @staticmethod
     def get_is_vm(computer_id):
