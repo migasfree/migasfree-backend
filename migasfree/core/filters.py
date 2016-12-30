@@ -48,7 +48,7 @@ class PackageFilter(filters.FilterSet):
 class ProjectFilter(filters.FilterSet):
     class Meta:
         model = Project
-        fields = ['platform__id']
+        fields = ['platform__id', 'name']
 
 
 class ClientAttributeFilter(filters.FilterSet):
