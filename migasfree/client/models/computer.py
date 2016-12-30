@@ -358,7 +358,8 @@ class Computer(models.Model):
             for logical_device in Logical.objects.filter(
                 attributes__id=att
             ):
-                devices.append(logical_device)
+                if logical_device not in devices:
+                    devices.append(logical_device)
 
         return devices
 
