@@ -42,7 +42,7 @@ class ComputerFilter(filters.FilterSet):
     class Meta:
         model = Computer
         fields = [
-            'project__id', 'status', 'name',
+            'id', 'project__id', 'status', 'name',
             'uuid', 'sync_attributes__id', 'tags__id',
         ]
 
@@ -53,14 +53,15 @@ class ErrorFilter(filters.FilterSet):
 
     class Meta:
         model = Error
-        fields = ['project__id', 'checked', 'computer__id']
+        fields = ['id', 'project__id', 'checked', 'computer__id']
 
 
 class FaultDefinitionFilter(filters.FilterSet):
     class Meta:
         model = FaultDefinition
         fields = [
-            'included_attributes__id', 'excluded_attributes__id', 'enabled'
+            'id', 'enabled',
+            'included_attributes__id', 'excluded_attributes__id'
         ]
 
 
@@ -96,7 +97,8 @@ class FaultFilter(filters.FilterSet):
     class Meta:
         model = Fault
         fields = [
-            'project__id', 'checked', 'fault_definition__id', 'computer__id'
+            'id', 'project__id', 'checked',
+            'fault_definition__id', 'computer__id'
         ]
 
 
@@ -106,7 +108,7 @@ class MigrationFilter(filters.FilterSet):
 
     class Meta:
         model = Migration
-        fields = ['project__id', 'computer__id']
+        fields = ['id', 'project__id', 'computer__id']
 
 
 class NotificationFilter(filters.FilterSet):
@@ -114,7 +116,7 @@ class NotificationFilter(filters.FilterSet):
 
     class Meta:
         model = Notification
-        fields = ['checked']
+        fields = ['id', 'checked']
 
 
 class PackageFilter(filters.FilterSet):
@@ -131,7 +133,7 @@ class StatusLogFilter(filters.FilterSet):
 
     class Meta:
         model = StatusLog
-        fields = ['computer__id']
+        fields = ['id', 'computer__id']
 
 
 class SynchronizationFilter(filters.FilterSet):
@@ -140,4 +142,4 @@ class SynchronizationFilter(filters.FilterSet):
 
     class Meta:
         model = Synchronization
-        fields = ['project__id', 'computer__id']
+        fields = ['id', 'project__id', 'computer__id']

@@ -36,34 +36,34 @@ class DeploymentFilter(filters.FilterSet):
 
     class Meta:
         model = Deployment
-        fields = ['project__id', 'enabled', 'schedule__id']
+        fields = ['id', 'project__id', 'enabled', 'schedule__id']
 
 
 class PackageFilter(filters.FilterSet):
     class Meta:
         model = Package
-        fields = ['deployment__id', 'store__id']
+        fields = ['id', 'deployment__id', 'store__id']
 
 
 class ProjectFilter(filters.FilterSet):
     class Meta:
         model = Project
-        fields = ['platform__id', 'name']
+        fields = ['id', 'platform__id', 'name']
 
 
 class ClientAttributeFilter(filters.FilterSet):
     class Meta:
         model = ClientAttribute
-        fields = ['property_att__id', 'property_att__prefix', 'value']
+        fields = ['id', 'property_att__id', 'property_att__prefix', 'value']
 
 
 class ServerAttributeFilter(filters.FilterSet):
     class Meta:
         model = ServerAttribute
-        fields = ['property_att__id', 'property_att__prefix', 'value']
+        fields = ['id', 'property_att__id', 'property_att__prefix', 'value']
 
 
 class StoreFilter(filters.FilterSet):
     class Meta:
         model = Store
-        fields = ['project__id']
+        fields = ['id', 'project__id']
