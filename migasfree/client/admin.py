@@ -220,6 +220,15 @@ class ErrorAdmin(admin.ModelAdmin):
 
     checked_ok.short_description = _("Checking is O.K.")
 
+    def truncated_desc(self):
+        if len(self.description) <= 250:  # FIXME constant
+            return self.description
+        else:
+            return self.description[:250] + ' ...'
+
+    truncated_desc.short_description = _("Truncated description")
+    truncated_desc.admin_order_field = 'description'
+
     def has_add_permission(self, request):
         return False
 

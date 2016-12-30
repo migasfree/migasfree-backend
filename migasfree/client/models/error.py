@@ -62,14 +62,6 @@ class Error(Event):
     objects = ErrorManager()
     unchecked = UncheckedManager()
 
-    def truncated_desc(self):
-        if len(self.description) <= 250:  # FIXME constant
-            return self.description
-        else:
-            return self.description[:250] + ' ...'
-
-    truncated_desc.short_description = _("Truncated description")
-
     @staticmethod
     def unchecked_count():
         return Error.objects.filter(checked=0).count()
