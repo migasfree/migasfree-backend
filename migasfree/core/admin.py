@@ -52,6 +52,7 @@ class ProjectAdmin(ImportExportActionModelAdmin):
         'pms',
         'autoregister'
     )
+    list_filter = ('platform', 'pms',)
     prepopulated_fields = {'slug': ('name',)}
 
 
@@ -166,6 +167,9 @@ class ServerAttributeAdmin(admin.ModelAdmin):
 @admin.register(SetOfAttributes)
 class SetOfAttributesAdmin(admin.ModelAdmin):
     model = SetOfAttributes
+    list_display = ('name',)
+    list_display_links = ('name',)
+    list_filter = ('enabled',)
 
 
 class ScheduleDelayLine(admin.TabularInline):

@@ -232,7 +232,7 @@ class FaultDefinitionAdmin(admin.ModelAdmin):
         'list_included_attributes', 'list_excluded_attributes',
         'list_users'
     )
-    list_filter = ('enabled',)
+    list_filter = ('enabled', 'users',)
     search_fields = ('name',)
     filter_horizontal = ('included_attributes',)
 
@@ -332,7 +332,7 @@ class MigrationAdmin(admin.ModelAdmin):
     list_filter = ('created_at', 'project__name', 'project__platform__name',)
     search_fields = add_computer_search_fields(['created_at'])
     readonly_fields = ('computer', 'project', 'created_at')
-    exclude = ("computer",)
+    exclude = ('computer',)
     actions = None
 
     def has_add_permission(self, request):
