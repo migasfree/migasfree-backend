@@ -53,6 +53,7 @@ class ProjectAdmin(ImportExportActionModelAdmin):
         'autoregister'
     )
     list_filter = ('platform', 'pms',)
+    list_select_related = ('platform', 'pms',)
     prepopulated_fields = {'slug': ('name',)}
 
 
@@ -63,6 +64,11 @@ class StoreAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     read_only_fields = ('slug',)
     fields = ('name', 'project')
+
+    def get_queryset(self, request):
+        return super(StoreAdmin, self).get_queryset(
+            request
+        ).select_related('project')
 
 
 class ClientPropertyFilter(SimpleListFilter):
@@ -166,7 +172,6 @@ class ServerAttributeAdmin(admin.ModelAdmin):
 
 @admin.register(SetOfAttributes)
 class SetOfAttributesAdmin(admin.ModelAdmin):
-    model = SetOfAttributes
     list_display = ('name',)
     list_display_links = ('name',)
     list_filter = ('enabled',)
@@ -193,10 +198,16 @@ class PackageAdmin(admin.ModelAdmin):
     list_display = ('name', 'project', 'store')
     # list_display_links = None
     list_filter = ('project__name', 'store',)
-    list_select_related = ('project',)
-    list_per_page = 25
+    list_select_related = ('project', 'store',)
     search_fields = ('name', 'store__name',)
     ordering = ('name',)
+
+    def get_queryset(self, request):
+        return super(PackageAdmin, self).get_queryset(
+            request
+        ).prefetch_related(
+            'repository_set'
+        )
 
     def save_model(self, request, obj, form, change):
         file_list = request.FILES.getlist('package_file')
@@ -207,7 +218,7 @@ class PackageAdmin(admin.ModelAdmin):
 class DeploymentAdmin(admin.ModelAdmin):
     form = DeploymentForm
     list_display = ('project', 'name', 'enabled', 'start_date',)
-    list_select_related = ('schedule',)
+    list_select_related = ('project',)
     list_filter = ('enabled', 'project__name', 'schedule',)
     ordering = ('name',)
     search_fields = ('name', 'available_packages__name',)
