@@ -21,7 +21,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 
-from .models import Package, Deployment, ClientProperty
+from migasfree.client.models import Computer
+
+from .models import Package, Deployment, ClientProperty, Attribute
 from .validators import MimetypeValidator
 from .pms import get_available_mimetypes
 from .fields import MultiFileField
@@ -70,9 +72,16 @@ class PackageForm(forms.ModelForm):
 
 
 class DeploymentForm(forms.ModelForm):
-    class Meta:
-        model = Deployment
-        fields = '__all__'
+    def _validate_active_computers(self, att_list):
+        for att_id in att_list:
+            attribute = Attribute.objects.get(pk=att_id)
+            if attribute.property_att.prefix == 'CID':
+                computer = Computer.objects.get(pk=int(attribute.value))
+                if computer.status not in Computer.ACTIVE_STATUS:
+                    raise ValidationError(
+                        _('It is not possible to assign an inactive computer (%s) as an attribute')
+                        % computer.__str__()
+                    )
 
     def clean(self):
         # http://stackoverflow.com/questions/7986510/django-manytomany-model-validation
@@ -85,6 +94,13 @@ class DeploymentForm(forms.ModelForm):
                         item, cleaned_data['project']
                     )
                 )
+
+        self._validate_active_computers(cleaned_data.get('included_attributes', []))
+        self._validate_active_computers(cleaned_data.get('excluded_attributes', []))
+
+    class Meta:
+        model = Deployment
+        fields = '__all__'
 
 
 class ClientPropertyForm(forms.ModelForm):

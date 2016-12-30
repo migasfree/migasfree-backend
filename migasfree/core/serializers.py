@@ -21,6 +21,8 @@ from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
+from migasfree.client.models import Computer
+
 from . import tasks
 
 from .validators import (
@@ -259,6 +261,17 @@ class DeploymentSerializer(serializers.ModelSerializer):
 
         return instance
 
+    def _validate_active_computers(self, att_list):
+        for att_id in att_list:
+            attribute = Attribute.objects.get(pk=att_id)
+            if attribute.property_att.prefix == 'CID':
+                computer = Computer.objects.get(pk=int(attribute.value))
+                if computer.status not in Computer.ACTIVE_STATUS:
+                    raise serializers.ValidationError(
+                        _('It is not possible to assign an inactive computer (%s) as an attribute')
+                        % computer.__str__()
+                    )
+
     def validate(self, data):
         for item in data.get('available_packages', []):
             if item.project.id != data['project'].id:
@@ -267,6 +280,9 @@ class DeploymentSerializer(serializers.ModelSerializer):
                         item, data['project']
                     )
                 )
+
+        self._validate_active_computers(data.get('included_attributes', []))
+        self._validate_active_computers(data.get('excluded_attributes', []))
 
         return data
 
