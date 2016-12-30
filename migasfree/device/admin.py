@@ -66,6 +66,7 @@ class LogicalAdmin(admin.ModelAdmin):
     fields = ('device', 'feature', 'name', 'attributes')
     list_select_related = ('device', 'feature',)
     list_display = ('device', 'feature')
+    list_filter = ('device__model', 'feature')
     ordering = ('device__name', 'feature__name')
     search_fields = (
         'id',
