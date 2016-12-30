@@ -66,6 +66,20 @@ class UnsubscribedManager(models.Manager):
         )
 
 
+class ActiveManager(models.Manager):
+    def get_queryset(self):
+        return super(ActiveManager, self).get_queryset().filter(
+            status__in=Computer.ACTIVE_STATUS
+        )
+
+
+class InactiveManager(models.Manager):
+    def get_queryset(self):
+        return super(InactiveManager, self).get_queryset().exclude(
+            status__in=Computer.ACTIVE_STATUS
+        )
+
+
 @python_2_unicode_compatible
 class Computer(models.Model):
     STATUS_CHOICES = (
@@ -78,6 +92,7 @@ class Computer(models.Model):
     )
 
     PRODUCTIVE_STATUS = ['intended', 'reserved', 'unknown']
+    ACTIVE_STATUS = PRODUCTIVE_STATUS + ['in repair']
 
     MACHINE_CHOICES = (
         ('P', _('Physical')),
@@ -234,6 +249,8 @@ class Computer(models.Model):
     unproductive = UnproductiveManager()
     subscribed = SubscribedManager()
     unsubscribed = UnsubscribedManager()
+    active = ActiveManager()
+    inactive = InactiveManager()
 
     def __init__(self, *args, **kwargs):
         super(Computer, self).__init__(*args, **kwargs)
