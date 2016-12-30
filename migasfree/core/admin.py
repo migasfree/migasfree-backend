@@ -54,6 +54,7 @@ class ProjectAdmin(ImportExportActionModelAdmin):
     )
     list_filter = ('platform', 'pms',)
     list_select_related = ('platform', 'pms',)
+    search_fields = ('name',)
     prepopulated_fields = {'slug': ('name',)}
 
 
@@ -175,6 +176,7 @@ class SetOfAttributesAdmin(admin.ModelAdmin):
     list_display = ('name',)
     list_display_links = ('name',)
     list_filter = ('enabled',)
+    search_fields = ('name', 'included_attributes__value', 'excluded_attributes__value')
 
 
 class ScheduleDelayLine(admin.TabularInline):
@@ -186,6 +188,7 @@ class ScheduleDelayLine(admin.TabularInline):
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'number_delays')
+    search_fields = ('name', 'description')
     ordering = ('name',)
     inlines = [ScheduleDelayLine, ]
     extra = 0
