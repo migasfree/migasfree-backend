@@ -27,16 +27,19 @@ from .models import (
 
 @admin.register(Type)
 class TypeAdmin(admin.ModelAdmin):
+    search_fields = ('name',)
     ordering = ('name',)
 
 
 @admin.register(Feature)
 class FeatureAdmin(admin.ModelAdmin):
+    search_fields = ('name',)
     ordering = ('name',)
 
 
 @admin.register(Manufacturer)
 class ManufacturerAdmin(admin.ModelAdmin):
+    search_fields = ('name',)
     ordering = ('name',)
 
 
@@ -44,6 +47,7 @@ class ManufacturerAdmin(admin.ModelAdmin):
 class ConnectionAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'device_type', 'fields')
     list_select_related = ('device_type',)
+    search_fields = ('name',)
     ordering = ('device_type__name', 'name', 'fields')
 
 
@@ -52,6 +56,7 @@ class DriverAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'model', 'project', 'feature')
     list_display_links = ('__str__',)
     list_filter = ('project', 'model')
+    search_fields = ('name',)
 
 
 class LogicalForm(forms.ModelForm):
