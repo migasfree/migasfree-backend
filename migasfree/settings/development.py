@@ -53,7 +53,7 @@ DATABASES = {
 }
 
 # python manage.py graph_models -a -o myapp_models.png
-INSTALLED_APPS = ('debug_toolbar', 'django_extensions') + INSTALLED_APPS
+INSTALLED_APPS += ('debug_toolbar', 'django_extensions')
 INTERNAL_IPS = ("127.0.0.1",)
 
 MIDDLEWARE_CLASSES += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
@@ -61,5 +61,5 @@ MIDDLEWARE_CLASSES += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
 CORS_ORIGIN_ALLOW_ALL = True
 
 DEBUG_TOOLBAR_CONFIG = {
-    'JQUERY_URL': ''
+    'JQUERY_URL': '/static/grappelli/jquery/jquery.min.js'
 }
