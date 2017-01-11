@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,8 +32,14 @@ from hardware.routers import (
 from device.routers import router as device_router
 from stats.routers import router as stats_router
 
+from rest_framework_swagger.views import get_swagger_view
+
 from django.contrib import admin
 admin.autodiscover()
+
+swagger_schema_view = get_swagger_view(
+    title='Migasfree REST API',
+)
 
 urlpatterns = [
     url(r'^grappelli/', include('grappelli.urls')),
@@ -53,16 +59,22 @@ urlpatterns = [
     url(r'^token-auth/$', views.obtain_auth_token),
     url(r'^token-auth-jwt/', jwt_views.obtain_jwt_token),
 
-    url(r'^docs/', include('rest_framework_swagger.urls')),
+    url(r'^docs/', swagger_schema_view, name='docs'),
     # url(r'^auth/', include('djoser.urls')),
 ]
 
-if settings.DEBUG and settings.MEDIA_ROOT is not None:
-    urlpatterns += static(
-        settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT,
-        show_indexes=True
-    )
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]
+
+    if settings.MEDIA_ROOT is not None:
+        urlpatterns += static(
+            settings.MEDIA_URL,
+            document_root=settings.MEDIA_ROOT,
+            show_indexes=True
+        )
 
 # initial database setup
 
