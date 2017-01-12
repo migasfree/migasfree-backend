@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -262,8 +262,7 @@ class DeploymentSerializer(serializers.ModelSerializer):
         return instance
 
     def _validate_active_computers(self, att_list):
-        for att_id in att_list:
-            attribute = Attribute.objects.get(pk=att_id)
+        for attribute in att_list:
             if attribute.property_att.prefix == 'CID':
                 computer = Computer.objects.get(pk=int(attribute.value))
                 if computer.status not in Computer.ACTIVE_STATUS:
