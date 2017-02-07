@@ -194,7 +194,7 @@ def is_computer_changed(computer, name, project, ip_address, uuid):
     if settings.MIGASFREE_NOTIFY_CHANGE_NAME and (computer.name != name):
         msg = _("Computer id=[%s]: NAME [%s] changed by [%s]") % (
             computer.id,
-            computer.__str__(),
+            computer,
             name
         )
         models.Notification.objects.create(message=msg)
@@ -262,9 +262,9 @@ class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
         remove_computer_messages(computer.id)
 
         if computer.status == 'available':
-            models.Notification.create(
+            models.Notification.objects.create(
                 _('Computer [%s] with available status, has been synchronized')
-                % computer.__str__()
+                % computer
             )
 
         return Response(
