@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ def save_computer_hardware(computer_id, node, parent=None, level=1):
         'bus_info': node.get('businfo'),
         'physid': node.get('physid'),
         'slot': node.get('slot'),
-        'size': size if (size <= MAXINT and size >= -MAXINT - 1) else 0,
+        'size': size if (MAXINT >= size >= -MAXINT - 1) else 0,
         'capacity': node.get('capacity'),
         'clock': node.get('clock'),
         'width': node.get('width'),
