@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,9 @@ from django.db import models
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 
 from . import Property, Attribute
 
@@ -144,3 +147,11 @@ class SetOfAttributes(models.Model):
         app_label = 'core'
         verbose_name = _("Set of Attributes")
         verbose_name_plural = _("Set of Attributes")
+
+
+@receiver(pre_delete, sender=SetOfAttributes)
+def pre_delete_set_of_attributes(sender, instance, **kwargs):
+    try:
+        Attribute.objects.get(property_att=Property(id=1), value=instance.name).delete()
+    except ObjectDoesNotExist:
+        pass
