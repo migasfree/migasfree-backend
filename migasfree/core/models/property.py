@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -84,17 +84,17 @@ class Property(models.Model):
                     " put in the standard output the value of the attribute correspondent"
                     " to this property.<br>The format of this value is 'name~description',"
                     " where 'description' is optional.<br><b>Example of code:</b>"
-                    "<br>#Create a attribute with the name of computer from bash<br>"
+                    "<br>#Create an attribute with the name of computer from bash<br>"
                     " echo $HOSTNAME")
     )
 
     def __str__(self):
         return self.name
 
-    def delete(self, *args, **kwargs):
+    def delete(self, using=None, keep_parents=False):
         # Not allowed delete basic properties
         if self.sort != 'basic':
-            super(Property, self).delete(*args, **kwargs)
+            return super(Property, self).delete(using, keep_parents)
 
     @staticmethod
     def enabled_client_properties():
