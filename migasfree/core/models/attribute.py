@@ -130,10 +130,10 @@ class Attribute(models.Model):
             self.description = new_value
             self.save()
 
-    def delete(self, *args, **kwargs):
+    def delete(self, using=None, keep_parents=False):
         # Not allowed delete attribute of basic properties
         if self.property_att.sort != 'basic':
-            super(Attribute, self).delete(*args, **kwargs)
+            return super(Attribute, self).delete(using, keep_parents)
 
     @staticmethod
     def process_kind_property(property_att, value):
