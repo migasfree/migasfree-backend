@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -86,6 +86,9 @@ class DeploymentForm(forms.ModelForm):
     def clean(self):
         # http://stackoverflow.com/questions/7986510/django-manytomany-model-validation
         cleaned_data = super(DeploymentForm, self).clean()
+
+        if 'project' not in cleaned_data:
+            raise ValidationError(_('Project is required'))
 
         for item in cleaned_data.get('available_packages', []):
             if item.project.id != cleaned_data['project'].id:
