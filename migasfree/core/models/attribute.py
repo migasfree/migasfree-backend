@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -118,9 +118,9 @@ class Attribute(models.Model):
     def __str__(self):
         if self.property_att.prefix == 'CID' and \
                 settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] != 'id':
-            return '%s (CID-%s)' % (self.description, self.value)
+            return '{} (CID-{})'.format(self.description, self.value)
         else:
-            return '%s-%s' % (self.property_att.prefix, self.value)
+            return '{}-{}'.format(self.property_att.prefix, self.value)
 
     def prefix_value(self):
         return self.__str__()
@@ -131,45 +131,43 @@ class Attribute(models.Model):
             self.save()
 
     def delete(self, *args, **kwargs):
-        # Not allowed delete atributte of basic properties
+        # Not allowed delete attribute of basic properties
         if self.property_att.sort != 'basic':
             super(Attribute, self).delete(*args, **kwargs)
 
     @staticmethod
     def process_kind_property(property_att, value):
         attributes = []
-        try:
-            if property_att.kind == "N":  # Normal
-                obj = Attribute.objects.create(property_att, value)
+
+        if property_att.kind == "N":  # Normal
+            obj = Attribute.objects.create(property_att, value)
+            attributes.append(obj.id)
+
+        if property_att.kind == "-":  # List
+            lst = value.split(",")
+            for item in lst:
+                item = item.replace('\n', '')
+                if item:
+                    obj = Attribute.objects.create(property_att, item)
+                    attributes.append(obj.id)
+
+        if property_att.kind == "R":  # Adds right
+            lst = value.split(".")
+            pos = 0
+            for item in lst:
+                obj = Attribute.objects.create(property_att, value[pos:])
                 attributes.append(obj.id)
+                pos += len(item) + 1
 
-            if property_att.kind == "-":  # List
-                lst = value.split(",")
-                for item in lst:
-                    item = item.replace('\n', '')
-                    if item:
-                        obj = Attribute.objects.create(property_att, item)
-                        attributes.append(obj.id)
-
-            if property_att.kind == "R":  # Adds right
-                lst = value.split(".")
-                pos = 0
-                for item in lst:
-                    obj = Attribute.objects.create(property_att, value[pos:])
-                    attributes.append(obj.id)
-                    pos += len(item) + 1
-
-            if property_att.kind == "L":  # Adds left
-                lst = value.split(".")
-                pos = 0
-                for item in lst:
-                    pos += len(item) + 1
-                    obj = Attribute.objects.create(
-                        property_att, value[0:pos - 1]
-                    )
-                    attributes.append(obj.id)
-        except:
-            pass
+        if property_att.kind == "L":  # Adds left
+            lst = value.split(".")
+            pos = 0
+            for item in lst:
+                pos += len(item) + 1
+                obj = Attribute.objects.create(
+                    property_att, value[0:pos - 1]
+                )
+                attributes.append(obj.id)
 
         return attributes
 
