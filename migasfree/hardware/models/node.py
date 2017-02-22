@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -86,10 +86,7 @@ class Node(models.Model):
         verbose_name=_("computer")
     )
 
-    level = models.IntegerField(
-        verbose_name=_("level"),
-        null=False
-    )
+    level = models.IntegerField(verbose_name=_("level"))
 
     width = models.IntegerField(
         verbose_name=_("width"),
@@ -98,13 +95,11 @@ class Node(models.Model):
 
     name = models.TextField(
         verbose_name=_("id"),
-        null=False,
         blank=True
     )  # This is the field "id" in lshw
 
     class_name = models.TextField(
         verbose_name=_("class"),
-        null=False,
         blank=True
     )  # This is the field "class" in lshw
 
