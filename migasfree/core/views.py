@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -224,7 +224,7 @@ class ClientAttributeViewSet(viewsets.ModelViewSet):
         if request.method == 'PATCH':  # append cid attribute to logical devices
             for device_id in request.data:
                 device = get_object_or_404(Logical, pk=device_id)
-                if not device in logical_devices:
+                if device not in logical_devices:
                     device.attributes.add(pk)
 
             return Response(status=status.HTTP_201_CREATED)

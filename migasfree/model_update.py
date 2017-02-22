@@ -39,8 +39,10 @@ def resolve_expression_node(instance, node):
 
 
 def update(instance, **kwargs):
-    "Atomically update instance, setting field/value pairs from kwargs"
-    # fields that use auto_now=True should be updated corrected, too!
+    """
+    Atomically update instance, setting field/value pairs from kwargs
+    fields that use auto_now=True should be updated corrected, too!
+    """
     for field in instance._meta.fields:
         if hasattr(field, 'auto_now') and field.auto_now and field.name not in kwargs:
             kwargs[field.name] = field.pre_save(instance, False)
@@ -51,11 +53,11 @@ def update(instance, **kwargs):
     # note that these might slightly differ from the true database values
     # as the DB could have been updated by another thread. callers should
     # retrieve a new copy of the object if up-to-date values are required
-    for k,v in kwargs.iteritems():
+    for k, v in kwargs.iteritems():
         if isinstance(v, Expression):
             v = resolve_expression_node(instance, v)
         setattr(instance, k, v)
 
     # If you use an ORM cache, make sure to invalidate the instance!
-    #cache.set(djangocache.get_cache_key(instance=instance), None, 5)
+    # cache.set(djangocache.get_cache_key(instance=instance), None, 5)
     return rows_affected
