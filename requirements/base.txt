@@ -6,10 +6,10 @@ django-grappelli==2.9.1
 django-import-export==0.5.1
 django-redis==4.7.0
 django-rest-swagger==2.1.1
-djangorestframework==3.5.3
+djangorestframework==3.5.4
 djangorestframework-filters==0.9.1
 djangorestframework-jwt==1.9.0
-djoser==0.5.2
+djoser==0.5.4
 docutils==0.13.1
 jose==1.0.0
 psycopg2==2.6.2
