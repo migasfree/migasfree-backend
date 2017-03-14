@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@ from datetime import datetime
 from django.db import models, transaction
 from django.db.models import Count
 from django.db.models.signals import pre_save, post_save
-from django.dispatch import receiver
 from django.core.exceptions import ObjectDoesNotExist
+from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.template import Context, Template
@@ -129,7 +129,7 @@ class Computer(models.Model):
         verbose_name=_("project")
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, help_text=_('Date of entry into the migasfree system'))
     updated_at = models.DateTimeField(auto_now=True)
 
     ip_address = models.GenericIPAddressField(
@@ -285,7 +285,7 @@ class Computer(models.Model):
             + list(self.sync_attributes.values_list('id', flat=True))
 
     def login(self):
-        return u'%s (%s)' % (
+        return u'{} ({})'.format(
             self.sync_user.name,
             self.sync_user.fullname.strip()
         )
@@ -315,13 +315,13 @@ class Computer(models.Model):
 
     @staticmethod
     def group_by_project():
-        return Computer.productives.values(
+        return Computer.productive.values(
             'project__name', 'project__id'
         ).annotate(count=Count('id'))
 
     @staticmethod
     def group_by_platform():
-        return Computer.productives.values(
+        return Computer.productive.values(
             'project__platform__name', 'project__platform__id'
         ).annotate(count=Count('id'))
 
@@ -370,15 +370,9 @@ class Computer(models.Model):
         if not attributes:
             attributes = self.sync_attributes.values_list('id', flat=True)
 
-        devices = []
-        for att in attributes:
-            for logical_device in Logical.objects.filter(
-                attributes__id=att
-            ):
-                if logical_device not in devices:
-                    devices.append(logical_device)
-
-        return devices
+        return DeviceLogical.objects.filter(
+            attributes__in=attributes
+        ).distinct()
 
     logical_devices.allow_tags = True
     logical_devices.short_description = _('Logical Devices')
@@ -390,6 +384,7 @@ class Computer(models.Model):
             target.default_logical_device, source.default_logical_device
         )
 
+        # SWAP CID
         source_cid = source.get_cid_attribute()
         target_cid = target.get_cid_attribute()
         swap_m2m(source_cid.devicelogical_set, target_cid.devicelogical_set)
@@ -405,6 +400,7 @@ class Computer(models.Model):
 
         source.status, target.status = target.status, source.status
 
+        # finally save changes!!! (order is important)
         source.save()
         target.save()
 
@@ -457,10 +453,10 @@ class Computer(models.Model):
         })
 
     def __str__(self):
-        if settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] == "id":
-            return 'CID-%d' % self.id
+        if settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] == 'id':
+            return u'CID-{}'.format(self.id)
         else:
-            return '%s (CID-%d)' % (self.get_cid_description(), self.id)
+            return u'{} (CID-{})'.format(self.get_cid_description(), self.id)
 
     class Meta:
         app_label = 'client'
