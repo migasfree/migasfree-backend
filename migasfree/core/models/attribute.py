@@ -125,6 +125,11 @@ class Attribute(models.Model):
     def prefix_value(self):
         return self.__str__()
 
+    def update_value(self, new_value):
+        if self.value != new_value:
+            self.value = new_value
+            self.save()
+
     def update_description(self, new_value):
         if self.description != new_value:
             self.description = new_value

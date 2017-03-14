@@ -20,8 +20,8 @@ from django.db import models
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models.signals import pre_delete
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 
 from . import Property, Attribute
@@ -68,14 +68,25 @@ class SetOfAttributes(models.Model):
     def __str__(self):
         return self.name
 
+    def clean(self):
+        super(SetOfAttributes, self).clean()
+
+        if self.id:
+            soa = SetOfAttributes.objects.get(pk=self.id)
+            if soa.name != self.name and \
+                    Attribute.objects.filter(
+                        property_att=Property(prefix='SET', sort='basic'), value=self.name
+                    ).count() > 0:
+                raise ValidationError(_('Duplicated name'))
+
     def save(self, *args, **kwargs):
+        super(SetOfAttributes, self).save(*args, **kwargs)
+
         Attribute.objects.get_or_create(
             property_att=Property.objects.get(prefix='SET', sort='basic'),
             value=self.name,
             defaults={'description': ''}
         )
-
-        super(SetOfAttributes, self).save(*args, **kwargs)
 
     @staticmethod
     def item_at_index(lst, item, before=-1):
@@ -149,9 +160,18 @@ class SetOfAttributes(models.Model):
         verbose_name_plural = _("Set of Attributes")
 
 
+@receiver(pre_save, sender=SetOfAttributes)
+def pre_save_set_of_attributes(sender, instance, **kwargs):
+    if instance.id:
+        soa = SetOfAttributes.objects.get(pk=instance.id)
+        if instance.name != soa.name:
+            att = Attribute.objects.get(property_att=Property(prefix='SET', sort='basic'), value=soa.name)
+            att.update_value(instance.name)
+
+
 @receiver(pre_delete, sender=SetOfAttributes)
 def pre_delete_set_of_attributes(sender, instance, **kwargs):
     try:
-        Attribute.objects.get(property_att=Property(id=1), value=instance.name).delete()
+        Attribute.objects.get(property_att=Property(prefix='SET', sort='basic'), value=instance.name).delete()
     except ObjectDoesNotExist:
         pass
