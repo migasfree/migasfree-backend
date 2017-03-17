@@ -370,7 +370,7 @@ class Computer(models.Model):
         if not attributes:
             attributes = self.sync_attributes.values_list('id', flat=True)
 
-        return DeviceLogical.objects.filter(
+        return Logical.objects.filter(
             attributes__in=attributes
         ).distinct()
 
