@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 from rest_framework import serializers
 
-from ..core.serializers import ClientAttributeSerializer
+from ..core.serializers import ClientAttributeSerializer, ProjectInfoSerializer
 from . import models
 
 
@@ -87,15 +87,18 @@ class StatusLogSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SynchronizationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Synchronization
-        fields = '__all__'
-
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
+        fields = '__all__'
+
+
+class SynchronizationSerializer(serializers.ModelSerializer):
+    project = ProjectInfoSerializer(many=False, read_only=True)
+    user = UserSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = models.Synchronization
         fields = '__all__'
 
 
