@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -220,11 +220,11 @@ class ErrorAdmin(admin.ModelAdmin):
 
     checked_ok.short_description = _("Checking is O.K.")
 
-    def truncated_desc(self):
-        if len(self.description) <= 250:  # FIXME constant
-            return self.description
+    def truncated_desc(self, obj):
+        if len(obj.description) <= 250:  # FIXME constant
+            return obj.description
         else:
-            return self.description[:250] + ' ...'
+            return obj.description[:250] + ' ...'
 
     truncated_desc.short_description = _("Truncated description")
     truncated_desc.admin_order_field = 'description'
@@ -350,7 +350,8 @@ class MigrationAdmin(admin.ModelAdmin):
 
 @admin.register(Synchronization)
 class SynchronizationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'computer', 'user', 'created_at', 'project')
+    list_display = ('__str__', 'user', 'project')
+    list_display_links = ('__str__',)
     list_filter = ('created_at', 'pms_status_ok')
     search_fields = add_computer_search_fields(['created_at', 'user__name'])
     readonly_fields = (
