@@ -46,7 +46,7 @@ class Event(models.Model):
         ).values('day').annotate(count=Count('id')).order_by('-day')
 
     def __str__(self):
-        return u'{} ({})'.format(self.computer, self.created_at)
+        return u'{} ({:%Y-%m-%d %H:%M:%S})'.format(self.computer, self.created_at)
 
     class Meta:
         abstract = True
