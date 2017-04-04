@@ -50,7 +50,7 @@ class ScheduleDelay(models.Model):
     )
 
     def __str__(self):
-        return '{} ({})'.format(self.schedule.name, self.delay)
+        return u'{} ({})'.format(self.schedule.name, self.delay)
 
     def attribute_list(self):
         return ', '.join(
