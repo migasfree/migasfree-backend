@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -209,22 +209,19 @@ class Deployment(models.Model):
         """
         # 1.- all deployments by attribute
         attributed = Deployment.objects.filter(
-            project__id=computer.project.id
-        ).filter(
-            enabled=True
-        ).filter(
-            included_attributes__id__in=attributes
-        ).filter(
+            project__id=computer.project.id,
+            enabled=True,
+            included_attributes__id__in=attributes,
             start_date__lte=datetime.datetime.now().date()
         ).values_list('id', flat=True)
         lst = list(attributed)
 
         # 2.- all deployments by schedule
         scheduled = Deployment.objects.filter(
-            project__id=computer.project.id
-        ).filter(
-            enabled=True
-        ).filter(schedule__delays__attributes__id__in=attributes).extra(
+            project__id=computer.project.id,
+            enabled=True,
+            schedule__delays__attributes__id__in=attributes
+        ).extra(
             select={
                 'delay': 'core_scheduledelay.delay',
                 'duration': 'core_scheduledelay.duration'
