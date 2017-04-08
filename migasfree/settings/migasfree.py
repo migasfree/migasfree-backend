@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,8 +45,8 @@ MIGASFREE_TMP_DIR = '/tmp'
 #        "https://myserver/?computer={{computer.name}}&port={{PRT}}"
 #    ]
 #    MIGASFREE_REMOTE_ADMIN_LINK = [
-#        "ssh://user@{{computer.ip}}",
-#        "vnc://{{computer.ip}}"
+#        "ssh://user@{{computer.ip_address}}",
+#        "vnc://{{computer.ip_address}}"
 #    ]
 MIGASFREE_REMOTE_ADMIN_LINK = []
 
@@ -67,12 +67,12 @@ MIGASFREE_HW_PERIOD = 30
 
 # Programming Languages for Properties and Fault Definitions
 MIGASFREE_PROGRAMMING_LANGUAGES = (
-    ('python', 'python'),
-    ('bash', 'bash'),
-    ('perl', 'perl'),
-    ('php', 'php'),
-    ('ruby', 'ruby'),
-    ('cmd', 'cmd'),
+    (0, 'bash'),
+    (1, 'python'),
+    (2, 'perl'),
+    (3, 'php'),
+    (4, 'ruby'),
+    (5, 'cmd'),
 )
 
 # Server Keys
