@@ -83,11 +83,10 @@ class Property(models.Model):
         choices=SORT_CHOICES
     )
 
-    language = models.CharField(
+    language = models.IntegerField(
         verbose_name=_("programming language"),
-        default=settings.MIGASFREE_PROGRAMMING_LANGUAGES[0],
-        choices=settings.MIGASFREE_PROGRAMMING_LANGUAGES,
-        max_length=20
+        default=settings.MIGASFREE_PROGRAMMING_LANGUAGES[0][0],
+        choices=settings.MIGASFREE_PROGRAMMING_LANGUAGES
     )
 
     code = models.TextField(
@@ -118,9 +117,15 @@ class Property(models.Model):
 
     @staticmethod
     def enabled_client_properties():
-        return list(Property.objects.filter(enabled=True).filter(
-            sort='client'
-        ).values('language', 'prefix', 'code'))
+        client_properties = []
+        for item in Property.objects.filter(enabled=True, sort='client'):
+            client_properties.append({
+                "language": item.get_language_display(),
+                "prefix": item.prefix,
+                "code": item.code
+            })
+
+        return client_properties
 
     class Meta:
         app_label = 'core'
