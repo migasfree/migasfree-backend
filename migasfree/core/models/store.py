@@ -33,7 +33,7 @@ from .project import Project
 @python_2_unicode_compatible
 class Store(models.Model):
     """
-    Location where packages will be stored (p.e. /third/vmware)
+    Location where packages will be stored (p.e. /debian8/third/syntevo/)
     """
 
     name = models.CharField(
