@@ -22,6 +22,20 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 
+class ClientPropertyManager(models.Manager):
+    def get_queryset(self):
+        return super(ClientPropertyManager, self).get_queryset().filter(
+            sort='client'
+        )
+
+
+class ServerPropertyManager(models.Manager):
+    def get_queryset(self):
+        return super(ServerPropertyManager, self).get_queryset().filter(
+            sort='server'
+        )
+
+
 @python_2_unicode_compatible
 class Property(models.Model):
     SORT_CHOICES = (
@@ -110,6 +124,8 @@ class Property(models.Model):
 
 
 class ServerProperty(Property):
+    objects = ServerPropertyManager()
+
     def save(self, *args, **kwargs):
         self.sort = 'server'
         self.code = ''
@@ -122,6 +138,8 @@ class ServerProperty(Property):
 
 
 class ClientProperty(Property):
+    objects = ClientPropertyManager()
+
     def save(self, *args, **kwargs):
         self.sort = 'client'
         self.code = self.code.replace("\r\n", "\n")
