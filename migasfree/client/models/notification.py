@@ -23,7 +23,10 @@ from django.utils.encoding import python_2_unicode_compatible
 
 @python_2_unicode_compatible
 class Notification(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("date"),
+    )
 
     message = models.TextField(
         verbose_name=_("message"),
@@ -34,6 +37,10 @@ class Notification(models.Model):
         default=False,
     )
 
+    def checked_ok(self):
+        self.checked = True
+        self.save()
+
     @staticmethod
     def unchecked_count():
         return Notification.objects.filter(checked=0).count()
@@ -43,7 +50,7 @@ class Notification(models.Model):
         super(Notification, self).save(*args, **kwargs)
 
     def __str__(self):
-        return '{} ({})'.format(self.id, self.created_at)
+        return '{} ({:%Y-%m-%d %H:%M:%S})'.format(self.id, self.created_at)
 
     class Meta:
         app_label = 'client'
