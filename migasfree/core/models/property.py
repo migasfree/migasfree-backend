@@ -102,6 +102,12 @@ class Property(models.Model):
                     " echo $HOSTNAME")
     )
 
+    auto_add = models.BooleanField(
+        verbose_name=_("automatically add"),
+        default=True,
+        help_text=_("automatically add the attribute to database")
+    )
+
     def __str__(self):
         return self.name
 
