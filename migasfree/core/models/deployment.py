@@ -75,20 +75,20 @@ class Deployment(models.Model):
     available_packages = models.ManyToManyField(
         Package,
         blank=True,
-        verbose_name=_('available'),
+        verbose_name=_('available packages'),
         help_text=_('If a computer has installed one of these packages it will'
                     ' be updated')
     )
 
     packages_to_install = models.TextField(
-        verbose_name=_("To install"),
+        verbose_name=_("packages to install"),
         null=True,
         blank=True,
         help_text=_('Mandatory packages to install each time')
     )
 
     packages_to_remove = models.TextField(
-        verbose_name=_("To remove"),
+        verbose_name=_("packages to remove"),
         null=True,
         blank=True,
         help_text=_('Mandatory packages to remove each time')
@@ -97,14 +97,14 @@ class Deployment(models.Model):
     included_attributes = models.ManyToManyField(
         Attribute,
         blank=True,
-        verbose_name=_("included")
+        verbose_name=_("included attributes")
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
         related_name="ExcludeAttribute",
         blank=True,
-        verbose_name=_("excluded")
+        verbose_name=_("excluded attributes")
     )
 
     schedule = models.ForeignKey(
