@@ -56,7 +56,11 @@ class Capability(models.Model):
     objects = CapabilityManager()
 
     def __str__(self):
-        return self.name
+        ret = self.name
+        if self.description:
+            ret += ': {}'.format(self.description)
+
+        return ret
 
     class Meta:
         app_label = 'hardware'
