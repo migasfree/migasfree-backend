@@ -98,7 +98,7 @@ class Logical(models.Model):
         return ret
 
     def __str__(self):
-        return '%s__%s__%s__%s__%d' % (
+        return u'{}__{}__{}__{}__{}'.format(
             self.device.model.manufacturer.name,
             self.device.model.name,
             self.feature.name,
