@@ -19,6 +19,7 @@
 from django.db import models
 from django.db.models import Q
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
@@ -43,6 +44,12 @@ class AttributeManager(models.Manager):
         )
         if queryset.exists():
             return queryset[0]
+
+        if property_att.auto_add is False:
+            raise ValidationError(
+                _('The attribute can not be created because'
+                  ' it prevents property')
+            )
 
         obj = Attribute()
         obj.property_att = property_att
@@ -118,9 +125,9 @@ class Attribute(models.Model):
     def __str__(self):
         if self.property_att.prefix == 'CID' and \
                 settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] != 'id':
-            return '{} (CID-{})'.format(self.description, self.value)
+            return u'{} (CID-{})'.format(self.description, self.value)
         else:
-            return '{}-{}'.format(self.property_att.prefix, self.value)
+            return u'{}-{}'.format(self.property_att.prefix, self.value)
 
     def prefix_value(self):
         return self.__str__()
