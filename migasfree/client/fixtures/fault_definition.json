@@ -5,7 +5,7 @@
         "fields": {
             "name": "Low Available Space On System Partition",
             "description": "Add a fault when available space available on system partition is low",
-            "language": "bash",
+            "language": 0,
             "enabled": true,
             "code": "let limit=90 #% USED SPACE LIMIT\nDEVICE=`mount |grep \" on / \"|awk '{print $1}'`\nlet used=`df -hl| grep $DEVICE| awk '{print $5}'|awk 'BEGIN {FS=\"%\";} {print $1}'`\nif [ $used -gt $limit ] ; then\n  echo \"The used space in / [$DEVICE] is $used%.\"\n  echo \"ACTION: You must delete files\"\nfi",
             "included_attributes": [
@@ -19,7 +19,7 @@
         "fields": {
             "name": "Low Available Space On Home Partition",
             "description": "Add a fault when available space on home partition is low",
-            "language": "bash",
+            "language": 0,
             "enabled": true,
             "code": "let limit=90 # % USED SPACE LIMIT\nDEVICE=`mount |grep \" on /home \"|awk '{print $1}'`\nlet used=`df -hl| grep $DEVICE| awk '{print $5}'|awk 'BEGIN {FS=\"%\";} {print $1}'`\nif [ $used -gt $limit ] ; then\n  echo \"The used space in /home [$DEVICE] is $used%.\"\n  echo \"ACTION: You must delete files\"\nfi",
             "included_attributes": [

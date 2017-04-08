@@ -8,7 +8,7 @@
             "enabled": true,
             "kind": "N",
             "sort": "basic",
-            "language": "python",
+            "language": 1,
             "code": "print 'All Systems'"
         }
     },
@@ -21,7 +21,7 @@
             "enabled": true,
             "kind": "N",
             "sort": "basic",
-            "language": "python",
+            "language": 1,
             "code": ""
         }
     },
@@ -34,7 +34,7 @@
             "enabled": true,
             "kind": "N",
             "sort": "basic",
-            "language": "python",
+            "language": 1,
             "code": ""
         }
     },
@@ -47,7 +47,7 @@
             "enabled": true,
             "kind": "N",
             "sort": "basic",
-            "language": "python",
+            "language": 1,
             "code": ""
         }
     },
@@ -60,7 +60,7 @@
             "enabled": true,
             "kind": "N",
             "sort": "basic",
-            "language": "python",
+            "language": 1,
             "code": ""
         }
     },
@@ -73,7 +73,7 @@
             "enabled": true,
             "kind": "N",
             "sort": "basic",
-            "language": "python",
+            "language": 1,
             "code": ""
         }
     },
@@ -86,7 +86,7 @@
             "enabled": true,
             "kind": "N",
             "sort": "client",
-            "language": "python",
+            "language": 1,
             "code": "import platform\nprint platform.node()"
         }
     },
@@ -99,7 +99,7 @@
             "enabled": true,
             "kind": "N",
             "sort": "client",
-            "language": "bash",
+            "language": 0,
             "code": "_IP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')\nLC_ALL=C ip route | grep $_IP | cut -d' ' -f1"
         }
     },
@@ -112,7 +112,7 @@
             "enabled": true,
             "kind": "-",
             "sort": "client",
-            "language": "python",
+            "language": 1,
             "code": "import subprocess\nimport platform\nimport os\n\n_platform = platform.system()\nif _platform == 'Linux':\n    if os.path.exists('/proc/bus/pci'):\n        cmd_linux=\"\"\"r=''\n      if [ $(lspci -n | sed -n 1p | awk '{print $2}') = 'Class' ]; then\n        dev=$(lspci -n | awk '{print $4}')\n      else\n        dev=$(lspci -n | awk '{print $3}')\n      fi\n      for l in $dev\n      do\n        n=$(lspci -d $l | awk '{for (i = 2; i <= NF; ++i) print $i}' | tr \"\\n\" \" \" | sed 's/,//g')\n        r=\"$r$l~$n,\"\n      done\n      echo $r\"\"\"\n        (out, err) = subprocess.Popen(cmd_linux, stdout=subprocess.PIPE, shell=True).communicate()\n        print out,\n    else:\n        print 'none',\nelse:\n    print 'none',"
         }
     }
