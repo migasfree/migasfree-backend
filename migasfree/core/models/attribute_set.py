@@ -18,9 +18,9 @@
 
 from django.db import models
 from django.db.models import Q
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 
@@ -29,10 +29,16 @@ from . import Property, Attribute
 
 # FIXME https://docs.djangoproject.com/en/1.8/ref/contrib/gis/
 @python_2_unicode_compatible
-class SetOfAttributes(models.Model):
+class AttributeSet(models.Model):
     name = models.CharField(
         verbose_name=_("name"),
         max_length=50
+    )
+
+    description = models.TextField(
+        verbose_name=_("description"),
+        null=True,
+        blank=True
     )
 
     enabled = models.BooleanField(
@@ -43,14 +49,14 @@ class SetOfAttributes(models.Model):
     included_attributes = models.ManyToManyField(
         Attribute,
         blank=True,
-        verbose_name=_("included")
+        verbose_name=_("included attributes"),
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
         related_name="ExcludedAttributesGroup",
         blank=True,
-        verbose_name=_("excluded")
+        verbose_name=_("excluded attributes"),
     )
 
     longitude = models.FloatField(
@@ -69,18 +75,18 @@ class SetOfAttributes(models.Model):
         return self.name
 
     def clean(self):
-        super(SetOfAttributes, self).clean()
+        super(AttributeSet, self).clean()
 
         if self.id:
-            soa = SetOfAttributes.objects.get(pk=self.id)
-            if soa.name != self.name and \
+            att_set = AttributeSet.objects.get(pk=self.id)
+            if att_set.name != self.name and \
                     Attribute.objects.filter(
                         property_att=Property(prefix='SET', sort='basic'), value=self.name
                     ).count() > 0:
                 raise ValidationError(_('Duplicated name'))
 
     def save(self, *args, **kwargs):
-        super(SetOfAttributes, self).save(*args, **kwargs)
+        super(AttributeSet, self).save(*args, **kwargs)
 
         Attribute.objects.get_or_create(
             property_att=Property.objects.get(prefix='SET', sort='basic'),
@@ -116,24 +122,24 @@ class SetOfAttributes(models.Model):
     @staticmethod
     def get_sets():
         sets = []
-        for item in SetOfAttributes.objects.filter(enabled=True):
-            sets = SetOfAttributes.item_at_index(sets, item.id)
+        for item in AttributeSet.objects.filter(enabled=True):
+            sets = AttributeSet.item_at_index(sets, item.id)
 
             for subset in item.included_attributes.filter(
                 ~Q(property_att__sort='basic')
             ).filter(property_att__prefix='SET').filter(~Q(value=item.name)):
-                sets = SetOfAttributes.item_at_index(
+                sets = AttributeSet.item_at_index(
                     sets,
-                    SetOfAttributes.objects.get(name=subset.value).id,
+                    AttributeSet.objects.get(name=subset.value).id,
                     before=item.id
                 )
 
             for subset in item.excluded_attributes.filter(
                 ~Q(property_att__sort='basic')
             ).filter(property_att__prefix='SET').filter(~Q(value=item.name)):
-                sets = SetOfAttributes.item_at_index(
+                sets = AttributeSet.item_at_index(
                     sets,
-                    SetOfAttributes.objects.get(name=subset.value).id,
+                    AttributeSet.objects.get(name=subset.value).id,
                     before=item.id
                 )
 
@@ -144,11 +150,11 @@ class SetOfAttributes(models.Model):
         property_set = Property.objects.get(prefix='SET', sort='basic')
 
         att_id = []
-        for item in SetOfAttributes.get_sets():
-            for soa in SetOfAttributes.objects.filter(id=item).filter(
+        for item in AttributeSet.get_sets():
+            for att_set in AttributeSet.objects.filter(id=item).filter(
                 Q(included_attributes__id__in=attributes)
             ).filter(~Q(excluded_attributes__id__in=attributes)):
-                att = Attribute.objects.create(property_set, soa.name)
+                att = Attribute.objects.create(property_set, att_set.name)
                 att_id.append(att.id)
                 attributes.append(att.id)
 
@@ -156,21 +162,21 @@ class SetOfAttributes(models.Model):
 
     class Meta:
         app_label = 'core'
-        verbose_name = _("Set of Attributes")
-        verbose_name_plural = _("Set of Attributes")
+        verbose_name = _("Attribute Set")
+        verbose_name_plural = _("Attribute Sets")
 
 
-@receiver(pre_save, sender=SetOfAttributes)
-def pre_save_set_of_attributes(sender, instance, **kwargs):
+@receiver(pre_save, sender=AttributeSet)
+def pre_save_attribute_set(sender, instance, **kwargs):
     if instance.id:
-        soa = SetOfAttributes.objects.get(pk=instance.id)
-        if instance.name != soa.name:
-            att = Attribute.objects.get(property_att=Property(prefix='SET', sort='basic'), value=soa.name)
+        att_set = AttributeSet.objects.get(pk=instance.id)
+        if instance.name != att_set.name:
+            att = Attribute.objects.get(property_att=Property(prefix='SET', sort='basic'), value=att_set.name)
             att.update_value(instance.name)
 
 
-@receiver(pre_delete, sender=SetOfAttributes)
-def pre_delete_set_of_attributes(sender, instance, **kwargs):
+@receiver(pre_delete, sender=AttributeSet)
+def pre_delete_attribute_set(sender, instance, **kwargs):
     try:
         Attribute.objects.get(property_att=Property(prefix='SET', sort='basic'), value=instance.name).delete()
     except ObjectDoesNotExist:

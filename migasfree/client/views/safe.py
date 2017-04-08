@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ from migasfree.utils import uuid_change_format, get_client_ip
 from migasfree.model_update import update
 from migasfree.core.mixins import SafeConnectionMixin
 from migasfree.core.models import (
-    Deployment, Property, Attribute, BasicAttribute, SetOfAttributes
+    Deployment, Property, Attribute, BasicAttribute, AttributeSet
 )
 
 from .. import models, serializers, tasks
@@ -524,8 +524,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         for item in att_id:
             computer.sync_attributes.add(item)
 
-        # set of attributes
-        att_id = SetOfAttributes.process(computer.get_all_attributes())
+        # attribute sets
+        att_id = AttributeSet.process(computer.get_all_attributes())
         for item in att_id:
             computer.sync_attributes.add(item)
 
