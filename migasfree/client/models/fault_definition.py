@@ -45,11 +45,10 @@ class FaultDefinition(models.Model):
         default=True
     )
 
-    language = models.CharField(
+    language = models.IntegerField(
         verbose_name=_("programming language"),
-        default=settings.MIGASFREE_PROGRAMMING_LANGUAGES[0],
-        choices=settings.MIGASFREE_PROGRAMMING_LANGUAGES,
-        max_length=20
+        default=settings.MIGASFREE_PROGRAMMING_LANGUAGES[0][0],
+        choices=settings.MIGASFREE_PROGRAMMING_LANGUAGES
     )
 
     code = models.TextField(
@@ -60,14 +59,14 @@ class FaultDefinition(models.Model):
     included_attributes = models.ManyToManyField(
         Attribute,
         blank=True,
-        verbose_name=_("included")
+        verbose_name=_("included attributes")
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
         related_name="ExcludeAttributeFaultDefinition",
         blank=True,
-        verbose_name=_("excluded")
+        verbose_name=_("excluded attributes")
     )
 
     users = models.ManyToManyField(
@@ -93,12 +92,19 @@ class FaultDefinition(models.Model):
 
     @staticmethod
     def enabled_for_attributes(attributes):
-        return list(FaultDefinition.objects.filter(
+        fault_definitions = []
+        for item in FaultDefinition.objects.filter(
             Q(enabled=True) &
             Q(included_attributes__id__in=attributes) &
             ~Q(excluded_attributes__id__in=attributes)
-        ).distinct().values('language', 'name', 'code'))
-        # NOTE .distinct('id') NOT supported in sqlite
+        ).distinct():
+            fault_definitions.append({
+                "language": item.get_language_display(),
+                "name": item.name,
+                "code": item.code
+            })
+
+        return fault_definitions
 
     def save(self, *args, **kwargs):
         self.code = self.code.replace("\r\n", "\n")
