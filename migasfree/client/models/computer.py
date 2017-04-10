@@ -391,7 +391,7 @@ class Computer(models.Model):
         swap_m2m(source_cid.faultdefinition_set, target_cid.faultdefinition_set)
         swap_m2m(source_cid.deployment_set, target_cid.deployment_set)
         swap_m2m(source_cid.ExcludeAttribute, target_cid.ExcludeAttribute)
-        swap_m2m(source_cid.setofattributes_set, target_cid.setofattributes_set)
+        swap_m2m(source_cid.attributeset_set, target_cid.attributeset_set)
         swap_m2m(
             source_cid.ExcludedAttributesGroup,
             target_cid.ExcludedAttributesGroup
@@ -438,7 +438,7 @@ class Computer(models.Model):
                 str(x) for x in cid.ExcludeAttribute.all()
             ),
             ugettext("Sets"): ', '.join(
-                str(x) for x in cid.setofattributes_set.all()
+                str(x) for x in cid.attributeset_set.all()
             ),
             ugettext("Sets (excluded)"): ', '.join(
                 str(x) for x in cid.ExcludedAttributesGroup.all()
@@ -488,6 +488,6 @@ def post_save_computer(sender, instance, created, **kwargs):
         cid.faultdefinition_set.clear()
         cid.deployment_set.clear()
         cid.ExcludeAttribute.clear()
-        cid.setofattributes_set.clear()
+        cid.attributeset_set.clear()
         cid.ExcludedAttributesGroup.clear()
         cid.scheduledelay_set.clear()
