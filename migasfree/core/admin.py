@@ -53,7 +53,7 @@ class ProjectAdmin(ImportExportActionModelAdmin):
         'autoregister'
     )
     list_filter = ('platform', 'pms',)
-    list_select_related = ('platform', 'pms',)
+    list_select_related = ('platform',)
     search_fields = ('name',)
     prepopulated_fields = {'slug': ('name',)}
 
