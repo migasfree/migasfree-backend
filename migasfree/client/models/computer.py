@@ -405,9 +405,8 @@ class Computer(models.Model):
         target.save()
 
     def get_cid_attribute(self):
-        prop = BasicProperty.objects.get(prefix='CID')
         cid_att, _ = Attribute.objects.get_or_create(
-            property_att=prop,
+            property_att=BasicProperty.objects.get(prefix='CID'),
             value=str(self.id),
             defaults={'description': self.get_cid_description()}
         )
