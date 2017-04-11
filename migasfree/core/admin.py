@@ -33,14 +33,14 @@ admin.site.register(Platform)
 
 
 class ProjectResource(resources.ModelResource):
-    autoregister = fields.Field(
-        attribute='autoregister',
+    auto_register_computers = fields.Field(
+        attribute='auto_register_computers',
         widget=widgets.BooleanWidget()
     )
 
     class Meta:
         model = Project
-        fields = ('name', 'pms', 'autoregister', 'platform__name')
+        fields = ('name', 'pms', 'auto_register_computers', 'platform__name')
 
 
 @admin.register(Project)
