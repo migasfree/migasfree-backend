@@ -100,7 +100,7 @@ class Migration(migrations.Migration):
                 ('slug', models.SlugField(unique=True, verbose_name='slug')),
                 ('pms', models.CharField(choices=[(b'apt', b'apt'), (b'yum', b'yum'), (b'zypper', b'zypper')], max_length=50, validators=[migasfree.core.validators.validate_project_pms], verbose_name='package management system')),
                 ('architecture', models.CharField(max_length=20, verbose_name='architecture')),
-                ('autoregister', models.BooleanField(default=False, help_text='Is not needed a user for register the computer in                      database and get the keys.', verbose_name='autoregister')),
+                ('auto_register_computers', models.BooleanField(default=False, help_text='Is not needed a user for register computers in database and get the keys.', verbose_name='auto register computers')),
                 ('platform', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.Platform', verbose_name='platform')),
             ],
             options={

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -65,11 +65,11 @@ class Project(models.Model):
         max_length=20
     )
 
-    autoregister = models.BooleanField(
-        verbose_name=_("autoregister"),
+    auto_register_computers = models.BooleanField(
+        verbose_name=_("auto register computers"),
         default=False,
-        help_text=_("Is not needed a user for register the computer in \
-                     database and get the keys.")
+        help_text=_("Is not needed a user for register computers in "
+                    "database and get the keys.")
     )
 
     platform = models.ForeignKey(
@@ -87,16 +87,14 @@ class Project(models.Model):
     @staticmethod
     def repositories_path(name):
         return os.path.join(
-            settings.MIGASFREE_PUBLIC_DIR,
-            name,
+            Project.path(name),
             'repos'
         )
 
     @staticmethod
     def stores_path(name):
         return os.path.join(
-            settings.MIGASFREE_PUBLIC_DIR,
-            name,
+            Project.path(name),
             'stores'
         )
 
