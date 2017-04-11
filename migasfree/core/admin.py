@@ -50,7 +50,7 @@ class ProjectAdmin(ImportExportActionModelAdmin):
         'name',
         'platform',
         'pms',
-        'autoregister'
+        'auto_register_computers'
     )
     list_filter = ('platform', 'pms',)
     list_select_related = ('platform',)
