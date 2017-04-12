@@ -503,31 +503,31 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         computer.sync_attributes.clear()
 
         # features
-        for key, value in claims.get('sync_attributes').iteritems():
-            prop = Property.objects.get(prefix=key)
-            for att_id in Attribute.process_kind_property(prop, value):
-                computer.sync_attributes.add(att_id)
+        for prefix, value in claims.get('sync_attributes').iteritems():
+            client_property = Property.objects.get(prefix=prefix)
+            if client_property.sort == 'client':
+                computer.sync_attributes.add(
+                    *Attribute.process_kind_property(client_property, value)
+                )
 
         # tags
         for tag in computer.tags.all().filter(property_att__enabled=True):
             Attribute.process_kind_property(tag.property_att, tag.value)
 
         # basic attributes
-        att_id = BasicAttribute.process(
-            id=computer.id,
-            ip_address=claims.get('ip_address'),
-            project=computer.project.name,
-            platform=computer.project.platform.name,
-            user=user.name,
-            description=computer.get_cid_description()
+        computer.sync_attributes.add(
+            *BasicAttribute.process(
+                id=computer.id,
+                ip_address=claims.get('ip_address'),
+                project=computer.project.name,
+                platform=computer.project.platform.name,
+                user=user.name,
+                description=computer.get_cid_description()
+            )
         )
-        for item in att_id:
-            computer.sync_attributes.add(item)
 
         # attribute sets
-        att_id = AttributeSet.process(computer.get_all_attributes())
-        for item in att_id:
-            computer.sync_attributes.add(item)
+        computer.sync_attributes.add(*AttributeSet.process(computer.get_all_attributes()))
 
         update(
             computer,
