@@ -396,7 +396,7 @@ class Computer(models.Model):
             source_cid.ExcludedAttributesGroup,
             target_cid.ExcludedAttributesGroup
         )
-        swap_m2m(source_cid.delays, target_cid.delays)
+        swap_m2m(source_cid.scheduledelay_set, target_cid.scheduledelay_set)
 
         source.status, target.status = target.status, source.status
 
@@ -443,7 +443,7 @@ class Computer(models.Model):
                 str(x) for x in cid.ExcludedAttributesGroup.all()
             ),
             ugettext("Delays"): ', '.join(
-                str(x) for x in cid.delays.all()
+                str(x) for x in cid.scheduledelay_set.all()
             ),
             ugettext("Logical devices"): ', '.join(
                 str(x) for x in self.logical_devices()
