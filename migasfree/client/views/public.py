@@ -52,7 +52,7 @@ def add_project(project_name, pms, platform, architecture, ip_address=None):
     project = Project.objects.create(
         name=project_name,
         pms=pms,
-        autoregister=settings.MIGASFREE_AUTOREGISTER,
+        auto_register_computers=settings.MIGASFREE_AUTOREGISTER,
         platform=platform,
         architecture=architecture
     )
