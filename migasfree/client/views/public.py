@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -82,14 +82,14 @@ class PackagerKeysView(views.APIView):
         }
         """
         pub_server_key_file = os.path.join(
-            settings.MIGASFREE_KEYS_PATH, "migasfree-server.pub"
+            settings.MIGASFREE_KEYS_DIR, "migasfree-server.pub"
         )
         if not os.path.exists(pub_server_key_file):
             secure.create_server_keys()
 
         pub_server_key = read_file(pub_server_key_file)
         priv_packager_key = read_file(os.path.join(
-            settings.MIGASFREE_KEYS_PATH, "migasfree-packager.pri"
+            settings.MIGASFREE_KEYS_DIR, "migasfree-packager.pri"
         ))
 
         return Response({
@@ -152,14 +152,14 @@ class ProjectKeysView(views.APIView):
         )
 
         priv_project_key_file = os.path.join(
-            settings.MIGASFREE_KEYS_PATH, "%s.pri" % project.slug
+            settings.MIGASFREE_KEYS_DIR, "{}.pri".format(project.slug)
         )
 
         if not os.path.exists(priv_project_key_file):
             secure.generate_rsa_keys(project.slug)
 
         pub_server_key_file = os.path.join(
-            settings.MIGASFREE_KEYS_PATH, "migasfree-server.pub"
+            settings.MIGASFREE_KEYS_DIR, "migasfree-server.pub"
         )
         if not os.path.exists(pub_server_key_file):
             secure.create_server_keys()

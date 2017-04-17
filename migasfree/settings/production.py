@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@ TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 ALLOWED_HOSTS = ['*']
 
 MIGASFREE_PUBLIC_DIR = '/var/lib/migasfree-backend/public'
-MIGASFREE_KEYS_PATH = '/var/lib/migasfree-backend/keys'
+MIGASFREE_KEYS_DIR = '/var/lib/migasfree-backend/keys'
 
-SECRET_KEY = secret_key(MIGASFREE_KEYS_PATH)
+SECRET_KEY = secret_key(MIGASFREE_KEYS_DIR)
 
 DATABASES = {
     'default': {

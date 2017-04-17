@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ from .utils import read_file, write_file
 
 def sign(claims, priv_key):
     rsa_key = RSA.importKey(
-        read_file(os.path.join(settings.MIGASFREE_KEYS_PATH, priv_key))
+        read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, priv_key))
     )
     jwk = {'k': rsa_key.exportKey('PEM')}
 
@@ -41,7 +41,7 @@ def sign(claims, priv_key):
 
 def verify(jwt, pub_key):
     rsa_key = RSA.importKey(
-        read_file(os.path.join(settings.MIGASFREE_KEYS_PATH, pub_key))
+        read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, pub_key))
     )
     jwk = {'k': rsa_key.exportKey('PEM')}
     try:
@@ -56,7 +56,7 @@ def verify(jwt, pub_key):
 
 def encrypt(claims, pub_key):
     rsa_key = RSA.importKey(
-        read_file(os.path.join(settings.MIGASFREE_KEYS_PATH, pub_key))
+        read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, pub_key))
     )
     pub_jwk = {'k': rsa_key.publickey().exportKey('PEM')}
 
@@ -68,7 +68,7 @@ def encrypt(claims, pub_key):
 
 def decrypt(jwt, priv_key):
     rsa_key = RSA.importKey(
-        read_file(os.path.join(settings.MIGASFREE_KEYS_PATH, priv_key))
+        read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, priv_key))
     )
     priv_jwk = {'k': rsa_key.exportKey('PEM')}
     try:
@@ -96,15 +96,15 @@ def unwrap(data, decrypt_key, verify_key):
 
 
 def check_keys_path():
-    if not os.path.lexists(settings.MIGASFREE_KEYS_PATH):
-        os.makedirs(settings.MIGASFREE_KEYS_PATH)
+    if not os.path.lexists(settings.MIGASFREE_KEYS_DIR):
+        os.makedirs(settings.MIGASFREE_KEYS_DIR)
 
 
 def generate_rsa_keys(name='migasfree-server'):
     check_keys_path()
 
-    private_pem = os.path.join(settings.MIGASFREE_KEYS_PATH, '{}.pri'.format(name))
-    public_pem = os.path.join(settings.MIGASFREE_KEYS_PATH, '{}.pub'.format(name))
+    private_pem = os.path.join(settings.MIGASFREE_KEYS_DIR, '{}.pri'.format(name))
+    public_pem = os.path.join(settings.MIGASFREE_KEYS_DIR, '{}.pub'.format(name))
 
     key = RSA.generate(2048)
     write_file(public_pem, key.publickey().exportKey('PEM'))
@@ -126,7 +126,7 @@ def gpg_get_key(name):
     Returns GPG keys (if not exists it is created)
     """
 
-    gpg_home = os.path.join(settings.MIGASFREE_KEYS_PATH, '.gnupg')
+    gpg_home = os.path.join(settings.MIGASFREE_KEYS_DIR, '.gnupg')
     gpg_conf = os.path.join(gpg_home, 'gpg.conf')
     _file = os.path.join(gpg_home, '{}.gpg'.format(name))
 
