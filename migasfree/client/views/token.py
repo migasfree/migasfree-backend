@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,7 +43,6 @@ class ComputerViewSet(
     serializer_class = serializers.ComputerSerializer
     filter_class = ComputerFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
-    paginate_by = 100  # FIXME constant
 
     """
     def update(request, *args, **kwargs):
@@ -211,7 +210,6 @@ class ErrorViewSet(
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
-    paginate_by = 100  # FIXME constant
 
 
 class FaultDefinitionViewSet(viewsets.ModelViewSet):
@@ -230,7 +228,6 @@ class FaultViewSet(
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
-    paginate_by = 100  # FIXME constant
 
 
 class MigrationViewSet(
@@ -242,7 +239,6 @@ class MigrationViewSet(
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
-    paginate_by = 100  # FIXME constant
 
 
 class NotificationViewSet(
@@ -254,7 +250,6 @@ class NotificationViewSet(
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
-    paginate_by = 100  # FIXME constant
 
 
 class PackageViewSet(

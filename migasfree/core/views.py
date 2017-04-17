@@ -152,7 +152,6 @@ class ServerAttributeViewSet(viewsets.ModelViewSet):
     queryset = ServerAttribute.objects.filter(property_att__sort='server')
     serializer_class = ServerAttributeSerializer
     filter_class = ServerAttributeFilter
-    paginate_by = 100  # FIXME constant
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update':
@@ -165,7 +164,6 @@ class ClientAttributeViewSet(viewsets.ModelViewSet):
     queryset = ClientAttribute.objects.filter(property_att__sort='client')
     serializer_class = ClientAttributeSerializer
     filter_class = ClientAttributeFilter
-    paginate_by = 100  # FIXME constant
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update':
@@ -257,7 +255,6 @@ class PackageViewSet(
     serializer_class = PackageSerializer
     filter_class = PackageFilter
     parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
-    paginate_by = 100  # FIXME constant
 
     @list_route(methods=['get'])
     def orphaned(self, request):
@@ -282,7 +279,6 @@ class DeploymentViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-start_date',)
-    paginate_by = 100  # FIXME constant
 
     @detail_route(methods=['get'])
     def metadata(self, request, pk=None):
