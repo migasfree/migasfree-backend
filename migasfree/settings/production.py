@@ -27,7 +27,6 @@ TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 
 ALLOWED_HOSTS = ['*']
 
-MIGASFREE_DB_DIR = '/var/lib/migasfree-backend/data'
 MIGASFREE_PUBLIC_DIR = '/var/lib/migasfree-backend/public'
 MIGASFREE_KEYS_PATH = '/var/lib/migasfree-backend/keys'
 

@@ -30,11 +30,8 @@ LOGGING['loggers']['migasfree']['level'] = 'DEBUG'
 LOGGING['handlers']['console']['level'] = 'DEBUG'
 LOGGING['handlers']['file']['level'] = 'DEBUG'
 
-MIGASFREE_DB_DIR = os.path.dirname(MIGASFREE_PROJECT_DIR)
 MIGASFREE_PUBLIC_DIR = os.path.join(MIGASFREE_PROJECT_DIR, 'pub')
 MIGASFREE_KEYS_PATH = os.path.join(MIGASFREE_APP_DIR, 'keys')
-
-MIGASFREE_NOTIFY_NEW_COMPUTER = True
 
 SECRET_KEY = secret_key(MIGASFREE_KEYS_PATH)
 
