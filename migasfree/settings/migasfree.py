@@ -84,5 +84,5 @@ MIGASFREE_PACKAGER_PUB_KEY = 'migasfree-packager.pub'
 MIGASFREE_PACKAGER_PRI_KEY = 'migasfree-packager.pri'
 
 # Default Computer Status
-# Values: 'intended', 'reserved', ''unknown', 'in repair', 'available' or 'unsubscribed'
+# Values: 'intended', 'reserved', 'unknown', 'in repair', 'available' or 'unsubscribed'
 MIGASFREE_DEFAULT_COMPUTER_STATUS = 'intended'
