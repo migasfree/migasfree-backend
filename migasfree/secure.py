@@ -123,35 +123,40 @@ def create_server_keys():
 
 def gpg_get_key(name):
     """
-    Return keys gpg and if not exists it is created
+    Returns GPG keys (if not exists it is created)
     """
 
     gpg_home = os.path.join(settings.MIGASFREE_KEYS_PATH, '.gnupg')
+    gpg_conf = os.path.join(gpg_home, 'gpg.conf')
     _file = os.path.join(gpg_home, '{}.gpg'.format(name))
 
     if not os.path.exists(_file):
         os.environ['GNUPGHOME'] = gpg_home
         if not os.path.exists(gpg_home):
             os.makedirs(gpg_home, 0o700)
-            # create a blank configuration file
-            write_file(os.path.join(gpg_home, 'gpg.conf'), '')
-            os.chmod(os.path.join(gpg_home, 'gpg.conf'), 0o600)
-
-        # create a context
-        ctx = gpgme.Context()
+            # creates configuration file
+            write_file(gpg_conf, 'cert-digest-algo SHA256\ndigest-algo SHA256')
+            os.chmod(gpg_conf, 0o600)
 
         key_params = """
-<GnupgKeyParms format="internal">
 Key-Type: RSA
 Key-Length: 4096
 Name-Real: %s
 Name-Email: fun.with@migasfree.org
 Expire-Date: 0
-</GnupgKeyParms>
 """
-        ctx.genkey(key_params % name)
+        file_params = os.path.join(gpg_home, '{}.txt'.format(name))
+        write_file(file_params, key_params % name)
+
+        os.system(
+            "echo '' | $(which gpg) --batch "
+            "--passphrase-fd 0 --gen-key %(file)s; rm %(file)s" % {
+                "file": file_params
+            }
+        )
 
         # export and save
+        ctx = gpgme.Context()
         ctx.armor = True
         key_data = BytesIO()
         ctx.export(name, key_data)
