@@ -145,6 +145,7 @@ def gpg_get_key(name):
 Key-Type: RSA
 Key-Length: 4096
 Name-Real: %s
+Name-Email: fun.with@migasfree.org
 Expire-Date: 0
 </GnupgKeyParms>
 """
