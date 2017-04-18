@@ -841,11 +841,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        try:
-            computer.tags = tag_objs
-        except:
-            computer.tags.clear()
-
+        computer.tags = tag_objs
         tag_ids = tag_objs.values_list('id', flat=True)
 
         old_tags = list(set(computer_tags_ids) - set(tag_ids))
@@ -856,9 +852,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         install = []
         remove = []
 
-        # Old Repositories
-        repos = Deployment.available_deployments(computer, old_tags)
-        pkgs = repos.values_list(
+        # Old deploys
+        old_deploys = Deployment.available_deployments(computer, old_tags)
+        pkgs = old_deploys.values_list(
             'packages_to_install',
             'default_preincluded_packages',
             'default_included_packages'
@@ -874,7 +870,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 [remove.append(x) for x in
                     default_included_packages.split('\n') if x]
 
-        pkgs = repos.values_list(
+        pkgs = old_deploys.values_list(
             'packages_to_remove', 'default_excluded_packages'
         )
         for packages_to_remove, default_excluded_packages in pkgs:
@@ -884,12 +880,12 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 [install.append(x) for x in
                     default_excluded_packages.split('\n') if x]
 
-        # New Repositories
-        repos = Deployment.available_deployments(
+        # New deploys
+        new_deploys = Deployment.available_deployments(
             computer,
             new_tags + intersection_tags
         )
-        pkgs = repos.values_list(
+        pkgs = new_deploys.values_list(
             'packages_to_remove', 'default_excluded_packages'
         )
         for packages_to_remove, default_excluded_packages in pkgs:
@@ -899,7 +895,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 [remove.append(x) for x in
                     default_excluded_packages.split('\n') if x]
 
-        pkgs = repos.values_list(
+        pkgs = new_deploys.values_list(
             'packages_to_install', 'default_included_packages'
         )
         for packages_to_install, default_included_packages in pkgs:
@@ -910,7 +906,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 [install.append(x) for x in
                     default_included_packages.split('\n') if x]
 
-        pkgs = repos.values_list('default_preincluded_packages')
+        pkgs = new_deploys.values_list('default_preincluded_packages')
         for default_preincluded_packages in pkgs:
             if default_preincluded_packages:
                 [preinstall.append(x) for x in
