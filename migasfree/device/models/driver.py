@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,16 +37,19 @@ class Driver(models.Model):
 
     model = models.ForeignKey(
         Model,
+        on_delete=models.CASCADE,
         verbose_name=_("model")
     )
 
     project = models.ForeignKey(
         Project,
+        on_delete=models.CASCADE,
         verbose_name=_("project")
     )
 
     feature = models.ForeignKey(
         Feature,
+        on_delete=models.CASCADE,
         verbose_name=_("feature")
     )
 

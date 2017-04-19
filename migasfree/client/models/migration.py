@@ -29,6 +29,7 @@ from .event import Event
 class Migration(Event):
     project = models.ForeignKey(
         Project,
+        on_delete=models.CASCADE,
         verbose_name=_("project")
     )
 

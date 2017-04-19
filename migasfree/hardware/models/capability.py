@@ -39,6 +39,7 @@ class CapabilityManager(models.Manager):
 class Capability(models.Model):
     node = models.ForeignKey(
         Node,
+        on_delete=models.CASCADE,
         verbose_name=_("hardware node")
     )
 
@@ -58,7 +59,7 @@ class Capability(models.Model):
     def __str__(self):
         ret = self.name
         if self.description:
-            ret += ': {}'.format(self.description)
+            ret += u': {}'.format(self.description)
 
         return ret
 

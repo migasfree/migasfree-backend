@@ -94,6 +94,7 @@ class AttributeManager(models.Manager):
 class Attribute(models.Model):
     property_att = models.ForeignKey(
         Property,
+        on_delete=models.CASCADE,
         verbose_name=_("Property")
     )
 

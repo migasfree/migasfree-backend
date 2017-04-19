@@ -74,6 +74,7 @@ class Project(models.Model):
 
     platform = models.ForeignKey(
         Platform,
+        on_delete=models.CASCADE,
         verbose_name=_("platform")
     )
 

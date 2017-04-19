@@ -38,6 +38,7 @@ class LogicalNameManager(models.Manager):
 class LogicalName(models.Model):
     node = models.ForeignKey(
         Node,
+        on_delete=models.CASCADE,
         verbose_name=_("hardware node")
     )
 

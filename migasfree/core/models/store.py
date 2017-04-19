@@ -49,6 +49,7 @@ class Store(models.Model):
 
     project = models.ForeignKey(
         Project,
+        on_delete=models.CASCADE,
         verbose_name=_("project")
     )
 

@@ -64,7 +64,11 @@ class Deployment(models.Model):
         verbose_name=_('slug')
     )
 
-    project = models.ForeignKey(Project, verbose_name=_('project'))
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        verbose_name=_('project')
+    )
 
     comment = models.TextField(
         verbose_name=_("comment"),
@@ -109,6 +113,7 @@ class Deployment(models.Model):
 
     schedule = models.ForeignKey(
         Schedule,
+        on_delete=models.CASCADE,
         verbose_name=_('schedule'),
         null=True,
         blank=True

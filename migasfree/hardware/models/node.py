@@ -75,6 +75,7 @@ class Node(models.Model):
 
     parent = models.ForeignKey(
         'self',
+        on_delete=models.CASCADE,
         blank=True,
         null=True,
         verbose_name=_("parent"),
@@ -83,6 +84,7 @@ class Node(models.Model):
 
     computer = models.ForeignKey(
         Computer,
+        on_delete=models.CASCADE,
         verbose_name=_("computer")
     )
 

@@ -126,6 +126,7 @@ class Computer(models.Model):
 
     project = models.ForeignKey(
         Project,
+        on_delete=models.CASCADE,
         verbose_name=_("project")
     )
 
@@ -153,6 +154,7 @@ class Computer(models.Model):
 
     default_logical_device = models.ForeignKey(
         Logical,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
         verbose_name=_("default logical device")
@@ -183,6 +185,7 @@ class Computer(models.Model):
 
     sync_user = models.ForeignKey(
         User,
+        on_delete=models.CASCADE,
         verbose_name=_("sync user"),
         null=True,
     )

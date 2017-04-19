@@ -63,11 +63,13 @@ class Package(models.Model):
 
     project = models.ForeignKey(
         Project,
+        on_delete=models.CASCADE,
         verbose_name=_("project")
     )
 
     store = models.ForeignKey(
         Store,
+        on_delete=models.CASCADE,
         verbose_name=_("store")
     )
 
