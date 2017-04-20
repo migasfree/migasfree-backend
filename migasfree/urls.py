@@ -44,7 +44,7 @@ swagger_schema_view = get_swagger_view(
 urlpatterns = [
     url(r'^grappelli/', include('grappelli.urls')),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
 
     url(r'^api/v1/token/', include(router.urls)),
     url(r'^api/v1/token/', include(client_router.urls)),
@@ -66,7 +66,7 @@ urlpatterns = [
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns += [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
+        url(r'^__debug__/', debug_toolbar.urls),
     ]
 
     if settings.MEDIA_ROOT is not None:
