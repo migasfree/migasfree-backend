@@ -71,7 +71,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = (
             'id', 'name', 'pms',
-            'architecture', 'autoregister', 'platform'
+            'architecture', 'auto_register_computers', 'platform'
         )
 
 
@@ -84,7 +84,7 @@ class ProjectWriteSerializer(serializers.ModelSerializer):
         model = Project
         fields = (
             'id', 'name', 'pms',
-            'architecture', 'autoregister', 'platform'
+            'architecture', 'auto_register_computers', 'platform'
         )
 
 
