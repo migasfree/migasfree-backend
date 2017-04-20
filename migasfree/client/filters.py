@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,15 +28,15 @@ from .models import (
 
 class ComputerFilter(filters.FilterSet):
     platform = filters.CharFilter(name='project__platform__id')
-    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
+    created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
     software_inventory = filters.CharFilter(
-        name='software_inventory__fullname', lookup_type='contains'
+        name='software_inventory__fullname', lookup_expr=['contains']
     )
     sync_attributes = filters.CharFilter(
-        name='sync_attributes__value', lookup_type='contains'
+        name='sync_attributes__value', lookup_expr=['contains']
     )
     mac_address = filters.CharFilter(
-        name='mac_address', lookup_type='icontains'
+        name='mac_address', lookup_expr=['icontains']
     )
 
     class Meta:
@@ -48,8 +48,8 @@ class ComputerFilter(filters.FilterSet):
 
 
 class ErrorFilter(filters.FilterSet):
-    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
-    created_at__lt = filters.DateFilter(name='created_at', lookup_expr='lt')
+    created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
+    created_at__lt = filters.DateFilter(name='created_at', lookup_expr=['lt'])
 
     class Meta:
         model = Error
@@ -66,8 +66,8 @@ class FaultDefinitionFilter(filters.FilterSet):
 
 
 class FaultFilter(filters.FilterSet):
-    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
-    created_at__lt = filters.DateFilter(name='created_at', lookup_expr='lt')
+    created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
+    created_at__lt = filters.DateFilter(name='created_at', lookup_expr=['lt'])
 
     """
     # TODO override filter_queryset (http://www.django-rest-framework.org/api-guide/filtering/)
@@ -103,8 +103,8 @@ class FaultFilter(filters.FilterSet):
 
 
 class MigrationFilter(filters.FilterSet):
-    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
-    created_at__lt = filters.DateFilter(name='created_at', lookup_expr='lt')
+    created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
+    created_at__lt = filters.DateFilter(name='created_at', lookup_expr=['lt'])
 
     class Meta:
         model = Migration
@@ -112,7 +112,7 @@ class MigrationFilter(filters.FilterSet):
 
 
 class NotificationFilter(filters.FilterSet):
-    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
+    created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
 
     class Meta:
         model = Notification
@@ -120,16 +120,16 @@ class NotificationFilter(filters.FilterSet):
 
 
 class PackageFilter(filters.FilterSet):
-    fullname = filters.CharFilter(name='fullname', lookup_type='contains')
-    project = filters.CharFilter(name='project__id', lookup_type='exact')
+    fullname = filters.CharFilter(name='fullname', lookup_expr=['contains'])
+    project = filters.CharFilter(name='project__id', lookup_expr=['exact'])
 
     class Meta:
         model = Package
 
 
 class StatusLogFilter(filters.FilterSet):
-    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
-    created_at__lt = filters.DateFilter(name='created_at', lookup_expr='lt')
+    created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
+    created_at__lt = filters.DateFilter(name='created_at', lookup_expr=['lt'])
 
     class Meta:
         model = StatusLog
@@ -137,8 +137,8 @@ class StatusLogFilter(filters.FilterSet):
 
 
 class SynchronizationFilter(filters.FilterSet):
-    created_at = filters.DateFilter(name='created_at', lookup_type='gte')
-    created_at__lt = filters.DateFilter(name='created_at', lookup_expr='lt')
+    created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
+    created_at__lt = filters.DateFilter(name='created_at', lookup_expr=['lt'])
 
     class Meta:
         model = Synchronization

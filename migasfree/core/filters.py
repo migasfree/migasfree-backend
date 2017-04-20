@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,13 +25,13 @@ from .models import (
 
 class DeploymentFilter(filters.FilterSet):
     included_attributes = filters.CharFilter(
-        name='included_attributes__value', lookup_type='contains'
+        name='included_attributes__value', lookup_expr=['contains']
     )
     excluded_attributes = filters.CharFilter(
-        name='excluded_attributes__value', lookup_type='contains'
+        name='excluded_attributes__value', lookup_expr=['contains']
     )
     available_packages = filters.CharFilter(
-        name='available_packages__name', lookup_type='contains'
+        name='available_packages__name', lookup_expr=['contains']
     )
 
     class Meta:
