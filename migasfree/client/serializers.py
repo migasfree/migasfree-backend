@@ -102,6 +102,12 @@ class SynchronizationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class SynchronizationWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Synchronization
+        fields = '__all__'
+
+
 class ComputerSyncSerializer(serializers.ModelSerializer):
     sync_user = UserSerializer(many=False, read_only=True)
     sync_attributes = ClientAttributeSerializer(many=True, read_only=True)

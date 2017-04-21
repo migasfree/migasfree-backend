@@ -297,7 +297,7 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
             'consumer': claims.get('consumer'),
             'pms_status_ok': claims.get('pms_status_ok', False),
         }
-        serializer = serializers.SynchronizationSerializer(data=data)
+        serializer = serializers.SynchronizationWriteSerializer(data=data)
 
         add_computer_message(
             computer, ugettext('Sending synchronization response...')

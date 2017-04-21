@@ -283,3 +283,9 @@ class SynchronizationViewSet(
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update':
+            return serializers.SynchronizationWriteSerializer
+
+        return serializers.SynchronizationSerializer
