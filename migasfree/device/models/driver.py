@@ -54,7 +54,7 @@ class Driver(models.Model):
     )
 
     packages_to_install = models.TextField(
-        _("packages to install"),
+        verbose_name=_("packages to install"),
         null=True,
         blank=True
     )
