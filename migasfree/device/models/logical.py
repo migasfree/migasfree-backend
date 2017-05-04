@@ -70,7 +70,7 @@ class Logical(models.Model):
         return self.name if self.name else self.feature.name
 
     def as_dict(self, project):
-        driver_dict = {}
+        driver_as_dict = {}
         try:
             driver = Driver.objects.filter(
                 project__id=project.id,
@@ -78,7 +78,7 @@ class Logical(models.Model):
                 feature__id=self.feature.id
             )[0]
             if driver:
-                driver_dict = driver.as_dict()
+                driver_as_dict = driver.as_dict()
         except IndexError:
             pass
 
@@ -90,11 +90,11 @@ class Logical(models.Model):
             }
         }
 
-        device_dict = self.device.as_dict()
-        for key, value in list(device_dict.items()):
+        device_as_dict = self.device.as_dict()
+        for key, value in list(device_as_dict.items()):
             ret[self.device.connection.device_type.name][key] = value
 
-        for key, value in list(driver_dict.items()):
+        for key, value in list(driver_as_dict.items()):
             ret[self.device.connection.device_type.name][key] = value
 
         return ret
@@ -110,7 +110,7 @@ class Logical(models.Model):
 
     def save(self, *args, **kwargs):
         if isinstance(self.name, basestring):
-            self.name = self.name.replace(" ", "_")
+            self.alternative_feature_name = self.alternative_feature_name.replace(" ", "_")
 
         super(Logical, self).save(*args, **kwargs)
 
