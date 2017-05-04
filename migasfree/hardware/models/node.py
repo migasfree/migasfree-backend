@@ -234,10 +234,12 @@ class Node(models.Model):
         )
         if query.count() == 1:
             product = query[0].product
-            for item in ['(R)', '(TM)', '@', 'CPU']:
-                product = product.replace(item, '')
-
-            return product.strip()
+            if product:
+                for item in ['(R)', '(TM)', '@', 'CPU']:
+                    product = product.replace(item, '')
+                return product.strip()
+            else:
+                return ''
         elif query.count() == 0:
             return ''
         else:
