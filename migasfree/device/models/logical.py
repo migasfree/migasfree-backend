@@ -67,7 +67,7 @@ class Logical(models.Model):
     objects = LogicalManager()
 
     def get_name(self):
-        return self.name if self.name else self.feature.name
+        return self.alternative_feature_name if self.alternative_feature_name else self.feature.name
 
     def as_dict(self, project):
         driver_as_dict = {}
