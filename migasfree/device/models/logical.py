@@ -109,7 +109,7 @@ class Logical(models.Model):
         )
 
     def save(self, *args, **kwargs):
-        if isinstance(self.name, basestring):
+        if isinstance(self.alternative_feature_name, basestring):
             self.alternative_feature_name = self.alternative_feature_name.replace(" ", "_")
 
         super(Logical, self).save(*args, **kwargs)
