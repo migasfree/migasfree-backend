@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -180,3 +180,10 @@ def swap_m2m(source_field, target_field):
 
 def remove_empty_elements_from_dict(dic):
     return dict((k, v) for k, v in dic.iteritems() if v)
+
+
+def remove_duplicates_preserving_order(seq):
+    seen = set()
+    seen_add = seen.add
+
+    return [x for x in seq if not (x in seen or seen_add(x))]
