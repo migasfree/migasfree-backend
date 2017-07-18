@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
             get_object_or_404(Project, pk=project_id)
             key = 'migasfree:stats:%d:years' % int(project_id)
 
-        con = get_redis_connection('default')
+        con = get_redis_connection()
         stats = []
         for i in range(begin, end):
             value = con.get('%s:%04d' % (key, i))
@@ -96,7 +96,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
             get_object_or_404(Project, pk=project_id)
             key = 'migasfree:stats:%d:months' % int(project_id)
 
-        con = get_redis_connection('default')
+        con = get_redis_connection()
         stats = []
         for i in month_year_iter(
             begin.month, begin.year,
@@ -133,7 +133,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
             get_object_or_404(Project, pk=project_id)
             key = 'migasfree:stats:%d:days' % int(project_id)
 
-        con = get_redis_connection('default')
+        con = get_redis_connection()
         stats = []
         for single_date in daterange(begin, end):
             value = con.get('%s:%s' % (
@@ -173,7 +173,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
             get_object_or_404(Project, pk=project_id)
             key = 'migasfree:stats:%d:hours' % int(project_id)
 
-        con = get_redis_connection('default')
+        con = get_redis_connection()
         stats = []
         while begin <= end:
             value = con.get('%s:%s' % (
@@ -221,7 +221,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
     def assigned_computers(self, request, pk=None):
         deploy = get_object_or_404(Deployment, pk=pk)
 
-        con = get_redis_connection('default')
+        con = get_redis_connection()
         response = con.smembers(
             'migasfree:deployments:%d:computers' % deploy.id
         )
@@ -235,7 +235,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
     def computers_with_ok_status(self, request, pk=None):
         deploy = get_object_or_404(Deployment, pk=pk)
 
-        con = get_redis_connection('default')
+        con = get_redis_connection()
         response = con.smembers('migasfree:deployments:%d:ok' % deploy.id)
 
         return Response(
@@ -247,7 +247,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
     def computers_with_error_status(self, request, pk=None):
         deploy = get_object_or_404(Deployment, pk=pk)
 
-        con = get_redis_connection('default')
+        con = get_redis_connection()
         response = con.smembers('migasfree:deployments:%d:error' % deploy.id)
 
         return Response(
@@ -259,7 +259,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
     def timeline(self, request, pk=None):
         deploy = get_object_or_404(Deployment, pk=pk)
 
-        con = get_redis_connection('default')
+        con = get_redis_connection()
 
         response = {
             'computers': {
