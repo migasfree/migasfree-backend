@@ -68,7 +68,7 @@ class Synchronization(Event):
             self.computer, self.computer.get_all_attributes()
         ).values_list('id', flat=True)
 
-        con = get_redis_connection('default')
+        con = get_redis_connection()
         for deploy_id in deployments:
             con.sadd(
                 'migasfree:deployments:%d:%s' % (
