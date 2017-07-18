@@ -44,7 +44,7 @@ DATABASES = {
         'NAME': 'migasfree_backend',
         'USER': 'migasfree_backend',
         'PASSWORD': 'migasfree_backend',
-        'HOST': '',
+        'HOST': 'localhost',
         'PORT': '',
     }
 }
