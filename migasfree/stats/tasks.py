@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,22 +35,22 @@ import logging
 logger = logging.getLogger('celery')
 
 
-def add_orphaned_packages():
-    con = get_redis_connection('default')
+def add_orphan_packages():
+    con = get_redis_connection()
     con.hmset(
-        'migasfree:chk:orphaned', {
-            'msg': ugettext('Orphaned Package/Set'),
+        'migasfree:chk:orphan', {
+            'msg': ugettext('Orphan Package/Set'),
             'target': 'server',
             'level': 'warning',
-            'result': Package.orphaned(),
-            'api': reverse('package-orphaned'),
+            'result': Package.orphan(),
+            'api': reverse('package-orphan'),
         }
     )
-    con.sadd('migasfree:watch:chk', 'orphaned')
+    con.sadd('migasfree:watch:chk', 'orphan')
 
 
 def add_unchecked_notifications():
-    con = get_redis_connection('default')
+    con = get_redis_connection()
     con.hmset(
         'migasfree:chk:notifications', {
             'msg': ugettext('Unchecked Notifications'),
@@ -64,7 +64,7 @@ def add_unchecked_notifications():
 
 
 def add_unchecked_faults():
-    con = get_redis_connection('default')
+    con = get_redis_connection()
     con.hmset(
         'migasfree:chk:faults', {
             'msg': ugettext('Unchecked Faults'),
@@ -78,7 +78,7 @@ def add_unchecked_faults():
 
 
 def add_unchecked_errors():
-    con = get_redis_connection('default')
+    con = get_redis_connection()
     con.hmset(
         'migasfree:chk:errors', {
             'msg': ugettext('Unchecked Errors'),
@@ -92,7 +92,7 @@ def add_unchecked_errors():
 
 
 def add_generating_repos():
-    con = get_redis_connection('default')
+    con = get_redis_connection()
     result = con.scard('migasfree:watch:repos')
     con.hmset(
         'migasfree:chk:repos', {
@@ -107,7 +107,7 @@ def add_generating_repos():
 
 
 def add_synchronizing_computers():
-    con = get_redis_connection('default')
+    con = get_redis_connection()
 
     result = 0
     delayed_time = datetime.now() - timedelta(
@@ -133,7 +133,7 @@ def add_synchronizing_computers():
 
 
 def add_delayed_computers():
-    con = get_redis_connection('default')
+    con = get_redis_connection()
 
     result = 0
     delayed_time = datetime.now() - timedelta(
@@ -160,9 +160,9 @@ def add_delayed_computers():
 
 @shared_task(queue='default')
 def alerts():
-    con = get_redis_connection('default')
+    con = get_redis_connection()
 
-    add_orphaned_packages()
+    add_orphan_packages()
     add_unchecked_notifications()
     add_unchecked_faults()
     add_unchecked_errors()
@@ -202,7 +202,7 @@ def assigned_computers_to_deployment(deployment_id):
         )
     ).values_list('id', flat=True)))
 
-    con = get_redis_connection('default')
+    con = get_redis_connection()
     key = 'migasfree:deployments:%d:computers' % deployment_id
     con.delete(key)
     if computers:
