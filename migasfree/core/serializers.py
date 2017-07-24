@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.contrib.auth.models import User, Group
+# from django.contrib.auth.models import User, Group
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
