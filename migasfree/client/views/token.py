@@ -28,9 +28,11 @@ from rest_framework.response import Response
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_filters import backends
 
+from migasfree.core.serializers import PackageSerializer
+
 from .. import models, serializers
 from ..filters import (
-    PackageFilter, ErrorFilter, NotificationFilter,
+    PackageHistoryFilter, ErrorFilter, NotificationFilter,
     FaultDefinitionFilter, FaultFilter, ComputerFilter,
     MigrationFilter, StatusLogFilter, SynchronizationFilter,
 )
@@ -60,8 +62,9 @@ class ComputerViewSet(
         """
         computer = get_object_or_404(models.Computer, pk=pk)
 
-        serializer = serializers.PackageSerializer(
-            computer.software_inventory.all(), many=True
+        serializer = serializers.PackageHistorySerializer(
+            computer.packagehistory_set.filter(uninstall_date__isnull=True),
+            many=True
         )
 
         return Response(
@@ -76,8 +79,13 @@ class ComputerViewSet(
         """
         computer = get_object_or_404(models.Computer, pk=pk)
 
+        package_history = models.PackageHistory.objects.filter(computer=computer)
+        serializer = serializers.PackageHistorySerializer(
+            package_history, many=True
+        )
+
         return Response(
-            computer.software_history,
+            serializer.data,
             status=status.HTTP_200_OK
         )
 
@@ -125,7 +133,7 @@ class ComputerViewSet(
 
     @list_route(methods=['get'])
     def synchronizing(self, request, format=None):
-        con = get_redis_connection('default')
+        con = get_redis_connection()
 
         result = []
         delayed_time = datetime.now() - timedelta(
@@ -148,7 +156,7 @@ class ComputerViewSet(
 
     @list_route(methods=['get'])
     def delayed(self, request, format=None):
-        con = get_redis_connection('default')
+        con = get_redis_connection()
 
         result = []
         delayed_time = datetime.now() - timedelta(
@@ -252,15 +260,15 @@ class NotificationViewSet(
     ordering = ('-created_at',)
 
 
-class PackageViewSet(
+class PackageHistoryViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
-    queryset = models.Package.objects.all()
-    serializer_class = serializers.PackageSerializer
-    filter_class = PackageFilter
+    queryset = models.PackageHistory.objects.all()
+    serializer_class = serializers.PackageHistorySerializer
+    filter_class = PackageHistoryFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
-    ordering = ('fullname',)
+    ordering = ('computer', 'package__fullname',)
 
 
 class StatusLogViewSet(
