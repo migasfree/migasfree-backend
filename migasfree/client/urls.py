@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@
 from django.conf.urls import include, url
 
 from .views import (
-    PackagerKeysView, ProjectKeysView, RepositoriesKeysView,
+    PackagerKeysView, ProjectKeysView,
+    RepositoriesKeysView, RepositoriesUrlTemplateView,
     SafeSynchronizationView, SafeEndOfTransmissionView,
 )
 
@@ -31,6 +32,7 @@ keys_patterns = [
 
 public_patterns = [
     url(r'keys/', include(keys_patterns)),
+    url(r'repository-url-template/', RepositoriesUrlTemplateView.as_view()),
 ]
 
 safe_patterns = [
