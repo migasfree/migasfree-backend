@@ -41,6 +41,9 @@ class Project(models.Model):
     Distribution for customize.
     """
 
+    REPOSITORY_TRAILING_PATH = 'repos'
+    STORE_TRAILING_PATH = 'stores'
+
     name = models.CharField(
         verbose_name=_("name"),
         max_length=50,
@@ -89,14 +92,14 @@ class Project(models.Model):
     def repositories_path(name):
         return os.path.join(
             Project.path(name),
-            'repos'
+            Project.REPOSITORY_TRAILING_PATH
         )
 
     @staticmethod
     def stores_path(name):
         return os.path.join(
             Project.path(name),
-            'stores'
+            Project.STORE_TRAILING_PATH
         )
 
     def _create_dirs(self):
@@ -108,15 +111,15 @@ class Project(models.Model):
         if not os.path.exists(stores):
             os.makedirs(stores)
 
+    @staticmethod
+    def get_project_names():
+        return Project.objects.values_list('id', 'name').order_by('name')
+
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         self._create_dirs()
 
         super(Project, self).save(*args, **kwargs)
-
-    @staticmethod
-    def get_project_names():
-        return Project.objects.all().order_by('name').values_list('id', 'name')
 
     class Meta:
         app_label = 'core'
