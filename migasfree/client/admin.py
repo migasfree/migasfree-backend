@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from collections import defaultdict
+
 from django.db.models import Q
 from django.contrib import admin
 from django.shortcuts import redirect
@@ -26,6 +28,7 @@ from django.conf import settings
 
 from migasfree.core.models import Attribute
 from migasfree.device.models import Logical
+from migasfree.utils import merge_dicts
 
 from .models import *
 
@@ -49,23 +52,28 @@ class ComputerAdmin(admin.ModelAdmin):
     )
     list_per_page = 25
     ordering = (settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0],)
-    list_filter = ('project__name', 'sync_start_date', 'status', 'machine')
+    list_filter = (
+        'project__platform', 'project__name',
+        'sync_start_date', 'status', 'machine'
+    )
     search_fields = settings.MIGASFREE_COMPUTER_SEARCH_FIELDS + (
         'sync_user', 'sync_user__fullname'
     )
 
     readonly_fields = (
         'name',
+        'fqdn',
         'uuid',
         'project',
         'created_at',
         'ip_address',
+        'forwarded_ip_address',
         'sync_start_date',
         'sync_user',
         'sync_attributes',
         'sync_end_date',
-        'software_inventory',
-        'software_history',
+        'get_software_inventory',
+        'get_software_history',
         'hardware',
         'machine',
         'cpu',
@@ -81,9 +89,12 @@ class ComputerAdmin(admin.ModelAdmin):
             'fields': (
                 'status',
                 'name',
+                'fqdn',
                 'project',
                 'created_at',
                 'ip_address',
+                'forwarded_ip_address',
+                'comment',
             )
         }),
         (_('Hardware'), {
@@ -113,8 +124,8 @@ class ComputerAdmin(admin.ModelAdmin):
         (_('Software'), {
             'classes': ('grp-collapse grp-closed',),
             'fields': (
-                'software_inventory',
-                'software_history',
+                'get_software_inventory',
+                'get_software_history',
             )
         }),
         (_('Devices'), {
@@ -144,10 +155,53 @@ class ComputerAdmin(admin.ModelAdmin):
     delete_selected.short_description = _("Delete selected %(verbose_name_plural)s")
     """
 
-    def my_logical_devices(self, obj):
-        return ' '.join([item.__str__() for item in obj.logical_devices()])
+    def get_software_inventory(self, obj):
+        return '\n'.join(list(
+            obj.packagehistory_set.filter(
+                uninstall_date__isnull=True
+            ).values_list(
+                'package__fullname', flat=True
+            )
+        ))
 
-    my_logical_devices.allow_tags = True
+    get_software_inventory.short_description = _('Software Inventory')
+
+    def get_software_history(self, obj):
+        installed = defaultdict(list)
+        uninstalled = defaultdict(list)
+
+        for k, v in list(
+                obj.packagehistory_set.filter(
+                    install_date__isnull=False
+                ).values_list(
+                    'install_date', 'package__fullname'
+                ).order_by('-install_date')
+        ):
+            installed[k.strftime('%Y-%m-%d %H:%M:%S')].append('+' + v)
+
+        for k, v in list(
+                obj.packagehistory_set.filter(
+                    uninstall_date__isnull=False
+                ).values_list(
+                    'uninstall_date', 'package__fullname'
+                ).order_by('-uninstall_date')
+        ):
+            uninstalled[k.strftime('%Y-%m-%d %H:%M:%S')].append('-' + v)
+
+        ret = merge_dicts(installed, uninstalled)
+
+        return '\n\n'.join(
+            "# %s\n%s" % (
+                key,
+                '\n'.join(v for v in val)
+            ) for (key, val) in sorted(ret.iteritems(), reverse=True)
+        )
+
+    get_software_history.short_description = _('Software History')
+
+    def my_logical_devices(self, obj):
+        return ', '.join([item.__str__() for item in obj.logical_devices()])
+
     my_logical_devices.short_description = _('Logical Devices')
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
@@ -178,16 +232,23 @@ class ComputerAdmin(admin.ModelAdmin):
         return False
 
 
-@admin.register(Package)
-class PackageAdmin(admin.ModelAdmin):
-    list_display = ('fullname', 'project')
-    ordering = ('name', 'version', 'project')
-    list_filter = ('project',)
-    search_fields = ('name', 'version', 'fullname')
+@admin.register(PackageHistory)
+class PackageHistoryAdmin(admin.ModelAdmin):
+    list_display = ('computer', 'package', 'install_date', 'uninstall_date')
+    ordering = ('computer', 'package__fullname')
+    list_filter = ('computer', 'package')
+    search_fields = ('computer__name', 'package__fullname')
     readonly_fields = (
-        'fullname', 'name',
-        'version', 'architecture', 'project'
+        'computer', 'package',
+        'install_date', 'uninstall_date'
     )
+
+    def get_queryset(self, request):
+        return super(PackageHistoryAdmin, self).get_queryset(
+            request
+        ).select_related(
+            'computer', 'package'
+        )
 
     def has_add_permission(self, request):
         return False
@@ -204,7 +265,6 @@ class ErrorAdmin(admin.ModelAdmin):
         'truncated_desc',
     )
     list_filter = ('checked', 'created_at', 'project__name')
-    # list_editable = ('checked',)  # TODO
     ordering = ('-created_at', 'computer',)
     search_fields = add_computer_search_fields(['created_at', 'description'])
     readonly_fields = ('computer', 'project', 'created_at', 'description')
@@ -249,7 +309,7 @@ class FaultDefinitionAdmin(admin.ModelAdmin):
         (None, {
             'fields': ('name', 'description', 'enabled', 'language', 'code')
         }),
-        (_('Atributtes'), {
+        (_('Attributes'), {
             'classes': ('grp-collapse grp-closed',),
             'fields': ('included_attributes', 'excluded_attributes')
         }),
