@@ -31,34 +31,57 @@ from .store import Store
 
 
 class PackageManager(models.Manager):
-    def create(self, name, project, store, file_list):
+    def create(self, fullname, name, version, architecture, project, store):
         target = Store.path(project.slug, store.slug)
-        if len(file_list) > 1 or name != str(file_list[0]):
-            target = os.path.join(target, name)
-
         if not os.path.exists(target):
             os.makedirs(target)
 
-        for item in file_list:
-            Package.handle_uploaded_file(
-                item,
-                os.path.join(target, str(item))
-            )
+        Package.handle_uploaded_file(
+            fullname,
+            os.path.join(target, fullname)
+        )
 
         package = Package(
+            fullname=fullname,
             name=name,
+            version=version,
+            architecture=architecture,
             project=project,
             store=store
         )
         package.save()
+
         return package
 
 
 @python_2_unicode_compatible
 class Package(models.Model):
+    fullname = models.CharField(
+        verbose_name=_('fullname'),
+        max_length=170,
+        null=False,
+        unique=False
+    )
+
     name = models.CharField(
-        verbose_name=_("name"),
-        max_length=100
+        verbose_name=_('name'),
+        max_length=100,
+        null=False,
+        blank=True,
+        unique=False
+    )
+
+    version = models.CharField(
+        verbose_name=_('version'),
+        max_length=60,
+        null=False,
+        unique=False
+    )
+
+    architecture = models.CharField(
+        verbose_name=_('architecture'),
+        max_length=10,
+        null=False,
     )
 
     project = models.ForeignKey(
@@ -70,6 +93,7 @@ class Package(models.Model):
     store = models.ForeignKey(
         Store,
         on_delete=models.CASCADE,
+        null=True,
         verbose_name=_("store")
     )
 
@@ -85,12 +109,30 @@ class Package(models.Model):
             raise ValidationError(_('Store must belong to the project'))
 
         queryset = Package.objects.filter(
-            name=self.name
-        ).filter(
+            fullname=self.fullname,
             project__id=self.project.id
         ).filter(~models.Q(id=self.id))
         if queryset.exists():
-            raise ValidationError(_('Duplicated name at project'))
+            raise ValidationError(_('Duplicated fullname at project'))
+
+    @staticmethod
+    def normalized_name(package_name):
+        name = None
+        version = None
+        architecture = None
+
+        # name_version_architecture.ext convention
+        try:
+            name, version, architecture = package_name.split('_')
+        except ValueError:
+            if package_name.count('_') > 2:
+                slices = package_name.split('_', 1)
+                name = slices[0]
+                version, architecture = slices[1].rsplit('_', 1)
+
+        architecture = architecture.split('.')[0]
+
+        return name, version, architecture
 
     @staticmethod
     def handle_uploaded_file(f, target):
@@ -103,54 +145,71 @@ class Package(models.Model):
                 destination.write(chunk)
 
     @staticmethod
-    def orphaned():
+    def orphan():
         return Package.objects.filter(deployment__id=None).count()
 
     @staticmethod
-    def path(project_name, store_name, name):
-        return os.path.join(Store.path(project_name, store_name), name)
+    def path(project_name, store_name, fullname):
+        return os.path.join(Store.path(project_name, store_name), fullname)
+
+    @staticmethod
+    def delete_from_store(path):
+        if os.path.exists(path):
+            try:
+                if os.path.isfile(path):
+                    os.remove(path)
+                else:
+                    shutil.rmtree(path, ignore_errors=True)
+            except OSError:
+                pass
 
     def create_dir(self):
-        path = self.path(self.project.slug, self.store.slug, self.name)
+        path = Store.path(self.project.slug, self.store.slug)
         if not os.path.exists(path):
             os.makedirs(path)
 
     def update_store(self, store):
         if self.store != store:
-            shutil.move(
-                self.path(self.project.slug, self.store.slug, self.name),
-                self.path(self.project.slug, store, self.name)
-            )
-
+            previous_store = self.store.slug
             self.store = store
             self.save()
+
+            shutil.move(
+                self.path(self.project.slug, previous_store, self.name),
+                self.path(self.project.slug, self.store, self.name)
+            )
 
     def save(self, *args, **kwargs):
         self.create_dir()
         super(Package, self).save(*args, **kwargs)
 
     def __str__(self):
-        return _('%s at project %s') % (self.name, self.project.name)
+        # return _('%s at project %s') % (self.fullname, self.project.name)
+        return self.fullname
 
     class Meta:
         app_label = 'core'
-        verbose_name = _('Package/Set')
-        verbose_name_plural = _('Packages/Sets')
-        unique_together = (('name', 'project'),)
+        verbose_name = _('Package')
+        verbose_name_plural = _('Packages')
+        unique_together = (('fullname', 'project'),)
 
 
 @receiver(pre_delete, sender=Package)
 def delete_package(sender, instance, **kwargs):
+    from .. import tasks
+    from .deployment import Deployment
+
     path = Package.path(
         instance.project.slug,
         instance.store.slug,
-        instance.name
+        instance.fullname
     )
-    if os.path.exists(path):
-        try:
-            if os.path.isfile(path):
-                os.remove(path)
-            else:
-                shutil.rmtree(path, ignore_errors=True)
-        except OSError:
-            pass
+    Package.delete_from_store(path)
+
+    queryset = Deployment.objects.filter(
+        available_packages__in=[instance],
+        enabled=True
+    )
+    for deploy in queryset:
+        deploy.available_packages.remove(instance)
+        tasks.create_repository_metadata.delay(deploy.id)
