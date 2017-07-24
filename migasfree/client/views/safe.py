@@ -27,12 +27,17 @@ from rest_framework.decorators import list_route
 from rest_framework.response import Response
 from django_redis import get_redis_connection
 
-from migasfree.utils import uuid_change_format, get_client_ip
+from migasfree.utils import (
+    uuid_change_format, get_client_ip,
+    remove_duplicates_preserving_order
+)
 from migasfree.model_update import update
 from migasfree.core.mixins import SafeConnectionMixin
 from migasfree.core.models import (
-    Deployment, Property, Attribute, BasicAttribute, AttributeSet
+    Deployment, Property,
+    Attribute, BasicAttribute, AttributeSet,
 )
+from migasfree.app_catalog.models import Policy
 
 from .. import models, serializers, tasks
 
@@ -41,7 +46,7 @@ logger = logging.getLogger('migasfree')
 
 
 def update_stats(sync):
-    con = get_redis_connection('default')
+    con = get_redis_connection()
 
     if not con.sismember(
         'migasfree:watch:stats:years:%04d' % sync.created_at.year,
@@ -146,7 +151,7 @@ def update_stats(sync):
 
 
 def add_computer_message(computer, message):
-    con = get_redis_connection('default')
+    con = get_redis_connection()
     con.hmset(
         'migasfree:msg:%d' % computer.id, {
             'date': datetime.now(),
@@ -161,7 +166,7 @@ def add_computer_message(computer, message):
 
 
 def remove_computer_messages(computer_id):
-    con = get_redis_connection('default')
+    con = get_redis_connection()
     keys = con.hkeys('migasfree:msg:%d' % computer_id)
     con.hdel('migasfree:msg:%d' % computer_id, *keys)
     con.srem('migasfree:watch:msg', computer_id)
@@ -331,6 +336,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
         claims['project'] = self.project.id
+        claims['forwarded_ip_address'] = get_client_ip(request)
 
         computer = get_computer(claims.get('uuid'), claims.get('name'))
         if computer:
@@ -402,7 +408,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             models.Error.objects.create(
                 computer,
                 computer.project,
-                "{} - {} - {}".format(
+                '{} - {} - {}'.format(
                     get_client_ip(request),
                     'id',
                     ugettext('Unsubscribed computer')
@@ -533,7 +539,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             computer,
             uuid=claims.get('uuid'),
             name=claims.get('name'),
+            fqdn=claims.get('fqdn'),
             ip_address=claims.get('ip_address'),
+            forwarded_ip_address=get_client_ip(request),
             sync_user=user,
             sync_start_date=datetime.now()
         )
@@ -725,7 +733,15 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 if remove_item:
                     remove = [x for x in remove_item.split('\n') if x]
 
-            response = {'install': install, 'remove': remove}
+            # policies
+            policy_pkg_to_install, policy_pkg_to_remove = Policy.get_packages(computer)
+            install.extend(policy_pkg_to_install)
+            remove.extend(policy_pkg_to_remove)
+
+            response = {
+                'install': remove_duplicates_preserving_order(install),
+                'remove': remove_duplicates_preserving_order(remove)
+            }
 
             return Response(
                 self.create_response(response),
@@ -913,9 +929,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     default_preincluded_packages.split('\n') if x]
 
         ret = {
-            "preinstall": preinstall,
-            "install": install,
-            "remove": remove,
+            "preinstall": remove_duplicates_preserving_order(preinstall),
+            "install": remove_duplicates_preserving_order(install),
+            "remove": remove_duplicates_preserving_order(remove),
         }
 
         add_computer_message(computer, ugettext('Sending tags...'))
@@ -999,8 +1015,11 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         """
         claims = {
             'id', 1,
-            'inventory': ['asdasd', 'asdasdsd', 'asdasdsd', ...],
-            'history': 'asdadf\n\dfasdfaf'
+            'inventory': ['asdasd', 'asdasdsd', 'asdafsdsd', ...],
+            'history': {
+                'installed': ['asdasd', 'asddda', ...],
+                'uninstalled': ['dada', ...]
+            }
         }
         """
 
