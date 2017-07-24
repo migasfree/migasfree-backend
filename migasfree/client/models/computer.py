@@ -18,9 +18,9 @@
 
 from datetime import datetime
 
-from django.db import models, transaction
+from django.db import models
 from django.db.models import Count
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save, post_save, m2m_changed
 from django.core.exceptions import ObjectDoesNotExist
 from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
@@ -30,11 +30,10 @@ from django.conf import settings
 
 from migasfree.utils import swap_m2m, remove_empty_elements_from_dict
 from migasfree.core.models import (
-    Project, ServerAttribute, Attribute, BasicProperty
+    Project, ServerAttribute, Attribute, BasicProperty,
 )
 from migasfree.device.models import Logical
 
-from .package import Package
 from .user import User
 
 
@@ -124,13 +123,25 @@ class Computer(models.Model):
         unique=False
     )
 
+    fqdn = models.CharField(
+        verbose_name=_('full qualified domain name'),
+        max_length=255,
+        null=True,
+        blank=True,
+        unique=False
+    )
+
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
         verbose_name=_("project")
     )
 
-    created_at = models.DateTimeField(auto_now_add=True, help_text=_('Date of entry into the migasfree system'))
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_('entry date'),
+        help_text=_('Date of entry into the migasfree system')
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     ip_address = models.GenericIPAddressField(
@@ -139,15 +150,8 @@ class Computer(models.Model):
         blank=True
     )
 
-    software_inventory = models.ManyToManyField(
-        Package,
-        blank=True,
-        verbose_name=_("software inventory"),
-    )
-
-    software_history = models.TextField(
-        verbose_name=_("software history"),
-        default="",
+    forwarded_ip_address = models.GenericIPAddressField(
+        verbose_name=_("forwarded ip address"),
         null=True,
         blank=True
     )
@@ -247,6 +251,12 @@ class Computer(models.Model):
         unique=False
     )
 
+    comment = models.TextField(
+        verbose_name=_("comment"),
+        null=True,
+        blank=True
+    )
+
     objects = models.Manager()
     productive = ProductiveManager()
     unproductive = UnproductiveManager()
@@ -309,12 +319,23 @@ class Computer(models.Model):
         return True
 
     def update_software_history(self, history):
+        from .package import PackageHistory
+
         if history:
-            if self.software_history:
-                self.software_history = history + '\n\n' + self.software_history
-            else:
-                self.software_history = history
-            self.save()
+            if 'installed' in history:
+                for pkg in PackageHistory.objects.filter(
+                    computer__id=self.id,
+                    package__fullname__in=history['installed']
+                ):
+                    pkg.install_date = datetime.now()
+                    pkg.save()
+            if 'uninstalled' in history:
+                for pkg in PackageHistory.objects.filter(
+                    computer__id=self.id,
+                    package__fullname__in=history['uninstalled']
+                ):
+                    pkg.uninstall_date = datetime.now()
+                    pkg.save()
 
     @staticmethod
     def group_by_project():
@@ -339,13 +360,6 @@ class Computer(models.Model):
             return Computer.objects.filter(
                 sync_attributes__id__in=attributes_id
             ).count()
-
-    @transaction.atomic
-    def update_software_inventory(self, pkgs):
-        if pkgs:
-            self.software_inventory.clear()
-            self.software_inventory = pkgs
-            self.save()
 
     def update_last_hardware_capture(self):
         self.last_hardware_capture = datetime.now()
@@ -377,7 +391,6 @@ class Computer(models.Model):
             attributes__in=attributes
         ).distinct()
 
-    logical_devices.allow_tags = True
     logical_devices.short_description = _('Logical Devices')
 
     @staticmethod
@@ -483,8 +496,6 @@ def post_save_computer(sender, instance, created, **kwargs):
         StatusLog.objects.create(instance)
 
     if instance.status in ['available', 'unsubscribed']:
-        instance.tags.clear()
-
         cid = instance.get_cid_attribute()
         cid.devicelogical_set.clear()
         cid.faultdefinition_set.clear()
@@ -493,3 +504,10 @@ def post_save_computer(sender, instance, created, **kwargs):
         cid.attributeset_set.clear()
         cid.ExcludedAttributesGroup.clear()
         cid.scheduledelay_set.clear()
+
+
+@receiver(m2m_changed, sender=Computer.tags.through)
+def tags_changed(sender, instance, action, **kwargs):
+    if hasattr(instance, 'status'):
+        if instance.status in ['available', 'unsubscribed'] and action == 'post_add':
+            instance.tags.clear()
