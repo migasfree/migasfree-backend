@@ -278,7 +278,7 @@ def pre_save_deployment(sender, instance, **kwargs):
         if instance.available_packages != old_obj.available_packages \
                 or instance.packages_to_install != old_obj.packages_to_install \
                 or instance.packages_to_remove != old_obj.packages_to_remove:
-            con = get_redis_connection('default')
+            con = get_redis_connection()
             con.delete('migasfree:deployments:%d:computers' % instance.id)
 
 
@@ -288,5 +288,5 @@ def pre_delete_deployment(sender, instance, **kwargs):
     if os.path.exists(path):
         shutil.rmtree(path)
 
-    con = get_redis_connection('default')
+    con = get_redis_connection()
     con.delete('migasfree:deployments:%d:computers' % instance.id)
