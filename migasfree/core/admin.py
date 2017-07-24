@@ -205,13 +205,6 @@ class PackageAdmin(admin.ModelAdmin):
     search_fields = ('name', 'store__name',)
     ordering = ('name',)
 
-    def get_queryset(self, request):
-        return super(PackageAdmin, self).get_queryset(
-            request
-        ).prefetch_related(
-            'repository_set'
-        )
-
     def save_model(self, request, obj, form, change):
         file_list = request.FILES.getlist('package_file')
         Package.objects.create(obj.name, obj.project, obj.store, file_list)
