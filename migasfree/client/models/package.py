@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,83 +20,41 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
-from migasfree.core.models import Project
-
-
-class PackageManager(models.Manager):
-    def create(self, fullname, name, version, architecture, project):
-        package = Package(
-            fullname=fullname,
-            name=name,
-            version=version,
-            architecture=architecture,
-            project=project
-        )
-        package.save()
-
-        return package
+from migasfree.core.models import Package
+from .computer import Computer
 
 
 @python_2_unicode_compatible
-class Package(models.Model):
-    """packages installed in computers"""
+class PackageHistory(models.Model):
+    """packages installed or/and uninstalled in computers"""
 
-    fullname = models.CharField(
-        verbose_name=_('fullname'),
-        max_length=140,
-        null=False,
-        unique=True
-    )
-
-    name = models.CharField(
-        verbose_name=_('name'),
-        max_length=100,
-        null=False,
-        blank=True,
-        unique=False
-    )
-
-    version = models.CharField(
-        verbose_name=_('version'),
-        max_length=60,
-        null=False,
-        unique=False
-    )
-
-    architecture = models.CharField(
-        verbose_name=_('architecture'),
-        max_length=10,
-        null=False,
-    )
-
-    project = models.ForeignKey(
-        Project,
+    computer = models.ForeignKey(
+        Computer,
         on_delete=models.CASCADE,
-        verbose_name=_("project"),
-        related_name='+'
+        verbose_name=_("computer")
     )
 
-    @staticmethod
-    def normalized_name(package_name):
-        name = version = architecture = None
+    package = models.ForeignKey(
+        Package,
+        on_delete=models.CASCADE,
+        verbose_name=_('package')
+    )
 
-        # name_version_architecture.ext convention
-        try:
-            name, version, architecture = package_name.split('_')
-        except ValueError:
-            if package_name.count('_') > 2:
-                slices = package_name.split('_', 1)
-                name = slices[0]
-                version, architecture = slices[1].rsplit('_', 1)
-                architecture = architecture.split('.')[0]
+    install_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_('install date'),
+        null=True,
+    )
 
-        return name, version, architecture
+    uninstall_date = models.DateTimeField(
+        verbose_name=_('uninstall date'),
+        null=True,
+    )
 
     def __str__(self):
-        return self.fullname
+        return _('%s at computer %s') % (self.package.fullname, self.computer)
 
     class Meta:
         app_label = 'client'
-        verbose_name = _("Package")
-        verbose_name_plural = _("Packages")
-        unique_together = (('fullname', 'project'),)
+        verbose_name = _("Package History")
+        verbose_name_plural = _("Packages History")
