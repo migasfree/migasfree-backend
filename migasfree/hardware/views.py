@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@ from . import tasks, serializers
 
 
 class HardwareComputerViewSet(viewsets.ViewSet):
+    queryset = Node.objects.all()  # FIXME
+
     @detail_route(methods=['get'])
     def hardware(self, request, pk=None):
         computer = get_object_or_404(Computer, pk=pk)
@@ -53,7 +55,6 @@ class HardwareViewSet(
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('id',)
-    paginate_by = 100  # FIXME constant
 
     # example cpu list: bus_info='cpu@' or bus_info='cpu@0'
 
