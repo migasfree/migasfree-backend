@@ -187,3 +187,25 @@ def remove_duplicates_preserving_order(seq):
     seen_add = seen.add
 
     return [x for x in seq if not (x in seen or seen_add(x))]
+
+
+def to_list(text):
+    """
+    Converts text with new lines and spaces to list (space delimiter)
+    """
+    return text.replace('\r', ' ').replace('\n', ' ').split()
+
+
+def merge_dicts(*dicts):
+    """
+    Merge dictionaries with lists as values
+    """
+    ret = {}
+    for item in dicts:
+        for key in item:
+            try:
+                ret[key] += item[key]
+            except KeyError:
+                ret[key] = item[key]
+
+    return ret
