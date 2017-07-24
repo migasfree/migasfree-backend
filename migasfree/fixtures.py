@@ -96,7 +96,10 @@ def create_default_users():
             "core.schedule", "core.scheduledelay",
             "client.fault", "client.faultdefinition", "client.migration",
             "client.notification",
-            "core.project", "core.package", "core.deployment", "core.store",
+            "core.project", "core.package", "core.packageset", "client.packagehistory",
+            "core.deployment", "core.store",
+            "app_catalog.policy", "app_catalog.policygroup",
+            "app_catalog.application", "app_catalog.packagesbyproject",
             "client.synchronization",
             "core.platform", "core.property",
             "device.device", "device.connection", "device.manufacturer",
@@ -112,7 +115,8 @@ def create_default_users():
         liberator.name = "Liberator"
         liberator.save()
         tables = [
-            "core.deployment", "core.schedule", "core.scheduledelay"
+            "core.deployment", "core.schedule", "core.scheduledelay",
+            "app_catalog.policy", "app_catalog.policygroup",
         ]
         add_perms(liberator, tables)
         liberator.save()
@@ -123,7 +127,7 @@ def create_default_users():
         packager = Group()
         packager.name = "Packager"
         packager.save()
-        tables = ["core.package", "core.store"]
+        tables = ["core.package", "core.packageset", "core.store"]
         add_perms(packager, tables)
         packager.save()
 
@@ -193,8 +197,9 @@ def sequence_reset():
             _file.write(commands.getvalue())
             _file.flush()
 
-        cmd = "su postgres -c 'psql %s -f %s' -" % (
-            settings.DATABASES.get('default').get('NAME'), _filename
+        cmd = "su postgres -c 'psql {} -f {}' -".format(
+            settings.DATABASES.get('default').get('NAME'),
+            _filename
         )
         out, err = run(cmd)
         if out != 0:
