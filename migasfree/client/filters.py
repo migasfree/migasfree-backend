@@ -21,7 +21,7 @@ import rest_framework_filters as filters
 # from django.utils.translation import ugettext_lazy as _
 
 from .models import (
-    Package, Error, Notification, FaultDefinition, Fault,
+    PackageHistory, Error, Notification, FaultDefinition, Fault,
     Computer, Migration, StatusLog, Synchronization,
 )
 
@@ -29,9 +29,6 @@ from .models import (
 class ComputerFilter(filters.FilterSet):
     platform = filters.CharFilter(name='project__platform__id')
     created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
-    software_inventory = filters.CharFilter(
-        name='software_inventory__fullname', lookup_expr=['contains']
-    )
     sync_attributes = filters.CharFilter(
         name='sync_attributes__value', lookup_expr=['contains']
     )
@@ -77,8 +74,8 @@ class FaultFilter(filters.FilterSet):
         action=filter_by_user
     )
 
-    def filter_by_user(qs, user):
-        me = request.user.id  # FIXME no access to request.user :(
+    def filter_by_user(self, qs, user):
+        me = self.request.user.id  # TODO test it
         if user == 'me':
             return qs.filter(
                 Q(fault_definition__users__id=me)
@@ -119,12 +116,13 @@ class NotificationFilter(filters.FilterSet):
         fields = ['id', 'checked']
 
 
-class PackageFilter(filters.FilterSet):
-    fullname = filters.CharFilter(name='fullname', lookup_expr=['contains'])
-    project = filters.CharFilter(name='project__id', lookup_expr=['exact'])
+class PackageHistoryFilter(filters.FilterSet):
+    computer = filters.CharFilter(name='computer__name', lookup_expr=['contains'])
+    package = filters.CharFilter(name='package__fullname', lookup_expr=['contains'])
 
     class Meta:
-        model = Package
+        model = PackageHistory
+        fields = '__all__'
 
 
 class StatusLogFilter(filters.FilterSet):
