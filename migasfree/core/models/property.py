@@ -83,6 +83,12 @@ class Property(models.Model):
         choices=SORT_CHOICES
     )
 
+    auto_add = models.BooleanField(
+        verbose_name=_("automatically add"),
+        default=True,
+        help_text=_("automatically add the attribute to database")
+    )
+
     language = models.IntegerField(
         verbose_name=_("programming language"),
         default=settings.MIGASFREE_PROGRAMMING_LANGUAGES[0][0],
@@ -99,12 +105,6 @@ class Property(models.Model):
                     " where 'description' is optional.<br><b>Example of code:</b>"
                     "<br>#Create an attribute with the name of computer from bash<br>"
                     " echo $HOSTNAME")
-    )
-
-    auto_add = models.BooleanField(
-        verbose_name=_("automatically add"),
-        default=True,
-        help_text=_("automatically add the attribute to database")
     )
 
     def __str__(self):
