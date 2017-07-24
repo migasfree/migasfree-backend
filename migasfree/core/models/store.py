@@ -58,7 +58,7 @@ class Store(models.Model):
         return os.path.join(
             settings.MIGASFREE_PUBLIC_DIR,
             project_name,
-            'stores',
+            Project.STORE_TRAILING_PATH,
             name
         )
 
