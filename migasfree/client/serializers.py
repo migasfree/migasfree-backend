@@ -33,10 +33,11 @@ class ComputerSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Computer
         fields = (
-            'id', 'uuid', 'name', 'project', 'ip_address',
-            'software_inventory', 'software_history', 'tags',
+            'id', 'uuid', 'name', 'fqdn', 'project',
+            'ip_address', 'forwarded_ip_address', 'tags',
+            'software_inventory', 'software_history',
             'status', 'product', 'machine', 'cpu', 'ram',
-            'storage', 'disks', 'mac_address'
+            'storage', 'disks', 'mac_address', 'comment'
         )
 
 
@@ -70,9 +71,9 @@ class NotificationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PackageSerializer(serializers.ModelSerializer):
+class PackageHistorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Package
+        model = models.PackageHistory
         fields = '__all__'
 
 
