@@ -176,9 +176,26 @@ class ProjectKeysView(views.APIView):
 class RepositoriesKeysView(views.APIView):
     def post(self, request, format=None):
         """
-        Return the repositories public key
+        Returns the repositories public key
         """
         return Response(
             secure.gpg_get_key('migasfree-repository'),
             content_type='text/plain'
         )
+
+
+class RepositoriesUrlTemplateView(views.APIView):
+    def post(self, request, format=None):
+        """
+        Returns the repositories URL template
+        """
+        protocol = 'https' if request.is_secure() else 'http'
+
+        return Response(
+            '{}://{{server}}{}{{project}}/{}'.format(
+                protocol,
+                settings.MEDIA_URL,
+                Project.REPOSITORY_TRAILING_PATH
+            ),
+            content_type='text/plain'
+)
