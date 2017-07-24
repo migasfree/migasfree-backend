@@ -257,7 +257,7 @@ class PackageViewSet(
     parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
 
     @list_route(methods=['get'])
-    def orphaned(self, request):
+    def orphan(self, request):
         """
         Returns packages that are not in any deployment
         """
@@ -292,7 +292,7 @@ class DeploymentViewSet(viewsets.ModelViewSet):
 
     @list_route(methods=['get'])
     def generating(self, request, format=None):
-        con = get_redis_connection('default')
+        con = get_redis_connection()
         result = con.smembers('migasfree:watch:repos')
 
         serializer = DeploymentSerializer(
