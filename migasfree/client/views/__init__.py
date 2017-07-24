@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,10 +19,13 @@
 from .safe import (
     SafeComputerViewSet, SafeSynchronizationView, SafeEndOfTransmissionView,
 )
-from .public import PackagerKeysView, ProjectKeysView, RepositoriesKeysView
+from .public import (
+    PackagerKeysView, ProjectKeysView,
+    RepositoriesKeysView, RepositoriesUrlTemplateView,
+)
 from .token import (
     ComputerViewSet, ErrorViewSet,
     FaultDefinitionViewSet, FaultViewSet,
-    PackageViewSet, NotificationViewSet, MigrationViewSet,
+    PackageHistoryViewSet, NotificationViewSet, MigrationViewSet,
     StatusLogViewSet, SynchronizationViewSet,
 )
