@@ -198,4 +198,4 @@ class RepositoriesUrlTemplateView(views.APIView):
                 Project.REPOSITORY_TRAILING_PATH
             ),
             content_type='text/plain'
-)
+        )
