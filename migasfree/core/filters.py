@@ -19,7 +19,8 @@
 import rest_framework_filters as filters
 
 from .models import (
-    Deployment, Package, ClientAttribute, ServerAttribute, Project, Store,
+    Deployment, Package, ClientAttribute, ServerAttribute,
+    Project, ScheduleDelay, Store,
 )
 
 
@@ -61,6 +62,12 @@ class ServerAttributeFilter(filters.FilterSet):
     class Meta:
         model = ServerAttribute
         fields = ['id', 'property_att__id', 'property_att__prefix', 'value']
+
+
+class ScheduleDelayFilter(filters.FilterSet):
+    class Meta:
+        model = ScheduleDelay
+        fields = ['schedule__id', 'schedule__name']
 
 
 class StoreFilter(filters.FilterSet):

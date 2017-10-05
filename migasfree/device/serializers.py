@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,15 @@
 
 from rest_framework import serializers
 
+from migasfree.core.serializers import ProjectInfoSerializer
+
 from . import models
+
+
+class ConnectionInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Connection
+        fields = ('id', 'name')
 
 
 class ConnectionSerializer(serializers.ModelSerializer):
@@ -27,19 +35,50 @@ class ConnectionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ModelInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Model
+        fields = ('id', 'name')
+
+
 class DeviceInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Device
         fields = ('id', 'name')
 
 
-class DeviceSerializer(serializers.ModelSerializer):
+class DeviceWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Device
         fields = '__all__'
 
 
+class DeviceSerializer(serializers.ModelSerializer):
+    connection = ConnectionInfoSerializer(many=False, read_only=True)
+    model = ModelInfoSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = models.Device
+        fields = '__all__'
+
+
+class FeatureInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Feature
+        fields = ('id', 'name')
+
+
+class DriverWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Driver
+        fields = '__all__'
+
+
 class DriverSerializer(serializers.ModelSerializer):
+    model = ModelInfoSerializer(many=False, read_only=True)
+    project = ProjectInfoSerializer(many=False, read_only=True)
+    feature = FeatureInfoSerializer(many=False, read_only=True)
+
     class Meta:
         model = models.Driver
         fields = '__all__'
@@ -72,13 +111,23 @@ class ManufacturerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ModelSerializer(serializers.ModelSerializer):
+class TypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Type
+        fields = '__all__'
+
+
+class ModelWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Model
         fields = '__all__'
 
 
-class TypeSerializer(serializers.ModelSerializer):
+class ModelSerializer(serializers.ModelSerializer):
+    manufacturer = ManufacturerSerializer(many=False, read_only=True)
+    connections = ConnectionInfoSerializer(many=True, read_only=True)
+    device_type = TypeSerializer(many=False, read_only=True)
+
     class Meta:
-        model = models.Type
+        model = models.Model
         fields = '__all__'

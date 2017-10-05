@@ -41,7 +41,7 @@ from .models import (
     Platform, Project, Store,
     ServerProperty, ClientProperty,
     ServerAttribute, ClientAttribute,
-    Schedule,
+    Schedule, ScheduleDelay,
     Package, Deployment,
 )
 from .serializers import (
@@ -51,12 +51,13 @@ from .serializers import (
     ServerPropertySerializer, ClientPropertySerializer,
     ServerAttributeSerializer, ServerAttributeWriteSerializer,
     ClientAttributeSerializer, ClientAttributeWriteSerializer,
-    ScheduleSerializer,
-    PackageSerializer, DeploymentSerializer,
+    ScheduleSerializer, ScheduleWriteSerializer,
+    ScheduleDelaySerializer, ScheduleDelayWriteSerializer,
+    PackageSerializer, DeploymentSerializer, DeploymentWriteSerializer,
 )
 from .filters import (
     DeploymentFilter, PackageFilter, ProjectFilter, StoreFilter,
-    ClientAttributeFilter, ServerAttributeFilter,
+    ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
 )
 from .permissions import IsAdminOrIsSelf
 
@@ -110,6 +111,8 @@ class GroupViewSet(viewsets.ModelViewSet):
 class PlatformViewSet(viewsets.ModelViewSet):
     queryset = Platform.objects.all()
     serializer_class = PlatformSerializer
+    ordering_fields = '__all__'
+    ordering = ('name',)
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -117,9 +120,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     filter_class = ProjectFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('name',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update':
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
             return ProjectWriteSerializer
 
         return ProjectSerializer
@@ -130,9 +136,12 @@ class StoreViewSet(viewsets.ModelViewSet):
     serializer_class = StoreSerializer
     filter_class = StoreFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('name',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update':
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
             return StoreWriteSerializer
 
         return StoreSerializer
@@ -154,7 +163,8 @@ class ServerAttributeViewSet(viewsets.ModelViewSet):
     filter_class = ServerAttributeFilter
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update':
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
             return ServerAttributeWriteSerializer
 
         return ServerAttributeSerializer
@@ -166,7 +176,8 @@ class ClientAttributeViewSet(viewsets.ModelViewSet):
     filter_class = ClientAttributeFilter
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update':
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
             return ClientAttributeWriteSerializer
 
         return ClientAttributeSerializer
@@ -239,9 +250,35 @@ class ClientAttributeViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_201_CREATED)
 
 
+class ScheduleDelayViewSet(viewsets.ModelViewSet):
+    queryset = ScheduleDelay.objects.all()
+    serializer_class = ScheduleDelaySerializer
+    filter_class = ScheduleDelayFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('delay',)
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return ScheduleDelayWriteSerializer
+
+        return ScheduleDelaySerializer
+
+
 class ScheduleViewSet(viewsets.ModelViewSet):
     queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('name',)
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return ScheduleWriteSerializer
+
+        return ScheduleSerializer
 
 
 class PackageViewSet(
@@ -279,6 +316,13 @@ class DeploymentViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-start_date',)
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return DeploymentWriteSerializer
+
+        return DeploymentSerializer
 
     @detail_route(methods=['get'])
     def metadata(self, request, pk=None):

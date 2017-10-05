@@ -18,11 +18,25 @@
 
 from rest_framework import serializers
 
-from ..core.serializers import ClientAttributeSerializer, ProjectInfoSerializer
+from ..core.serializers import (
+    ClientAttributeSerializer, ProjectInfoSerializer, AttributeInfoSerializer,
+)
 from . import models
 
 
+class ComputerInfoSerializer(serializers.ModelSerializer):
+    cid_description = serializers.SerializerMethodField()
+
+    def get_cid_description(self, obj):
+        return obj.get_cid_description()
+
+    class Meta:
+        model = models.Computer
+        fields = ('id', 'cid_description')
+
+
 class ComputerSerializer(serializers.ModelSerializer):
+    project = ProjectInfoSerializer(many=False, read_only=True)
     software_inventory = serializers.HyperlinkedIdentityField(
         view_name='computer-software/inventory'
     )
@@ -42,24 +56,72 @@ class ComputerSerializer(serializers.ModelSerializer):
 
 
 class ErrorSerializer(serializers.ModelSerializer):
+    project = ProjectInfoSerializer(many=False, read_only=True)
+    computer = ComputerInfoSerializer(many=False, read_only=True)
+
     class Meta:
         model = models.Error
         fields = '__all__'
 
 
+class ErrorWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Error
+        fields = ('checked',)
+
+
+class FaultDefinitionInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.FaultDefinition
+        fields = ('id', 'name')
+
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.User
+        fields = ('id', 'name')
+
+
 class FaultDefinitionSerializer(serializers.ModelSerializer):
+    language = serializers.SerializerMethodField()
+    included_attributes = AttributeInfoSerializer(many=True, read_only=True)
+    excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
+    users = UserInfoSerializer(many=True, read_only=True)
+
+    def get_language(self, obj):
+        return obj.get_language_display()
+
+    class Meta:
+        model = models.FaultDefinition
+        fields = '__all__'
+
+
+class FaultDefinitionWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FaultDefinition
         fields = '__all__'
 
 
 class FaultSerializer(serializers.ModelSerializer):
+    project = ProjectInfoSerializer(many=False, read_only=True)
+    computer = ComputerInfoSerializer(many=False, read_only=True)
+    fault_definition = FaultDefinitionInfoSerializer(many=False, read_only=True)
+
     class Meta:
         model = models.Fault
         fields = '__all__'
 
 
+class FaultWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Fault
+        fields = ('checked',)
+
+
 class MigrationSerializer(serializers.ModelSerializer):
+    project = ProjectInfoSerializer(many=False, read_only=True)
+    computer = ComputerInfoSerializer(many=False, read_only=True)
+
     class Meta:
         model = models.Migration
         fields = '__all__'
@@ -69,6 +131,12 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Notification
         fields = '__all__'
+
+
+class NotificationWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Notification
+        fields = ('checked',)
 
 
 class PackageHistorySerializer(serializers.ModelSerializer):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,7 +42,13 @@ class DeviceViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('name',)
-    paginate_by = 100  # FIXME constant
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return serializers.DeviceWriteSerializer
+
+        return serializers.DeviceSerializer
 
 
 class DriverViewSet(viewsets.ModelViewSet):
@@ -50,7 +56,13 @@ class DriverViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.DriverSerializer
     ordering_fields = '__all__'
     ordering = ('name',)
-    paginate_by = 100  # FIXME constant
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return serializers.DriverWriteSerializer
+
+        return serializers.DriverSerializer
 
 
 class FeatureViewSet(viewsets.ModelViewSet):
@@ -65,10 +77,10 @@ class LogicalViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.LogicalSerializer
     ordering_fields = '__all__'
     ordering = ('device__name',)
-    paginate_by = 100  # FIXME constant
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update':
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
             return serializers.LogicalWriteSerializer
 
         return serializers.LogicalSerializer
@@ -86,7 +98,13 @@ class ModelViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ModelSerializer
     ordering_fields = '__all__'
     ordering = ('name',)
-    paginate_by = 100  # FIXME constant
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return serializers.ModelWriteSerializer
+
+        return serializers.ModelSerializer
 
 
 class TypeViewSet(viewsets.ModelViewSet):

@@ -39,7 +39,8 @@ from ..filters import (
 
 
 class ComputerViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    mixins.ListModelMixin, mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
     queryset = models.Computer.objects.all()
     serializer_class = serializers.ComputerSerializer
@@ -210,7 +211,9 @@ class ComputerViewSet(
 
 
 class ErrorViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    mixins.ListModelMixin, mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin, mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
 ):
     queryset = models.Error.objects.all()
     serializer_class = serializers.ErrorSerializer
@@ -219,16 +222,33 @@ class ErrorViewSet(
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
+    def get_serializer_class(self):
+        if self.action == 'update' or self.action == 'partial_update':
+            return serializers.ErrorWriteSerializer
+
+        return serializers.ErrorSerializer
+
 
 class FaultDefinitionViewSet(viewsets.ModelViewSet):
     queryset = models.FaultDefinition.objects.all()
     serializer_class = serializers.FaultDefinitionSerializer
     filter_class = FaultDefinitionFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('name',)
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return serializers.FaultDefinitionWriteSerializer
+
+        return serializers.FaultDefinitionSerializer
 
 
 class FaultViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    mixins.ListModelMixin, mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin, mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
 ):
     queryset = models.Fault.objects.all()
     serializer_class = serializers.FaultSerializer
@@ -237,9 +257,16 @@ class FaultViewSet(
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
+    def get_serializer_class(self):
+        if self.action == 'update' or self.action == 'partial_update':
+            return serializers.FaultWriteSerializer
+
+        return serializers.FaultSerializer
+
 
 class MigrationViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    mixins.ListModelMixin, mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
     queryset = models.Migration.objects.all()
     serializer_class = serializers.MigrationSerializer
@@ -250,7 +277,9 @@ class MigrationViewSet(
 
 
 class NotificationViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    mixins.ListModelMixin, mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin, mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
 ):
     queryset = models.Notification.objects.all()
     serializer_class = serializers.NotificationSerializer
@@ -258,6 +287,12 @@ class NotificationViewSet(
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
+
+    def get_serializer_class(self):
+        if self.action == 'update' or self.action == 'partial_update':
+            return serializers.NotificationWriteSerializer
+
+        return serializers.NotificationSerializer
 
 
 class PackageHistoryViewSet(
@@ -272,7 +307,8 @@ class PackageHistoryViewSet(
 
 
 class StatusLogViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    mixins.ListModelMixin, mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
     queryset = models.StatusLog.objects.all()
     serializer_class = serializers.StatusLogSerializer
@@ -283,7 +319,8 @@ class StatusLogViewSet(
 
 
 class SynchronizationViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    mixins.ListModelMixin, mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
     queryset = models.Synchronization.objects.all()
     serializer_class = serializers.SynchronizationSerializer
@@ -293,7 +330,18 @@ class SynchronizationViewSet(
     ordering = ('-created_at',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update':
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
             return serializers.SynchronizationWriteSerializer
 
         return serializers.SynchronizationSerializer
+
+
+class UserViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
+    queryset = models.User.objects.all()
+    serializer_class = serializers.UserSerializer
+    ordering_fields = '__all__'
+    ordering = ('name',)

@@ -31,12 +31,12 @@ from .validators import (
 from .pms import get_available_mimetypes
 from .models import (
     Platform, Project, Store,
-    ServerProperty, ClientProperty,
+    ServerProperty, ClientProperty, Property,
     Attribute, ServerAttribute, ClientAttribute,
     Schedule, ScheduleDelay,
-    Package, Deployment,
+    Package, Deployment, AttributeSet,
 )
-
+from ..utils import to_list
 
 '''
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -50,6 +50,45 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         model = Group
         fields = ('url', 'id', 'name')
 '''
+
+
+class PropertyInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Property
+        fields = ('id', 'prefix')
+
+
+class AttributeSerializer(serializers.ModelSerializer):
+    total_computers = serializers.SerializerMethodField()
+    property_att = PropertyInfoSerializer(many=False, read_only=True)
+
+    def get_total_computers(self, obj):
+        return obj.total_computers()
+
+    class Meta:
+        model = Attribute
+        fields = '__all__'
+
+
+class AttributeInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attribute
+        fields = ('id', 'value')
+
+
+class AttributeSetSerializer(serializers.ModelSerializer):
+    included_attributes = AttributeInfoSerializer(many=True, read_only=True)
+    excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = AttributeSet
+        fields = '__all__'
+
+
+class AttributeSetWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttributeSet
+        fields = '__all__'
 
 
 class PlatformSerializer(serializers.ModelSerializer):
@@ -86,6 +125,12 @@ class ProjectWriteSerializer(serializers.ModelSerializer):
             'id', 'name', 'pms',
             'architecture', 'auto_register_computers', 'platform'
         )
+
+
+class StoreInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Store
+        fields = ('id', 'name')
 
 
 class StoreSerializer(serializers.ModelSerializer):
@@ -130,12 +175,6 @@ class ClientPropertySerializer(serializers.ModelSerializer):
         fields = ('id', 'prefix', 'name', 'kind', 'enabled', 'language', 'code')
 
 
-class AttributeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Attribute
-        fields = ('id',)
-
-
 class ServerAttributeSerializer(serializers.ModelSerializer):
     property_att = ServerPropertyInfoSerializer(many=False, read_only=True)
 
@@ -166,10 +205,32 @@ class ClientAttributeWriteSerializer(serializers.ModelSerializer):
 
 class ScheduleDelaySerializer(serializers.ModelSerializer):
     attributes = AttributeSerializer(many=True)
+    total_computers = serializers.SerializerMethodField()
+
+    def get_total_computers(self, obj):
+        return obj.total_computers()
 
     class Meta:
         model = ScheduleDelay
-        fields = ('id', 'delay', 'attributes')
+        fields = '__all__'
+
+
+class ScheduleDelayWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ScheduleDelay
+        fields = '__all__'
+
+
+class ScheduleInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Schedule
+        fields = ('id', 'name')
+
+
+class ScheduleWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Schedule
+        fields = '__all__'
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
@@ -178,6 +239,12 @@ class ScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Schedule
         fields = ('id', 'name', 'description', 'number_delays', 'delays')
+
+
+class PackageInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Package
+        fields = ('id', 'name')
 
 
 class PackageSerializer(serializers.ModelSerializer):
@@ -229,10 +296,80 @@ class PackageSerializer(serializers.ModelSerializer):
 
 
 class DeploymentSerializer(serializers.ModelSerializer):
+    project = ProjectInfoSerializer(many=False, read_only=True)
+    schedule = ScheduleInfoSerializer(many=False, read_only=True)
+    available_packages = PackageInfoSerializer(many=True, read_only=True)
+    included_attributes = AttributeInfoSerializer(many=True, read_only=True)
+    excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
+
+    packages_to_install = serializers.SerializerMethodField()
+    packages_to_remove = serializers.SerializerMethodField()
+    default_preincluded_packages = serializers.SerializerMethodField()
+    default_included_packages = serializers.SerializerMethodField()
+    default_excluded_packages = serializers.SerializerMethodField()
+
+    def get_packages_to_install(self, obj):
+        return to_list(obj.packages_to_install)
+
+    def get_packages_to_remove(self, obj):
+        return to_list(obj.packages_to_remove)
+
+    def get_default_preincluded_packages(self, obj):
+        return to_list(obj.default_preincluded_packages)
+
+    def get_default_included_packages(self, obj):
+        return to_list(obj.default_included_packages)
+
+    def get_default_excluded_packages(self, obj):
+        return to_list(obj.default_excluded_packages)
+
+    class Meta:
+        model = Deployment
+        fields = '__all__'
+
+
+class DeploymentWriteSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(read_only=True)
 
+    def to_internal_value(self, data):
+        """
+        :param data: {
+            "enabled": true,
+            "project": id,
+            "name": "string",
+            "comment": "string",
+            "available_packages": ["string", ...],
+            "start_date": "string",
+            "packages_to_install": [],
+            "packages_to_remove": [],
+            "default_preincluded_packages": [],
+            "default_included_packages": [],
+            "default_excluded_packages": [],
+            "schedule": id,
+            "included_attributes": [id1, id2, ...],
+            "excluded_attributes": [id1, ...]
+        }
+        :return: Deployment object
+        """
+        if 'packages_to_install' in data:
+            data['packages_to_install'] = '\n'.join(data.get('packages_to_install', []))
+
+        if 'packages_to_remove' in data:
+            data['packages_to_remove'] = '\n'.join(data.get('packages_to_remove', []))
+
+        if 'default_preincluded_packages' in data:
+            data['default_preincluded_packages'] = '\n'.join(data.get('default_preincluded_packages', []))
+
+        if 'default_included_packages' in data:
+            data['default_included_packages'] = '\n'.join(data.get('default_included_packages', []))
+
+        if 'default_excluded_packages' in data:
+            data['default_excluded_packages'] = '\n'.join(data.get('default_excluded_packages', []))
+
+        return super(DeploymentWriteSerializer, self).to_internal_value(data)
+
     def create(self, validated_data):
-        deploy = super(DeploymentSerializer, self).create(validated_data)
+        deploy = super(DeploymentWriteSerializer, self).create(validated_data)
         tasks.create_repository_metadata.delay(deploy.id)
         return deploy
 
@@ -244,7 +381,7 @@ class DeploymentSerializer(serializers.ModelSerializer):
         old_name = old_obj.name
 
         # https://github.com/tomchristie/django-rest-framework/issues/2442
-        instance = super(DeploymentSerializer, self).update(
+        instance = super(DeploymentWriteSerializer, self).update(
             instance, validated_data
         )
         new_pkgs = sorted(
