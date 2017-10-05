@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +18,20 @@
 
 import rest_framework_filters as filters
 
-from .models import Device
+from .models import Device, Driver
 
 
 class DeviceFilter(filters.FilterSet):
     class Meta:
         model = Device
         fields = ['model__id', 'model__name']
+
+
+class DriverFilter(filters.FilterSet):
+    class Meta:
+        model = Driver
+        fields = [
+            'project__id', 'project__name',
+            'model__id', 'model__name',
+            'feature__id', 'feature__name'
+        ]

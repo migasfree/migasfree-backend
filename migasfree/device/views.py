@@ -24,7 +24,7 @@ from .models import (
     Feature, Logical, Manufacturer,
     Model, Type
 )
-from .filters import DeviceFilter
+from .filters import DeviceFilter, DriverFilter
 from . import serializers
 
 
@@ -54,6 +54,7 @@ class DeviceViewSet(viewsets.ModelViewSet):
 class DriverViewSet(viewsets.ModelViewSet):
     queryset = Driver.objects.all()
     serializer_class = serializers.DriverSerializer
+    filter_class = DriverFilter
     ordering_fields = '__all__'
     ordering = ('name',)
 
