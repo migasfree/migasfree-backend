@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,15 +18,14 @@
 
 from rest_framework import serializers
 
+from migasfree.client.serializers import ComputerInfoSerializer
+
 from . import models
 
 
 class NodeSerializer(serializers.ModelSerializer):
+    computer = ComputerInfoSerializer(many=False, read_only=True)
+
     class Meta:
         model = models.Node
-        fields = (
-            'id', 'product', 'parent', 'name', 'level', 'width',
-            'class_name', 'enabled', 'claimed', 'description',
-            'vendor', 'version', 'serial', 'bus_info', 'physid',
-            'slot', 'size', 'capacity', 'clock', 'dev', 'computer'
-        )
+        fields = '__all__'
