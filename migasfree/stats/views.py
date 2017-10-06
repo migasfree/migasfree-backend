@@ -77,13 +77,13 @@ class SyncStatsViewSet(viewsets.ViewSet):
     def monthly(self, request, format=None):
         fmt = '%Y%m'
 
-        begin = request.query_params.get('begin')
+        begin = request.query_params.get('begin', '')
         try:
             begin = datetime.strptime(begin, fmt)
         except ValueError:
             begin = datetime.now()
 
-        end = request.query_params.get('end')
+        end = request.query_params.get('end', '')
         try:
             end = datetime.strptime(end, fmt)
         except ValueError:
@@ -114,13 +114,13 @@ class SyncStatsViewSet(viewsets.ViewSet):
         now = time.localtime()
         fmt = '%Y%m%d'
 
-        begin = request.query_params.get('begin')
+        begin = request.query_params.get('begin', '')
         try:
             begin = datetime.strptime(begin, fmt)
         except ValueError:
             begin = datetime(now[0], now[1], now[2])
 
-        end = request.query_params.get('end')
+        end = request.query_params.get('end', '')
         try:
             end = datetime.strptime(end, fmt)
         except ValueError:
@@ -154,13 +154,13 @@ class SyncStatsViewSet(viewsets.ViewSet):
         hour = timedelta(hours=1)
         fmt = '%Y%m%d%H'
 
-        begin = request.query_params.get('begin')
+        begin = request.query_params.get('begin', '')
         try:
             begin = datetime.strptime(begin, fmt)
         except ValueError:
             begin = datetime(now[0], now[1], now[2], now[3])
 
-        end = request.query_params.get('end')
+        end = request.query_params.get('end', '')
         try:
             end = datetime.strptime(end, fmt)
         except ValueError:
