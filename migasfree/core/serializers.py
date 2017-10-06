@@ -59,11 +59,7 @@ class PropertyInfoSerializer(serializers.ModelSerializer):
 
 
 class AttributeSerializer(serializers.ModelSerializer):
-    total_computers = serializers.SerializerMethodField()
     property_att = PropertyInfoSerializer(many=False, read_only=True)
-
-    def get_total_computers(self, obj):
-        return obj.total_computers()
 
     class Meta:
         model = Attribute
@@ -193,7 +189,7 @@ class ClientAttributeSerializer(serializers.ModelSerializer):
     property_att = ServerPropertyInfoSerializer(many=False, read_only=True)
 
     class Meta:
-        model = ServerAttribute
+        model = ClientAttribute
         fields = ('id', 'property_att', 'value', 'description')
 
 
