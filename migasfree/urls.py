@@ -31,6 +31,7 @@ from hardware.routers import (
 )
 from device.routers import router as device_router
 from stats.routers import router as stats_router
+from app_catalog.routers import router as catalog_router
 
 from rest_framework_swagger.views import get_swagger_view
 
@@ -55,6 +56,7 @@ urlpatterns = [
     url(r'^api/v1/safe/', include(core_safe_router.urls)),
     url(r'^api/v1/safe/', include(hardware_safe_router.urls)),
     url(r'^api/v1/', include('migasfree.client.urls')),
+    url(r'^api/v1/public/catalog/', include(catalog_router.urls)),
 
     url(r'^token-auth/$', views.obtain_auth_token),
     url(r'^token-auth-jwt/', jwt_views.obtain_jwt_token),

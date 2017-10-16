@@ -18,7 +18,9 @@
 
 from rest_framework import serializers
 
-from migasfree.core.serializers import ProjectInfoSerializer
+from migasfree.core.serializers import (
+    AttributeInfoSerializer, ProjectInfoSerializer
+)
 from migasfree.utils import to_list
 from . import models
 
@@ -39,6 +41,26 @@ class CategorySerializer(serializers.Serializer):
         }
 
 
+class PackagesByProjectWriteSerializer(serializers.ModelSerializer):
+    def to_internal_value(self, data):
+        """
+        :param data: {
+            'project': 17,
+            'application': 1,
+            'packages_to_install': ['one', 'two']
+        }
+        :return: PackagesByProject object
+        """
+        if 'packages_to_install' in data:
+            data['packages_to_install'] = '\n'.join(data.get('packages_to_install', []))
+
+        return super(PackagesByProjectWriteSerializer, self).to_internal_value(data)
+
+    class Meta:
+        model = models.PackagesByProject
+        fields = '__all__'
+
+
 class PackagesByProjectSerializer(serializers.ModelSerializer):
     project = ProjectInfoSerializer(many=False, read_only=True)
 
@@ -56,6 +78,18 @@ class PackagesByProjectSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ApplicationInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Application
+        fields = ['id', 'name']
+
+
+class ApplicationWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Application
+        fields = '__all__'
+
+
 class ApplicationSerializer(serializers.ModelSerializer):
     level = LevelSerializer(many=False, read_only=True)
     category = CategorySerializer(many=False, read_only=True)
@@ -63,4 +97,42 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Application
+        fields = '__all__'
+
+
+class PolicyInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Policy
+        fields = ['id', 'name']
+
+
+class PolicyWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Policy
+        fields = '__all__'
+
+
+class PolicySerializer(serializers.ModelSerializer):
+    included_attributes = AttributeInfoSerializer(many=True, read_only=True)
+    excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = models.Policy
+        fields = '__all__'
+
+
+class PolicyGroupWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.PolicyGroup
+        fields = '__all__'
+
+
+class PolicyGroupSerializer(serializers.ModelSerializer):
+    policy = PolicyInfoSerializer(many=False, read_only=True)
+    applications = ApplicationInfoSerializer(many=True, read_only=True)
+    included_attributes = AttributeInfoSerializer(many=True, read_only=True)
+    excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = models.PolicyGroup
         fields = '__all__'
