@@ -1,4 +1,4 @@
-celery==4.0.2
+celery==4.1.0
 Django==1.11.5
 django-cors-headers==2.1.0
 django-filter==1.0.4
@@ -10,13 +10,13 @@ django-rest-swagger==2.1.2
 djangorestframework==3.6.4
 djangorestframework-filters==0.10.1
 djangorestframework-jwt==1.11.0
-djoser==0.7.0
-docutils==0.13.1
+djoser==1.0.0
+docutils==0.14
 jose==1.0.0
-psycopg2==2.7.1
+psycopg2==2.7.3.1
 python-dateutil==2.6.1
 python-magic==0.4.13
 pycrypto==2.6.1
 pygpgme==0.3
-redis==2.10.5
+redis==2.10.6
 wsgiref==0.1.2
