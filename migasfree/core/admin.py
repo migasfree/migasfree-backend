@@ -199,7 +199,6 @@ class PackageAdmin(admin.ModelAdmin):
     form = PackageForm
 
     list_display = ('name', 'project', 'store')
-    # list_display_links = None
     list_filter = ('project__name', 'store',)
     list_select_related = ('project', 'store',)
     search_fields = ('name', 'store__name',)
@@ -208,6 +207,25 @@ class PackageAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         file_list = request.FILES.getlist('package_file')
         Package.objects.create(obj.name, obj.project, obj.store, file_list)
+
+
+@admin.register(PackageSet)
+class PackageSetAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
+    search_fields = ('name',)
+    ordering = ('name',)
+
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
+        if db_field.name == 'packages':
+            kwargs["queryset"] = Package.objects.filter(
+                store__isnull=False
+            )
+
+            return db_field.formfield(**kwargs)
+
+        return super(PackageSetAdmin, self).formfield_for_manytomany(
+            db_field, request, **kwargs
+        )
 
 
 @admin.register(Deployment)
