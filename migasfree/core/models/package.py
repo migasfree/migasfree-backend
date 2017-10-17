@@ -183,6 +183,14 @@ class Package(models.Model):
         self.create_dir()
         super(Package, self).save(*args, **kwargs)
 
+    def delete(self, using=None, keep_parents=False):
+        from migasfree.client.models import PackageHistory
+        if PackageHistory.objects.filter(package__id=self.pk).exists():
+            self.store = None
+            self.save()
+        else:
+            super(Package, self).delete(using=using, keep_parents=keep_parents)
+
     def __str__(self):
         # return _('%s at project %s') % (self.fullname, self.project.name)
         return self.fullname
