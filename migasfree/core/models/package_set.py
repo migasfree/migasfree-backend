@@ -17,10 +17,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
 from .package import Package
+from .project import Project
+from .store import Store
 
 
 @python_2_unicode_compatible
@@ -36,11 +39,35 @@ class PackageSet(models.Model):
         blank=True
     )
 
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        verbose_name=_("project")
+    )
+
+    store = models.ForeignKey(
+        Store,
+        on_delete=models.CASCADE,
+        null=True,
+        verbose_name=_("store")
+    )
+
     packages = models.ManyToManyField(
         Package,
         blank=True,
         verbose_name=_("packages"),
     )
+
+    def clean(self):
+        super(PackageSet, self).clean()
+
+        if not hasattr(self, 'project'):
+            return False
+
+        if self.store.project.id != self.project.id:
+            raise ValidationError(_('Store must belong to the project'))
+
+        # TODO packages must be in the same store
 
     def __str__(self):
         return self.name
