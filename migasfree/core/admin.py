@@ -247,6 +247,7 @@ class DeploymentAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'fields': (
                 'available_packages',
+                'available_package_sets',
                 'packages_to_install',
                 'packages_to_remove',
             )
@@ -276,6 +277,13 @@ class DeploymentAdmin(admin.ModelAdmin):
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == "included_attributes":
+            kwargs["queryset"] = Attribute.objects.filter(
+                property_att__enabled=True
+            )
+
+            return db_field.formfield(**kwargs)
+
+        if db_field.name == "excluded_attributes":
             kwargs["queryset"] = Attribute.objects.filter(
                 property_att__enabled=True
             )
