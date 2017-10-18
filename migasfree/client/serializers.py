@@ -35,6 +35,12 @@ class ComputerInfoSerializer(serializers.ModelSerializer):
         fields = ('id', 'cid_description')
 
 
+class ComputerWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Computer
+        fields = '__all__'
+
+
 class ComputerSerializer(serializers.ModelSerializer):
     project = ProjectInfoSerializer(many=False, read_only=True)
     software_inventory = serializers.HyperlinkedIdentityField(
