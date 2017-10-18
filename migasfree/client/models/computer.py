@@ -319,7 +319,7 @@ class Computer(models.Model):
         return True
 
     def update_software_history(self, history):
-        from .package import PackageHistory
+        from .package_history import PackageHistory
 
         if history:
             if 'installed' in history:
