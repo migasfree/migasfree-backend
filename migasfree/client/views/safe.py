@@ -679,7 +679,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, ugettext('Getting errors...'))
 
-        serializer = serializers.ErrorSerializer(data=claims)
+        serializer = serializers.ErrorSafeWriteSerializer(data=claims)
 
         add_computer_message(computer, ugettext('Sending errors response...'))
 

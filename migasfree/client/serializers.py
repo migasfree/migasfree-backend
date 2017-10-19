@@ -76,6 +76,12 @@ class ErrorWriteSerializer(serializers.ModelSerializer):
         fields = ('checked',)
 
 
+class ErrorSafeWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Error
+        fields = '__all__'
+
+
 class FaultDefinitionInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FaultDefinition
