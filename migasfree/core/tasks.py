@@ -44,6 +44,15 @@ def remove_repository_metadata(deployment_id, old_slug=''):
     shutil.rmtree(deploy.path(slug), ignore_errors=True)
 
 
+def symlink_pkg(pkg, source_path, target_path):
+    target = os.path.join(target_path, pkg.name)
+    if not os.path.lexists(target):
+        os.symlink(
+            os.path.join(source_path, pkg.store.slug, pkg.name),
+            target
+        )
+
+
 @shared_task(queue='repository')
 def create_repository_metadata(deployment_id):
     try:
@@ -80,12 +89,11 @@ def create_repository_metadata(deployment_id):
         os.makedirs(pkg_tmp_path)
 
     for pkg in deploy.available_packages.all():
-        dst = os.path.join(pkg_tmp_path, pkg.name)
-        if not os.path.lexists(dst):
-            os.symlink(
-                os.path.join(stores_path, pkg.store.slug, pkg.name),
-                dst
-            )
+        symlink_pkg(pkg, stores_path, pkg_tmp_path)
+
+    for set_ in deploy.available_package_sets.all():
+        for pkg in set_.packages:
+            symlink_pkg(pkg, stores_path, pkg_tmp_path)
 
     source = os.path.join(slug_tmp_path, deploy.slug)
     ret, output, error = deploy.pms.create_repository(
