@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             name='Connection',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=50, null=True, verbose_name='name')),
+                ('name', models.CharField(max_length=50, verbose_name='name')),
                 ('fields', models.CharField(blank=True, help_text='Fields separated by comma', max_length=100, null=True, verbose_name='fields')),
             ],
             options={
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
             name='Feature',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=50, null=True, unique=True, verbose_name='name')),
+                ('name', models.CharField(max_length=50, unique=True, verbose_name='name')),
             ],
             options={
                 'verbose_name': 'Feature',
@@ -82,7 +82,7 @@ class Migration(migrations.Migration):
             name='Manufacturer',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=50, null=True, unique=True, verbose_name='name')),
+                ('name', models.CharField(max_length=50, unique=True, verbose_name='name')),
             ],
             options={
                 'ordering': ['name'],
@@ -107,7 +107,7 @@ class Migration(migrations.Migration):
             name='Type',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=50, null=True, unique=True, verbose_name='name')),
+                ('name', models.CharField(max_length=50, unique=True, verbose_name='name')),
             ],
             options={
                 'verbose_name': 'Type',

@@ -32,7 +32,8 @@ from . import Property, Attribute
 class AttributeSet(models.Model):
     name = models.CharField(
         verbose_name=_("name"),
-        max_length=50
+        max_length=50,
+        unique=True
     )
 
     description = models.TextField(

@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
             name='AttributeSet',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, verbose_name='name')),
+                ('name', models.CharField(max_length=50, unique=True, verbose_name='name')),
                 ('description', models.TextField(blank=True, null=True, verbose_name='description')),
                 ('enabled', models.BooleanField(default=True, verbose_name='enabled')),
                 ('longitude', models.FloatField(blank=True, null=True, verbose_name='longitude')),
@@ -101,7 +101,7 @@ class Migration(migrations.Migration):
             name='Platform',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=50, null=True, unique=True, verbose_name='name')),
+                ('name', models.CharField(max_length=50, unique=True, verbose_name='name')),
             ],
             options={
                 'verbose_name': 'Platform',

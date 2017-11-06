@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,8 +26,6 @@ class Manufacturer(models.Model):
     name = models.CharField(
         verbose_name=_("name"),
         max_length=50,
-        null=True,
-        blank=True,
         unique=True
     )
 
