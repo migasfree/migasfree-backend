@@ -25,11 +25,9 @@ from .event import Event
 from .fault_definition import FaultDefinition
 
 
-class UncheckedManager(models.Manager):
-    def get_queryset(self):
-        return super(UncheckedManager, self).get_queryset().filter(
-            checked=0
-        )
+class FaultQueryset(models.query.QuerySet):
+    def unchecked(self):
+        return self.filter(checked=False)
 
 
 class FaultManager(models.Manager):
@@ -42,6 +40,19 @@ class FaultManager(models.Manager):
         obj.save()
 
         return obj
+
+    def get_queryset(self):
+        return FaultQueryset(self.model, using=self._db)
+
+    def unchecked(self, user_id=0):
+        queryset = self.get_queryset().unchecked()
+        if user_id:
+            queryset = queryset.filter(
+                models.Q(fault_definition__users__id__in=[user_id, ])
+                | models.Q(fault_definition__users=None)
+            )
+
+        return queryset
 
 
 class Fault(Event):
@@ -76,18 +87,6 @@ class Fault(Event):
     )
 
     objects = FaultManager()
-    unchecked = UncheckedManager()
-
-    @staticmethod
-    def unchecked_count(user_id=0):
-        queryset = Fault.objects.filter(checked=0)
-        if user_id:
-            queryset = queryset.filter(
-                models.Q(fault_definition__users__id__in=[user_id, ])
-                | models.Q(fault_definition__users=None)
-            )
-
-        return queryset.count()
 
     def checked_ok(self):
         self.checked = True

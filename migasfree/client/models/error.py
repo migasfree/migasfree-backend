@@ -24,11 +24,9 @@ from migasfree.core.models import Project
 from .event import Event
 
 
-class UncheckedManager(models.Manager):
-    def get_queryset(self):
-        return super(UncheckedManager, self).get_queryset().filter(
-            checked=0
-        )
+class ErrorQueryset(models.query.QuerySet):
+    def unchecked(self):
+        return self.filter(checked=False)
 
 
 class ErrorManager(models.Manager):
@@ -40,6 +38,12 @@ class ErrorManager(models.Manager):
         obj.save()
 
         return obj
+
+    def get_queryset(self):
+        return ErrorQueryset(self.model, using=self._db)
+
+    def unchecked(self):
+        return self.get_queryset().unchecked()
 
 
 class Error(Event):
@@ -61,11 +65,6 @@ class Error(Event):
     )
 
     objects = ErrorManager()
-    unchecked = UncheckedManager()
-
-    @staticmethod
-    def unchecked_count():
-        return Error.objects.filter(checked=0).count()
 
     def checked_ok(self):
         self.checked = True

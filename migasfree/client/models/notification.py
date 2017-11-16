@@ -21,6 +21,19 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
 
+class NotificationQueryset(models.query.QuerySet):
+    def unchecked(self):
+        return self.filter(checked=False)
+
+
+class NotificationManager(models.Manager):
+    def get_queryset(self):
+        return NotificationQueryset(self.model, using=self._db)
+
+    def unchecked(self):
+        return self.get_queryset().unchecked()
+
+
 @python_2_unicode_compatible
 class Notification(models.Model):
     created_at = models.DateTimeField(
@@ -37,13 +50,11 @@ class Notification(models.Model):
         default=False,
     )
 
+    objects = NotificationManager()
+
     def checked_ok(self):
         self.checked = True
         self.save()
-
-    @staticmethod
-    def unchecked_count():
-        return Notification.objects.filter(checked=0).count()
 
     def save(self, *args, **kwargs):
         self.message = self.message.replace("\r\n", "\n")

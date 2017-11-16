@@ -56,7 +56,7 @@ def add_unchecked_notifications():
             'msg': ugettext('Unchecked Notifications'),
             'target': 'server',
             'level': 'warning',
-            'result': Notification.unchecked_count(),
+            'result': Notification.objects.unchecked().count(),
             'api': '%s?checked=False' % reverse('notification-list')
         }
     )
@@ -70,7 +70,7 @@ def add_unchecked_faults():
             'msg': ugettext('Unchecked Faults'),
             'target': 'computer',
             'level': 'critical',
-            'result': Fault.unchecked_count(),
+            'result': Fault.objects.unchecked().count(),
             'api': '%s?checked=False' % reverse('fault-list')
         }
     )
@@ -84,7 +84,7 @@ def add_unchecked_errors():
             'msg': ugettext('Unchecked Errors'),
             'target': 'computer',
             'level': 'critical',
-            'result': Error.unchecked_count(),
+            'result': Error.objects.unchecked().count(),
             'api': '%s?checked=False' % reverse('error-list')
         }
     )
