@@ -16,8 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from rest_framework import viewsets, filters
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, filters, status
 from rest_framework_filters import backends
+from rest_framework.decorators import list_route
+from rest_framework.response import Response
+
+from migasfree.client.models import Computer
 
 from .models import (
     Connection, Device, Driver,
@@ -85,6 +91,32 @@ class LogicalViewSet(viewsets.ModelViewSet):
             return serializers.LogicalWriteSerializer
 
         return serializers.LogicalSerializer
+
+    @list_route(methods=['get'])
+    def availables(self, request):
+        """
+        :param request:
+            cid (computer Id) int,
+            q string (name or data contains...),
+            page int
+        :return: DeviceLogicalSerializer set
+        """
+        computer = get_object_or_404(Computer, pk=request.GET.get('cid', 0))
+        query = request.GET.get('q', '')
+
+        results = Logical.objects.filter(
+            device__available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True)
+        ).order_by('device__name', 'feature__name')
+        if query:
+            results = results.filter(Q(device__name__icontains=query) | Q(device__data__icontains=query))
+
+        page = self.paginate_queryset(results)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(results, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ManufacturerViewSet(viewsets.ModelViewSet):
