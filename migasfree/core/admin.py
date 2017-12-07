@@ -19,10 +19,13 @@
 from django.db.models import Q
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
+from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
 from import_export import resources, fields, widgets
 from import_export.admin import ImportExportActionModelAdmin
+
+from migasfree.client.models import Computer
 
 from . import tasks
 
@@ -165,10 +168,20 @@ class ServerAttributeFilter(SimpleListFilter):
 @admin.register(ServerAttribute)
 class ServerAttributeAdmin(admin.ModelAdmin):
     list_display = ('value', 'description', 'property_att')
-    fields = ('property_att', 'value', 'description')
+    fields = ('property_att', 'value', 'description', 'inflicted_computers')
     list_filter = (ServerAttributeFilter,)
     ordering = ('property_att', 'value',)
     search_fields = ('value', 'description')
+    readonly_fields = ('inflicted_computers',)
+
+    def inflicted_computers(self, obj):
+        ret = []
+        for c in Computer.productive.filter(sync_attributes__in=[obj.pk]).exclude(tags__in=[obj.pk]):
+            ret.append(c.__str__())
+
+        return format_html('<br />'.join(ret))
+
+    inflicted_computers.short_description = _('Inflicted Computers')
 
 
 @admin.register(AttributeSet)
