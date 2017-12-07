@@ -129,7 +129,11 @@ class ComputerAdmin(admin.ModelAdmin):
             )
         }),
         (_('Devices'), {
-            'fields': ('my_logical_devices', 'default_logical_device',)
+            'fields': (
+                'my_inflected_logical_devices_link',
+                'assigned_logical_devices_to_cid',
+                'default_logical_device',
+            )
         }),
     )
 
@@ -199,10 +203,10 @@ class ComputerAdmin(admin.ModelAdmin):
 
     get_software_history.short_description = _('Software History')
 
-    def my_logical_devices(self, obj):
-        return ', '.join([item.__str__() for item in obj.logical_devices()])
+    def my_inflected_logical_devices(self, obj):
+        return ', '.join([item.__str__() for item in obj.inflected_logical_devices()])
 
-    my_logical_devices.short_description = _('Logical Devices')
+    my_inflected_logical_devices.short_description = _('Inflected Logical Devices')
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == "sync_attributes":
