@@ -16,7 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from django.db import models
+from django.db.models.signals import pre_save, post_save
+from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
@@ -24,6 +30,27 @@ from markdownx.models import MarkdownxField
 
 from migasfree.core.models import Project, Attribute
 from migasfree.utils import to_list
+
+_UNSAVED_IMAGEFIELD = 'unsaved_imagefield'
+
+
+class MediaFileSystemStorage(FileSystemStorage):
+    def get_available_name(self, name, max_length=None):
+        if max_length and len(name) > max_length:
+            raise(Exception("name's length is greater than max_length"))
+
+        return name
+
+    def _save(self, name, content):
+        if self.exists(name):
+            os.remove(os.path.join(settings.MIGASFREE_PUBLIC_DIR, name))
+
+        return super(MediaFileSystemStorage, self)._save(name, content)
+
+
+def upload_path_handler(instance, filename):
+    _, ext = os.path.splitext(filename)
+    return 'catalog_icons/app_{}{}'.format(instance.pk, ext)
 
 
 @python_2_unicode_compatible
@@ -73,7 +100,8 @@ class Application(models.Model):
 
     icon = models.ImageField(
         verbose_name=_('icon'),
-        upload_to='catalog_icons/',
+        upload_to=upload_path_handler,
+        storage=MediaFileSystemStorage(),
         null=True
     )
 
@@ -292,3 +320,18 @@ class PolicyGroup(models.Model):
         verbose_name_plural = _("Policy Groups")
         unique_together = (("policy", "priority"),)
         ordering = ['policy__name', 'priority']
+
+
+@receiver(pre_save, sender=Application)
+def pre_save_application(sender, instance, **kwargs):
+    if not instance.pk and not hasattr(instance, _UNSAVED_IMAGEFIELD):
+        setattr(instance, _UNSAVED_IMAGEFIELD, instance.icon)
+        instance.icon = None
+
+
+@receiver(post_save, sender=Application)
+def post_save_application(sender, instance, created, **kwargs):
+    if created and hasattr(instance, _UNSAVED_IMAGEFIELD):
+        instance.icon = getattr(instance, _UNSAVED_IMAGEFIELD)
+        instance.save()
+        instance.__dict__.pop(_UNSAVED_IMAGEFIELD)
