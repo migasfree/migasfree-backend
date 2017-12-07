@@ -90,6 +90,12 @@ class Application(models.Model):
         choices=CATEGORIES
     )
 
+    available_for_attributes = models.ManyToManyField(
+        Attribute,
+        blank=True,
+        verbose_name=_("available for attributes")
+    )
+
     def __str__(self):
         return self.name
 

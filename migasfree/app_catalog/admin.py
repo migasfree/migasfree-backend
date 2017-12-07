@@ -55,15 +55,12 @@ class PackagesByProjectLine(admin.TabularInline):
 
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
-    # formfield_overrides = {
-    #     models.ImageField: {'widget': ImageWidget}
-    # }
     list_display = ('name', 'score', 'level', 'category',)
     list_filter = ('level', 'category')
     ordering = ('name',)
     fields = (
         'name', 'category', 'level',
-        'score', 'icon', 'description'
+        'score', 'icon', 'available_for_attributes', 'description'
     )
     search_fields = ('name', 'description')
 

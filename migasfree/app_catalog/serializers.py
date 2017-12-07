@@ -94,6 +94,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
     level = LevelSerializer(many=False, read_only=True)
     category = CategorySerializer(many=False, read_only=True)
     packages_by_project = PackagesByProjectSerializer(many=True, read_only=True)
+    available_for_attributes = AttributeInfoSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Application
