@@ -158,17 +158,74 @@ def add_delayed_computers():
     con.sadd('migasfree:watch:chk', 'delayed')
 
 
+def add_active_schedule_deployments():
+    """
+    With schedule, but not finished -> to relationship with errors
+    """
+    con = get_redis_connection()
+
+    result = 0
+    for item in Deployment.objects.filter(schedule__isnull=False, enabled=True):
+        if int(item.schedule_timeline()['percent']) < 100:
+            result += 1
+
+    con.hmset(
+        'migasfree:chk:active_deploys', {
+            'msg': ugettext('Active schedule deployments'),
+            'target': 'server',
+            'level': 'info',
+            'result': result,
+            'api': '{}?enabled__exact=1&schedule__isnull=False'.format(
+                reverse('admin:server_deployment_changelist')
+            ),  # FIXME
+        }
+    )
+    con.sadd('migasfree:watch:chk', 'active_deploys')
+
+
+def add_finished_schedule_deployments():
+    """
+    To convert in permanents or delete
+    """
+    con = get_redis_connection()
+
+    result = 0
+    for item in Deployment.objects.filter(schedule__isnull=False, enabled=True):
+        if int(item.schedule_timeline()['percent']) == 100:
+            result += 1
+
+    con.hmset(
+        'migasfree:chk:finished_deploys', {
+            'msg': ugettext('Finished schedule deployments'),
+            'target': 'server',
+            'level': 'warning',
+            'result': result,
+            'api': '{}?enabled__exact=1&schedule__isnull=False'.format(
+                reverse('admin:server_deployment_changelist')
+            ),  # FIXME
+        }
+    )
+    con.sadd('migasfree:watch:chk', 'finished_deploys')
+
+
 @shared_task(queue='default')
 def alerts():
     con = get_redis_connection()
 
-    add_orphan_packages()
-    add_unchecked_notifications()
-    add_unchecked_faults()
-    add_unchecked_errors()
+    # info
     add_generating_repos()
     add_synchronizing_computers()
+    add_active_schedule_deployments()
+
+    # warning
+    add_orphan_packages()
+    add_unchecked_notifications()
     add_delayed_computers()
+    add_finished_schedule_deployments()
+
+    # error
+    add_unchecked_faults()
+    add_unchecked_errors()
 
     logger.debug(con.smembers('migasfree:watch:chk'))
 
