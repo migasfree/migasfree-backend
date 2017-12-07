@@ -309,11 +309,9 @@ class DeploymentAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         is_new = (obj.pk is None)
+        has_slug_changed = form.initial.get('slug') != obj.slug
         packages_after = form.cleaned_data['available_packages']
         super(DeploymentAdmin, self).save_model(request, obj, form, change)
-
-        old_slug = form.initial.get('slug')
-        new_slug = obj.slug
 
         # create repository metadata when packages has been changed
         # or repository not have packages at first time
@@ -324,9 +322,9 @@ class DeploymentAdmin(admin.ModelAdmin):
                         obj.available_packages.values_list('id', flat=True)
                     ),  # packages before
                     sorted(packages_after)
-                ) != 0) or (new_slug != old_slug):
+                ) != 0) or has_slug_changed:
             tasks.create_repository_metadata.delay(obj.id)
 
             # delete old repository when name (slug) has changed
-            if new_slug != old_slug and not is_new:
-                tasks.remove_repository_metadata.delay(obj.id, old_slug)
+            if has_slug_changed and not is_new:
+                tasks.remove_repository_metadata.delay(obj.id, form.initial.get('slug'))
