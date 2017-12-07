@@ -20,12 +20,12 @@ from __future__ import absolute_import
 
 from celery import shared_task
 
-import logging
-logger = logging.getLogger('celery')
-
 from migasfree.client.models import Computer
 
 from .models import Node, Capability, LogicalName, Configuration
+
+import logging
+logger = logging.getLogger('celery')
 
 MAXINT = 9223372036854775807  # sys.maxint = (2**63) - 1
 

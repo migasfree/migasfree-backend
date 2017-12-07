@@ -49,7 +49,8 @@ def verify(jwt, pub_key):
         return jose.verify(jwe, jwk, alg='RS256')  # Asymmetric!!!
     except:
         # DEBUG
-        import sys, traceback
+        import sys
+        import traceback
         traceback.print_exc(file=sys.stdout)
         return None
 

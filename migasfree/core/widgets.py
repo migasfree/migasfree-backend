@@ -22,7 +22,7 @@ from django import forms
 class MultiFileInput(forms.FileInput):
     # http://koensblog.eu/blog/7/multiple-file-upload-django
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         if attrs is None:
             attrs = {}
 
