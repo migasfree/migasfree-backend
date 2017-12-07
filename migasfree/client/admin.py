@@ -81,7 +81,7 @@ class ComputerAdmin(admin.ModelAdmin):
         'storage',
         'disks',
         'mac_address',
-        'my_logical_devices',
+        'my_inflected_logical_devices',
     )
 
     fieldsets = (
