@@ -22,6 +22,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
+from migasfree.core.models import Attribute
+
 from .connection import Connection
 from .model import Model
 
@@ -46,6 +48,12 @@ class Device(models.Model):
         Connection,
         on_delete=models.CASCADE,
         verbose_name=_("connection")
+    )
+
+    available_for_attributes = models.ManyToManyField(
+        Attribute,
+        blank=True,
+        verbose_name=_("available for attributes")
     )
 
     data = models.TextField(

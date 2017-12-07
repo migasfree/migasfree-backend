@@ -18,7 +18,7 @@
 
 from rest_framework import serializers
 
-from migasfree.core.serializers import ProjectInfoSerializer
+from migasfree.core.serializers import AttributeInfoSerializer, ProjectInfoSerializer
 
 from ..utils import to_list
 from . import models
@@ -57,6 +57,7 @@ class DeviceWriteSerializer(serializers.ModelSerializer):
 class DeviceSerializer(serializers.ModelSerializer):
     connection = ConnectionInfoSerializer(many=False, read_only=True)
     model = ModelInfoSerializer(many=False, read_only=True)
+    available_for_attributes = AttributeInfoSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Device

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -94,7 +94,7 @@ class DeviceAdmin(admin.ModelAdmin):
     list_display = ('name', 'location', 'model', 'connection')
     list_filter = ('model',)
     search_fields = ('name', 'model__name', 'model__manufacturer__name', 'data')
-    fields = ('name', 'model', 'connection', 'data')
+    fields = ('name', 'model', 'connection', 'available_for_attributes', 'data')
     ordering = ('name',)
 
     inlines = [LogicalInline]
