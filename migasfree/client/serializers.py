@@ -38,14 +38,11 @@ class ComputerInfoSerializer(serializers.ModelSerializer):
 class ComputerWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Computer
-        fields = '__all__'
-        """
         fields = (
             'name', 'last_hardware_capture',
             'status', 'comment', 'tags',
             'default_logical_device',
         )
-        """
 
 
 class ComputerSerializer(serializers.ModelSerializer):

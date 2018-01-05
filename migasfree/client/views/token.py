@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,23 +36,30 @@ from ..filters import (
 )
 
 
-class ComputerViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
+class ComputerViewSet(viewsets.ModelViewSet):
     queryset = models.Computer.objects.all()
     serializer_class = serializers.ComputerSerializer
     filter_class = ComputerFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
 
-    """
-    def update(request, *args, **kwargs):
-        # TODO is_computer_changed(computer, name, project, ip_address, uuid)
-        pass
+    def get_serializer_class(self):
+        if self.action == 'update' or self.action == 'partial_update':
+            return serializers.ComputerWriteSerializer
 
-    def partial_update(request, *args, **kwargs):
-        pass
-    """
+        return serializers.ComputerSerializer
+
+    def partial_update(self, request, *args, **kwargs):
+        data = dict(request.data.iterlists())
+        if 'assigned_logical_devices_to_cid[]' in data:
+            assigned_logical_devices_to_cid = map(int, data['assigned_logical_devices_to_cid[]'])
+            computer = get_object_or_404(models.Computer, pk=kwargs['pk'])
+            computer.update_logical_devices(assigned_logical_devices_to_cid)
+
+        return super(ComputerViewSet, self).partial_update(
+            request,
+            *args,
+            **kwargs
+        )
 
     @detail_route(methods=['get'], url_path='software/inventory')
     def software_inventory(self, request, pk=None):
