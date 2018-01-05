@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,6 +39,13 @@ class ComputerWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Computer
         fields = '__all__'
+        """
+        fields = (
+            'name', 'last_hardware_capture',
+            'status', 'comment', 'tags',
+            'default_logical_device',
+        )
+        """
 
 
 class ComputerSerializer(serializers.ModelSerializer):
@@ -49,6 +56,7 @@ class ComputerSerializer(serializers.ModelSerializer):
     software_history = serializers.HyperlinkedIdentityField(
         view_name='computer-software/history'
     )
+    tags = AttributeInfoSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Computer
@@ -57,7 +65,8 @@ class ComputerSerializer(serializers.ModelSerializer):
             'ip_address', 'forwarded_ip_address', 'tags',
             'software_inventory', 'software_history',
             'status', 'product', 'machine', 'cpu', 'ram',
-            'storage', 'disks', 'mac_address', 'comment'
+            'storage', 'disks', 'mac_address', 'comment',
+            'created_at', 'last_hardware_capture', 'sync_end_date',
         )
 
 
