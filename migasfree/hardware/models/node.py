@@ -230,7 +230,7 @@ class Node(models.Model):
             computer=computer_id,
             class_name='processor'
         ).filter(
-            models.Q(description='CPU') | models.Q(name__startswith='cpu:0')
+            models.Q(name='cpu') | models.Q(name='cpu:0')
         )
         if query.count() == 1:
             product = query[0].product
