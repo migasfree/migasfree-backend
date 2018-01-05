@@ -1,5 +1,5 @@
 celery==4.1.0
-Django==1.11.7
+Django==1.11.9
 django-cors-headers==2.1.0
 django-filter==1.0.4
 django-grappelli==2.10.1
@@ -7,10 +7,10 @@ django-import-export==0.6.1
 django-markdownx==2.0.21
 django-redis==4.8.0
 django-rest-swagger==2.1.2
-djangorestframework==3.7.3
+djangorestframework==3.7.7
 djangorestframework-filters==0.10.2
 djangorestframework-jwt==1.11.0
-djoser==1.1.4
+djoser==1.1.5
 docutils==0.14
 jose==1.0.0
 psycopg2==2.7.3.2
