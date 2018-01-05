@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ class ApplicationFilter(django_filters.FilterSet):
 
 class PackagesByProjectFilter(django_filters.FilterSet):
     packages_to_install = django_filters.CharFilter(
-        name='packages_to_install', lookup_expr='icontains'
+        field_name='packages_to_install', lookup_expr='icontains'
     )
 
     class Meta:
@@ -39,7 +39,7 @@ class PackagesByProjectFilter(django_filters.FilterSet):
 
 class PolicyFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(
-        name='name', lookup_expr='icontains'
+        field_name='name', lookup_expr='icontains'
     )
 
     class Meta:

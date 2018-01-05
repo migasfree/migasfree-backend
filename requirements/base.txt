@@ -1,7 +1,7 @@
 celery==4.1.0
 Django==1.11.9
 django-cors-headers==2.1.0
-django-filter==1.0.4
+django-filter==1.1.0
 django-grappelli==2.10.1
 django-import-export==0.6.1
 django-markdownx==2.0.21

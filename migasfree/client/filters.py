@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,13 +27,13 @@ from .models import (
 
 
 class ComputerFilter(filters.FilterSet):
-    platform = filters.CharFilter(name='project__platform__id')
-    created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
+    platform = filters.CharFilter(field_name='project__platform__id')
+    created_at = filters.DateFilter(field_name='created_at', lookup_expr=['gte'])
     sync_attributes = filters.CharFilter(
-        name='sync_attributes__value', lookup_expr=['contains']
+        field_name='sync_attributes__value', lookup_expr=['contains']
     )
     mac_address = filters.CharFilter(
-        name='mac_address', lookup_expr=['icontains']
+        field_name='mac_address', lookup_expr=['icontains']
     )
 
     class Meta:
@@ -45,8 +45,8 @@ class ComputerFilter(filters.FilterSet):
 
 
 class ErrorFilter(filters.FilterSet):
-    created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
-    created_at__lt = filters.DateFilter(name='created_at', lookup_expr=['lt'])
+    created_at = filters.DateFilter(field_name='created_at', lookup_expr=['gte'])
+    created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr=['lt'])
 
     class Meta:
         model = Error
@@ -63,8 +63,8 @@ class FaultDefinitionFilter(filters.FilterSet):
 
 
 class FaultFilter(filters.FilterSet):
-    created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
-    created_at__lt = filters.DateFilter(name='created_at', lookup_expr=['lt'])
+    created_at = filters.DateFilter(field_name='created_at', lookup_expr=['gte'])
+    created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr=['lt'])
 
     """
     # TODO override filter_queryset (http://www.django-rest-framework.org/api-guide/filtering/)
@@ -100,8 +100,8 @@ class FaultFilter(filters.FilterSet):
 
 
 class MigrationFilter(filters.FilterSet):
-    created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
-    created_at__lt = filters.DateFilter(name='created_at', lookup_expr=['lt'])
+    created_at = filters.DateFilter(field_name='created_at', lookup_expr=['gte'])
+    created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr=['lt'])
 
     class Meta:
         model = Migration
@@ -109,7 +109,7 @@ class MigrationFilter(filters.FilterSet):
 
 
 class NotificationFilter(filters.FilterSet):
-    created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
+    created_at = filters.DateFilter(field_name='created_at', lookup_expr=['gte'])
 
     class Meta:
         model = Notification
@@ -117,8 +117,8 @@ class NotificationFilter(filters.FilterSet):
 
 
 class PackageHistoryFilter(filters.FilterSet):
-    computer = filters.CharFilter(name='computer__name', lookup_expr=['contains'])
-    package = filters.CharFilter(name='package__fullname', lookup_expr=['contains'])
+    computer = filters.CharFilter(field_name='computer__name', lookup_expr=['contains'])
+    package = filters.CharFilter(field_name='package__fullname', lookup_expr=['contains'])
 
     class Meta:
         model = PackageHistory
@@ -126,8 +126,8 @@ class PackageHistoryFilter(filters.FilterSet):
 
 
 class StatusLogFilter(filters.FilterSet):
-    created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
-    created_at__lt = filters.DateFilter(name='created_at', lookup_expr=['lt'])
+    created_at = filters.DateFilter(field_name='created_at', lookup_expr=['gte'])
+    created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr=['lt'])
 
     class Meta:
         model = StatusLog
@@ -135,8 +135,8 @@ class StatusLogFilter(filters.FilterSet):
 
 
 class SynchronizationFilter(filters.FilterSet):
-    created_at = filters.DateFilter(name='created_at', lookup_expr=['gte'])
-    created_at__lt = filters.DateFilter(name='created_at', lookup_expr=['lt'])
+    created_at = filters.DateFilter(field_name='created_at', lookup_expr=['gte'])
+    created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr=['lt'])
 
     class Meta:
         model = Synchronization
