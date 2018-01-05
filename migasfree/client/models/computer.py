@@ -424,14 +424,12 @@ class Computer(models.Model):
     def get_architecture(self):
         from migasfree.hardware.models.node import Node
 
-        query = Node.objects.filter(
+        node = Node.objects.filter(
             computer=self.id,
             class_name='processor'
-        )
-        if query.count() == 1:
-            return query[0].width
+        ).first()
 
-        return None
+        return node.width if node else None
 
     @staticmethod
     def replacement(source, target):
