@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.template import Context, Template
 from django.conf import settings
 
-from migasfree.utils import swap_m2m, remove_empty_elements_from_dict
+from migasfree.utils import swap_m2m, remove_empty_elements_from_dict, list_difference
 from migasfree.core.models import (
     Project, ServerAttribute, Attribute, BasicProperty,
 )
@@ -382,6 +382,22 @@ class Computer(models.Model):
         self.mac_address = Node.get_mac_address(self.id)
 
         self.save()
+
+    def update_logical_devices(self, devices):
+        """
+        :param devices: [id1, id2, id3, ...]
+        :return: void
+        """
+        cid_attribute = self.get_cid_attribute()
+        initial_logical_devices = list(
+            self.assigned_logical_devices_to_cid().values_list('id', flat=True)
+        )
+
+        for pk in list_difference(devices, initial_logical_devices):
+            Logical.objects.get(pk=pk).attributes.add(cid_attribute)
+
+        for pk in list_difference(initial_logical_devices, devices):
+            Logical.objects.get(pk=pk).attributes.remove(cid_attribute)
 
     def logical_devices(self, attributes=None):
         if not attributes:
