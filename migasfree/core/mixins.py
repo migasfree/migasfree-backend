@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ class SafeConnectionMixin(object):
             self.project = get_object_or_404(
                 Project, name=data.get('project')
             )
-            self.verify_key = '%s.pub' % self.project.slug
+            self.verify_key = '{}.pub'.format(self.project.slug)
         claims = secure.unwrap(
             msg,
             decrypt_key=self.decrypt_key,
@@ -71,7 +71,7 @@ class SafeConnectionMixin(object):
 
         logger.debug('create_response: %s' % data)
         if not self.encrypt_key:
-            self.encrypt_key = '%s.pub' % self.project.slug
+            self.encrypt_key = '{}.pub'.format(self.project.slug)
         msg = secure.wrap(
             data,
             sign_key=self.sign_key,
