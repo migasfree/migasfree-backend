@@ -41,7 +41,7 @@ class ComputerWriteSerializer(serializers.ModelSerializer):
         fields = (
             'name', 'last_hardware_capture',
             'status', 'comment', 'tags',
-            'default_logical_device',
+            'default_logical_device', 'project',
         )
 
 
