@@ -35,7 +35,7 @@ from .models import *
 
 def add_computer_search_fields(fields_list):
     for field in settings.MIGASFREE_COMPUTER_SEARCH_FIELDS:
-        fields_list.append("computer__%s" % field)
+        fields_list.append('computer__{}'.format(field))
 
     return tuple(fields_list)
 
@@ -130,8 +130,8 @@ class ComputerAdmin(admin.ModelAdmin):
         }),
         (_('Devices'), {
             'fields': (
-                'my_inflected_logical_devices_link',
-                'assigned_logical_devices_to_cid',
+                'my_inflected_logical_devices',
+                # 'assigned_logical_devices_to_cid',
                 'default_logical_device',
             )
         }),
