@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -99,22 +99,6 @@ class Package(models.Model):
 
     objects = PackageManager()
 
-    def clean(self):
-        super(Package, self).clean()
-
-        if not hasattr(self, 'project'):
-            return False
-
-        if self.store.project.id != self.project.id:
-            raise ValidationError(_('Store must belong to the project'))
-
-        queryset = Package.objects.filter(
-            fullname=self.fullname,
-            project__id=self.project.id
-        ).filter(~models.Q(id=self.id))
-        if queryset.exists():
-            raise ValidationError(_('Duplicated fullname at project'))
-
     @staticmethod
     def normalized_name(package_name):
         name = None
@@ -145,7 +129,7 @@ class Package(models.Model):
                 destination.write(chunk)
 
     @staticmethod
-    def orphan():
+    def orphan_count():
         return Package.objects.filter(deployment__id=None).count()
 
     @staticmethod
@@ -178,6 +162,22 @@ class Package(models.Model):
                 self.path(self.project.slug, previous_store, self.name),
                 self.path(self.project.slug, self.store, self.name)
             )
+
+    def clean(self):
+        super(Package, self).clean()
+
+        if not hasattr(self, 'project'):
+            return False
+
+        if self.store.project.id != self.project.id:
+            raise ValidationError(_('Store must belong to the project'))
+
+        queryset = Package.objects.filter(
+            fullname=self.fullname,
+            project__id=self.project.id
+        ).filter(~models.Q(id=self.id))
+        if queryset.exists():
+            raise ValidationError(_('Duplicated fullname at project'))
 
     def save(self, *args, **kwargs):
         self.create_dir()
