@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from rest_framework import (
     viewsets, parsers, status, mixins,
     exceptions, filters
 )
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_filters import backends
 
@@ -76,8 +76,9 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    @detail_route(
+    @action(
         methods=['post'],
+        detail=True,
         permission_classes=[IsAdminOrIsSelf],
         url_path='change-password'
     )
@@ -94,7 +95,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-    @list_route(url_path='recent-users')
+    @action(url_path='recent-users', detail=False)
     def recent_users(self, request):
         recent_users = User.objects.all().order('-last_login')
         page = self.paginate_queryset(recent_users)
@@ -182,7 +183,7 @@ class ClientAttributeViewSet(viewsets.ModelViewSet):
 
         return ClientAttributeSerializer
 
-    @detail_route(methods=['get', 'put', 'patch'], url_path='logical-devices')
+    @action(methods=['get', 'put', 'patch'], detail=True, url_path='logical-devices')
     def logical_devices(self, request, pk=None):
         """
         GET
@@ -293,7 +294,7 @@ class PackageViewSet(
     filter_class = PackageFilter
     parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
 
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def orphan(self, request):
         """
         Returns packages that are not in any deployment
@@ -324,7 +325,7 @@ class DeploymentViewSet(viewsets.ModelViewSet):
 
         return DeploymentSerializer
 
-    @detail_route(methods=['get'])
+    @action(methods=['get'], detail=True)
     def metadata(self, request, pk=None):
         get_object_or_404(Deployment, pk=pk)
         tasks.create_repository_metadata.delay(pk)
@@ -334,7 +335,7 @@ class DeploymentViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def generating(self, request, format=None):
         con = get_redis_connection()
         result = con.smembers('migasfree:watch:repos')
@@ -438,7 +439,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @list_route(methods=['post'], url_path='set')
+    @action(methods=['post'], detail=False, url_path='set')
     def packageset(self, request, format=None):
         """
         claims = {
@@ -500,7 +501,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @list_route(methods=['post'], url_path='repos')
+    @action(methods=['post'], detail=False, url_path='repos')
     def create_repository(self, request, format=None):
         """
         claims = {

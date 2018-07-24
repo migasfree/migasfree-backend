@@ -23,7 +23,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django_redis import get_redis_connection
 from rest_framework import viewsets, exceptions, status, mixins, filters
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import action
 from rest_framework.response import Response
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_filters import backends
@@ -64,8 +64,8 @@ class ComputerViewSet(viewsets.ModelViewSet):
             *args,
             **kwargs
         )
-    
-    @detail_route(methods=['get'], url_path='software/inventory')
+
+    @action(methods=['get'], detail=True, url_path='software/inventory')
     def software_inventory(self, request, pk=None):
         """
         Returns installed packages in a computer
@@ -82,7 +82,7 @@ class ComputerViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
-    @detail_route(methods=['get'], url_path='software/history')
+    @action(methods=['get'], detail=True, url_path='software/history')
     def software_history(self, request, pk=None):
         """
         Returns software history of a computer
@@ -99,7 +99,7 @@ class ComputerViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
-    @detail_route(methods=['post'])
+    @action(methods=['post'], detail=True)
     def status(self, request, pk=None):
         """
         Input: {
@@ -124,7 +124,7 @@ class ComputerViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
-    @detail_route(methods=['post'])
+    @action(methods=['post'], detail=True)
     def replacement(self, request, pk=None):
         """
         Input: {
@@ -141,7 +141,7 @@ class ComputerViewSet(viewsets.ModelViewSet):
 
         return Response(status=status.HTTP_200_OK)
 
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def synchronizing(self, request, format=None):
         con = get_redis_connection()
 
@@ -164,7 +164,7 @@ class ComputerViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def delayed(self, request, format=None):
         con = get_redis_connection()
 
@@ -187,7 +187,7 @@ class ComputerViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
-    @detail_route(methods=['get'])
+    @action(methods=['get'], detail=True)
     def sync(self, request, pk=None):
         """
         :returns

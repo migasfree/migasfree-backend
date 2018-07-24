@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ from dateutil import relativedelta
 from django.shortcuts import get_object_or_404
 from django_redis import get_redis_connection
 from rest_framework import viewsets, status
-from rest_framework.decorators import list_route, detail_route
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from migasfree.core.models import Project, Deployment
@@ -49,7 +49,7 @@ def daterange(start_date, end_date):
 
 
 class SyncStatsViewSet(viewsets.ViewSet):
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def yearly(self, request, format=None):
         begin = int(request.query_params.get('begin', time.localtime()[0]))
         end = int(request.query_params.get('end', time.localtime()[0] + 1))
@@ -73,7 +73,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
 
         return Response(stats, status=status.HTTP_200_OK)
 
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def monthly(self, request, format=None):
         fmt = '%Y%m'
 
@@ -109,7 +109,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
 
         return Response(stats, status=status.HTTP_200_OK)
 
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def daily(self, request, format=None):
         now = time.localtime()
         fmt = '%Y%m%d'
@@ -148,7 +148,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
 
         return Response(stats, status=status.HTTP_200_OK)
 
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def hourly(self, request, format=None):
         now = time.localtime()
         hour = timedelta(hours=1)
@@ -191,21 +191,21 @@ class SyncStatsViewSet(viewsets.ViewSet):
 
 
 class ComputerStatsViewSet(viewsets.ViewSet):
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def projects(self, request, format=None):
         return Response(
             Computer.group_by_project(),
             status=status.HTTP_200_OK
         )
 
-    @list_route(methods=['get'])
+    @action(methods=['get'], detail=False)
     def platforms(self, request, format=None):
         return Response(
             Computer.group_by_platform(),
             status=status.HTTP_200_OK
         )
 
-    @list_route(methods=['get'], url_path='attributes/count')
+    @action(methods=['get'], detail=False, url_path='attributes/count')
     def attributes_count(self, request, format=None):
         attributes = request.query_params.getlist('attributes')
         project_id = request.query_params.get('project_id', None)
@@ -217,7 +217,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
 
 
 class DeploymentStatsViewSet(viewsets.ViewSet):
-    @detail_route(methods=['get'], url_path='computers/assigned')
+    @action(methods=['get'], detail=True, url_path='computers/assigned')
     def assigned_computers(self, request, pk=None):
         deploy = get_object_or_404(Deployment, pk=pk)
 
@@ -231,7 +231,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @detail_route(methods=['get'], url_path='computers/status/ok')
+    @action(methods=['get'], detail=True, url_path='computers/status/ok')
     def computers_with_ok_status(self, request, pk=None):
         deploy = get_object_or_404(Deployment, pk=pk)
 
@@ -243,7 +243,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @detail_route(methods=['get'], url_path='computers/status/error')
+    @action(methods=['get'], detail=True, url_path='computers/status/error')
     def computers_with_error_status(self, request, pk=None):
         deploy = get_object_or_404(Deployment, pk=pk)
 
@@ -255,7 +255,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @detail_route(methods=['get'])
+    @action(methods=['get'], detail=True)
     def timeline(self, request, pk=None):
         deploy = get_object_or_404(Deployment, pk=pk)
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext, ugettext_lazy as _
 from rest_framework import viewsets, status, views
-from rest_framework.decorators import list_route
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_redis import get_redis_connection
 
@@ -379,7 +379,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def id(self, request, format=None):
         """
         claims = {
@@ -436,7 +436,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def properties(self, request, format=None):
         """
         claims = {'id': 1}
@@ -472,7 +472,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def attributes(self, request, format=None):
         """
         claims = {
@@ -557,7 +557,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_201_CREATED
         )
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def repositories(self, request, format=None):
         """
         claims = {'id': 1}
@@ -591,7 +591,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    @list_route(methods=['post'], url_path='faults/definitions')
+    @action(methods=['post'], detail=False, url_path='faults/definitions')
     def fault_definitions(self, request, format=None):
         """
         claims = {'id': 1}
@@ -627,7 +627,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def faults(self, request, format=None):
         """
         claims = {
@@ -663,7 +663,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def errors(self, request, format=None):
         """
         claims = {
@@ -695,7 +695,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    @list_route(methods=['post'], url_path='packages/mandatory')
+    @action(methods=['post'], detail=False, url_path='packages/mandatory')
     def mandatory_pkgs(self, request, format=None):
         """
         claims = {'id': 1}
@@ -755,7 +755,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    @list_route(methods=['post'], url_path='tags/assigned')
+    @action(methods=['post'], detail=False, url_path='tags/assigned')
     def assigned_tags(self, request, format=None):
         """
         claims = {'id': 1}
@@ -780,7 +780,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @list_route(methods=['post'], url_path='tags/available')
+    @action(methods=['post'], detail=False, url_path='tags/available')
     def available_tags(self, request, format=None):
         """
         claims = {'id': 1}
@@ -828,7 +828,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def tags(self, request, format=None):
         """
         claims = {
@@ -941,7 +941,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def label(self, request, format=None):
         """
         claims = {
@@ -975,7 +975,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @list_route(methods=['post'], url_path='hardware/required')
+    @action(methods=['post'], detail=False, url_path='hardware/required')
     def hardware_capture_is_required(self, request, format=None):
         """
         claims = {'id': 1}
@@ -1010,7 +1010,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def software(self, request, format=None):
         """
         claims = {
@@ -1046,7 +1046,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @list_route(methods=['post'])
+    @action(methods=['post'], detail=False)
     def devices(self, request, format=None):
         """
         claims = {'id': 1}

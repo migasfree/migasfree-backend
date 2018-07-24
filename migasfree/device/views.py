@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2016-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, filters, status
 from rest_framework_filters import backends
-from rest_framework.decorators import list_route
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from migasfree.client.models import Computer
@@ -92,8 +92,8 @@ class LogicalViewSet(viewsets.ModelViewSet):
 
         return serializers.LogicalSerializer
 
-    @list_route(methods=['get'])
-    def availables(self, request):
+    @action(methods=['get'], detail=False)
+    def available(self, request):
         """
         :param request:
             cid (computer Id) int,
