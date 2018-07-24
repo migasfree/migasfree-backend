@@ -176,8 +176,8 @@ def add_active_schedule_deployments():
             'level': 'info',
             'result': result,
             'api': '{}?enabled__exact=1&schedule__isnull=False'.format(
-                reverse('admin:server_deployment_changelist')
-            ),  # FIXME
+                reverse('admin:core_deployment_changelist')
+            ),
         }
     )
     con.sadd('migasfree:watch:chk', 'active_deploys')
@@ -201,8 +201,8 @@ def add_finished_schedule_deployments():
             'level': 'warning',
             'result': result,
             'api': '{}?enabled__exact=1&schedule__isnull=False'.format(
-                reverse('admin:server_deployment_changelist')
-            ),  # FIXME
+                reverse('admin:core_deployment_changelist')
+            ),
         }
     )
     con.sadd('migasfree:watch:chk', 'finished_deploys')
