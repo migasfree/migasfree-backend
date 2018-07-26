@@ -349,7 +349,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 status=status.HTTP_200_OK
             )
 
-        serializer = serializers.ComputerWriteSerializer(
+        serializer = serializers.ComputerCreateSerializer(
             data=claims,
             context={'request': request}
         )
