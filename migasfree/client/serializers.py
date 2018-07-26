@@ -35,6 +35,15 @@ class ComputerInfoSerializer(serializers.ModelSerializer):
         fields = ('id', 'cid_description')
 
 
+class ComputerCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Computer
+        fields = (
+            'id', 'uuid', 'name', 'project',
+            'ip_address', 'forwarded_ip_address',
+        )
+
+
 class ComputerWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Computer
@@ -48,10 +57,10 @@ class ComputerWriteSerializer(serializers.ModelSerializer):
 class ComputerSerializer(serializers.ModelSerializer):
     project = ProjectInfoSerializer(many=False, read_only=True)
     software_inventory = serializers.HyperlinkedIdentityField(
-        view_name='computer-software/inventory'
+        view_name='computer-software_inventory'
     )
     software_history = serializers.HyperlinkedIdentityField(
-        view_name='computer-software/history'
+        view_name='computer-software_history'
     )
     tags = AttributeInfoSerializer(many=True, read_only=True)
 
