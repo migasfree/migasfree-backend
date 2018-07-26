@@ -65,7 +65,7 @@ class ComputerViewSet(viewsets.ModelViewSet):
             **kwargs
         )
 
-    @action(methods=['get'], detail=True, url_path='software/inventory')
+    @action(methods=['get'], detail=True, url_path='software/inventory', url_name='software_inventory')
     def software_inventory(self, request, pk=None):
         """
         Returns installed packages in a computer
@@ -82,7 +82,7 @@ class ComputerViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(methods=['get'], detail=True, url_path='software/history')
+    @action(methods=['get'], detail=True, url_path='software/history', url_name='software_history')
     def software_history(self, request, pk=None):
         """
         Returns software history of a computer
