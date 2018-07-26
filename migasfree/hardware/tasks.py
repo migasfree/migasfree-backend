@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,10 +32,11 @@ MAXINT = 9223372036854775807  # sys.maxint = (2**63) - 1
 
 @shared_task(queue='default')
 def save_computer_hardware(computer_id, node, parent=None, level=1):
+    computer = Computer.objects.get(id=computer_id)
     size = node.get('size')
     n = Node.objects.create({
         'parent': parent,
-        'computer': Computer.objects.get(id=computer_id),
+        'computer': computer,
         'level': level,
         'name': str(node.get('id')),
         'class_name': node.get('class'),
@@ -76,3 +77,5 @@ def save_computer_hardware(computer_id, node, parent=None, level=1):
             else:
                 for x in node[e]:
                     LogicalName.objects.create(node=n, name=x)
+
+    computer.update_hardware_resume()
