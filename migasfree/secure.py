@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,66 +17,88 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import jose
 import gpgme
+import json
 
 from io import BytesIO
-from Crypto.PublicKey import RSA
+from jwcrypto import jwk, jwe, jws
+from jwcrypto.common import json_encode
 from django.conf import settings
 
 from .utils import read_file, write_file
 
 
 def sign(claims, priv_key):
-    rsa_key = RSA.importKey(
+    """
+    string sign(dict claims, string priv_key)
+    """
+    priv_jwk = jwk.JWK.from_pem(
         read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, priv_key))
     )
-    jwk = {'k': rsa_key.exportKey('PEM')}
 
-    jws = jose.sign(claims, jwk, alg='RS256')  # Asymmetric!!!
-    jwt = jose.serialize_compact(jws)
+    if isinstance(claims, dict):
+        claims = json.dumps(claims)
 
-    return jwt
+    jws_token = jws.JWS(str(claims))
+    jws_token.add_signature(
+        priv_jwk,
+        header=json_encode({'alg': 'RS256', "kid": priv_jwk.thumbprint()})
+    )
+
+    return jws_token.serialize()
 
 
 def verify(jwt, pub_key):
-    rsa_key = RSA.importKey(
+    """
+    dict verify(string jwt, string pub_key)
+    """
+    pub_jwk = jwk.JWK.from_pem(
         read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, pub_key))
     )
-    jwk = {'k': rsa_key.exportKey('PEM')}
-    try:
-        jwe = jose.deserialize_compact(jwt)
-        return jose.verify(jwe, jwk, alg='RS256')  # Asymmetric!!!
-    except:
-        # DEBUG
-        import sys
-        import traceback
-        traceback.print_exc(file=sys.stdout)
-        return None
+
+    jws_token = jws.JWS()
+    jws_token.deserialize(jwt)
+    jws_token.verify(pub_jwk)
+
+    return jws_token.payload
 
 
 def encrypt(claims, pub_key):
-    rsa_key = RSA.importKey(
+    """
+    string encrypt(dict claims, string pub_key)
+    """
+    pub_jwk = jwk.JWK.from_pem(
         read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, pub_key))
     )
-    pub_jwk = {'k': rsa_key.publickey().exportKey('PEM')}
 
-    jwe = jose.encrypt(claims, pub_jwk)
-    jwt = jose.serialize_compact(jwe)
+    protected_header = {
+        "alg": "RSA-OAEP-256",
+        "enc": "A256CBC-HS512",
+        "typ": "JWE",
+        "kid": pub_jwk.thumbprint(),
+    }
+    jwe_token = jwe.JWE(
+        json.dumps(claims),
+        recipient=pub_jwk,
+        protected=protected_header
+    )
+    jwt = jwe_token.serialize()
 
     return jwt
 
 
 def decrypt(jwt, priv_key):
-    rsa_key = RSA.importKey(
+    """
+    string decrypt(string jwt, string priv_key)
+    """
+    priv_jwk = jwk.JWK.from_pem(
         read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, priv_key))
     )
-    priv_jwk = {'k': rsa_key.exportKey('PEM')}
-    try:
-        jwe = jose.deserialize_compact(jwt)
-        return jose.decrypt(jwe, priv_jwk)
-    except:
-        return None
+
+    jwe_token = jwe.JWE()
+    jwe_token.deserialize(jwt, key=priv_jwk)
+
+    return jwe_token.payload
 
 
 def wrap(data, sign_key, encrypt_key):
@@ -88,10 +110,10 @@ def wrap(data, sign_key, encrypt_key):
 
 
 def unwrap(data, decrypt_key, verify_key):
-    jwt = decrypt(data, decrypt_key)
-    jws = verify(jwt.claims['sign'], verify_key)
+    jwt = json.loads(decrypt(data, decrypt_key))
+    jws = verify(jwt['sign'], verify_key)
     if jws:
-        return jwt.claims['data']
+        return jwt['data']
 
     return None
 
@@ -107,9 +129,9 @@ def generate_rsa_keys(name='migasfree-server'):
     private_pem = os.path.join(settings.MIGASFREE_KEYS_DIR, '{}.pri'.format(name))
     public_pem = os.path.join(settings.MIGASFREE_KEYS_DIR, '{}.pub'.format(name))
 
-    key = RSA.generate(2048)
-    write_file(public_pem, key.publickey().exportKey('PEM'))
-    write_file(private_pem, key.exportKey('PEM'))
+    key = jwk.JWK.generate(kty='RSA', size=2048)
+    write_file(public_pem, key.export_to_pem())
+    write_file(private_pem, key.export_to_pem(private_key=True, password=None))
 
     # read only keys
     os.chmod(private_pem, 0o400)

@@ -12,11 +12,10 @@ djangorestframework-filters==0.10.2
 djangorestframework-jwt==1.11.0
 djoser==1.2.0
 docutils==0.14
-jose==1.0.0
+jwcrypto==0.5.0
 psycopg2==2.7.5
 python-dateutil==2.7.3
 python-magic==0.4.15
-pycryptodome==3.6.4
 pygpgme==0.3
 redis==2.10.6
 wsgiref==0.1.2
