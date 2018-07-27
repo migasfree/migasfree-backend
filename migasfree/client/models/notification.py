@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,6 +27,13 @@ class NotificationQueryset(models.query.QuerySet):
 
 
 class NotificationManager(models.Manager):
+    def create(self, message):
+        obj = Notification()
+        obj.message = message
+        obj.save()
+
+        return obj
+
     def get_queryset(self):
         return NotificationQueryset(self.model, using=self._db)
 
@@ -56,9 +63,9 @@ class Notification(models.Model):
         self.checked = True
         self.save()
 
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.message = self.message.replace("\r\n", "\n")
-        super(Notification, self).save(*args, **kwargs)
+        super(Notification, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return '{} ({:%Y-%m-%d %H:%M:%S})'.format(self.id, self.created_at)
