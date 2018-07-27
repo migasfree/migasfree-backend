@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,16 @@ from .computer import Computer
 from .event import Event
 
 
-class StatusLogManager(models.Manager):
+class DomainStatusLogManager(models.Manager):
+    def scope(self, user):
+        qs = super(DomainStatusLogManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(computer_id__in=user.get_computers())
+
+        return qs
+
+
+class StatusLogManager(DomainStatusLogManager):
     def create(self, computer):
         obj = StatusLog()
         obj.computer = computer
