@@ -20,7 +20,7 @@ from datetime import datetime
 
 from django.db import models
 from django.db.models import Count
-from django.db.models.signals import pre_save, post_save, m2m_changed
+from django.db.models.signals import pre_save, post_save, pre_delete
 from django.core.exceptions import ObjectDoesNotExist
 from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
@@ -30,53 +30,104 @@ from django.conf import settings
 
 from migasfree.utils import swap_m2m, remove_empty_elements_from_dict, list_difference
 from migasfree.core.models import (
-    Project, ServerAttribute, Attribute, BasicProperty,
+    Project, ServerAttribute, Attribute, BasicProperty, Property,
 )
 from migasfree.device.models import Logical
 
 from .user import User
 
 
-class ProductiveManager(models.Manager):
+class DomainComputerManager(models.Manager):
+    def scope(self, user):
+        qs = super(DomainComputerManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(id__in=user.get_computers())
+
+        return qs
+
+
+class ProductiveManager(DomainComputerManager):
     def get_queryset(self):
         return super(ProductiveManager, self).get_queryset().filter(
             status__in=Computer.PRODUCTIVE_STATUS
         )
 
+    def scope(self, user):
+        return super(ProductiveManager, self).scope(user).filter(
+            status__in=Computer.PRODUCTIVE_STATUS
+        )
 
-class UnproductiveManager(models.Manager):
+
+class UnproductiveManager(DomainComputerManager):
     def get_queryset(self):
         return super(UnproductiveManager, self).get_queryset().exclude(
             status__in=Computer.PRODUCTIVE_STATUS
         )
 
+    def scope(self, user):
+        return super(UnproductiveManager, self).scope(user).exclude(
+            status__in=Computer.PRODUCTIVE_STATUS
+        )
 
-class SubscribedManager(models.Manager):
+
+class SubscribedManager(DomainComputerManager):
     def get_queryset(self):
         return super(SubscribedManager, self).get_queryset().exclude(
             status='unsubscribed'
         )
 
+    def scope(self, user):
+        return super(SubscribedManager, self).scope(user).exclude(
+            status='unsubscribed'
+        )
 
-class UnsubscribedManager(models.Manager):
+
+class UnsubscribedManager(DomainComputerManager):
     def get_queryset(self):
         return super(UnsubscribedManager, self).get_queryset().filter(
             status='unsubscribed'
         )
 
+    def scope(self, user):
+        return super(UnsubscribedManager, self).scope(user).filter(
+            status='unsubscribed'
+        )
 
-class ActiveManager(models.Manager):
+
+class ActiveManager(DomainComputerManager):
     def get_queryset(self):
         return super(ActiveManager, self).get_queryset().filter(
             status__in=Computer.ACTIVE_STATUS
         )
 
+    def scope(self, user):
+        return super(ActiveManager, self).scope(user).filter(
+            status__in=Computer.ACTIVE_STATUS
+        )
 
-class InactiveManager(models.Manager):
+
+class InactiveManager(DomainComputerManager):
     def get_queryset(self):
         return super(InactiveManager, self).get_queryset().exclude(
             status__in=Computer.ACTIVE_STATUS
         )
+
+    def scope(self, user):
+        return super(InactiveManager, self).scope(user).exclude(
+            status__in=Computer.ACTIVE_STATUS
+        )
+
+
+class ComputerManager(DomainComputerManager):
+    def create(self, name, project, uuid, ip_address=None):
+        obj = Computer()
+        obj.name = name
+        obj.project = project
+        obj.uuid = uuid
+        obj.ip_address = ip_address
+        obj.save()
+
+        return obj
 
 
 @python_2_unicode_compatible
@@ -92,6 +143,7 @@ class Computer(models.Model):
 
     PRODUCTIVE_STATUS = ['intended', 'reserved', 'unknown']
     ACTIVE_STATUS = PRODUCTIVE_STATUS + ['in repair']
+    UNSUBSCRIBED_STATUS = ['unsubscribed']
 
     MACHINE_CHOICES = (
         ('P', _('Physical')),
@@ -257,7 +309,7 @@ class Computer(models.Model):
         blank=True
     )
 
-    objects = models.Manager()
+    objects = ComputerManager()
     productive = ProductiveManager()
     unproductive = UnproductiveManager()
     subscribed = SubscribedManager()
@@ -317,6 +369,20 @@ class Computer(models.Model):
         self.save()
 
         return True
+
+    def update_sync_user(self, user):
+        self.sync_user = user
+        self.sync_start_date = datetime.now()
+        self.save()
+
+    def update_identification(self, name, fqdn, project, uuid, ip_address, forwarded_ip_address):
+        self.name = name
+        self.fqdn = fqdn
+        self.project = project
+        self.uuid = uuid
+        self.ip_address = ip_address
+        self.forwarded_ip_address = forwarded_ip_address
+        self.save()
 
     def update_software_history(self, history):
         from .package_history import PackageHistory
@@ -409,15 +475,15 @@ class Computer(models.Model):
 
     logical_devices.short_description = _('Logical Devices')
 
-    def inflected_logical_devices(self):
+    def inflicted_logical_devices(self):
         return self.logical_devices().exclude(
             attributes__in=[self.get_cid_attribute().pk]
         )
 
-    inflected_logical_devices.short_description = _('Inflected Logical Devices')
+    inflicted_logical_devices.short_description = _('Inflicted Logical Devices')
 
     def assigned_logical_devices_to_cid(self):
-        return self.logical_devices().difference(self.inflected_logical_devices())
+        return self.logical_devices().difference(self.inflicted_logical_devices())
 
     assigned_logical_devices_to_cid.short_description = _('Assigned Logical Devices to CID')
 
@@ -426,10 +492,25 @@ class Computer(models.Model):
 
         node = Node.objects.filter(
             computer=self.id,
-            class_name='processor'
+            class_name='processor',
+            width__gt=0
         ).first()
 
+        if node:
+            return node.width
+
+        node = Node.objects.filter(
+            computer=self.id,
+            class_name='system',
+            width__gt=0
+        )
+
         return node.width if node else None
+
+    def is_docker(self):
+        from migasfree.hardware.models.node import Node
+
+        return Node.get_is_docker(self.id)
 
     @staticmethod
     def replacement(source, target):
@@ -451,6 +532,38 @@ class Computer(models.Model):
             target_cid.ExcludedAttributesGroup
         )
         swap_m2m(source_cid.scheduledelay_set, target_cid.scheduledelay_set)
+        swap_m2m(
+            source_cid.PolicyIncludedAttributes,
+            target_cid.PolicyIncludedAttributes
+        )
+        swap_m2m(
+            source_cid.PolicyExcludedAttributes,
+            target_cid.PolicyExcludedAttributes
+        )
+        swap_m2m(
+            source_cid.PolicyGroupIncludedAttributes,
+            target_cid.PolicyGroupIncludedAttributes
+        )
+        swap_m2m(
+            source_cid.PolicyGroupExcludedAttributes,
+            target_cid.PolicyGroupExcludedAttributes
+        )
+        swap_m2m(
+            source_cid.ScopeIncludedAttribute,
+            target_cid.ScopeIncludedAttribute
+        )
+        swap_m2m(
+            source_cid.ScopeExcludedAttribute,
+            target_cid.ScopeExcludedAttribute
+        )
+        swap_m2m(
+            source_cid.DomainIncludedAttribute,
+            target_cid.DomainIncludedAttribute
+        )
+        swap_m2m(
+            source_cid.DomainExcludedAttribute,
+            target_cid.DomainExcludedAttribute
+        )
 
         source.status, target.status = target.status, source.status
 
@@ -503,7 +616,26 @@ class Computer(models.Model):
                 str(x) for x in self.logical_devices()
             ),
             ugettext("Default logical device"): self.default_logical_device.__str__(),
+            ugettext("Policies (included)"): ', '.join(
+                str(x) for x in cid.PolicyIncludedAttributes.all()
+            ),
+            ugettext("Policies (excluded)"): ', '.join(
+                str(x) for x in cid.PolicyExcludedAttributes.all()
+            ),
+            ugettext("Policy Groups (included)"): ', '.join(
+                str(x) for x in cid.PolicyGroupIncludedAttributes.all()
+            ),
+            ugettext("Policy Groups (excluded)"): ', '.join(
+                str(x) for x in cid.PolicyGroupExcludedAttributes.all()
+            ),
         })
+
+    def append_devices(self, computer_id):
+        try:
+            target = Computer.objects.get(pk=computer_id)
+            target.devices_logical.add(*self.devices_logical.all())
+        except ObjectDoesNotExist:
+            pass
 
     def __str__(self):
         if settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] == 'id':
@@ -534,6 +666,7 @@ def post_save_computer(sender, instance, created, **kwargs):
         StatusLog.objects.create(instance)
 
     if instance.status in ['available', 'unsubscribed']:
+        instance.tags.clear()
         cid = instance.get_cid_attribute()
         cid.devicelogical_set.clear()
         cid.faultdefinition_set.clear()
@@ -544,8 +677,9 @@ def post_save_computer(sender, instance, created, **kwargs):
         cid.scheduledelay_set.clear()
 
 
-@receiver(m2m_changed, sender=Computer.tags.through)
-def tags_changed(sender, instance, action, **kwargs):
-    if hasattr(instance, 'status'):
-        if instance.status in ['available', 'unsubscribed'] and action == 'post_add':
-            instance.tags.clear()
+@receiver(pre_delete, sender=Computer)
+def pre_delete_computer(sender, instance, **kwargs):
+    Attribute.objects.filter(
+        property_att=Property.objects.get(prefix='CID'),
+        value=instance.id
+    ).delete()
