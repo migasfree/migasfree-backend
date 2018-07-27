@@ -35,7 +35,7 @@ from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 from django_redis import get_redis_connection
 
-from migasfree.utils import time_horizon
+from ...utils import time_horizon
 
 from .project import Project
 from .package import Package
@@ -43,6 +43,19 @@ from .package_set import PackageSet
 from .attribute import Attribute
 from .schedule import Schedule
 from .schedule_delay import ScheduleDelay
+from .domain import Domain
+
+
+class DeploymentManager(models.Manager):
+    def scope(self, user):
+        qs = super(DeploymentManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(project__in=user.get_projects())
+            domain = user.domain_preference
+            if domain:
+                qs = qs.filter(Q(domain_id=domain.id) | Q(domain_id=None))
+
+        return qs
 
 
 @python_2_unicode_compatible
@@ -104,6 +117,14 @@ class Deployment(models.Model):
         help_text=_('Mandatory packages to remove each time')
     )
 
+    domain = models.ForeignKey(
+        Domain,
+        verbose_name=_('domain'),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL
+    )
+
     included_attributes = models.ManyToManyField(
         Attribute,
         blank=True,
@@ -147,6 +168,8 @@ class Deployment(models.Model):
         null=True,
         blank=True
     )
+
+    objects = DeploymentManager()
 
     def __str__(self):
         return self.name
@@ -220,7 +243,7 @@ class Deployment(models.Model):
             )
         }
 
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.name)
 
         if self.packages_to_install:
@@ -235,7 +258,7 @@ class Deployment(models.Model):
         if self.default_excluded_packages:
             self.default_excluded_packages = self.default_excluded_packages.replace("\r\n", "\n")
 
-        super(Deployment, self).save(*args, **kwargs)
+        super(Deployment, self).save(force_insert, force_update, using, update_fields)
 
         try:
             from migasfree.stats import tasks
@@ -254,6 +277,11 @@ class Deployment(models.Model):
             enabled=True,
             included_attributes__id__in=attributes,
             start_date__lte=datetime.datetime.now().date()
+        ).filter(
+            Q(domain__isnull=True) | (
+                Q(domain__included_attributes__id__in=attributes) &
+                ~Q(domain__excluded_attributes__id__in=attributes)
+            )
         ).values_list('id', flat=True)
         lst = list(attributed)
 
@@ -262,6 +290,11 @@ class Deployment(models.Model):
             project__id=computer.project.id,
             enabled=True,
             schedule__delays__attributes__id__in=attributes
+        ).filter(
+            Q(domain__isnull=True) | (
+                Q(domain__included_attributes__id__in=attributes) &
+                ~Q(domain__excluded_attributes__id__in=attributes)
+            )
         ).extra(
             select={
                 'delay': 'core_scheduledelay.delay',
