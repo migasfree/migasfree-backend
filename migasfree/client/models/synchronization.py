@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,28 @@ from migasfree.core.models import Project, Deployment
 
 from .event import Event
 from .user import User
+
+
+class DomainSynchronizationManager(models.Manager):
+    def scope(self, user):
+        qs = super(DomainSynchronizationManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(
+                computer_id__in=user.get_computers()
+            )
+
+        return qs
+
+
+class SynchronizationManager(DomainSynchronizationManager):
+    def create(self, computer):
+        obj = Synchronization()
+        obj.computer = computer
+        obj.project = computer.project
+        obj.user = computer.sync_user
+        obj.save()
+
+        return obj
 
 
 class Synchronization(Event):
@@ -58,8 +80,10 @@ class Synchronization(Event):
         help_text=_('indicates the status of transactions with PMS')
     )
 
-    def save(self, *args, **kwargs):
-        super(Synchronization, self).save(*args, **kwargs)
+    objects = SynchronizationManager()
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super(Synchronization, self).save(force_insert, force_update, using, update_fields)
 
         self.computer.sync_end_date = self.created_at
         self.computer.save()
