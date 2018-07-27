@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,11 +19,22 @@
 from django.db import models
 from django.db.models import Q
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
-from migasfree.core.models import Attribute
+from migasfree.core.models import Attribute, UserProfile
+
+
+class DomainFaultDefinitionManager(models.Manager):
+    def scope(self, user):
+        qs = super(DomainFaultDefinitionManager, self).get_queryset()
+        if not user.is_view_all():
+            atts = user.get_attributes()
+            qs = qs.filter(included_attributes__in=atts)
+            qs = qs.exclude(excluded_attributes__in=atts)
+            qs = qs.distinct()
+
+        return qs
 
 
 @python_2_unicode_compatible
@@ -70,10 +81,12 @@ class FaultDefinition(models.Model):
     )
 
     users = models.ManyToManyField(
-        User,
+        UserProfile,
         blank=True,
         verbose_name=_("users")
     )
+
+    objects = DomainFaultDefinitionManager()
 
     def list_included_attributes(self):
         return self.included_attributes.all().values_list('value', flat=True)
@@ -106,10 +119,10 @@ class FaultDefinition(models.Model):
 
         return fault_definitions
 
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.code = self.code.replace("\r\n", "\n")
 
-        super(FaultDefinition, self).save(*args, **kwargs)
+        super(FaultDefinition, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.name
