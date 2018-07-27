@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
 import re
 
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.translation import ugettext_lazy as _
 
 from migasfree.client.models import Computer
 
@@ -31,7 +31,16 @@ def validate_mac(mac):
         len(re.findall(r':', mac)) == 5
 
 
-class NodeManager(models.Manager):
+class DomainNodeManager(models.Manager):
+    def scope(self, user):
+        qs = super(DomainNodeManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(computer_id__in=user.get_computers())
+
+        return qs
+
+
+class NodeManager(DomainNodeManager):
     def create(self, data):
         obj = Node(
             parent=data.get('parent'),
@@ -187,22 +196,41 @@ class Node(models.Model):
     objects = NodeManager()
 
     def get_product(self):
-        return self.VIRTUAL_MACHINES.get(self.vendor, self.product)
+        if self.vendor:
+            return self.VIRTUAL_MACHINES.get(self.vendor, self.product)
+        if self.get_is_docker(self.computer_id):
+            return "docker"
+
+        return self.product or self.description
 
     def __str__(self):
-        text = self.get_product()
-        return text if text else ''
+        return self.get_product() or self.name
 
     @staticmethod
     def get_is_vm(computer_id):
         query = Node.objects.filter(
             computer=computer_id,
-        ).filter(parent_id__isnull=True)
+            parent_id__isnull=True
+        )
         if query.count() == 1:
-            if query[0].vendor in list(Node.VIRTUAL_MACHINES.keys()):
+            if query[0].vendor in list(self.VIRTUAL_MACHINES.keys()):
+                return True
+            elif self.get_is_docker(computer_id):
                 return True
 
         return False
+
+    @staticmethod
+    def get_is_docker(computer_id):
+        query = Node.objects.filter(
+            computer=computer_id,
+            name="network",
+            class_name="network",
+            description="Ethernet interface"
+        )
+
+        return query.count() == 1 and \
+            query[0].serial.upper().startswith("02:42:AC")
 
     @staticmethod
     def get_ram(computer_id):
@@ -250,7 +278,7 @@ class Node(models.Model):
         """ returns all addresses in only string without any separator """
         query = Node.objects.filter(
             computer=computer_id,
-            name='network',
+            name__icontains='network',
             class_name='network'
         )
         lst = []
