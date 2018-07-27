@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,12 +17,26 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.db import models
+from django.db.models import Q
+from django.db.models import Count
 from django.core.validators import MinValueValidator
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from .schedule import Schedule
 from .attribute import Attribute
+
+
+class ScheduleDelayManager(models.Manager):
+    def scope(self, user):
+        qs = super(ScheduleDelayManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(
+                Q(attributes__in=user.get_attributes()) |
+                Q(attributes__in=user.get_domain_tags())
+            )
+
+        return qs
 
 
 @python_2_unicode_compatible
@@ -49,6 +63,30 @@ class ScheduleDelay(models.Model):
         default=1,
         validators=[MinValueValidator(1), ]
     )
+
+    objects = ScheduleDelayManager()
+
+    # computers with productive status
+    TOTAL_COMPUTER_QUERY = "SELECT DISTINCT COUNT(client_computer.id) \
+        FROM client_computer, client_computer_sync_attributes \
+        WHERE core_scheduledelay_attributes.attribute_id=client_computer_sync_attributes.attribute_id \
+        AND client_computer_sync_attributes.computer_id=client_computer.id \
+        AND client_computer.status IN ('intended', 'reserved', 'unknown')"
+
+    def total_computers(self, user=None):
+        from migasfree.client.models import Computer
+
+        if user and not user.userprofile.is_view_all():
+            queryset = Computer.productive.scope(user.userprofile).filter(
+                sync_attributes__id__in=self.attributes.values_list('id')
+            )
+        else:
+            queryset = Computer.productive.filter(
+                sync_attributes__id__in=self.attributes.values_list('id')
+            )
+        return queryset.annotate(total=Count('id')).count()
+
+    total_computers.short_description = _('Total computers')
 
     def __str__(self):
         return u'{} ({})'.format(self.schedule.name, self.delay)
