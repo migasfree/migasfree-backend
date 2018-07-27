@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 from django.db import models
 from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 from django.db.models.signals import pre_delete, pre_save
@@ -87,8 +87,8 @@ class AttributeSet(models.Model):
                     ).count() > 0:
                 raise ValidationError(_('Duplicated name'))
 
-    def save(self, *args, **kwargs):
-        super(AttributeSet, self).save(*args, **kwargs)
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super(AttributeSet, self).save(force_insert, force_update, using, update_fields)
 
         Attribute.objects.get_or_create(
             property_att=Property.objects.get(prefix='SET', sort='basic'),
@@ -153,9 +153,13 @@ class AttributeSet(models.Model):
 
         att_id = []
         for item in AttributeSet.get_sets():
-            for att_set in AttributeSet.objects.filter(id=item).filter(
+            for att_set in AttributeSet.objects.filter(
+                id=item
+            ).filter(
                 Q(included_attributes__id__in=attributes)
-            ).filter(~Q(excluded_attributes__id__in=attributes)):
+            ).filter(
+                ~Q(excluded_attributes__id__in=attributes)
+            ).distinct():
                 att = Attribute.objects.create(property_set, att_set.name)
                 att_id.append(att.id)
 
@@ -181,10 +185,7 @@ def pre_save_attribute_set(sender, instance, **kwargs):
 
 @receiver(pre_delete, sender=AttributeSet)
 def pre_delete_attribute_set(sender, instance, **kwargs):
-    try:
-        Attribute.objects.get(
-            property_att=Property.objects.get(prefix='SET', sort='basic'),
-            value=instance.name
-        ).delete()
-    except ObjectDoesNotExist:
-        pass
+    Attribute.objects.filter(
+        property_att=Property.objects.get(prefix='SET', sort='basic'),
+        value=instance.name
+    ).delete()
