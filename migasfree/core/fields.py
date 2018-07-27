@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ class MultiFileField(forms.FileField):
             )
 
         for uploaded_file in data:
-            if uploaded_file.size > self.maximum_file_size:
+            if uploaded_file and uploaded_file.size > self.maximum_file_size:
                 raise ValidationError(
                     self.error_messages['file_size'] % {
                         'uploaded_file_name': uploaded_file.name
