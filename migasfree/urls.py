@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.conf import settings
 from rest_framework.authtoken import views
+from rest_framework.documentation import include_docs_urls
 from rest_framework_jwt import views as jwt_views
 
 from core.routers import router, safe_router as core_safe_router
@@ -38,9 +39,9 @@ from rest_framework_swagger.views import get_swagger_view
 from django.contrib import admin
 admin.autodiscover()
 
-swagger_schema_view = get_swagger_view(
-    title='Migasfree REST API',
-)
+TITLE = 'Migasfree REST API'
+
+swagger_schema_view = get_swagger_view(title=TITLE)
 
 urlpatterns = [
     url(r'^grappelli/', include('grappelli.urls')),
@@ -62,6 +63,7 @@ urlpatterns = [
     url(r'^token-auth-jwt/', jwt_views.obtain_jwt_token),
 
     url(r'^docs/', swagger_schema_view, name='docs'),
+    url(r'^api-docs/', include_docs_urls(title=TITLE)),
     # url(r'^auth/', include('djoser.urls')),
 ]
 
