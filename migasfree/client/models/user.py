@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +21,25 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
 
+class DomainUserManager(models.Manager):
+    def scope(self, user):
+        qs = super(DomainUserManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(computer__in=user.get_computers())
+
+        return qs.distinct()
+
+
+class UserManager(DomainUserManager):
+    def create(self, name, fullname=''):
+        obj = User()
+        obj.name = name
+        obj.fullname = fullname
+        obj.save()
+
+        return obj
+
+
 @python_2_unicode_compatible
 class User(models.Model):
     name = models.CharField(
@@ -34,6 +53,12 @@ class User(models.Model):
         max_length=100,
         blank=True
     )
+
+    objects = UserManager()
+
+    def update_fullname(self, fullname):
+        self.fullname = fullname
+        self.save()
 
     def __str__(self):
         if self.fullname != '':
