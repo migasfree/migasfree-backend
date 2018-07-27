@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,12 +24,31 @@ from migasfree.core.models import Project
 from .event import Event
 
 
-class ErrorQueryset(models.query.QuerySet):
-    def unchecked(self):
-        return self.filter(checked=False)
+class DomainErrorManager(models.Manager):
+    def scope(self, user):
+        qs = super(DomainErrorManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(
+                project_id__in=user.get_projects(),
+                computer_id__in=user.get_computers()
+            )
+
+        return qs
 
 
-class ErrorManager(models.Manager):
+class UncheckedManager(DomainErrorManager):
+    def get_queryset(self):
+        return super(UncheckedManager, self).get_queryset().filter(
+            checked=0
+        )
+
+    def scope(self, user):
+        return super(UncheckedManager, self).scope(user).filter(
+            checked=0
+        )
+
+
+class ErrorManager(DomainErrorManager):
     def create(self, computer, project, description):
         obj = Error()
         obj.computer = computer
@@ -38,12 +57,6 @@ class ErrorManager(models.Manager):
         obj.save()
 
         return obj
-
-    def get_queryset(self):
-        return ErrorQueryset(self.model, using=self._db)
-
-    def unchecked(self):
-        return self.get_queryset().unchecked()
 
 
 class Error(Event):
@@ -65,14 +78,19 @@ class Error(Event):
     )
 
     objects = ErrorManager()
+    unchecked = UncheckedManager()
+
+    @staticmethod
+    def unchecked_count(user):
+        return Error.unchecked.scope(user).count()
 
     def checked_ok(self):
         self.checked = True
         self.save()
 
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.description = self.description.replace("\r\n", "\n")
-        super(Error, self).save(*args, **kwargs)
+        super(Error, self).save(force_insert, force_update, using, update_fields)
 
     class Meta:
         app_label = 'client'
