@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,15 +51,16 @@ class MimetypeValidator(object):
             value = [value]
         try:
             for item in value:
-                tmp_file = os.path.join(settings.MIGASFREE_TMP_DIR, item.name)
-                write_file(tmp_file, item.read(1024))  # only header
-                mime = my_magic.file(tmp_file)
-                os.remove(tmp_file)
+                if item:
+                    tmp_file = os.path.join(settings.MIGASFREE_TMP_DIR, item.name)
+                    write_file(tmp_file, item.read(1024))  # only header
+                    mime = my_magic.file(tmp_file)
+                    os.remove(tmp_file)
 
-                if mime not in self.mimetypes:
-                    raise ValidationError(
-                        _('%s is not an acceptable file type') % item
-                    )
+                    if mime not in self.mimetypes:
+                        raise ValidationError(
+                            _('%s is not an acceptable file type') % item
+                        )
         except AttributeError:
             raise ValidationError(
                 _('This value could not be validated for file type') % item
