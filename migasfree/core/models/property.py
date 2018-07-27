@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -137,10 +137,10 @@ class Property(models.Model):
 class ServerProperty(Property):
     objects = ServerPropertyManager()
 
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.sort = 'server'
         self.code = ''
-        super(ServerProperty, self).save(*args, **kwargs)
+        super(ServerProperty, self).save(force_insert, force_update, using, update_fields)
 
     class Meta:
         verbose_name = _("Stamp")
@@ -151,10 +151,10 @@ class ServerProperty(Property):
 class ClientProperty(Property):
     objects = ClientPropertyManager()
 
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.sort = 'client'
         self.code = self.code.replace("\r\n", "\n")
-        super(ClientProperty, self).save(*args, **kwargs)
+        super(ClientProperty, self).save(force_insert, force_update, using, update_fields)
 
     class Meta:
         verbose_name = _("Formula")
@@ -163,10 +163,10 @@ class ClientProperty(Property):
 
 
 class BasicProperty(Property):
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.sort = 'basic'
         self.code = self.code.replace("\r\n", "\n")
-        super(BasicProperty, self).save(*args, **kwargs)
+        super(BasicProperty, self).save(force_insert, force_update, using, update_fields)
 
     class Meta:
         verbose_name = _("Basic Property")
