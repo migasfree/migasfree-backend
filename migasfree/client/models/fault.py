@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,12 +25,29 @@ from .event import Event
 from .fault_definition import FaultDefinition
 
 
-class FaultQueryset(models.query.QuerySet):
-    def unchecked(self):
-        return self.filter(checked=False)
+class DomainFaultManager(models.Manager):
+    def scope(self, user):
+        qs = super(DomainFaultManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(project_id__in=user.get_projects())
+            qs = qs.filter(computer_id__in=user.get_computers())
+
+        return qs
 
 
-class FaultManager(models.Manager):
+class UncheckedManager(DomainFaultManager):
+    def get_queryset(self):
+        return super(UncheckedManager, self).get_queryset().filter(
+            checked=0
+        )
+
+    def scope(self, user):
+        return super(UncheckedManager, self).scope(user).filter(
+            checked=0
+        )
+
+
+class FaultManager(DomainFaultManager):
     def create(self, computer, definition, result):
         obj = Fault()
         obj.computer = computer
@@ -40,19 +57,6 @@ class FaultManager(models.Manager):
         obj.save()
 
         return obj
-
-    def get_queryset(self):
-        return FaultQueryset(self.model, using=self._db)
-
-    def unchecked(self, user_id=0):
-        queryset = self.get_queryset().unchecked()
-        if user_id:
-            queryset = queryset.filter(
-                models.Q(fault_definition__users__id__in=[user_id, ])
-                | models.Q(fault_definition__users=None)
-            )
-
-        return queryset
 
 
 class Fault(Event):
@@ -87,6 +91,18 @@ class Fault(Event):
     )
 
     objects = FaultManager()
+    unchecked = UncheckedManager()
+
+    @staticmethod
+    def unchecked_count(user):
+        queryset = Fault.unchecked.scope(user)
+        if user:
+            queryset = queryset.filter(
+                models.Q(fault_definition__users__id__in=[user.id, ])
+                | models.Q(fault_definition__users=None)
+            )
+
+        return queryset.count()
 
     def checked_ok(self):
         self.checked = True
