@@ -30,7 +30,15 @@ from .project import Project
 from .store import Store
 
 
-class PackageManager(models.Manager):
+class DomainPackageManager(models.Manager):
+    def scope(self, user):
+        qs = super(DomainPackageManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(project__in=user.get_projects())
+        return qs
+
+
+class PackageManager(DomainPackageManager):
     def create(self, fullname, name, version, architecture, project, store, file_=None):
         if store and file_:
             Package.handle_uploaded_file(
@@ -49,6 +57,9 @@ class PackageManager(models.Manager):
         package.save()
 
         return package
+
+    def by_project(self, project_id):
+        return self.get_queryset().filter(project__id=project_id)
 
 
 @python_2_unicode_compatible
@@ -126,8 +137,8 @@ class Package(models.Model):
                 destination.write(chunk)
 
     @staticmethod
-    def orphan_count():
-        return Package.objects.filter(deployment__id=None).count()
+    def orphan_count(user):
+        return Package.objects.scope(user).filter(deployment__id=None).count()
 
     @staticmethod
     def path(project_name, store_name, fullname):
@@ -177,9 +188,9 @@ class Package(models.Model):
         if queryset.exists():
             raise ValidationError(_('Duplicated fullname at project'))
 
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.create_dir()
-        super(Package, self).save(*args, **kwargs)
+        super(Package, self).save(force_insert, force_update, using, update_fields)
 
     def delete(self, using=None, keep_parents=False):
         from migasfree.client.models import PackageHistory
