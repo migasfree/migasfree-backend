@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -108,11 +108,11 @@ class Logical(models.Model):
             self.id
         )
 
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if isinstance(self.alternative_feature_name, basestring):
             self.alternative_feature_name = self.alternative_feature_name.replace(" ", "_")
 
-        super(Logical, self).save(*args, **kwargs)
+        super(Logical, self).save(force_insert, force_update, using, update_fields)
 
     class Meta:
         app_label = 'device'
