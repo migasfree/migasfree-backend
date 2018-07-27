@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+import os
 
 from django.db.models import Q
 from django.contrib import admin
@@ -211,15 +213,29 @@ class ScheduleAdmin(admin.ModelAdmin):
 class PackageAdmin(admin.ModelAdmin):
     form = PackageForm
 
-    list_display = ('name', 'project', 'store')
+    list_display = ('name', 'version', 'architecture', 'project', 'store')
     list_filter = ('project__name', 'store',)
     list_select_related = ('project', 'store',)
     search_fields = ('name', 'store__name',)
     ordering = ('name',)
 
     def save_model(self, request, obj, form, change):
-        file_list = request.FILES.getlist('package_file')
-        Package.objects.create(obj.name, obj.project, obj.store, file_list)
+        package_file = request.FILES['package_file']
+        if obj.id:
+            if obj.store and package_file:
+                Package.handle_uploaded_file(
+                    package_file,
+                    os.path.join(Store.path(obj.project.slug, obj.store.slug), obj.fullname)
+                )
+            super(PackageAdmin, self).save_model(request, obj, form, change)
+        else:
+            Package.objects.create(
+                fullname=obj.fullname, project=obj.project,
+                name=obj.name, version=obj.version,
+                architecture=obj.architecture,
+                store=obj.store,
+                file_=package_file
+            )
 
 
 @admin.register(PackageSet)
