@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ from migasfree.core.models import Project
 
 from .model import Model
 from .feature import Feature
+from ...utils import to_list
 
 
 @python_2_unicode_compatible
@@ -60,26 +61,19 @@ class Driver(models.Model):
     )
 
     def as_dict(self):
-        lst_install = []
-        for p in self.packages_to_install.replace("\r", " ").replace(
-            "\n", " "
-        ).split(" "):
-            if p != '' and p != 'None':
-                lst_install.append(p)
-
         return {
-            'driver': self.name,
-            'packages': lst_install,
+            'driver': self.name if self.name else '',
+            'packages': to_list(self.packages_to_install),
         }
 
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.packages_to_install = self.packages_to_install.replace(
             "\r\n", "\n"
         )
-        super(Driver, self).save(*args, **kwargs)
+        super(Driver, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
-        return self.name.split("/")[-1]
+        return self.name.split("/")[-1] if self.name else ''
 
     class Meta:
         app_label = 'device'
