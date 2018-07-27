@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,6 +30,27 @@ from django.dispatch import receiver
 from .project import Project
 
 
+class DomainStoreManager(models.Manager):
+    def scope(self, user):
+        qs = super(DomainStoreManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(project__in=user.get_projects())
+        return qs
+
+
+class StoreManager(DomainStoreManager):
+    def create(self, name, project):
+        obj = Store()
+        obj.name = name
+        obj.project = project
+        obj.save()
+
+        return obj
+
+    def by_project(self, project_id):
+        return self.get_queryset().filter(project__id=project_id)
+
+
 @python_2_unicode_compatible
 class Store(models.Model):
     """
@@ -53,6 +74,8 @@ class Store(models.Model):
         verbose_name=_("project")
     )
 
+    objects = StoreManager()
+
     @staticmethod
     def path(project_name, name):
         return os.path.join(
@@ -67,11 +90,11 @@ class Store(models.Model):
         if not os.path.exists(path):
             os.makedirs(path)
 
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.name)
         self._create_dir()
 
-        super(Store, self).save(*args, **kwargs)
+        super(Store, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.name
