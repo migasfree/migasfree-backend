@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,50 +17,68 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django import forms
-from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
+from django.utils.translation import ugettext_lazy as _
 
 from migasfree.client.models import Computer
 
 from .models import Package, Deployment, ClientProperty, Attribute
 from .validators import MimetypeValidator
 from .pms import get_available_mimetypes
-from .fields import MultiFileField
 
-# TODO https://github.com/Chive/django-multiupload
 # TODO https://github.com/blueimp/jQuery-File-Upload/wiki
 # TODO https://github.com/sigurdga/django-jquery-file-upload
 # TODO https://github.com/digi604/django-smart-selects (project -> store)
 
 
 class PackageForm(forms.ModelForm):
-    package_file = MultiFileField(
-        maximum_file_size=1024*1024*50,  # FIXME to settings.py
+    package_file = forms.FileField(
         required=False,
-        validators=[MimetypeValidator(get_available_mimetypes())]
+        validators=[MimetypeValidator(get_available_mimetypes())],
+        max_length=settings.MAX_FILE_SIZE,
+        allow_empty_file=True,
     )
 
     def __init__(self, *args, **kwargs):
         super(PackageForm, self).__init__(*args, **kwargs)
+        self.fields['fullname'].required = False
         self.fields['name'].required = False
+        self.fields['version'].required = False
+        self.fields['architecture'].required = False
+        self.fields['store'].required = False
 
     def clean(self):
+        if self['package_file'].value() is not None and not self['store'].value():
+            raise ValidationError(_('Store is required with package file'))
+
         cleaned_data = super(PackageForm, self).clean()
-        if self['name'].value() == '':
-            if len(self['package_file'].value()) == 1:
-                cleaned_data['name'] = self['package_file'].value()[0]
-            else:
-                raise ValidationError(
-                    _('When more than one file is uploaded, name is required')
-                )
+        if self['fullname'].value() == '':
+            cleaned_data['fullname'] = self['package_file'].value().name
         else:
-            cleaned_data['name'] = slugify(cleaned_data['name'])
+            cleaned_data['fullname'] = slugify(cleaned_data['fullname'])
+
+        if not cleaned_data['fullname']:
+            raise ValidationError(_('Fullname is required'))
+
+        cleaned_data['name'], cleaned_data['version'], cleaned_data['architecture'] = Package.normalized_name(
+            cleaned_data['fullname']
+        )
+
+        if not cleaned_data['version']:
+            raise ValidationError(_('Version is required'))
+
+        if not cleaned_data['architecture']:
+            raise ValidationError(_('Architecture is required'))
+
+        self.data = cleaned_data
+        return cleaned_data
 
     def save(self, commit=True):
         instance = super(PackageForm, self).save(commit=False)
-        if instance.name is None:
-            instance.name = str(self['package_file'].value())
+        if instance.fullname is None:
+            instance.fullname = self['package_file'].value().name
         if commit:
             instance.save()
 
