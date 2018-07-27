@@ -31,15 +31,12 @@ from .store import Store
 
 
 class PackageManager(models.Manager):
-    def create(self, fullname, name, version, architecture, project, store):
-        target = Store.path(project.slug, store.slug)
-        if not os.path.exists(target):
-            os.makedirs(target)
-
-        Package.handle_uploaded_file(
-            fullname,
-            os.path.join(target, fullname)
-        )
+    def create(self, fullname, name, version, architecture, project, store, file_=None):
+        if store and file_:
+            Package.handle_uploaded_file(
+                file_,
+                os.path.join(Store.path(project.slug, store.slug), fullname)
+            )
 
         package = Package(
             fullname=fullname,
@@ -87,14 +84,14 @@ class Package(models.Model):
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        verbose_name=_("project")
+        verbose_name=_('project')
     )
 
     store = models.ForeignKey(
         Store,
         on_delete=models.CASCADE,
         null=True,
-        verbose_name=_("store")
+        verbose_name=_('store')
     )
 
     objects = PackageManager()
@@ -148,9 +145,10 @@ class Package(models.Model):
                 pass
 
     def create_dir(self):
-        path = Store.path(self.project.slug, self.store.slug)
-        if not os.path.exists(path):
-            os.makedirs(path)
+        if self.store:
+            path = Store.path(self.project.slug, self.store.slug)
+            if not os.path.exists(path):
+                os.makedirs(path)
 
     def update_store(self, store):
         if self.store != store:
@@ -169,7 +167,7 @@ class Package(models.Model):
         if not hasattr(self, 'project'):
             return False
 
-        if self.store.project.id != self.project.id:
+        if self.store and self.store.project.id != self.project.id:
             raise ValidationError(_('Store must belong to the project'))
 
         queryset = Package.objects.filter(
