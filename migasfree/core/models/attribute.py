@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,13 +20,29 @@ from django.db import models
 from django.db.models import Q
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from .property import Property
 
 
-class AttributeManager(models.Manager):
+class DomainAttributeManager(models.Manager):
+    def scope(self, user):
+        qs = super(DomainAttributeManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(
+                Q(id__in=user.get_attributes()) |
+                Q(id__in=user.get_domain_tags())
+            )
+
+        return qs.defer(
+            'computer__software_inventory',
+            'computer__software_history'
+        )
+
+
+class AttributeManager(DomainAttributeManager):
     def create(
         self, property_att, value,
         description=None, longitude=None, latitude=None
@@ -34,10 +50,18 @@ class AttributeManager(models.Manager):
         """
         if value = "text~other", description = "other"
         """
-        if '~' in value:
+        from migasfree.client.models import Notification
+
+        if value.count('~') == 1:
             value, description = value.split('~')
+        else:
+            description = description
 
         value = value.strip()  # clean field
+        original_value = value
+
+        if len(value) > Attribute.VALUE_LEN:
+            value = value[:Attribute.VALUE_LEN]
 
         queryset = Attribute.objects.filter(
             property_att=property_att, value=value
@@ -47,8 +71,8 @@ class AttributeManager(models.Manager):
 
         if property_att.auto_add is False:
             raise ValidationError(
-                _('The attribute can not be created because'
-                  ' it prevents property')
+                _('The attribute cannot be created because'
+                  ' property prevents it')
             )
 
         obj = Attribute()
@@ -58,6 +82,19 @@ class AttributeManager(models.Manager):
         obj.longitude = longitude
         obj.latitude = latitude
         obj.save()
+
+        if original_value != obj.value:
+            Notification.objects.create(
+                _('The value of the attribute [%s] has more than %d characters. '
+                  'The original value is truncated: %s') % (
+                    '<a href="{}">{}</a>'.format(
+                        reverse('admin:server_attribute_change', args=(obj.id,)),
+                        obj
+                    ),
+                    Attribute.VALUE_LEN,
+                    original_value
+                )
+            )
 
         return obj
 
@@ -92,6 +129,8 @@ class AttributeManager(models.Manager):
 # FIXME https://docs.djangoproject.com/en/1.8/ref/contrib/gis/
 @python_2_unicode_compatible
 class Attribute(models.Model):
+    VALUE_LEN = 250
+
     property_att = models.ForeignKey(
         Property,
         on_delete=models.CASCADE,
@@ -100,7 +139,7 @@ class Attribute(models.Model):
 
     value = models.CharField(
         verbose_name=_("value"),
-        max_length=250
+        max_length=VALUE_LEN
     )
 
     description = models.TextField(
@@ -123,8 +162,15 @@ class Attribute(models.Model):
 
     objects = AttributeManager()
 
+    TOTAL_COMPUTER_QUERY = "SELECT DISTINCT COUNT(client_computer.id) \
+        FROM client_computer, client_computer_sync_attributes \
+        WHERE core_attribute.id=client_computer_sync_attributes.attribute_id \
+        AND client_computer_sync_attributes.computer_id=client_computer.id"
+
     def __str__(self):
-        if self.property_att.prefix == 'CID' and \
+        if self.id == 1:  # special case (SET-All Systems)
+            return self.value
+        elif self.property_att.prefix == 'CID' and \
                 settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] != 'id':
             return u'{} (CID-{})'.format(self.description, self.value)
         else:
@@ -132,6 +178,19 @@ class Attribute(models.Model):
 
     def prefix_value(self):
         return self.__str__()
+
+    def total_computers(self, user=None):
+        from migasfree.client.models import Computer
+
+        if user and not user.userprofile.is_view_all():
+            queryset = Computer.productive.scope(user.userprofile).filter(sync_attributes__id=self.id)
+        else:
+            queryset = Computer.productive.filter(sync_attributes__id=self.id)
+
+        return queryset.count()
+
+    total_computers.admin_order_field = 'total_computers'
+    total_computers.short_description = _('Total computers')
 
     def update_value(self, new_value):
         if self.value != new_value:
@@ -196,11 +255,10 @@ class Attribute(models.Model):
         ordering = ['property_att__prefix', 'value']
 
 
-class ServerAttributeManager(AttributeManager):
-    def get_queryset(self):
-        return super(ServerAttributeManager, self).get_queryset().filter(
-            property_att__sort='server'
-        )
+class ServerAttributeManager(DomainAttributeManager):
+    def scope(self, user):
+        qs = super(ServerAttributeManager, self).scope(user)
+        return qs.filter(property_att__sort='server')
 
 
 class ServerAttribute(Attribute):  # tag
@@ -212,10 +270,12 @@ class ServerAttribute(Attribute):  # tag
         proxy = True
 
 
-class ClientAttributeManager(AttributeManager):
-    def get_queryset(self):
-        return super(ClientAttributeManager, self).get_queryset().filter(
-            Q(property_att__sort='client') | Q(property_att__sort='basic')
+class ClientAttributeManager(DomainAttributeManager):
+    def scope(self, user):
+        qs = super(ClientAttributeManager, self).scope(user)
+        return qs.filter(
+            Q(property_att__sort='client') |
+            Q(property_att__sort='basic')
         )
 
 
@@ -228,11 +288,10 @@ class ClientAttribute(Attribute):
         proxy = True
 
 
-class BasicAttributeManager(AttributeManager):
-    def get_queryset(self):
-        return super(BasicAttributeManager, self).get_queryset().filter(
-            property_att__sort='basic'
-        )
+class BasicAttributeManager(DomainAttributeManager):
+    def scope(self, user):
+        qs = super(BasicAttributeManager, self).scope(user)
+        return qs.filter(property_att__sort='basic')
 
 
 class BasicAttribute(Attribute):
