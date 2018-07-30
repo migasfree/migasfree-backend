@@ -14,7 +14,7 @@ djangorestframework-jwt==1.11.0
 djoser==1.2.0
 docutils==0.14
 jwcrypto==0.5.0
-psycopg2==2.7.5
+psycopg2-binary==2.7.5
 python-dateutil==2.7.3
 python-magic==0.4.15
 pygpgme==0.3
