@@ -48,6 +48,14 @@ class ComputerViewSet(viewsets.ModelViewSet):
 
         return serializers.ComputerSerializer
 
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(id__in=user.get_computers())
+
+        return qs
+
     def partial_update(self, request, *args, **kwargs):
         data = dict(request.data.iterlists())
         devices = data.get('assigned_logical_devices_to_cid[]', data.get('assigned_logical_devices_to_cid', None))
@@ -237,6 +245,17 @@ class ErrorViewSet(
 
         return serializers.ErrorSerializer
 
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(
+                project_id__in=user.get_projects(),
+                computer_id__in=user.get_computers()
+            )
+
+        return qs
+
 
 class FaultDefinitionViewSet(viewsets.ModelViewSet):
     queryset = models.FaultDefinition.objects.all()
@@ -272,6 +291,17 @@ class FaultViewSet(
 
         return serializers.FaultSerializer
 
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(
+                project_id__in=user.get_projects(),
+                computer_id__in=user.get_computers()
+            )
+
+        return qs
+
 
 class MigrationViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
@@ -283,6 +313,17 @@ class MigrationViewSet(
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
+
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(
+                project_id__in=user.get_projects(),
+                computer_id__in=user.get_computers()
+            )
+
+        return qs
 
 
 class NotificationViewSet(
@@ -326,6 +367,14 @@ class StatusLogViewSet(
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(computer_id__in=user.get_computers())
+
+        return qs
+
 
 class SynchronizationViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
@@ -345,6 +394,17 @@ class SynchronizationViewSet(
 
         return serializers.SynchronizationSerializer
 
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(
+                project_id__in=user.get_projects(),
+                computer_id__in=user.get_computers()
+            )
+
+        return qs
+
 
 class UserViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
@@ -354,3 +414,11 @@ class UserViewSet(
     serializer_class = serializers.UserSerializer
     ordering_fields = '__all__'
     ordering = ('name',)
+
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(computer__in=user.get_computers())
+
+        return qs
