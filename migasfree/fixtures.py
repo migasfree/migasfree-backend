@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,10 +26,12 @@ import django.core.management
 
 from StringIO import StringIO
 
-from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.management import create_permissions
 from django.apps import apps
 from django.conf import settings
+
+from migasfree.core.models import UserProfile
 
 
 def run(cmd):
@@ -42,22 +44,25 @@ def run(cmd):
     return out, err
 
 
-def create_user(name, groups=None):
+def configure_user(name, groups=None):
     if groups is None:
         groups = []
 
-    user = User.objects.filter(username=name)
+    user = UserProfile.objects.filter(username=name)
     if not user:
-        user = User()
+        user = UserProfile()
         user.username = name
         user.is_staff = True
         user.is_active = True
         user.is_superuser = (name == 'admin')
         user.set_password(name)
         user.save()
+    else:
+        user = user[0]
 
-        user.groups.add(*groups)
-        user.save()
+    user.groups.clear()
+    user.groups.add(*groups)
+    user.save()
 
 
 def add_perms(group, tables=None, all_perms=True):
@@ -80,9 +85,9 @@ def add_perms(group, tables=None, all_perms=True):
             )
 
 
-def create_default_users():
+def configure_default_users():
     """
-    Create default Groups and Users
+    Create/Update default Groups and Users
     """
 
     # reader group
@@ -91,22 +96,31 @@ def create_default_users():
         reader = Group()
         reader.name = "Reader"
         reader.save()
-        tables = [
-            "client.computer", "client.user", "core.attribute", "client.error",
-            "core.schedule", "core.scheduledelay",
-            "client.fault", "client.faultdefinition", "client.migration",
-            "client.notification",
-            "core.project", "core.package", "core.packageset", "client.packagehistory",
-            "core.deployment", "core.store",
-            "app_catalog.policy", "app_catalog.policygroup",
-            "app_catalog.application", "app_catalog.packagesbyproject",
-            "client.synchronization",
-            "core.platform", "core.property",
-            "device.device", "device.connection", "device.manufacturer",
-            "device.model", "device.type",
-        ]
-        add_perms(reader, tables, all_perms=False)
-        reader.save()
+    else:
+        reader = reader[0]
+
+    tables = [
+        "client.computer", "client.user", "client.error",
+        "client.fault", "client.faultdefinition", "client.migration",
+        "client.notification", "client.statuslog",
+        "core.attribute", "core.attributeset",
+        "core.schedule", "core.scheduledelay",
+        "core.project", "core.package", "core.packageset", "client.packagehistory",
+        "core.deployment", "core.store", "core.userprofile",
+        "core.domain", "core.scope",
+        "app_catalog.policy", "app_catalog.policygroup",
+        "app_catalog.application", "app_catalog.packagesbyproject",
+        "client.synchronization",
+        "core.platform", "core.property",
+        "device.device", "device.connection", "device.driver",
+        "device.manufacturer", "device.feature", "device.logical",
+        "device.model", "device.type",
+        "hardware.node", "hardware.capability",
+        "hardware.configuration", "hardware.logicalname",
+    ]
+    reader.permissions.clear()
+    add_perms(reader, tables, all_perms=False)
+    reader.save()
 
     # liberator group
     liberator = Group.objects.filter(name='Liberator')
@@ -114,12 +128,17 @@ def create_default_users():
         liberator = Group()
         liberator.name = "Liberator"
         liberator.save()
-        tables = [
-            "core.deployment", "core.schedule", "core.scheduledelay",
-            "app_catalog.policy", "app_catalog.policygroup",
-        ]
-        add_perms(liberator, tables)
-        liberator.save()
+    else:
+        liberator = liberator[0]
+
+    tables = [
+        "core.deployment", "core.schedule", "core.scheduledelay",
+        "app_catalog.policy", "app_catalog.policygroup",
+        "app_catalog.application", "app_catalog.packagesbyproject",
+    ]
+    liberator.permissions.clear()
+    add_perms(liberator, tables)
+    liberator.save()
 
     # packager group
     packager = Group.objects.filter(name='Packager')
@@ -127,9 +146,13 @@ def create_default_users():
         packager = Group()
         packager.name = "Packager"
         packager.save()
-        tables = ["core.package", "core.packageset", "core.store"]
-        add_perms(packager, tables)
-        packager.save()
+    else:
+        packager = packager[0]
+
+    tables = ["core.package", "core.packageset", "core.store"]
+    packager.permissions.clear()
+    add_perms(packager, tables)
+    packager.save()
 
     # computer checker group
     checker = Group.objects.filter(name='Computer Checker')
@@ -137,11 +160,15 @@ def create_default_users():
         checker = Group()
         checker.name = "Computer Checker"
         checker.save()
-        tables = [
-            "client.error", "client.fault", "client.synchronization"
-        ]
-        add_perms(checker, tables)
-        checker.save()
+    else:
+        checker = checker[0]
+
+    tables = [
+        "client.error", "client.fault", "client.synchronization"
+    ]
+    checker.permissions.clear()
+    add_perms(checker, tables)
+    checker.save()
 
     # device installer group
     device_installer = Group.objects.filter(name='Device installer')
@@ -149,12 +176,17 @@ def create_default_users():
         device_installer = Group()
         device_installer.name = "Device installer"
         device_installer.save()
-        tables = [
-            "device.connection", "device.manufacturer",
-            "device.model", "device.type"
-        ]
-        add_perms(device_installer, tables)
-        device_installer.save()
+    else:
+        device_installer = device_installer[0]
+
+    tables = [
+        "device.connection", "device.manufacturer",
+        "device.model", "device.type", "device.device",
+        "device.driver", "device.logical",
+    ]
+    device_installer.permissions.clear()
+    add_perms(device_installer, tables)
+    device_installer.save()
 
     # configurator group
     configurator = Group.objects.filter(name='Configurator')
@@ -162,22 +194,44 @@ def create_default_users():
         configurator = Group()
         configurator.name = "Configurator"
         configurator.save()
-        tables = [
-            "client.faultdefinition", "core.property", "core.project",
-            "client.synchronization", "core.platform",
-            "client.migration", "client.notification",
-        ]
-        add_perms(configurator, tables)
-        configurator.save()
+    else:
+        configurator = configurator[0]
+
+    tables = [
+        "client.faultdefinition", "core.property", "core.project",
+        "client.synchronization", "core.platform", "core.attributeset",
+        "client.migration", "client.notification",
+    ]
+    configurator.permissions.clear()
+    add_perms(configurator, tables)
+    configurator.save()
+
+    # domain admin group
+    domain_admin = Group.objects.filter(name='Domain Admin')
+    if not domain_admin:
+        domain_admin = Group()
+        domain_admin.name = "Domain Admin"
+        domain_admin.save()
+    else:
+        domain_admin = domain_admin[0]
+
+    tables = [
+        "core.scope", "core.deployment",
+    ]
+    domain_admin.permissions.clear()
+    add_perms(domain_admin, tables)
+    add_perms(domain_admin, ["client.computer", ], all_perms=False)
+    domain_admin.save()
 
     # default users
-    create_user("admin")
-    create_user("packager", [reader, packager])
-    create_user("configurator", [reader, configurator])
-    create_user("installer", [reader, device_installer])
-    create_user("liberator", [reader, liberator])
-    create_user("checker", [reader, checker])
-    create_user("reader", [reader])
+    configure_user("admin")
+    configure_user("domain-admin", [reader, domain_admin])
+    configure_user("packager", [reader, packager])
+    configure_user("configurator", [reader, configurator])
+    configure_user("installer", [reader, device_installer])
+    configure_user("liberator", [reader, liberator])
+    configure_user("checker", [reader, checker])
+    configure_user("reader", [reader])
 
 
 def sequence_reset():
@@ -214,7 +268,7 @@ def create_initial_data():
         for app in apps.get_app_configs():
             create_permissions(app, None, 2)
 
-    create_default_users()
+    configure_default_users()
 
     fixtures = [
         'core.property.json',
