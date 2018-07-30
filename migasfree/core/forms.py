@@ -16,15 +16,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
+
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
 from migasfree.client.models import Computer
 
-from .models import Package, Deployment, ClientProperty, Attribute
+from .models import (
+    Package, Deployment, ClientProperty, Attribute,
+    UserProfile, Scope, Domain, Project, Store,
+)
 from .validators import MimetypeValidator
 from .pms import get_available_mimetypes
 
@@ -42,12 +48,25 @@ class PackageForm(forms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
         super(PackageForm, self).__init__(*args, **kwargs)
+
         self.fields['fullname'].required = False
         self.fields['name'].required = False
         self.fields['version'].required = False
         self.fields['architecture'].required = False
         self.fields['store'].required = False
+
+        user = self.request.user.userprofile
+
+        try:
+            if Project.objects.scope(user).count() == 1:
+                self.fields['project'].initial = Project.objects.scope(user).first().id
+
+            self.fields['project'].empty_label = None
+            self.fields['project'].queryset = Project.objects.scope(user)
+        except AttributeError:
+            pass
 
     def clean(self):
         if self['package_file'].value() is not None and not self['store'].value():
@@ -89,7 +108,46 @@ class PackageForm(forms.ModelForm):
         fields = '__all__'
 
 
+class StoreForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
+        super(StoreForm, self).__init__(*args, **kwargs)
+
+        user = self.request.user.userprofile
+
+        try:
+            if Project.objects.scope(user).count() == 1:
+                self.fields['project'].initial = Project.objects.scope(user).first().id
+
+            self.fields['project'].empty_label = None
+            self.fields['project'].queryset = Project.objects.scope(user)
+        except AttributeError:
+            pass
+
+    class Meta:
+        model = Store
+        fields = '__all__'
+
+
 class DeploymentForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
+        super(DeploymentForm, self).__init__(*args, **kwargs)
+        user = self.request.user.userprofile
+        self.fields['start_date'].initial = datetime.date.today()
+
+        try:
+            if Project.objects.scope(user).count() == 1:
+                self.fields['project'].initial = Project.objects.scope(user).first().id
+
+            self.fields['project'].queryset = Project.objects.scope(user)
+        except AttributeError:
+            pass
+
+        if not self.instance and user.domain_preference:
+            self.fields['domain'].initial = user.domain_preference
+            self.fields['domain'].widget.attrs['readonly'] = True
+
     def _validate_active_computers(self, att_list):
         for att_id in att_list:
             attribute = Attribute.objects.get(pk=att_id)
@@ -98,7 +156,7 @@ class DeploymentForm(forms.ModelForm):
                 if computer.status not in Computer.ACTIVE_STATUS:
                     raise ValidationError(
                         _('It is not possible to assign an inactive computer (%s) as an attribute')
-                        % computer.__str__()
+                        % computer
                     )
 
     def clean(self):
@@ -132,3 +190,45 @@ class ClientPropertyForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ClientPropertyForm, self).__init__(*args, **kwargs)
         self.fields['code'].required = True
+
+
+class ScopeForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
+        super(ScopeForm, self).__init__(*args, **kwargs)
+
+        try:
+            self.fields['user'].initial = self.request.user.userprofile
+            self.fields['domain'].initial = self.request.user.userprofile.domain_preference
+        except AttributeError:
+            pass
+
+    class Meta:
+        model = Scope
+        fields = ('name', 'user')
+
+
+class DomainForm(forms.ModelForm):
+    class Meta:
+        model = Domain
+        fields = ('name',)
+
+
+class UserProfileForm(forms.ModelForm):
+     def __init__(self, *args, **kwargs):
+         super(UserProfileForm, self).__init__(*args, **kwargs)
+         self.fields['groups'].help_text = ''
+         if self.instance.id:
+             self.fields['username'].help_text += u'<p><a href="{}">{}</a></p>'.format(
+                 reverse('admin:auth_user_password_change', args=(self.instance.id,)),
+                 _('Change Password')
+             )
+
+     class Meta:
+         model = UserProfile
+         fields = (
+            'username', 'first_name', 'last_name',
+            'email', 'date_joined', 'last_login',
+            'is_active', 'is_superuser', 'is_staff',
+            'groups', 'user_permissions', 'domains',
+         )
