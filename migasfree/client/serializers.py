@@ -201,7 +201,7 @@ class SynchronizationSerializer(serializers.ModelSerializer):
 class SynchronizationWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Synchronization
-        fields = '__all__'
+        fields = ('computer',)
 
 
 class ComputerSyncSerializer(serializers.ModelSerializer):
