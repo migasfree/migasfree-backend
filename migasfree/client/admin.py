@@ -18,7 +18,7 @@
 
 from collections import defaultdict
 
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.contrib import admin
 from django.shortcuts import redirect
 from django.contrib.admin import SimpleListFilter
@@ -28,6 +28,7 @@ from django.conf import settings
 
 from migasfree.core.models import Attribute
 from migasfree.device.models import Logical
+from migasfree.hardware.models import Node
 from migasfree.utils import merge_dicts
 
 from .models import *
@@ -81,7 +82,7 @@ class ComputerAdmin(admin.ModelAdmin):
         'storage',
         'disks',
         'mac_address',
-        'my_inflected_logical_devices',
+        'my_inflicted_logical_devices',
     )
 
     fieldsets = (
@@ -130,7 +131,7 @@ class ComputerAdmin(admin.ModelAdmin):
         }),
         (_('Devices'), {
             'fields': (
-                'my_inflected_logical_devices',
+                'my_inflicted_logical_devices',
                 # 'assigned_logical_devices_to_cid',
                 'default_logical_device',
             )
@@ -203,10 +204,10 @@ class ComputerAdmin(admin.ModelAdmin):
 
     get_software_history.short_description = _('Software History')
 
-    def my_inflected_logical_devices(self, obj):
-        return ', '.join([item.__str__() for item in obj.inflected_logical_devices()])
+    def my_inflicted_logical_devices(self, obj):
+        return ', '.join([item.__str__() for item in obj.inflicted_logical_devices()])
 
-    my_inflected_logical_devices.short_description = _('Inflected Logical Devices')
+    my_inflicted_logical_devices.short_description = _('Inflicted Logical Devices')
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == "sync_attributes":
@@ -234,6 +235,16 @@ class ComputerAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+    def get_queryset(self, request):
+        return Computer.objects.scope(request.user.userprofile).select_related(
+            'project',
+            'sync_user',
+            'default_logical_device',
+            'default_logical_device__device',
+        ).prefetch_related(
+            Prefetch('node_set', queryset=Node.objects.filter(parent=None)),
+        )
 
 
 @admin.register(PackageHistory)
@@ -322,6 +333,18 @@ class FaultDefinitionAdmin(admin.ModelAdmin):
             'fields': ('users',)
         }),
     )
+
+    def get_queryset(self, request):
+        qs = Attribute.objects.scope(request.user.userprofile)
+        return super(FaultDefinitionAdmin, self).get_queryset(
+            request
+        ).prefetch_related(
+            Prefetch('included_attributes', queryset=qs),
+            'included_attributes__property_att',
+            Prefetch('excluded_attributes', queryset=qs),
+            'excluded_attributes__property_att',
+            'users',
+        )
 
 
 class UserFaultFilter(SimpleListFilter):
