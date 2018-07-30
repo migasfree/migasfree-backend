@@ -213,9 +213,9 @@ class Node(models.Model):
             parent_id__isnull=True
         )
         if query.count() == 1:
-            if query[0].vendor in list(self.VIRTUAL_MACHINES.keys()):
+            if query[0].vendor in list(Node.VIRTUAL_MACHINES.keys()):
                 return True
-            elif self.get_is_docker(computer_id):
+            elif Node.get_is_docker(computer_id):
                 return True
 
         return False
