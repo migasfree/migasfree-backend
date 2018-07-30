@@ -81,7 +81,10 @@ class Error(Event):
     unchecked = UncheckedManager()
 
     @staticmethod
-    def unchecked_count(user):
+    def unchecked_count(user=None):
+        if not user:
+            return Error.unchecked.count()
+
         return Error.unchecked.scope(user).count()
 
     def checked_ok(self):

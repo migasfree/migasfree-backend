@@ -94,10 +94,10 @@ class Fault(Event):
     unchecked = UncheckedManager()
 
     @staticmethod
-    def unchecked_count(user):
-        queryset = Fault.unchecked.scope(user)
+    def unchecked_count(user=None):
+        queryset = Fault.unchecked.all()
         if user:
-            queryset = queryset.filter(
+            queryset = Fault.unchecked.scope(user).filter(
                 models.Q(fault_definition__users__id__in=[user.id, ])
                 | models.Q(fault_definition__users=None)
             )
