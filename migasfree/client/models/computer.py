@@ -119,12 +119,13 @@ class InactiveManager(DomainComputerManager):
 
 
 class ComputerManager(DomainComputerManager):
-    def create(self, name, project, uuid, ip_address=None):
+    def create(self, name, project, uuid, ip_address=None, forwarded_ip_address=None):
         obj = Computer()
         obj.name = name
         obj.project = project
         obj.uuid = uuid
         obj.ip_address = ip_address
+        obj.forwarded_ip_address = forwarded_ip_address
         obj.save()
 
         return obj
