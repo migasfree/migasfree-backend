@@ -58,6 +58,14 @@ class HardwareViewSet(
 
     # example cpu list: bus_info='cpu@' or bus_info='cpu@0'
 
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(computer_id__in=user.get_computers())
+
+        return qs
+
 
 class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
     @action(methods=['post'], detail=False)
