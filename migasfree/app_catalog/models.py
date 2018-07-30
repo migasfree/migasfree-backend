@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,6 +32,26 @@ from migasfree.core.models import Project, Attribute
 from migasfree.utils import to_list
 
 _UNSAVED_IMAGEFIELD = 'unsaved_imagefield'
+
+
+class DomainPackagesByProjectManager(models.Manager):
+    def scope(self, user):
+        qs = super(DomainPackagesByProjectManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(project__in=user.get_projects())
+
+        return qs
+
+
+class PackagesByProjectManager(DomainPackagesByProjectManager):
+    def create(self, application, project, packages_to_install):
+        obj = PackagesByProject()
+        obj.application = application
+        obj.project = project
+        obj.packages_to_install = packages_to_install
+        obj.save()
+
+        return obj
 
 
 class MediaFileSystemStorage(FileSystemStorage):
@@ -152,6 +172,8 @@ class PackagesByProject(models.Model):
         verbose_name=_('packages to install'),
         blank=True,
     )
+
+    objects = PackagesByProjectManager()
 
     def __str__(self):
         return u'{}@{}'.format(self.application, self.project)
