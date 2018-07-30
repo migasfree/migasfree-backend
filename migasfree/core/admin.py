@@ -18,7 +18,7 @@
 
 import os
 
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.utils.html import format_html
@@ -32,7 +32,10 @@ from migasfree.client.models import Computer
 from . import tasks
 
 from .models import *
-from .forms import PackageForm, DeploymentForm, ClientPropertyForm
+from .forms import (
+    PackageForm, DeploymentForm, ClientPropertyForm,
+    UserProfileForm, ScopeForm, DomainForm, StoreForm,
+)
 
 admin.site.register(Platform)
 
@@ -65,6 +68,7 @@ class ProjectAdmin(ImportExportActionModelAdmin):
 
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
+    form = StoreForm
     list_display = ('name', 'project')
     list_filter = ('project__name',)
     search_fields = ('name',)
@@ -152,6 +156,18 @@ class ClientAttributeAdmin(admin.ModelAdmin):
     search_fields = ('value', 'description')
     readonly_fields = ('property_att', 'value',)
 
+    def get_queryset(self, request):
+        sql = Attribute.TOTAL_COMPUTER_QUERY
+        user = request.user.userprofile
+        if not user.is_view_all():
+            computers = user.get_computers()
+            if computers:
+                sql += " AND client_computer_sync_attributes.computer_id IN " \
+                    + "(" + ",".join(str(x) for x in computers) + ")"
+        return ClientAttribute.objects.scope(user).extra(
+            select={'total_computers': sql}
+        )
+
 
 class ServerAttributeFilter(SimpleListFilter):
     title = 'Server Attribute'
@@ -176,6 +192,18 @@ class ServerAttributeAdmin(admin.ModelAdmin):
     search_fields = ('value', 'description')
     readonly_fields = ('inflicted_computers',)
 
+    def get_queryset(self, request):
+        sql = Attribute.TOTAL_COMPUTER_QUERY
+        user = request.user.userprofile
+        if not user.is_view_all():
+            computers = user.get_computers()
+            if computers:
+                sql += " AND client_computer_sync_attributes.computer_id IN " \
+                    + "(" + ",".join(str(x) for x in computers) + ")"
+        return ServerAttribute.objects.scope(user).extra(
+            select={'total_computers': sql}
+        )
+
     def inflicted_computers(self, obj):
         ret = []
         for c in Computer.productive.filter(sync_attributes__in=[obj.pk]).exclude(tags__in=[obj.pk]):
@@ -199,6 +227,20 @@ class ScheduleDelayLine(admin.TabularInline):
     extra = 0
     ordering = ('delay',)
 
+    def get_queryset(self, request):
+        sql = ScheduleDelay.TOTAL_COMPUTER_QUERY
+        user = request.user.userprofile
+        if not user.is_view_all():
+            computers = user.get_computers()
+            if computers:
+                sql += " AND client_computer_sync_attributes.computer_id IN " \
+                    + "(" + ",".join(str(x) for x in computers) + ")"
+            qs = ScheduleDelay.objects.scope(user).extra(select={'total_computers': sql})
+        else:
+            qs = ScheduleDelay.objects.all()
+
+        return qs
+
 
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
@@ -207,6 +249,15 @@ class ScheduleAdmin(admin.ModelAdmin):
     ordering = ('name',)
     inlines = [ScheduleDelayLine, ]
     extra = 0
+
+    fieldsets = (
+        ('', {
+            'fields': (
+                'name',
+                'project',
+            )
+        }),
+    )
 
 
 @admin.register(Package)
@@ -218,6 +269,13 @@ class PackageAdmin(admin.ModelAdmin):
     list_select_related = ('project', 'store',)
     search_fields = ('name', 'store__name',)
     ordering = ('name',)
+
+    def get_queryset(self, request):
+        return super(PackageAdmin, self).get_queryset(
+            request
+        ).prefetch_related(
+            Prefetch('deployment_set', queryset=Deployment.objects.scope(request.user.userprofile))
+        )
 
     def save_model(self, request, obj, form, change):
         package_file = request.FILES['package_file']
@@ -304,29 +362,18 @@ class DeploymentAdmin(admin.ModelAdmin):
         }),
     )
 
-    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
-        if db_field.name == "included_attributes":
-            kwargs["queryset"] = Attribute.objects.filter(
-                property_att__enabled=True
-            )
-
-            return db_field.formfield(**kwargs)
-
-        if db_field.name == "excluded_attributes":
-            kwargs["queryset"] = Attribute.objects.filter(
-                property_att__enabled=True
-            )
-
-            return db_field.formfield(**kwargs)
-
-        return super(DeploymentAdmin, self).formfield_for_manytomany(
-            db_field, request, **kwargs
-        )
-
     def save_model(self, request, obj, form, change):
         is_new = (obj.pk is None)
         has_slug_changed = form.initial.get('slug') != obj.slug
         packages_after = form.cleaned_data['available_packages']
+
+        user = request.user.userprofile
+        if user:
+            obj.domain = user.domain_preference
+        if user.domain_preference:
+            if not obj.name.startswith(user.domain_preference.name.lower()):
+                obj.name = u'{}_{}'.format(user.domain_preference.name.lower(), obj.name)
+
         super(DeploymentAdmin, self).save_model(request, obj, form, change)
 
         # create repository metadata when packages has been changed
@@ -344,3 +391,99 @@ class DeploymentAdmin(admin.ModelAdmin):
             # delete old repository when name (slug) has changed
             if has_slug_changed and not is_new:
                 tasks.remove_repository_metadata.delay(obj.id, form.initial.get('slug'))
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    form = UserProfileForm
+    list_display = ('username', 'first_name', 'last_name', 'domain_preference')
+    ordering = ('username',)
+    search_fields = ('username', 'first_name', 'last_name')
+    readonly_fields = ('date_joined', 'last_login')
+
+    fieldsets = (
+         (_('General'), {
+             'fields': (
+                 'username',
+                 'first_name',
+                 'last_name',
+                 'email',
+                 'date_joined',
+                 'last_login',
+             ),
+         }),
+         (_('Authorizations'), {
+             'fields': (
+                 'is_active',
+                 'is_superuser',
+                 'is_staff',
+                 'groups',
+                 'user_permissions',
+                 'domains',
+             ),
+        }),
+        (_('Preferences'), {
+            'fields': (
+                'domain_preference',
+                'scope_preference',
+            ),
+        }),
+    )
+
+
+@admin.register(Scope)
+class ScopeAdmin(admin.ModelAdmin):
+    form = ScopeForm
+    list_display = ('name', 'domain')
+    ordering = ('name',)
+    search_fields = ('name',)
+    fieldsets = (
+        (_('General'), {
+            'fields': (
+                'name',
+                'domain'
+            ),
+        }),
+        (_('Attributes'), {
+            'fields': (
+                'included_attributes',
+                'excluded_attributes',
+            ),
+        }),
+        ('', {
+            'fields': ('user',),
+            'classes': ['hidden'],
+        })
+    )
+
+
+@admin.register(Domain)
+class DomainAdmin(admin.ModelAdmin):
+    form = DomainForm
+    list_display = ('name',)
+    ordering = ('name',)
+    search_fields = ('name',)
+    fieldsets = (
+        (_('General'), {
+            'fields': (
+                'name', 'comment',
+            ),
+        }),
+        (_('Attributes'), {
+            'fields': (
+                'included_attributes',
+                'excluded_attributes',
+             ),
+        }),
+        (_('Available tags'), {
+            'fields': (
+                'tags',
+            ),
+        }),
+    )
+
+    def get_queryset(self, request):
+        user_profile = UserProfile.objects.get(id=request.user.id)
+        user_profile.update_scope(0)
+
+        return super(DomainAdmin, self).get_queryset(request)
