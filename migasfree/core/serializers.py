@@ -74,9 +74,11 @@ class AttributeSerializer(serializers.ModelSerializer):
 
 
 class AttributeInfoSerializer(serializers.ModelSerializer):
+    property_att = PropertyInfoSerializer(many=False, read_only=True)
+
     class Meta:
         model = Attribute
-        fields = ('id', 'value')
+        fields = ('id', 'property_att', 'value')
 
 
 class AttributeSetSerializer(serializers.ModelSerializer):
@@ -448,7 +450,7 @@ class DomainInfoSerializer(serializers.ModelSerializer):
 class DomainSerializer(serializers.ModelSerializer):
     included_attributes = AttributeInfoSerializer(many=True, read_only=True)
     excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
-    available_tags = AttributeInfoSerializer(many=True, read_only=True)
+    tags = AttributeInfoSerializer(many=True, read_only=True)
 
     class Meta:
         model = Domain
