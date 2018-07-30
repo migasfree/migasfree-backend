@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
             name='Device',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=50, null=True, unique=True, verbose_name='name')),
+                ('name', models.CharField(max_length=50, unique=True, verbose_name='name')),
                 ('data', models.TextField(default=b'{}', null=True, verbose_name='data')),
                 ('available_for_attributes', models.ManyToManyField(blank=True, to='core.Attribute', verbose_name='available for attributes')),
                 ('connection', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='device.Connection', verbose_name='connection')),
