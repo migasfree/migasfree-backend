@@ -36,10 +36,7 @@ class DomainAttributeManager(models.Manager):
                 Q(id__in=user.get_domain_tags())
             )
 
-        return qs.defer(
-            'computer__software_inventory',
-            'computer__software_history'
-        )
+        return qs
 
 
 class AttributeManager(DomainAttributeManager):
