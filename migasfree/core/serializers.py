@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ from .models import (
     Attribute, ServerAttribute, ClientAttribute,
     Schedule, ScheduleDelay,
     Package, Deployment, AttributeSet,
+    Domain, Scope, UserProfile,
 )
 from ..utils import to_list
 
@@ -60,6 +61,9 @@ class PropertyInfoSerializer(serializers.ModelSerializer):
 
 class AttributeSerializer(serializers.ModelSerializer):
     property_att = PropertyInfoSerializer(many=False, read_only=True)
+
+    def get_total_computers(self, obj):
+        return obj.total_computers(user=self.context['request'].user)
 
     class Meta:
         model = Attribute
@@ -204,7 +208,7 @@ class ScheduleDelaySerializer(serializers.ModelSerializer):
     total_computers = serializers.SerializerMethodField()
 
     def get_total_computers(self, obj):
-        return obj.total_computers()
+        return obj.total_computers(user=self.context['request'].user)
 
     class Meta:
         model = ScheduleDelay
@@ -420,4 +424,49 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Deployment
+        fields = '__all__'
+
+
+class UserProfileInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ('id', 'username')
+
+
+class DomainInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Domain
+        fields = ('id', 'name')
+
+
+class DomainSerializer(serializers.ModelSerializer):
+    included_attributes = AttributeInfoSerializer(many=True, read_only=True)
+    excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
+    available_tags = AttributeInfoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Domain
+        fields = '__all__'
+
+
+class DomainWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Domain
+        fields = '__all__'
+
+
+class ScopeSerializer(serializers.ModelSerializer):
+    included_attributes = AttributeInfoSerializer(many=True, read_only=True)
+    excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
+    user = UserProfileInfoSerializer(many=False, read_only=True)
+    domain = DomainInfoSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Scope
+        fields = '__all__'
+
+
+class ScopeWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Scope
         fields = '__all__'
