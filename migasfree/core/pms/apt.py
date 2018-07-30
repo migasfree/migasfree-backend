@@ -53,7 +53,11 @@ do
   mkdir -p $_NAME/PKGS/binary-$_ARCH/
   cd ..
 
-  dpkg-scanpackages -m dists/$_NAME/PKGS > dists/$_NAME/PKGS/binary-$_ARCH/Packages
+  ionize -c 3 dpkg-scanpackages -m dists/$_NAME/PKGS > dists/$_NAME/PKGS/binary-$_ARCH/Packages 2> /tmp/$_NAME
+  if [ $? != 0 ]
+  then
+    (>&2 cat /tmp/$_NAME)
+  fi
   gzip -9c dists/$_NAME/PKGS/binary-$_ARCH/Packages > dists/$_NAME/PKGS/binary-$_ARCH/Packages.gz
 done
 
