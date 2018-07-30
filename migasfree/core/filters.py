@@ -55,13 +55,13 @@ class ProjectFilter(filters.FilterSet):
 class ClientAttributeFilter(filters.FilterSet):
     class Meta:
         model = ClientAttribute
-        fields = ['id', 'property_att__id', 'property_att__prefix', 'value']
+        fields = ['id', 'property_att__id', 'property_att__prefix', 'value', 'property_att__sort']
 
 
 class ServerAttributeFilter(filters.FilterSet):
     class Meta:
         model = ServerAttribute
-        fields = ['id', 'property_att__id', 'property_att__prefix', 'value']
+        fields = ['id', 'property_att__id', 'property_att__prefix', 'value', 'property_att__sort']
 
 
 class ScheduleDelayFilter(filters.FilterSet):
