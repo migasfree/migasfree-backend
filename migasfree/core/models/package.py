@@ -137,7 +137,10 @@ class Package(models.Model):
                 destination.write(chunk)
 
     @staticmethod
-    def orphan_count(user):
+    def orphan_count(user=None):
+        if not user:
+            return Package.objects.filter(deployment__id=None).count()
+
         return Package.objects.scope(user).filter(deployment__id=None).count()
 
     @staticmethod
