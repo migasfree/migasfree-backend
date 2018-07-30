@@ -53,7 +53,7 @@ do
   mkdir -p $_NAME/PKGS/binary-$_ARCH/
   cd ..
 
-  ionize -c 3 dpkg-scanpackages -m dists/$_NAME/PKGS > dists/$_NAME/PKGS/binary-$_ARCH/Packages 2> /tmp/$_NAME
+  ionice -c 3 dpkg-scanpackages -m dists/$_NAME/PKGS > dists/$_NAME/PKGS/binary-$_ARCH/Packages 2> /tmp/$_NAME
   if [ $? != 0 ]
   then
     (>&2 cat /tmp/$_NAME)
