@@ -320,7 +320,7 @@ class DeploymentAdmin(admin.ModelAdmin):
     form = DeploymentForm
     list_display = ('project', 'name', 'enabled', 'start_date',)
     list_select_related = ('project',)
-    list_filter = ('enabled', 'project__name', 'schedule',)
+    list_filter = ('enabled', 'project__name', 'domain',)
     ordering = ('name',)
     search_fields = ('name', 'available_packages__name',)
     read_only_fields = ('slug',)
