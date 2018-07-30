@@ -57,7 +57,7 @@ def add_unchecked_notifications():
             'target': 'server',
             'level': 'warning',
             'result': Notification.objects.unchecked().count(),
-            'api': '%s?checked=False' % reverse('notification-list')
+            'api': '{}?checked=False'.format('notification-list')
         }
     )
     con.sadd('migasfree:watch:chk', 'notifications')
@@ -70,8 +70,8 @@ def add_unchecked_faults():
             'msg': ugettext('Unchecked Faults'),
             'target': 'computer',
             'level': 'critical',
-            'result': Fault.objects.unchecked().count(),
-            'api': '%s?checked=False' % reverse('fault-list')
+            'result': Fault.unchecked_count(),
+            'api': '{}?checked=False'.format('fault-list')
         }
     )
     con.sadd('migasfree:watch:chk', 'faults')
@@ -84,8 +84,8 @@ def add_unchecked_errors():
             'msg': ugettext('Unchecked Errors'),
             'target': 'computer',
             'level': 'critical',
-            'result': Error.objects.unchecked().count(),
-            'api': '%s?checked=False' % reverse('error-list')
+            'result': Error.unchecked_count(),
+            'api': '{}?checked=False'.format('error-list')
         }
     )
     con.sadd('migasfree:watch:chk', 'errors')
@@ -116,7 +116,7 @@ def add_synchronizing_computers():
 
     computers = con.smembers('migasfree:watch:msg')
     for computer_id in computers:
-        date = con.hget('migasfree:msg:%s' % computer_id, 'date')
+        date = con.hget('migasfree:msg:{}'.format(computer_id), 'date')
         if datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f') > delayed_time:
             result += 1
 
@@ -142,7 +142,7 @@ def add_delayed_computers():
 
     computers = con.smembers('migasfree:watch:msg')
     for computer_id in computers:
-        date = con.hget('migasfree:msg:%s' % computer_id, 'date')
+        date = con.hget('migasfree:msg:{}'.format(computer_id), 'date')
         if datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f') <= delayed_time:
             result += 1
 
@@ -260,7 +260,7 @@ def assigned_computers_to_deployment(deployment_id):
     ).values_list('id', flat=True)))
 
     con = get_redis_connection()
-    key = 'migasfree:deployments:%d:computers' % deployment_id
+    key = 'migasfree:deployments:{}:computers'.format(deployment_id)
     con.delete(key)
     if computers:
         [con.sadd(key, computer_id) for computer_id in list(computers)]
