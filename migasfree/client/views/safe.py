@@ -18,6 +18,7 @@
 
 from datetime import datetime, timedelta
 
+from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.shortcuts import get_object_or_404
@@ -34,7 +35,7 @@ from migasfree.utils import (
 from migasfree.model_update import update
 from migasfree.core.mixins import SafeConnectionMixin
 from migasfree.core.models import (
-    Deployment, Property,
+    Deployment, Property, Domain,
     Attribute, BasicAttribute, AttributeSet,
 )
 from migasfree.app_catalog.models import Policy
@@ -155,7 +156,7 @@ def add_computer_message(computer, message):
     con.hmset(
         'migasfree:msg:%d' % computer.id, {
             'date': datetime.now(),
-            'name': computer.__str__(),
+            'name': computer,
             'project': computer.project.name,
             'ip': computer.ip_address,
             'user': computer.sync_user,
@@ -516,6 +517,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     *Attribute.process_kind_property(client_property, value)
                 )
 
+        # Domain attribute
+        computer.sync_attributes.add(*Domain.process(computer.get_all_attributes()))
+
         # tags
         for tag in computer.tags.all().filter(property_att__enabled=True):
             Attribute.process_kind_property(tag.property_att, tag.value)
@@ -802,6 +806,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         add_computer_message(computer, ugettext('Getting available tags...'))
 
         available = {}
+
+        # Deployment tags
         for deploy in Deployment.objects.filter(
             project__id=computer.project.id
         ).filter(enabled=True):
@@ -811,6 +817,18 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 if tag.property_att.name not in available.keys():
                     available[tag.property_att.name] = []
 
+                value = tag.__str__()
+                if value not in available[tag.property_att.name]:
+                    available[tag.property_att.name].append(value)
+
+        # Domain Tags
+        for domain in Domain.objects.filter(
+            Q(included_attributes__in=computer.sync_attributes.all()) &
+            ~Q(excluded_attributes__in=computer.sync_attributes.all())
+        ):
+            for tag in domain.tags.all():
+                if tag.property_att.name not in available:
+                    available[tag.property_att.name] = []
                 value = tag.__str__()
                 if value not in available[tag.property_att.name]:
                     available[tag.property_att.name].append(value)
