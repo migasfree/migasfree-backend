@@ -95,7 +95,7 @@ class Synchronization(Event):
         con = get_redis_connection()
         for deploy_id in deployments:
             con.sadd(
-                'migasfree:deployments:%d:%s' % (
+                'migasfree:deployments:{}:{}'.format(
                     deploy_id,
                     'ok' if self.pms_status_ok else 'error'
                 ),
