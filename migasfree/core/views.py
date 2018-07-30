@@ -43,6 +43,7 @@ from .models import (
     ServerAttribute, ClientAttribute,
     Schedule, ScheduleDelay,
     Package, Deployment,
+    Domain, Scope,
 )
 from .serializers import (
     # UserSerializer, GroupSerializer,
@@ -54,12 +55,14 @@ from .serializers import (
     ScheduleSerializer, ScheduleWriteSerializer,
     ScheduleDelaySerializer, ScheduleDelayWriteSerializer,
     PackageSerializer, DeploymentSerializer, DeploymentWriteSerializer,
+    DomainWriteSerializer, DomainSerializer,
+    ScopeSerializer, ScopeWriteSerializer,
 )
 from .filters import (
     DeploymentFilter, PackageFilter, ProjectFilter, StoreFilter,
     ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
 )
-from .permissions import IsAdminOrIsSelf
+# from .permissions import IsAdminOrIsSelf
 
 from . import tasks
 
@@ -115,6 +118,14 @@ class PlatformViewSet(viewsets.ModelViewSet):
     ordering_fields = '__all__'
     ordering = ('name',)
 
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(project__in=user.get_projects()).distinct()
+
+        return qs
+
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
@@ -131,6 +142,14 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
         return ProjectSerializer
 
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(id__in=user.get_projects())
+
+        return qs
+
 
 class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.all()
@@ -146,6 +165,14 @@ class StoreViewSet(viewsets.ModelViewSet):
             return StoreWriteSerializer
 
         return StoreSerializer
+
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(project__in=user.get_projects())
+
+        return qs
 
 
 class ServerPropertyViewSet(viewsets.ModelViewSet):
@@ -182,6 +209,14 @@ class ClientAttributeViewSet(viewsets.ModelViewSet):
             return ClientAttributeWriteSerializer
 
         return ClientAttributeSerializer
+
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(id__in=user.get_attributes()).distinct()
+
+        return qs
 
     @action(methods=['get', 'put', 'patch'], detail=True, url_path='logical-devices')
     def logical_devices(self, request, pk=None):
@@ -294,6 +329,14 @@ class PackageViewSet(
     filter_class = PackageFilter
     parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
 
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(project__in=user.get_projects())
+
+        return qs
+
     @action(methods=['get'], detail=False)
     def orphan(self, request):
         """
@@ -325,6 +368,16 @@ class DeploymentViewSet(viewsets.ModelViewSet):
 
         return DeploymentSerializer
 
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(project__in=user.get_projects())
+            if user.domain_preference:
+                qs = qs.filter(domain=user.domain_preference)
+
+        return qs
+
     @action(methods=['get'], detail=True)
     def metadata(self, request, pk=None):
         get_object_or_404(Deployment, pk=pk)
@@ -349,6 +402,36 @@ class DeploymentViewSet(viewsets.ModelViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+class DomainViewSet(viewsets.ModelViewSet):
+    queryset = Domain.objects.all()
+    serializer_class = DomainSerializer
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('name',)
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return DomainWriteSerializer
+
+        return DomainSerializer
+
+
+class ScopeViewSet(viewsets.ModelViewSet):
+    queryset = Scope.objects.all()
+    serializer_class = ScopeSerializer
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('name',)
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return ScopeWriteSerializer
+
+        return ScopeSerializer
 
 '''
 def get_token_for_user(user, scope):
