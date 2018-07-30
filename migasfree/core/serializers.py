@@ -63,7 +63,10 @@ class AttributeSerializer(serializers.ModelSerializer):
     property_att = PropertyInfoSerializer(many=False, read_only=True)
 
     def get_total_computers(self, obj):
-        return obj.total_computers(user=self.context['request'].user)
+        if self.context.get('request'):
+            return obj.total_computers(user=self.context['request'].user)
+
+        return obj.total_computers()
 
     class Meta:
         model = Attribute
@@ -208,7 +211,10 @@ class ScheduleDelaySerializer(serializers.ModelSerializer):
     total_computers = serializers.SerializerMethodField()
 
     def get_total_computers(self, obj):
-        return obj.total_computers(user=self.context['request'].user)
+        if self.context.get('request'):
+            return obj.total_computers(user=self.context['request'].user)
+
+        return obj.total_computers()
 
     class Meta:
         model = ScheduleDelay

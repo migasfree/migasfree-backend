@@ -208,6 +208,16 @@ class ComputerSyncSerializer(serializers.ModelSerializer):
     sync_user = UserSerializer(many=False, read_only=True)
     sync_attributes = ClientAttributeSerializer(many=True, read_only=True)
 
+    def __init__(self, *args, **kwargs):
+        super(ComputerSyncSerializer, self).__init__(*args, **kwargs)
+
+        context = kwargs.get('context', None)
+        if context:
+            request = kwargs['context']['request']
+            self.sync_attributes = ClientAttributeSerializer(
+                many=True, read_only=True, context={'request': request}
+            )
+
     class Meta:
         model = models.Computer
         fields = ('sync_start_date', 'sync_end_date', 'sync_user', 'sync_attributes')
