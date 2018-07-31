@@ -20,6 +20,7 @@ import datetime
 
 from django import forms
 from django.conf import settings
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils.text import slugify
@@ -221,20 +222,36 @@ class DomainForm(forms.ModelForm):
 
 
 class UserProfileForm(forms.ModelForm):
-     def __init__(self, *args, **kwargs):
-         super(UserProfileForm, self).__init__(*args, **kwargs)
-         self.fields['groups'].help_text = ''
-         if self.instance.id:
-             self.fields['username'].help_text += u'<p><a href="{}">{}</a></p>'.format(
-                 reverse('admin:auth_user_password_change', args=(self.instance.id,)),
-                 _('Change Password')
-             )
+    def __init__(self, *args, **kwargs):
+        super(UserProfileForm, self).__init__(*args, **kwargs)
+        self.fields['groups'].help_text = ''
+        if self.instance.id:
+            self.fields['username'].help_text += u'<p><a href="{}">{}</a></p>'.format(
+                reverse('admin:auth_user_password_change', args=(self.instance.id,)),
+                _('Change Password')
+            )
 
-     class Meta:
-         model = UserProfile
-         fields = (
+    def clean(self):
+        cleaned_data = super(UserProfileForm, self).clean()
+
+        if not cleaned_data['is_superuser'] and len(cleaned_data['domains']) == 0:
+            admin_domain_group = Group.objects.filter(name=_('Admin Domain'))
+            if admin_domain_group:
+                admin_domain_group = admin_domain_group[0]
+                if admin_domain_group.id in list(cleaned_data['groups'].values_list('id', flat=True)):
+                    raise ValidationError(_('This user must be one domain at least'))
+
+        if cleaned_data['domain_preference'] \
+                and cleaned_data['domain_preference'] not in list(cleaned_data['domains']):
+            raise ValidationError(_('Domain preference not in selected Domains'))
+
+        return cleaned_data
+
+    class Meta:
+        model = UserProfile
+        fields = (
             'username', 'first_name', 'last_name',
             'email', 'date_joined', 'last_login',
             'is_active', 'is_superuser', 'is_staff',
             'groups', 'user_permissions', 'domains',
-         )
+        )
