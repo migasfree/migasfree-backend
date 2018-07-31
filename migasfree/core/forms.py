@@ -184,6 +184,15 @@ class DeploymentForm(forms.ModelForm):
         self._validate_active_computers(cleaned_data.get('included_attributes', []))
         self._validate_active_computers(cleaned_data.get('excluded_attributes', []))
 
+        if not cleaned_data['domain']:
+            admin_domain_group = Group.objects.filter(name=_('Admin Domain'))
+            if admin_domain_group:
+                admin_domain_group = admin_domain_group[0]
+                if admin_domain_group.id in list(
+                    self.request.user.userprofile.groups.values_list('id', flat=True)
+                ):
+                    raise ValidationError(_('Domain can not be empty'))
+
     class Meta:
         model = Deployment
         fields = '__all__'
