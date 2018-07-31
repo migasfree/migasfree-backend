@@ -185,10 +185,10 @@ class DeploymentForm(forms.ModelForm):
         self._validate_active_computers(cleaned_data.get('excluded_attributes', []))
 
         if not cleaned_data['domain']:
-            admin_domain_group = Group.objects.filter(name=_('Admin Domain'))
-            if admin_domain_group:
-                admin_domain_group = admin_domain_group[0]
-                if admin_domain_group.id in list(
+            domain_admin_group = Group.objects.filter(name='Domain Admin')
+            if domain_admin_group:
+                domain_admin_group = domain_admin_group[0]
+                if domain_admin_group.id in list(
                     self.request.user.userprofile.groups.values_list('id', flat=True)
                 ):
                     raise ValidationError(_('Domain can not be empty'))
@@ -225,6 +225,16 @@ class ScopeForm(forms.ModelForm):
 
 
 class DomainForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(DomainForm, self).__init__(*args, **kwargs)
+        self.fields['users'].initial = self.instance.userprofile_set.values_list('id', flat=True)
+
+    def save(self, commit=True):
+        users = self.cleaned_data.get('users', [])
+        self.instance.update_domain_admins(map(int, users))
+
+        return super(DomainForm, self).save(commit=commit)
+
     class Meta:
         model = Domain
         fields = ('name',)
@@ -244,10 +254,10 @@ class UserProfileForm(forms.ModelForm):
         cleaned_data = super(UserProfileForm, self).clean()
 
         if not cleaned_data['is_superuser'] and len(cleaned_data['domains']) == 0:
-            admin_domain_group = Group.objects.filter(name=_('Admin Domain'))
-            if admin_domain_group:
-                admin_domain_group = admin_domain_group[0]
-                if admin_domain_group.id in list(cleaned_data['groups'].values_list('id', flat=True)):
+            domain_admin_group = Group.objects.filter(name='Domain Admin')
+            if domain_admin_group:
+                domain_admin_group = domain_admin_group[0]
+                if domain_admin_group.id in list(cleaned_data['groups'].values_list('id', flat=True)):
                     raise ValidationError(_('This user must be one domain at least'))
 
         if cleaned_data['domain_preference'] \
