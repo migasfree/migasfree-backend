@@ -41,6 +41,7 @@ class ComputerViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ComputerSerializer
     filter_class = ComputerFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering = (settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0],)
 
     def get_serializer_class(self):
         if self.action == 'update' or self.action == 'partial_update':
