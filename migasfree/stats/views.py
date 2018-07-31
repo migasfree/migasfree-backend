@@ -83,6 +83,8 @@ class SyncStatsViewSet(viewsets.ViewSet):
         except ValueError:
             begin = datetime.now()
 
+        begin += relativedelta(day=1, hour=0, minute=0, second=0, microsecond=0)
+
         end = request.query_params.get('end', '')
         try:
             end = datetime.strptime(end, fmt)
