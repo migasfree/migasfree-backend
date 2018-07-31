@@ -512,6 +512,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             claims.get('sync_user'), claims.get('sync_fullname')
             # claims.get('ip_address')  # TODO for notification
         )
+        user.update_fullname(claims.get('sync_fullname'))
 
         computer.sync_attributes.clear()
 
