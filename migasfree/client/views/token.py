@@ -19,6 +19,7 @@
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django_redis import get_redis_connection
@@ -58,10 +59,10 @@ class ComputerViewSet(viewsets.ModelViewSet):
         return qs
 
     def partial_update(self, request, *args, **kwargs):
-        if isinstance(request.data, dict):
-            data = request.data
-        else:
+        if isinstance(request.data, QueryDict):
             data = dict(request.data.iterlists())
+        else:
+            data = request.data
 
         devices = data.get(
             'assigned_logical_devices_to_cid[]',
