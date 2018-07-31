@@ -58,8 +58,15 @@ class ComputerViewSet(viewsets.ModelViewSet):
         return qs
 
     def partial_update(self, request, *args, **kwargs):
-        data = dict(request.data.iterlists())
-        devices = data.get('assigned_logical_devices_to_cid[]', data.get('assigned_logical_devices_to_cid', None))
+        if isinstance(request.data, dict):
+            data = request.data
+        else:
+            data = dict(request.data.iterlists())
+
+        devices = data.get(
+            'assigned_logical_devices_to_cid[]',
+            data.get('assigned_logical_devices_to_cid', None)
+        )
         if devices:
             try:
                 assigned_logical_devices_to_cid = map(int, devices)
