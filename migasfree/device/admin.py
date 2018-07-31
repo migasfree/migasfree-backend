@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ class LogicalInline(admin.TabularInline):
 @admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
     list_display = ('name', 'location', 'model', 'connection')
-    list_filter = ('model',)
+    list_filter = ('model', 'model__manufacturer')
     search_fields = ('name', 'model__name', 'model__manufacturer__name', 'data')
     fields = ('name', 'model', 'connection', 'available_for_attributes', 'data')
     ordering = ('name',)
