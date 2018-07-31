@@ -20,13 +20,11 @@ import os
 
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-# from django.core import signing
-from django.utils.translation import ugettext, ugettext_lazy as _
-# from django.contrib.auth.models import User, Group
+from django.utils.translation import ugettext
 from django_redis import get_redis_connection
 from rest_framework import (
-    viewsets, parsers, status, mixins,
-    exceptions, filters
+    viewsets, parsers, status,
+    mixins, filters,
 )
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -46,7 +44,6 @@ from .models import (
     Domain, Scope,
 )
 from .serializers import (
-    # UserSerializer, GroupSerializer,
     PlatformSerializer, ProjectSerializer, ProjectWriteSerializer,
     StoreSerializer, StoreWriteSerializer,
     ServerPropertySerializer, ClientPropertySerializer,
@@ -62,7 +59,6 @@ from .filters import (
     DeploymentFilter, PackageFilter, ProjectFilter, StoreFilter,
     ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
 )
-# from .permissions import IsAdminOrIsSelf
 
 from . import tasks
 
@@ -73,43 +69,6 @@ class SafePackagerConnectionMixin(SafeConnectionMixin):
 
     sign_key = settings.MIGASFREE_PRIVATE_KEY
     encrypt_key = settings.MIGASFREE_PACKAGER_PUB_KEY
-
-'''
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-    @action(
-        methods=['post'],
-        detail=True,
-        permission_classes=[IsAdminOrIsSelf],
-        url_path='change-password'
-    )
-    def set_password(self, request, pk=None):
-        user = self.get_object()
-        serializer = PasswordSerializer(data=request.data)
-        if serializer.is_valid():
-            user.set_password(serializer.data['password'])
-            user.save()
-            return Response({'status': 'password set'})
-        else:
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-    @action(url_path='recent-users', detail=False)
-    def recent_users(self, request):
-        recent_users = User.objects.all().order('-last_login')
-        page = self.paginate_queryset(recent_users)
-        serializer = self.get_pagination_serializer(page)
-        return Response(serializer.data)
-
-
-class GroupViewSet(viewsets.ModelViewSet):
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
-'''
 
 
 class PlatformViewSet(viewsets.ModelViewSet):
@@ -432,54 +391,6 @@ class ScopeViewSet(viewsets.ModelViewSet):
             return ScopeWriteSerializer
 
         return ScopeSerializer
-
-'''
-def get_token_for_user(user, scope):
-    """
-    Generate a new signed token containing
-    a specified user limited for a scope (identified as a string).
-    """
-    data = {"user_%s_id" % scope: user.id}
-    return signing.dumps(data)
-
-
-def get_and_validate_user(username, password):
-    """
-    Check if user with username/email exists and specified
-    password matchs well with existing user password.
-
-    if user is valid,  user is returned else, corresponding
-    exception is raised.
-    """
-
-    qs = User.objects.filter(Q(username=username) | Q(email=username))
-    if len(qs) == 0:
-        raise exceptions.APIException(
-            _("Username or password does not matches user.")
-        )
-
-    user = qs[0]
-    if not user.check_password(password):
-        raise exceptions.APIException(
-            _("Username or password does not matches user.")
-        )
-
-    return user
-
-
-class AuthViewSet(viewsets.ViewSet):
-    def create(self, request, **kwargs):
-        username = request.DATA.get('username', None)
-        password = request.DATA.get('password', None)
-
-        user = get_and_validate_user(username=username, password=password)
-
-        serializer = UserSerializer(user, context={'request': request})
-        data = dict(serializer.data)
-        data['auth_token'] = get_token_for_user(user, 'authentication')
-
-        return Response(data, status=status.HTTP_200_OK)
-'''
 
 
 class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):

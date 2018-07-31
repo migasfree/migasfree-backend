@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,17 +34,18 @@ if not hasattr(sys, 'version_info') or sys.version_info < (2, 7, 0, 'final'):
     raise SystemExit('migasfree-backend requires Python 2.7 or later.')
 
 import os
+
+from setuptools import setup, find_packages
+from distutils.command.install_data import install_data
+
 PATH = os.path.dirname(__file__)
 README = open(os.path.join(PATH, 'README.md')).read()
-VERSION = open(os.path.join(PATH, 'VERSION')).read().splitlines()[0]
+VERSION = __import__('migasfree').__version__
 
 REQUIRES = filter(
     lambda s: len(s) > 0,
     open(os.path.join(PATH, 'requirements', 'base.txt')).read().split('\n')
 )
-
-from setuptools import setup, find_packages
-from distutils.command.install_data import install_data
 
 
 class InstallData(install_data):
@@ -152,7 +153,6 @@ setup(
             # 'INSTALL',  # TODO
             'MANIFEST.in',
             'README.md',
-            'VERSION',
             'migasfree-backend.doap'
         ]),
     ],

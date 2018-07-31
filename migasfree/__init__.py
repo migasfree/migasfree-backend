@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,3 +19,11 @@
 from __future__ import absolute_import
 
 from .celery import app as celery_app
+
+__version__ = "5.0"
+__author__ = [
+    'Alberto Gacías <alberto@migasfree.org>',
+    'Jose Antonio Chavarría <jachavar@gmail.com>'
+]
+__contact__ = "fun.with@migasfree.org"
+__homepage__ = "https://github.com/migasfree/migasfree-backend/"
