@@ -56,6 +56,32 @@ class DeviceViewSet(viewsets.ModelViewSet):
 
         return serializers.DeviceSerializer
 
+    @action(methods=['get'], detail=False)
+    def available(self, request):
+        """
+        :param request:
+            cid (computer Id) int,
+            q string (name or data contains...),
+            page int
+        :return: DeviceSerializer set
+        """
+        computer = get_object_or_404(Computer, pk=request.GET.get('cid', 0))
+        query = request.GET.get('q', '')
+
+        results = Device.objects.filter(
+            available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True)
+        ).order_by('name', 'model__name')
+        if query:
+            results = results.filter(Q(name__icontains=query) | Q(data__icontains=query))
+
+        page = self.paginate_queryset(results)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(results, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class DriverViewSet(viewsets.ModelViewSet):
     queryset = Driver.objects.all()
