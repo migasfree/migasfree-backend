@@ -227,7 +227,11 @@ class ScopeForm(forms.ModelForm):
 class DomainForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(DomainForm, self).__init__(*args, **kwargs)
-        self.fields['users'].initial = self.instance.userprofile_set.values_list('id', flat=True)
+
+        if self.instance.id:
+            self.fields['users'].initial = self.instance.domains.values_list('id', flat=True)
+        else:
+            self.fields['users'].initial = []
 
     def save(self, commit=True):
         users = self.cleaned_data.get('users', [])
