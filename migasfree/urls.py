@@ -61,6 +61,7 @@ urlpatterns = [
 
     url(r'^token-auth/$', views.obtain_auth_token),
     url(r'^token-auth-jwt/', jwt_views.obtain_jwt_token),
+    url(r'^rest-auth/', include('rest_auth.urls')),
 
     url(r'^docs/', swagger_schema_view, name='docs'),
     url(r'^api-docs/', include_docs_urls(title=TITLE)),

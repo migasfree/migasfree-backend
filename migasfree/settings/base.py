@@ -109,6 +109,7 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'rest_framework_filters',
+    'rest_auth',
     'django_filters',
     'corsheaders',
     'djoser',
@@ -135,6 +136,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 100,
     'DATETIME_FORMAT': '%c',
+}
+
+REST_AUTH_SERIALIZERS = {
+    'USER_DETAILS_SERIALIZER': 'migasfree.core.serializers.UserProfileSerializer',
 }
 
 # http://docs.python.org/2/howto/logging-cookbook.html
