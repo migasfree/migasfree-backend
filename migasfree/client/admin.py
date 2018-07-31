@@ -439,7 +439,7 @@ class MigrationAdmin(admin.ModelAdmin):
 class SynchronizationAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'user', 'project')
     list_display_links = ('__str__',)
-    list_filter = ('created_at', 'pms_status_ok')
+    list_filter = ('created_at', 'project', 'pms_status_ok')
     search_fields = add_computer_search_fields(['created_at', 'user__name'])
     readonly_fields = (
         'computer', 'user', 'project', 'created_at',
