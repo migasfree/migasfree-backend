@@ -807,6 +807,17 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         available = {}
 
+        # Computer tags
+        for tag in computer.tags.all():
+            # if tag is a domain, includes all domain's tags
+            if tag.property_att.prefix == 'DMN':
+                for tag_dmn in Domain.objects.get(name=tag.value.split('.')[0]).get_tags():
+                    if tag_dmn.property_att.name not in available:
+                        available[tag_dmn.property_att.name] = []
+                    value = tag_dmn.__str__()
+                    if value not in available[tag_dmn.property_att.name]:
+                        available[tag_dmn.property_att.name].append(value)
+
         # Deployment tags
         for deploy in Deployment.objects.filter(
             project__id=computer.project.id
