@@ -21,6 +21,7 @@ from rest_framework import serializers
 from ..core.serializers import (
     ClientAttributeSerializer, ProjectInfoSerializer, AttributeInfoSerializer,
 )
+from ..device.serializers import LogicalInfoSerializer
 from . import models
 
 
@@ -81,6 +82,19 @@ class ComputerSerializer(serializers.ModelSerializer):
             'status', 'product', 'machine', 'cpu', 'ram',
             'storage', 'disks', 'mac_address', 'comment',
             'created_at', 'last_hardware_capture', 'sync_end_date',
+        )
+
+
+class ComputerDevicesSerializer(serializers.ModelSerializer):
+    assigned_logical_devices_to_cid = LogicalInfoSerializer(many=True, read_only=True)
+    inflicted_logical_devices = LogicalInfoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = models.Computer
+        fields = (
+            'default_logical_device',
+            'assigned_logical_devices_to_cid',
+            'inflicted_logical_devices'
         )
 
 

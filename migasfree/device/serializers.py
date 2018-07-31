@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -100,6 +100,15 @@ class FeatureSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Feature
         fields = '__all__'
+
+
+class LogicalInfoSerializer(serializers.ModelSerializer):
+    device = DeviceInfoSerializer(many=False, read_only=True)
+    feature = FeatureSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = models.Logical
+        fields = ('id', 'device', 'feature')
 
 
 class LogicalSerializer(serializers.ModelSerializer):
