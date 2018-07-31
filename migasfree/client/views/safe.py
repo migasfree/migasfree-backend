@@ -243,6 +243,12 @@ def get_computer(uuid, name):
     except models.Computer.DoesNotExist:
         pass
 
+    computer = models.Computer.objects.filter(mac_address__icontains=uuid[-12:])
+    if computer.count() == 1 and uuid[0:8] == '0'*8:
+        logger.debug('computer found by mac_address (in uuid format)')
+
+        return computer.first()
+
     try:
         computer = models.Computer.objects.get(name=name)
         logger.debug('computer found by name')
