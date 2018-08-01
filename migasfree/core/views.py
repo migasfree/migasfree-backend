@@ -24,7 +24,7 @@ from django.utils.translation import ugettext
 from django_redis import get_redis_connection
 from rest_framework import (
     viewsets, parsers, status,
-    mixins, filters,
+    mixins, filters, views,
 )
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -528,3 +528,20 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             self.create_response(ugettext('Data received')),
             status=status.HTTP_200_OK
         )
+
+
+class ServerInfoView(views.APIView):
+    def post(self, request, format=None):
+        """
+        Returns server info
+        """
+        from .. import __version__, __author__, __contact__, __homepage__
+
+        info = {
+            'version': __version__,
+            'author': __author__,
+            'contact': __contact__,
+            'homepage': __homepage__,
+        }
+
+        return Response(info)

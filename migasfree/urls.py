@@ -57,6 +57,7 @@ urlpatterns = [
     url(r'^api/v1/safe/', include(client_safe_router.urls)),
     url(r'^api/v1/safe/', include(core_safe_router.urls)),
     url(r'^api/v1/safe/', include(hardware_safe_router.urls)),
+    url(r'^api/v1/', include('migasfree.core.urls')),
     url(r'^api/v1/', include('migasfree.client.urls')),
 
     url(r'^token-auth/$', views.obtain_auth_token),
