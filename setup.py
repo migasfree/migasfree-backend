@@ -144,6 +144,7 @@ setup(
             'locale/*/LC_MESSAGES/*.mo',
             'core/fixtures/*',
             'client/fixtures/*',
+            'device/fixtures/*',
         ],
     },
     data_files=[
