@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from collections import defaultdict
+from six import iteritems
 
 from django.db.models import Q, Prefetch
 from django.contrib import admin
@@ -199,7 +200,7 @@ class ComputerAdmin(admin.ModelAdmin):
             "# %s\n%s" % (
                 key,
                 '\n'.join(v for v in val)
-            ) for (key, val) in sorted(ret.iteritems(), reverse=True)
+            ) for (key, val) in sorted(iteritems(ret), reverse=True)
         )
 
     get_software_history.short_description = _('Software History')
