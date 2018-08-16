@@ -93,8 +93,7 @@ class Domain(models.Model):
         return att_id
 
     def get_tags(self):
-        tags = []
-        tags.append(Attribute.objects.get(property_att__prefix='DMN', value=self.name))
+        tags = [Attribute.objects.get(property_att__prefix='DMN', value=self.name)]
         for tag in Attribute.objects.filter(
             property_att__prefix='DMN',
             value__startswith='{}.'.format(self.name)
