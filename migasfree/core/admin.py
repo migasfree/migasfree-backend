@@ -18,6 +18,8 @@
 
 import os
 
+from past.builtins import cmp
+
 from django.db.models import Q, Prefetch
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
