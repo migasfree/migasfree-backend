@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from past.builtins import cmp
+
 from django.contrib.auth.models import Group, Permission
 from django.shortcuts import get_object_or_404
 from django.utils.text import slugify
