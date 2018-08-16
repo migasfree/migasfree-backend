@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import datetime, timedelta
+from six import iteritems
 
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
@@ -517,7 +518,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         computer.sync_attributes.clear()
 
         # features
-        for prefix, value in claims.get('sync_attributes').iteritems():
+        for prefix, value in iteritems(claims.get('sync_attributes')):
             client_property = Property.objects.get(prefix=prefix)
             if client_property.sort == 'client':
                 computer.sync_attributes.add(
@@ -656,7 +657,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         add_computer_message(computer, ugettext('Getting faults...'))
 
         ret = []
-        for name, result in claims.get('faults').iteritems():
+        for name, result in iteritems(claims.get('faults')):
             try:
                 definition = models.FaultDefinition.objects.get(name=name)
             except ObjectDoesNotExist:
