@@ -24,7 +24,7 @@ import tempfile
 
 import django.core.management
 
-from StringIO import StringIO
+from io import StringIO
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.management import create_permissions
