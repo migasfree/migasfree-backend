@@ -22,7 +22,7 @@ import fcntl
 import select
 
 from datetime import timedelta
-
+from six import iteritems
 from django.conf import settings
 
 
@@ -179,7 +179,7 @@ def swap_m2m(source_field, target_field):
 
 
 def remove_empty_elements_from_dict(dic):
-    return dict((k, v) for k, v in dic.iteritems() if v)
+    return dict((k, v) for k, v in iteritems(dic) if v)
 
 
 def remove_duplicates_preserving_order(seq):
