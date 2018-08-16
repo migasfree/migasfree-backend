@@ -4,6 +4,7 @@
 import operator
 
 from django.db.models.expressions import F, Expression
+from six import iteritems
 
 EXPRESSION_NODE_CALLBACKS = {
     Expression.ADD: operator.add,
@@ -53,7 +54,7 @@ def update(instance, **kwargs):
     # note that these might slightly differ from the true database values
     # as the DB could have been updated by another thread. callers should
     # retrieve a new copy of the object if up-to-date values are required
-    for k, v in kwargs.iteritems():
+    for k, v in iteritems(kwargs):
         if isinstance(v, Expression):
             v = resolve_expression_node(instance, v)
         setattr(instance, k, v)
