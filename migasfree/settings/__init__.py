@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +21,6 @@ import os
 django_settings = os.environ.get('DJANGO_SETTINGS_MODULE', '')
 
 if django_settings != '' and django_settings != 'migasfree.settings':
-    exec('from %s import *' % django_settings.split('.')[-1])
+    exec('from .{} import *'.format(django_settings.split('.')[-1]))
 else:
     from .production import *
