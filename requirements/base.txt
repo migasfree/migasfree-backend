@@ -12,7 +12,7 @@ django-rest-swagger==2.2.0
 djangorestframework==3.8.2
 djangorestframework-filters==0.10.2
 djangorestframework-jwt==1.11.0
-djoser==1.2.0
+djoser==1.2.1
 docutils==0.14
 future==0.16.0
 jwcrypto==0.5.0
