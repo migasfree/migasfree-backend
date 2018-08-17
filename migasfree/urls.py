@@ -23,16 +23,16 @@ from rest_framework.authtoken import views
 from rest_framework.documentation import include_docs_urls
 from rest_framework_jwt import views as jwt_views
 
-from core.routers import router, safe_router as core_safe_router
-from client.routers import (
+from .core.routers import router, safe_router as core_safe_router
+from .client.routers import (
     router as client_router, safe_router as client_safe_router
 )
-from hardware.routers import (
+from .hardware.routers import (
     router as hardware_router, safe_router as hardware_safe_router
 )
-from device.routers import router as device_router
-from stats.routers import router as stats_router
-from app_catalog.routers import router as catalog_router
+from .device.routers import router as device_router
+from .stats.routers import router as stats_router
+from .app_catalog.routers import router as catalog_router
 
 from rest_framework_swagger.views import get_swagger_view
 
