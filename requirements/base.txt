@@ -20,5 +20,6 @@ psycopg2-binary==2.7.5
 python-dateutil==2.7.3
 python-magic==0.4.15
 pygpgme==0.3
+six==1.11.0
 redis==2.10.6
 wsgiref==0.1.2
