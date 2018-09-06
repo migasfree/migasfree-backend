@@ -24,7 +24,10 @@ import tempfile
 
 import django.core.management
 
-from io import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.management import create_permissions
