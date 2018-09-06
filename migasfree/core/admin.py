@@ -374,7 +374,8 @@ class DeploymentAdmin(admin.ModelAdmin):
         user = request.user.userprofile
         if user:
             obj.domain = user.domain_preference
-        if user.domain_preference:
+
+        if user.domain_preference and user.domain_preference == obj.domain:
             if not obj.name.startswith(user.domain_preference.name.lower()):
                 obj.name = u'{}_{}'.format(user.domain_preference.name.lower(), obj.name)
 
