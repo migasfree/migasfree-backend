@@ -21,6 +21,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.http import QueryDict
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django_redis import get_redis_connection
 from rest_framework import viewsets, exceptions, status, mixins, filters
@@ -29,6 +30,7 @@ from rest_framework.response import Response
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_filters import backends
 
+from migasfree.device.models import Logical, Driver, Model
 from .. import models, serializers
 from ..filters import (
     PackageHistoryFilter, ErrorFilter, NotificationFilter,
@@ -69,11 +71,38 @@ class ComputerViewSet(viewsets.ModelViewSet):
             data.get('assigned_logical_devices_to_cid', None)
         )
         if devices:
+            computer = get_object_or_404(models.Computer, pk=kwargs['pk'])
+
             try:
                 assigned_logical_devices_to_cid = map(int, devices)
             except ValueError:
                 assigned_logical_devices_to_cid = []
-            computer = get_object_or_404(models.Computer, pk=kwargs['pk'])
+
+            for item in assigned_logical_devices_to_cid:
+                logical_device = Logical.objects.get(pk=item)
+                model = Model.objects.get(device=logical_device.device)
+                if not Driver.objects.filter(
+                        feature=logical_device.feature,
+                        model=model,
+                        project=computer.project
+                ):
+                    return Response(
+                        _('Error in feature %s for assign computer %s.'
+                          ' There is no driver defined for project %s in model %s.') % (
+                                logical_device.feature,
+                                computer,
+                                computer.project,
+                                '<a href="{}">{}</a>'.format(
+                                    reverse(
+                                        'admin:server_devicemodel_change',
+                                        args=(model.pk,)
+                                    ),
+                                    model
+                                )
+                            ),
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
             computer.update_logical_devices(assigned_logical_devices_to_cid)
 
         return super(ComputerViewSet, self).partial_update(
