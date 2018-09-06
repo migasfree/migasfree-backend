@@ -26,13 +26,13 @@ from .models import (
 
 class DeploymentFilter(filters.FilterSet):
     included_attributes = filters.CharFilter(
-        field_name='included_attributes__value', lookup_expr=['contains']
+        field_name='included_attributes__value', lookup_expr='contains'
     )
     excluded_attributes = filters.CharFilter(
-        field_name='excluded_attributes__value', lookup_expr=['contains']
+        field_name='excluded_attributes__value', lookup_expr='contains'
     )
     available_packages = filters.CharFilter(
-        field_name='available_packages__name', lookup_expr=['contains']
+        field_name='available_packages__name', lookup_expr='contains'
     )
 
     class Meta:
