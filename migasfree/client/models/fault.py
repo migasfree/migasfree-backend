@@ -26,9 +26,9 @@ from .fault_definition import FaultDefinition
 
 
 class DomainFaultManager(models.Manager):
-    def scope(self, user):
+    def scope(self, user=None):
         qs = super(DomainFaultManager, self).get_queryset()
-        if not user.is_view_all():
+        if user and not user.is_view_all():
             qs = qs.filter(project_id__in=user.get_projects())
             qs = qs.filter(computer_id__in=user.get_computers())
 
@@ -41,7 +41,7 @@ class UncheckedManager(DomainFaultManager):
             checked=0
         )
 
-    def scope(self, user):
+    def scope(self, user=None):
         return super(UncheckedManager, self).scope(user).filter(
             checked=0
         )
