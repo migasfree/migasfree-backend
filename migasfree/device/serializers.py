@@ -36,10 +36,16 @@ class ConnectionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ManufacturerInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Manufacturer
+        fields = ('id', 'name')
+
+
 class ModelInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Model
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'manufacturer')
 
 
 class DeviceInfoSerializer(serializers.ModelSerializer):
