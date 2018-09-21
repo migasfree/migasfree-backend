@@ -58,9 +58,8 @@ class PackageForm(forms.ModelForm):
         self.fields['architecture'].required = False
         self.fields['store'].required = False
 
-        user = self.request.user.userprofile
-
         try:
+            user = self.request.user.userprofile
             if Project.objects.scope(user).count() == 1:
                 self.fields['project'].initial = Project.objects.scope(user).first().id
 
