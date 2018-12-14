@@ -129,6 +129,21 @@ class Domain(models.Model):
                 except UserProfile.DoesNotExist:
                     pass
 
+    def related_objects(self, model, user):
+        """
+        Returns Queryset with the related computers based in attributes
+        """
+        if model == 'computer':
+            from migasfree.client.models import Computer
+
+            return Computer.productive.scope(user).filter(
+                sync_attributes__in=self.included_attributes.all()
+            ).exclude(
+                sync_attributes__in=self.excluded_attributes.all()
+            ).distinct()
+
+        return None
+
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.name = slugify(self.name).upper()
         super(Domain, self).save(force_insert, force_update, using, update_fields)
