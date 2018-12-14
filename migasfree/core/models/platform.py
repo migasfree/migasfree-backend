@@ -55,6 +55,19 @@ class Platform(models.Model):
     def __str__(self):
         return self.name
 
+    def related_objects(self, model, user):
+        """
+        Returns Queryset with the related computers based in project
+        """
+        if model == 'computer':
+            from migasfree.client.models import Computer
+
+            return Computer.productive.scope(user).filter(
+                project__platform__id=self.id
+            ).distinct()
+
+        return None
+
     class Meta:
         app_label = 'core'
         verbose_name = _('Platform')
