@@ -50,6 +50,23 @@ class PropertyInfoSerializer(serializers.ModelSerializer):
         fields = ('id', 'prefix')
 
 
+class PropertyWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Property
+        fields = '__all__'
+
+
+class PropertySerializer(serializers.ModelSerializer):
+    language = serializers.SerializerMethodField()
+
+    def get_language(self, obj):
+        return obj.get_language_display()
+
+    class Meta:
+        model = Property
+        fields = '__all__'
+
+
 class AttributeSerializer(serializers.ModelSerializer):
     property_att = PropertyInfoSerializer(many=False, read_only=True)
 
