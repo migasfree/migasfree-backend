@@ -20,7 +20,7 @@ import rest_framework_filters as filters
 
 from .models import (
     Deployment, Package, ClientAttribute, ServerAttribute,
-    Project, ScheduleDelay, Store, AttributeSet,
+    Project, ScheduleDelay, Store, AttributeSet, Property,
 )
 
 
@@ -43,19 +43,25 @@ class DeploymentFilter(filters.FilterSet):
 
     class Meta:
         model = Deployment
-        fields = ['id', 'project__id', 'enabled', 'schedule__id']
+        fields = ['id', 'name', 'project__id', 'enabled', 'schedule__id']
 
 
 class PackageFilter(filters.FilterSet):
     class Meta:
         model = Package
-        fields = ['id', 'deployment__id', 'store__id']
+        fields = ['id', 'name', 'deployment__id', 'store__id']
 
 
 class ProjectFilter(filters.FilterSet):
     class Meta:
         model = Project
         fields = ['id', 'platform__id', 'name']
+
+
+class PropertyFilter(filters.FilterSet):
+    class Meta:
+        model = Property
+        fields = ['id', 'name', 'enabled', 'sort']
 
 
 class ClientAttributeFilter(filters.FilterSet):
@@ -79,4 +85,4 @@ class ScheduleDelayFilter(filters.FilterSet):
 class StoreFilter(filters.FilterSet):
     class Meta:
         model = Store
-        fields = ['id', 'project__id']
+        fields = ['id', 'name', 'project__id']
