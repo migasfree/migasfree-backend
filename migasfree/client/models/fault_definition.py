@@ -30,13 +30,9 @@ class DomainFaultDefinitionManager(models.Manager):
         qs = super(DomainFaultDefinitionManager, self).get_queryset()
         if not user.is_view_all():
             user_attributes = user.get_attributes()
-            qs = qs.filter(
-                included_attributes__in=user_attributes
-            ).exclude(
-                excluded_attributes__in=user_attributes
-            ).distinct()
+            qs = qs.filter(included_attributes__id__in=user_attributes)
 
-        return qs
+        return qs.distinct()
 
 
 @python_2_unicode_compatible
@@ -120,6 +116,21 @@ class FaultDefinition(models.Model):
             })
 
         return fault_definitions
+
+    def related_objects(self, model, user):
+        """
+        Returns Queryset with the related computers based in attributes
+        """
+        if model == 'computer':
+            from .computer import Computer
+
+            return Computer.productive.scope(user).filter(
+                sync_attributes__in=self.included_attributes.all()
+            ).exclude(
+                sync_attributes__in=self.excluded_attributes.all()
+            ).distinct()
+
+        return None
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.code = self.code.replace("\r\n", "\n")
