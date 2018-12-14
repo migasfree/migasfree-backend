@@ -17,6 +17,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.db import models
+from django.db.models.aggregates import Count
+from django.db.models.functions import ExtractMonth, ExtractYear
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
@@ -69,6 +71,17 @@ class Notification(models.Model):
 
     def __str__(self):
         return '{} ({:%Y-%m-%d %H:%M:%S})'.format(self.id, self.created_at)
+
+    @classmethod
+    def by_month(cls, start_date):
+        return list(cls.objects.filter(
+            created_at__gte=start_date
+        ).annotate(
+            year=ExtractYear('created_at'),
+            month=ExtractMonth('created_at')
+        ).order_by('year', 'month', 'checked').values('year', 'month', 'checked').annotate(
+            count=Count('id')
+        ))
 
     class Meta:
         app_label = 'client'
