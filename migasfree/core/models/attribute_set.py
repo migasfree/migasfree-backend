@@ -27,6 +27,16 @@ from django.dispatch import receiver
 from . import Property, Attribute
 
 
+class AttributeSetManager(models.Manager):
+    def scope(self, user):
+        qs = super(AttributeSetManager, self).get_queryset()
+        if not user.is_view_all():
+            user_attributes = user.get_attributes()
+            qs = qs.filter(included_attributes__in=user_attributes).distinct()
+
+        return qs
+
+
 # FIXME https://docs.djangoproject.com/en/1.8/ref/contrib/gis/
 @python_2_unicode_compatible
 class AttributeSet(models.Model):
@@ -72,8 +82,25 @@ class AttributeSet(models.Model):
         blank=True
     )
 
+    objects = AttributeSetManager()
+
     def __str__(self):
         return self.name
+
+    def related_objects(self, model, user):
+        """
+        Returns Queryset with the related computers based in attributes
+        """
+        if model == 'computer':
+            from migasfree.client.models import Computer
+
+            return Computer.productive.scope(user).filter(
+                sync_attributes__in=self.included_attributes.all()
+            ).exclude(
+                sync_attributes__in=self.excluded_attributes.all()
+            ).distinct()
+
+        return None
 
     def clean(self):
         super(AttributeSet, self).clean()
