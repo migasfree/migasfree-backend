@@ -25,7 +25,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.template import Context, Template
 from django.conf import settings
 
 from migasfree.utils import swap_m2m, remove_empty_elements_from_dict, list_difference
@@ -317,34 +316,6 @@ class Computer(models.Model):
     unsubscribed = UnsubscribedManager()
     active = ActiveManager()
     inactive = InactiveManager()
-
-    def __init__(self, *args, **kwargs):
-        super(Computer, self).__init__(*args, **kwargs)
-
-        if not settings.MIGASFREE_REMOTE_ADMIN_LINK:
-            self._actions = None
-            return
-
-        self._actions = []
-        template = Template(' '.join(settings.MIGASFREE_REMOTE_ADMIN_LINK))
-        context = {'computer': self}
-        for node in template.nodelist:
-            try:
-                token = node.filter_expression.token
-                if not token.startswith('computer'):
-                    context[token] = ','.join(list(
-                        self.sync_attributes.filter(
-                            property_att__prefix=token
-                        ).values_list('value', flat=True)
-                    ))
-            except:
-                pass
-
-        remote_admin = template.render(Context(context))
-
-        for element in remote_admin.split(' '):
-            protocol = element.split('://')[0]
-            self._actions.append([protocol, element])
 
     def get_all_attributes(self):
         return list(self.tags.values_list('id', flat=True)) \
