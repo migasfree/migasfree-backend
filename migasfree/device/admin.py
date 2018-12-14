@@ -18,6 +18,7 @@
 
 from django.contrib import admin
 from django import forms
+from django.utils.translation import ugettext_lazy as _
 
 from .models import (
     Type, Feature, Manufacturer, Connection,
@@ -91,13 +92,22 @@ class LogicalInline(admin.TabularInline):
 
 @admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'location', 'model', 'connection')
+    list_display = ('name', 'location', 'model', 'connection', 'computers')
     list_filter = ('model', 'model__manufacturer')
     search_fields = ('name', 'model__name', 'model__manufacturer__name', 'data')
     fields = ('name', 'model', 'connection', 'available_for_attributes', 'data')
     ordering = ('name',)
 
     inlines = [LogicalInline]
+
+    def computers(self, obj):
+        related_objects = obj.related_objects('computer', self.user.userprofile)
+        if related_objects:
+            return related_objects.count()
+
+        return 0
+
+    computers.short_description = _('Computers')
 
     def save_related(self, request, form, formsets, change):
         super(DeviceAdmin, self).save_related(request, form, formsets, change)
