@@ -42,6 +42,9 @@ class ScopeManager(models.Manager):
         if user.domain_preference:
             qs = qs.filter(domain=user.domain_preference)
 
+        if not user.is_view_all():
+            qs = qs.filter(included_attributes__in=user.get_attributes()).distinct()
+
         return qs
 
 
@@ -85,6 +88,32 @@ class Scope(models.Model):
 
     def __str__(self):
         return self.name
+
+    def related_objects(self, model, user):
+        """
+        Returns Queryset with the related computers based in attributes
+        """
+        if model == 'computer':
+            from migasfree.client.models import Computer
+
+            qs = Computer.productive.scope(user)
+            if self.domain:
+                atts_domain = Attribute.objects.filter(
+                    id__in=self.domain.included_attributes.all()
+                ).exclude(
+                    id__in=self.domain.excluded_attributes.all()
+                )
+                qs = qs.filter(sync_attributes__in=atts_domain)
+
+            qs = qs.filter(
+                sync_attributes__in=self.included_attributes.all()
+            ).exclude(
+                sync_attributes__in=self.excluded_attributes.all()
+            )
+
+            return qs.distinct()
+
+        return None
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.name = slugify(self.name)
