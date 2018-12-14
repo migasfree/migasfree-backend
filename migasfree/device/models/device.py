@@ -28,6 +28,16 @@ from .connection import Connection
 from .model import Model
 
 
+class DeviceManager(models.Manager):
+    def scope(self, user):
+        qs = super(DeviceManager, self).get_queryset()
+        if not user.is_view_all():
+            user_attributes = user.get_attributes()
+            qs = qs.filter(devicelogical__attributes__in=user_attributes).distinct()
+
+        return qs
+
+
 @python_2_unicode_compatible
 class Device(models.Model):
     name = models.CharField(
@@ -60,6 +70,8 @@ class Device(models.Model):
         default="{}"
     )
 
+    objects = DeviceManager()
+
     def location(self):
         data = json.loads(self.data)
         return data.get('LOCATION', '')
@@ -76,7 +88,7 @@ class Device(models.Model):
 
     def related_objects(self, model, user):
         """
-        Return Queryset with the related computers based in logical device attributes
+        Returns Queryset with the related computers based in logical device attributes
         """
         if model == 'computer':
             from migasfree.client.models import Computer
