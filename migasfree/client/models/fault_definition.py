@@ -29,10 +29,12 @@ class DomainFaultDefinitionManager(models.Manager):
     def scope(self, user):
         qs = super(DomainFaultDefinitionManager, self).get_queryset()
         if not user.is_view_all():
-            atts = user.get_attributes()
-            qs = qs.filter(included_attributes__in=atts)
-            qs = qs.exclude(excluded_attributes__in=atts)
-            qs = qs.distinct()
+            user_attributes = user.get_attributes()
+            qs = qs.filter(
+                included_attributes__in=user_attributes
+            ).exclude(
+                excluded_attributes__in=user_attributes
+            ).distinct()
 
         return qs
 
