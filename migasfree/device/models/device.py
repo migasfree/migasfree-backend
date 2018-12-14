@@ -74,6 +74,20 @@ class Device(models.Model):
     def __str__(self):
         return self.name
 
+    def related_objects(self, model, user):
+        """
+        Return Queryset with the related computers based in logical device attributes
+        """
+        if model == 'computer':
+            from migasfree.client.models import Computer
+            from migasfree.core.models import Attribute
+
+            return Computer.productive.scope(user).filter(
+                sync_attributes__in=Attribute.objects.filter(logical__device__id=self.id)
+            ).distinct()
+
+        return None
+
     def save(self, *args, **kwargs):
         data = json.loads(self.data)
         if 'NAME' in data:
