@@ -215,25 +215,44 @@ class AttributeSetAdmin(admin.ModelAdmin):
     list_filter = ('enabled',)
     search_fields = ('name', 'included_attributes__value', 'excluded_attributes__value')
 
+    def get_queryset(self, request):
+        qs = Attribute.objects.scope(request.user.userprofile)
+        return super(AttributeSetAdmin, self).get_queryset(
+            request
+        ).prefetch_related(
+            Prefetch('included_attributes', queryset=qs),
+            'included_attributes__property_att',
+            Prefetch('excluded_attributes', queryset=qs),
+            'excluded_attributes__property_att'
+        )
+
 
 class ScheduleDelayLine(admin.TabularInline):
     model = ScheduleDelay
+    fields = ('delay', 'attributes', 'computers', 'duration')
+    readonly_fields = ('computers',)
     extra = 0
     ordering = ('delay',)
 
-    def get_queryset(self, request):
-        sql = ScheduleDelay.TOTAL_COMPUTER_QUERY
-        user = request.user.userprofile
-        if not user.is_view_all():
-            computers = user.get_computers()
-            if computers:
-                sql += " AND client_computer_sync_attributes.computer_id IN " \
-                    + "(" + ",".join(str(x) for x in computers) + ")"
-            qs = ScheduleDelay.objects.scope(user).extra(select={'total_computers': sql})
-        else:
-            qs = ScheduleDelay.objects.all()
+    def computers(self, obj):
+        related_objects = obj.related_objects('computer', self.request.user.userprofile)
+        if related_objects:
+            return related_objects.count()
 
-        return qs
+        return 0
+
+    computers.short_description = _('Computers')
+
+    def get_queryset(self, request):
+        self.request = request
+        qs = Attribute.objects.scope(request.user.userprofile)
+
+        return super(ScheduleDelayLine, self).get_queryset(
+            request
+        ).prefetch_related(
+            Prefetch('attributes', queryset=qs),
+            'attributes__property_att',
+        )
 
 
 @admin.register(Schedule)
@@ -252,6 +271,13 @@ class ScheduleAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+    def get_queryset(self, request):
+        self.request = request
+
+        return super(ScheduleAdmin, self).get_queryset(
+            request
+        )
 
 
 @admin.register(Package)
@@ -396,6 +422,28 @@ class DeploymentAdmin(admin.ModelAdmin):
             if has_slug_changed and not is_new:
                 tasks.remove_repository_metadata.delay(obj.id, form.initial.get('slug'))
 
+    def get_queryset(self, request):
+        self.user = request.user
+        qs = Attribute.objects.scope(request.user.userprofile)
+
+        return super(DeploymentAdmin, self).get_queryset(
+            request
+        ).prefetch_related(
+            Prefetch('included_attributes', queryset=qs),
+            'included_attributes__property_att',
+            Prefetch('excluded_attributes', queryset=qs),
+            'excluded_attributes__property_att',
+        ).extra(
+            select={
+                'schedule_begin': '(SELECT delay FROM core_scheduledelay '
+                                  'WHERE core_deployment.schedule_id = core_scheduledelay.schedule_id '
+                                  'ORDER BY core_scheduledelay.delay LIMIT 1)',
+                'schedule_end': '(SELECT delay+duration FROM core_scheduledelay '
+                                'WHERE core_deployment.schedule_id = core_scheduledelay.schedule_id '
+                                'ORDER BY core_scheduledelay.delay DESC LIMIT 1)'
+             }
+        ).select_related('project', 'schedule')
+
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
@@ -459,6 +507,18 @@ class ScopeAdmin(admin.ModelAdmin):
             'classes': ['hidden'],
         })
     )
+
+    def get_queryset(self, request):
+        qs = Attribute.objects.scope(request.user.userprofile)
+
+        return super(ScopeAdmin, self).get_queryset(
+            request
+        ).prefetch_related(
+            Prefetch('included_attributes', queryset=qs),
+            'included_attributes__property_att',
+            Prefetch('excluded_attributes', queryset=qs),
+            'excluded_attributes__property_att'
+        )
 
 
 @admin.register(Domain)
