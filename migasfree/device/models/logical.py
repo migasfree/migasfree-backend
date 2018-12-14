@@ -36,6 +36,14 @@ class LogicalManager(models.Manager):
 
         return obj
 
+    def scope(self, user):
+        qs = super(LogicalManager, self).get_queryset()
+        if not user.is_view_all():
+            user_attributes = user.get_attributes()
+            qs = qs.filter(attributes__in=user_attributes).distinct()
+
+        return qs
+
 
 @python_2_unicode_compatible
 class Logical(models.Model):
