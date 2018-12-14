@@ -210,7 +210,7 @@ class ServerAttributeAdmin(ImportExportActionModelAdmin):
 
 @admin.register(AttributeSet)
 class AttributeSetAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('name', 'enabled')
     list_display_links = ('name',)
     list_filter = ('enabled',)
     search_fields = ('name', 'included_attributes__value', 'excluded_attributes__value')
