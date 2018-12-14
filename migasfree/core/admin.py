@@ -312,11 +312,11 @@ class PackageSetAdmin(admin.ModelAdmin):
 @admin.register(Deployment)
 class DeploymentAdmin(admin.ModelAdmin):
     form = DeploymentForm
-    list_display = ('project', 'name', 'enabled', 'start_date',)
+    list_display = ('project', 'name', 'enabled', 'start_date', 'computers')
     list_select_related = ('project',)
-    list_filter = ('enabled', 'project__name', 'domain',)
+    list_filter = ('enabled', 'project__name', 'domain')
     ordering = ('name',)
-    search_fields = ('name', 'available_packages__name',)
+    search_fields = ('name', 'available_packages__name')
     read_only_fields = ('slug',)
     prepopulated_fields = {'slug': ('name',)}
 
@@ -355,6 +355,15 @@ class DeploymentAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+    def computers(self, obj):
+        related_objects = obj.related_objects('computer', self.user.userprofile)
+        if related_objects:
+            return related_objects.count()
+
+        return 0
+
+    computers.short_description = _('Computers')
 
     def save_model(self, request, obj, form, change):
         is_new = (obj.pk is None)
