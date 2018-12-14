@@ -29,8 +29,10 @@ class DomainFaultManager(models.Manager):
     def scope(self, user=None):
         qs = super(DomainFaultManager, self).get_queryset()
         if user and not user.is_view_all():
-            qs = qs.filter(project_id__in=user.get_projects())
-            qs = qs.filter(computer_id__in=user.get_computers())
+            qs = qs.filter(
+                project_id__in=user.get_projects(),
+                computer_id__in=user.get_computers()
+            )
 
         return qs
 
