@@ -63,7 +63,8 @@ class UserProfile(UserSystem):
         cursor = connection.cursor()
         ctx = {
             'domain': self.domain_preference_id,
-            'scope': self.scope_preference_id
+            'scope': self.scope_preference_id,
+            'status': "('intended', 'reserved', 'unknown')"
         }
 
         if self.domain_preference:
@@ -71,11 +72,12 @@ class UserProfile(UserSystem):
 (
     SELECT DISTINCT computer_id
     FROM client_computer_sync_attributes
+    INNER JOIN client_computer ON client_computer.id=client_computer_sync_attributes.computer_id
     WHERE attribute_id IN (
         SELECT attribute_id
         FROM core_domain_included_attributes
         WHERE domain_id=%(domain)s
-    )
+    ) AND client_computer.status in %(status)s
     EXCEPT
     SELECT DISTINCT computer_id
     FROM client_computer_sync_attributes
@@ -94,11 +96,12 @@ class UserProfile(UserSystem):
 (
     SELECT DISTINCT computer_id
     FROM client_computer_sync_attributes
+    INNER JOIN client_computer ON client_computer.id=client_computer_sync_attributes.computer_id
     WHERE attribute_id IN (
         SELECT attribute_id
         FROM core_scope_included_attributes
         WHERE scope_id=%(scope)s
-    )
+    ) AND server_computer.status in %(status)s
     EXCEPT
     SELECT DISTINCT computer_id
     FROM client_computer_sync_attributes
