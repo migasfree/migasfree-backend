@@ -16,10 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.contrib import admin
 from django import forms
+from django.contrib import admin
+from django.db.models import Prefetch
 from django.utils.translation import ugettext_lazy as _
 
+from migasfree.core.models import Attribute
 from .models import (
     Type, Feature, Manufacturer, Connection,
     Driver, Logical, Model, Device
@@ -82,12 +84,31 @@ class LogicalAdmin(admin.ModelAdmin):
         'feature__name',
     )
 
+    def get_queryset(self, request):
+        qs = Attribute.objects.scope(request.user.userprofile)
+
+        return super(LogicalAdmin, self).get_queryset(
+            request
+        ).prefetch_related(
+            Prefetch('attributes', queryset=qs),
+            'attributes__property_att',
+        )
+
 
 class LogicalInline(admin.TabularInline):
     model = Logical
     form = LogicalForm
     fields = ('feature', 'name', 'attributes')
     extra = 0
+
+    def get_queryset(self, request):
+        qs = Attribute.objects.scope(request.user.userprofile)
+        return super(LogicalInline, self).get_queryset(
+            request
+        ).prefetch_related(
+            Prefetch('attributes', queryset=qs),
+            'attributes__property_att',
+        )
 
 
 @admin.register(Device)
@@ -108,6 +129,22 @@ class DeviceAdmin(admin.ModelAdmin):
         return 0
 
     computers.short_description = _('Computers')
+
+    def get_queryset(self, request):
+        self.user = request.user
+        qs = Attribute.objects.scope(request.user.userprofile)
+
+        return super(DeviceAdmin, self).get_queryset(
+            request
+        ).select_related(
+            'connection', 'connection__device_type',
+            'model', 'model__manufacturer', 'model__device_type',
+        ).prefetch_related(
+            Prefetch('logical_set__attributes', queryset=qs),
+            'logical_set__attributes__property_att',
+            Prefetch('available_for_attributes', queryset=qs),
+            'logical_set'
+        )
 
     def save_related(self, request, form, formsets, change):
         super(DeviceAdmin, self).save_related(request, form, formsets, change)
