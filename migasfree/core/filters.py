@@ -20,8 +20,14 @@ import rest_framework_filters as filters
 
 from .models import (
     Deployment, Package, ClientAttribute, ServerAttribute,
-    Project, ScheduleDelay, Store,
+    Project, ScheduleDelay, Store, AttributeSet,
 )
+
+
+class AttributeSetFilter(filters.FilterSet):
+    class Meta:
+        model = AttributeSet
+        fields = ['id', 'name', 'enabled']
 
 
 class DeploymentFilter(filters.FilterSet):
