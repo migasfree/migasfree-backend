@@ -25,12 +25,11 @@ from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
-
-from import_export import resources, fields, widgets
 from import_export.admin import ImportExportActionModelAdmin
 
 from migasfree.client.models import Computer
 
+from .resources import AttributeResource, ProjectResource
 from . import tasks
 
 from .models import *
@@ -40,17 +39,6 @@ from .forms import (
 )
 
 admin.site.register(Platform)
-
-
-class ProjectResource(resources.ModelResource):
-    auto_register_computers = fields.Field(
-        attribute='auto_register_computers',
-        widget=widgets.BooleanWidget()
-    )
-
-    class Meta:
-        model = Project
-        fields = ('name', 'pms', 'auto_register_computers', 'platform__name')
 
 
 @admin.register(Project)
@@ -150,13 +138,14 @@ class ClientAttributeFilter(SimpleListFilter):
 
 
 @admin.register(ClientAttribute)
-class ClientAttributeAdmin(admin.ModelAdmin):
+class ClientAttributeAdmin(ImportExportActionModelAdmin):
     list_display = ('id', 'property_att', 'value', 'description')
     list_select_related = ('property_att',)
     list_filter = (ClientAttributeFilter,)
     ordering = ('property_att', 'value',)
     search_fields = ('value', 'description')
     readonly_fields = ('property_att', 'value',)
+    resource_class = AttributeResource
 
     def get_queryset(self, request):
         sql = Attribute.TOTAL_COMPUTER_QUERY
@@ -186,13 +175,14 @@ class ServerAttributeFilter(SimpleListFilter):
 
 
 @admin.register(ServerAttribute)
-class ServerAttributeAdmin(admin.ModelAdmin):
+class ServerAttributeAdmin(ImportExportActionModelAdmin):
     list_display = ('value', 'description', 'property_att')
     fields = ('property_att', 'value', 'description', 'inflicted_computers')
     list_filter = (ServerAttributeFilter,)
     ordering = ('property_att', 'value',)
     search_fields = ('value', 'description')
     readonly_fields = ('inflicted_computers',)
+    resource_class = AttributeResource
 
     def get_queryset(self, request):
         sql = Attribute.TOTAL_COMPUTER_QUERY
