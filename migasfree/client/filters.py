@@ -57,7 +57,7 @@ class FaultDefinitionFilter(filters.FilterSet):
     class Meta:
         model = FaultDefinition
         fields = [
-            'id', 'enabled',
+            'id', 'name', 'enabled',
             'included_attributes__id', 'excluded_attributes__id'
         ]
 
