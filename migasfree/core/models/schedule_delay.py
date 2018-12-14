@@ -18,7 +18,6 @@
 
 from django.db import models
 from django.db.models import Q
-from django.db.models import Count
 from django.core.validators import MinValueValidator
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -66,28 +65,6 @@ class ScheduleDelay(models.Model):
 
     objects = ScheduleDelayManager()
 
-    # computers with productive status
-    TOTAL_COMPUTER_QUERY = "SELECT DISTINCT COUNT(client_computer.id) \
-        FROM client_computer, client_computer_sync_attributes \
-        WHERE core_scheduledelay_attributes.attribute_id=client_computer_sync_attributes.attribute_id \
-        AND client_computer_sync_attributes.computer_id=client_computer.id \
-        AND client_computer.status IN ('intended', 'reserved', 'unknown')"
-
-    def total_computers(self, user=None):
-        from migasfree.client.models import Computer
-
-        if user and not user.userprofile.is_view_all():
-            queryset = Computer.productive.scope(user.userprofile).filter(
-                sync_attributes__id__in=self.attributes.values_list('id')
-            )
-        else:
-            queryset = Computer.productive.filter(
-                sync_attributes__id__in=self.attributes.values_list('id')
-            )
-        return queryset.annotate(total=Count('id')).count()
-
-    total_computers.short_description = _('Total computers')
-
     def __str__(self):
         return u'{} ({})'.format(self.schedule.name, self.delay)
 
@@ -97,6 +74,19 @@ class ScheduleDelay(models.Model):
         )
 
     attribute_list.short_description = _("attribute list")
+
+    def related_objects(self, model, user):
+        """
+        Returns Queryset with the related computers based in attributes
+        """
+        if model == 'computer':
+            from migasfree.client.models import Computer
+
+            return Computer.productive.scope(user).filter(
+                sync_attributes__in=self.attributes.all()
+            ).distinct()
+
+        return None
 
     class Meta:
         app_label = 'core'
