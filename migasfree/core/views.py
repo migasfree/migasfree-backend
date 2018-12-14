@@ -42,6 +42,7 @@ from .models import (
     Schedule, ScheduleDelay,
     Package, Deployment,
     Domain, Scope,
+    AttributeSet, Property,
 )
 from .serializers import (
     PlatformSerializer, ProjectSerializer, ProjectWriteSerializer,
@@ -54,10 +55,13 @@ from .serializers import (
     PackageSerializer, DeploymentSerializer, DeploymentWriteSerializer,
     DomainWriteSerializer, DomainSerializer,
     ScopeSerializer, ScopeWriteSerializer,
+    AttributeSetSerializer, AttributeSetWriteSerializer,
+    PropertySerializer, PropertyWriteSerializer,
 )
 from .filters import (
     DeploymentFilter, PackageFilter, ProjectFilter, StoreFilter,
     ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
+    AttributeSetFilter, PropertyFilter,
 )
 
 from . import tasks
@@ -69,6 +73,21 @@ class SafePackagerConnectionMixin(SafeConnectionMixin):
 
     sign_key = settings.MIGASFREE_PRIVATE_KEY
     encrypt_key = settings.MIGASFREE_PACKAGER_PUB_KEY
+
+
+class AttributeSetViewSet(viewsets.ModelViewSet):
+    queryset = AttributeSet.objects.all()
+    serializer_class = AttributeSetSerializer
+    filter_class = AttributeSetFilter
+    ordering_fields = '__all__'
+    ordering = ('name',)
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return AttributeSetWriteSerializer
+
+        return AttributeSetSerializer
 
 
 class PlatformViewSet(viewsets.ModelViewSet):
@@ -132,6 +151,22 @@ class StoreViewSet(viewsets.ModelViewSet):
             qs = qs.filter(project__in=user.get_projects())
 
         return qs
+
+
+class PropertyViewSet(viewsets.ModelViewSet):
+    queryset = Property.objects.all()
+    serializer_class = PropertySerializer
+    filter_class = PropertyFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    ordering_fields = '__all__'
+    ordering = ('prefix', 'name',)
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return PropertyWriteSerializer
+
+        return PropertySerializer
 
 
 class ServerPropertyViewSet(viewsets.ModelViewSet):
