@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,10 +17,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.contrib import admin
+from django.db.models import Prefetch
 from django.utils.translation import ugettext_lazy as _
 
 # from form_utils.widgets import ImageWidget
 
+from migasfree.core.models import Attribute
 from .models import Application, PackagesByProject, Policy, PolicyGroup
 
 
@@ -67,6 +69,14 @@ class ApplicationAdmin(admin.ModelAdmin):
     inlines = [PackagesByProjectLine]
     extra = 0
 
+    def get_queryset(self, request):
+        qs = Attribute.objects.scope(request.user.userprofile)
+        return super(ApplicationAdmin, self).get_queryset(
+            request
+        ).prefetch_related(
+            Prefetch('available_for_attributes', queryset=qs)
+        )
+
     def __str__(self):
         return self.name
 
@@ -84,12 +94,13 @@ class PolicyGroupAdmin(admin.ModelAdmin):
     )
 
     def get_queryset(self, request):
+        qs = Attribute.objects.scope(request.user.userprofile)
         return super(PolicyGroupAdmin, self).get_queryset(
             request
         ).prefetch_related(
-            'included_attributes',
+            Prefetch('included_attributes', queryset=qs),
             'included_attributes__property_att',
-            'excluded_attributes',
+            Prefetch('excluded_attributes', queryset=qs),
             'excluded_attributes__property_att'
         )
 
@@ -102,6 +113,17 @@ class PolicyGroupLine(admin.TabularInline):
     )
     ordering = ('priority',)
     extra = 0
+
+    def get_queryset(self, request):
+        qs = Attribute.objects.scope(request.user.userprofile)
+        return super(PolicyGroupLine, self).get_queryset(
+            request
+        ).prefetch_related(
+            Prefetch('included_attributes', queryset=qs),
+            'included_attributes__property_att',
+            Prefetch('excluded_attributes', queryset=qs),
+            'excluded_attributes__property_att'
+        )
 
 
 @admin.register(Policy)
@@ -132,3 +154,14 @@ class PolicyAdmin(admin.ModelAdmin):
     )
     inlines = [PolicyGroupLine]
     extra = 0
+
+    def get_queryset(self, request):
+        qs = Attribute.objects.scope(request.user.userprofile)
+        return super(PolicyAdmin, self).get_queryset(
+            request
+        ).prefetch_related(
+            Prefetch('included_attributes', queryset=qs),
+            'included_attributes__property_att',
+            Prefetch('excluded_attributes', queryset=qs),
+            'excluded_attributes__property_att'
+        )
