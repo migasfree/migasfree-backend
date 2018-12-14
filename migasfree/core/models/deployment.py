@@ -318,8 +318,51 @@ class Deployment(models.Model):
 
         return deployments
 
+    def related_objects(self, model, user):
+        """
+        Returns Queryset with the related computers based in attributes and schedule
+        """
+        if model == 'computer':
+            from migasfree.client.models import Computer
+
+            if self.enabled and (self.start_date <= datetime.datetime.now().date()):
+                # by assigned attributes
+                computers = Computer.productive.scope(user).filter(
+                    project_id=self.project.id
+                ).filter(
+                    Q(sync_attributes__in=self.included_attributes.all())
+                )
+
+                # by schedule
+                if self.schedule:
+                    for delay in self.schedule.delays.all():
+                        delay_attributes = list(delay.attributes.values_list('id', flat=True))
+                        for duration in range(0, delay.duration):
+                            if time_horizon(
+                                self.start_date, delay.delay + duration - 1
+                            ) <= datetime.datetime.now().date():
+                                computers_schedule = Computer.productive.scope(user).filter(
+                                    project_id=self.project.id
+                                ).filter(
+                                    Q(sync_attributes__id__in=delay_attributes)
+                                ).extra(
+                                    where=['mod(server_computer.id, {}) = {}'.format(delay.duration, duration)]
+                                )
+                                computers = (computers | computers_schedule)
+                            else:
+                                break
+
+                # excluded attributes
+                computers = computers.exclude(
+                    Q(sync_attributes__in=self.excluded_attributes.all())
+                )
+
+                return computers.distinct()
+
+        return None
+
     def pms(self):
-        mod = import_module('migasfree.core.pms.%s' % self.project.pms)
+        mod = import_module('migasfree.core.pms.{}'.format(self.project.pms))
         return getattr(mod, self.project.pms.capitalize())()
 
     def path(self, name=None):
