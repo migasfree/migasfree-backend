@@ -43,5 +43,5 @@ safe_router = routers.DefaultRouter()
 safe_router.register(
     r'packages',
     views.SafePackageViewSet,
-    base_name='safe_packages'
+    basename='safe_packages'
 )

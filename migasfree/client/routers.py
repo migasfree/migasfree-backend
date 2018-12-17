@@ -37,5 +37,5 @@ safe_router = routers.DefaultRouter()
 safe_router.register(
     r'computers',
     views.SafeComputerViewSet,
-    base_name='computers'
+    basename='computers'
 )

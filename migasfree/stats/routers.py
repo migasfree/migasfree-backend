@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,12 +22,12 @@ from . import views
 
 router = routers.DefaultRouter()
 
-router.register(r'stats/syncs', views.SyncStatsViewSet, base_name='stats-syncs')
+router.register(r'stats/syncs', views.SyncStatsViewSet, basename='stats-syncs')
 router.register(
-    r'stats/computers', views.ComputerStatsViewSet, base_name='stats-computers'
+    r'stats/computers', views.ComputerStatsViewSet, basename='stats-computers'
 )
 router.register(
     r'stats/deployments',
     views.DeploymentStatsViewSet,
-    base_name='stats-deployments'
+    basename='stats-deployments'
 )

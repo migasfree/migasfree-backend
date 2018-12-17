@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ router = routers.DefaultRouter()
 router.register(
     r'computers',
     views.HardwareComputerViewSet,
-    base_name='computers-hardware'
+    basename='computers-hardware'
 )
 router.register(r'hardware', views.HardwareViewSet)
 
@@ -34,5 +34,5 @@ safe_router = routers.DefaultRouter()
 safe_router.register(
     r'computers',
     views.SafeHardwareViewSet,
-    base_name='safe_hardware'
+    basename='safe_hardware'
 )
