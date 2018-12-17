@@ -31,8 +31,9 @@ class AttributeSetManager(models.Manager):
     def scope(self, user):
         qs = super(AttributeSetManager, self).get_queryset()
         if not user.is_view_all():
-            user_attributes = user.get_attributes()
-            qs = qs.filter(included_attributes__in=user_attributes).distinct()
+            qs = qs.filter(
+                included_attributes__in=user.get_attributes()
+            ).distinct()
 
         return qs
 
@@ -155,8 +156,12 @@ class AttributeSet(models.Model):
             sets = AttributeSet.item_at_index(sets, item.id)
 
             for subset in item.included_attributes.filter(
-                ~Q(property_att__sort='basic')
-            ).filter(property_att__prefix='SET').filter(~Q(value=item.name)):
+                ~Q(value='All Systems')
+            ).filter(
+                property_att__prefix='SET'
+            ).filter(
+                ~Q(value=item.name)
+            ):
                 sets = AttributeSet.item_at_index(
                     sets,
                     AttributeSet.objects.get(name=subset.value).id,
@@ -164,8 +169,12 @@ class AttributeSet(models.Model):
                 )
 
             for subset in item.excluded_attributes.filter(
-                ~Q(property_att__sort='basic')
-            ).filter(property_att__prefix='SET').filter(~Q(value=item.name)):
+                ~Q(value='All Systems')
+            ).filter(
+                property_att__prefix='SET'
+            ).filter(
+                ~Q(value=item.name)
+            ):
                 sets = AttributeSet.item_at_index(
                     sets,
                     AttributeSet.objects.get(name=subset.value).id,
@@ -189,6 +198,7 @@ class AttributeSet(models.Model):
             ).distinct():
                 att = Attribute.objects.create(property_set, att_set.name)
                 att_id.append(att.id)
+                attributes.append(att.id)  # important!!!
 
         return att_id
 
