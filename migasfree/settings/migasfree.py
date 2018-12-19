@@ -50,8 +50,8 @@ Sample:
             "vnc": {"title": "VNC", "description": "remote control vnc", "many": False},
             "sync": {"title": "SYNC", "description": "ssh -> run migasfree -u"},
             "install": {
-                "title": "INSTALL", 
-                "description": "ssh -> install a package", 
+                "title": "INSTALL",
+                "description": "ssh -> install a package" 
                 "related": ["deployment", "computer"]
             },
         },
