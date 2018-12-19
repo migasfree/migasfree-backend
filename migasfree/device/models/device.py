@@ -92,7 +92,6 @@ class Device(models.Model):
         """
         if model == 'computer':
             from migasfree.client.models import Computer
-            from migasfree.core.models import Attribute
 
             return Computer.productive.scope(user).filter(
                 sync_attributes__in=Attribute.objects.filter(logical__device__id=self.id)
