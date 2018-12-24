@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import json
+
 from past.builtins import basestring
 
 from django.db import models
@@ -39,8 +41,9 @@ class LogicalManager(models.Manager):
     def scope(self, user):
         qs = super(LogicalManager, self).get_queryset()
         if not user.is_view_all():
-            user_attributes = user.get_attributes()
-            qs = qs.filter(attributes__in=user_attributes).distinct()
+            qs = qs.filter(
+                attributes__in=user.get_attributes()
+            ).distinct()
 
         return qs
 
@@ -110,12 +113,19 @@ class Logical(models.Model):
         return ret
 
     def __str__(self):
-        return u'{}__{}__{}__{}__{}'.format(
+        data = json.loads(self.device.data)
+        if 'NAME' in data and not (data['NAME'] == 'undefined' or data['NAME'] == ''):
+            return u'{}__{}__{}'.format(
+                data['NAME'],
+                self.get_name(),
+                self.device.name,
+            )
+
+        return u'{}__{}__{}__{}'.format(
             self.device.model.manufacturer.name,
             self.device.model.name,
-            self.feature.name,
+            self.get_name(),
             self.device.name,
-            self.id
         )
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
