@@ -210,7 +210,7 @@ class Computer(models.Model):
 
     default_logical_device = models.ForeignKey(
         Logical,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         verbose_name=_("default logical device")
