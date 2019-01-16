@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+
+from django.conf import settings
 
 from .pms import Pms
 from migasfree.utils import execute
@@ -47,9 +49,11 @@ _DIR=%(path)s/%(name)s
 rm -rf $_DIR/repodata
 rm -rf $_DIR/checksum
 createrepo --cachedir checksum $_DIR
+gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg --detach-sign --armor $_DIR/repodata/repomd.xml
         ''' % {
             'path': path,
             'name': os.path.basename(path),
+            'keys_path': settings.MIGASFREE_KEYS_DIR
         }
 
         return execute(_cmd)
