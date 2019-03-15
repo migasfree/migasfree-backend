@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +18,11 @@
 
 from django.conf.urls import include, url
 
-from .views import ServerInfoView
+from .views import ServerInfoView, GetSourceFileView
 
 public_patterns = [
     url(r'server/info/', ServerInfoView.as_view()),
+    url(r'^src/', GetSourceFileView.as_view()),
 ]
 
 urlpatterns = [

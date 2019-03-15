@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,18 +17,23 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import time
+
+from urllib2 import urlopen, URLError, HTTPError
+from wsgiref.util import FileWrapper
 
 from django.conf import settings
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext
 from django_redis import get_redis_connection
 from rest_framework import (
     viewsets, parsers, status,
-    mixins, filters, views,
+    mixins, views,
 )
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework_filters import backends
+from rest_framework_filters import backends, filters
 
 from .mixins import SafeConnectionMixin
 
@@ -40,7 +45,7 @@ from .models import (
     ServerProperty, ClientProperty,
     ServerAttribute, ClientAttribute,
     Schedule, ScheduleDelay,
-    Package, Deployment,
+    Package, Deployment, ExternalSource,
     Domain, Scope,
     AttributeSet, Property,
 )
@@ -580,3 +585,57 @@ class ServerInfoView(views.APIView):
         }
 
         return Response(info)
+
+
+class GetSourceFileView(views.APIView):
+    def get(self, request, format=None):
+        source = None
+
+        _path = request.get_full_path()
+        project_name = _path.split('/')[2]
+        source_name = _path.split('/')[4]
+        resource = _path.split('/src/{}/EXTERNAL/{}/'.format(project_name, source_name))[1]
+
+        _file_local = os.path.join(settings.MIGASFREE_PUBLIC_DIR, _path.split('/src/')[1])
+
+        # FIXME PMS dependency
+        if not (_file_local.endswith('.deb') or _file_local.endswith('.rpm')):  # is a metadata file
+            source = ExternalSource.objects.get(project__name=project_name, name=source_name)
+
+            if not source.frozen:
+                # expired metadata
+                if os.path.exists(_file_local) and (
+                    source.expire <= 0 or
+                    (time.time() - os.stat(_file_local).st_mtime) / (60 * source.expire) > 1
+                ):
+                    os.remove(_file_local)
+
+        if not os.path.exists(_file_local):
+            if not os.path.exists(os.path.dirname(_file_local)):
+                os.makedirs(os.path.dirname(_file_local))  # Make local path
+
+            if not source:
+                source = ExternalSource.objects.get(project__name=project_name, name=source_name)
+
+            url = '{}/{}'.format(source.base_url, resource)
+
+            try:
+                f = urlopen(url)
+                # Open our local file for writing
+                with open(_file_local, "wb") as local_file:
+                    local_file.write(f.read())
+            # handle errors
+            except HTTPError, e:
+                return HttpResponse('HTTP Error: {} {}'.format(e.code, url), status=e.code)
+            except URLError, e:
+                return HttpResponse('URL Error: {} {}'.format(e.reason, url), status=e.code)
+
+        if os.path.isfile(_file_local):
+            wrapper = FileWrapper(file(_file_local))
+            response = HttpResponse(wrapper, content_type='application/octet-stream')
+            response['Content-Disposition'] = u'attachment; filename={}'.format(os.path.basename(_file_local))
+            response['Content-Length'] = os.path.getsize(_file_local)
+        else:
+            return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+
+        return response
