@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import datetime
 from importlib import import_module
 
 from django.db import models
+from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
@@ -60,6 +61,14 @@ class DeploymentManager(models.Manager):
 
 @python_2_unicode_compatible
 class Deployment(models.Model):
+    SOURCE_INTERNAL = 'I'
+    SOURCE_EXTERNAL = 'E'
+
+    SOURCE_CHOICES = (
+        (SOURCE_INTERNAL, _('Internal')),
+        (SOURCE_EXTERNAL, _('External')),
+    )
+
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
         default=True,
@@ -83,24 +92,18 @@ class Deployment(models.Model):
         verbose_name=_('project')
     )
 
+    domain = models.ForeignKey(
+        Domain,
+        verbose_name=_('domain'),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL
+    )
+
     comment = models.TextField(
         verbose_name=_('comment'),
         null=True,
         blank=True
-    )
-
-    available_packages = models.ManyToManyField(
-        Package,
-        blank=True,
-        verbose_name=_('available packages'),
-        help_text=_('If a computer has installed one of these packages it will be updated')
-    )
-
-    available_package_sets = models.ManyToManyField(
-        PackageSet,
-        blank=True,
-        verbose_name=_('available package sets'),
-        help_text=_('If a computer has installed one of these packages it will be updated')
     )
 
     packages_to_install = models.TextField(
@@ -115,14 +118,6 @@ class Deployment(models.Model):
         null=True,
         blank=True,
         help_text=_('Mandatory packages to remove each time')
-    )
-
-    domain = models.ForeignKey(
-        Domain,
-        verbose_name=_('domain'),
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL
     )
 
     included_attributes = models.ManyToManyField(
@@ -167,6 +162,68 @@ class Deployment(models.Model):
         verbose_name=_('default excluded packages'),
         null=True,
         blank=True
+    )
+
+    source = models.CharField(
+        verbose_name=_('source'),
+        max_length=1,
+        null=False,
+        choices=SOURCE_CHOICES,
+        default=SOURCE_INTERNAL
+    )
+
+    available_packages = models.ManyToManyField(
+        Package,
+        blank=True,
+        verbose_name=_('available packages'),
+        help_text=_('If a computer has installed one of these packages it will be updated')
+    )
+
+    available_package_sets = models.ManyToManyField(
+        PackageSet,
+        blank=True,
+        verbose_name=_('available package sets'),
+        help_text=_('If a computer has installed one of these packages it will be updated')
+    )
+
+    base_url = models.CharField(
+        max_length=100,
+        verbose_name=_('base url'),
+        null=True,
+        blank=True
+    )
+
+    # https://manpages.debian.org/stretch/apt/sources.list.5.en.html
+    # https://linux.die.net/man/5/yum.conf
+    options = models.CharField(
+        max_length=250,
+        verbose_name=_('options'),
+        null=True,
+        blank=True
+    )
+
+    suite = models.CharField(
+        max_length=50,
+        verbose_name=_('suite'),
+        null=True,
+        blank=True
+    )
+
+    components = models.CharField(
+        max_length=100,
+        verbose_name=_('components'),
+        null=True,
+        blank=True
+    )
+
+    frozen = models.BooleanField(
+        verbose_name=_('frozen'),
+        default=True
+    )
+
+    expire = models.IntegerField(
+        verbose_name=_('metadata cache minutes. Default 1440 minutes = 1 day'),
+        default=1440  # 60m * 24h = 1 day
     )
 
     objects = DeploymentManager()
@@ -374,7 +431,7 @@ class Deployment(models.Model):
 
     def can_delete(self, user):
         if user.has_perm("core.delete_deployment"):
-            if len(user.userprofile.domains.all()) == 0 or self.domain == user.userprofile.domain_preference:
+            if user.userprofile.domains.count() == 0 or self.domain == user.userprofile.domain_preference:
                 return True
 
         return False
@@ -409,3 +466,62 @@ def pre_delete_deployment(sender, instance, **kwargs):
 
     con = get_redis_connection()
     con.delete('migasfree:deployments:%d:computers' % instance.id)
+
+class InternalSourceManager(models.Manager):
+    def scope(self, user):
+        qs = super(InternalSourceManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(project__in=user.get_projects())
+            domain = user.domain_preference
+            if domain:
+                qs = qs.filter(
+                    Q(domain_id=domain.id) | Q(domain_id=None)
+                )
+
+        qs = qs.filter(source=Deployment.SOURCE_INTERNAL)
+
+        return qs
+
+
+class InternalSource(Deployment):
+    objects = InternalSourceManager()
+
+    def __init__(self, *args, **kwargs):
+        super(InternalSource, self).__init__(*args, **kwargs)
+        self.source = Deployment.SOURCE_INTERNAL
+
+    class Meta:
+        app_label = 'server'
+        verbose_name = _("Deployment (internal source)")
+        verbose_name_plural = _("Deployments (internal source)")
+        proxy = True
+
+
+class ExternalSourceManager(models.Manager):
+    def scope(self, user):
+        qs = super(ExternalSourceManager, self).get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(project__in=user.get_projects())
+            domain = user.domain_preference
+            if domain:
+                qs = qs.filter(
+                    Q(domain_id=domain.id) | Q(domain_id=None)
+                )
+
+        qs = qs.filter(source=Deployment.SOURCE_EXTERNAL)
+
+        return qs
+
+
+class ExternalSource(Deployment):
+    objects = ExternalSourceManager()
+
+    def __init__(self, *args, **kwargs):
+        super(ExternalSource, self).__init__(*args, **kwargs)
+        self.source = Deployment.SOURCE_EXTERNAL
+
+    class Meta:
+        app_label = 'server'
+        verbose_name = _("Deployment (external source)")
+        verbose_name_plural = _("Deployments (external source)")
+        proxy = True
