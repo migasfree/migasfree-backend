@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -180,22 +180,5 @@ class RepositoriesKeysView(views.APIView):
         """
         return Response(
             secure.gpg_get_key('migasfree-repository'),
-            content_type='text/plain'
-        )
-
-
-class RepositoriesUrlTemplateView(views.APIView):
-    def post(self, request, format=None):
-        """
-        Returns the repositories URL template
-        """
-        protocol = 'https' if request.is_secure() else 'http'
-
-        return Response(
-            '{}://{{server}}{}{{project}}/{}'.format(
-                protocol,
-                settings.MEDIA_URL,
-                Project.REPOSITORY_TRAILING_PATH
-            ),
             content_type='text/plain'
         )
