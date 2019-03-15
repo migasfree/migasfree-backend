@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ from .models import *
 from .forms import (
     PackageForm, DeploymentForm, ClientPropertyForm,
     UserProfileForm, ScopeForm, DomainForm, StoreForm,
+    ExternalSourceForm, InternalSourceForm,
 )
 
 admin.site.register(Platform)
@@ -338,7 +339,7 @@ class PackageSetAdmin(admin.ModelAdmin):
 @admin.register(Deployment)
 class DeploymentAdmin(admin.ModelAdmin):
     form = DeploymentForm
-    list_display = ('project', 'name', 'enabled', 'start_date', 'computers')
+    list_display = ('project', 'name', 'enabled', 'domain', 'start_date', 'computers')
     list_select_related = ('project',)
     list_filter = ('enabled', 'project__name', 'domain')
     ordering = ('name',)
@@ -362,6 +363,7 @@ class DeploymentAdmin(admin.ModelAdmin):
         (_('To whom (Attributes)'), {
             'classes': ('collapse',),
             'fields': (
+                'domain',
                 'included_attributes',
                 'excluded_attributes'
             )
@@ -445,6 +447,86 @@ class DeploymentAdmin(admin.ModelAdmin):
         ).select_related('project', 'schedule')
 
 
+@admin.register(ExternalSource)
+class ExternalSourceAdmin(DeploymentAdmin):
+    form = ExternalSourceForm
+    fieldsets = (
+        (_('General'), {
+            'fields': (
+                'name',
+                'slug',
+                'project',
+                'enabled',
+                'comment',
+            )
+        }),
+        (_('Source'), {
+            'fields': ('base_url', 'suite', 'components', 'options', 'frozen', 'expire',)
+        }),
+        (_('What (Packages)'), {
+            'classes': ('collapse',),
+            'fields': (
+                'packages_to_install',
+                'packages_to_remove',
+            )
+        }),
+        (_('Packages by default'), {
+            'classes': ('collapse',),
+            'fields': (
+                'default_preincluded_packages',
+                'default_included_packages',
+                'default_excluded_packages',
+            )
+        }),
+        (_('To whom (Attributes)'), {
+            'fields': (
+                'domain',
+                'included_attributes',
+                'excluded_attributes'
+            )
+        }),
+        (_('When (Schedule)'), {
+            'fields': (
+                'start_date',
+                'schedule',
+            )
+        }),
+    )
+
+
+@admin.register(InternalSource)
+class InternalSourceAdmin(DeploymentAdmin):
+    form = InternalSourceForm
+    fieldsets = (
+        (_('General'), {
+            'fields': ('name', 'slug', 'project', 'enabled', 'comment',)
+        }),
+        (_('What (Packages)'), {
+            'classes': ('collapse',),
+            'fields': (
+                'available_packages',
+                'available_package_sets',
+                'packages_to_install',
+                'packages_to_remove',
+            )
+        }),
+        (_('Packages by default'), {
+            'classes': ('collapse',),
+            'fields': (
+                'default_preincluded_packages',
+                'default_included_packages',
+                'default_excluded_packages',
+            )
+        }),
+        (_('To whom (Attributes)'), {
+            'fields': ('domain', 'included_attributes', 'excluded_attributes')
+        }),
+        (_('When (Schedule)'), {
+            'fields': ('start_date', 'schedule')
+        }),
+    )
+
+
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     form = UserProfileForm
@@ -473,13 +555,13 @@ class UserProfileAdmin(admin.ModelAdmin):
                  'user_permissions',
                  'domains',
              ),
-        }),
-        (_('Preferences'), {
+         }),
+         (_('Preferences'), {
             'fields': (
                 'domain_preference',
                 'scope_preference',
             ),
-        }),
+         }),
     )
 
 
