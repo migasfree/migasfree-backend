@@ -529,7 +529,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         computer.sync_attributes.add(*Domain.process(computer.get_all_attributes()))
 
         # tags
-        for tag in computer.tags.all().filter(property_att__enabled=True):
+        for tag in computer.tags.filter(property_att__enabled=True):
             Attribute.process_kind_property(tag.property_att, tag.value)
 
         # basic attributes
@@ -885,7 +885,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, ugettext('Getting tags...'))
 
-        computer_tags_ids = computer.tags.all().values_list('id', flat=True)
+        computer_tags_ids = computer.tags.values_list('id', flat=True)
         tags = claims.get('tags')
         tag_objs = Attribute.objects.filter_by_prefix_value(tags)
         if not tag_objs:
