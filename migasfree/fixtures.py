@@ -235,6 +235,17 @@ def configure_default_users():
     configure_user("liberator", [reader, liberator])
     configure_user("checker", [reader, checker])
     configure_user("reader", [reader])
+    configure_user("migasfree-play")
+
+    # default user permissions
+    user = UserProfile.objects.get(username="migasfree-play")
+    user.is_staff = False
+    user.save()
+    permissions = Permission.objects.filter(
+        codename__in=['change_device.logical'],
+        content_type__app_label='server'
+    )
+    user.user_permissions.add(*permissions)
 
 
 def sequence_reset():
