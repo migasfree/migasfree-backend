@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,8 @@ router.register(r'tags', views.ServerAttributeViewSet)
 router.register(r'features', views.ClientAttributeViewSet)
 router.register(r'schedules', views.ScheduleViewSet)
 router.register(r'packages', views.PackageViewSet)
-router.register(r'deployments', views.DeploymentViewSet)
+router.register(r'deployments/internal-sources', views.InternalSourceViewSet)
+router.register(r'deployments/external-sources', views.ExternalSourceViewSet)
 router.register(r'domains', views.DomainViewSet)
 router.register(r'scopes', views.ScopeViewSet)
 # router.register(r'auth', views.AuthViewSet, base_name='auth')
