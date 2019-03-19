@@ -574,10 +574,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         """
         claims = {'id': 1}
 
-        Returns: [
-            slug,
-            ...
-        ]
+        Returns: [{"name": slug, "source_template": "template"}, ...]
         """
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
@@ -586,13 +583,20 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         repos = Deployment.available_deployments(
             computer, computer.get_all_attributes()
-        ).values_list('slug', flat=True)
+        )
+
+        ret = []
+        for repo in repos:
+            ret.append({
+                'name': repo.slug,
+                'source_template': repo.get_source_template()
+            })
 
         add_computer_message(computer, ugettext('Sending repositories...'))
 
-        if repos:
+        if ret:
             return Response(
-                self.create_response(list(repos)),
+                self.create_response(ret),
                 status=status.HTTP_200_OK
             )
 
