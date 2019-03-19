@@ -25,7 +25,6 @@ import datetime
 from importlib import import_module
 
 from django.db import models
-from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
@@ -429,6 +428,9 @@ class Deployment(models.Model):
             name if name else self.slug
         )
 
+    def source_template(self):
+        return self.pms.source_template(self)
+
     def can_delete(self, user):
         if user.has_perm("core.delete_deployment"):
             if user.userprofile.domains.count() == 0 or self.domain == user.userprofile.domain_preference:
@@ -466,6 +468,7 @@ def pre_delete_deployment(sender, instance, **kwargs):
 
     con = get_redis_connection()
     con.delete('migasfree:deployments:%d:computers' % instance.id)
+
 
 class InternalSourceManager(models.Manager):
     def scope(self, user):

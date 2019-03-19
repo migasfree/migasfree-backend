@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -165,3 +165,28 @@ dpkg-deb -c %(pkg)s | awk '{print $6}'
         _ret, _output, _error = execute(_cmd)
 
         return _output if _ret == 0 else _error
+
+    def source_template(self, deploy):
+        """
+        string source_template(Deployment deploy)
+        """
+
+        from ..models import Deployment, Project
+
+        if deploy.source == Deployment.SOURCE_INTERNAL:
+            return 'deb {{protocol}}://{{server}}{}{}/{} {} PKGS\n'.format(
+                settings.MEDIA_URL,
+                deploy.project.slug,
+                Project.REPOSITORY_TRAILING_PATH,
+                deploy.slug
+            )
+        elif deploy.source == Deployment.SOURCE_EXTERNAL:
+            return 'deb {} {{protocol}}://{{server}}/src/{}/EXTERNAL/{} {} {}\n'.format(
+                deploy.options,
+                deploy.project.slug,
+                deploy.slug,
+                deploy.suite,
+                deploy.components
+            )
+
+        return ''

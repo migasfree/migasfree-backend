@@ -589,7 +589,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         for repo in repos:
             ret.append({
                 'name': repo.slug,
-                'source_template': repo.get_source_template()
+                'source_template': repo.source_template()
             })
 
         add_computer_message(computer, ugettext('Sending repositories...'))
