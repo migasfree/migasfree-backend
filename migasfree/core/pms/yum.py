@@ -102,27 +102,32 @@ echo
         string source_template(Deployment deploy)
         """
 
-        from ..models import Deployment
+        from ..models import Deployment, Project
 
         if deploy.source == Deployment.SOURCE_INTERNAL:
             return """[REPO-{repo}]
 name=REPO-{repo}
-baseurl={{protocol}}://{{server}}{}/{}/{repo}
+baseurl={{protocol}}://{{server}}{}{}/{}/{repo}
 enabled=1
 http_caching=none
 repo_gpgcheck=1
 gpgcheck=0
 gpgkey=file://{{keys_path}}/{{server}}/repositories.pub
-""".format(settings.MEDIA_URL, deploy.project.slug, repo=deploy.slug)
+""".format(
+                settings.MEDIA_URL,
+                deploy.project.slug,
+                Project.REPOSITORY_TRAILING_PATH,
+                repo=deploy.slug
+            )
         elif deploy.source == Deployment.SOURCE_EXTERNAL:
             normal_template = """[EXTERNAL-{repo}]
 name=EXTERNAL-{repo}
-baseurl={{protocol}}://{{server}}{media}{project}/EXTERNAL/{name}/{suite}/$basearch/
+baseurl={{protocol}}://{{server}}/src/{project}/EXTERNAL/{name}/{suite}/$basearch/
 {options}
 """
             components_template = """[EXTERNAL-{repo}-{component}]
 name=EXTERNAL-{repo}-{component}
-baseurl={{protocol}}://{{server}}{media}{project}/EXTERNAL/{name}/{suite}/{component}/$basearch/
+baseurl={{protocol}}://{{server}}/src/{project}/EXTERNAL/{name}/{suite}/{component}/$basearch/
 {options}
 """
             if deploy.components:
@@ -134,7 +139,7 @@ baseurl={{protocol}}://{{server}}{media}{project}/EXTERNAL/{name}/{suite}/{compo
                         project=deploy.project.slug,
                         name=deploy.slug,
                         suite=deploy.suite,
-                        options=deploy.options,
+                        options=deploy.options.replace(' ', '\n'),
                         component=component
                     )
 
@@ -146,7 +151,7 @@ baseurl={{protocol}}://{{server}}{media}{project}/EXTERNAL/{name}/{suite}/{compo
                     project=deploy.project.slug,
                     name=deploy.slug,
                     suite=deploy.suite,
-                    options=deploy.options
+                    options=deploy.options.replace(' ', '\n'),
                 )
 
         return ''
