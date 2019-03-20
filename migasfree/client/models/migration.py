@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,8 +29,10 @@ class DomainMigrationManager(models.Manager):
     def scope(self, user):
         qs = super(DomainMigrationManager, self).get_queryset()
         if not user.is_view_all():
-            qs = qs.filter(project_id__in=user.get_projects())
-            qs = qs.filter(computer_id__in=user.get_computers())
+            qs = qs.filter(
+                project_id__in=user.get_projects(),
+                computer_id__in=user.get_computers()
+            )
 
         return qs
 
