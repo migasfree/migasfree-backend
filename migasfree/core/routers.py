@@ -35,7 +35,7 @@ router.register(r'deployments/internal-sources', views.InternalSourceViewSet)
 router.register(r'deployments/external-sources', views.ExternalSourceViewSet)
 router.register(r'domains', views.DomainViewSet)
 router.register(r'scopes', views.ScopeViewSet)
-# router.register(r'auth', views.AuthViewSet, base_name='auth')
+# router.register(r'auth', views.AuthViewSet, basename='auth')
 # router.register(r'accounts', views.UserViewSet)
 # router.register(r'account-groups', views.GroupViewSet)
 
