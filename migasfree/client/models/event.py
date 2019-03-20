@@ -77,7 +77,7 @@ class Event(models.Model):
         ).order_by(
             '-created_at'
         ).first()
-        
+
     def __str__(self):
         return u'{} ({:%Y-%m-%d %H:%M:%S})'.format(self.computer, self.created_at)
 
