@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -70,6 +70,14 @@ class Event(models.Model):
             count=Count('id')
         ))
 
+    @classmethod
+    def situation(cls, computer_id, date, user):
+        return cls.objects.scope(user).filter(
+            computer__id=computer_id, created_at__lte=date
+        ).order_by(
+            '-created_at'
+        ).first()
+        
     def __str__(self):
         return u'{} ({:%Y-%m-%d %H:%M:%S})'.format(self.computer, self.created_at)
 
