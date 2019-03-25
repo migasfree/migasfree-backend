@@ -424,12 +424,12 @@ class Deployment(models.Model):
     def path(self, name=None):
         return os.path.join(
             Project.path(self.project.slug),
-            self.pms.relative_path,
+            self.pms().relative_path,
             name if name else self.slug
         )
 
     def source_template(self):
-        return self.pms.source_template(self)
+        return self.pms().source_template(self)
 
     def can_delete(self, user):
         if user.has_perm("core.delete_deployment"):
