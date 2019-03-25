@@ -494,7 +494,7 @@ class InternalSource(Deployment):
         self.source = Deployment.SOURCE_INTERNAL
 
     class Meta:
-        app_label = 'server'
+        app_label = 'core'
         verbose_name = _("Deployment (internal source)")
         verbose_name_plural = _("Deployments (internal source)")
         proxy = True
@@ -524,7 +524,7 @@ class ExternalSource(Deployment):
         self.source = Deployment.SOURCE_EXTERNAL
 
     class Meta:
-        app_label = 'server'
+        app_label = 'core'
         verbose_name = _("Deployment (external source)")
         verbose_name_plural = _("Deployments (external source)")
         proxy = True
