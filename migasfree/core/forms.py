@@ -134,7 +134,7 @@ class DeploymentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
         super(DeploymentForm, self).__init__(*args, **kwargs)
-        user = self.request.user.userprofile
+        user = self.request.user.userprofile if self.request else None
         self.fields['start_date'].initial = datetime.date.today()
 
         try:
@@ -145,19 +145,19 @@ class DeploymentForm(forms.ModelForm):
         except AttributeError:
             pass
 
-        if not self.instance.id and user.domain_preference:
+        if not self.instance.id and user and user.domain_preference:
             self.fields['domain'].initial = user.domain_preference
             self.fields['domain'].widget.attrs['readonly'] = True
 
-        domains = user.domains.all()
-        if domains.count() == 0:
+        domains = user.domains.all() if user else None
+        if not domains or domains.count() == 0:
             self.fields['domain'].queryset = Domain.objects.all()
         else:
             self.fields['domain'].queryset = domains
 
     def _validate_active_computers(self, att_list):
-        for att_id in att_list:
-            attribute = Attribute.objects.get(pk=att_id)
+        for att in att_list:
+            attribute = Attribute.objects.get(pk=att.id)
             if attribute.property_att.prefix == 'CID':
                 computer = Computer.objects.get(pk=int(attribute.value))
                 if computer.status not in Computer.ACTIVE_STATUS:
@@ -187,8 +187,8 @@ class DeploymentForm(forms.ModelForm):
         if not cleaned_data['domain']:
             domain_admin_group = Group.objects.filter(name='Domain Admin')
             if domain_admin_group:
-                domain_admin_group = domain_admin_group[0]
-                if domain_admin_group.id in list(
+                domain_admin_group = domain_admin_group.first()
+                if self.request and domain_admin_group.id in list(
                     self.request.user.userprofile.groups.values_list('id', flat=True)
                 ):
                     raise ValidationError(_('Domain can not be empty'))
