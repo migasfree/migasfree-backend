@@ -58,7 +58,7 @@ from .serializers import (
     ClientAttributeSerializer, ClientAttributeWriteSerializer,
     ScheduleSerializer, ScheduleWriteSerializer,
     ScheduleDelaySerializer, ScheduleDelayWriteSerializer,
-    PackageSerializer, DeploymentSerializer, DeploymentWriteSerializer,
+    PackageSerializer, DeploymentSerializer,
     DomainWriteSerializer, DomainSerializer,
     ScopeSerializer, ScopeWriteSerializer,
     AttributeSetSerializer, AttributeSetWriteSerializer,
