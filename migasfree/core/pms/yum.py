@@ -125,9 +125,9 @@ name=EXTERNAL-{name}
 baseurl={{protocol}}://{{server}}/src/{project}/EXTERNAL/{name}/{suite}/$basearch/
 {options}
 """
-            components_template = """[EXTERNAL-{name}-{component}]
-name=EXTERNAL-{name}-{component}
-baseurl={{protocol}}://{{server}}/src/{project}/EXTERNAL/{name}/{suite}/{component}/$basearch/
+            components_template = """[EXTERNAL-{name}]
+name=EXTERNAL-{name}
+baseurl={{protocol}}://{{server}}/src/{project}/EXTERNAL/{name}/{suite}/{component}
 {options}
 """
             if deploy.components:
@@ -135,9 +135,9 @@ baseurl={{protocol}}://{{server}}/src/{project}/EXTERNAL/{name}/{suite}/{compone
                 for component in deploy.components.split(' '):
                     template += components_template.format(
                         project=deploy.project.slug,
-                        name=deploy.slug,
+                        name=u'{}-{}'.format(deploy.slug, component.replace('/', '-')),
                         suite=deploy.suite,
-                        options=deploy.options.replace(' ', '\n'),
+                        options=deploy.options.replace(' ', '\n') if deploy.options else '',
                         component=component
                     )
 
@@ -147,7 +147,7 @@ baseurl={{protocol}}://{{server}}/src/{project}/EXTERNAL/{name}/{suite}/{compone
                     project=deploy.project.slug,
                     name=deploy.slug,
                     suite=deploy.suite,
-                    options=deploy.options.replace(' ', '\n'),
+                    options=deploy.options.replace(' ', '\n') if deploy.options else '',
                 )
 
         return ''
