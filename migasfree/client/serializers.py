@@ -20,7 +20,6 @@ from rest_framework import serializers
 
 from ..core.serializers import (
     ClientAttributeSerializer, ProjectInfoSerializer, AttributeInfoSerializer,
-    PlatformSerializer,
 )
 from ..device.serializers import LogicalInfoSerializer
 from . import models
