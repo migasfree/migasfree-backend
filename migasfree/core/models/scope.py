@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.template.defaultfilters import slugify
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -34,6 +35,7 @@ class ScopeManager(models.Manager):
         obj.included_attributes = included_attributes
         obj.excluded_attributes = excluded_attributes
         obj.save()
+
         return obj
 
     def scope(self, user):
@@ -98,22 +100,33 @@ class Scope(models.Model):
 
             qs = Computer.productive.scope(user)
             if self.domain:
-                atts_domain = Attribute.objects.filter(
-                    id__in=self.domain.included_attributes.all()
-                ).exclude(
-                    id__in=self.domain.excluded_attributes.all()
+                qs = qs.filter(
+                    sync_attributes__in=Attribute.objects.filter(
+                        id__in=self.domain.included_attributes.all()
+                    ).exclude(
+                        id__in=self.domain.excluded_attributes.all()
+                    )
                 )
-                qs = qs.filter(sync_attributes__in=atts_domain)
 
             qs = qs.filter(
                 sync_attributes__in=self.included_attributes.all()
             ).exclude(
                 sync_attributes__in=self.excluded_attributes.all()
-            )
+            ).distinct()
 
-            return qs.distinct()
+            return qs
 
         return None
+
+    def validate_unique(self, exclude=None):
+        if Scope.objects.exclude(id=self.id).filter(
+                name=self.name,
+                user=self.user,
+                domain__isnull=True
+        ).exists():
+            raise ValidationError(_("Duplicated name"))
+
+        super(Scope, self).validate_unique(exclude)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.name = slugify(self.name)
@@ -123,3 +136,5 @@ class Scope(models.Model):
         app_label = 'core'
         verbose_name = _('Scope')
         verbose_name_plural = _('Scopes')
+        unique_together = (('name', 'domain', 'user'),)
+

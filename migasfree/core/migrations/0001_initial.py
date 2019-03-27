@@ -6,7 +6,6 @@ from django.conf import settings
 import django.contrib.auth.models
 import django.core.validators
 from django.db import migrations, models
-import django.db.models.deletion
 import django.utils.timezone
 import migasfree.core.validators
 
@@ -207,6 +206,10 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Scope',
                 'verbose_name_plural': 'Scopes',
             },
+        ),
+        migrations.AlterUniqueTogether(
+            name='scope',
+            unique_together=set([('name', 'domain', 'user')]),
         ),
         migrations.CreateModel(
             name='Store',
