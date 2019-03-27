@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,9 +21,10 @@ from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
-from django.db.models.signals import pre_delete, pre_save
+from django.db.models.signals import pre_delete, pre_save, m2m_changed
 from django.dispatch import receiver
 
+from ...utils import sort_depends
 from . import Property, Attribute
 
 
@@ -112,7 +113,7 @@ class AttributeSet(models.Model):
                     Attribute.objects.filter(
                         property_att=Property.objects.get(prefix='SET', sort='basic'),
                         value=self.name
-                    ).count() > 0:
+                    ).exists():
                 raise ValidationError(_('Duplicated name'))
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
@@ -125,35 +126,10 @@ class AttributeSet(models.Model):
         )
 
     @staticmethod
-    def item_at_index(lst, item, before=-1):
-        try:
-            id_before = lst.index(before)
-        except ValueError:
-            id_before = -1
-
-        try:
-            id_item = lst.index(item)
-        except ValueError:
-            id_item = -1
-
-        if id_item == -1:
-            if id_before == -1:
-                lst.append(item)
-            else:
-                lst.insert(id_before, item)
-        else:
-            if id_before > -1:
-                if id_before < id_item:
-                    lst = lst[0:id_before] + lst[id_item:] \
-                        + lst[id_before:id_item]
-
-        return lst
-
-    @staticmethod
-    def get_sets():
-        sets = []
+    def sets_dependencies():
+        sets = {}
         for item in AttributeSet.objects.filter(enabled=True):
-            sets = AttributeSet.item_at_index(sets, item.id)
+            sets[item.id] = []
 
             for subset in item.included_attributes.filter(
                 ~Q(value='All Systems')
@@ -162,11 +138,7 @@ class AttributeSet(models.Model):
             ).filter(
                 ~Q(value=item.name)
             ):
-                sets = AttributeSet.item_at_index(
-                    sets,
-                    AttributeSet.objects.get(name=subset.value).id,
-                    before=item.id
-                )
+                sets[item.id].append(AttributeSet.objects.get(name=subset.value).id)
 
             for subset in item.excluded_attributes.filter(
                 ~Q(value='All Systems')
@@ -175,11 +147,7 @@ class AttributeSet(models.Model):
             ).filter(
                 ~Q(value=item.name)
             ):
-                sets = AttributeSet.item_at_index(
-                    sets,
-                    AttributeSet.objects.get(name=subset.value).id,
-                    before=item.id
-                )
+                sets[item.id].append(AttributeSet.objects.get(name=subset.value).id)
 
         return sets
 
@@ -187,8 +155,15 @@ class AttributeSet(models.Model):
     def process(attributes):
         property_set = Property.objects.get(prefix='SET', sort='basic')
 
+        depends = AttributeSet.sets_dependencies()
+        sets = []
+        try:
+            sets = sort_depends(depends)
+        except ValueError:
+            pass
+
         att_id = []
-        for item in AttributeSet.get_sets():
+        for item in sets:
             for att_set in AttributeSet.objects.filter(
                 id=item
             ).filter(
@@ -198,7 +173,8 @@ class AttributeSet(models.Model):
             ).distinct():
                 att = Attribute.objects.create(property_set, att_set.name)
                 att_id.append(att.id)
-                attributes.append(att.id)  # important!!!
+                # IMPORTANT: appends attribute to attribute list
+                attributes.append(att.id)
 
         return att_id
 
@@ -226,3 +202,34 @@ def pre_delete_attribute_set(sender, instance, **kwargs):
         property_att=Property.objects.get(prefix='SET', sort='basic'),
         value=instance.name
     ).delete()
+
+
+@receiver(m2m_changed, sender=AttributeSet.included_attributes.through)
+@receiver(m2m_changed, sender=AttributeSet.excluded_attributes.through)
+def prevent_circular_dependencies(sender, instance, action, reverse, model, pk_set, **kwargs):
+    if action != 'pre_add':
+        return
+
+    if not reverse:
+        depends = AttributeSet.sets_dependencies()
+        atts_id = [int(x) for x in pk_set]
+        depends[instance.id] = list(AttributeSet.objects.filter(
+            name__in=Attribute.objects.filter(
+                id__in=atts_id,
+                property_att__prefix='SET'
+            ).values_list('value', flat=True)
+        ).values_list('id', flat=True))
+
+        try:
+            sort_depends(depends)
+        except ValueError as e:
+            from ast import literal_eval
+
+            depends = literal_eval(str(e))
+            if instance.id in depends:
+                del depends[instance.id]
+
+            review = list(AttributeSet.objects.filter(
+                id__in=list(depends.keys())
+            ).values_list('name', flat=True))
+            raise ValidationError(_('Review circular dependencies: %s') % ', '.join(review))
