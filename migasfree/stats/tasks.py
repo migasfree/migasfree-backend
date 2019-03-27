@@ -100,7 +100,7 @@ def add_generating_repos():
             'target': 'server',
             'level': 'info',
             'result': result,
-            'api': reverse('deployment-generating')
+            'api': reverse('internalsource-generating')
         }
     )
     con.sadd('migasfree:watch:chk', 'repos')
