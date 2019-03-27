@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import os
 import subprocess
 import fcntl
 import select
+import copy
 
 from datetime import timedelta
 from six import iteritems
@@ -214,3 +215,28 @@ def merge_dicts(*dicts):
 def list_difference(l1, l2):
     """ uses l1 as reference, returns list of items not in l2 """
     return list(set(l1).difference(l2))
+
+
+def sort_depends(data):
+    # if something fails, ask @agacias
+    ret = []
+    data_copy = copy.deepcopy(data)
+
+    def sort():
+        for i, s in data_copy.items():
+            if not s:
+                if data_copy:
+                    ret.append(i)
+                    del data_copy[i]
+                    for _, n in data_copy.items():
+                        if i in n:
+                            n.remove(i)
+
+                    sort()
+
+        if data_copy:
+            raise ValueError(data_copy)
+        else:
+            return ret
+
+    return sort()
