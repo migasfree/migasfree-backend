@@ -31,7 +31,8 @@ from migasfree.client.models import Computer
 from .models import (
     Package, Deployment, ClientProperty, Attribute,
     UserProfile, Scope, Domain, Project, Store,
-    ExternalSource, InternalSource,
+    ExternalSource, InternalSource, AttributeSet,
+    prevent_circular_dependencies,
 )
 from .validators import MimetypeValidator
 from .pms import get_available_mimetypes
@@ -39,6 +40,40 @@ from .pms import get_available_mimetypes
 # TODO https://github.com/blueimp/jQuery-File-Upload/wiki
 # TODO https://github.com/sigurdga/django-jquery-file-upload
 # TODO https://github.com/digi604/django-smart-selects (project -> store)
+
+
+class AttributeSetForm(forms.ModelForm):
+    def clean_included_attributes(self):
+        included_attributes = self.cleaned_data.get('included_attributes', [])
+        if included_attributes and self.instance.id:
+            prevent_circular_dependencies(
+                sender=self.instance.included_attributes,
+                instance=self.instance,
+                action='pre_add',
+                reverse=False,
+                model=self.instance.included_attributes.model,
+                pk_set=included_attributes
+        )
+
+        return included_attributes
+
+    def clean_excluded_attributes(self):
+        excluded_attributes = self.cleaned_data.get('excluded_attributes', [])
+        if excluded_attributes and self.instance.id:
+            prevent_circular_dependencies(
+                sender=self.instance.excluded_attributes,
+                instance=self.instance,
+                action='pre_add',
+                reverse=False,
+                model=self.instance.excluded_attributes.model,
+                pk_set=excluded_attributes
+        )
+
+        return excluded_attributes
+
+    class Meta:
+        model = AttributeSet
+        fields = '__all__'
 
 
 class PackageForm(forms.ModelForm):
