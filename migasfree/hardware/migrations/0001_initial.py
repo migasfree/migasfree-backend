@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('level', models.IntegerField(verbose_name='level')),
-                ('width', models.IntegerField(null=True, verbose_name='width')),
+                ('width', models.BigIntegerField(null=True, verbose_name='width')),
                 ('name', models.TextField(blank=True, verbose_name='id')),
                 ('class_name', models.TextField(blank=True, verbose_name='class')),
                 ('enabled', models.BooleanField(default=False, verbose_name='enabled')),
