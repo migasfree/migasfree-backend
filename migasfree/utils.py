@@ -253,8 +253,8 @@ def read_remote_chunks(local_file, remote, chunk_size=8192):
                 break
             yield data
             tmp_file.write(data)
+            tmp_file.flush()
 
-        tmp_file.flush()
         os.fsync(tmp_file.fileno())
 
     shutil.move(tmp, local_file)
