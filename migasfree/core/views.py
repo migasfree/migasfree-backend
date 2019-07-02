@@ -25,7 +25,6 @@ from wsgiref.util import FileWrapper
 
 from django.conf import settings
 from django.http import HttpResponse
-from django.http.response import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext
 from django_redis import get_redis_connection
@@ -655,7 +654,7 @@ class GetSourceFileView(views.APIView):
                 ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
                 remote_file = urlopen(url, context=ctx)
                 stream = read_remote_chunks(_file_local, remote_file)
-                response = StreamingHttpResponse(
+                response = HttpResponse(
                     stream,
                     status=status.HTTP_206_PARTIAL_CONTENT,
                     content_type='application/octet-stream'
