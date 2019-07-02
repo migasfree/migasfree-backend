@@ -45,8 +45,8 @@ MIGASFREE_EXTERNAL_ACTIONS
 Sample:
      MIGASFREE_EXTERNAL_ACTIONS = {
         "computer": {
-            "ping": {"title": "PING", "description": "check conectivity"},
-            "ssh": {"title": "SSH", "description": "remote control vía ssh"},
+            "ping": {"title": "PING", "description": "check connectivity"},
+            "ssh": {"title": "SSH", "description": "remote control via ssh"},
             "vnc": {"title": "VNC", "description": "remote control vnc", "many": False},
             "sync": {"title": "SYNC", "description": "ssh -> run migasfree -u"},
             "install": {
