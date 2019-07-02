@@ -286,7 +286,7 @@ class PackageAdmin(admin.ModelAdmin):
     form = PackageForm
 
     list_display = ('name', 'version', 'architecture', 'project', 'store')
-    list_filter = ('project__name', 'store',)
+    list_filter = ('project__platform', 'project__name', 'store', 'deployment')
     list_select_related = ('project', 'store',)
     search_fields = ('name', 'store__name',)
     ordering = ('name',)
