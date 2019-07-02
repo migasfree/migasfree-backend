@@ -156,7 +156,7 @@ def add_computer_message(computer, message):
     con = get_redis_connection()
     con.hmset(
         'migasfree:msg:%d' % computer.id, {
-            'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),
             'name': computer.__str__(),
             'project': computer.project.name,
             'ip': computer.ip_address,
