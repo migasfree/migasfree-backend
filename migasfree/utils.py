@@ -22,6 +22,7 @@ import fcntl
 import select
 import copy
 import tempfile
+import shutil
 
 from datetime import timedelta
 from six import iteritems
@@ -256,4 +257,4 @@ def read_remote_chunks(local_file, remote, chunk_size=8192):
         tmp_file.flush()
         os.fsync(tmp_file.fileno())
 
-    os.rename(tmp, local_file)
+    shutil.move(tmp, local_file)
