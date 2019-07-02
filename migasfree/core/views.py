@@ -25,6 +25,7 @@ from wsgiref.util import FileWrapper
 
 from django.conf import settings
 from django.http import HttpResponse
+from django.http.response import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext
 from django_redis import get_redis_connection
@@ -41,6 +42,7 @@ from .mixins import SafeConnectionMixin
 from migasfree.device.models import Logical
 from migasfree.device.serializers import LogicalSerializer
 
+from ..utils import read_remote_chunks
 from .models import (
     Platform, Project, Store,
     ServerProperty, ClientProperty,
@@ -651,9 +653,11 @@ class GetSourceFileView(views.APIView):
 
             try:
                 ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-                f = urlopen(url, context=ctx)
-                with open(_file_local, 'wb') as local_file:
-                    local_file.write(f.read())
+                remote_file = urlopen(url, context=ctx)
+                stream = read_remote_chunks(_file_local, remote_file)
+                response = StreamingHttpResponse(stream, status=200, content_type='text/event-stream')
+                response['Cache-Control'] = 'no-cache'
+                return response
             except HTTPError as e:
                 return HttpResponse(
                     u'HTTP Error: {} {}'.format(e.code, url),
@@ -664,12 +668,12 @@ class GetSourceFileView(views.APIView):
                     u'URL Error: {} {}'.format(e.reason, url),
                     status=status.HTTP_404_NOT_FOUND
                 )
+        else:
+            if not os.path.isfile(_file_local):
+                return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+            else:
+                response = HttpResponse(FileWrapper(open(_file_local, 'rb')), content_type='application/octet-stream')
+                response['Content-Disposition'] = u'attachment; filename={}'.format(os.path.basename(_file_local))
+                response['Content-Length'] = os.path.getsize(_file_local)
 
-        if not os.path.isfile(_file_local):
-            return HttpResponse(status=status.HTTP_204_NO_CONTENT)
-
-        response = HttpResponse(FileWrapper(open(_file_local, 'rb')), content_type='application/octet-stream')
-        response['Content-Disposition'] = u'attachment; filename={}'.format(os.path.basename(_file_local))
-        response['Content-Length'] = os.path.getsize(_file_local)
-
-        return response
+                return response
