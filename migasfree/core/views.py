@@ -18,6 +18,7 @@
 
 import os
 import time
+import ssl
 
 from urllib2 import urlopen, URLError, HTTPError
 from wsgiref.util import FileWrapper
@@ -649,7 +650,8 @@ class GetSourceFileView(views.APIView):
             url = u'{}/{}'.format(source.base_url, resource)
 
             try:
-                f = urlopen(url)
+                ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+                f = urlopen(url, context=ctx)
                 with open(_file_local, 'wb') as local_file:
                     local_file.write(f.read())
             except HTTPError as e:
