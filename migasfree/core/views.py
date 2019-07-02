@@ -655,8 +655,13 @@ class GetSourceFileView(views.APIView):
                 ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
                 remote_file = urlopen(url, context=ctx)
                 stream = read_remote_chunks(_file_local, remote_file)
-                response = StreamingHttpResponse(stream, status=200, content_type='text/event-stream')
+                response = StreamingHttpResponse(
+                    stream,
+                    status=status.HTTP_206_PARTIAL_CONTENT,
+                    content_type='application/octet-stream'
+                )
                 response['Cache-Control'] = 'no-cache'
+
                 return response
             except HTTPError as e:
                 return HttpResponse(
