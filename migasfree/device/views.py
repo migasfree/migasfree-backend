@@ -18,8 +18,8 @@
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status
-from rest_framework_filters import backends, filters
+from rest_framework import viewsets, status, filters
+from rest_framework_filters import backends
 from rest_framework.decorators import action
 from rest_framework.response import Response
 

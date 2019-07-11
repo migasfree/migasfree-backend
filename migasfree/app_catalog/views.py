@@ -18,8 +18,8 @@
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status
-from rest_framework_filters import backends, OrderingFilter
+from rest_framework import viewsets, status, filters
+from rest_framework_filters import backends
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -34,7 +34,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
     queryset = models.Application.objects.all()
     serializer_class = serializers.ApplicationSerializer
     filter_class = ApplicationFilter
-    filter_backends = (OrderingFilter, backends.DjangoFilterBackend)
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     permission_classes = (PublicPermission,)
 
     def get_serializer_class(self):
@@ -98,7 +98,7 @@ class PackagesByProjectViewSet(viewsets.ModelViewSet):
     queryset = models.PackagesByProject.objects.all()
     serializer_class = serializers.PackagesByProjectSerializer
     filter_class = PackagesByProjectFilter
-    filter_backends = (OrderingFilter, backends.DjangoFilterBackend)
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     permission_classes = (PublicPermission,)
 
     def get_serializer_class(self):
@@ -113,7 +113,7 @@ class PolicyViewSet(viewsets.ModelViewSet):
     queryset = models.Policy.objects.all()
     serializer_class = serializers.PolicySerializer
     filter_class = PolicyFilter
-    filter_backends = (OrderingFilter, backends.DjangoFilterBackend)
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
@@ -126,7 +126,7 @@ class PolicyViewSet(viewsets.ModelViewSet):
 class PolicyGroupViewSet(viewsets.ModelViewSet):
     queryset = models.PolicyGroup.objects.all()
     serializer_class = serializers.PolicyGroupSerializer
-    filter_backends = (OrderingFilter, backends.DjangoFilterBackend)
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \

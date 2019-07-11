@@ -30,11 +30,11 @@ from django.utils.translation import ugettext
 from django_redis import get_redis_connection
 from rest_framework import (
     viewsets, parsers, status,
-    mixins, views,
+    mixins, views, filters,
 )
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework_filters import backends, filters
+from rest_framework_filters import backends
 
 from .mixins import SafeConnectionMixin
 
