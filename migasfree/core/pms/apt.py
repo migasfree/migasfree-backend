@@ -183,7 +183,7 @@ dpkg-deb -c %(pkg)s | awk '{print $6}'
         elif deploy.source == Deployment.SOURCE_EXTERNAL:
             return 'deb {options} {{protocol}}://{{server}}/src/{project}/EXTERNAL/{name} ' \
                    '{suite} {components}\n'.format(
-                options=deploy.options,
+                options=deploy.options if deploy.options else '',
                 project=deploy.project.slug,
                 name=deploy.slug,
                 suite=deploy.suite,
