@@ -252,11 +252,14 @@ def sequence_reset():
     commands = StringIO()
 
     os.environ['DJANGO_COLORS'] = 'nocolor'
-    django.core.management.call_command(
-        'sqlsequencereset',
-        'core client device hardware',
-        stdout=commands
-    )
+
+    label_apps = ['core', 'client', 'device', 'hardware', 'stats', 'app_catalog']
+    for label in label_apps:
+        django.core.management.call_command(
+            'sqlsequencereset',
+            label,
+            stdout=commands
+        )
 
     if settings.DATABASES.get('default').get('ENGINE') == \
             'django.db.backends.postgresql_psycopg2':
