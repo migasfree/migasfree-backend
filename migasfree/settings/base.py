@@ -114,6 +114,7 @@ INSTALLED_APPS = (
     'corsheaders',
     'djoser',
     'import_export',
+    'markdownx',
     'migasfree.core',
     'migasfree.app_catalog',
     'migasfree.client',
@@ -217,4 +218,4 @@ TEMPLATES = [
 ]
 
 SESSION_COOKIE_NAME = 'migasfree_backend'
-CSRF_COOKIE_NAME = 'csrftoken_migasfree_backend'
+# CSRF_COOKIE_NAME = 'csrftoken_migasfree_backend'  # issue with markdownx component :_(
