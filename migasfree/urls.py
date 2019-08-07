@@ -47,6 +47,7 @@ urlpatterns = [
     url(r'^grappelli/', include('grappelli.urls')),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', admin.site.urls),
+    url(r'^markdownx/', include('markdownx.urls')),
 
     url(r'^api/v1/token/', include(router.urls)),
     url(r'^api/v1/token/', include(client_router.urls)),
