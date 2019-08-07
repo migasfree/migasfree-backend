@@ -207,10 +207,6 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Scopes',
             },
         ),
-        migrations.AlterUniqueTogether(
-            name='scope',
-            unique_together=set([('name', 'domain', 'user')]),
-        ),
         migrations.CreateModel(
             name='Store',
             fields=[
@@ -246,6 +242,10 @@ class Migration(migrations.Migration):
             model_name='scope',
             name='user',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.UserProfile', verbose_name='user'),
+        ),
+        migrations.AlterUniqueTogether(
+            name='scope',
+            unique_together=set([('name', 'domain', 'user')]),
         ),
         migrations.AddField(
             model_name='packageset',
