@@ -534,6 +534,7 @@ class UserProfileAdmin(admin.ModelAdmin):
     ordering = ('username',)
     search_fields = ('username', 'first_name', 'last_name')
     readonly_fields = ('date_joined', 'last_login')
+    actions = ['activate_users']
 
     fieldsets = (
          (_('General'), {
@@ -563,6 +564,50 @@ class UserProfileAdmin(admin.ModelAdmin):
             ),
          }),
     )
+
+    def activate_users(self, request, queryset):
+        cnt = queryset.filter(is_active=False).update(is_active=True)
+        self.message_user(request, 'Activated {} users.'.format(cnt))
+
+    activate_users.short_description = _('Activate Users')
+
+    def get_actions(self, request):
+        actions = super(UserProfileAdmin, self).get_actions(request)
+        if not request.user.has_perm('auth.change_user'):
+            del actions['activate_users']
+
+        return actions
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(UserProfileAdmin, self).get_form(request, obj, **kwargs)
+        is_superuser = request.user.is_superuser
+        disabled_fields = set()
+
+        if not is_superuser:
+            disabled_fields |= {
+                'username',
+                'is_superuser',
+                'user_permissions',
+            }
+
+        # Prevent non-superusers from editing their own permissions
+        if (
+            not is_superuser
+            and obj is not None
+            and obj == request.user
+        ):
+            disabled_fields |= {
+                'is_staff',
+                'is_superuser',
+                'groups',
+                'user_permissions',
+            }
+
+        for f in disabled_fields:
+            if f in form.base_fields:
+                form.base_fields[f].disabled = True
+
+        return form
 
 
 @admin.register(Scope)
