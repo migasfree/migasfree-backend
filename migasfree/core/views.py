@@ -145,7 +145,7 @@ class StoreViewSet(viewsets.ModelViewSet):
     filter_class = StoreFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
-    ordering = ('name',)
+    ordering = ('name', 'project__name')
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
@@ -332,6 +332,7 @@ class PackageViewSet(
     serializer_class = PackageSerializer
     filter_class = PackageFilter
     parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
+    ordering = ('name', 'project__name')
 
     def get_queryset(self):
         user = self.request.user.userprofile
@@ -363,7 +364,7 @@ class InternalSourceViewSet(viewsets.ModelViewSet):
     filter_class = DeploymentFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
-    ordering = ('-start_date',)
+    ordering = ('-start_date', 'name')
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
@@ -414,7 +415,7 @@ class ExternalSourceViewSet(viewsets.ModelViewSet):
     filter_class = DeploymentFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
-    ordering = ('-start_date',)
+    ordering = ('-start_date', 'name')
 
     def get_queryset(self):
         user = self.request.user.userprofile
