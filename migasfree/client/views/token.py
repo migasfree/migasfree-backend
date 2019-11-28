@@ -327,7 +327,8 @@ class ErrorViewSet(
     queryset = models.Error.objects.all()
     serializer_class = serializers.ErrorSerializer
     filter_class = ErrorFilter
-    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ['created_at', 'description']
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
@@ -373,7 +374,8 @@ class FaultViewSet(
     queryset = models.Fault.objects.all()
     serializer_class = serializers.FaultSerializer
     filter_class = FaultFilter
-    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ['created_at', 'result']
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
@@ -426,7 +428,8 @@ class NotificationViewSet(
     queryset = models.Notification.objects.all()
     serializer_class = serializers.NotificationSerializer
     filter_class = NotificationFilter
-    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ['message']
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
@@ -455,7 +458,8 @@ class StatusLogViewSet(
     queryset = models.StatusLog.objects.all()
     serializer_class = serializers.StatusLogSerializer
     filter_class = StatusLogFilter
-    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ['status']
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
@@ -475,7 +479,8 @@ class SynchronizationViewSet(
     queryset = models.Synchronization.objects.all()
     serializer_class = serializers.SynchronizationSerializer
     filter_class = SynchronizationFilter
-    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ['user__name', 'user__fullname']
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 

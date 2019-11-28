@@ -89,6 +89,8 @@ class AttributeSetViewSet(viewsets.ModelViewSet):
     queryset = AttributeSet.objects.all()
     serializer_class = AttributeSetSerializer
     filter_class = AttributeSetFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ['value', 'description']
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -143,7 +145,8 @@ class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
     filter_class = StoreFilter
-    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ['name']
     ordering_fields = '__all__'
     ordering = ('name', 'project__name')
 
@@ -167,9 +170,10 @@ class PropertyViewSet(viewsets.ModelViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
     filter_class = PropertyFilter
-    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ['name', 'language', 'code']
     ordering_fields = '__all__'
-    ordering = ('prefix', 'name',)
+    ordering = ('prefix', 'name')
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
