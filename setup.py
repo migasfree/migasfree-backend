@@ -141,7 +141,7 @@ setup(
     },
     package_data={
         'migasfree': [
-            'locale/*/LC_MESSAGES/*.mo',
+            'i18n/*/LC_MESSAGES/*.mo',
             'core/fixtures/*',
             'client/fixtures/*',
             'device/fixtures/*',
