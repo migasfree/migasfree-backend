@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ from datetime import datetime
 
 from django.db import models
 from django.db.models import Count
+from django.db.models.functions import ExtractMonth, ExtractYear
 from django.db.models.signals import pre_save, post_save, pre_delete
 from django.core.exceptions import ObjectDoesNotExist
 from django.dispatch import receiver
@@ -316,6 +317,26 @@ class Computer(models.Model):
     unsubscribed = UnsubscribedManager()
     active = ActiveManager()
     inactive = InactiveManager()
+
+    @classmethod
+    def stacked_by_month(cls, user, start_date, field='project_id'):
+        return list(cls.objects.scope(user).filter(
+            created_at__gte=start_date
+        ).annotate(
+            year=ExtractYear('created_at'),
+            month=ExtractMonth('created_at')
+        ).order_by('year', 'month', field).values('year', 'month', field).annotate(
+            count=Count('id')
+        ))
+
+    @classmethod
+    def average_age(cls, user, date):
+        result = cls.objects.scope(user).extra(
+            select={'average': "avg(to_date('{}', 'YYYY-MM-DD') - created_at)".format(date)}
+        ).values('average')
+        result = result[0].get('average')
+
+        return result.days / 365.25
 
     def get_all_attributes(self):
         return list(self.tags.values_list('id', flat=True)) \
