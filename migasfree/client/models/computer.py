@@ -507,7 +507,7 @@ class Computer(models.Model):
             computer=self.id,
             class_name='system',
             width__gt=0
-        )
+        ).first()
 
         return node.width if node else None
 
