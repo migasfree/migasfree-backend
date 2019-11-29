@@ -10,7 +10,7 @@ EXPRESSION_NODE_CALLBACKS = {
     Expression.ADD: operator.add,
     Expression.SUB: operator.sub,
     Expression.MUL: operator.mul,
-    Expression.DIV: operator.div,
+    Expression.DIV: operator.truediv,
     Expression.MOD: operator.mod,
     # Expression.AND: operator.and_,
     # Expression.OR: operator.or_,
