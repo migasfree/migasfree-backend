@@ -223,11 +223,12 @@ class ComputerAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == "default_logical_device":
-            args = resolve(request.path).args
-            computer = Computer.objects.get(pk=args[0])
-            kwargs['queryset'] = Logical.objects.filter(
-                pk__in=[x.id for x in computer.logical_devices()]
-            )
+            computer_id = resolve(request.path).kwargs.get('object_id', 0)
+            if computer_id:
+                computer = Computer.objects.get(pk=computer_id)
+                kwargs['queryset'] = Logical.objects.filter(
+                    pk__in=[x.id for x in computer.logical_devices()]
+                )
         return super(ComputerAdmin, self).formfield_for_foreignkey(
             db_field,
             request,
