@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,10 @@
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.conf import settings
+from django.urls import path
+from graphene_django.views import GraphQLView
 from rest_framework.authtoken import views
+from rest_framework.schemas import get_schema_view
 from rest_framework.documentation import include_docs_urls
 from rest_framework_jwt import views as jwt_views
 
@@ -69,6 +72,9 @@ urlpatterns = [
     url(r'^docs/', swagger_schema_view, name='docs'),
     url(r'^api-docs/', include_docs_urls(title=TITLE)),
     # url(r'^auth/', include('djoser.urls')),
+
+    path('openapi', get_schema_view(title=TITLE), name='openapi-schema'),
+    path('graphql', GraphQLView.as_view(graphiql=True)),
 ]
 
 if settings.DEBUG:
