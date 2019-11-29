@@ -105,6 +105,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'graphene_django',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
@@ -136,10 +137,15 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 100,
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 }
 
 REST_AUTH_SERIALIZERS = {
     'USER_DETAILS_SERIALIZER': 'migasfree.core.serializers.UserProfileSerializer',
+}
+
+GRAPHENE = {
+    'SCHEMA': 'migasfree.schema.schema'
 }
 
 # http://docs.python.org/2/howto/logging-cookbook.html
