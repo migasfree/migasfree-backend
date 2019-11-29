@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from .fault_definition import FaultDefinition
 class DomainFaultManager(models.Manager):
     def scope(self, user):
         qs = super(DomainFaultManager, self).get_queryset()
-        if not user.is_view_all():
+        if user and not user.is_view_all():
             qs = qs.filter(
                 project_id__in=user.get_projects(),
                 computer_id__in=user.get_computers()
@@ -44,12 +44,14 @@ class UncheckedManager(DomainFaultManager):
         )
 
     def scope(self, user):
-        return super(UncheckedManager, self).scope(user).filter(
-            checked=0
-        ).filter(
-            models.Q(fault_definition__users__id__in=[user.id, ])
-            | models.Q(fault_definition__users=None)
+        qs = super(UncheckedManager, self).scope(user).filter(
+            checked=0,
+            fault_definition__users=None
         )
+        if user:
+            qs = qs.filter(fault_definition__users__id__in=[user.id, ])
+
+        return qs
 
 
 class FaultManager(DomainFaultManager):
