@@ -16,9 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import rest_framework_filters as filters
-
-# from django.utils.translation import ugettext_lazy as _
+from django_filters import rest_framework as filters
 
 from .models import (
     PackageHistory, Error, Notification, FaultDefinition, Fault,
