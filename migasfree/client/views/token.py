@@ -30,7 +30,8 @@ from rest_framework.response import Response
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_filters import backends
 
-from migasfree.device.models import Logical, Driver, Model
+from ...device.models import Logical, Driver, Model
+from ...core.serializers import PlatformSerializer
 from .. import models, serializers
 from ..filters import (
     PackageHistoryFilter, ErrorFilter, NotificationFilter,
@@ -302,7 +303,7 @@ class ComputerViewSet(viewsets.ModelViewSet):
 
         response = {}
         if migration:
-            serializer = serializers.PlatformSerializer(migration.project.platform, context={'request': request})
+            serializer = PlatformSerializer(migration.project.platform, context={'request': request})
             response['platform'] = serializer.data
 
             serializer = serializers.ProjectInfoSerializer(migration.project, context={'request': request})
@@ -311,7 +312,7 @@ class ComputerViewSet(viewsets.ModelViewSet):
         if status_log:
             response['status'] = status_log.status
         else:
-            if isinstance(date, basestring):
+            if isinstance(date, str):
                 date = datetime.strptime(date, '%Y-%m-%d')
                 if date >= computer.created_at:
                     response['status'] = settings.MIGASFREE_DEFAULT_COMPUTER_STATUS
