@@ -72,7 +72,7 @@ def save_computer_hardware(computer_id, node, parent=None, level=1):
             for x in node[e]:
                 Configuration.objects.create(node=n, name=x, value=node[e][x])
         elif e == 'logicalname':
-            if isinstance(node[e], unicode):
+            if isinstance(node[e], str):
                 LogicalName.objects.create(node=n, name=node[e])
             else:
                 for x in node[e]:
