@@ -23,8 +23,8 @@ from dateutil import relativedelta
 
 from django.shortcuts import get_object_or_404
 from django_redis import get_redis_connection
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework import viewsets, status, permissions
+from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
 from migasfree.core.models import Project, Deployment
@@ -48,6 +48,7 @@ def daterange(start_date, end_date):
         yield start_date + timedelta(n)
 
 
+@permission_classes((permissions.IsAuthenticated,))
 class SyncStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False)
     def yearly(self, request, format=None):
@@ -192,6 +193,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
         return Response(stats, status=status.HTTP_200_OK)
 
 
+@permission_classes((permissions.IsAuthenticated,))
 class ComputerStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False)
     def projects(self, request, format=None):
@@ -218,6 +220,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
         )
 
 
+@permission_classes((permissions.IsAuthenticated,))
 class DeploymentStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=True, url_path='computers/assigned')
     def assigned_computers(self, request, pk=None):
