@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext, ugettext_lazy as _
-from rest_framework import viewsets, status, views
-from rest_framework.decorators import action
+from rest_framework import viewsets, status, views, permissions
+from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 from django_redis import get_redis_connection
 
@@ -262,6 +262,7 @@ def get_computer(uuid, name):
         return None
 
 
+@permission_classes((permissions.AllowAny,))
 class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
     def post(self, request, format=None):
         """
@@ -286,6 +287,7 @@ class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
         )
 
 
+@permission_classes((permissions.AllowAny,))
 class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
     def post(self, request, format=None):
         """
@@ -332,6 +334,7 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
         )
 
 
+@permission_classes((permissions.AllowAny,))
 class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
     def create(self, request, format=None):
         """
