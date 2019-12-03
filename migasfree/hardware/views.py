@@ -18,8 +18,8 @@
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext
-from rest_framework import viewsets, status, mixins, filters
-from rest_framework.decorators import action
+from rest_framework import viewsets, status, mixins, filters, permissions
+from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 from rest_framework_filters import backends
 
@@ -31,6 +31,7 @@ from .filters import NodeFilter
 from . import tasks, serializers
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class HardwareComputerViewSet(viewsets.ViewSet):
     queryset = Node.objects.all()  # FIXME
 
@@ -46,6 +47,7 @@ class HardwareComputerViewSet(viewsets.ViewSet):
         )
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class HardwareViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
@@ -67,6 +69,7 @@ class HardwareViewSet(
         return qs
 
 
+@permission_classes((permissions.AllowAny,))
 class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
     @action(methods=['post'], detail=False)
     def hardware(self, request, format=None):
