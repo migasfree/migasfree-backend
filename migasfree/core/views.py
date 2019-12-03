@@ -30,9 +30,9 @@ from django.utils.translation import ugettext
 from django_redis import get_redis_connection
 from rest_framework import (
     viewsets, parsers, status,
-    mixins, views, filters,
+    mixins, views, filters, permissions,
 )
-from rest_framework.decorators import action
+from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 from rest_framework_filters import backends
 
@@ -85,6 +85,7 @@ class SafePackagerConnectionMixin(SafeConnectionMixin):
     encrypt_key = settings.MIGASFREE_PACKAGER_PUB_KEY
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class AttributeSetViewSet(viewsets.ModelViewSet):
     queryset = AttributeSet.objects.all()
     serializer_class = AttributeSetSerializer
@@ -102,6 +103,7 @@ class AttributeSetViewSet(viewsets.ModelViewSet):
         return AttributeSetSerializer
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class PlatformViewSet(viewsets.ModelViewSet):
     queryset = Platform.objects.all()
     serializer_class = PlatformSerializer
@@ -117,6 +119,7 @@ class PlatformViewSet(viewsets.ModelViewSet):
         return qs
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
@@ -141,6 +144,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return qs
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
@@ -166,6 +170,7 @@ class StoreViewSet(viewsets.ModelViewSet):
         return qs
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class PropertyViewSet(viewsets.ModelViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
@@ -183,16 +188,19 @@ class PropertyViewSet(viewsets.ModelViewSet):
         return PropertySerializer
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class ServerPropertyViewSet(viewsets.ModelViewSet):
     queryset = ServerProperty.objects.filter(sort='server')
     serializer_class = ServerPropertySerializer
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class ClientPropertyViewSet(viewsets.ModelViewSet):
     queryset = ClientProperty.objects.filter(sort='client')
     serializer_class = ClientPropertySerializer
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class ServerAttributeViewSet(viewsets.ModelViewSet):
     queryset = ServerAttribute.objects.filter(property_att__sort='server')
     serializer_class = ServerAttributeSerializer
@@ -206,6 +214,7 @@ class ServerAttributeViewSet(viewsets.ModelViewSet):
         return ServerAttributeSerializer
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class ClientAttributeViewSet(viewsets.ModelViewSet):
     queryset = ClientAttribute.objects.filter(property_att__sort='client')
     serializer_class = ClientAttributeSerializer
@@ -294,6 +303,7 @@ class ClientAttributeViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_201_CREATED)
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class ScheduleDelayViewSet(viewsets.ModelViewSet):
     queryset = ScheduleDelay.objects.all()
     serializer_class = ScheduleDelaySerializer
@@ -310,6 +320,7 @@ class ScheduleDelayViewSet(viewsets.ModelViewSet):
         return ScheduleDelaySerializer
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class ScheduleViewSet(viewsets.ModelViewSet):
     queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
@@ -325,6 +336,7 @@ class ScheduleViewSet(viewsets.ModelViewSet):
         return ScheduleSerializer
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class PackageViewSet(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
@@ -362,6 +374,7 @@ class PackageViewSet(
         )
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class InternalSourceViewSet(viewsets.ModelViewSet):
     queryset = InternalSource.objects.all()
     serializer_class = InternalSourceSerializer
@@ -413,6 +426,7 @@ class InternalSourceViewSet(viewsets.ModelViewSet):
         )
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class ExternalSourceViewSet(viewsets.ModelViewSet):
     queryset = ExternalSource.objects.all()
     serializer_class = ExternalSourceSerializer
@@ -439,6 +453,7 @@ class ExternalSourceViewSet(viewsets.ModelViewSet):
         return ExternalSourceSerializer
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class DomainViewSet(viewsets.ModelViewSet):
     queryset = Domain.objects.all()
     serializer_class = DomainSerializer
@@ -454,6 +469,7 @@ class DomainViewSet(viewsets.ModelViewSet):
         return DomainSerializer
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class ScopeViewSet(viewsets.ModelViewSet):
     queryset = Scope.objects.all()
     serializer_class = ScopeSerializer
@@ -469,6 +485,7 @@ class ScopeViewSet(viewsets.ModelViewSet):
         return ScopeSerializer
 
 
+@permission_classes((permissions.AllowAny,))
 class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
     def create(self, request, format=None):
         """
@@ -606,6 +623,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         )
 
 
+@permission_classes((permissions.AllowAny,))
 class ServerInfoView(views.APIView):
     def post(self, request, format=None):
         """
@@ -623,6 +641,7 @@ class ServerInfoView(views.APIView):
         return Response(info)
 
 
+@permission_classes((permissions.AllowAny,))
 class GetSourceFileView(views.APIView):
     def get(self, request, format=None):
         source = None
