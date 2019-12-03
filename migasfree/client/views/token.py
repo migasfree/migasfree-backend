@@ -24,8 +24,8 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django_redis import get_redis_connection
-from rest_framework import viewsets, exceptions, status, mixins, filters
-from rest_framework.decorators import action
+from rest_framework import viewsets, exceptions, status, mixins, filters, permissions
+from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_filters import backends
@@ -40,6 +40,7 @@ from ..filters import (
 )
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class ComputerViewSet(viewsets.ModelViewSet):
     queryset = models.Computer.objects.all()
     serializer_class = serializers.ComputerSerializer
@@ -320,6 +321,7 @@ class ComputerViewSet(viewsets.ModelViewSet):
         return Response(response, status=status.HTTP_200_OK)
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class ErrorViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin, mixins.DestroyModelMixin,
@@ -351,6 +353,7 @@ class ErrorViewSet(
         return qs
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class FaultDefinitionViewSet(viewsets.ModelViewSet):
     queryset = models.FaultDefinition.objects.all()
     serializer_class = serializers.FaultDefinitionSerializer
@@ -367,6 +370,7 @@ class FaultDefinitionViewSet(viewsets.ModelViewSet):
         return serializers.FaultDefinitionSerializer
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class FaultViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin, mixins.DestroyModelMixin,
@@ -398,6 +402,7 @@ class FaultViewSet(
         return qs
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class MigrationViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin, viewsets.GenericViewSet
@@ -421,6 +426,7 @@ class MigrationViewSet(
         return qs
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class NotificationViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin, mixins.DestroyModelMixin,
@@ -441,6 +447,7 @@ class NotificationViewSet(
         return serializers.NotificationSerializer
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class PackageHistoryViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
@@ -452,6 +459,7 @@ class PackageHistoryViewSet(
     ordering = ('computer', 'package__fullname',)
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class StatusLogViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin, viewsets.GenericViewSet
@@ -473,6 +481,7 @@ class StatusLogViewSet(
         return qs
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class SynchronizationViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin, viewsets.GenericViewSet
@@ -504,6 +513,7 @@ class SynchronizationViewSet(
         return qs
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class UserViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin, viewsets.GenericViewSet
