@@ -18,9 +18,9 @@
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status, filters
+from rest_framework import viewsets, status, filters, permissions
 from rest_framework_filters import backends
-from rest_framework.decorators import action
+from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
 from migasfree.client.models import Computer
@@ -34,6 +34,7 @@ from .filters import DeviceFilter, DriverFilter
 from . import serializers
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class ConnectionViewSet(viewsets.ModelViewSet):
     queryset = Connection.objects.all()
     serializer_class = serializers.ConnectionSerializer
@@ -41,6 +42,7 @@ class ConnectionViewSet(viewsets.ModelViewSet):
     ordering = ('id',)
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class DeviceViewSet(viewsets.ModelViewSet):
     queryset = Device.objects.all()
     serializer_class = serializers.DeviceSerializer
@@ -83,6 +85,7 @@ class DeviceViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class DriverViewSet(viewsets.ModelViewSet):
     queryset = Driver.objects.all()
     serializer_class = serializers.DriverSerializer
@@ -98,6 +101,7 @@ class DriverViewSet(viewsets.ModelViewSet):
         return serializers.DriverSerializer
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class FeatureViewSet(viewsets.ModelViewSet):
     queryset = Feature.objects.all()
     serializer_class = serializers.FeatureSerializer
@@ -105,6 +109,7 @@ class FeatureViewSet(viewsets.ModelViewSet):
     ordering = ('name',)
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class LogicalViewSet(viewsets.ModelViewSet):
     queryset = Logical.objects.all()
     serializer_class = serializers.LogicalSerializer
@@ -149,6 +154,7 @@ class LogicalViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class ManufacturerViewSet(viewsets.ModelViewSet):
     queryset = Manufacturer.objects.all()
     serializer_class = serializers.ManufacturerSerializer
@@ -156,6 +162,7 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
     ordering = ('name',)
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class ModelViewSet(viewsets.ModelViewSet):
     queryset = Model.objects.all()
     serializer_class = serializers.ModelSerializer
@@ -170,6 +177,7 @@ class ModelViewSet(viewsets.ModelViewSet):
         return serializers.ModelSerializer
 
 
+@permission_classes((permissions.DjangoModelPermissions,))
 class TypeViewSet(viewsets.ModelViewSet):
     queryset = Type.objects.all()
     serializer_class = serializers.TypeSerializer
