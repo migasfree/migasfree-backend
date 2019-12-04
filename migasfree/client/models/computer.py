@@ -24,7 +24,6 @@ from django.db.models.functions import ExtractMonth, ExtractYear
 from django.db.models.signals import pre_save, post_save, pre_delete
 from django.core.exceptions import ObjectDoesNotExist
 from django.dispatch import receiver
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.conf import settings
 
@@ -131,7 +130,6 @@ class ComputerManager(DomainComputerManager):
         return obj
 
 
-@python_2_unicode_compatible
 class Computer(models.Model):
     STATUS_CHOICES = (
         ('intended', _('Intended')),
@@ -354,7 +352,7 @@ class Computer(models.Model):
         return self.sync_attributes.exclude(property_att__prefix='SET')
 
     def login(self):
-        return u'{} ({})'.format(
+        return '{} ({})'.format(
             self.sync_user.name,
             self.sync_user.fullname.strip()
         )
@@ -643,9 +641,9 @@ class Computer(models.Model):
 
     def __str__(self):
         if settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] == 'id':
-            return u'CID-{}'.format(self.id)
+            return 'CID-{}'.format(self.id)
         else:
-            return u'{} (CID-{})'.format(self.get_cid_description(), self.id)
+            return '{} (CID-{})'.format(self.get_cid_description(), self.id)
 
     class Meta:
         app_label = 'client'
