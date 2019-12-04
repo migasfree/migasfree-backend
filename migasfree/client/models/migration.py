@@ -17,7 +17,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from migasfree.core.models import Project
@@ -47,7 +46,6 @@ class MigrationManager(DomainMigrationManager):
         return obj
 
 
-@python_2_unicode_compatible
 class Migration(Event):
     project = models.ForeignKey(
         Project,
@@ -58,7 +56,7 @@ class Migration(Event):
     objects = MigrationManager()
 
     def __str__(self):
-        return u'{} ({:%Y-%m-%d %H:%M:%S}) {}'.format(
+        return '{} ({:%Y-%m-%d %H:%M:%S}) {}'.format(
             self.computer, self.created_at, self.project
         )
 
