@@ -106,10 +106,10 @@ def update_software_inventory_raw(pkgs, computer_id, project_id):
     cursor.execute(sql)
     to_add = [
         (
-            x[0].encode('ascii', 'ignore'),
-            x[1].encode('ascii', 'ignore'),
-            x[2].encode('ascii', 'ignore'),
-            x[3].encode('ascii', 'ignore'),
+            x[0],  # name
+            x[1],  # version
+            x[2],  # architecture
+            x[3],  # fullname
             project_id
         ) for x in cursor.fetchall()
     ]
@@ -118,6 +118,7 @@ def update_software_inventory_raw(pkgs, computer_id, project_id):
         INSERT INTO core_package(name, version, architecture, fullname, project_id)
         VALUES %s;
         """ % str(to_add)[1:-1]
+        print(sql, to_add, type(to_add))  # DEBUG
         cursor.execute(sql)
 
     # INSERT M2M
