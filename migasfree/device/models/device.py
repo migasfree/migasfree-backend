@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,10 +20,8 @@ import json
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import python_2_unicode_compatible
 
-from migasfree.core.models import Attribute
-
+from ...core.models import Attribute
 from .connection import Connection
 from .model import Model
 
@@ -38,7 +36,6 @@ class DeviceManager(models.Manager):
         return qs
 
 
-@python_2_unicode_compatible
 class Device(models.Model):
     name = models.CharField(
         verbose_name=_("name"),
@@ -91,7 +88,7 @@ class Device(models.Model):
         Returns Queryset with the related computers based in logical device attributes
         """
         if model == 'computer':
-            from migasfree.client.models import Computer
+            from ...client.models import Computer
 
             return Computer.productive.scope(user).filter(
                 sync_attributes__in=Attribute.objects.filter(logical__device__id=self.id)
