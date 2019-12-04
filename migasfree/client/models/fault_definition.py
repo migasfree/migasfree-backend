@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,9 +20,8 @@ from django.db import models
 from django.db.models import Q
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import python_2_unicode_compatible
 
-from migasfree.core.models import Attribute, UserProfile
+from ...core.models import Attribute, UserProfile
 
 
 class DomainFaultDefinitionManager(models.Manager):
@@ -35,7 +34,6 @@ class DomainFaultDefinitionManager(models.Manager):
         return qs.distinct()
 
 
-@python_2_unicode_compatible
 class FaultDefinition(models.Model):
     name = models.CharField(
         verbose_name=_("name"),
