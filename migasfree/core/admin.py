@@ -27,7 +27,7 @@ from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ImportExportActionModelAdmin
 
-from migasfree.client.models import Computer
+from ..client.models import Computer
 
 from .resources import AttributeResource, ProjectResource
 from . import tasks
@@ -404,7 +404,7 @@ class DeploymentAdmin(admin.ModelAdmin):
 
         if user.domain_preference and user.domain_preference == obj.domain:
             if not obj.name.startswith(user.domain_preference.name.lower()):
-                obj.name = u'{}_{}'.format(user.domain_preference.name.lower(), obj.name)
+                obj.name = '{}_{}'.format(user.domain_preference.name.lower(), obj.name)
 
         super(DeploymentAdmin, self).save_model(request, obj, form, change)
 
