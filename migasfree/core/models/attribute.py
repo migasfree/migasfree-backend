@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ from django.db.models import Q
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.urls import reverse
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from .property import Property
@@ -47,7 +46,7 @@ class AttributeManager(DomainAttributeManager):
         """
         if value = "text~other", description = "other"
         """
-        from migasfree.client.models import Notification
+        from ...client.models import Notification
 
         if value.count('~') == 1:
             value, description = value.split('~')
@@ -124,7 +123,6 @@ class AttributeManager(DomainAttributeManager):
 
 
 # FIXME https://docs.djangoproject.com/en/1.8/ref/contrib/gis/
-@python_2_unicode_compatible
 class Attribute(models.Model):
     VALUE_LEN = 250
 
@@ -169,15 +167,15 @@ class Attribute(models.Model):
             return self.value
         elif self.property_att.prefix == 'CID' and \
                 settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] != 'id':
-            return u'{} (CID-{})'.format(self.description, self.value)
+            return '{} (CID-{})'.format(self.description, self.value)
         else:
-            return u'{}-{}'.format(self.property_att.prefix, self.value)
+            return '{}-{}'.format(self.property_att.prefix, self.value)
 
     def prefix_value(self):
         return self.__str__()
 
     def total_computers(self, user=None):
-        from migasfree.client.models import Computer
+        from ...client.models import Computer
 
         if user and not user.userprofile.is_view_all():
             queryset = Computer.productive.scope(user.userprofile).filter(sync_attributes__id=self.id)
@@ -310,7 +308,7 @@ class BasicAttribute(Attribute):
             basic_attributes.append(obj.id)
 
         if 'CID' in properties.keys() and 'id' in kwargs:
-            description = u'{}'.format(kwargs['description'])
+            description = '{}'.format(kwargs['description'])
             obj, _ = Attribute.objects.get_or_create(
                 property_att=Property.objects.get(pk=properties['CID']),
                 value=str(kwargs['id']),
