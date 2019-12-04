@@ -38,10 +38,10 @@ from rest_framework_filters import backends
 
 from .mixins import SafeConnectionMixin
 
-from migasfree.device.models import Logical
-from migasfree.device.serializers import LogicalSerializer
-
+from ..device.models import Logical
+from ..device.serializers import LogicalSerializer
 from ..utils import read_remote_chunks
+
 from .models import (
     Platform, Project, Store,
     ServerProperty, ClientProperty,
@@ -672,7 +672,7 @@ class GetSourceFileView(views.APIView):
             if not source:
                 source = ExternalSource.objects.get(project__name=project_name, name=source_name)
 
-            url = u'{}/{}'.format(source.base_url, resource)
+            url = '{}/{}'.format(source.base_url, resource)
 
             try:
                 ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
@@ -688,12 +688,12 @@ class GetSourceFileView(views.APIView):
                 return response
             except HTTPError as e:
                 return HttpResponse(
-                    u'HTTP Error: {} {}'.format(e.code, url),
+                    'HTTP Error: {} {}'.format(e.code, url),
                     status=e.code
                 )
             except URLError as e:
                 return HttpResponse(
-                    u'URL Error: {} {}'.format(e.reason, url),
+                    'URL Error: {} {}'.format(e.reason, url),
                     status=status.HTTP_404_NOT_FOUND
                 )
         else:
@@ -701,7 +701,7 @@ class GetSourceFileView(views.APIView):
                 return HttpResponse(status=status.HTTP_204_NO_CONTENT)
             else:
                 response = HttpResponse(FileWrapper(open(_file_local, 'rb')), content_type='application/octet-stream')
-                response['Content-Disposition'] = u'attachment; filename={}'.format(os.path.basename(_file_local))
+                response['Content-Disposition'] = 'attachment; filename={}'.format(os.path.basename(_file_local))
                 response['Content-Length'] = os.path.getsize(_file_local)
 
                 return response
