@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 from django.db import models
 from django.db.models import Q
 from django.core.validators import MinValueValidator
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from .schedule import Schedule
@@ -38,7 +37,6 @@ class ScheduleDelayManager(models.Manager):
         return qs
 
 
-@python_2_unicode_compatible
 class ScheduleDelay(models.Model):
     delay = models.IntegerField(
         verbose_name=_("delay")
@@ -66,7 +64,7 @@ class ScheduleDelay(models.Model):
     objects = ScheduleDelayManager()
 
     def __str__(self):
-        return u'{} ({})'.format(self.schedule.name, self.delay)
+        return '{} ({})'.format(self.schedule.name, self.delay)
 
     def attribute_list(self):
         return ', '.join(
@@ -80,7 +78,7 @@ class ScheduleDelay(models.Model):
         Returns Queryset with the related computers based in attributes
         """
         if model == 'computer':
-            from migasfree.client.models import Computer
+            from ...client.models import Computer
 
             return Computer.productive.scope(user).filter(
                 sync_attributes__in=self.attributes.all()
