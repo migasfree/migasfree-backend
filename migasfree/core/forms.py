@@ -26,7 +26,7 @@ from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
-from migasfree.client.models import Computer
+from ..client.models import Computer
 
 from .models import (
     Package, Deployment, ClientProperty, Attribute,
@@ -296,7 +296,7 @@ class UserProfileForm(forms.ModelForm):
         super(UserProfileForm, self).__init__(*args, **kwargs)
         self.fields['groups'].help_text = ''
         if self.instance.id:
-            self.fields['username'].help_text += u'<p><a href="{}">{}</a></p>'.format(
+            self.fields['username'].help_text += '<p><a href="{}">{}</a></p>'.format(
                 reverse('admin:auth_user_password_change', args=(self.instance.id,)),
                 _('Change Password')
             )
