@@ -18,17 +18,14 @@
 
 import re
 
-from past.builtins import basestring
-
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
-from migasfree.client.models import Computer
+from ...client.models import Computer
 
 
 def validate_mac(mac):
-    return isinstance(mac, basestring) and \
+    return isinstance(mac, str) and \
         len(mac) == 17 and \
         len(re.findall(r':', mac)) == 5
 
@@ -71,7 +68,6 @@ class NodeManager(DomainNodeManager):
         return obj
 
 
-@python_2_unicode_compatible
 class Node(models.Model):
     # Detect Virtual Machine with lshw:
     # http://techglimpse.com/xen-kvm-virtualbox-vm-detection-command/
@@ -201,7 +197,7 @@ class Node(models.Model):
         if self.vendor:
             return self.VIRTUAL_MACHINES.get(self.vendor, self.product)
         if self.get_is_docker(self.computer_id):
-            return "docker"
+            return 'docker'
 
         return self.product or self.description
 
