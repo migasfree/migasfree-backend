@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,14 +23,13 @@ from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.conf import settings
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django.utils.text import slugify
 
-from . import Platform
+from ..pms import get_available_pms
+from ..validators import validate_project_pms
 
-from migasfree.core.pms import get_available_pms
-from migasfree.core.validators import validate_project_pms
+from . import Platform
 
 
 class DomainProjectManager(models.Manager):
@@ -38,6 +37,7 @@ class DomainProjectManager(models.Manager):
         qs = super(DomainProjectManager, self).get_queryset()
         if not user.is_view_all():
             qs = qs.filter(id__in=user.get_projects())
+
         return qs
 
 
@@ -54,7 +54,6 @@ class ProjectManager(DomainProjectManager):
         return obj
 
 
-@python_2_unicode_compatible
 class Project(models.Model):
     """
     OS Version: 'Ubuntu natty 32bit' or 'openSUSE 12.1' or 'Vitalinux'
