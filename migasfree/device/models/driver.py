@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,16 +18,13 @@
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import python_2_unicode_compatible
 
-from migasfree.core.models import Project
-
+from ...core.models import Project
+from ...utils import to_list
 from .model import Model
 from .feature import Feature
-from ...utils import to_list
 
 
-@python_2_unicode_compatible
 class Driver(models.Model):
     name = models.CharField(
         verbose_name=_('name'),
@@ -73,7 +70,7 @@ class Driver(models.Model):
         super(Driver, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
-        return self.name.split("/")[-1] if self.name else ''
+        return self.name.split('/')[-1] if self.name else ''
 
     class Meta:
         app_label = 'device'
