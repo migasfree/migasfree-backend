@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -26,6 +25,7 @@ class DomainPlatformManager(models.Manager):
         qs = super(DomainPlatformManager, self).get_queryset()
         if not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects()).distinct()
+
         return qs
 
 
@@ -38,7 +38,6 @@ class PlatformManager(DomainPlatformManager):
         return obj
 
 
-@python_2_unicode_compatible
 class Platform(models.Model):
     """
     Computer Platform
