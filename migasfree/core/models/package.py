@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,11 +20,10 @@ import os
 import shutil
 
 from django.db import models
-from django.core.exceptions import ValidationError
-from django.utils.encoding import python_2_unicode_compatible
-from django.utils.translation import ugettext_lazy as _
 from django.db.models.signals import pre_delete
+from django.core.exceptions import ValidationError
 from django.dispatch import receiver
+from django.utils.translation import ugettext_lazy as _
 
 from .project import Project
 from .store import Store
@@ -35,6 +34,7 @@ class DomainPackageManager(models.Manager):
         qs = super(DomainPackageManager, self).get_queryset()
         if not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects())
+
         return qs
 
 
@@ -62,7 +62,6 @@ class PackageManager(DomainPackageManager):
         return self.get_queryset().filter(project__id=project_id)
 
 
-@python_2_unicode_compatible
 class Package(models.Model):
     fullname = models.CharField(
         verbose_name=_('fullname'),
