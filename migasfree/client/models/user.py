@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import python_2_unicode_compatible
 
 
 class DomainUserManager(models.Manager):
@@ -40,7 +39,6 @@ class UserManager(DomainUserManager):
         return obj
 
 
-@python_2_unicode_compatible
 class User(models.Model):
     name = models.CharField(
         verbose_name=_("name"),
@@ -61,8 +59,8 @@ class User(models.Model):
         self.save()
 
     def __str__(self):
-        if self.fullname != '':
-            return u'{} ({})'.format(self.name, self.fullname.strip())
+        if self.fullname.strip():
+            return '{} ({})'.format(self.name, self.fullname.strip())
 
         return self.name
 
