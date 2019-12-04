@@ -28,9 +28,9 @@ class Pms(object):
     relative_path = ''
     mimetype = ''
 
-    def __unicode__(self):
+    def __str__(self):
         """
-        string __unicode__(void)
+        string __str__(void)
         """
 
         return self.name
