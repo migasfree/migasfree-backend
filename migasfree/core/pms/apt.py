@@ -20,8 +20,9 @@ import os
 
 from django.conf import settings
 
+from ...utils import execute
+
 from .pms import Pms
-from migasfree.utils import execute
 
 
 class Apt(Pms):
