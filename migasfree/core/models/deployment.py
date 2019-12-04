@@ -27,7 +27,6 @@ from importlib import import_module
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils import timezone
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import Q
 from django.db.models.signals import pre_save, pre_delete
@@ -58,7 +57,6 @@ class DeploymentManager(models.Manager):
         return qs
 
 
-@python_2_unicode_compatible
 class Deployment(models.Model):
     SOURCE_INTERNAL = 'I'
     SOURCE_EXTERNAL = 'E'
@@ -317,7 +315,7 @@ class Deployment(models.Model):
         super(Deployment, self).save(force_insert, force_update, using, update_fields)
 
         try:
-            from migasfree.stats import tasks
+            from ...stats import tasks
             tasks.assigned_computers_to_deployment(self.id)
         except:
             pass
@@ -379,7 +377,7 @@ class Deployment(models.Model):
         Returns Queryset with the related computers based in attributes and schedule
         """
         if model == 'computer':
-            from migasfree.client.models import Computer
+            from ...client.models import Computer
 
             if self.enabled and (self.start_date <= datetime.datetime.now().date()):
                 # by assigned attributes
