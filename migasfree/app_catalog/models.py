@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from markdownx.models import MarkdownxField
@@ -73,7 +72,6 @@ def upload_path_handler(instance, filename):
     return 'catalog_icons/app_{}{}'.format(instance.pk, ext)
 
 
-@python_2_unicode_compatible
 class Application(models.Model):
     LEVELS = (
         ('U', _('User')),
@@ -153,7 +151,6 @@ class Application(models.Model):
         verbose_name_plural = _('Applications')
 
 
-@python_2_unicode_compatible
 class PackagesByProject(models.Model):
     application = models.ForeignKey(
         Application,
@@ -176,7 +173,7 @@ class PackagesByProject(models.Model):
     objects = PackagesByProjectManager()
 
     def __str__(self):
-        return u'{}@{}'.format(self.application, self.project)
+        return '{}@{}'.format(self.application, self.project)
 
     class Meta:
         app_label = 'app_catalog'
@@ -185,7 +182,6 @@ class PackagesByProject(models.Model):
         unique_together = (('application', 'project'),)
 
 
-@python_2_unicode_compatible
 class Policy(models.Model):
     name = models.CharField(
         verbose_name=_("name"),
@@ -301,7 +297,6 @@ class Policy(models.Model):
         ordering = ['name']
 
 
-@python_2_unicode_compatible
 class PolicyGroup(models.Model):
     priority = models.IntegerField(
         verbose_name=_("priority")
@@ -334,7 +329,7 @@ class PolicyGroup(models.Model):
     )
 
     def __str__(self):
-        return u'{} ({})'.format(self.policy.name, self.priority)
+        return '{} ({})'.format(self.policy.name, self.priority)
 
     class Meta:
         app_label = 'app_catalog'
