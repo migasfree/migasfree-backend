@@ -20,8 +20,9 @@ import os
 
 from django.conf import settings
 
+from ...utils import execute
+
 from .pms import Pms
-from migasfree.utils import execute
 
 
 class Yum(Pms):
@@ -135,7 +136,7 @@ baseurl={{protocol}}://{{server}}/src/{project}/EXTERNAL/{name}/{suite}/{compone
                 for component in deploy.components.split(' '):
                     template += components_template.format(
                         project=deploy.project.slug,
-                        name=u'{}-{}'.format(deploy.slug, component.replace('/', '-')),
+                        name='{}-{}'.format(deploy.slug, component.replace('/', '-')),
                         suite=deploy.suite,
                         options=deploy.options.replace(' ', '\n') if deploy.options else '',
                         component=component
