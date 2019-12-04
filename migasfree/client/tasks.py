@@ -118,7 +118,6 @@ def update_software_inventory_raw(pkgs, computer_id, project_id):
         INSERT INTO core_package(name, version, architecture, fullname, project_id)
         VALUES %s;
         """ % str(to_add)[1:-1]
-        print(sql, to_add, type(to_add))  # DEBUG
         cursor.execute(sql)
 
     # INSERT M2M
