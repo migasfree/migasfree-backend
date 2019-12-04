@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,10 @@
 
 import json
 
-from past.builtins import basestring
-
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import python_2_unicode_compatible
 
-from migasfree.core.models import Attribute
-
+from ...core.models import Attribute
 from .device import Device
 from .feature import Feature
 from .driver import Driver
@@ -48,7 +44,6 @@ class LogicalManager(models.Manager):
         return qs
 
 
-@python_2_unicode_compatible
 class Logical(models.Model):
     device = models.ForeignKey(
         Device,
@@ -115,13 +110,13 @@ class Logical(models.Model):
     def __str__(self):
         data = json.loads(self.device.data)
         if 'NAME' in data and not (data['NAME'] == 'undefined' or data['NAME'] == ''):
-            return u'{}__{}__{}'.format(
+            return '{}__{}__{}'.format(
                 data['NAME'],
                 self.get_name(),
                 self.device.name,
             )
 
-        return u'{}__{}__{}__{}'.format(
+        return '{}__{}__{}__{}'.format(
             self.device.model.manufacturer.name,
             self.device.model.name,
             self.get_name(),
@@ -129,7 +124,7 @@ class Logical(models.Model):
         )
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        if isinstance(self.alternative_feature_name, basestring):
+        if isinstance(self.alternative_feature_name, str):
             self.alternative_feature_name = self.alternative_feature_name.replace(" ", "_")
 
         super(Logical, self).save(force_insert, force_update, using, update_fields)
