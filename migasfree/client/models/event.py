@@ -20,12 +20,10 @@ from django.db import models
 from django.db.models.aggregates import Count
 from django.db.models.functions import TruncDay, TruncHour, ExtractMonth, ExtractYear
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import python_2_unicode_compatible
 
 from .computer import Computer
 
 
-@python_2_unicode_compatible
 class Event(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -79,7 +77,7 @@ class Event(models.Model):
         ).first()
 
     def __str__(self):
-        return u'{} ({:%Y-%m-%d %H:%M:%S})'.format(self.computer, self.created_at)
+        return '{} ({:%Y-%m-%d %H:%M:%S})'.format(self.computer, self.created_at)
 
     class Meta:
         abstract = True
