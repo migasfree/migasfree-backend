@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2016-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django_filters import rest_framework as backends
 from rest_framework import viewsets, status, filters, permissions
-from rest_framework_filters import backends
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
@@ -46,7 +46,7 @@ class ConnectionViewSet(viewsets.ModelViewSet):
 class DeviceViewSet(viewsets.ModelViewSet):
     queryset = Device.objects.all()
     serializer_class = serializers.DeviceSerializer
-    filter_class = DeviceFilter
+    filterset_class = DeviceFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('name',)
@@ -89,7 +89,7 @@ class DeviceViewSet(viewsets.ModelViewSet):
 class DriverViewSet(viewsets.ModelViewSet):
     queryset = Driver.objects.all()
     serializer_class = serializers.DriverSerializer
-    filter_class = DriverFilter
+    filterset_class = DriverFilter
     ordering_fields = '__all__'
     ordering = ('name',)
 
