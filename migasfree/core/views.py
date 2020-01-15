@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext
+from django_filters import rest_framework as backends
 from django_redis import get_redis_connection
 from rest_framework import (
     viewsets, parsers, status,
@@ -34,7 +35,6 @@ from rest_framework import (
 )
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
-from rest_framework_filters import backends
 
 from .mixins import SafeConnectionMixin
 
@@ -89,7 +89,7 @@ class SafePackagerConnectionMixin(SafeConnectionMixin):
 class AttributeSetViewSet(viewsets.ModelViewSet):
     queryset = AttributeSet.objects.all()
     serializer_class = AttributeSetSerializer
-    filter_class = AttributeSetFilter
+    filterset_class = AttributeSetFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
     search_fields = ['value', 'description']
     ordering_fields = '__all__'
@@ -123,7 +123,7 @@ class PlatformViewSet(viewsets.ModelViewSet):
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    filter_class = ProjectFilter
+    filterset_class = ProjectFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('name',)
@@ -148,7 +148,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
-    filter_class = StoreFilter
+    filterset_class = StoreFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
     search_fields = ['name']
     ordering_fields = '__all__'
@@ -174,7 +174,7 @@ class StoreViewSet(viewsets.ModelViewSet):
 class PropertyViewSet(viewsets.ModelViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
-    filter_class = PropertyFilter
+    filterset_class = PropertyFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
     search_fields = ['name', 'language', 'code']
     ordering_fields = '__all__'
@@ -204,7 +204,7 @@ class ClientPropertyViewSet(viewsets.ModelViewSet):
 class ServerAttributeViewSet(viewsets.ModelViewSet):
     queryset = ServerAttribute.objects.filter(property_att__sort='server')
     serializer_class = ServerAttributeSerializer
-    filter_class = ServerAttributeFilter
+    filterset_class = ServerAttributeFilter
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
@@ -218,7 +218,7 @@ class ServerAttributeViewSet(viewsets.ModelViewSet):
 class ClientAttributeViewSet(viewsets.ModelViewSet):
     queryset = ClientAttribute.objects.filter(property_att__sort='client')
     serializer_class = ClientAttributeSerializer
-    filter_class = ClientAttributeFilter
+    filterset_class = ClientAttributeFilter
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
@@ -307,7 +307,7 @@ class ClientAttributeViewSet(viewsets.ModelViewSet):
 class ScheduleDelayViewSet(viewsets.ModelViewSet):
     queryset = ScheduleDelay.objects.all()
     serializer_class = ScheduleDelaySerializer
-    filter_class = ScheduleDelayFilter
+    filterset_class = ScheduleDelayFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('delay',)
@@ -346,7 +346,7 @@ class PackageViewSet(
 ):
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
-    filter_class = PackageFilter
+    filterset_class = PackageFilter
     parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
     ordering = ('name', 'project__name')
 
@@ -378,7 +378,7 @@ class PackageViewSet(
 class InternalSourceViewSet(viewsets.ModelViewSet):
     queryset = InternalSource.objects.all()
     serializer_class = InternalSourceSerializer
-    filter_class = DeploymentFilter
+    filterset_class = DeploymentFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-start_date', 'name')
@@ -430,7 +430,7 @@ class InternalSourceViewSet(viewsets.ModelViewSet):
 class ExternalSourceViewSet(viewsets.ModelViewSet):
     queryset = ExternalSource.objects.all()
     serializer_class = ExternalSourceSerializer
-    filter_class = DeploymentFilter
+    filterset_class = DeploymentFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-start_date', 'name')
