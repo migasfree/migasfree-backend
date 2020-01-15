@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,13 +18,13 @@
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django_filters import rest_framework as backends
 from rest_framework import viewsets, status, filters, permissions
-from rest_framework_filters import backends
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
-from migasfree.core.permissions import PublicPermission
-from migasfree.client.models import Computer
+from ..core.permissions import PublicPermission
+from ..client.models import Computer
 
 from . import models, serializers
 from .filters import ApplicationFilter, PackagesByProjectFilter, PolicyFilter
@@ -34,7 +34,7 @@ from .filters import ApplicationFilter, PackagesByProjectFilter, PolicyFilter
 class ApplicationViewSet(viewsets.ModelViewSet):
     queryset = models.Application.objects.all()
     serializer_class = serializers.ApplicationSerializer
-    filter_class = ApplicationFilter
+    filterset_class = ApplicationFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     permission_classes = (PublicPermission,)
 
@@ -99,7 +99,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
 class PackagesByProjectViewSet(viewsets.ModelViewSet):
     queryset = models.PackagesByProject.objects.all()
     serializer_class = serializers.PackagesByProjectSerializer
-    filter_class = PackagesByProjectFilter
+    filterset_class = PackagesByProjectFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     permission_classes = (PublicPermission,)
 
@@ -115,7 +115,7 @@ class PackagesByProjectViewSet(viewsets.ModelViewSet):
 class PolicyViewSet(viewsets.ModelViewSet):
     queryset = models.Policy.objects.all()
     serializer_class = serializers.PolicySerializer
-    filter_class = PolicyFilter
+    filterset_class = PolicyFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
 
     def get_serializer_class(self):
