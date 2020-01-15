@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,12 +23,12 @@ from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
+from django_filters import rest_framework as backends
 from django_redis import get_redis_connection
 from rest_framework import viewsets, exceptions, status, mixins, filters, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from rest_framework_filters import backends
 
 from ...device.models import Logical, Driver, Model
 from ...core.serializers import PlatformSerializer
@@ -44,7 +44,7 @@ from ..filters import (
 class ComputerViewSet(viewsets.ModelViewSet):
     queryset = models.Computer.objects.all()
     serializer_class = serializers.ComputerSerializer
-    filter_class = ComputerFilter
+    filterset_class = ComputerFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering = (settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0],)
 
@@ -329,7 +329,7 @@ class ErrorViewSet(
 ):
     queryset = models.Error.objects.all()
     serializer_class = serializers.ErrorSerializer
-    filter_class = ErrorFilter
+    filterset_class = ErrorFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
     search_fields = ['created_at', 'description']
     ordering_fields = '__all__'
@@ -357,7 +357,7 @@ class ErrorViewSet(
 class FaultDefinitionViewSet(viewsets.ModelViewSet):
     queryset = models.FaultDefinition.objects.all()
     serializer_class = serializers.FaultDefinitionSerializer
-    filter_class = FaultDefinitionFilter
+    filterset_class = FaultDefinitionFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('name',)
@@ -378,7 +378,7 @@ class FaultViewSet(
 ):
     queryset = models.Fault.objects.all()
     serializer_class = serializers.FaultSerializer
-    filter_class = FaultFilter
+    filterset_class = FaultFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
     search_fields = ['created_at', 'result']
     ordering_fields = '__all__'
@@ -409,7 +409,7 @@ class MigrationViewSet(
 ):
     queryset = models.Migration.objects.all()
     serializer_class = serializers.MigrationSerializer
-    filter_class = MigrationFilter
+    filterset_class = MigrationFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
@@ -434,7 +434,7 @@ class NotificationViewSet(
 ):
     queryset = models.Notification.objects.all()
     serializer_class = serializers.NotificationSerializer
-    filter_class = NotificationFilter
+    filterset_class = NotificationFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
     search_fields = ['message']
     ordering_fields = '__all__'
@@ -453,7 +453,7 @@ class PackageHistoryViewSet(
 ):
     queryset = models.PackageHistory.objects.all()
     serializer_class = serializers.PackageHistorySerializer
-    filter_class = PackageHistoryFilter
+    filterset_class = PackageHistoryFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('computer', 'package__fullname',)
@@ -466,7 +466,7 @@ class StatusLogViewSet(
 ):
     queryset = models.StatusLog.objects.all()
     serializer_class = serializers.StatusLogSerializer
-    filter_class = StatusLogFilter
+    filterset_class = StatusLogFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
     search_fields = ['status']
     ordering_fields = '__all__'
@@ -488,7 +488,7 @@ class SynchronizationViewSet(
 ):
     queryset = models.Synchronization.objects.all()
     serializer_class = serializers.SynchronizationSerializer
-    filter_class = SynchronizationFilter
+    filterset_class = SynchronizationFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
     search_fields = ['user__name', 'user__fullname']
     ordering_fields = '__all__'
