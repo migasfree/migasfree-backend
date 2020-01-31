@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@ from __future__ import absolute_import
 
 from celery import shared_task
 
-from migasfree.client.models import Computer
-
+from ..client.models import Computer
 from .models import Node, Capability, LogicalName, Configuration
 
 import logging
@@ -33,7 +32,7 @@ MAXINT = 9223372036854775807  # sys.maxint = (2**63) - 1
 @shared_task(queue='default')
 def save_computer_hardware(computer_id, node, parent=None, level=1):
     computer = Computer.objects.get(id=computer_id)
-    size = node.get('size')
+    size = node.get('size', 0)
     n = Node.objects.create({
         'parent': parent,
         'computer': computer,
