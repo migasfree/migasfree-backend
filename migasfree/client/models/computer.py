@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,16 +22,16 @@ from django.db import models
 from django.db.models import Count
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.db.models.signals import pre_save, post_save, pre_delete
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.dispatch import receiver
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.conf import settings
 
-from migasfree.utils import swap_m2m, remove_empty_elements_from_dict, list_difference
-from migasfree.core.models import (
+from ...utils import swap_m2m, remove_empty_elements_from_dict, list_difference
+from ...core.models import (
     Project, ServerAttribute, Attribute, BasicProperty, Property,
 )
-from migasfree.device.models import Logical
+from ...device.models import Logical
 
 from .user import User
 
@@ -434,7 +434,7 @@ class Computer(models.Model):
         self.save()
 
     def update_hardware_resume(self):
-        from migasfree.hardware.models import Node
+        from ...hardware.models import Node
 
         try:
             self.product = Node.objects.get(
