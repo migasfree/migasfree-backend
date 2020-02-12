@@ -64,7 +64,7 @@ class ComputerViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         if isinstance(request.data, QueryDict):
-            data = dict(request.data.iterlists())
+            data = dict(request.data.lists())
         else:
             data = request.data
 
