@@ -74,7 +74,7 @@ def execute(cmd, verbose=False, interactive=False):
                     chunk = _process.stdout.read()
                     if chunk and chunk != '\n':
                         print(chunk)
-                    _output_buffer = '%s%s' % (_output_buffer, chunk)
+                    _output_buffer = '{}{}'.format(_output_buffer, chunk)
 
     _output, _error = _process.communicate()
 
@@ -92,7 +92,10 @@ def write_file(filename, content):
     _file = None
     try:
         _file = open(filename, 'wb')
-        _file.write(content)
+        try:
+            _file.write(bytes(content))
+        except TypeError:
+            _file.write(bytes(content, encoding='utf8'))
         _file.flush()
         os.fsync(_file.fileno())
         _file.close()
@@ -182,7 +185,7 @@ def swap_m2m(source_field, target_field):
 
 
 def remove_empty_elements_from_dict(dic):
-    return dict((k, v) for k, v in iteritems(dic) if v)
+    return dict((k, v) for k, v in dic.items() if v)
 
 
 def remove_duplicates_preserving_order(seq):
@@ -225,12 +228,12 @@ def sort_depends(data):
     data_copy = copy.deepcopy(data)
 
     def sort():
-        for i, s in data_copy.items():
+        for i, s in list(data_copy.items()):
             if not s:
                 if data_copy:
                     ret.append(i)
                     del data_copy[i]
-                    for _, n in data_copy.items():
+                    for _, n in list(data_copy.items()):
                         if i in n:
                             n.remove(i)
 
