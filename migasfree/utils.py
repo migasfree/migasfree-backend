@@ -25,7 +25,6 @@ import tempfile
 import shutil
 
 from datetime import timedelta
-from six import iteritems
 from django.conf import settings
 
 
