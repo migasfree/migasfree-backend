@@ -89,8 +89,12 @@ class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         computer = get_object_or_404(Computer, id=claims.get('id'))
 
+        hw_data = claims.get('hardware')
+        if isinstance(hw_data, list):
+            hw_data = hw_data[0]
+
         Node.objects.filter(computer=computer).delete()
-        tasks.save_computer_hardware.delay(computer.id, claims.get('hardware'))
+        tasks.save_computer_hardware.delay(computer.id, hw_data)
         computer.update_last_hardware_capture()
         computer.update_hardware_resume()
 
