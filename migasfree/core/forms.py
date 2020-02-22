@@ -53,7 +53,7 @@ class AttributeSetForm(forms.ModelForm):
                 reverse=False,
                 model=self.instance.included_attributes.model,
                 pk_set=included_attributes
-        )
+            )
 
         return included_attributes
 
@@ -67,7 +67,7 @@ class AttributeSetForm(forms.ModelForm):
                 reverse=False,
                 model=self.instance.excluded_attributes.model,
                 pk_set=excluded_attributes
-        )
+            )
 
         return excluded_attributes
 
