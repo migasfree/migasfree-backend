@@ -20,7 +20,8 @@ import os
 import time
 import ssl
 
-from urllib.request import urlopen, URLError, HTTPError
+from urllib.error import URLError, HTTPError
+from urllib.request import urlopen
 from wsgiref.util import FileWrapper
 
 from django.conf import settings
