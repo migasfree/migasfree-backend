@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ router = routers.DefaultRouter()
 router.register(r'platforms', views.PlatformViewSet)
 router.register(r'projects', views.ProjectViewSet)
 router.register(r'stores', views.StoreViewSet)
+router.register(r'attributes', views.AttributeViewSet)
 router.register(r'stamps', views.ServerPropertyViewSet)
 router.register(r'formulas', views.ClientPropertyViewSet)
 router.register(r'tags', views.ServerAttributeViewSet)
