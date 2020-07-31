@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 from django_filters import rest_framework as filters
 
 from .models import (
-    Deployment, Package, ClientAttribute, ServerAttribute,
+    Deployment, Package, ClientAttribute, ServerAttribute, Attribute,
     Project, ScheduleDelay, Store, AttributeSet, Property,
 )
 
@@ -62,6 +62,12 @@ class PropertyFilter(filters.FilterSet):
     class Meta:
         model = Property
         fields = ['id', 'name', 'enabled', 'sort']
+
+
+class AttributeFilter(filters.FilterSet):
+    class Meta:
+        model = Attribute
+        fields = ['id', 'property_att__id', 'property_att__prefix', 'value', 'property_att__sort']
 
 
 class ClientAttributeFilter(filters.FilterSet):
