@@ -46,7 +46,7 @@ from ..utils import read_remote_chunks
 from .models import (
     Platform, Project, Store,
     ServerProperty, ClientProperty,
-    ServerAttribute, ClientAttribute,
+    ServerAttribute, ClientAttribute, Attribute,
     Schedule, ScheduleDelay,
     Package, Deployment,
     ExternalSource, InternalSource,
@@ -59,6 +59,7 @@ from .serializers import (
     ServerPropertySerializer, ClientPropertySerializer,
     ServerAttributeSerializer, ServerAttributeWriteSerializer,
     ClientAttributeSerializer, ClientAttributeWriteSerializer,
+    AttributeSerializer,
     ScheduleSerializer, ScheduleWriteSerializer,
     ScheduleDelaySerializer, ScheduleDelayWriteSerializer,
     PackageSerializer, DeploymentSerializer,
@@ -72,7 +73,7 @@ from .serializers import (
 from .filters import (
     DeploymentFilter, PackageFilter, ProjectFilter, StoreFilter,
     ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
-    AttributeSetFilter, PropertyFilter,
+    AttributeSetFilter, PropertyFilter, AttributeFilter,
 )
 
 from . import tasks
@@ -199,6 +200,22 @@ class ServerPropertyViewSet(viewsets.ModelViewSet):
 class ClientPropertyViewSet(viewsets.ModelViewSet):
     queryset = ClientProperty.objects.filter(sort='client')
     serializer_class = ClientPropertySerializer
+
+
+@permission_classes((permissions.DjangoModelPermissions,))
+class AttributeViewSet(viewsets.ModelViewSet):
+    queryset = Attribute.objects.all()
+    serializer_class = AttributeSerializer
+    filter_class = AttributeFilter
+    search_fields = ['value', 'description']
+
+    def get_queryset(self):
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(id__in=user.get_attributes()).distinct()
+
+        return qs
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
