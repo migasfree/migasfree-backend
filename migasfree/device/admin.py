@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -65,13 +65,13 @@ class DriverAdmin(admin.ModelAdmin):
 class LogicalForm(forms.ModelForm):
     class Meta:
         model = Logical
-        fields = ['device', 'feature']
+        fields = '__all__'
 
 
 @admin.register(Logical)
 class LogicalAdmin(admin.ModelAdmin):
     form = LogicalForm
-    fields = ('device', 'feature', 'name', 'attributes')
+    fields = ('device', 'feature', 'alternative_feature_name', 'attributes')
     list_select_related = ('device', 'feature',)
     list_display = ('device', 'feature')
     list_filter = ('device__model', 'feature')
@@ -98,7 +98,7 @@ class LogicalAdmin(admin.ModelAdmin):
 class LogicalInline(admin.TabularInline):
     model = Logical
     form = LogicalForm
-    fields = ('feature', 'name', 'attributes')
+    fields = ('feature', 'alternative_feature_name', 'attributes')
     extra = 0
 
     def get_queryset(self, request):
