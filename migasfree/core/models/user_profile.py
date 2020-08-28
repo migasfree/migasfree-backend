@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 from django.db import models, connection
 from django.core.exceptions import PermissionDenied
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import (
     User as UserSystem,
     UserManager,
@@ -143,7 +143,7 @@ SELECT ARRAY(
             cursor = connection.cursor()
             cursor.execute("""
                 SELECT ARRAY(
-                    SELECT DISTINCT attribute_id 
+                    SELECT DISTINCT attribute_id
                     FROM client_computer_sync_attributes
                     WHERE computer_id IN %s
                 ) AS attributes""" % ("(" + ",".join(str(e) for e in computers) + ")"))
