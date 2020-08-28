@@ -21,10 +21,15 @@ from django.conf.urls.static import static
 from django.conf import settings
 from django.urls import path
 from graphene_django.views import GraphQLView
+from rest_framework import permissions
 from rest_framework.authtoken import views
 from rest_framework.schemas import get_schema_view
 from rest_framework.documentation import include_docs_urls
-from rest_framework_jwt import views as jwt_views
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 
 from .core.routers import router, safe_router as core_safe_router
 from .client.routers import (
@@ -37,7 +42,8 @@ from .device.routers import router as device_router
 from .stats.routers import router as stats_router
 from .app_catalog.routers import router as catalog_router
 
-from rest_framework_swagger.views import get_swagger_view
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
 from django.contrib import admin
 admin.autodiscover()
@@ -48,7 +54,18 @@ admin.site.index_title = 'Welcome to Migasfree Backend Portal'
 
 TITLE = 'Migasfree REST API'
 
-swagger_schema_view = get_swagger_view(title=TITLE)
+schema_view = get_schema_view(
+   openapi.Info(
+      title=TITLE,
+      default_version='v1',
+      # description='Test description',
+      # terms_of_service='https://www.google.com/policies/terms/',
+      contact=openapi.Contact(email='fun.with@migasfree.org'),
+      license=openapi.License(name='GPLv3'),
+   ),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
     url(r'^grappelli/', include('grappelli.urls')),
@@ -69,15 +86,18 @@ urlpatterns = [
     url(r'^api/v1/', include('migasfree.client.urls')),
 
     url(r'^token-auth/$', views.obtain_auth_token),
-    url(r'^token-auth-jwt/', jwt_views.obtain_jwt_token),
+    path('token-auth-jwt/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token-refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     url(r'^rest-auth/', include('rest_auth.urls')),
 
     url(r'^', include('django.contrib.auth.urls')),
-    url(r'^docs/', swagger_schema_view, name='docs'),
     url(r'^api-docs/', include_docs_urls(title=TITLE)),
     # url(r'^auth/', include('djoser.urls')),
 
-    path('openapi', get_schema_view(title=TITLE), name='openapi-schema'),
+    url(r'^docs(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    url(r'^docs/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    url(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('graphql', GraphQLView.as_view(graphiql=True)),
 ]
 
