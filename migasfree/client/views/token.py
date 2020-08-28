@@ -22,13 +22,12 @@ from django.conf import settings
 from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as backends
 from django_redis import get_redis_connection
 from rest_framework import viewsets, exceptions, status, mixins, filters, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
-# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from ...device.models import Logical, Driver, Model
 from ...core.serializers import PlatformSerializer
