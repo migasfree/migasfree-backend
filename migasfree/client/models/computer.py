@@ -25,7 +25,7 @@ from django.db.models.signals import pre_save, post_save, pre_delete
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.dispatch import receiver
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 
 from ...utils import swap_m2m, remove_empty_elements_from_dict, list_difference
 from ...core.models import (
@@ -593,41 +593,41 @@ class Computer(models.Model):
         cid = self.get_cid_attribute()
 
         return remove_empty_elements_from_dict({
-            ugettext("Computer"): self.__str__(),
-            ugettext("Status"): ugettext(self.status),
-            ugettext("Tags"): ', '.join(str(x) for x in self.tags.all()),
-            ugettext("Faults"): ', '.join(
+            gettext("Computer"): self.__str__(),
+            gettext("Status"): gettext(self.status),
+            gettext("Tags"): ', '.join(str(x) for x in self.tags.all()),
+            gettext("Faults"): ', '.join(
                 str(x) for x in cid.faultdefinition_set.all()
             ),
-            ugettext("Deployments"): ', '.join(
+            gettext("Deployments"): ', '.join(
                 str(x) for x in cid.deployment_set.all()
             ),
-            ugettext("Deployments (excluded)"): ', '.join(
+            gettext("Deployments (excluded)"): ', '.join(
                 str(x) for x in cid.ExcludeAttribute.all()
             ),
-            ugettext("Sets"): ', '.join(
+            gettext("Sets"): ', '.join(
                 str(x) for x in cid.attributeset_set.all()
             ),
-            ugettext("Sets (excluded)"): ', '.join(
+            gettext("Sets (excluded)"): ', '.join(
                 str(x) for x in cid.ExcludedAttributesGroup.all()
             ),
-            ugettext("Delays"): ', '.join(
+            gettext("Delays"): ', '.join(
                 str(x) for x in cid.scheduledelay_set.all()
             ),
-            ugettext("Logical devices"): ', '.join(
+            gettext("Logical devices"): ', '.join(
                 str(x) for x in self.logical_devices()
             ),
-            ugettext("Default logical device"): self.default_logical_device.__str__(),
-            ugettext("Policies (included)"): ', '.join(
+            gettext("Default logical device"): self.default_logical_device.__str__(),
+            gettext("Policies (included)"): ', '.join(
                 str(x) for x in cid.PolicyIncludedAttributes.all()
             ),
-            ugettext("Policies (excluded)"): ', '.join(
+            gettext("Policies (excluded)"): ', '.join(
                 str(x) for x in cid.PolicyExcludedAttributes.all()
             ),
-            ugettext("Policy Groups (included)"): ', '.join(
+            gettext("Policy Groups (included)"): ', '.join(
                 str(x) for x in cid.PolicyGroupIncludedAttributes.all()
             ),
-            ugettext("Policy Groups (excluded)"): ', '.join(
+            gettext("Policy Groups (excluded)"): ', '.join(
                 str(x) for x in cid.PolicyGroupExcludedAttributes.all()
             ),
         })
