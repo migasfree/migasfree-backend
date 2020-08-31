@@ -5,5 +5,5 @@ from django.apps import AppConfig
 
 
 class AppCatalogConfig(AppConfig):
-    name = 'app_catalog'
+    name = 'migasfree.app_catalog'
     verbose_name = 'Apps Catalog'
