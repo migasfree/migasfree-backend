@@ -286,7 +286,7 @@ class PackageSerializer(serializers.ModelSerializer):
             'id': obj.id,
             'name': obj.name,
             'project': obj.project.id,
-            'store': obj.store.id
+            'store': obj.store.id if obj.store else None
         }
 
     def create(self, validated_data):
