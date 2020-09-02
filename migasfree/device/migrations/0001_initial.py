@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=50, unique=True, verbose_name='name')),
-                ('data', models.TextField(default=b'{}', null=True, verbose_name='data')),
+                ('data', models.TextField(default='{}', null=True, verbose_name='data')),
                 ('available_for_attributes', models.ManyToManyField(blank=True, to='core.Attribute', verbose_name='available for attributes')),
                 ('connection', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='device.Connection', verbose_name='connection')),
             ],

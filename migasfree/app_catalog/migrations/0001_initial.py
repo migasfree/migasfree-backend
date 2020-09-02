@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='date')),
                 ('score', models.IntegerField(choices=[(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)], default=1, help_text='Relevance to the organization', verbose_name='score')),
                 ('icon', models.ImageField(null=True, storage=migasfree.app_catalog.models.MediaFileSystemStorage(), upload_to=migasfree.app_catalog.models.upload_path_handler, verbose_name='icon')),
-                ('level', models.CharField(choices=[(b'U', 'User'), (b'A', 'Admin')], default=b'U', max_length=1, verbose_name='level')),
+                ('level', models.CharField(choices=[('U', 'User'), ('A', 'Admin')], default='U', max_length=1, verbose_name='level')),
                 ('category', models.IntegerField(choices=[(1, 'Accessories'), (2, 'Books'), (3, 'Developers Tools'), (4, 'Education'), (5, 'Fonts'), (6, 'Games'), (7, 'Graphics'), (8, 'Internet'), (9, 'Medicine'), (10, 'Office'), (11, 'Science & Engineering'), (12, 'Sound & Video'), (13, 'Themes & Tweaks'), (14, 'Universal Access')], default=1, verbose_name='category')),
                 ('available_for_attributes', models.ManyToManyField(blank=True, to='core.Attribute', verbose_name='available for attributes')),
             ],

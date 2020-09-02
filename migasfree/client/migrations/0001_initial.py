@@ -20,8 +20,8 @@ class Migration(migrations.Migration):
             name='Computer',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('uuid', models.CharField(blank=True, default=b'', max_length=36, null=True, unique=True, verbose_name='uuid')),
-                ('status', models.CharField(choices=[(b'intended', 'Intended'), (b'reserved', 'Reserved'), (b'unknown', 'Unknown'), (b'in repair', 'In repair'), (b'available', 'Available'), (b'unsubscribed', 'Unsubscribed')], default=b'intended', max_length=20, verbose_name='status')),
+                ('uuid', models.CharField(blank=True, default='', max_length=36, null=True, unique=True, verbose_name='uuid')),
+                ('status', models.CharField(choices=[('intended', 'Intended'), ('reserved', 'Reserved'), ('unknown', 'Unknown'), ('in repair', 'In repair'), ('available', 'Available'), ('unsubscribed', 'Unsubscribed')], default='intended', max_length=20, verbose_name='status')),
                 ('name', models.CharField(blank=True, max_length=50, null=True, verbose_name='name')),
                 ('fqdn', models.CharField(blank=True, max_length=255, null=True, verbose_name='full qualified domain name')),
                 ('created_at', models.DateTimeField(auto_now_add=True, help_text='Date of entry into the migasfree system', verbose_name='entry date')),
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 ('sync_start_date', models.DateTimeField(null=True, verbose_name='sync start date')),
                 ('sync_end_date', models.DateTimeField(null=True, verbose_name='sync end date')),
                 ('product', models.CharField(blank=True, max_length=80, null=True, verbose_name='product')),
-                ('machine', models.CharField(choices=[(b'P', 'Physical'), (b'V', 'Virtual')], default=b'P', max_length=1, verbose_name='machine')),
+                ('machine', models.CharField(choices=[('P', 'Physical'), ('V', 'Virtual')], default='P', max_length=1, verbose_name='machine')),
                 ('cpu', models.CharField(blank=True, max_length=50, null=True, verbose_name='CPU')),
                 ('ram', models.BigIntegerField(blank=True, null=True, verbose_name='RAM')),
                 ('storage', models.BigIntegerField(blank=True, null=True, verbose_name='storage')),
@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=50, unique=True, verbose_name='name')),
                 ('description', models.TextField(blank=True, null=True, verbose_name='description')),
                 ('enabled', models.BooleanField(default=True, verbose_name='enabled')),
-                ('language', models.IntegerField(choices=[(0, b'bash'), (1, b'python'), (2, b'perl'), (3, b'php'), (4, b'ruby'), (5, b'cmd'), (6, b'powershell')], default=0, verbose_name='programming language')),
+                ('language', models.IntegerField(choices=[(0, 'bash'), (1, 'python'), (2, 'perl'), (3, 'php'), (4, 'ruby'), (5, 'cmd'), (6, 'powershell')], default=0, verbose_name='programming language')),
                 ('code', models.TextField(blank=True, verbose_name='code')),
                 ('excluded_attributes', models.ManyToManyField(blank=True, related_name='ExcludeAttributeFaultDefinition', to='core.Attribute', verbose_name='excluded attributes')),
                 ('included_attributes', models.ManyToManyField(blank=True, to='core.Attribute', verbose_name='included attributes')),
@@ -141,7 +141,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='date')),
-                ('status', models.CharField(choices=[(b'intended', 'Intended'), (b'reserved', 'Reserved'), (b'unknown', 'Unknown'), (b'in repair', 'In repair'), (b'available', 'Available'), (b'unsubscribed', 'Unsubscribed')], default=b'intended', max_length=20, verbose_name='status')),
+                ('status', models.CharField(choices=[('intended', 'Intended'), ('reserved', 'Reserved'), ('unknown', 'Unknown'), ('in repair', 'In repair'), ('available', 'Available'), ('unsubscribed', 'Unsubscribed')], default='intended', max_length=20, verbose_name='status')),
                 ('computer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='client.Computer', verbose_name='computer')),
             ],
             options={
