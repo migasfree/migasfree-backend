@@ -38,6 +38,7 @@ from . import serializers
 class ConnectionViewSet(viewsets.ModelViewSet):
     queryset = Connection.objects.all()
     serializer_class = serializers.ConnectionSerializer
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('id',)
 

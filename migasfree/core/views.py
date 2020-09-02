@@ -226,7 +226,7 @@ class AttributeViewSet(viewsets.ModelViewSet):
     queryset = Attribute.objects.all()
     serializer_class = AttributeSerializer
     filter_class = AttributeFilter
-    filter_backends = (filters.SearchFilter)
+    filter_backends = (filters.SearchFilter, backends.DjangoFilterBackend)
     search_fields = ['value', 'description']
 
     def get_queryset(self):
@@ -243,7 +243,7 @@ class ServerAttributeViewSet(viewsets.ModelViewSet):
     queryset = ServerAttribute.objects.filter(property_att__sort='server')
     serializer_class = ServerAttributeSerializer
     filterset_class = ServerAttributeFilter
-    filter_backends = (filters.SearchFilter)
+    filter_backends = (filters.SearchFilter, backends.DjangoFilterBackend)
     search_fields = ['value', 'description']
 
     def get_serializer_class(self):
@@ -259,7 +259,7 @@ class ClientAttributeViewSet(viewsets.ModelViewSet):
     queryset = ClientAttribute.objects.filter(property_att__sort='client')
     serializer_class = ClientAttributeSerializer
     filterset_class = ClientAttributeFilter
-    filter_backends = (filters.SearchFilter)
+    filter_backends = (filters.SearchFilter, backends.DjangoFilterBackend)
     search_fields = ['value', 'description']
 
     def get_serializer_class(self):
