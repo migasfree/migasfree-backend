@@ -61,6 +61,9 @@ class HardwareViewSet(
     # example cpu list: bus_info='cpu@' or bus_info='cpu@0'
 
     def get_queryset(self):
+        if self.request is None:
+            return Node.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset
         if not user.is_view_all():

@@ -124,6 +124,9 @@ class PlatformViewSet(viewsets.ModelViewSet):
     search_fields = ['name']
 
     def get_queryset(self):
+        if self.request is None:
+            return Platform.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset
         if not user.is_view_all():
@@ -149,6 +152,9 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return ProjectSerializer
 
     def get_queryset(self):
+        if self.request is None:
+            return Project.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset
         if not user.is_view_all():
@@ -179,6 +185,9 @@ class StoreViewSet(viewsets.ModelViewSet):
         return StoreSerializer
 
     def get_queryset(self):
+        if self.request is None:
+            return Store.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset
         if not user.is_view_all():
@@ -230,6 +239,9 @@ class AttributeViewSet(viewsets.ModelViewSet):
     search_fields = ['value', 'description']
 
     def get_queryset(self):
+        if self.request is None:
+            return Attribute.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset
         if not user.is_view_all():
@@ -270,6 +282,9 @@ class ClientAttributeViewSet(viewsets.ModelViewSet):
         return ClientAttributeSerializer
 
     def get_queryset(self):
+        if self.request is None:
+            return ClientAttribute.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset
         if not user.is_view_all():
@@ -394,6 +409,9 @@ class PackageViewSet(
     ordering = ('name', 'project__name')
 
     def get_queryset(self):
+        if self.request is None:
+            return Package.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset
         if not user.is_view_all():
@@ -434,6 +452,9 @@ class InternalSourceViewSet(viewsets.ModelViewSet):
         return InternalSourceSerializer
 
     def get_queryset(self):
+        if self.request is None:
+            return InternalSource.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset.filter(source=Deployment.SOURCE_INTERNAL)
         if not user.is_view_all():
@@ -479,6 +500,9 @@ class ExternalSourceViewSet(viewsets.ModelViewSet):
     ordering = ('-start_date', 'name')
 
     def get_queryset(self):
+        if self.request is None:
+            return ExternalSource.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset.filter(source=Deployment.SOURCE_EXTERNAL)
         if not user.is_view_all():

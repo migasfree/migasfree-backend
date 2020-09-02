@@ -54,6 +54,9 @@ class ComputerViewSet(viewsets.ModelViewSet):
         return serializers.ComputerSerializer
 
     def get_queryset(self):
+        if self.request is None:
+            return models.Computer.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset
         if not user.is_view_all():
@@ -342,6 +345,9 @@ class ErrorViewSet(
         return serializers.ErrorSerializer
 
     def get_queryset(self):
+        if self.request is None:
+            return models.Error.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset
         if not user.is_view_all():
@@ -391,6 +397,9 @@ class FaultViewSet(
         return serializers.FaultSerializer
 
     def get_queryset(self):
+        if self.request is None:
+            return models.Fault.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset
         if not user.is_view_all():
@@ -415,6 +424,9 @@ class MigrationViewSet(
     ordering = ('-created_at',)
 
     def get_queryset(self):
+        if self.request is None:
+            return models.Migration.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset
         if not user.is_view_all():
@@ -473,6 +485,9 @@ class StatusLogViewSet(
     ordering = ('-created_at',)
 
     def get_queryset(self):
+        if self.request is None:
+            return models.StatusLog.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset
         if not user.is_view_all():
@@ -502,6 +517,9 @@ class SynchronizationViewSet(
         return serializers.SynchronizationSerializer
 
     def get_queryset(self):
+        if self.request is None:
+            return models.Synchronization.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset
         if not user.is_view_all():
@@ -525,6 +543,9 @@ class UserViewSet(
     ordering = ('name',)
 
     def get_queryset(self):
+        if self.request is None:
+            return models.User.objects.none()
+
         user = self.request.user.userprofile
         qs = self.queryset
         if not user.is_view_all():
