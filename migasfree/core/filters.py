@@ -49,7 +49,12 @@ class DeploymentFilter(filters.FilterSet):
 class PackageFilter(filters.FilterSet):
     class Meta:
         model = Package
-        fields = ['id', 'name', 'deployment__id', 'store__id']
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
+            'deployment__id': ['exact'],
+            'store__id': ['exact']
+        }
 
 
 class ProjectFilter(filters.FilterSet):
