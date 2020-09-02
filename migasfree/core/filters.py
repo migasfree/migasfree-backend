@@ -20,7 +20,7 @@ from django_filters import rest_framework as filters
 
 from .models import (
     Deployment, Package, ClientAttribute, ServerAttribute, Attribute,
-    Project, ScheduleDelay, Store, AttributeSet, Property,
+    Project, ScheduleDelay, Store, AttributeSet, Property, Platform,
 )
 
 
@@ -54,6 +54,15 @@ class PackageFilter(filters.FilterSet):
             'name': ['exact', 'icontains'],
             'deployment__id': ['exact'],
             'store__id': ['exact']
+        }
+
+
+class PlatformFilter(filters.FilterSet):
+    class Meta:
+        model = Platform
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains']
         }
 
 
