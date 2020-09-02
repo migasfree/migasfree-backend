@@ -285,6 +285,7 @@ class PackageSerializer(serializers.ModelSerializer):
         return {
             'id': obj.id,
             'name': obj.name,
+            'version': obj.version,
             'project': obj.project.id,
             'store': obj.store.id if obj.store else None
         }
