@@ -73,7 +73,7 @@ from .serializers import (
 from .filters import (
     DeploymentFilter, PackageFilter, ProjectFilter, StoreFilter,
     ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
-    AttributeSetFilter, PropertyFilter, AttributeFilter,
+    AttributeSetFilter, PropertyFilter, AttributeFilter, PlatformFilter,
 )
 
 from . import tasks
@@ -93,7 +93,7 @@ class AttributeSetViewSet(viewsets.ModelViewSet):
     serializer_class = AttributeSetSerializer
     filterset_class = AttributeSetFilter
     filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend, filters.SearchFilter)
-    search_fields = ['value', 'description']
+    search_fields = ['name', 'description']
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -109,6 +109,7 @@ class AttributeSetViewSet(viewsets.ModelViewSet):
 class PlatformViewSet(viewsets.ModelViewSet):
     queryset = Platform.objects.all()
     serializer_class = PlatformSerializer
+    filterset_class = PlatformFilter
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -223,6 +224,7 @@ class ServerAttributeViewSet(viewsets.ModelViewSet):
     queryset = ServerAttribute.objects.filter(property_att__sort='server')
     serializer_class = ServerAttributeSerializer
     filterset_class = ServerAttributeFilter
+    search_fields = ['value', 'description']
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
@@ -237,6 +239,7 @@ class ClientAttributeViewSet(viewsets.ModelViewSet):
     queryset = ClientAttribute.objects.filter(property_att__sort='client')
     serializer_class = ClientAttributeSerializer
     filterset_class = ClientAttributeFilter
+    search_fields = ['value', 'description']
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
