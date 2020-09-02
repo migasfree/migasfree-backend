@@ -520,6 +520,7 @@ class UserViewSet(
 ):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('name',)
 

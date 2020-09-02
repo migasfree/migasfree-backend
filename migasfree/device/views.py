@@ -90,6 +90,7 @@ class DriverViewSet(viewsets.ModelViewSet):
     queryset = Driver.objects.all()
     serializer_class = serializers.DriverSerializer
     filterset_class = DriverFilter
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -105,6 +106,7 @@ class DriverViewSet(viewsets.ModelViewSet):
 class FeatureViewSet(viewsets.ModelViewSet):
     queryset = Feature.objects.all()
     serializer_class = serializers.FeatureSerializer
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -113,6 +115,7 @@ class FeatureViewSet(viewsets.ModelViewSet):
 class LogicalViewSet(viewsets.ModelViewSet):
     queryset = Logical.objects.all()
     serializer_class = serializers.LogicalSerializer
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('device__name',)
 
@@ -158,6 +161,7 @@ class LogicalViewSet(viewsets.ModelViewSet):
 class ManufacturerViewSet(viewsets.ModelViewSet):
     queryset = Manufacturer.objects.all()
     serializer_class = serializers.ManufacturerSerializer
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -166,6 +170,7 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
 class ModelViewSet(viewsets.ModelViewSet):
     queryset = Model.objects.all()
     serializer_class = serializers.ModelSerializer
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -181,5 +186,6 @@ class ModelViewSet(viewsets.ModelViewSet):
 class TypeViewSet(viewsets.ModelViewSet):
     queryset = Type.objects.all()
     serializer_class = serializers.TypeSerializer
+    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     ordering_fields = '__all__'
     ordering = ('name',)
