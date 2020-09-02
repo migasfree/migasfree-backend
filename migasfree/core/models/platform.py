@@ -71,3 +71,4 @@ class Platform(models.Model):
         app_label = 'core'
         verbose_name = _('Platform')
         verbose_name_plural = _('Platforms')
+        ordering = ['name']
