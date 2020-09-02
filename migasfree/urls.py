@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 from django.urls import path
 from graphene_django.views import GraphQLView
-from rest_framework import permissions
+from rest_framework import permissions, routers
 from rest_framework.authtoken import views
 from rest_framework.schemas import get_schema_view
 from rest_framework.documentation import include_docs_urls
@@ -31,7 +31,7 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 
-from .core.routers import router, safe_router as core_safe_router
+from .core.routers import router as core_router, safe_router as core_safe_router
 from .client.routers import (
     router as client_router, safe_router as client_safe_router
 )
@@ -67,21 +67,27 @@ schema_view = get_schema_view(
    permission_classes=(permissions.AllowAny,),
 )
 
+token_router = routers.DefaultRouter()
+token_router.registry.extend(core_router.registry)
+token_router.registry.extend(client_router.registry)
+token_router.registry.extend(stats_router.registry)
+token_router.registry.extend(hardware_router.registry)
+
+safe_router = routers.DefaultRouter()
+safe_router.registry.extend(core_safe_router.registry)
+safe_router.registry.extend(client_safe_router.registry)
+safe_router.registry.extend(hardware_safe_router.registry)
+
 urlpatterns = [
     url(r'^grappelli/', include('grappelli.urls')),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^markdownx/', include('markdownx.urls')),
 
-    url(r'^api/v1/token/', include(router.urls)),
-    url(r'^api/v1/token/', include(client_router.urls)),
-    url(r'^api/v1/token/', include(stats_router.urls)),
-    url(r'^api/v1/token/', include(hardware_router.urls)),
+    url(r'^api/v1/token/', include(token_router.urls)),
     url(r'^api/v1/token/devices/', include(device_router.urls)),
     url(r'^api/v1/token/catalog/', include(catalog_router.urls)),
-    url(r'^api/v1/safe/', include(client_safe_router.urls)),
-    url(r'^api/v1/safe/', include(core_safe_router.urls)),
-    url(r'^api/v1/safe/', include(hardware_safe_router.urls)),
+    url(r'^api/v1/safe/', include(safe_router.urls)),
     url(r'^api/v1/', include('migasfree.core.urls')),
     url(r'^api/v1/', include('migasfree.client.urls')),
 
