@@ -234,7 +234,7 @@ class ClientPropertyViewSet(viewsets.ModelViewSet):
 class AttributeViewSet(viewsets.ModelViewSet):
     queryset = Attribute.objects.all()
     serializer_class = AttributeSerializer
-    filter_class = AttributeFilter
+    filterset_class = AttributeFilter
     filter_backends = (filters.SearchFilter, backends.DjangoFilterBackend)
     search_fields = ['value', 'description']
 
