@@ -18,7 +18,6 @@
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext
-from django_filters import rest_framework as backends
 from rest_framework import viewsets, status, mixins, filters, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -54,7 +53,7 @@ class HardwareViewSet(
     queryset = Node.objects.all()
     serializer_class = serializers.NodeSerializer
     filterset_class = NodeFilter
-    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
+    filter_backends = (filters.OrderingFilter,)
     ordering_fields = '__all__'
     ordering = ('id',)
 
