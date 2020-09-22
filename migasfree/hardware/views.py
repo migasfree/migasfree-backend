@@ -53,7 +53,6 @@ class HardwareViewSet(
     queryset = Node.objects.all()
     serializer_class = serializers.NodeSerializer
     filterset_class = NodeFilter
-    filter_backends = (filters.OrderingFilter,)
     ordering_fields = '__all__'
     ordering = ('id',)
 
