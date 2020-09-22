@@ -18,7 +18,6 @@
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from django_filters import rest_framework as backends
 from rest_framework import viewsets, status, filters, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -35,7 +34,6 @@ class ApplicationViewSet(viewsets.ModelViewSet):
     queryset = models.Application.objects.all()
     serializer_class = serializers.ApplicationSerializer
     filterset_class = ApplicationFilter
-    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     permission_classes = (PublicPermission,)
 
     def get_serializer_class(self):
@@ -100,7 +98,6 @@ class PackagesByProjectViewSet(viewsets.ModelViewSet):
     queryset = models.PackagesByProject.objects.all()
     serializer_class = serializers.PackagesByProjectSerializer
     filterset_class = PackagesByProjectFilter
-    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
     permission_classes = (PublicPermission,)
 
     def get_serializer_class(self):
@@ -116,7 +113,6 @@ class PolicyViewSet(viewsets.ModelViewSet):
     queryset = models.Policy.objects.all()
     serializer_class = serializers.PolicySerializer
     filterset_class = PolicyFilter
-    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
@@ -130,7 +126,6 @@ class PolicyViewSet(viewsets.ModelViewSet):
 class PolicyGroupViewSet(viewsets.ModelViewSet):
     queryset = models.PolicyGroup.objects.all()
     serializer_class = serializers.PolicyGroupSerializer
-    filter_backends = (filters.OrderingFilter, backends.DjangoFilterBackend)
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
