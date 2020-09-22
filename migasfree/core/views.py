@@ -29,6 +29,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext
 from django_redis import get_redis_connection
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (
     viewsets, parsers, status,
     mixins, views, filters, permissions,
@@ -91,7 +92,6 @@ class AttributeSetViewSet(viewsets.ModelViewSet):
     queryset = AttributeSet.objects.all()
     serializer_class = AttributeSetSerializer
     filterset_class = AttributeSetFilter
-    filter_backends = (filters.OrderingFilter, filters.SearchFilter)
     search_fields = ['name', 'description']
     ordering_fields = '__all__'
     ordering = ('name',)
@@ -109,7 +109,6 @@ class PlatformViewSet(viewsets.ModelViewSet):
     queryset = Platform.objects.all()
     serializer_class = PlatformSerializer
     filterset_class = PlatformFilter
-    filter_backends = (filters.OrderingFilter, filters.SearchFilter)
     ordering_fields = '__all__'
     ordering = ('name',)
     search_fields = ['name']
@@ -131,7 +130,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     filterset_class = ProjectFilter
-    filter_backends = (filters.OrderingFilter,)
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -159,7 +157,6 @@ class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
     filterset_class = StoreFilter
-    filter_backends = (filters.OrderingFilter, filters.SearchFilter)
     ordering_fields = '__all__'
     ordering = ('name', 'project__name')
     search_fields = ['name']
@@ -188,7 +185,6 @@ class PropertyViewSet(viewsets.ModelViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
     filterset_class = PropertyFilter
-    filter_backends = (filters.OrderingFilter, filters.SearchFilter)
     ordering_fields = '__all__'
     ordering = ('prefix', 'name')
     search_fields = ['name', 'language', 'code']
@@ -218,7 +214,6 @@ class AttributeViewSet(viewsets.ModelViewSet):
     queryset = Attribute.objects.all()
     serializer_class = AttributeSerializer
     filterset_class = AttributeFilter
-    filter_backends = (filters.SearchFilter,)
     search_fields = ['value', 'description']
 
     def get_queryset(self):
@@ -238,7 +233,6 @@ class ServerAttributeViewSet(viewsets.ModelViewSet):
     queryset = ServerAttribute.objects.filter(property_att__sort='server')
     serializer_class = ServerAttributeSerializer
     filterset_class = ServerAttributeFilter
-    filter_backends = (filters.SearchFilter,)
     search_fields = ['value', 'description']
 
     def get_serializer_class(self):
@@ -254,7 +248,6 @@ class ClientAttributeViewSet(viewsets.ModelViewSet):
     queryset = ClientAttribute.objects.filter(property_att__sort='client')
     serializer_class = ClientAttributeSerializer
     filterset_class = ClientAttributeFilter
-    filter_backends = (filters.SearchFilter,)
     search_fields = ['value', 'description']
 
     def get_serializer_class(self):
@@ -348,7 +341,6 @@ class ScheduleDelayViewSet(viewsets.ModelViewSet):
     queryset = ScheduleDelay.objects.all()
     serializer_class = ScheduleDelaySerializer
     filterset_class = ScheduleDelayFilter
-    filter_backends = (filters.OrderingFilter,)
     ordering_fields = '__all__'
     ordering = ('delay',)
 
@@ -364,7 +356,6 @@ class ScheduleDelayViewSet(viewsets.ModelViewSet):
 class ScheduleViewSet(viewsets.ModelViewSet):
     queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
-    filter_backends = (filters.OrderingFilter,)
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -387,7 +378,6 @@ class PackageViewSet(
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
     filterset_class = PackageFilter
-    filter_backends = (filters.OrderingFilter,)
     parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
     ordering = ('name', 'project__name')
 
@@ -423,7 +413,6 @@ class InternalSourceViewSet(viewsets.ModelViewSet):
     queryset = InternalSource.objects.all()
     serializer_class = InternalSourceSerializer
     filterset_class = DeploymentFilter
-    filter_backends = (filters.OrderingFilter,)
     ordering_fields = '__all__'
     ordering = ('-start_date', 'name')
 
@@ -478,7 +467,6 @@ class ExternalSourceViewSet(viewsets.ModelViewSet):
     queryset = ExternalSource.objects.all()
     serializer_class = ExternalSourceSerializer
     filterset_class = DeploymentFilter
-    filter_backends = (filters.OrderingFilter,)
     ordering_fields = '__all__'
     ordering = ('-start_date', 'name')
 
@@ -507,7 +495,6 @@ class ExternalSourceViewSet(viewsets.ModelViewSet):
 class DomainViewSet(viewsets.ModelViewSet):
     queryset = Domain.objects.all()
     serializer_class = DomainSerializer
-    filter_backends = (filters.OrderingFilter,)
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -523,7 +510,6 @@ class DomainViewSet(viewsets.ModelViewSet):
 class ScopeViewSet(viewsets.ModelViewSet):
     queryset = Scope.objects.all()
     serializer_class = ScopeSerializer
-    filter_backends = (filters.OrderingFilter,)
     ordering_fields = '__all__'
     ordering = ('name',)
 
