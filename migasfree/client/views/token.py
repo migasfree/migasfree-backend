@@ -43,7 +43,6 @@ class ComputerViewSet(viewsets.ModelViewSet):
     queryset = models.Computer.objects.all()
     serializer_class = serializers.ComputerSerializer
     filterset_class = ComputerFilter
-    filter_backends = (filters.OrderingFilter,)
     ordering = (settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0],)
 
     def get_serializer_class(self):
@@ -332,7 +331,6 @@ class ErrorViewSet(
     queryset = models.Error.objects.all()
     serializer_class = serializers.ErrorSerializer
     filterset_class = ErrorFilter
-    filter_backends = (filters.OrderingFilter, filters.SearchFilter)
     search_fields = ['created_at', 'description']
     ordering_fields = '__all__'
     ordering = ('-created_at',)
@@ -363,7 +361,6 @@ class FaultDefinitionViewSet(viewsets.ModelViewSet):
     queryset = models.FaultDefinition.objects.all()
     serializer_class = serializers.FaultDefinitionSerializer
     filterset_class = FaultDefinitionFilter
-    filter_backends = (filters.OrderingFilter,)
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -384,7 +381,6 @@ class FaultViewSet(
     queryset = models.Fault.objects.all()
     serializer_class = serializers.FaultSerializer
     filterset_class = FaultFilter
-    filter_backends = (filters.OrderingFilter, filters.SearchFilter)
     search_fields = ['created_at', 'result']
     ordering_fields = '__all__'
     ordering = ('-created_at',)
@@ -418,7 +414,6 @@ class MigrationViewSet(
     queryset = models.Migration.objects.all()
     serializer_class = serializers.MigrationSerializer
     filterset_class = MigrationFilter
-    filter_backends = (filters.OrderingFilter,)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
@@ -446,7 +441,6 @@ class NotificationViewSet(
     queryset = models.Notification.objects.all()
     serializer_class = serializers.NotificationSerializer
     filterset_class = NotificationFilter
-    filter_backends = (filters.OrderingFilter, filters.SearchFilter)
     search_fields = ['message']
     ordering_fields = '__all__'
     ordering = ('-created_at',)
@@ -465,7 +459,6 @@ class PackageHistoryViewSet(
     queryset = models.PackageHistory.objects.all()
     serializer_class = serializers.PackageHistorySerializer
     filterset_class = PackageHistoryFilter
-    filter_backends = (filters.OrderingFilter,)
     ordering_fields = '__all__'
     ordering = ('computer', 'package__fullname',)
 
@@ -478,7 +471,6 @@ class StatusLogViewSet(
     queryset = models.StatusLog.objects.all()
     serializer_class = serializers.StatusLogSerializer
     filterset_class = StatusLogFilter
-    filter_backends = (filters.OrderingFilter, filters.SearchFilter)
     search_fields = ['status']
     ordering_fields = '__all__'
     ordering = ('-created_at',)
@@ -503,7 +495,6 @@ class SynchronizationViewSet(
     queryset = models.Synchronization.objects.all()
     serializer_class = serializers.SynchronizationSerializer
     filterset_class = SynchronizationFilter
-    filter_backends = (filters.OrderingFilter, filters.SearchFilter)
     search_fields = ['user__name', 'user__fullname']
     ordering_fields = '__all__'
     ordering = ('-created_at',)
@@ -537,7 +528,6 @@ class UserViewSet(
 ):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
-    filter_backends = (filters.OrderingFilter,)
     ordering_fields = '__all__'
     ordering = ('name',)
 
