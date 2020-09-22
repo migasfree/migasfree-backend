@@ -219,13 +219,6 @@ class ClientAttributeWriteSerializer(serializers.ModelSerializer):
 
 class ScheduleDelaySerializer(serializers.ModelSerializer):
     attributes = AttributeSerializer(many=True)
-    total_computers = serializers.SerializerMethodField()
-
-    def get_total_computers(self, obj):
-        if self.context.get('request'):
-            return obj.total_computers(user=self.context['request'].user)
-
-        return obj.total_computers()
 
     class Meta:
         model = ScheduleDelay
