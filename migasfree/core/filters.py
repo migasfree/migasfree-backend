@@ -52,6 +52,9 @@ class PackageFilter(filters.FilterSet):
         fields = {
             'id': ['exact'],
             'name': ['exact', 'icontains'],
+            'version': ['exact', 'icontains'],
+            'architecture': ['exact', 'icontains'],
+            'project__id': ['exact'],
             'deployment__id': ['exact'],
             'store__id': ['exact']
         }
