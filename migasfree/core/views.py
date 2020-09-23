@@ -379,6 +379,7 @@ class PackageViewSet(
     serializer_class = PackageSerializer
     filterset_class = PackageFilter
     parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
+    ordering_fields = '__all__'
     ordering = ('name', 'project__name')
 
     def get_queryset(self):
