@@ -527,6 +527,18 @@ class UserProfileInfoSerializer(serializers.ModelSerializer):
         fields = ('id', 'username')
 
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = '__all__'
+
+
+class UserProfileWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = '__all__'
+
+
 class ScopeInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scope
