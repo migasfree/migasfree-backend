@@ -50,7 +50,7 @@ from .models import (
     Schedule, ScheduleDelay,
     Package, Deployment,
     ExternalSource, InternalSource,
-    Domain, Scope,
+    Domain, Scope, UserProfile,
     AttributeSet, Property,
 )
 from .serializers import (
@@ -65,6 +65,7 @@ from .serializers import (
     PackageSerializer, DeploymentSerializer,
     DomainWriteSerializer, DomainSerializer,
     ScopeSerializer, ScopeWriteSerializer,
+    UserProfileSerializer, UserProfileWriteSerializer,
     AttributeSetSerializer, AttributeSetWriteSerializer,
     PropertySerializer, PropertyWriteSerializer,
     ExternalSourceSerializer, ExternalSourceWriteSerializer,
@@ -492,6 +493,21 @@ class ExternalSourceViewSet(viewsets.ModelViewSet):
             return ExternalSourceWriteSerializer
 
         return ExternalSourceSerializer
+
+
+@permission_classes((permissions.DjangoModelPermissions,))
+class UserProfileViewSet(viewsets.ModelViewSet):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    ordering_fields = '__all__'
+    ordering = ('username',)
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return UserProfileWriteSerializer
+
+        return UserProfileSerializer
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
