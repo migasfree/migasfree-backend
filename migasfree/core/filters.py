@@ -72,7 +72,12 @@ class PlatformFilter(filters.FilterSet):
 class ProjectFilter(filters.FilterSet):
     class Meta:
         model = Project
-        fields = ['id', 'platform__id', 'name']
+        fields = {
+            'id': ['exact'],
+            'platform__id': ['exact'],
+            'name': ['exact', 'icontains'],
+            'pms': ['exact', 'icontains']
+        }
 
 
 class PropertyFilter(filters.FilterSet):
