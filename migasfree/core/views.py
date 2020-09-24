@@ -201,6 +201,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
 class ServerPropertyViewSet(viewsets.ModelViewSet):
     queryset = ServerProperty.objects.filter(sort='server')
     serializer_class = ServerPropertySerializer
+    filterset_class = PropertyFilter
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
