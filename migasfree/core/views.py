@@ -207,6 +207,7 @@ class ServerPropertyViewSet(viewsets.ModelViewSet):
 class ClientPropertyViewSet(viewsets.ModelViewSet):
     queryset = ClientProperty.objects.filter(sort='client')
     serializer_class = ClientPropertySerializer
+    filterset_class = PropertyFilter
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
