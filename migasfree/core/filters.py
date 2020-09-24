@@ -83,7 +83,13 @@ class ProjectFilter(filters.FilterSet):
 class PropertyFilter(filters.FilterSet):
     class Meta:
         model = Property
-        fields = ['id', 'name', 'enabled', 'sort']
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
+            'enabled': ['exact'],
+            'sort': ['exact'],
+            'kind': ['exact'],
+        }
 
 
 class AttributeFilter(filters.FilterSet):
