@@ -30,6 +30,7 @@ from rest_framework.response import Response
 
 from ...device.models import Logical, Driver, Model
 from ...core.serializers import PlatformSerializer
+from ...core.views import MigasViewSet
 from .. import models, serializers
 from ..filters import (
     PackageHistoryFilter, ErrorFilter, NotificationFilter,
@@ -39,7 +40,7 @@ from ..filters import (
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ComputerViewSet(viewsets.ModelViewSet):
+class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = models.Computer.objects.all()
     serializer_class = serializers.ComputerSerializer
     filterset_class = ComputerFilter
@@ -326,7 +327,7 @@ class ComputerViewSet(viewsets.ModelViewSet):
 class ErrorViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
+    viewsets.GenericViewSet, MigasViewSet
 ):
     queryset = models.Error.objects.all()
     serializer_class = serializers.ErrorSerializer
@@ -357,7 +358,7 @@ class ErrorViewSet(
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class FaultDefinitionViewSet(viewsets.ModelViewSet):
+class FaultDefinitionViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = models.FaultDefinition.objects.all()
     serializer_class = serializers.FaultDefinitionSerializer
     filterset_class = FaultDefinitionFilter
@@ -376,7 +377,7 @@ class FaultDefinitionViewSet(viewsets.ModelViewSet):
 class FaultViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
+    viewsets.GenericViewSet, MigasViewSet
 ):
     queryset = models.Fault.objects.all()
     serializer_class = serializers.FaultSerializer
@@ -409,7 +410,8 @@ class FaultViewSet(
 @permission_classes((permissions.DjangoModelPermissions,))
 class MigrationViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet
+    mixins.DestroyModelMixin, viewsets.GenericViewSet,
+    MigasViewSet
 ):
     queryset = models.Migration.objects.all()
     serializer_class = serializers.MigrationSerializer
@@ -436,7 +438,7 @@ class MigrationViewSet(
 class NotificationViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
+    viewsets.GenericViewSet, MigasViewSet
 ):
     queryset = models.Notification.objects.all()
     serializer_class = serializers.NotificationSerializer
@@ -454,7 +456,8 @@ class NotificationViewSet(
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class PackageHistoryViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    mixins.ListModelMixin, mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet, MigasViewSet
 ):
     queryset = models.PackageHistory.objects.all()
     serializer_class = serializers.PackageHistorySerializer
@@ -466,7 +469,8 @@ class PackageHistoryViewSet(
 @permission_classes((permissions.DjangoModelPermissions,))
 class StatusLogViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet
+    mixins.DestroyModelMixin, viewsets.GenericViewSet,
+    MigasViewSet
 ):
     queryset = models.StatusLog.objects.all()
     serializer_class = serializers.StatusLogSerializer
@@ -490,7 +494,8 @@ class StatusLogViewSet(
 @permission_classes((permissions.DjangoModelPermissions,))
 class SynchronizationViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet
+    mixins.DestroyModelMixin, viewsets.GenericViewSet,
+    MigasViewSet
 ):
     queryset = models.Synchronization.objects.all()
     serializer_class = serializers.SynchronizationSerializer
@@ -524,7 +529,8 @@ class SynchronizationViewSet(
 @permission_classes((permissions.DjangoModelPermissions,))
 class UserViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet
+    mixins.DestroyModelMixin, viewsets.GenericViewSet,
+    MigasViewSet
 ):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
