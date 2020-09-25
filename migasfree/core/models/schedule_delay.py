@@ -21,6 +21,7 @@ from django.db.models import Q
 from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
 
+from .migas_link import MigasLink
 from .schedule import Schedule
 from .attribute import Attribute
 
@@ -37,7 +38,7 @@ class ScheduleDelayManager(models.Manager):
         return qs
 
 
-class ScheduleDelay(models.Model):
+class ScheduleDelay(models.Model, MigasLink):
     delay = models.IntegerField(
         verbose_name=_("delay")
     )

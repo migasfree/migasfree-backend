@@ -29,7 +29,7 @@ from django.utils.text import slugify
 from ..pms import get_available_pms
 from ..validators import validate_project_pms
 
-from . import Platform
+from . import Platform, MigasLink
 
 
 class DomainProjectManager(models.Manager):
@@ -54,7 +54,7 @@ class ProjectManager(DomainProjectManager):
         return obj
 
 
-class Project(models.Model):
+class Project(models.Model, MigasLink):
     """
     OS Version: 'Ubuntu natty 32bit' or 'openSUSE 12.1' or 'Vitalinux'
     This is 'your personal distribution', a set of computers with a determinate

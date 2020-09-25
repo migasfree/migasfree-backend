@@ -21,6 +21,7 @@ import re
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from ...core.models import MigasLink
 from ...client.models import Computer
 
 
@@ -68,7 +69,7 @@ class NodeManager(DomainNodeManager):
         return obj
 
 
-class Node(models.Model):
+class Node(models.Model, MigasLink):
     # Detect Virtual Machine with lshw:
     # http://techglimpse.com/xen-kvm-virtualbox-vm-detection-command/
     VIRTUAL_MACHINES = {

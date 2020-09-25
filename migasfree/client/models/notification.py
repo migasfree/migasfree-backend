@@ -21,6 +21,8 @@ from django.db.models.aggregates import Count
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.utils.translation import gettext_lazy as _
 
+from ...core.models import MigasLink
+
 
 class NotificationQueryset(models.query.QuerySet):
     def unchecked(self):
@@ -42,7 +44,7 @@ class NotificationManager(models.Manager):
         return self.get_queryset().unchecked()
 
 
-class Notification(models.Model):
+class Notification(models.Model, MigasLink):
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name=_("date"),

@@ -19,6 +19,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from .migas_link import MigasLink
+
 
 class DomainPlatformManager(models.Manager):
     def scope(self, user):
@@ -38,7 +40,7 @@ class PlatformManager(DomainPlatformManager):
         return obj
 
 
-class Platform(models.Model):
+class Platform(models.Model, MigasLink):
     """
     Computer Platform
     """

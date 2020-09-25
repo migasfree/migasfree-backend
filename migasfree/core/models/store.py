@@ -26,6 +26,7 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+from .migas_link import MigasLink
 from .project import Project
 
 
@@ -51,7 +52,7 @@ class StoreManager(DomainStoreManager):
         return self.get_queryset().filter(project__id=project_id)
 
 
-class Store(models.Model):
+class Store(models.Model, MigasLink):
     """
     Location where packages will be stored (p.e. /debian8/third/syntevo/)
     """

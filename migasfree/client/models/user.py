@@ -19,6 +19,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from ...core.models import MigasLink
+
 
 class DomainUserManager(models.Manager):
     def scope(self, user):
@@ -39,15 +41,15 @@ class UserManager(DomainUserManager):
         return obj
 
 
-class User(models.Model):
+class User(models.Model, MigasLink):
     name = models.CharField(
-        verbose_name=_("name"),
+        verbose_name=_('name'),
         max_length=50,
         null=False
     )
 
     fullname = models.CharField(
-        verbose_name=_("fullname"),
+        verbose_name=_('fullname'),
         max_length=100,
         blank=True
     )
@@ -66,6 +68,6 @@ class User(models.Model):
 
     class Meta:
         app_label = 'client'
-        verbose_name = _("User")
-        verbose_name_plural = _("Users")
+        verbose_name = _('User')
+        verbose_name_plural = _('Users')
         unique_together = (('name', 'fullname'),)

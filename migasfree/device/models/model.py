@@ -19,12 +19,13 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from ...core.models import MigasLink
 from .type import Type
 from .manufacturer import Manufacturer
 from .connection import Connection
 
 
-class Model(models.Model):
+class Model(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_("name"),
         max_length=50,

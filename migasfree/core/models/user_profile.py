@@ -25,8 +25,10 @@ from django.contrib.auth.models import (
     Group,
 )
 
+from .migas_link import MigasLink
 
-class UserProfile(UserSystem):
+
+class UserProfile(UserSystem, MigasLink):
     domains = models.ManyToManyField(
         'Domain',
         blank=True,

@@ -21,7 +21,7 @@ from django.db.models import Q
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
-from ...core.models import Attribute, UserProfile
+from ...core.models import Attribute, UserProfile, MigasLink
 
 
 class DomainFaultDefinitionManager(models.Manager):
@@ -34,7 +34,7 @@ class DomainFaultDefinitionManager(models.Manager):
         return qs.distinct()
 
 
-class FaultDefinition(models.Model):
+class FaultDefinition(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_("name"),
         max_length=50,

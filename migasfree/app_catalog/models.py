@@ -27,8 +27,8 @@ from django.utils.translation import gettext_lazy as _
 
 from markdownx.models import MarkdownxField
 
-from migasfree.core.models import Project, Attribute
-from migasfree.utils import to_list
+from ..core.models import Project, Attribute, MigasLink
+from ..utils import to_list
 
 _UNSAVED_IMAGEFIELD = 'unsaved_imagefield'
 
@@ -72,7 +72,7 @@ def upload_path_handler(instance, filename):
     return 'catalog_icons/app_{}{}'.format(instance.pk, ext)
 
 
-class Application(models.Model):
+class Application(models.Model, MigasLink):
     LEVELS = (
         ('U', _('User')),
         ('A', _('Admin')),
@@ -139,7 +139,7 @@ class Application(models.Model):
     available_for_attributes = models.ManyToManyField(
         Attribute,
         blank=True,
-        verbose_name=_("available for attributes")
+        verbose_name=_('available for attributes')
     )
 
     def __str__(self):
@@ -151,7 +151,7 @@ class Application(models.Model):
         verbose_name_plural = _('Applications')
 
 
-class PackagesByProject(models.Model):
+class PackagesByProject(models.Model, MigasLink):
     application = models.ForeignKey(
         Application,
         on_delete=models.CASCADE,
@@ -182,14 +182,14 @@ class PackagesByProject(models.Model):
         unique_together = (('application', 'project'),)
 
 
-class Policy(models.Model):
+class Policy(models.Model, MigasLink):
     name = models.CharField(
-        verbose_name=_("name"),
+        verbose_name=_('"name'),
         max_length=50
     )
 
     enabled = models.BooleanField(
-        verbose_name=_("enabled"),
+        verbose_name=_('enabled'),
         default=True,
         help_text=_("if you uncheck this field, the policy is disabled for"
                     " all computers.")
@@ -201,23 +201,23 @@ class Policy(models.Model):
     )
 
     comment = models.TextField(
-        verbose_name=_("comment"),
+        verbose_name=_('comment'),
         null=True,
         blank=True
     )
 
     included_attributes = models.ManyToManyField(
         Attribute,
-        related_name="PolicyIncludedAttributes",
+        related_name='PolicyIncludedAttributes',
         blank=True,
-        verbose_name=_("included attributes"),
+        verbose_name=_('included attributes'),
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
-        related_name="PolicyExcludedAttributes",
+        related_name='PolicyExcludedAttributes',
         blank=True,
-        verbose_name=_("excluded attributes"),
+        verbose_name=_('excluded attributes'),
     )
 
     def __str__(self):
@@ -291,41 +291,41 @@ class Policy(models.Model):
 
     class Meta:
         app_label = 'app_catalog'
-        verbose_name = _("Policy")
-        verbose_name_plural = _("Policies")
-        unique_together = ("name",)
+        verbose_name = _('Policy')
+        verbose_name_plural = _('Policies')
+        unique_together = ('name',)
         ordering = ['name']
 
 
-class PolicyGroup(models.Model):
+class PolicyGroup(models.Model, MigasLink):
     priority = models.IntegerField(
-        verbose_name=_("priority")
+        verbose_name=_('priority')
     )
 
     policy = models.ForeignKey(
         Policy,
         on_delete=models.CASCADE,
-        verbose_name=_("policy")
+        verbose_name=_('policy')
     )
 
     included_attributes = models.ManyToManyField(
         Attribute,
-        related_name="PolicyGroupIncludedAttributes",
+        related_name='PolicyGroupIncludedAttributes',
         blank=True,
-        verbose_name=_("included attributes"),
+        verbose_name=_('included attributes'),
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
-        related_name="PolicyGroupExcludedAttributes",
+        related_name='PolicyGroupExcludedAttributes',
         blank=True,
-        verbose_name=_("excluded attributes"),
+        verbose_name=_('excluded attributes'),
     )
 
     applications = models.ManyToManyField(
         Application,
         blank=True,
-        verbose_name=_("application"),
+        verbose_name=_('application'),
     )
 
     def __str__(self):
@@ -333,9 +333,9 @@ class PolicyGroup(models.Model):
 
     class Meta:
         app_label = 'app_catalog'
-        verbose_name = _("Policy Group")
-        verbose_name_plural = _("Policy Groups")
-        unique_together = (("policy", "priority"),)
+        verbose_name = _('Policy Group')
+        verbose_name_plural = _('Policy Groups')
+        unique_together = (('policy', 'priority'),)
         ordering = ['policy__name', 'priority']
 
 

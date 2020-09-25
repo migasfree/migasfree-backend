@@ -36,6 +36,7 @@ from django_redis import get_redis_connection
 
 from ...utils import time_horizon
 
+from .migas_link import MigasLink
 from .project import Project
 from .package import Package
 from .package_set import PackageSet
@@ -57,7 +58,7 @@ class DeploymentManager(models.Manager):
         return qs
 
 
-class Deployment(models.Model):
+class Deployment(models.Model, MigasLink):
     SOURCE_INTERNAL = 'I'
     SOURCE_EXTERNAL = 'E'
 

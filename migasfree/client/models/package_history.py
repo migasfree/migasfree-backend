@@ -19,17 +19,17 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from ...core.models import Package
+from ...core.models import Package, MigasLink
 from .computer import Computer
 
 
-class PackageHistory(models.Model):
+class PackageHistory(models.Model, MigasLink):
     """packages installed or/and uninstalled in computers"""
 
     computer = models.ForeignKey(
         Computer,
         on_delete=models.CASCADE,
-        verbose_name=_("computer")
+        verbose_name=_('computer')
     )
 
     package = models.ForeignKey(
@@ -54,5 +54,5 @@ class PackageHistory(models.Model):
 
     class Meta:
         app_label = 'client'
-        verbose_name = _("Package History")
-        verbose_name_plural = _("Packages History")
+        verbose_name = _('Package History')
+        verbose_name_plural = _('Packages History')

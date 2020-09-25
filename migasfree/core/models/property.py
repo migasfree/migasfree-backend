@@ -20,6 +20,8 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
+from .migas_link import MigasLink
+
 
 class ClientPropertyManager(models.Manager):
     def get_queryset(self):
@@ -35,7 +37,7 @@ class ServerPropertyManager(models.Manager):
         )
 
 
-class Property(models.Model):
+class Property(models.Model, MigasLink):
     SORT_CHOICES = (
         ('basic', _('Basic')),
         ('client', _('Client')),

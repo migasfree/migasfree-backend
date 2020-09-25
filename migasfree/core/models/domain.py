@@ -29,10 +29,11 @@ from . import (
     Property,
     Attribute,
     ServerAttribute,
+    MigasLink
 )
 
 
-class Domain(models.Model):
+class Domain(models.Model, MigasLink):
     name = models.CharField(
         max_length=50,
         verbose_name=_('name'),

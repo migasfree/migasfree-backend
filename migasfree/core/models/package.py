@@ -25,6 +25,7 @@ from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
+from .migas_link import MigasLink
 from .project import Project
 from .store import Store
 
@@ -62,7 +63,7 @@ class PackageManager(DomainPackageManager):
         return self.get_queryset().filter(project__id=project_id)
 
 
-class Package(models.Model):
+class Package(models.Model, MigasLink):
     fullname = models.CharField(
         verbose_name=_('fullname'),
         max_length=170,

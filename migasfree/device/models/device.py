@@ -21,7 +21,7 @@ import json
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from ...core.models import Attribute
+from ...core.models import Attribute, MigasLink
 from .connection import Connection
 from .model import Model
 
@@ -36,7 +36,7 @@ class DeviceManager(models.Manager):
         return qs
 
 
-class Device(models.Model):
+class Device(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_("name"),
         max_length=50,

@@ -19,13 +19,13 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from ...core.models import Project
+from ...core.models import Project, MigasLink
 from ...utils import to_list
 from .model import Model
 from .feature import Feature
 
 
-class Driver(models.Model):
+class Driver(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_('name'),
         max_length=100,

@@ -20,12 +20,13 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from .migas_link import MigasLink
 from .package import Package
 from .project import Project
 from .store import Store
 
 
-class PackageSet(models.Model):
+class PackageSet(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_("name"),
         max_length=50

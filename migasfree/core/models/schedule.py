@@ -19,8 +19,10 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from .migas_link import MigasLink
 
-class Schedule(models.Model):
+
+class Schedule(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_('name'),
         max_length=50,

@@ -21,6 +21,7 @@ from django.core.exceptions import ValidationError
 from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 
+from .migas_link import MigasLink
 from .attribute import Attribute
 from .domain import Domain
 from .user_profile import UserProfile
@@ -49,7 +50,7 @@ class ScopeManager(models.Manager):
         return qs
 
 
-class Scope(models.Model):
+class Scope(models.Model, MigasLink):
     user = models.ForeignKey(
         UserProfile,
         verbose_name=_('user'),

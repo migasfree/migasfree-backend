@@ -21,7 +21,7 @@ import json
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from ...core.models import Attribute
+from ...core.models import Attribute, MigasLink
 from .device import Device
 from .feature import Feature
 from .driver import Driver
@@ -44,7 +44,7 @@ class LogicalManager(models.Manager):
         return qs
 
 
-class Logical(models.Model):
+class Logical(models.Model, MigasLink):
     device = models.ForeignKey(
         Device,
         on_delete=models.CASCADE,

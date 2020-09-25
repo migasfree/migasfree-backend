@@ -29,7 +29,9 @@ from django.utils.translation import gettext, gettext_lazy as _
 
 from ...utils import swap_m2m, remove_empty_elements_from_dict, list_difference
 from ...core.models import (
-    Project, ServerAttribute, Attribute, BasicProperty, Property,
+    Project, MigasLink,
+    ServerAttribute, Attribute,
+    BasicProperty, Property,
 )
 from ...device.models import Logical
 
@@ -130,7 +132,7 @@ class ComputerManager(DomainComputerManager):
         return obj
 
 
-class Computer(models.Model):
+class Computer(models.Model, MigasLink):
     STATUS_CHOICES = (
         ('intended', _('Intended')),
         ('reserved', _('Reserved')),
