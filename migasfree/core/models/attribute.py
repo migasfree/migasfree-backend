@@ -23,6 +23,7 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from .migas_link import MigasLink
 from .property import Property
 
 
@@ -123,7 +124,7 @@ class AttributeManager(DomainAttributeManager):
 
 
 # FIXME https://docs.djangoproject.com/en/1.8/ref/contrib/gis/
-class Attribute(models.Model):
+class Attribute(models.Model, MigasLink):
     VALUE_LEN = 250
 
     property_att = models.ForeignKey(

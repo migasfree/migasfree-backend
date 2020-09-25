@@ -24,7 +24,7 @@ from django.db.models.signals import pre_delete, pre_save, m2m_changed
 from django.dispatch import receiver
 
 from ...utils import sort_depends
-from . import Property, Attribute
+from . import Property, Attribute, MigasLink
 
 
 class AttributeSetManager(models.Manager):
@@ -39,7 +39,7 @@ class AttributeSetManager(models.Manager):
 
 
 # FIXME https://docs.djangoproject.com/en/1.8/ref/contrib/gis/
-class AttributeSet(models.Model):
+class AttributeSet(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_("name"),
         max_length=50,
