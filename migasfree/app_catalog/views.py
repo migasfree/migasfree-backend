@@ -23,6 +23,7 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
 from ..core.permissions import PublicPermission
+from ..core.views import MigasViewSet
 from ..client.models import Computer
 
 from . import models, serializers
@@ -30,7 +31,7 @@ from .filters import ApplicationFilter, PackagesByProjectFilter, PolicyFilter
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ApplicationViewSet(viewsets.ModelViewSet):
+class ApplicationViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = models.Application.objects.all()
     serializer_class = serializers.ApplicationSerializer
     filterset_class = ApplicationFilter
@@ -94,7 +95,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class PackagesByProjectViewSet(viewsets.ModelViewSet):
+class PackagesByProjectViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = models.PackagesByProject.objects.all()
     serializer_class = serializers.PackagesByProjectSerializer
     filterset_class = PackagesByProjectFilter
@@ -109,7 +110,7 @@ class PackagesByProjectViewSet(viewsets.ModelViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class PolicyViewSet(viewsets.ModelViewSet):
+class PolicyViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = models.Policy.objects.all()
     serializer_class = serializers.PolicySerializer
     filterset_class = PolicyFilter
@@ -123,7 +124,7 @@ class PolicyViewSet(viewsets.ModelViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class PolicyGroupViewSet(viewsets.ModelViewSet):
+class PolicyGroupViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = models.PolicyGroup.objects.all()
     serializer_class = serializers.PolicyGroupSerializer
 
