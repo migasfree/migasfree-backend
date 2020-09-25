@@ -40,6 +40,7 @@ from .forms import (
 )
 
 admin.site.register(Platform)
+admin.site.register(Attribute)
 
 
 @admin.register(Project)
