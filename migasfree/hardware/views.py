@@ -23,6 +23,7 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
 from ..core.mixins import SafeConnectionMixin
+from ..core.views import MigasViewSet
 from ..client.models import Computer
 
 from .models import Node
@@ -48,7 +49,8 @@ class HardwareComputerViewSet(viewsets.ViewSet):
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class HardwareViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    mixins.ListModelMixin, mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet, MigasViewSet
 ):
     queryset = Node.objects.all()
     serializer_class = serializers.NodeSerializer
