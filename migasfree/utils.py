@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -192,6 +192,10 @@ def remove_duplicates_preserving_order(seq):
     seen_add = seen.add
 
     return [x for x in seq if not (x in seen or seen_add(x))]
+
+
+def escape_format_string(text):
+    return text.replace('{', '{{').replace('}', '}}')
 
 
 def to_list(text):
