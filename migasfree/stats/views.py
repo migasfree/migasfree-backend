@@ -197,15 +197,35 @@ class SyncStatsViewSet(viewsets.ViewSet):
 class ComputerStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False)
     def projects(self, request, format=None):
+        data = list(Computer.group_by_project())
+        aliases = {
+            'project__name': 'name',
+            'project__id': 'project_id',
+            'count': 'value'
+        }
+
+        for i, item in enumerate(data):
+            data[i] = dict((aliases[key], value) for (key, value) in item.items())
+
         return Response(
-            Computer.group_by_project(),
+            data,
             status=status.HTTP_200_OK
         )
 
     @action(methods=['get'], detail=False)
     def platforms(self, request, format=None):
+        data = list(Computer.group_by_platform())
+        aliases = {
+            'project__platform__name': 'name',
+            'project__platform__id': 'platform_id',
+            'count': 'value'
+        }
+
+        for i, item in enumerate(data):
+            data[i] = dict((aliases[key], value) for (key, value) in item.items())
+
         return Response(
-            Computer.group_by_platform(),
+            data,
             status=status.HTTP_200_OK
         )
 
