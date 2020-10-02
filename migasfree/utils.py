@@ -187,6 +187,13 @@ def remove_empty_elements_from_dict(dic):
     return dict((k, v) for k, v in dic.items() if v)
 
 
+def replace_keys(data, aliases):
+    for i, item in enumerate(data):
+        data[i] = dict((aliases[key], value) for (key, value) in item.items())
+
+    return data
+
+
 def remove_duplicates_preserving_order(seq):
     seen = set()
     seen_add = seen.add
