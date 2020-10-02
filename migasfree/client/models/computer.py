@@ -431,6 +431,31 @@ class Computer(models.Model, MigasLink):
                 sync_attributes__id__in=attributes_id
             ).count()
 
+    @staticmethod
+    def productive_computers_by_platform(user):
+        total = Computer.productive.scope(user).count()
+
+        projects = list(Computer.productive.scope(user).values(
+            'project__name',
+            'project__id',
+            'project__platform__id',
+        ).annotate(
+            count=Count('id')
+        ).order_by('project__platform__id', '-count'))
+
+        platforms = list(Computer.productive.scope(user).values(
+            'project__platform__id',
+            'project__platform__name'
+        ).annotate(
+            count=Count('id')
+        ).order_by('project__platform__id', '-count'))
+
+        return {
+            'total': total,
+            'inner': platforms,
+            'outer': projects,
+        }
+
     def update_last_hardware_capture(self):
         self.last_hardware_capture = datetime.now()
         self.save()
