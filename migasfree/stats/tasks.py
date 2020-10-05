@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
-from django.utils.translation import ugettext
+from django.utils.translation import gettext
 from celery import shared_task
 from django_redis import get_redis_connection
 from rest_framework.reverse import reverse
@@ -39,7 +39,7 @@ def add_orphan_packages():
     con = get_redis_connection()
     con.hmset(
         'migasfree:chk:orphan', {
-            'msg': ugettext('Orphan Package/Set'),
+            'msg': gettext('Orphan Package/Set'),
             'target': 'server',
             'level': 'warning',
             'result': Package.orphan_count(),
@@ -53,7 +53,7 @@ def add_unchecked_notifications():
     con = get_redis_connection()
     con.hmset(
         'migasfree:chk:notifications', {
-            'msg': ugettext('Unchecked Notifications'),
+            'msg': gettext('Unchecked Notifications'),
             'target': 'server',
             'level': 'warning',
             'result': Notification.objects.unchecked().count(),
@@ -67,7 +67,7 @@ def add_unchecked_faults():
     con = get_redis_connection()
     con.hmset(
         'migasfree:chk:faults', {
-            'msg': ugettext('Unchecked Faults'),
+            'msg': gettext('Unchecked Faults'),
             'target': 'computer',
             'level': 'critical',
             'result': Fault.unchecked_count(),
@@ -81,7 +81,7 @@ def add_unchecked_errors():
     con = get_redis_connection()
     con.hmset(
         'migasfree:chk:errors', {
-            'msg': ugettext('Unchecked Errors'),
+            'msg': gettext('Unchecked Errors'),
             'target': 'computer',
             'level': 'critical',
             'result': Error.unchecked_count(),
@@ -96,7 +96,7 @@ def add_generating_repos():
     result = con.scard('migasfree:watch:repos')
     con.hmset(
         'migasfree:chk:repos', {
-            'msg': ugettext('Generating Repositories'),
+            'msg': gettext('Generating Repositories'),
             'target': 'server',
             'level': 'info',
             'result': result,
@@ -122,7 +122,7 @@ def add_synchronizing_computers():
 
     con.hmset(
         'migasfree:chk:syncs', {
-            'msg': ugettext('Synchronizing Computers Now'),
+            'msg': gettext('Synchronizing Computers Now'),
             'target': 'computer',
             'level': 'info',
             'result': result,
@@ -148,7 +148,7 @@ def add_delayed_computers():
 
     con.hmset(
         'migasfree:chk:delayed', {
-            'msg': ugettext('Delayed Computers'),
+            'msg': gettext('Delayed Computers'),
             'target': 'computer',
             'level': 'critical',
             'result': result,
@@ -171,7 +171,7 @@ def add_active_schedule_deployments():
 
     con.hmset(
         'migasfree:chk:active_deploys', {
-            'msg': ugettext('Active schedule deployments'),
+            'msg': gettext('Active schedule deployments'),
             'target': 'server',
             'level': 'info',
             'result': result,
@@ -196,7 +196,7 @@ def add_finished_schedule_deployments():
 
     con.hmset(
         'migasfree:chk:finished_deploys', {
-            'msg': ugettext('Finished schedule deployments'),
+            'msg': gettext('Finished schedule deployments'),
             'target': 'server',
             'level': 'warning',
             'result': result,
