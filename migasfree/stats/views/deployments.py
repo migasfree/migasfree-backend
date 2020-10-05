@@ -16,14 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from collections import defaultdict
+
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 from django_redis import get_redis_connection
 
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
-from ...core.models import Deployment
+from ...core.models import Deployment, Project
 
 
 @permission_classes((permissions.IsAuthenticated,))
@@ -85,5 +89,78 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
 
         return Response(
             response,
+            status=status.HTTP_200_OK
+        )
+
+    @action(methods=['get'], detail=False, url_path='enabled/project')
+    def enabled_by_project(self, request, format=None):
+        total = Deployment.objects.scope(request.user.userprofile).filter(enabled=True).count()
+
+        values_null = defaultdict(list)
+        for item in Deployment.objects.scope(
+            request.user.userprofile
+        ).filter(
+            enabled=True, schedule=None
+        ).values(
+            'project__id',
+        ).annotate(
+            count=Count('id')
+        ).order_by('project__id', '-count'):
+            values_null[item.get('project__id')].append(
+                {
+                    'name': _('Without schedule'),
+                    'value': item.get('count'),
+                    'project_id': item.get('project__id'),
+                    # FIXME 'schedule': null
+                }
+            )
+
+        values_not_null = defaultdict(list)
+        for item in Deployment.objects.scope(
+            request.user.userprofile
+        ).filter(
+            enabled=True,
+        ).filter(
+            ~Q(schedule=None)
+        ).values(
+            'project__id',
+        ).annotate(
+            count=Count('id')
+        ).order_by('project__id', '-count'):
+            values_not_null[item.get('project__id')].append(
+                {
+                    'name': _('With schedule'),
+                    'value': item.get('count'),
+                    'project_id': item.get('project__id'),
+                    # FIXME 'schedule': true
+                }
+            )
+
+        data = []
+        for project in Project.objects.scope(request.user.userprofile).all():
+            count = 0
+            data_project = []
+            if project.id in values_null:
+                count += values_null[project.id][0]['value']
+                data_project.append(values_null[project.id][0])
+            if project.id in values_not_null:
+                count += values_not_null[project.id][0]['value']
+                data_project.append(values_not_null[project.id][0])
+            if count:
+                data.append(
+                    {
+                        'name': project.name,
+                        'value': count,
+                        'project_id': project.id,
+                        'data': data_project
+                    }
+                )
+
+        return Response(
+            {
+                'title': _('Enabled Deployments'),
+                'total': total,
+                'data': data,
+            },
             status=status.HTTP_200_OK
         )
