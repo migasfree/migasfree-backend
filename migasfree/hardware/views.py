@@ -17,7 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext
+from django.utils.translation import gettext
 from rest_framework import viewsets, status, mixins, filters, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -86,7 +86,7 @@ class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         if not claims or 'id' not in claims or 'hardware' not in claims:
             return Response(
-                self.create_response(ugettext('Malformed claims')),
+                self.create_response(gettext('Malformed claims')),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -102,6 +102,6 @@ class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
         computer.update_hardware_resume()
 
         return Response(
-            self.create_response(ugettext('Data received')),
+            self.create_response(gettext('Data received')),
             status=status.HTTP_200_OK
         )
