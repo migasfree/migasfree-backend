@@ -29,7 +29,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext
+from django.utils.translation import gettext
 from django_redis import get_redis_connection
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (
@@ -475,7 +475,7 @@ class InternalSourceViewSet(viewsets.ModelViewSet, MigasViewSet):
         tasks.create_repository_metadata.delay(pk)
 
         return Response(
-            {'detail': ugettext('Operation received')},
+            {'detail': gettext('Operation received')},
             status=status.HTTP_200_OK
         )
 
@@ -606,7 +606,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         Package.handle_uploaded_file(_file, target)
 
         return Response(
-            self.create_response(ugettext('Data received')),
+            self.create_response(gettext('Data received')),
             status=status.HTTP_200_OK
         )
 
@@ -668,7 +668,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             os.rename(target, dst)
 
         return Response(
-            self.create_response(ugettext('Data received')),
+            self.create_response(gettext('Data received')),
             status=status.HTTP_200_OK
         )
 
@@ -684,7 +684,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         if not claims or 'project' not in claims or 'packageset' not in claims:
             return Response(
-                self.create_response(ugettext('Malformed claims')),
+                self.create_response(gettext('Malformed claims')),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -702,7 +702,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             tasks.create_repository_metadata.delay(deploy.id)
 
         return Response(
-            self.create_response(ugettext('Data received')),
+            self.create_response(gettext('Data received')),
             status=status.HTTP_200_OK
         )
 
