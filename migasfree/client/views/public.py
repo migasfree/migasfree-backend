@@ -19,7 +19,7 @@
 import os
 
 from django.conf import settings
-from django.utils.translation import ugettext, gettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 from django.http import HttpResponseForbidden
 from rest_framework import views
 from rest_framework.response import Response
@@ -144,7 +144,7 @@ class ProjectKeysView(views.APIView):
         available_pms = dict(get_available_pms()).keys()
         if pms not in available_pms:
             return Response({
-                'error': ugettext('PMS must be one of %s' % str(available_pms))
+                'error': gettext('PMS must be one of %s' % str(available_pms))
             })
 
         project = self.get_object(
