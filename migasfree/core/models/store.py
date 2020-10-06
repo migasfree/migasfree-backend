@@ -85,6 +85,15 @@ class Store(models.Model, MigasLink):
             name
         )
 
+    @staticmethod
+    def group_by_project(user=None):
+        return Store.objects.scope(user).values(
+            'project__name',
+            'project__id',
+        ).annotate(
+            count=models.aggregates.Count('id')
+        ).order_by('-count')
+
     def _create_dir(self):
         path = self.path(self.project.slug, self.slug)
         if not os.path.exists(path):
