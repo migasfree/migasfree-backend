@@ -51,6 +51,15 @@ class Model(models.Model, MigasLink):
         verbose_name=_("connections")
     )
 
+    @staticmethod
+    def group_by_manufacturer():
+        return Model.objects.values(
+            'manufacturer__name',
+            'manufacturer__id',
+        ).annotate(
+            count=models.aggregates.Count('id')
+        ).order_by('-count')
+
     def __str__(self):
         return self.name
 
