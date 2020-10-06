@@ -111,7 +111,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                     'name': _('Without schedule'),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
-                    # FIXME 'schedule': null
+                    'schedule': False
                 }
             )
 
@@ -132,7 +132,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                     'name': _('With schedule'),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
-                    # FIXME 'schedule': true
+                    'schedule': True
                 }
             )
 
@@ -159,6 +159,140 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         return Response(
             {
                 'title': _('Enabled Deployments'),
+                'total': total,
+                'data': data,
+            },
+            status=status.HTTP_200_OK
+        )
+
+    @action(methods=['get'], detail=False, url_path='enabled')
+    def by_enabled(self, request, format=None):
+        total = Deployment.objects.scope(request.user.userprofile).count()
+
+        values_null = defaultdict(list)
+        for item in Deployment.objects.scope(request.user.userprofile).filter(
+            enabled=True
+        ).values(
+            'project__id',
+        ).annotate(
+            count=Count('id')
+        ).order_by('project__id', '-count'):
+            values_null[item.get('project__id')].append(
+                {
+                    'name': _('Enabled'),
+                    'value': item.get('count'),
+                    'project_id': item.get('project__id'),
+                    'enabled': True,
+                }
+            )
+
+        values_not_null = defaultdict(list)
+        for item in Deployment.objects.scope(user).filter(
+            enabled=False,
+        ).values(
+            'project__id',
+        ).annotate(
+            count=Count('id')
+        ).order_by('project__id', '-count'):
+            values_not_null[item.get('project__id')].append(
+                {
+                    'name': _('Disabled'),
+                    'value': item.get('count'),
+                    'project_id': item.get('project__id'),
+                    'enabled': False
+                }
+            )
+
+        data = []
+        for project in Project.objects.scope(request.user.userprofile).all():
+            count = 0
+            data_project = []
+            if project.id in values_null:
+                count += values_null[project.id][0]['value']
+                data_project.append(values_null[project.id][0])
+            if project.id in values_not_null:
+                count += values_not_null[project.id][0]['value']
+                data_project.append(values_not_null[project.id][0])
+            if count:
+                data.append(
+                    {
+                        'name': project.name,
+                        'value': count,
+                        'project_id': project.id,
+                        'data': data_project
+                    }
+                )
+
+        return Response(
+            {
+                'title': _('Deployments / Enabled'),
+                'total': total,
+                'data': data,
+            },
+            status=status.HTTP_200_OK
+        )
+
+    @action(methods=['get'], detail=False, url_path='schedule')
+    def by_schedule(self, request, format=None):
+        total = Deployment.objects.scope(request.user.userprofile).count()
+
+        values_null = defaultdict(list)
+        for item in Deployment.objects.scope(request.user.userprofile).filter(
+            schedule=None
+        ).values(
+            'project__id',
+        ).annotate(
+            count=Count('id')
+        ).order_by('project__id', '-count'):
+            values_null[item.get('project__id')].append(
+                {
+                    'name': _('Without schedule'),
+                    'value': item.get('count'),
+                    'project_id': item.get('project__id'),
+                    'schedule': False
+                }
+            )
+
+        values_not_null = defaultdict(list)
+        for item in Deployment.objects.scope(request.user.userprofile).filter(
+            ~Q(schedule=None)
+        ).values(
+            'project__id',
+        ).annotate(
+            count=Count('id')
+        ).order_by('project__id', '-count'):
+            values_not_null[item.get('project__id')].append(
+                {
+                    'name': _('With schedule'),
+                    'value': item.get('count'),
+                    'project_id': item.get('project__id'),
+                    'schedule': True
+                }
+            )
+
+        data = []
+        for project in Project.objects.scope(request.user.userprofile).all():
+            count = 0
+            data_project = []
+            if project.id in values_null:
+                count += values_null[project.id][0]['value']
+                data_project.append(values_null[project.id][0])
+            if project.id in values_not_null:
+                count += values_not_null[project.id][0]['value']
+                data_project.append(values_not_null[project.id][0])
+            if count:
+                data.append(
+                    {
+                        'name': project.name,
+                        'value': count,
+                        'project_id': project.id,
+                        'data': data_project
+                    }
+                )
+
+        return Response(
+            {
+                'title': _('Deployments / Schedule'),
                 'total': total,
                 'data': data,
             },
