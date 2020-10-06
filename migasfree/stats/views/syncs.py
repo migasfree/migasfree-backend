@@ -22,23 +22,18 @@ from datetime import timedelta, datetime, date
 from dateutil.relativedelta import relativedelta
 
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 from django_redis import get_redis_connection
-
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
 from ...core.models import Project
+from ...client.models import Synchronization
+from ...utils import replace_keys
 from .. import validators
 
-
-def month_year_iter(start_month, start_year, end_month, end_year):
-    # http://stackoverflow.com/questions/5734438/how-to-create-a-month-iterator
-    ym_start = 12 * int(start_year) + int(start_month) - 1
-    ym_end = 12 * int(end_year) + int(end_month) - 1
-    for ym in range(ym_start, ym_end):
-        y, m = divmod(ym, 12)
-        yield y, m + 1
+from .events import event_by_month, month_interval, month_year_iter
 
 
 def daterange(start_date, end_date):
@@ -190,3 +185,36 @@ class SyncStatsViewSet(viewsets.ViewSet):
             begin += hour
 
         return Response(stats, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], detail=False, url_path='project')
+    def by_project(self, request, format=None):
+        return Response(
+            {
+                'title': _('Synchronizations / Project'),
+                'total': Synchronization.objects.scope(request.user.userprofile).count(),
+                'data': replace_keys(
+                    list(Synchronization.group_by_project(request.user.userprofile)),
+                    {
+                        'project__name': 'name',
+                        'project__id': 'project_id',
+                        'count': 'value'
+                    }
+                ),
+            },
+            status=status.HTTP_200_OK
+        )
+
+    @action(methods=['get'], detail=False, url_path='project/month')
+    def project_by_month(self, request, format=None):
+        begin_date, end_date = month_interval()
+
+        data = event_by_month(
+            Synchronization.stacked_by_month(request.user.userprofile, begin_date),
+            begin_date,
+            end_date,
+            'synchronization'
+        )
+        return Response(
+            data,
+            status=status.HTTP_200_OK
+        )
