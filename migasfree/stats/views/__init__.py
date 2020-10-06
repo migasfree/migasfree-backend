@@ -5,4 +5,11 @@ MONTHLY_RANGE = 18  # months
 from .attributes import ClientAttributeStatsViewSet, ServerAttributeStatsViewSet
 from .computers import ComputerStatsViewSet
 from .deployments import DeploymentStatsViewSet
+from .devices import DeviceStatsViewSet
+from .errors import ErrorStatsViewSet
+from .faults import FaultStatsViewSet
+from .migrations import MigrationStatsViewSet
+from .notifications import NotificationStatsViewSet
+from .status_logs import StatusLogStatsViewSet
+from .stores import StoreStatsViewSet
 from .syncs import SyncStatsViewSet
