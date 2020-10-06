@@ -70,6 +70,17 @@ class Event(models.Model, MigasLink):
         ))
 
     @classmethod
+    def stacked_by_month(cls, user, start_date, field='project_id'):
+        return list(cls.objects.scope(user).filter(
+            created_at__gte=start_date
+        ).annotate(
+            year=ExtractYear('created_at'),
+            month=ExtractMonth('created_at')
+        ).order_by('year', 'month', field).values('year', 'month', field).annotate(
+            count=Count('id')
+        ))
+
+    @classmethod
     def situation(cls, computer_id, date, user):
         return cls.objects.scope(user).filter(
             computer__id=computer_id, created_at__lte=date
