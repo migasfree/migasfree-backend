@@ -73,7 +73,7 @@ class Notification(models.Model, MigasLink):
         return '{} ({:%Y-%m-%d %H:%M:%S})'.format(self.id, self.created_at)
 
     @classmethod
-    def by_month(cls, start_date):
+    def stacked_by_month(cls, start_date):
         return list(cls.objects.filter(
             created_at__gte=start_date
         ).annotate(
