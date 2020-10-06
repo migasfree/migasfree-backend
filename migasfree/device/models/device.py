@@ -80,6 +80,33 @@ class Device(models.Model, MigasLink):
             self.connection.name: json.loads(self.data),
         }
 
+    @staticmethod
+    def group_by_connection():
+        return Device.objects.values(
+            'connection__name',
+            'connection__id',
+        ).annotate(
+            count=models.aggregates.Count('id')
+        ).order_by('-count')
+
+    @staticmethod
+    def group_by_model():
+        return Device.objects.values(
+            'model__name',
+            'model__id',
+        ).annotate(
+            count=models.aggregates.Count('id')
+        ).order_by('-count')
+
+    @staticmethod
+    def group_by_manufacturer():
+        return Device.objects.values(
+            'model__manufacturer__name',
+            'model__manufacturer__id',
+        ).annotate(
+            count=models.aggregates.Count('id')
+        ).order_by('-count')
+
     def __str__(self):
         return self.name
 
