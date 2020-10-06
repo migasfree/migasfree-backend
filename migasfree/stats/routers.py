@@ -41,3 +41,38 @@ router.register(
     views.ServerAttributeStatsViewSet,
     basename='stats-tags'
 )
+router.register(
+    r'stats/devices',
+    views.DeviceStatsViewSet,
+    basename='stats-devices'
+)
+router.register(
+    r'stats/migrations',
+    views.MigrationStatsViewSet,
+    basename='stats-migrations'
+)
+router.register(
+    r'stats/status-logs',
+    views.StatusLogStatsViewSet,
+    basename='stats-status-logs'
+)
+router.register(
+    r'stats/notifications',
+    views.NotificationStatsViewSet,
+    basename='stats-notifications'
+)
+router.register(
+    r'stats/errors',
+    views.ErrorStatsViewSet,
+    basename='stats-errors'
+)
+router.register(
+    r'stats/faults',
+    views.FaultStatsViewSet,
+    basename='stats-faults'
+)
+router.register(
+    r'stats/stores',
+    views.StoreStatsViewSet,
+    basename='stats-stores'
+)
