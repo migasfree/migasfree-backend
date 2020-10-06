@@ -111,6 +111,14 @@ class Fault(Event):
 
         return queryset.count()
 
+    @staticmethod
+    def group_by_definition(user=None):
+        return Fault.objects.scope(user).values(
+            'fault_definition__id', 'fault_definition__name'
+        ).annotate(
+            count=models.aggregates.Count('fault_definition__id')
+        ).order_by('-count')
+
     def checked_ok(self):
         self.checked = True
         self.save()
