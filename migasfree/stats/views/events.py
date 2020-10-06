@@ -26,12 +26,20 @@ from django.utils.translation import gettext as _
 from ...client.models import Computer
 from ...core.models import Project
 
-from .syncs import month_year_iter
 from . import MONTHLY_RANGE
 
 
 def first_day_month(date_):
     return date(date_.year, date_.month, 1)
+
+
+def month_year_iter(start_month, start_year, end_month, end_year):
+    # http://stackoverflow.com/questions/5734438/how-to-create-a-month-iterator
+    ym_start = 12 * int(start_year) + int(start_month) - 1
+    ym_end = 12 * int(end_year) + int(end_month) - 1
+    for ym in range(ym_start, ym_end):
+        y, m = divmod(ym, 12)
+        yield y, m + 1
 
 
 def month_interval():
