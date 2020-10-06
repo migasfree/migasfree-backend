@@ -81,6 +81,14 @@ class Synchronization(Event):
 
     objects = SynchronizationManager()
 
+    @staticmethod
+    def group_by_project(user):
+        return Synchronization.objects.scope(user).values(
+            'project__id', 'project__name'
+        ).annotate(
+            count=models.Count('project__id')
+        ).order_by('-count')
+
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         super(Synchronization, self).save(force_insert, force_update, using, update_fields)
 
