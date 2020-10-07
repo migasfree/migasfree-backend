@@ -84,7 +84,7 @@ class SyncStatsViewSet(viewsets.ViewSet):
         try:
             end = datetime.strptime(end, fmt)
         except ValueError:
-            end = datetime.now() + relativedelta.relativedelta(months=1)
+            end = datetime.now() + relativedelta(months=1)
 
         project_id = request.query_params.get('project_id')
 
