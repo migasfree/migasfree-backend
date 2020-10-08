@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,6 +23,12 @@ from ..core.serializers import (
 )
 from ..device.serializers import LogicalInfoSerializer
 from . import models
+
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.User
+        fields = ('id', 'name')
 
 
 class ComputerInfoSerializer(serializers.ModelSerializer):
@@ -72,6 +78,7 @@ class ComputerSerializer(serializers.ModelSerializer):
         view_name='computer-software_history'
     )
     tags = AttributeInfoSerializer(many=True, read_only=True)
+    sync_user = UserInfoSerializer(many=False, read_only=True)
 
     class Meta:
         model = models.Computer
@@ -81,7 +88,8 @@ class ComputerSerializer(serializers.ModelSerializer):
             'software_inventory', 'software_history',
             'status', 'product', 'machine', 'cpu', 'ram',
             'storage', 'disks', 'mac_address', 'comment',
-            'created_at', 'last_hardware_capture', 'sync_end_date',
+            'created_at', 'last_hardware_capture',
+            'sync_user', 'sync_end_date',
         )
 
 
@@ -122,12 +130,6 @@ class ErrorSafeWriteSerializer(serializers.ModelSerializer):
 class FaultDefinitionInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FaultDefinition
-        fields = ('id', 'name')
-
-
-class UserInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.User
         fields = ('id', 'name')
 
 
