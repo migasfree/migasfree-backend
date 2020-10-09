@@ -36,11 +36,18 @@ class ComputerFilter(filters.FilterSet):
 
     class Meta:
         model = Computer
-        fields = [
-            'id', 'project__id', 'status', 'name',
-            'uuid', 'sync_attributes__id', 'tags__id',
-            'machine', 'sync_user__name',
-        ]
+        fields = {
+            'id': ['exact'],
+            'project__id': ['exact'],
+            'status': ['exact'],
+            'name': ['exact', 'icontains'],
+            'uuid': ['exact'],
+            'sync_attributes__id': ['exact'],
+            'tags__id': ['exact'],
+            'machine': ['exact'],
+            'sync_user__name': ['exact', 'icontains'],
+            'product': ['exact', 'icontains']
+        }
 
 
 class ErrorFilter(filters.FilterSet):
