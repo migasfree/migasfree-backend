@@ -184,6 +184,17 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(methods=['get'], detail=False, url_path='status')
+    def status_choices(self, request, format=None):
+        response = {
+            'choices': dict(models.Computer.STATUS_CHOICES),
+            'productive': models.Computer.PRODUCTIVE_STATUS,
+            'active': models.Computer.ACTIVE_STATUS,
+            'unsubscribed': models.Computer.UNSUBSCRIBED_STATUS
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
     @action(methods=['post'], detail=True)
     def replacement(self, request, pk=None):
         """
