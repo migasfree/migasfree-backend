@@ -46,6 +46,7 @@ class ComputerFilter(filters.FilterSet):
             'tags__id': ['exact'],
             'machine': ['exact'],
             'sync_user__name': ['exact', 'icontains'],
+            'sync_end_date': ['lt', 'gte', 'isnull'],
             'product': ['exact', 'icontains']
         }
 
