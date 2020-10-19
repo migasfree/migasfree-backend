@@ -63,9 +63,6 @@ class ComputerStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False, url_path='machine')
     def by_machine(self, request, format=None):
         total = Computer.objects.scope(request.user.userprofile).count()
-        link = '{}?_REPLACE_'.format(
-            reverse('admin:client_computer_changelist')
-        )
 
         data = {
             'inner': [],
@@ -85,10 +82,8 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                     {
                         'name': _('Virtual'),
                         'value': count_subscribed_virtual,
-                        'url': link.replace(
-                            '_REPLACE_',
-                            'status__in=intended,reserved,unknown,available,in repair&machine__exact=V'
-                        )
+                        'status__in': 'intended,reserved,unknown,available,in repair',
+                        'machine': 'V'
                     }
                 )
 
@@ -97,10 +92,8 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                     {
                         'name': _('Physical'),
                         'value': count_subscribed_physical,
-                        'url': link.replace(
-                            '_REPLACE_',
-                            'status__in=intended,reserved,unknown,available,in repair&machine__exact=P'
-                        )
+                        'status__in': 'intended,reserved,unknown,available,in repair',
+                        'machine': 'P'
                     }
                 )
 
@@ -108,10 +101,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                 {
                     'name': _('Subscribed'),
                     'value': count_subscribed,
-                    'url': link.replace(
-                        '_REPLACE_',
-                        'status__in=intended,reserved,unknown,available,in repair'
-                    ),
+                    'status__in': 'intended,reserved,unknown,available,in repair'
                 },
             )
 
@@ -121,10 +111,8 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                     {
                         'name': _('Virtual'),
                         'value': count_unsubscribed_virtual,
-                        'url': link.replace(
-                            '_REPLACE_',
-                            'status__in=unsubscribed&machine__exact=V'
-                        )
+                        'status__in': 'unsubscribed',
+                        'machine': 'V'
                     }
                 )
 
@@ -133,10 +121,8 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                     {
                         'name': _('Physical'),
                         'value': count_unsubscribed_physical,
-                        'url': link.replace(
-                            '_REPLACE_',
-                            'status__in=unsubscribed&machine__exact=P'
-                        )
+                        'status__in': 'unsubscribed',
+                        'machine': 'P'
                     }
                 )
 
@@ -144,10 +130,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                 {
                     'name': _('Unsubscribed'),
                     'value': count_unsubscribed,
-                    'url': link.replace(
-                        '_REPLACE_',
-                        'status__in=unsubscribed'
-                    ),
+                    'status__in': 'unsubscribed'
                 }
             )
 
@@ -157,7 +140,6 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                 'total': total,
                 'inner': data['inner'],
                 'outer': data['outer'],
-                'url': link.replace('?_REPLACE_', ''),
             },
             status=status.HTTP_200_OK
         )
@@ -166,9 +148,6 @@ class ComputerStatsViewSet(viewsets.ViewSet):
     def by_status(self, request, format=None):
         # TODO response format (inner, outer)
         total = Computer.objects.scope(request.user.userprofile).exclude(status='unsubscribed').count()
-        link = '{}?_REPLACE_'.format(
-            reverse('admin:client_computer_changelist')
-        )
 
         values = dict()
         for item in Computer.objects.scope(
@@ -184,10 +163,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             values[item.get('status')] = {
                 'name': status_name,
                 'value': item.get('count'),
-                'url': link.replace(
-                    '_REPLACE_',
-                    'status__in={}'.format(item.get('status'))
-                ),
+                'status__in': item.get('status')
             }
 
         count_productive = values.get('intended', {}).get('value', 0) \
@@ -213,19 +189,13 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             {
                 'name': _('Productive'),
                 'value': count_productive,
-                'url': link.replace(
-                    '_REPLACE_',
-                    'status__in=intended,reserved,unknown'
-                ),
+                'status__in': 'intended,reserved,unknown',
                 'data': data_productive,
             },
             {
                 'name': _('Unproductive'),
                 'value': count_unproductive,
-                'url': link.replace(
-                    '_REPLACE_',
-                    'status__in=available,in repair'
-                ),
+                'status__in': 'available,in repair',
                 'data': data_unproductive,
             },
         ]
@@ -235,7 +205,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                 'title': _('Subscribed Computers / Status'),
                 'total': total,
                 'data': data,
-                'url': link.replace('_REPLACE_', 'status__in=intended,reserved,unknown,available,in repair'),
+                'status__in': 'intended,reserved,unknown,available,in repair',
             },
             status=status.HTTP_200_OK
         )
@@ -291,24 +261,16 @@ class ComputerStatsViewSet(viewsets.ViewSet):
 
     @action(methods=['get'], detail=False, url_path='entry/year')
     def entry_year(self, request, format=None):
-        url = '{}?machine__exact=P&_REPLACE_'.format(
-            reverse('admin:client_computer_changelist')
-        )
         results = Computer.entry_year(request.user.userprofile)
         data = [x['count'] for x in results]
         labels = [x['year'] for x in results]
 
         for i, item in enumerate(labels):
-            querystring = {
-                'created_at__gte': '{}-01-01'.format(labels[i]),
-                'created_at__lt': '{}-01-01'.format(labels[i] + 1)
-            }
             data[i] = {
                 'value': data[i],
-                'url': url.replace(
-                    '_REPLACE_',
-                    urlencode(querystring)
-                )
+                'machine': 'P',
+                'created_at__gte': '{}-01-01'.format(labels[i]),
+                'created_at__lt': '{}-01-01'.format(labels[i] + 1)
             }
 
         return Response(
