@@ -54,7 +54,6 @@ def event_by_month(data, begin_date, end_date, model, field='project_id'):
     labels = {}
     new_data = {}
     chart_data = {}
-    url = reverse('admin:client_{}_changelist'.format(model))
 
     if field == 'project_id':
         projects = Project.objects.only('id', 'name')
@@ -91,43 +90,46 @@ def event_by_month(data, begin_date, end_date, model, field='project_id'):
             for project in projects:
                 if value:
                     count = list(filter(lambda item: item['project_id'] == project.id, value))
-                    querystring['project__id__exact'] = project.id
                     new_data[project.id].append({
                         'value': count[0]['count'] if count else 0,
-                        'url': '{}?{}'.format(url, urlencode(querystring))
+                        'model': model,
+                        'project__id__exact': project.id,
+                        'created_at__gte': start_date.strftime('%Y-%m-%d'),
+                        'created_at__lt': final_date.strftime('%Y-%m-%d'),
                     })
                 else:
                     new_data[project.id].append({
                         'value': 0,
-                        'url': '#'
                     })
         elif field == 'status':
             for status in Computer.STATUS_CHOICES:
                 if value:
                     count = list(filter(lambda item: item['status'] == status[0], value))
-                    querystring['status__in'] = status[0]
                     new_data[status[0]].append({
                         'value': count[0]['count'] if count else 0,
-                        'url': '{}?{}'.format(url, urlencode(querystring))
+                        'model': model,
+                        'status__in': status[0],
+                        'created_at__gte': start_date.strftime('%Y-%m-%d'),
+                        'created_at__lt': final_date.strftime('%Y-%m-%d'),
                     })
                 else:
                     new_data[status[0]].append({
                         'value': 0,
-                        'url': '#'
                     })
         elif field == 'checked':
             for val in [True, False]:
                 if value:
                     count = list(filter(lambda item: item['checked'] == val, value))
-                    querystring['checked__exact'] = 1 if val else 0
                     new_data[val].append({
                         'value': count[0]['count'] if count else 0,
-                        'url': '{}?{}'.format(url, urlencode(querystring))
+                        'model': model,
+                        'checked__exact': 1 if val else 0,
+                        'created_at__gte': start_date.strftime('%Y-%m-%d'),
+                        'created_at__lt': final_date.strftime('%Y-%m-%d'),
                     })
                 else:
                     new_data[val].append({
                         'value': 0,
-                        'url': '#'
                     })
 
     for item in new_data:
