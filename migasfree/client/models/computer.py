@@ -407,6 +407,11 @@ class Computer(models.Model, MigasLink):
                     pkg.uninstall_date = datetime.now()
                     pkg.save()
 
+    def has_software_inventory(self):
+        from .package_history import PackageHistory
+
+        return PackageHistory.objects.filter(computer__id=self.id).count() > 0
+
     @staticmethod
     def group_by_project():
         return Computer.productive.values(
