@@ -85,7 +85,7 @@ class ComputerSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'uuid', 'name', 'fqdn', 'project',
             'ip_address', 'forwarded_ip_address', 'tags',
-            'software_inventory', 'software_history',
+            'software_inventory', 'software_history', 'has_software_inventory',
             'status', 'product', 'machine', 'cpu', 'ram',
             'storage', 'disks', 'mac_address', 'comment',
             'created_at', 'last_hardware_capture',
