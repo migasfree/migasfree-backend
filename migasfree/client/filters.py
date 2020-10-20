@@ -33,6 +33,15 @@ class ComputerFilter(filters.FilterSet):
     mac_address = filters.CharFilter(
         field_name='mac_address', lookup_expr='icontains'
     )
+    has_software_inventory = filters.BooleanFilter(
+        method='filter_has_software_inventory'
+    )
+
+    def filter_has_software_inventory(self, qs, name, value):
+        if value:
+            return qs.exclude(packagehistory=None)
+
+        return qs.filter(packagehistory=None)
 
     class Meta:
         model = Computer
@@ -47,7 +56,8 @@ class ComputerFilter(filters.FilterSet):
             'machine': ['exact'],
             'sync_user__name': ['exact', 'icontains'],
             'sync_end_date': ['lt', 'gte', 'isnull'],
-            'product': ['exact', 'icontains']
+            'product': ['exact', 'icontains'],
+            # 'has_software_inventory': ['exact'],
         }
 
 
