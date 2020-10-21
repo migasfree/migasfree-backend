@@ -143,7 +143,9 @@ class Computer(models.Model, MigasLink):
     )
 
     PRODUCTIVE_STATUS = ['intended', 'reserved', 'unknown']
+    UNPRODUCTIVE_STATUS = ['in repair', 'available']
     ACTIVE_STATUS = PRODUCTIVE_STATUS + ['in repair']
+    SUBSCRIBED_STATUS = PRODUCTIVE_STATUS + UNPRODUCTIVE_STATUS
     UNSUBSCRIBED_STATUS = ['unsubscribed']
 
     MACHINE_CHOICES = (
