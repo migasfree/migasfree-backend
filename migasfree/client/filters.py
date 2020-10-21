@@ -48,7 +48,7 @@ class ComputerFilter(filters.FilterSet):
         fields = {
             'id': ['exact'],
             'project__id': ['exact'],
-            'status': ['exact'],
+            'status': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'uuid': ['exact'],
             'sync_attributes__id': ['exact'],
@@ -57,7 +57,6 @@ class ComputerFilter(filters.FilterSet):
             'sync_user__name': ['exact', 'icontains'],
             'sync_end_date': ['lt', 'gte', 'isnull'],
             'product': ['exact', 'icontains'],
-            # 'has_software_inventory': ['exact'],
         }
 
 
