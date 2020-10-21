@@ -189,7 +189,9 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet):
         response = {
             'choices': dict(models.Computer.STATUS_CHOICES),
             'productive': models.Computer.PRODUCTIVE_STATUS,
+            'unproductive': models.Computer.UNPRODUCTIVE_STATUS,
             'active': models.Computer.ACTIVE_STATUS,
+            'subscribed': models.Computer.SUBSCRIBED_STATUS,
             'unsubscribed': models.Computer.UNSUBSCRIBED_STATUS
         }
 
