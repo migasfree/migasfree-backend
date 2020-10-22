@@ -44,6 +44,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = models.Computer.objects.all()
     serializer_class = serializers.ComputerSerializer
     filterset_class = ComputerFilter
+    search_fields = settings.MIGASFREE_COMPUTER_SEARCH_FIELDS
     ordering = (settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0],)
 
     def get_serializer_class(self):
