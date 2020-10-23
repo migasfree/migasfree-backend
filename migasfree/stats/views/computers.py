@@ -34,29 +34,41 @@ from .events import event_by_month, month_interval
 class ComputerStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False)
     def projects(self, request, format=None):
-        return Response(
-            replace_keys(
-                list(Computer.group_by_project()),
+        data = Computer.group_by_project(request.user.userprofile)
+        response = {
+            'data': replace_keys(
+                list(data),
                 {
                     'project__name': 'name',
                     'project__id': 'project_id',
                     'count': 'value'
                 }
             ),
+            'total': data.count()
+        }
+
+        return Response(
+            response,
             status=status.HTTP_200_OK
         )
 
     @action(methods=['get'], detail=False)
     def platforms(self, request, format=None):
-        return Response(
-            replace_keys(
-                list(Computer.group_by_platform()),
+        data = Computer.group_by_platform(request.user.userprofile)
+        response = {
+            'data': replace_keys(
+                list(data),
                 {
                     'project__platform__name': 'name',
                     'project__platform__id': 'platform_id',
                     'count': 'value'
                 }
             ),
+            'total': data.count()
+        }
+
+        return Response(
+            response,
             status=status.HTTP_200_OK
         )
 
