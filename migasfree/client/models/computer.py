@@ -415,14 +415,14 @@ class Computer(models.Model, MigasLink):
         return PackageHistory.objects.filter(computer__id=self.id).count() > 0
 
     @staticmethod
-    def group_by_project():
-        return Computer.productive.values(
+    def group_by_project(user):
+        return Computer.productive.scope(user).values(
             'project__name', 'project__id'
         ).annotate(count=Count('id'))
 
     @staticmethod
-    def group_by_platform():
-        return Computer.productive.values(
+    def group_by_platform(user):
+        return Computer.productive.scope(user).values(
             'project__platform__name', 'project__platform__id'
         ).annotate(count=Count('id'))
 
