@@ -26,7 +26,8 @@ from .models import (
 
 class ComputerFilter(filters.FilterSet):
     platform = filters.CharFilter(field_name='project__platform__id')
-    created_at = filters.DateFilter(field_name='created_at', lookup_expr='gte')
+    created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
+    created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
     sync_attributes = filters.CharFilter(
         field_name='sync_attributes__value', lookup_expr='contains'
     )
