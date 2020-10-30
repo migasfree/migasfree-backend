@@ -98,7 +98,7 @@ class ComputerSerializer(serializers.ModelSerializer):
             'cpu', 'architecture', 'ram',
             'storage', 'disks', 'mac_address', 'comment',
             'created_at', 'last_hardware_capture',
-            'sync_user', 'sync_end_date',
+            'sync_user', 'sync_end_date', '__str__'
         )
 
 
