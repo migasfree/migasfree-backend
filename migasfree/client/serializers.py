@@ -79,6 +79,14 @@ class ComputerSerializer(serializers.ModelSerializer):
     )
     tags = AttributeInfoSerializer(many=True, read_only=True)
     sync_user = UserInfoSerializer(many=False, read_only=True)
+    architecture = serializers.SerializerMethodField()
+    product_system = serializers.SerializerMethodField()
+
+    def get_architecture(self, obj):
+        return obj.get_architecture()
+
+    def get_product_system(self, obj):
+        return obj.product_system()
 
     class Meta:
         model = models.Computer
@@ -86,7 +94,8 @@ class ComputerSerializer(serializers.ModelSerializer):
             'id', 'uuid', 'name', 'fqdn', 'project',
             'ip_address', 'forwarded_ip_address', 'tags',
             'software_inventory', 'software_history', 'has_software_inventory',
-            'status', 'product', 'machine', 'cpu', 'ram',
+            'status', 'product', 'machine', 'product_system',
+            'cpu', 'architecture', 'ram',
             'storage', 'disks', 'mac_address', 'comment',
             'created_at', 'last_hardware_capture',
             'sync_user', 'sync_end_date',
