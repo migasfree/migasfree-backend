@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from django.db.models import Q
 from django_filters import rest_framework as filters
 
 from .models import (
@@ -35,7 +36,12 @@ class ComputerFilter(filters.FilterSet):
         field_name='mac_address', lookup_expr='icontains'
     )
     has_software_inventory = filters.BooleanFilter(
-        method='filter_has_software_inventory'
+        method='filter_has_software_inventory',
+        label='has software inventory'
+    )
+    architecture = filters.NumberFilter(
+        method='filter_architecture',
+        label='architecture'
     )
 
     def filter_has_software_inventory(self, qs, name, value):
@@ -43,6 +49,12 @@ class ComputerFilter(filters.FilterSet):
             return qs.exclude(packagehistory=None)
 
         return qs.filter(packagehistory=None)
+
+    def filter_architecture(self, qs, name, value):
+        return qs.filter(
+            Q(node__class_name='processor', node__width=value) |
+            Q(node__class_name='system', node__width=value)
+        ).distinct()
 
     class Meta:
         model = Computer
