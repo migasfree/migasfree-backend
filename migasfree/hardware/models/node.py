@@ -223,13 +223,37 @@ class Node(models.Model, MigasLink):
     def get_is_docker(computer_id):
         query = Node.objects.filter(
             computer=computer_id,
-            name="network",
-            class_name="network",
-            description="Ethernet interface"
+            name='network',
+            class_name='network',
+            description='Ethernet interface'
         )
 
         return query.count() == 1 and \
-            query[0].serial.upper().startswith("02:42:AC")
+            query[0].serial.upper().startswith('02:42:AC')
+
+    @staticmethod
+    def get_is_laptop(computer_id):
+        query = Node.objects.filter(
+            computer=computer_id,
+            class_name='system',
+            configuration__name='chassis',
+            configuration__value='notebook'  # TODO maybe others...
+        )
+
+        return query.count() == 1
+
+    @staticmethod
+    def get_product_system(computer_id):
+        if Node.get_is_docker(computer_id):
+            return 'docker'
+
+        if Node.get_is_vm(computer_id):
+            return 'virtual'
+
+        if Node.get_is_laptop(computer_id):
+            return 'laptop'
+
+        return 'desktop'
 
     @staticmethod
     def get_ram(computer_id):
