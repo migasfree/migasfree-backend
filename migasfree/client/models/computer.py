@@ -524,7 +524,7 @@ class Computer(models.Model, MigasLink):
     assigned_logical_devices_to_cid.short_description = _('Assigned Logical Devices to CID')
 
     def get_architecture(self):
-        from migasfree.hardware.models.node import Node
+        from ...hardware.models.node import Node
 
         node = Node.objects.filter(
             computer=self.id,
@@ -544,9 +544,14 @@ class Computer(models.Model, MigasLink):
         return node.width if node else None
 
     def is_docker(self):
-        from migasfree.hardware.models.node import Node
+        from ...hardware.models.node import Node
 
         return Node.get_is_docker(self.id)
+
+    def product_system(self):
+        from ...hardware.models.node import Node
+
+        return Node.get_product_system(self.id)
 
     @staticmethod
     def replacement(source, target):
