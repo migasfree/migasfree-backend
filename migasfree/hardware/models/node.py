@@ -243,6 +243,18 @@ class Node(models.Model, MigasLink):
         return query.count() == 1
 
     @staticmethod
+    def get_is_desktop(computer_id):
+        query = Node.objects.filter(
+            computer=computer_id,
+            class_name='system',
+            configuration__name='chassis'
+        ).exclude(
+            configuration__value='notebook'  # TODO maybe others...
+        )
+
+        return query.count() == 1
+
+    @staticmethod
     def get_product_system(computer_id):
         if Node.get_is_docker(computer_id):
             return 'docker'
@@ -253,7 +265,10 @@ class Node(models.Model, MigasLink):
         if Node.get_is_laptop(computer_id):
             return 'laptop'
 
-        return 'desktop'
+        if Node.get_is_desktop(computer_id):
+            return 'desktop'
+
+        return ''
 
     @staticmethod
     def get_ram(computer_id):
