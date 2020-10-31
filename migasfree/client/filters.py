@@ -19,6 +19,8 @@
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
+from ..hardware.models import Node
+
 from .models import (
     PackageHistory, Error, Notification, FaultDefinition, Fault,
     Computer, Migration, StatusLog, Synchronization,
@@ -43,6 +45,16 @@ class ComputerFilter(filters.FilterSet):
         method='filter_architecture',
         label='architecture'
     )
+    product_system = filters.ChoiceFilter(
+        method='filter_product_system',
+        label='product system',
+        choices=(
+            ('docker', 'docker'),
+            ('virtual', 'virtual'),
+            ('laptop', 'laptop'),
+            ('desktop', 'desktop'),
+        )
+    )
 
     def filter_has_software_inventory(self, qs, name, value):
         if value:
@@ -55,6 +67,38 @@ class ComputerFilter(filters.FilterSet):
             Q(node__class_name='processor', node__width=value) |
             Q(node__class_name='system', node__width=value)
         ).distinct()
+
+    def filter_product_system(self, qs, name, value):
+        if value == 'docker':
+            return qs.filter(
+                node__name='network',
+                node__class_name='network',
+                node__description='Ethernet interface',
+                node__serial__istartswith='02:42:AC'
+            )
+
+        if value == 'virtual':
+            return qs.filter(
+                node__parent_id__isnull=True,
+                node__vendor__in=list(Node.VIRTUAL_MACHINES.keys())
+            )
+
+        if value == 'laptop':
+            return qs.filter(
+                node__class_name='system',
+                node__configuration__name='chassis',
+                node__configuration__value='notebook'
+            )
+
+        if value == 'desktop':
+            return qs.filter(
+                node__class_name='system',
+                node__configuration__name='chassis'
+            ).exclude(
+                node__configuration__value='notebook'
+            )
+
+        return qs
 
     class Meta:
         model = Computer
