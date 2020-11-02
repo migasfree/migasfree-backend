@@ -19,7 +19,7 @@
 from datetime import datetime, timedelta
 
 from django.conf import settings
-from django.http import QueryDict
+from django.http import QueryDict, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -37,6 +37,7 @@ from ..filters import (
     FaultDefinitionFilter, FaultFilter, ComputerFilter,
     MigrationFilter, StatusLogFilter, SynchronizationFilter,
 )
+from ..resources import ComputerResource
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -184,6 +185,21 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+    @action(methods=['get'], detail=False)
+    def export(self, request, format=None):
+        data = ComputerResource().export(
+            self.filter_queryset(self.get_queryset())
+        )
+
+        response = HttpResponse(
+            data.csv,
+            status=status.HTTP_200_OK,
+            content_type='text/csv',
+        )
+        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(self.basename)
+
+        return response
 
     @action(methods=['get'], detail=False, url_path='status')
     def status_choices(self, request, format=None):
