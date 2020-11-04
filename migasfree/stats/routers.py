@@ -23,6 +23,12 @@ from . import views
 router = routers.DefaultRouter()
 
 router.register(
+    r'stats/alerts',
+    views.AlertsViewSet,
+    basename='stats-alerts'
+)
+
+router.register(
     r'stats/applications',
     views.ApplicationStatsViewSet,
     basename='stats-applications'
