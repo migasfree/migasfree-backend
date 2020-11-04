@@ -271,3 +271,10 @@ def read_remote_chunks(local_file, remote, chunk_size=8192):
         os.fsync(tmp_file.fileno())
 
     shutil.move(tmp, local_file)
+
+
+def decode_dict(value):
+    """
+    https://www.geeksforgeeks.org/python-convert-bytestring-keyvalue-pair-of-dictionary-to-string/
+    """
+    return {y.decode(): value.get(y).decode() for y in value.keys()}
