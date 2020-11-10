@@ -79,6 +79,9 @@ from .filters import (
     AttributeSetFilter, PropertyFilter, AttributeFilter, PlatformFilter,
 )
 
+from ..client.resources import ComputerResource
+from .resources import ProjectResource, AttributeResource
+
 from . import tasks
 
 
@@ -88,6 +91,25 @@ class SafePackagerConnectionMixin(SafeConnectionMixin):
 
     sign_key = settings.MIGASFREE_PRIVATE_KEY
     encrypt_key = settings.MIGASFREE_PACKAGER_PUB_KEY
+
+
+class ExportViewSet(viewsets.ViewSet):
+    @action(methods=['get'], detail=False)
+    def export(self, request, format=None):
+        resource = globals()['{}Resource'.format(self.basename.capitalize())]
+        obj = resource()
+        data = obj.export(
+            self.filter_queryset(self.get_queryset())
+        )
+
+        response = HttpResponse(
+            data.csv,
+            status=status.HTTP_200_OK,
+            content_type='text/csv',
+        )
+        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(self.basename)
+
+        return response
 
 
 class MigasViewSet(viewsets.ViewSet):
@@ -155,7 +177,7 @@ class PlatformViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ProjectViewSet(viewsets.ModelViewSet, MigasViewSet):
+class ProjectViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     filterset_class = ProjectFilter
@@ -241,7 +263,7 @@ class ClientPropertyViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class AttributeViewSet(viewsets.ModelViewSet, MigasViewSet):
+class AttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Attribute.objects.all()
     serializer_class = AttributeSerializer
     filterset_class = AttributeFilter
