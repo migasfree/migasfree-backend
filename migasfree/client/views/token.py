@@ -30,18 +30,17 @@ from rest_framework.response import Response
 
 from ...device.models import Logical, Driver, Model
 from ...core.serializers import PlatformSerializer
-from ...core.views import MigasViewSet
+from ...core.views import MigasViewSet, ExportViewSet
 from .. import models, serializers
 from ..filters import (
     PackageHistoryFilter, ErrorFilter, NotificationFilter,
     FaultDefinitionFilter, FaultFilter, ComputerFilter,
     MigrationFilter, StatusLogFilter, SynchronizationFilter,
 )
-from ..resources import ComputerResource
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet):
+class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = models.Computer.objects.all()
     serializer_class = serializers.ComputerSerializer
     filterset_class = ComputerFilter
@@ -185,21 +184,6 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
-
-    @action(methods=['get'], detail=False)
-    def export(self, request, format=None):
-        data = ComputerResource().export(
-            self.filter_queryset(self.get_queryset())
-        )
-
-        response = HttpResponse(
-            data.csv,
-            status=status.HTTP_200_OK,
-            content_type='text/csv',
-        )
-        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(self.basename)
-
-        return response
 
     @action(methods=['get'], detail=False, url_path='status')
     def status_choices(self, request, format=None):
