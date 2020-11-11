@@ -527,11 +527,12 @@ class UserProfileInfoSerializer(serializers.ModelSerializer):
         fields = ('id', 'username')
 
 
+"""
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = '__all__'
-
+"""
 
 class UserProfileWriteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -611,5 +612,6 @@ class UserProfileSerializer(UserDetailsSerializer):
     class Meta(UserDetailsSerializer.Meta):
         fields = UserDetailsSerializer.Meta.fields + (
             'domains', 'domain_preference', 'scope_preference',
-            'groups', 'user_permissions',
+            'groups', 'user_permissions', 'is_superuser', 'is_staff',
+            'is_active', 'last_login',
         )
