@@ -27,5 +27,5 @@ from .token import (
     ComputerViewSet, ErrorViewSet,
     FaultDefinitionViewSet, FaultViewSet,
     PackageHistoryViewSet, NotificationViewSet, MigrationViewSet,
-    StatusLogViewSet, SynchronizationViewSet,
+    StatusLogViewSet, SynchronizationViewSet, UserViewSet,
 )
