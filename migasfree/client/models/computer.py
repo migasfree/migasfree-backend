@@ -418,6 +418,15 @@ class Computer(models.Model, MigasLink):
 
         return PackageHistory.objects.filter(computer__id=self.id).count() > 0
 
+    def get_software_inventory(self):
+        return list(
+            self.packagehistory_set.filter(
+                uninstall_date__isnull=True
+            ).values_list(
+                'package__fullname', flat=True
+            ).order_by('package__fullname')
+        )
+
     def get_software_history(self):
         installed = defaultdict(list)
         uninstalled = defaultdict(list)
