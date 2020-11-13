@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import datetime
+from collections import defaultdict
 
 from django.db import models
 from django.db.models import Count
@@ -27,7 +28,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.dispatch import receiver
 from django.utils.translation import gettext, gettext_lazy as _
 
-from ...utils import swap_m2m, remove_empty_elements_from_dict, list_difference
+from ...utils import (
+    swap_m2m, remove_empty_elements_from_dict,
+    list_difference, merge_dicts,
+)
 from ...core.models import (
     Project, MigasLink,
     ServerAttribute, Attribute,
@@ -413,6 +417,30 @@ class Computer(models.Model, MigasLink):
         from .package_history import PackageHistory
 
         return PackageHistory.objects.filter(computer__id=self.id).count() > 0
+
+    def get_software_history(self):
+        installed = defaultdict(list)
+        uninstalled = defaultdict(list)
+
+        for k, v in list(
+                self.packagehistory_set.filter(
+                    install_date__isnull=False
+                ).values_list(
+                    'install_date', 'package__fullname'
+                ).order_by('-install_date')
+        ):
+            installed[k.strftime('%Y-%m-%d %H:%M:%S')].append('+' + v)
+
+        for k, v in list(
+                self.packagehistory_set.filter(
+                    uninstall_date__isnull=False
+                ).values_list(
+                    'uninstall_date', 'package__fullname'
+                ).order_by('-uninstall_date')
+        ):
+            uninstalled[k.strftime('%Y-%m-%d %H:%M:%S')].append('-' + v)
+
+        return merge_dicts(installed, uninstalled)
 
     @staticmethod
     def group_by_project(user):
