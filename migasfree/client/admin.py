@@ -162,39 +162,12 @@ class ComputerAdmin(admin.ModelAdmin):
     """
 
     def get_software_inventory(self, obj):
-        return '\n'.join(list(
-            obj.packagehistory_set.filter(
-                uninstall_date__isnull=True
-            ).values_list(
-                'package__fullname', flat=True
-            )
-        ))
+        return '\n'.join(obj.get_software_inventory())
 
     get_software_inventory.short_description = _('Software Inventory')
 
     def get_software_history(self, obj):
-        installed = defaultdict(list)
-        uninstalled = defaultdict(list)
-
-        for k, v in list(
-                obj.packagehistory_set.filter(
-                    install_date__isnull=False
-                ).values_list(
-                    'install_date', 'package__fullname'
-                ).order_by('-install_date')
-        ):
-            installed[k.strftime('%Y-%m-%d %H:%M:%S')].append('+' + v)
-
-        for k, v in list(
-                obj.packagehistory_set.filter(
-                    uninstall_date__isnull=False
-                ).values_list(
-                    'uninstall_date', 'package__fullname'
-                ).order_by('-uninstall_date')
-        ):
-            uninstalled[k.strftime('%Y-%m-%d %H:%M:%S')].append('-' + v)
-
-        ret = merge_dicts(installed, uninstalled)
+        ret = obj.get_software_history()
 
         return '\n\n'.join(
             "# %s\n%s" % (
