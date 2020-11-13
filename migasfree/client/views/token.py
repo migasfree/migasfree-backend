@@ -31,6 +31,8 @@ from rest_framework.response import Response
 from ...device.models import Logical, Driver, Model
 from ...core.serializers import PlatformSerializer
 from ...core.views import MigasViewSet, ExportViewSet
+from ...utils import replace_keys
+
 from .. import models, serializers
 from ..filters import (
     PackageHistoryFilter, ErrorFilter, NotificationFilter,
@@ -133,13 +135,22 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         """
         computer = get_object_or_404(models.Computer, pk=pk)
 
-        serializer = serializers.PackageHistorySerializer(
-            computer.packagehistory_set.filter(uninstall_date__isnull=True),
-            many=True
+        data = list(
+            computer.packagehistory_set.filter(
+                uninstall_date__isnull=True
+            ).values(
+                'package__id', 'package__fullname',
+            ).order_by('package__fullname')
         )
 
         return Response(
-            serializer.data,
+            replace_keys(
+                data,
+                {
+                    'package__id': 'id',
+                    'package__fullname': 'name',
+                }
+            ),
             status=status.HTTP_200_OK
         )
 
@@ -150,13 +161,8 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         """
         computer = get_object_or_404(models.Computer, pk=pk)
 
-        package_history = models.PackageHistory.objects.filter(computer=computer)
-        serializer = serializers.PackageHistorySerializer(
-            package_history, many=True
-        )
-
         return Response(
-            serializer.data,
+            computer.get_software_history(),
             status=status.HTTP_200_OK
         )
 
