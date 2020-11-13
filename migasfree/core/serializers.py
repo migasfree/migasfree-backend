@@ -254,7 +254,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
 class PackageInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Package
-        fields = ('id', 'name')
+        fields = ('id', 'fullname')
 
 
 class PackageSerializer(serializers.ModelSerializer):
