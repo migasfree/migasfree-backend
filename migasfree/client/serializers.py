@@ -19,7 +19,8 @@
 from rest_framework import serializers
 
 from ..core.serializers import (
-    ClientAttributeSerializer, ProjectInfoSerializer, AttributeInfoSerializer,
+    ClientAttributeSerializer, ProjectInfoSerializer,
+    AttributeInfoSerializer, PackageInfoSerializer,
 )
 from ..device.serializers import LogicalInfoSerializer
 from . import models
@@ -200,6 +201,8 @@ class NotificationWriteSerializer(serializers.ModelSerializer):
 
 
 class PackageHistorySerializer(serializers.ModelSerializer):
+    package = PackageInfoSerializer(many=False, read_only=True)
+
     class Meta:
         model = models.PackageHistory
         fields = '__all__'
