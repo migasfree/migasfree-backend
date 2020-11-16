@@ -204,6 +204,30 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
         return Response(response, status=status.HTTP_200_OK)
 
+    @action(methods=['get'], detail=True)
+    def errors(self, request, pk=None):
+        get_object_or_404(models.Computer, pk=pk)
+
+        return Response(
+            {
+                'unchecked': models.Error.unchecked.filter(computer__pk=pk).count(),
+                'total': models.Error.objects.filter(computer__pk=pk).count()
+            },
+            status=status.HTTP_200_OK
+        )
+
+    @action(methods=['get'], detail=True)
+    def faults(self, request, pk=None):
+        get_object_or_404(models.Computer, pk=pk)
+
+        return Response(
+            {
+                'unchecked': models.Fault.unchecked.filter(computer__pk=pk).count(),
+                'total': models.Fault.objects.filter(computer__pk=pk).count()
+            },
+            status=status.HTTP_200_OK
+        )
+
     @action(methods=['post'], detail=True)
     def replacement(self, request, pk=None):
         """
