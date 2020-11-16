@@ -128,6 +128,22 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(methods=['get'], detail=True)
+    def label(self, request, pk=None):
+        computer = get_object_or_404(models.Computer, pk=pk)
+
+        response = {
+            'uuid': computer.uuid,
+            'name': computer.name,
+            'search': computer.__str__(),
+            'helpdesk': settings.MIGASFREE_HELP_DESK,
+        }
+
+        return Response(
+            response,
+            status=status.HTTP_200_OK
+        )
+
     @action(methods=['get'], detail=True, url_path='software/inventory', url_name='software_inventory')
     def software_inventory(self, request, pk=None):
         """
