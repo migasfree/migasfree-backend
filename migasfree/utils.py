@@ -278,3 +278,22 @@ def decode_dict(value):
     https://www.geeksforgeeks.org/python-convert-bytestring-keyvalue-pair-of-dictionary-to-string/
     """
     return {y.decode(): value.get(y).decode() for y in value.keys()}
+
+
+def to_heatmap(results, range_name='day'):
+    """
+    :param results: [{"day": datetime, "count": int}, ...]
+    :param range_name
+    :return: [["YYYY-MM-DD", int], ...]
+    """
+
+    heatmap = []
+    for item in results:
+        heatmap.append(
+            [
+                item[range_name].strftime("%Y-%m-%d"),
+                item['count']
+            ]
+        )
+
+    return heatmap
