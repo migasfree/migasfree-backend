@@ -22,9 +22,16 @@ from dateutil.relativedelta import relativedelta
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.translation import gettext as _
+from rest_framework import viewsets, status, permissions
+from rest_framework.decorators import action, permission_classes
+from rest_framework.response import Response
 
-from ...client.models import Computer
+from ...client.models import (
+    Computer, Error, Fault,
+    Synchronization, Migration, StatusLog,
+)
 from ...core.models import Project
+from ...utils import to_heatmap
 
 from . import MONTHLY_RANGE
 
@@ -136,3 +143,34 @@ def event_by_month(data, begin_date, end_date, model, field='project_id'):
         chart_data[labels[item]] = new_data[item]
 
     return {'x_labels': x_axe, 'data': chart_data}
+
+
+@permission_classes((permissions.IsAuthenticated,))
+class EventViewSet(viewsets.ViewSet):
+    @action(methods=['get'], detail=False, url_path='by-day')
+    def by_day(self, request, format=None):
+        user = request.user.userprofile
+        computer_id = request.GET.get('computer_id', 0)
+        start_date = request.GET.get('start_date', '')
+        end_date = request.GET.get('end_date', '')
+
+        # FIXME validate parameters
+
+        if 'error' in self.basename:
+            event_class = 'Error'
+        elif 'fault' in self.basename:
+            event_class = 'Fault'
+        elif 'sync' in self.basename:
+            event_class = 'Synchronization'
+        elif 'migration' in self.basename:
+            event_class = 'Migration'
+        elif 'status' in self.basename:
+            event_class = 'StatusLog'
+
+        event_class = globals()[event_class]
+        data = event_class.by_day(computer_id, start_date, end_date, user)
+
+        return Response(
+            to_heatmap(data),
+            status=status.HTTP_200_OK
+        )
