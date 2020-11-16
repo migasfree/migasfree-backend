@@ -24,7 +24,7 @@ from dateutil.relativedelta import relativedelta
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from django_redis import get_redis_connection
-from rest_framework import viewsets, status, permissions
+from rest_framework import status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
@@ -33,7 +33,10 @@ from ...client.models import Synchronization
 from ...utils import replace_keys
 from .. import validators
 
-from .events import event_by_month, month_interval, month_year_iter
+from .events import (
+    event_by_month, month_interval,
+    month_year_iter, EventViewSet,
+)
 
 
 def daterange(start_date, end_date):
@@ -43,7 +46,7 @@ def daterange(start_date, end_date):
 
 
 @permission_classes((permissions.IsAuthenticated,))
-class SyncStatsViewSet(viewsets.ViewSet):
+class SyncStatsViewSet(EventViewSet):
     @action(methods=['get'], detail=False)
     def yearly(self, request, format=None):
         begin = int(request.query_params.get('begin', time.localtime()[0]))

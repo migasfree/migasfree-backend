@@ -20,7 +20,7 @@ from collections import defaultdict
 
 from django.db.models.aggregates import Count
 from django.utils.translation import gettext as _
-from rest_framework import viewsets, status, permissions
+from rest_framework import status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
@@ -28,11 +28,11 @@ from ...core.models import Platform
 from ...client.models import Fault
 from ...utils import replace_keys
 
-from .events import event_by_month, month_interval
+from .events import event_by_month, month_interval, EventViewSet
 
 
 @permission_classes((permissions.IsAuthenticated,))
-class FaultStatsViewSet(viewsets.ViewSet):
+class FaultStatsViewSet(EventViewSet):
     @action(methods=['get'], detail=False)
     def unchecked(self, request, format=None):
         user = request.user.userprofile

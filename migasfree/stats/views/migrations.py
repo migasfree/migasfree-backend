@@ -20,18 +20,21 @@ from collections import defaultdict
 
 from django.db.models.aggregates import Count
 from django.utils.translation import gettext as _
-from rest_framework import viewsets, status, permissions
+from rest_framework import status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
 from ...core.models import Platform
 from ...client.models import Migration
 
-from .events import event_by_month, month_interval, month_year_iter
+from .events import (
+    event_by_month, month_interval,
+    month_year_iter, EventViewSet,
+)
 
 
 @permission_classes((permissions.IsAuthenticated,))
-class MigrationStatsViewSet(viewsets.ViewSet):
+class MigrationStatsViewSet(EventViewSet):
     @action(methods=['get'], detail=False, url_path='project')
     def by_project(self, request, format=None):
         user = request.user.userprofile
