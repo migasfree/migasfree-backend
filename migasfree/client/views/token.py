@@ -384,7 +384,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
         return Response(response, status=status.HTTP_200_OK)
 
-    @action(methods=['get'], detail=True, url_path='simulate-sync')
+    @action(methods=['get'], detail=True, url_path='sync/simulation')
     def simulate_sync(self, request, pk=None):
         computer = get_object_or_404(models.Computer, pk=pk)
         user = request.user
