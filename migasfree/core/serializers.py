@@ -25,7 +25,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_auth.serializers import UserDetailsSerializer
 
-from migasfree.client.models import Computer
+from ..client.models import Computer
 
 from . import tasks
 
