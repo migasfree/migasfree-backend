@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import defaultdict
 
 from django.db import models
@@ -499,6 +499,18 @@ class Computer(models.Model, MigasLink):
             'inner': platforms,
             'outer': projects,
         }
+
+    def hardware_capture_is_required(self):
+        if self.last_hardware_capture:
+            capture = (datetime.now() > (
+                self.last_hardware_capture.replace(tzinfo=None) + timedelta(
+                    days=settings.MIGASFREE_HW_PERIOD
+                ))
+            )
+        else:
+            capture = True
+
+        return capture
 
     def update_last_hardware_capture(self):
         self.last_hardware_capture = datetime.now()
