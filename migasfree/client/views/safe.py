@@ -629,9 +629,16 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Getting fault definitions...'))
 
-        definitions = models.FaultDefinition.enabled_for_attributes(
+        results = models.FaultDefinition.enabled_for_attributes(
             computer.get_all_attributes()
         )
+        definitions = []
+        for item in results:
+            definitions.append({
+                'language': item.get_language_display(),
+                'name': item.name,
+                'code': item.code
+            })
 
         add_computer_message(computer, gettext('Sending fault definitions...'))
 
@@ -1036,14 +1043,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             computer, gettext('Getting hardware capture is required...')
         )
 
-        if computer.last_hardware_capture:
-            capture = (datetime.now() > (
-                computer.last_hardware_capture.replace(tzinfo=None) + timedelta(
-                    days=settings.MIGASFREE_HW_PERIOD
-                ))
-            )
-        else:
-            capture = True
+        capture = computer.hardware_capture_is_required()
 
         add_computer_message(
             computer, gettext('Sending hardware capture response...')
