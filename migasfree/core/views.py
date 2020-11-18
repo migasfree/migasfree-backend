@@ -464,6 +464,37 @@ class PackageViewSet(
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
+class DeploymentViewSet(viewsets.ModelViewSet, MigasViewSet):
+    queryset = Deployment.objects.all()
+    serializer_class = DeploymentSerializer
+    filterset_class = DeploymentFilter
+    ordering_fields = '__all__'
+    ordering = ('-start_date', 'name')
+
+    """ FIXME
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return DeploymentWriteSerializer
+
+        return DeploymentSerializer
+    """
+
+    def get_queryset(self):
+        if self.request is None:
+            return Deployment.objects.none()
+
+        user = self.request.user.userprofile
+        qs = self.queryset
+        if not user.is_view_all():
+            qs = qs.filter(project__in=user.get_projects())
+            if user.domain_preference:
+                qs = qs.filter(domain=user.domain_preference)
+
+        return qs
+
+
+@permission_classes((permissions.DjangoModelPermissions,))
 class InternalSourceViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = InternalSource.objects.all()
     serializer_class = InternalSourceSerializer
