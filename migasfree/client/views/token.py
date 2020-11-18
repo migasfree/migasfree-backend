@@ -28,10 +28,12 @@ from rest_framework import viewsets, exceptions, status, mixins, filters, permis
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
+from ...core.models import Deployment
 from ...device.models import Logical, Driver, Model
+from ...app_catalog.models import Policy
 from ...core.serializers import PlatformSerializer
 from ...core.views import MigasViewSet, ExportViewSet
-from ...utils import replace_keys
+from ...utils import replace_keys, remove_duplicates_preserving_order
 
 from .. import models, serializers
 from ..filters import (
@@ -379,6 +381,66 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
                 date = datetime.strptime(date, '%Y-%m-%d')
                 if date >= computer.created_at:
                     response['status'] = settings.MIGASFREE_DEFAULT_COMPUTER_STATUS
+
+        return Response(response, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], detail=True, url_path='simulate-sync')
+    def simulate_sync(self, request, pk=None):
+        computer = get_object_or_404(models.Computer, pk=pk)
+        user = request.user
+        user.userprofile.check_scope(pk)
+
+        repos = Deployment.available_deployments(
+            computer, computer.get_all_attributes()
+        ).values('id', 'name')
+        definitions = models.FaultDefinition.enabled_for_attributes(
+            computer.get_all_attributes()
+        ).values('id', 'name')
+
+        pkgs = Deployment.available_deployments(
+            computer, computer.get_all_attributes()
+        ).values_list('packages_to_install', 'packages_to_remove')
+
+        install = []
+        remove = []
+        for install_item, remove_item in pkgs:
+            if install_item:
+                install = [x for x in install_item.split('\n') if x]
+
+            if remove_item:
+                remove = [x for x in remove_item.split('\n') if x]
+
+        packages = {
+            'install': remove_duplicates_preserving_order(install),
+            'remove': remove_duplicates_preserving_order(remove)
+        }
+
+        policy_pkg_to_install, policy_pkg_to_remove = Policy.get_packages(computer)
+        policies = {
+            'install': policy_pkg_to_install,
+            'remove': policy_pkg_to_remove
+        }
+
+        capture = computer.hardware_capture_is_required()
+
+        logical_devices = []
+        for device in computer.logical_devices():
+            logical_devices.append(device.as_dict(computer.project))
+
+        if computer.default_logical_device:
+            default_logical_device = computer.default_logical_device.id
+        else:
+            default_logical_device = 0
+
+        response = {
+            'deployments': repos,
+            'fault_definitions': definitions,
+            'packages': packages,
+            'policies': policies,
+            'capture_hardware': capture,
+            'logical_devices': logical_devices,
+            'default_logical_device': default_logical_device
+        }
 
         return Response(response, status=status.HTTP_200_OK)
 
