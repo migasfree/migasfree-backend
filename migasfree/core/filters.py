@@ -95,19 +95,37 @@ class PropertyFilter(filters.FilterSet):
 class AttributeFilter(filters.FilterSet):
     class Meta:
         model = Attribute
-        fields = ['id', 'property_att__id', 'property_att__prefix', 'value', 'property_att__sort']
+        fields = {
+            'id': ['exact'],
+            'property_att__id': ['exact'],
+            'property_att__prefix': ['exact'],
+            'value': ['exact', 'icontains'],
+            'property_att__sort': ['exact']
+        }
 
 
 class ClientAttributeFilter(filters.FilterSet):
     class Meta:
         model = ClientAttribute
-        fields = ['id', 'property_att__id', 'property_att__prefix', 'value', 'property_att__sort']
+        fields = {
+            'id': ['exact'],
+            'property_att__id': ['exact'],
+            'property_att__prefix': ['exact'],
+            'value': ['exact', 'icontains'],
+            'property_att__sort': ['exact'],
+        }
 
 
 class ServerAttributeFilter(filters.FilterSet):
     class Meta:
         model = ServerAttribute
-        fields = ['id', 'property_att__id', 'property_att__prefix', 'value', 'property_att__sort']
+        fields = {
+            'id': ['exact'],
+            'property_att__id': ['exact'],
+            'property_att__prefix': ['exact'],
+            'value': ['exact', 'icontains'],
+            'property_att__sort': ['exact'],
+        }
 
 
 class ScheduleDelayFilter(filters.FilterSet):
