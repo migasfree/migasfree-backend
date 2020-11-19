@@ -41,7 +41,7 @@ from .forms import (
 
 admin.site.register(Platform)
 admin.site.register(Attribute)
-
+admin.site.register(Property)
 
 @admin.register(Project)
 class ProjectAdmin(ImportExportActionModelAdmin):
