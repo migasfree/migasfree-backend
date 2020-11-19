@@ -298,7 +298,7 @@ class ServerAttributeViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class ClientAttributeViewSet(viewsets.ModelViewSet, MigasViewSet):
-    queryset = ClientAttribute.objects.filter(property_att__sort='client')
+    queryset = ClientAttribute.objects.filter(property_att__sort__in=['client', 'basic'])
     serializer_class = ClientAttributeSerializer
     filterset_class = ClientAttributeFilter
     search_fields = ['value', 'description']
