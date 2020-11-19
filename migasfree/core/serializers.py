@@ -194,7 +194,10 @@ class ServerAttributeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServerAttribute
-        fields = ('id', 'property_att', 'value', 'description')
+        fields = (
+            'id', 'property_att', 'value',
+            'description', 'total_computers'
+        )
 
 
 class ServerAttributeWriteSerializer(serializers.ModelSerializer):
@@ -208,7 +211,10 @@ class ClientAttributeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClientAttribute
-        fields = ('id', 'property_att', 'value', 'description')
+        fields = (
+            'id', 'property_att', 'value',
+            'description', 'total_computers'
+        )
 
 
 class ClientAttributeWriteSerializer(serializers.ModelSerializer):
