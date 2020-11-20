@@ -100,6 +100,7 @@ class AttributeFilter(filters.FilterSet):
             'property_att__id': ['exact'],
             'property_att__prefix': ['exact'],
             'value': ['exact', 'icontains'],
+            'description': ['icontains'],
             'property_att__sort': ['exact']
         }
 
@@ -112,6 +113,7 @@ class ClientAttributeFilter(filters.FilterSet):
             'property_att__id': ['exact'],
             'property_att__prefix': ['exact'],
             'value': ['exact', 'icontains'],
+            'description': ['icontains'],
             'property_att__sort': ['exact'],
         }
 
@@ -124,6 +126,7 @@ class ServerAttributeFilter(filters.FilterSet):
             'property_att__id': ['exact'],
             'property_att__prefix': ['exact'],
             'value': ['exact', 'icontains'],
+            'description': ['icontains'],
             'property_att__sort': ['exact'],
         }
 
