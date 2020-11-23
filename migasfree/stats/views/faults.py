@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from collections import defaultdict
-
 from django.db.models.aggregates import Count
 from django.utils.translation import gettext as _
 from rest_framework import status, permissions
@@ -35,48 +33,27 @@ from .events import event_by_month, month_interval, EventViewSet
 class FaultStatsViewSet(EventViewSet):
     @action(methods=['get'], detail=False)
     def unchecked(self, request, format=None):
-        user = request.user.userprofile
-        total = Fault.unchecked_count(user)
-
-        values = defaultdict(list)
-        for item in Fault.unchecked.scope(user).values(
-            'project__platform__id',
-            'project__id',
-            'project__name',
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__id', '-count'):
-            values[item.get('project__platform__id')].append(
-                {
-                    'name': item.get('project__name'),
-                    'value': item.get('count'),
-                    'project_id': item.get('project__id'),
-                    'platform_id': item.get('project__platform__id')
-                }
-            )
-
-        data = []
-        for platform in Platform.objects.scope(user).all():
-            if platform.id in values:
-                count = sum(item['value'] for item in values[platform.id])
-                data.append(
-                    {
-                        'name': platform.name,
-                        'value': count,
-                        'platform_id': platform.id,
-                        'data': values[platform.id]
-                    }
-                )
+        data = Fault.unchecked_by_project(request.user.userprofile)
+        inner_aliases = {
+            'project__platform__id': 'platform_id',
+            'project__platform__name': 'name',
+            'count': 'value'
+        }
+        outer_aliases = {
+            'project__name': 'name',
+            'project__id': 'project_id',
+            'project__platform__id': 'platform_id',
+            'count': 'value'
+        }
 
         return Response(
             {
-                'title': _('Unchecked Faults'),
-                'total': total,
-                'data': data,
+                'total': data['total'],
+                'inner': replace_keys(data['inner'], inner_aliases),
+                'outer': replace_keys(data['outer'], outer_aliases)
             },
             status=status.HTTP_200_OK
         )
-
 
     @action(methods=['get'], detail=False, url_path='project/month')
     def project_by_month(self, request, format=None):
