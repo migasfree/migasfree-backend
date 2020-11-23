@@ -115,12 +115,14 @@ class MigasLink(object):
                     })
 
         data.append({
-            'url': reverse(
-                'admin:{}_{}_changelist'.format(
-                    self._meta.app_label,
-                    self._meta.model_name
-                )
-            ) + str(self.id),
+            #'url': reverse(
+            #    'admin:{}_{}_changelist'.format(
+            #        self._meta.app_label,
+            #        self._meta.model_name
+            #    )
+            #) + str(self.id),
+            'model': self._meta.verbose_name_plural.lower(),
+            'pk': self.id,
             'text': '{} {}'.format(self._meta.verbose_name, self.__str__()),
             'count': 1,
             'actions': actions
@@ -373,13 +375,15 @@ class MigasLink(object):
     def relations(self, request):
         data = []
 
-        if self._meta.model_name == 'hwnode':
+        if self._meta.model_name == 'node':
             from ...client.models import Computer
             data.append({
-                'url': '{}?{}'.format(
-                    reverse('admin:server_computer_changelist'),
-                    urlencode({'product': self.computer.product}),
-                ),
+                #'url': '{}?{}'.format(
+                #    reverse('admin:server_computer_changelist'),
+                #    urlencode({'product': self.computer.product}),
+                #),
+                'model': 'computers',
+                'query': [{'product': self.computer.product}],
                 'text': '{} [{}]'.format(
                     gettext('computer'),
                     gettext('product')
@@ -513,32 +517,11 @@ class MigasLink(object):
                 except ObjectDoesNotExist:
                     pass
 
-        url = 'admin:{}_{}_change'.format(
-            self._meta.app_label,
-            self._meta.model_name
-        )
-        if self._meta.model_name == 'attribute':
-            if self.property_att.sort == 'server':
-                url = 'admin:{}_serverattribute_change'.format(self._meta.app_label)
-            else:
-                url = 'admin:{}_clientattribute_change'.format(self._meta.app_label)
-
-        if self._meta.model_name == 'deployment':
-            from . import Deployment
-            if self.source == Deployment.SOURCE_INTERNAL:
-                url = 'admin:{}_internalsource_change'.format(self._meta.app_label)
-            elif self.source == Deployment.SOURCE_EXTERNAL:
-                url = 'admin:{}_externalsource_change'.format(self._meta.app_label)
-
         lnk = {
-            'url': reverse(
-                url,
-                args=(self.id,)
-            ),
             'text': escape_format_string(self.__str__()),
-            'app': self._meta.app_label,
-            'class': self._meta.model_name,
-            'pk': self.id
+            # 'app': self._meta.app_label,
+            # 'class': self._meta.model_name,
+            # 'pk': self.id
         }
         if self._meta.model_name == 'computer':
             lnk['status'] = self.status
