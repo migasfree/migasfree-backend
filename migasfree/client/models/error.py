@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.db import models
+from django.db.models.aggregates import Count
 from django.utils.translation import gettext_lazy as _
 
 from ...core.models import Project
@@ -86,6 +87,31 @@ class Error(Event):
             return Error.unchecked.count()
 
         return Error.unchecked.scope(user).count()
+
+    @staticmethod
+    def unchecked_by_project(user):
+        total = Error.unchecked_count(user)
+
+        projects = list(Error.unchecked.scope(user).values(
+            'project__name',
+            'project__id',
+            'project__platform__id',
+        ).annotate(
+            count=Count('id')
+        ).order_by('project__platform__id', '-count'))
+
+        platforms = list(Error.unchecked.scope(user).values(
+            'project__platform__id',
+            'project__platform__name'
+        ).annotate(
+            count=Count('id')
+        ).order_by('project__platform__id', '-count'))
+
+        return {
+            'total': total,
+            'inner': platforms,
+            'outer': projects,
+        }
 
     def checked_ok(self):
         self.checked = True
