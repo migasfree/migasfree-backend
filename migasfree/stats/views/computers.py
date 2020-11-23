@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.db.models import Count
+from django.db.models.aggregates import Count
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.translation import gettext as _
