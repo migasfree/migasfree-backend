@@ -20,7 +20,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 
 from django.db import models
-from django.db.models import Count
+from django.db.models.aggregates import Count
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.db.models.signals import pre_save, post_save, pre_delete
 from django.conf import settings
