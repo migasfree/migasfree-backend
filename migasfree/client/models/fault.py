@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.db import models
+from django.db.models.aggregates import Count
 from django.utils.translation import gettext_lazy as _
 
 from ...core.models import Project
@@ -44,14 +45,12 @@ class UncheckedManager(DomainFaultManager):
         )
 
     def scope(self, user):
-        qs = super(UncheckedManager, self).scope(user).filter(
-            checked=0,
-            fault_definition__users=None
+        return super(UncheckedManager, self).scope(user).filter(
+            checked=0
+        ).filter(
+            models.Q(fault_definition__users__id__in=[user.id, ])
+            | models.Q(fault_definition__users=None)
         )
-        if user:
-            qs = qs.filter(fault_definition__users__id__in=[user.id, ])
-
-        return qs
 
 
 class FaultManager(DomainFaultManager):
@@ -110,6 +109,31 @@ class Fault(Event):
             )
 
         return queryset.count()
+
+    @staticmethod
+    def unchecked_by_project(user):
+        total = Fault.unchecked_count(user)
+
+        projects = list(Fault.unchecked.scope(user).values(
+            'project__name',
+            'project__id',
+            'project__platform__id',
+        ).annotate(
+            count=Count('id')
+        ).order_by('project__platform__id', '-count'))
+
+        platforms = list(Fault.unchecked.scope(user).values(
+            'project__platform__id',
+            'project__platform__name'
+        ).annotate(
+            count=Count('id')
+        ).order_by('project__platform__id', '-count'))
+
+        return {
+            'total': total,
+            'inner': platforms,
+            'outer': projects,
+        }
 
     @staticmethod
     def group_by_definition(user=None):
