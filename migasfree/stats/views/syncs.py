@@ -50,9 +50,16 @@ def daterange(start_date, end_date):
 class SyncStatsViewSet(EventViewSet):
     @action(methods=['get'], detail=False)
     def yearly(self, request, format=None):
+        """
+        Returns unique number of synchronized computers
+        Params:
+            begin int (Y)
+            end int (Y)
+            project_id int
+        """
         begin = int(request.query_params.get('begin', time.localtime()[0]))
         end = int(request.query_params.get('end', time.localtime()[0] + 1))
-        project_id = request.query_params.get('project_id')
+        project_id = request.query_params.get('project_id', 0)
 
         validators.validate_year(begin)
         validators.validate_year(end)
@@ -66,15 +73,20 @@ class SyncStatsViewSet(EventViewSet):
         stats = []
         for i in range(begin, end):
             value = con.get('%s:%04d' % (key, i))
-            if not value:
-                value = 0
-            stats.append([i, int(value)])
+            stats.append([i, int(value) if value else 0])
 
         return Response(stats, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False)
     def monthly(self, request, format=None):
-        fmt = '%Y%m'
+        """
+        Returns unique number of synchronized computers
+        Params:
+            begin string (Y-m)
+            end string (Y-m)
+            project_id int
+        """
+        fmt = '%Y-%m'
 
         end = request.query_params.get('end', '')
         try:
@@ -104,16 +116,24 @@ class SyncStatsViewSet(EventViewSet):
             end.month, end.year
         ):
             value = con.get('%s:%04d%02d' % (key, i[0], i[1]))
-            if not value:
-                value = 0
-            stats.append([int('%04d%02d' % (i[0], i[1])), int(value)])
+            stats.append([
+                '%04d-%02d' % (i[0], i[1]),
+                int(value) if value else 0
+            ])
 
         return Response(stats, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False)
     def daily(self, request, format=None):
+        """
+        Returns unique number of synchronized computers
+        Params:
+            begin string (Y-m-d)
+            end string (Y-m-d)
+            project_id int
+        """
         now = time.localtime()
-        fmt = '%Y%m%d'
+        fmt = '%Y-%m-%d'
 
         end = request.query_params.get('end', '')
         try:
@@ -134,45 +154,32 @@ class SyncStatsViewSet(EventViewSet):
             get_object_or_404(Project, pk=project_id)
             key = 'migasfree:stats:%d:days' % int(project_id)
 
-        """
-        FIXME???
-        time_range = Synchronization.time_range(
-            begin, end,
-            platform=0, project=project_id,
-            range_name='day', user=request.user.userprofile
-        )
-
-        # filling the gaps (zeros)
-        data = []
-        labels = []
-        for item in datetime_iterator(begin, end, delta):
-            labels.append(_date(item, 'Y-m-d (D)'))
-            index = str(to_timestamp(datetime.combine(item, time.min)))
-            data.append(time_range[index] if index in time_range else 0)
-
-        return Response(list(zip(labels, data)), status=status.HTTP_200_OK)
-        """
-
         con = get_redis_connection()
         stats = []
         for single_date in daterange(begin, end):
             value = con.get('%s:%s' % (
-                key, time.strftime('%Y%m%d', single_date.timetuple())
+                key,
+                time.strftime('%Y%m%d', single_date.timetuple())
             ))
-            if not value:
-                value = 0
             stats.append([
-                int(time.strftime('%Y%m%d', single_date.timetuple())),
-                int(value)
+                time.strftime(fmt, single_date.timetuple()),
+                int(value) if value else 0
             ])
 
         return Response(stats, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False)
     def hourly(self, request, format=None):
+        """
+        Returns unique number of synchronized computers
+        Params:
+            begin string (Y-m-dTH)
+            end string (Y-m-dTH)
+            project_id int
+        """
         now = time.localtime()
         hour = timedelta(hours=1)
-        fmt = '%Y%m%d%H'
+        fmt = '%Y-%m-%dT%H'
 
         begin = request.query_params.get('begin', '')
         try:
@@ -186,7 +193,7 @@ class SyncStatsViewSet(EventViewSet):
         except ValueError:
             end = datetime(now[0], now[1], now[2], now[3]) + hour
 
-        project_id = request.query_params.get('project_id')
+        project_id = request.query_params.get('project_id', 0)
 
         key = 'migasfree:stats:hours'
         if project_id:
@@ -197,13 +204,11 @@ class SyncStatsViewSet(EventViewSet):
         stats = []
         while begin <= end:
             value = con.get('%s:%s' % (
-                key, begin.strftime(fmt)
+                key, begin.strftime('%Y%m%d%H')
             ))
-            if not value:
-                value = 0
             stats.append([
-                int(begin.strftime(fmt)),
-                int(value)
+                begin.strftime(fmt),
+                int(value) if value else 0
             ])
             begin += hour
 
