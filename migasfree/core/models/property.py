@@ -26,7 +26,7 @@ from .migas_link import MigasLink
 class ClientPropertyManager(models.Manager):
     def get_queryset(self):
         return super(ClientPropertyManager, self).get_queryset().filter(
-            sort='client'
+            sort__in=['client', 'basic']
         )
 
 
