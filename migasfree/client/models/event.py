@@ -88,6 +88,24 @@ class Event(models.Model, MigasLink):
             '-created_at'
         ).first()
 
+    @classmethod
+    def time_range(cls, start_date, end_date, platform=0, project=0, range_name='month', user=None):
+        items = cls.objects.scope(user).filter(
+            created_at__range=(start_date, end_date)
+        ).extra(
+            {range_name: "date_trunc('" + range_name + "', created_at)"}
+        ).values(range_name).annotate(
+            count=Count('computer_id', distinct=True)
+        ).order_by('-' + range_name)
+
+        if platform:
+            items = items.filter(project__platform=platform)
+
+        if project:
+            items = items.filter(project__id=project)
+
+        return items
+
     def __str__(self):
         return '{} ({:%Y-%m-%d %H:%M:%S})'.format(self.computer, self.created_at)
 
