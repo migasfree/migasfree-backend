@@ -38,6 +38,7 @@ from .events import (
     month_year_iter, EventViewSet,
 )
 
+from . import DAILY_RANGE, MONTHLY_RANGE
 
 def daterange(start_date, end_date):
     # http://stackoverflow.com/questions/1060279/iterating-through-a-range-of-dates-in-python
@@ -75,21 +76,21 @@ class SyncStatsViewSet(EventViewSet):
     def monthly(self, request, format=None):
         fmt = '%Y%m'
 
-        begin = request.query_params.get('begin', '')
-        try:
-            begin = datetime.strptime(begin, fmt)
-        except ValueError:
-            begin = datetime.now()
-
-        begin += relativedelta(day=1, hour=0, minute=0, second=0, microsecond=0)
-
         end = request.query_params.get('end', '')
         try:
             end = datetime.strptime(end, fmt)
         except ValueError:
             end = datetime.now() + relativedelta(months=1)
 
-        project_id = request.query_params.get('project_id')
+        begin = request.query_params.get('begin', '')
+        try:
+            begin = datetime.strptime(begin, fmt)
+        except ValueError:
+            begin = end - relativedelta(months=+MONTHLY_RANGE)
+
+        begin += relativedelta(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+        project_id = request.query_params.get('project_id', 0)
 
         key = 'migasfree:stats:months'
         if project_id:
@@ -114,24 +115,43 @@ class SyncStatsViewSet(EventViewSet):
         now = time.localtime()
         fmt = '%Y%m%d'
 
-        begin = request.query_params.get('begin', '')
-        try:
-            begin = datetime.strptime(begin, fmt)
-        except ValueError:
-            begin = datetime(now[0], now[1], now[2])
-
         end = request.query_params.get('end', '')
         try:
             end = datetime.strptime(end, fmt)
         except ValueError:
             end = datetime(now[0], now[1], now[2]) + timedelta(days=1)
 
-        project_id = request.query_params.get('project_id')
+        begin = request.query_params.get('begin', '')
+        try:
+            begin = datetime.strptime(begin, fmt)
+        except ValueError:
+            begin = end - timedelta(days=DAILY_RANGE)
+
+        project_id = request.query_params.get('project_id', 0)
 
         key = 'migasfree:stats:days'
         if project_id:
             get_object_or_404(Project, pk=project_id)
             key = 'migasfree:stats:%d:days' % int(project_id)
+
+        """
+        FIXME???
+        time_range = Synchronization.time_range(
+            begin, end,
+            platform=0, project=project_id,
+            range_name='day', user=request.user.userprofile
+        )
+
+        # filling the gaps (zeros)
+        data = []
+        labels = []
+        for item in datetime_iterator(begin, end, delta):
+            labels.append(_date(item, 'Y-m-d (D)'))
+            index = str(to_timestamp(datetime.combine(item, time.min)))
+            data.append(time_range[index] if index in time_range else 0)
+
+        return Response(list(zip(labels, data)), status=status.HTTP_200_OK)
+        """
 
         con = get_redis_connection()
         stats = []
