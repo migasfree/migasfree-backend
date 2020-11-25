@@ -45,12 +45,15 @@ class UncheckedManager(DomainFaultManager):
         )
 
     def scope(self, user):
-        return super(UncheckedManager, self).scope(user).filter(
-            checked=0
-        ).filter(
-            models.Q(fault_definition__users__id__in=[user.id, ])
-            | models.Q(fault_definition__users=None)
-        )
+        qs = super(UncheckedManager, self).scope(user).filter(checked=0)
+
+        if user:
+            qs = qs.filter(models.Q(fault_definition__users__id__in=[user.id, ])
+            | models.Q(fault_definition__users=None))
+        else:
+            qs = qs.filter(fault_definition__users=None)
+
+        return qs
 
 
 class FaultManager(DomainFaultManager):
