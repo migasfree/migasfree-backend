@@ -116,8 +116,9 @@ def add_synchronizing_computers():
 
     computers = con.smembers('migasfree:watch:msg')
     for computer_id in computers:
+        computer_id = int(computer_id)
         date = con.hget('migasfree:msg:{}'.format(computer_id), 'date')
-        if date and datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%f') > delayed_time:
+        if date and datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f') > delayed_time:
             result += 1
 
     con.hmset(
@@ -142,8 +143,9 @@ def add_delayed_computers():
 
     computers = con.smembers('migasfree:watch:msg')
     for computer_id in computers:
+        computer_id = int(computer_id)
         date = con.hget('migasfree:msg:{}'.format(computer_id), 'date')
-        if date and datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%f') <= delayed_time:
+        if date and datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f') <= delayed_time:
             result += 1
 
     con.hmset(
