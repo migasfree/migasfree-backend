@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import time
+
 from datetime import timedelta, datetime, date
 from dateutil.relativedelta import relativedelta
 
@@ -198,6 +200,7 @@ class EventViewSet(viewsets.ViewSet):
         user = request.user.userprofile
         now = timezone.now()
         fmt = '%Y-%m-%dT%H'
+        human_fmt = '%Y-%m-%d %H:%M:%S'
 
         end = request.query_params.get('end', '')
         try:
@@ -218,7 +221,7 @@ class EventViewSet(viewsets.ViewSet):
         stats = []
 
         for item in datetime_iterator(begin, end - timedelta(hours=1), delta=timedelta(hours=1)):
-            labels.append(item)
+            labels.append(time.strftime(human_fmt, item.timetuple()))
             stats.append({'value': events[item]['count'] if item in events else 0})
 
         return Response(
