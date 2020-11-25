@@ -47,111 +47,6 @@ import logging
 logger = logging.getLogger('migasfree')
 
 
-def update_stats(sync):
-    con = get_redis_connection()
-
-    if not con.sismember(
-        'migasfree:watch:stats:years:%04d' % sync.created_at.year,
-        sync.computer.id
-    ):
-        con.incr('migasfree:stats:years:%04d' % sync.created_at.year)
-        con.sadd(
-            'migasfree:watch:stats:years:%04d' % sync.created_at.year,
-            sync.computer.id
-        )
-        con.incr('migasfree:stats:%d:years:%04d' % (
-            sync.project.id, sync.created_at.year
-        ))
-        con.sadd(
-            'migasfree:watch:stats:%d:years:%04d' % (
-                sync.project.id, sync.created_at.year
-            ),
-            sync.computer.id
-        )
-
-    if not con.sismember(
-        'migasfree:watch:stats:months:%04d%02d' % (
-            sync.created_at.year, sync.created_at.month
-        ),
-        sync.computer.id
-    ):
-        con.incr('migasfree:stats:months:%04d%02d' % (
-            sync.created_at.year, sync.created_at.month
-        ))
-        con.sadd(
-            'migasfree:watch:stats:months:%04d%02d' % (
-                sync.created_at.year, sync.created_at.month
-            ),
-            sync.computer.id
-        )
-        con.incr('migasfree:stats:%d:months:%04d%02d' % (
-            sync.project.id, sync.created_at.year, sync.created_at.month
-        ))
-        con.sadd(
-            'migasfree:watch:stats:%d:months:%04d%02d' % (
-                sync.project.id, sync.created_at.year, sync.created_at.month
-            ),
-            sync.computer.id
-        )
-
-    if not con.sismember(
-        'migasfree:watch:stats:days:%04d%02d%02d' % (
-            sync.created_at.year, sync.created_at.month, sync.created_at.day
-        ),
-        sync.computer.id
-    ):
-        con.incr('migasfree:stats:days:%04d%02d%02d' % (
-            sync.created_at.year, sync.created_at.month, sync.created_at.day
-        ))
-        con.sadd(
-            'migasfree:watch:stats:days:%04d%02d%02d' % (
-                sync.created_at.year, sync.created_at.month, sync.created_at.day
-            ),
-            sync.computer.id
-        )
-        con.incr('migasfree:stats:%d:days:%04d%02d%02d' % (
-            sync.project.id, sync.created_at.year,
-            sync.created_at.month, sync.created_at.day
-        ))
-        con.sadd(
-            'migasfree:watch:stats:%d:days:%04d%02d%02d' % (
-                sync.project.id, sync.created_at.year,
-                sync.created_at.month, sync.created_at.day
-            ),
-            sync.computer.id
-        )
-
-    if not con.sismember(
-        'migasfree:watch:stats:hours:%04d%02d%02d%02d' % (
-            sync.created_at.year, sync.created_at.month,
-            sync.created_at.day, sync.created_at.hour
-        ),
-        sync.computer.id
-    ):
-        con.incr('migasfree:stats:hours:%04d%02d%02d%02d' % (
-            sync.created_at.year, sync.created_at.month,
-            sync.created_at.day, sync.created_at.hour
-        ))
-        con.sadd(
-            'migasfree:watch:stats:hours:%04d%02d%02d%02d' % (
-                sync.created_at.year, sync.created_at.month,
-                sync.created_at.day, sync.created_at.hour
-            ),
-            sync.computer.id
-        )
-        con.incr('migasfree:stats:%d:hours:%04d%02d%02d%02d' % (
-            sync.project.id, sync.created_at.year, sync.created_at.month,
-            sync.created_at.day, sync.created_at.hour
-        ))
-        con.sadd(
-            'migasfree:watch:stats:%d:hours:%04d%02d%02d%02d' % (
-                sync.project.id, sync.created_at.year, sync.created_at.month,
-                sync.created_at.day, sync.created_at.hour
-            ),
-            sync.computer.id
-        )
-
-
 def add_computer_message(computer, message):
     con = get_redis_connection()
     con.hmset(
@@ -319,9 +214,7 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
         )
 
         if serializer.is_valid():
-            synchronization = serializer.save()
-
-            update_stats(synchronization)
+            serializer.save()
 
             return Response(
                 self.create_response(serializer.data),
