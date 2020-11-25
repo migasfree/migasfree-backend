@@ -110,18 +110,23 @@ class SyncStatsViewSet(EventViewSet):
             key = 'migasfree:stats:%d:months' % int(project_id)
 
         con = get_redis_connection()
+        labels = []
         stats = []
         for i in month_year_iter(
             begin.month, begin.year,
             end.month, end.year
         ):
             value = con.get('%s:%04d%02d' % (key, i[0], i[1]))
-            stats.append([
-                '%04d-%02d' % (i[0], i[1]),
-                int(value) if value else 0
-            ])
+            labels.append('%04d-%02d' % (i[0], i[1]))
+            stats.append({'value': int(value) if value else 0})
 
-        return Response(stats, status=status.HTTP_200_OK)
+        return Response(
+            {
+                'x_labels': labels,
+                'data': {_('Computers'): stats}
+            },
+            status=status.HTTP_200_OK
+        )
 
     @action(methods=['get'], detail=False)
     def daily(self, request, format=None):
@@ -134,6 +139,7 @@ class SyncStatsViewSet(EventViewSet):
         """
         now = time.localtime()
         fmt = '%Y-%m-%d'
+        human_fmt = '%Y-%m-%d (%a)'
 
         end = request.query_params.get('end', '')
         try:
@@ -155,18 +161,23 @@ class SyncStatsViewSet(EventViewSet):
             key = 'migasfree:stats:%d:days' % int(project_id)
 
         con = get_redis_connection()
+        labels = []
         stats = []
         for single_date in daterange(begin, end):
             value = con.get('%s:%s' % (
                 key,
                 time.strftime('%Y%m%d', single_date.timetuple())
             ))
-            stats.append([
-                time.strftime(fmt, single_date.timetuple()),
-                int(value) if value else 0
-            ])
+            labels.append(time.strftime(human_fmt, single_date.timetuple()))
+            stats.append({'value': int(value) if value else 0})
 
-        return Response(stats, status=status.HTTP_200_OK)
+        return Response(
+            {
+                'x_labels': labels,
+                'data': {_('Computers'): stats}
+            },
+            status=status.HTTP_200_OK
+        )
 
     @action(methods=['get'], detail=False)
     def hourly(self, request, format=None):
