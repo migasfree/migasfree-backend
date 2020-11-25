@@ -297,13 +297,17 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
         computers = con.smembers('migasfree:watch:msg')
         for computer_id in computers:
-            date = con.hget('migasfree:msg:%s' % computer_id, 'date')
-            if datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%f') <= delayed_time:
+            computer_id = int(computer_id)
+            date = con.hget('migasfree:msg:{}'.format(computer_id), 'date')
+            if date and datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f') <= delayed_time:
                 result.append(computer_id)
 
         delayed_computers = models.Computer.objects.filter(pk__in=result)
 
-        serializer = serializers.ComputerSerializer(delayed_computers, many=True)
+        serializer = serializers.ComputerSerializer(
+            delayed_computers, many=True,
+            context={'request': request}
+        )
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
