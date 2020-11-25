@@ -20,6 +20,7 @@ from datetime import timedelta, datetime, date
 from dateutil.relativedelta import relativedelta
 
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 from rest_framework import viewsets, status, permissions
@@ -33,11 +34,19 @@ from ...client.models import (
 from ...core.models import Project
 from ...utils import to_heatmap
 
-from . import MONTHLY_RANGE
+from . import MONTHLY_RANGE, HOURLY_RANGE
 
 
 def first_day_month(date_):
     return date(date_.year, date_.month, 1)
+
+
+def datetime_iterator(from_date=None, to_date=None, delta=timedelta(minutes=1)):
+    # from https://www.ianlewis.org/en/python-date-range-iterator
+    from_date = from_date or datetime.now()
+    while to_date is None or from_date <= to_date:
+        yield from_date
+        from_date += delta
 
 
 def month_year_iter(start_month, start_year, end_month, end_year):
@@ -147,15 +156,7 @@ def event_by_month(data, begin_date, end_date, model, field='project_id'):
 
 @permission_classes((permissions.IsAuthenticated,))
 class EventViewSet(viewsets.ViewSet):
-    @action(methods=['get'], detail=False, url_path='by-day')
-    def by_day(self, request, format=None):
-        user = request.user.userprofile
-        computer_id = request.GET.get('computer_id', 0)
-        start_date = request.GET.get('start_date', '')
-        end_date = request.GET.get('end_date', '')
-
-        # FIXME validate parameters
-
+    def get_event_class(self):
         if 'error' in self.basename:
             event_class = 'Error'
         elif 'fault' in self.basename:
@@ -167,10 +168,63 @@ class EventViewSet(viewsets.ViewSet):
         elif 'status' in self.basename:
             event_class = 'StatusLog'
 
-        event_class = globals()[event_class]
+        return globals()[event_class]
+
+    @action(methods=['get'], detail=False, url_path='by-day')
+    def by_day(self, request, format=None):
+        user = request.user.userprofile
+        computer_id = request.GET.get('computer_id', 0)
+        start_date = request.GET.get('start_date', '')
+        end_date = request.GET.get('end_date', '')
+
+        # FIXME validate parameters
+
+        event_class = self.get_event_class()
         data = event_class.by_day(computer_id, start_date, end_date, user)
 
         return Response(
             to_heatmap(data),
+            status=status.HTTP_200_OK
+        )
+
+    @action(methods=['get'], detail=False)
+    def history(self, request, format=None):
+        """
+        Returns events history by hours
+        Params:
+            begin string (Y-m-dTH)
+            end string (Y-m-dTH)
+        """
+        user = request.user.userprofile
+        now = timezone.now()
+        fmt = '%Y-%m-%dT%H'
+
+        end = request.query_params.get('end', '')
+        try:
+            end = datetime.strptime(end, fmt)
+        except ValueError:
+            end = datetime(now.year, now.month, now.day, now.hour) + timedelta(hours=1)
+
+        begin = request.query_params.get('begin', '')
+        try:
+            begin = datetime.strptime(begin, fmt)
+        except ValueError:
+            begin = end - timedelta(days=HOURLY_RANGE)
+
+        event_class = self.get_event_class()
+        events = dict((i['hour'], i) for i in event_class.by_hour(begin, end, user))
+
+        labels = []
+        stats = []
+
+        for item in datetime_iterator(begin, end - timedelta(hours=1), delta=timedelta(hours=1)):
+            labels.append(item)
+            stats.append({'value': events[item]['count'] if item in events else 0})
+
+        return Response(
+            {
+                'x_labels': labels,
+                'data': {str(event_class._meta.verbose_name_plural): stats}
+            },
             status=status.HTTP_200_OK
         )
