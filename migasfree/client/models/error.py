@@ -113,6 +113,30 @@ class Error(Event):
             'outer': projects,
         }
 
+    @staticmethod
+    def status_by_project(user):
+        total = Error.objects.scope(user).count()
+
+        projects = list(Error.objects.scope(user).values(
+            'computer__status',
+            'project__id',
+            'project__name',
+        ).annotate(
+            count=Count('id')
+        ).order_by('computer__status', '-count'))
+
+        status = list(Error.objects.scope(user).values(
+            'computer__status',
+        ).annotate(
+            count=Count('id')
+        ).order_by('computer__status', '-count'))
+
+        return {
+            'total': total,
+            'inner': status,
+            'outer': projects,
+        }
+
     def checked_ok(self):
         self.checked = True
         self.save()
