@@ -275,7 +275,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         computers = con.smembers('migasfree:watch:msg')
         for computer_id in computers:
             date = con.hget('migasfree:msg:%s' % computer_id, 'date')
-            if datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f') > delayed_time:
+            if datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%f') > delayed_time:
                 result.append(computer_id)
 
         sync_computers = models.Computer.objects.filter(pk__in=result)
@@ -298,7 +298,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         computers = con.smembers('migasfree:watch:msg')
         for computer_id in computers:
             date = con.hget('migasfree:msg:%s' % computer_id, 'date')
-            if datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f') <= delayed_time:
+            if datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%f') <= delayed_time:
                 result.append(computer_id)
 
         delayed_computers = models.Computer.objects.filter(pk__in=result)
