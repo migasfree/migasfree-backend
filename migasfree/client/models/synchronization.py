@@ -17,6 +17,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.db import models
+from django.db.models.signals import pre_delete, post_save
+from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from django_redis import get_redis_connection
 
@@ -113,3 +115,216 @@ class Synchronization(Event):
         app_label = 'client'
         verbose_name = _("Synchronization")
         verbose_name_plural = _("Synchronizations")
+
+
+@receiver(post_save, sender=Synchronization)
+def post_save_sync(sender, instance, created, **kwargs):
+    if created:
+        con = get_redis_connection()
+
+        if not con.sismember(
+            'migasfree:watch:stats:years:%04d' % instance.created_at.year,
+            instance.computer.id
+        ):
+            con.incr('migasfree:stats:years:%04d' % instance.created_at.year)
+            con.sadd(
+                'migasfree:watch:stats:years:%04d' % instance.created_at.year,
+                instance.computer.id
+            )
+            con.incr('migasfree:stats:%d:years:%04d' % (
+                instance.project.id, instance.created_at.year
+            ))
+            con.sadd(
+                'migasfree:watch:stats:%d:years:%04d' % (
+                    instance.project.id, instance.created_at.year
+                ),
+                instance.computer.id
+            )
+
+        if not con.sismember(
+            'migasfree:watch:stats:months:%04d%02d' % (
+                instance.created_at.year, instance.created_at.month
+            ),
+            instance.computer.id
+        ):
+            con.incr('migasfree:stats:months:%04d%02d' % (
+                instance.created_at.year, instance.created_at.month
+            ))
+            con.sadd(
+                'migasfree:watch:stats:months:%04d%02d' % (
+                    instance.created_at.year, instance.created_at.month
+                ),
+                instance.computer.id
+            )
+            con.incr('migasfree:stats:%d:months:%04d%02d' % (
+                instance.project.id, instance.created_at.year, instance.created_at.month
+            ))
+            con.sadd(
+                'migasfree:watch:stats:%d:months:%04d%02d' % (
+                    instance.project.id, instance.created_at.year, instance.created_at.month
+                ),
+                instance.computer.id
+            )
+
+        if not con.sismember(
+            'migasfree:watch:stats:days:%04d%02d%02d' % (
+                instance.created_at.year, instance.created_at.month, instance.created_at.day
+            ),
+            instance.computer.id
+        ):
+            con.incr('migasfree:stats:days:%04d%02d%02d' % (
+                instance.created_at.year, instance.created_at.month, instance.created_at.day
+            ))
+            con.sadd(
+                'migasfree:watch:stats:days:%04d%02d%02d' % (
+                    instance.created_at.year, instance.created_at.month, instance.created_at.day
+                ),
+                instance.computer.id
+            )
+            con.incr('migasfree:stats:%d:days:%04d%02d%02d' % (
+                instance.project.id, instance.created_at.year,
+                instance.created_at.month, instance.created_at.day
+            ))
+            con.sadd(
+                'migasfree:watch:stats:%d:days:%04d%02d%02d' % (
+                    instance.project.id, instance.created_at.year,
+                    instance.created_at.month, instance.created_at.day
+                ),
+                instance.computer.id
+            )
+
+        if not con.sismember(
+            'migasfree:watch:stats:hours:%04d%02d%02d%02d' % (
+                instance.created_at.year, instance.created_at.month,
+                instance.created_at.day, instance.created_at.hour
+            ),
+            instance.computer.id
+        ):
+            con.incr('migasfree:stats:hours:%04d%02d%02d%02d' % (
+                instance.created_at.year, instance.created_at.month,
+                instance.created_at.day, instance.created_at.hour
+            ))
+            con.sadd(
+                'migasfree:watch:stats:hours:%04d%02d%02d%02d' % (
+                    instance.created_at.year, instance.created_at.month,
+                    instance.created_at.day, instance.created_at.hour
+                ),
+                instance.computer.id
+            )
+            con.incr('migasfree:stats:%d:hours:%04d%02d%02d%02d' % (
+                instance.project.id, instance.created_at.year, instance.created_at.month,
+                instance.created_at.day, instance.created_at.hour
+            ))
+            con.sadd(
+                'migasfree:watch:stats:%d:hours:%04d%02d%02d%02d' % (
+                    instance.project.id, instance.created_at.year, instance.created_at.month,
+                    instance.created_at.day, instance.created_at.hour
+                ),
+                instance.computer.id
+            )
+
+
+@receiver(pre_delete, sender=Synchronization)
+def pre_delete_sync(sender, instance, **kwargs):
+    con = get_redis_connection()
+
+    if con.sismember(
+        'migasfree:watch:stats:years:%04d' % instance.created_at.year,
+        instance.computer.id
+    ):
+        con.decr('migasfree:stats:years:%04d' % instance.created_at.year)
+        con.srem(
+            'migasfree:watch:stats:years:%04d' % instance.created_at.year,
+            instance.computer.id
+        )
+        con.decr('migasfree:stats:%d:years:%04d' % (
+            instance.project.id, instance.created_at.year
+        ))
+        con.srem(
+            'migasfree:watch:stats:%d:years:%04d' % (
+                instance.project.id, instance.created_at.year
+            ),
+            instance.computer.id
+        )
+
+    if con.sismember(
+        'migasfree:watch:stats:months:%04d%02d' % (
+            instance.created_at.year, instance.created_at.month
+        ),
+        instance.computer.id
+    ):
+        con.decr('migasfree:stats:months:%04d%02d' % (
+            instance.created_at.year, instance.created_at.month
+        ))
+        con.srem(
+            'migasfree:watch:stats:months:%04d%02d' % (
+                instance.created_at.year, instance.created_at.month
+            ),
+            instance.computer.id
+        )
+        con.decr('migasfree:stats:%d:months:%04d%02d' % (
+            instance.project.id, instance.created_at.year, instance.created_at.month
+        ))
+        con.srem(
+            'migasfree:watch:stats:%d:months:%04d%02d' % (
+                instance.project.id, instance.created_at.year, instance.created_at.month
+            ),
+            instance.computer.id
+        )
+
+    if con.sismember(
+        'migasfree:watch:stats:days:%04d%02d%02d' % (
+            instance.created_at.year, instance.created_at.month, instance.created_at.day
+        ),
+        instance.computer.id
+    ):
+        con.decr('migasfree:stats:days:%04d%02d%02d' % (
+            instance.created_at.year, instance.created_at.month, instance.created_at.day
+        ))
+        con.srem(
+            'migasfree:watch:stats:days:%04d%02d%02d' % (
+                instance.created_at.year, instance.created_at.month, instance.created_at.day
+            ),
+            instance.computer.id
+        )
+        con.decr('migasfree:stats:%d:days:%04d%02d%02d' % (
+            instance.project.id, instance.created_at.year,
+            instance.created_at.month, instance.created_at.day
+        ))
+        con.srem(
+            'migasfree:watch:stats:%d:days:%04d%02d%02d' % (
+                instance.project.id, instance.created_at.year,
+                instance.created_at.month, instance.created_at.day
+            ),
+            instance.computer.id
+        )
+
+    if con.sismember(
+        'migasfree:watch:stats:hours:%04d%02d%02d%02d' % (
+            instance.created_at.year, instance.created_at.month,
+            instance.created_at.day, instance.created_at.hour
+        ),
+        instance.computer.id
+    ):
+        con.decr('migasfree:stats:hours:%04d%02d%02d%02d' % (
+            instance.created_at.year, instance.created_at.month,
+            instance.created_at.day, instance.created_at.hour
+        ))
+        con.srem(
+            'migasfree:watch:stats:hours:%04d%02d%02d%02d' % (
+                instance.created_at.year, instance.created_at.month,
+                instance.created_at.day, instance.created_at.hour
+            ),
+            instance.computer.id
+        )
+        con.decr('migasfree:stats:%d:hours:%04d%02d%02d%02d' % (
+            instance.project.id, instance.created_at.year, instance.created_at.month,
+            instance.created_at.day, instance.created_at.hour
+        ))
+        con.srem(
+            'migasfree:watch:stats:%d:hours:%04d%02d%02d%02d' % (
+                instance.project.id, instance.created_at.year, instance.created_at.month,
+                instance.created_at.day, instance.created_at.hour
+            ),
+            instance.computer.id
+        )
