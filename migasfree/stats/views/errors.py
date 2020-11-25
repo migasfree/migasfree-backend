@@ -16,9 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from collections import defaultdict
-
-from django.db.models.aggregates import Count
 from django.utils.translation import gettext as _
 from rest_framework import status, permissions
 from rest_framework.decorators import action, permission_classes
@@ -74,44 +71,23 @@ class ErrorStatsViewSet(EventViewSet):
 
     @action(methods=['get'], detail=False, url_path='status/project')
     def status_by_project(self, request, format=None):
-        user = request.user.userprofile
-        total = Error.objects.scope(user).count()
-
-        values = defaultdict(list)
-        for item in Error.objects.scope(user).values(
-            'computer__status',
-            'project__id',
-            'project__name',
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__id', '-count'):
-            values[item.get('computer__status')].append(
-                {
-                    'name': item.get('project__name'),
-                    'value': item.get('count'),
-                    'project_id': item.get('project__id'),
-                    'status': item.get('computer__status'),
-                }
-            )
-
-        data = []
-        for computer_status in Computer.STATUS_CHOICES:
-            if computer_status[0] in values:
-                count = sum(item['value'] for item in values[computer_status[0]])
-                data.append(
-                    {
-                        'name': _(computer_status[1]),
-                        'value': count,
-                        'status': computer_status[0],
-                        'data': values[computer_status[0]]
-                    }
-                )
+        data = Error.status_by_project(request.user.userprofile)
+        inner_aliases = {
+            'computer__status': 'name',
+            'count': 'value'
+        }
+        outer_aliases = {
+            'computer__status': 'status',
+            'project__id': 'project_id',
+            'project__name': 'name',
+            'count': 'value'
+        }
 
         return Response(
             {
-                'title': _('Errors / Status / Project'),
-                'total': total,
-                'data': data,
+                'total': data['total'],
+                'inner': replace_keys(data['inner'], inner_aliases),
+                'outer': replace_keys(data['outer'], outer_aliases)
             },
             status=status.HTTP_200_OK
         )
