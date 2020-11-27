@@ -122,7 +122,11 @@ class ErrorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Error
-        fields = '__all__'
+        fields = (
+            'id', '__str__',
+            'project', 'computer',
+            'created_at', 'checked', 'description'
+        )
 
 
 class ErrorWriteSerializer(serializers.ModelSerializer):
