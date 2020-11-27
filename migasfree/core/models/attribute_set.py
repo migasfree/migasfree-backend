@@ -19,7 +19,7 @@
 from django.db import models
 from django.db.models import Q
 from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 from django.db.models.signals import pre_delete, pre_save, m2m_changed
 from django.dispatch import receiver
 
@@ -83,6 +83,12 @@ class AttributeSet(models.Model, MigasLink):
     )
 
     objects = AttributeSetManager()
+
+    def get_summary(self):
+        return '({}) {}'.format(
+            gettext(self._meta.verbose_name),
+            self.description
+        )
 
     def __str__(self):
         return self.name
