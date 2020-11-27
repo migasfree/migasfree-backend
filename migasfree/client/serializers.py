@@ -33,14 +33,14 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
 
 class ComputerInfoSerializer(serializers.ModelSerializer):
-    cid_description = serializers.SerializerMethodField()
+    summary = serializers.SerializerMethodField()
 
-    def get_cid_description(self, obj):
-        return obj.get_cid_description()
+    def get_summary(self, obj):
+        return obj.get_summary()
 
     class Meta:
         model = models.Computer
-        fields = ('id', 'cid_description', 'status')
+        fields = ('id', '__str__', 'status', 'summary')
 
 
 class ComputerCreateSerializer(serializers.ModelSerializer):
