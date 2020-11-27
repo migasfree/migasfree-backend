@@ -123,7 +123,16 @@ class ErrorFilter(filters.FilterSet):
 
     class Meta:
         model = Error
-        fields = ['id', 'project__id', 'checked', 'computer__id']
+        fields = {
+            'id': ['exact'],
+            'project__id': ['exact'],
+            'project__platform__id': ['exact'],
+            'checked': ['exact'],
+            'computer__id': ['exact'],
+            'computer__name': ['icontains'],
+            'computer__status': ['exact', 'in'],
+            'description': ['icontains'],
+        }
 
 
 class FaultDefinitionFilter(filters.FilterSet):
