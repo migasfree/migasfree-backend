@@ -40,7 +40,7 @@ class ComputerInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Computer
-        fields = ('id', 'cid_description')
+        fields = ('id', 'cid_description', 'status')
 
 
 class ComputerCreateSerializer(serializers.ModelSerializer):
