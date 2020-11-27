@@ -677,6 +677,14 @@ class Computer(models.Model, MigasLink):
 
         return str(self.__getattribute__(desc[0]))
 
+    def get_summary(self):
+        return '{}, {}, {}, {}'.format(
+            gettext(self.status),
+            self.project,
+            self.ip_address,
+            self.sync_user
+        )
+
     def get_replacement_info(self):
         cid = self.get_cid_attribute()
 
