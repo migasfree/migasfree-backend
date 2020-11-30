@@ -18,12 +18,11 @@
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status, filters, permissions
+from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
-from migasfree.client.models import Computer
-
+from ..client.models import Computer
 from ..core.views import MigasViewSet
 
 from .models import (
