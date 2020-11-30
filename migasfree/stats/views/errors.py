@@ -16,13 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.utils.translation import gettext as _
 from rest_framework import status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
-from ...core.models import Platform
-from ...client.models import Error, Computer
+from ...client.models import Error
 from ...utils import replace_keys
 
 from .events import event_by_month, month_interval, EventViewSet
