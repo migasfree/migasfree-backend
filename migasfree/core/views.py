@@ -31,10 +31,9 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
 from django_redis import get_redis_connection
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (
     viewsets, parsers, status,
-    mixins, views, filters, permissions,
+    mixins, views, permissions,
 )
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -78,9 +77,6 @@ from .filters import (
     ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
     AttributeSetFilter, PropertyFilter, AttributeFilter, PlatformFilter,
 )
-
-from ..client.resources import ComputerResource
-from .resources import ProjectResource, AttributeResource
 
 from . import tasks
 
