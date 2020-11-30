@@ -21,18 +21,13 @@ import time
 from datetime import timedelta, datetime, date
 from dateutil.relativedelta import relativedelta
 
-from django.urls import reverse
 from django.utils import timezone
-from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
-from ...client.models import (
-    Computer, Error, Fault,
-    Synchronization, Migration, StatusLog,
-)
+from ...client.models import Computer
 from ...core.models import Project
 from ...utils import to_heatmap
 
@@ -96,10 +91,6 @@ def event_by_month(data, begin_date, end_date, model, field='project_id'):
     ):
         start_date = date(monthly[0], monthly[1], 1)
         final_date = start_date + relativedelta(months=+1)
-        querystring = {
-            'created_at__gte': start_date.strftime('%Y-%m-%d'),
-            'created_at__lt': final_date.strftime('%Y-%m-%d')
-        }
 
         key = '%d-%02d' % (monthly[0], monthly[1])
         x_axe.append(key)
