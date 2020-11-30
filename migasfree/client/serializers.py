@@ -241,6 +241,7 @@ class UserSerializer(serializers.ModelSerializer):
 class SynchronizationSerializer(serializers.ModelSerializer):
     project = ProjectInfoSerializer(many=False, read_only=True)
     user = UserSerializer(many=False, read_only=True)
+    computer = ComputerInfoSerializer(many=False, read_only=True)
 
     class Meta:
         model = models.Synchronization
