@@ -179,7 +179,11 @@ class FaultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Fault
-        fields = '__all__'
+        fields = (
+            'id', '__str__',
+            'project', 'computer', 'fault_definition',
+            'created_at', 'checked', 'result'
+        )
 
 
 class FaultWriteSerializer(serializers.ModelSerializer):
