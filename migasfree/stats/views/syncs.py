@@ -18,7 +18,7 @@
 
 import time
 
-from datetime import timedelta, datetime, date
+from datetime import timedelta, datetime
 from dateutil.relativedelta import relativedelta
 
 from django.shortcuts import get_object_or_404
