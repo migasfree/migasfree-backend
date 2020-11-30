@@ -18,7 +18,7 @@
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
-from rest_framework import viewsets, status, mixins, filters, permissions
+from rest_framework import viewsets, status, mixins, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
