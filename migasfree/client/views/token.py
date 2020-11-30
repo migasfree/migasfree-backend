@@ -19,12 +19,12 @@
 from datetime import datetime, timedelta
 
 from django.conf import settings
-from django.http import QueryDict, HttpResponse
+from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django_redis import get_redis_connection
-from rest_framework import viewsets, exceptions, status, mixins, filters, permissions
+from rest_framework import viewsets, exceptions, status, mixins, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
