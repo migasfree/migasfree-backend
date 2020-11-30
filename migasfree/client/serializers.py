@@ -82,12 +82,16 @@ class ComputerSerializer(serializers.ModelSerializer):
     sync_user = UserInfoSerializer(many=False, read_only=True)
     architecture = serializers.SerializerMethodField()
     product_system = serializers.SerializerMethodField()
+    summary = serializers.SerializerMethodField()
 
     def get_architecture(self, obj):
         return obj.get_architecture()
 
     def get_product_system(self, obj):
         return obj.product_system()
+
+    def get_summary(self, obj):
+        return obj.get_summary()
 
     class Meta:
         model = models.Computer
@@ -99,7 +103,8 @@ class ComputerSerializer(serializers.ModelSerializer):
             'cpu', 'architecture', 'ram',
             'storage', 'disks', 'mac_address', 'comment',
             'created_at', 'last_hardware_capture',
-            'sync_user', 'sync_end_date', '__str__'
+            'sync_user', 'sync_end_date',
+            '__str__', 'summary'
         )
 
 
