@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from collections import defaultdict
 from six import iteritems
 
 from django.db.models import Q, Prefetch
@@ -27,10 +26,9 @@ from django.urls import resolve
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
-from migasfree.core.models import Attribute
-from migasfree.device.models import Logical
-from migasfree.hardware.models import Node
-from migasfree.utils import merge_dicts
+from ..core.models import Attribute
+from ..device.models import Logical
+from ..hardware.models import Node
 
 from .models import *
 
