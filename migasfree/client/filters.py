@@ -186,7 +186,7 @@ class FaultFilter(filters.FilterSet):
 
 
 class MigrationFilter(filters.FilterSet):
-    created_at = filters.DateFilter(field_name='created_at', lookup_expr='gte')
+    created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
     created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
 
     class Meta:
@@ -195,7 +195,8 @@ class MigrationFilter(filters.FilterSet):
 
 
 class NotificationFilter(filters.FilterSet):
-    created_at = filters.DateFilter(field_name='created_at', lookup_expr='gte')
+    created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
+    created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
 
     class Meta:
         model = Notification
@@ -212,7 +213,7 @@ class PackageHistoryFilter(filters.FilterSet):
 
 
 class StatusLogFilter(filters.FilterSet):
-    created_at = filters.DateFilter(field_name='created_at', lookup_expr='gte')
+    created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
     created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
 
     class Meta:
@@ -221,9 +222,16 @@ class StatusLogFilter(filters.FilterSet):
 
 
 class SynchronizationFilter(filters.FilterSet):
-    created_at = filters.DateFilter(field_name='created_at', lookup_expr='gte')
+    created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
     created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
 
     class Meta:
         model = Synchronization
-        fields = ['id', 'project__id', 'computer__id']
+        fields = {
+            'id': ['exact'],
+            'project__id': ['exact'],
+            'project__platform__id': ['exact'],
+            'computer__id': ['exact'],
+            'computer__name': ['icontains'],
+            'pms_status_ok': ['exact'],
+        }
