@@ -679,7 +679,7 @@ class Computer(models.Model, MigasLink):
 
     def get_summary(self):
         return '{}, {}, {}, {}'.format(
-            gettext(self.status),
+            gettext(dict(self.STATUS_CHOICES)[self.status]),
             self.project,
             self.ip_address,
             self.sync_user
