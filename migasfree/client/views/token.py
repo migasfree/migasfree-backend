@@ -532,6 +532,14 @@ class FaultViewSet(
 
         return qs
 
+    @action(methods=['get'], detail=False, url_path='user')
+    def user_choices(self, request, format=None):
+        response = {
+            'choices': dict(models.Fault.USER_FILTER_CHOICES),
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class MigrationViewSet(
