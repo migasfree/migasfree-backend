@@ -29,7 +29,7 @@ from ...client.models import Migration
 
 from .events import (
     event_by_month, month_interval,
-    month_year_iter, EventViewSet,
+    EventViewSet,
 )
 
 
