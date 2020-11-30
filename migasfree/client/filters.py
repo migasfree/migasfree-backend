@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
 
 from ..hardware.models import Node
@@ -118,7 +119,7 @@ class ComputerFilter(filters.FilterSet):
 
 
 class ErrorFilter(filters.FilterSet):
-    created_at = filters.DateFilter(field_name='created_at', lookup_expr='gte')
+    created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
     created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
 
     class Meta:
@@ -145,40 +146,43 @@ class FaultDefinitionFilter(filters.FilterSet):
 
 
 class FaultFilter(filters.FilterSet):
-    created_at = filters.DateFilter(field_name='created_at', lookup_expr='gte')
+    created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
     created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
 
-    """
-    # TODO override filter_queryset (http://www.django-rest-framework.org/api-guide/filtering/)
     user = filters.ChoiceFilter(
         choices=Fault.USER_FILTER_CHOICES,
         label=_('User'),
-        action=filter_by_user
+        method='filter_by_user'
     )
 
-    def filter_by_user(self, qs, user):
-        me = self.request.user.id  # TODO test it
-        if user == 'me':
+    def filter_by_user(self, qs, name, value):
+        me = self.request.user.id
+        if value == 'me':
             return qs.filter(
                 Q(fault_definition__users__id=me)
                 | Q(fault_definition__users=None)
             )
-        elif user == 'only_me':
+        elif value == 'only_me':
             return qs.filter(fault_definition__users__id=me)
-        elif user == 'others':
+        elif value == 'others':
             return qs.exclude(
                 fault_definition__users__id=me
             ).exclude(fault_definition__users=None)
-        elif user == 'unassigned':
+        elif value == 'unassigned':
             return qs.filter(Q(fault_definition__users=None))
-    """
 
     class Meta:
         model = Fault
-        fields = [
-            'id', 'project__id', 'checked',
-            'fault_definition__id', 'computer__id'
-        ]
+        fields = {
+            'id': ['exact'],
+            'project__id': ['exact'],
+            'project__platform__id': ['exact'],
+            'checked': ['exact'],
+            'computer__id': ['exact'],
+            'computer__name': ['icontains'],
+            'fault_definition_id': ['exact'],
+            'result': ['icontains'],
+        }
 
 
 class MigrationFilter(filters.FilterSet):
