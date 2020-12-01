@@ -41,6 +41,9 @@ class ConnectionViewSet(viewsets.ModelViewSet, MigasViewSet):
     ordering_fields = '__all__'
     ordering = ('id',)
 
+    def get_queryset(self):
+        return self.queryset.select_related('type')
+
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class DeviceViewSet(viewsets.ModelViewSet, MigasViewSet):
@@ -56,6 +59,12 @@ class DeviceViewSet(viewsets.ModelViewSet, MigasViewSet):
             return serializers.DeviceWriteSerializer
 
         return serializers.DeviceSerializer
+
+    def get_queryset(self):
+        return self.queryset.select_related(
+            'connection', 'connection__type',
+            'model', 'model__manufacturer', 'model__type',
+        )
 
     @action(methods=['get'], detail=False)
     def available(self, request):
@@ -121,6 +130,9 @@ class LogicalViewSet(viewsets.ModelViewSet, MigasViewSet):
             return serializers.LogicalWriteSerializer
 
         return serializers.LogicalSerializer
+
+    def get_queryset(self):
+        return self.queryset.select_related('device', 'feature')
 
     @action(methods=['get'], detail=False)
     def available(self, request):
