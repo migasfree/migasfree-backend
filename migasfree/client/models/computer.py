@@ -436,7 +436,7 @@ class Computer(models.Model, MigasLink):
                     install_date__isnull=False
                 ).values_list(
                     'install_date', 'package__fullname'
-                ).order_by('-install_date')
+                ).distinct().order_by('-install_date')
         ):
             installed[k.strftime('%Y-%m-%d %H:%M:%S')].append('+' + v)
 
@@ -445,7 +445,7 @@ class Computer(models.Model, MigasLink):
                     uninstall_date__isnull=False
                 ).values_list(
                     'uninstall_date', 'package__fullname'
-                ).order_by('-uninstall_date')
+                ).distinct().order_by('-uninstall_date')
         ):
             uninstalled[k.strftime('%Y-%m-%d %H:%M:%S')].append('-' + v)
 
