@@ -20,6 +20,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.http import QueryDict
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -30,6 +31,7 @@ from rest_framework.response import Response
 
 from ...core.models import Deployment
 from ...device.models import Logical, Driver, Model
+from ...hardware.models import Node
 from ...app_catalog.models import Policy
 from ...core.serializers import PlatformSerializer
 from ...core.views import MigasViewSet, ExportViewSet
@@ -62,7 +64,15 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
             return models.Computer.objects.none()
 
         user = self.request.user.userprofile
-        qs = self.queryset
+        qs = self.queryset.select_related(
+            'project',
+            'sync_user',
+            'default_logical_device',
+            'default_logical_device__feature',
+            'default_logical_device__device',
+        ).prefetch_related(
+            Prefetch('node_set', queryset=Node.objects.filter(parent=None)),
+        )
         if not user.is_view_all():
             qs = qs.filter(id__in=user.get_computers())
 
@@ -473,7 +483,10 @@ class ErrorViewSet(
             return models.Error.objects.none()
 
         user = self.request.user.userprofile
-        qs = self.queryset
+        qs = self.queryset.select_related(
+            'project',
+            'computer',
+        )
         if not user.is_view_all():
             qs = qs.filter(
                 project_id__in=user.get_projects(),
@@ -523,7 +536,11 @@ class FaultViewSet(
             return models.Fault.objects.none()
 
         user = self.request.user.userprofile
-        qs = self.queryset
+        qs = self.queryset.select_related(
+            'project',
+            'fault_definition',
+            'computer',
+        )
         if not user.is_view_all():
             qs = qs.filter(
                 project_id__in=user.get_projects(),
@@ -558,7 +575,10 @@ class MigrationViewSet(
             return models.Migration.objects.none()
 
         user = self.request.user.userprofile
-        qs = self.queryset
+        qs = self.queryset.select_related(
+            'project',
+            'computer',
+        )
         if not user.is_view_all():
             qs = qs.filter(
                 project_id__in=user.get_projects(),
@@ -618,7 +638,9 @@ class StatusLogViewSet(
             return models.StatusLog.objects.none()
 
         user = self.request.user.userprofile
-        qs = self.queryset
+        qs = self.queryset.select_related(
+            'computer',
+        )
         if not user.is_view_all():
             qs = qs.filter(computer_id__in=user.get_computers())
 
@@ -650,7 +672,11 @@ class SynchronizationViewSet(
             return models.Synchronization.objects.none()
 
         user = self.request.user.userprofile
-        qs = self.queryset
+        qs = self.queryset.select_related(
+            'computer',
+            'project',
+            'user',
+        )
         if not user.is_view_all():
             qs = qs.filter(
                 project_id__in=user.get_projects(),
