@@ -192,7 +192,7 @@ class ProjectViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
             return Project.objects.none()
 
         user = self.request.user.userprofile
-        qs = self.queryset
+        qs = self.queryset.select_related('platform')
         if not user.is_view_all():
             qs = qs.filter(id__in=user.get_projects())
 
@@ -220,7 +220,7 @@ class StoreViewSet(viewsets.ModelViewSet, MigasViewSet):
             return Store.objects.none()
 
         user = self.request.user.userprofile
-        qs = self.queryset
+        qs = self.queryset.select_related('project')
         if not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects())
 
@@ -270,7 +270,7 @@ class AttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
             return Attribute.objects.none()
 
         user = self.request.user.userprofile
-        qs = self.queryset
+        qs = self.queryset.select_related('property_att')
         if not user.is_view_all():
             qs = qs.filter(id__in=user.get_attributes()).distinct()
 
@@ -311,7 +311,7 @@ class ClientAttributeViewSet(viewsets.ModelViewSet, MigasViewSet):
             return ClientAttribute.objects.none()
 
         user = self.request.user.userprofile
-        qs = self.queryset
+        qs = self.queryset.select_related('property_att')
         if not user.is_view_all():
             qs = qs.filter(id__in=user.get_attributes()).distinct()
 
@@ -437,7 +437,7 @@ class PackageViewSet(
             return Package.objects.none()
 
         user = self.request.user.userprofile
-        qs = self.queryset
+        qs = self.queryset.select_related('project', 'store')
         if not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects())
 
@@ -481,7 +481,7 @@ class DeploymentViewSet(viewsets.ModelViewSet, MigasViewSet):
             return Deployment.objects.none()
 
         user = self.request.user.userprofile
-        qs = self.queryset
+        qs = self.queryset.select_related('project', 'schedule')
         if not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects())
             if user.domain_preference:
