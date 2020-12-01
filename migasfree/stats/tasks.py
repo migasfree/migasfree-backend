@@ -71,7 +71,12 @@ def add_unchecked_faults():
             'target': 'computer',
             'level': 'critical',
             'result': Fault.unchecked_count(),
-            'api': '{}?checked=False'.format('fault-list')
+            'api': {
+                'model': 'faults',
+                'query': {
+                    'checked': False
+                }
+            }
         }
     )
     con.sadd('migasfree:watch:chk', 'faults')
@@ -85,7 +90,12 @@ def add_unchecked_errors():
             'target': 'computer',
             'level': 'critical',
             'result': Error.unchecked_count(),
-            'api': '{}?checked=False'.format('error-list')
+            'api': {
+                'model': 'errors',
+                'query': {
+                    'checked': False
+                }
+            }
         }
     )
     con.sadd('migasfree:watch:chk', 'errors')
@@ -177,9 +187,13 @@ def add_active_schedule_deployments():
             'target': 'server',
             'level': 'info',
             'result': result,
-            'api': '{}?enabled__exact=1&schedule__isnull=False'.format(
-                reverse('admin:core_deployment_changelist')
-            ),
+            'api': {
+                'model': 'deployments',
+                'query': {
+                    'enabled': True,
+                    'schedule__isnull': False
+                }
+            }
         }
     )
     con.sadd('migasfree:watch:chk', 'active_deploys')
@@ -202,9 +216,13 @@ def add_finished_schedule_deployments():
             'target': 'server',
             'level': 'warning',
             'result': result,
-            'api': '{}?enabled__exact=1&schedule__isnull=False'.format(
-                reverse('admin:core_deployment_changelist')
-            ),
+            'api': {
+                'model': 'deployments',
+                'query': {
+                    'enabled': True,
+                    'schedule__isnull': False
+                }
+            }
         }
     )
     con.sadd('migasfree:watch:chk', 'finished_deploys')
