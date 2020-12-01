@@ -168,7 +168,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
                 uninstall_date__isnull=True
             ).values(
                 'package__id', 'package__fullname',
-            ).order_by('package__fullname')
+            ).distinct().order_by('package__fullname')
         )
 
         return Response(
