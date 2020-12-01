@@ -424,7 +424,7 @@ class Computer(models.Model, MigasLink):
                 uninstall_date__isnull=True
             ).values_list(
                 'package__fullname', flat=True
-            ).order_by('package__fullname')
+            ).distinct().order_by('package__fullname')
         )
 
     def get_software_history(self):
