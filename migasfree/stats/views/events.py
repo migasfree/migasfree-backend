@@ -27,7 +27,10 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
-from ...client.models import Computer
+from ...client.models import (
+    Computer, Error, Fault,
+    Synchronization, Migration, StatusLog,
+)
 from ...core.models import Project
 from ...utils import to_heatmap
 
