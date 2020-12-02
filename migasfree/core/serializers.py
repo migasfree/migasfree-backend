@@ -117,6 +117,14 @@ class ProjectInfoSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
+class ProjectNestedInfoSerializer(serializers.ModelSerializer):
+    platform = PlatformSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Project
+        fields = ('id', 'name', 'platform')
+
+
 class ProjectSerializer(serializers.ModelSerializer):
     platform = PlatformSerializer(many=False, read_only=True)
 
