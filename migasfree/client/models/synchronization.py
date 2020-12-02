@@ -39,11 +39,14 @@ class DomainSynchronizationManager(models.Manager):
 
 
 class SynchronizationManager(DomainSynchronizationManager):
-    def create(self, computer):
+    def create(self, computer, consumer=None, start_date=None, pms_status_ok=False):
         obj = Synchronization()
         obj.computer = computer
         obj.project = computer.project
         obj.user = computer.sync_user
+        obj.consumer = consumer
+        obj.start_date = start_date
+        obj.pms_status_ok = pms_status_ok
         obj.save()
 
         return obj
