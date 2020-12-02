@@ -165,7 +165,8 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
         data = list(
             computer.packagehistory_set.filter(
-                uninstall_date__isnull=True
+                uninstall_date__isnull=True,
+                package__project=computer.project
             ).values(
                 'package__id', 'package__fullname',
             ).distinct().order_by('package__fullname')
