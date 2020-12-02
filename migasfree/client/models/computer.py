@@ -385,6 +385,22 @@ class Computer(models.Model, MigasLink):
         self.sync_start_date = datetime.now()
         self.save()
 
+    def update_project(self, value):
+        self.project = value
+        self.save()
+
+    def update_name(self, value):
+        self.name = value
+        self.save()
+
+    def update_uuid(self, value):
+        self.uuid = value
+        self.save()
+
+    def update_ip_address(self, value):
+        self.ip_address = value
+        self.save()
+
     def update_identification(self, name, fqdn, project, uuid, ip_address, forwarded_ip_address):
         self.name = name
         self.fqdn = fqdn
