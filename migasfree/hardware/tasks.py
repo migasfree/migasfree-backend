@@ -78,3 +78,4 @@ def save_computer_hardware(computer_id, node, parent=None, level=1):
                     LogicalName.objects.create(node=n, name=x)
 
     computer.update_hardware_resume()
+    computer.update_last_hardware_capture()
