@@ -291,6 +291,7 @@ class PackageSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         return {
             'id': obj.id,
+            'fullname': obj.fullname,
             'name': obj.name,
             'version': obj.version,
             'architecture': obj.architecture,
@@ -324,7 +325,7 @@ class PackageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Package
-        fields = ('id', 'name', 'project', 'store', 'files')
+        fields = ('id', 'fullname', 'name', 'project', 'store', 'files')
 
 
 class DeploymentSerializer(serializers.ModelSerializer):
