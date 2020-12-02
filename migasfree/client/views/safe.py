@@ -95,6 +95,7 @@ def is_computer_changed(computer, name, project, ip_address, uuid):
             computer=computer,
             project=project
         )
+        computer.update_project(project)
 
     if settings.MIGASFREE_NOTIFY_CHANGE_NAME and (computer.name != name):
         msg = _("Computer id=[%s]: NAME [%s] changed by [%s]") % (
@@ -103,6 +104,7 @@ def is_computer_changed(computer, name, project, ip_address, uuid):
             name
         )
         models.Notification.objects.create(message=msg)
+        computer.update_name(name)
 
     if settings.MIGASFREE_NOTIFY_CHANGE_IP and (computer.ip_address != ip_address):
         msg = _("Computer id=[%s]: IP [%s] changed by [%s]") % (
@@ -111,6 +113,7 @@ def is_computer_changed(computer, name, project, ip_address, uuid):
             ip_address
         )
         models.Notification.objects.create(message=msg)
+        computer.update_ip_address(ip_address)
 
     if settings.MIGASFREE_NOTIFY_CHANGE_UUID and (computer.uuid != uuid):
         msg = _("Computer id=[%s]: UUID [%s] changed by [%s]") % (
@@ -119,6 +122,7 @@ def is_computer_changed(computer, name, project, ip_address, uuid):
             uuid
         )
         models.Notification.objects.create(message=msg)
+        computer.update_uuid(uuid)
 
 
 def get_computer(uuid, name):
