@@ -21,6 +21,7 @@ from rest_framework import serializers
 from ..core.serializers import (
     ClientAttributeSerializer, ProjectInfoSerializer,
     AttributeInfoSerializer, PackageInfoSerializer,
+    ProjectNestedInfoSerializer,
 )
 from ..device.serializers import LogicalInfoSerializer
 from . import models
@@ -71,7 +72,7 @@ class ComputerWriteSerializer(serializers.ModelSerializer):
 
 
 class ComputerSerializer(serializers.ModelSerializer):
-    project = ProjectInfoSerializer(many=False, read_only=True)
+    project = ProjectNestedInfoSerializer(many=False, read_only=True)
     software_inventory = serializers.HyperlinkedIdentityField(
         view_name='computer-software_inventory'
     )
