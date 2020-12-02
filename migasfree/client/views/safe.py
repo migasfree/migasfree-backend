@@ -29,17 +29,17 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 from django_redis import get_redis_connection
 
-from migasfree.utils import (
+from ...utils import (
     uuid_change_format, get_client_ip,
     remove_duplicates_preserving_order
 )
-from migasfree.model_update import update
-from migasfree.core.mixins import SafeConnectionMixin
-from migasfree.core.models import (
+from ...model_update import update
+from ...core.mixins import SafeConnectionMixin
+from ...core.models import (
     Deployment, Property, Domain,
     Attribute, BasicAttribute, AttributeSet,
 )
-from migasfree.app_catalog.models import Policy
+from ...app_catalog.models import Policy
 
 from .. import models, serializers, tasks
 
