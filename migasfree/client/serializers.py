@@ -252,7 +252,7 @@ class SynchronizationSerializer(serializers.ModelSerializer):
 class SynchronizationWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Synchronization
-        fields = ('computer',)
+        fields = ('computer', 'start_date', 'consumer', 'pms_status_ok')
 
 
 class ComputerSyncSerializer(serializers.ModelSerializer):
