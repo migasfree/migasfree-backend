@@ -530,9 +530,8 @@ class Computer(models.Model, MigasLink):
         return capture
 
     def update_last_hardware_capture(self):
-        self.last_hardware_capture = datetime.utcnow()
+        self.last_hardware_capture = datetime.now()
         self.save()
-        # FIXME value not updated in BD!!! why???
 
     def update_hardware_resume(self):
         from ...hardware.models import Node
