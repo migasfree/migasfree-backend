@@ -225,6 +225,9 @@ class SynchronizationFilter(filters.FilterSet):
     created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
     created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
 
+    start_date__gte = filters.DateFilter(field_name='start_date', lookup_expr='gte')
+    start_date__lt = filters.DateFilter(field_name='start_date', lookup_expr='lt')
+
     class Meta:
         model = Synchronization
         fields = {
@@ -234,4 +237,5 @@ class SynchronizationFilter(filters.FilterSet):
             'computer__id': ['exact'],
             'computer__name': ['icontains'],
             'pms_status_ok': ['exact'],
+            'consumer': ['icontains']
         }
