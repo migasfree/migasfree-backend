@@ -51,6 +51,7 @@ class PackageFilter(filters.FilterSet):
         model = Package
         fields = {
             'id': ['exact'],
+            'fullname': ['icontains'],
             'name': ['exact', 'icontains'],
             'version': ['exact', 'icontains'],
             'architecture': ['exact', 'icontains'],
