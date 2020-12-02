@@ -437,7 +437,8 @@ class Computer(models.Model, MigasLink):
     def get_software_inventory(self):
         return list(
             self.packagehistory_set.filter(
-                uninstall_date__isnull=True
+                uninstall_date__isnull=True,
+                package__project=self.project
             ).values_list(
                 'package__fullname', flat=True
             ).distinct().order_by('package__fullname')
