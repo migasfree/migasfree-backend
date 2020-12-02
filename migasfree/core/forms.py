@@ -149,7 +149,9 @@ class StoreForm(forms.ModelForm):
         self.request = kwargs.pop("request", None)
         super(StoreForm, self).__init__(*args, **kwargs)
 
-        user = self.request.user.userprofile
+        user = None
+        if self.request:
+            user = self.request.user.userprofile
 
         try:
             if Project.objects.scope(user).count() == 1:
