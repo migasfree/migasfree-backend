@@ -60,7 +60,7 @@ class ComputerWriteSerializer(serializers.ModelSerializer):
             self.instance.tags.clear()
             del self.fields['tags']
 
-        return super(ComputerWriteSerializer, self).is_valid(raise_exception)
+        return super().is_valid(raise_exception)
 
     class Meta:
         model = models.Computer
@@ -260,7 +260,7 @@ class ComputerSyncSerializer(serializers.ModelSerializer):
     sync_attributes = ClientAttributeSerializer(many=True, read_only=True)
 
     def __init__(self, *args, **kwargs):
-        super(ComputerSyncSerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         context = kwargs.get('context', None)
         if context:
