@@ -354,7 +354,7 @@ class ClientAttributeViewSet(viewsets.ModelViewSet, MigasViewSet):
             returns: status code 201
         """
 
-        attribute = get_object_or_404(ClientAttribute, pk=pk)
+        attribute = self.get_object()
         logical_devices = attribute.devicelogical_set.all()
 
         if request.method == 'GET':
@@ -428,7 +428,7 @@ class PackageViewSet(
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
     filterset_class = PackageFilter
-    parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
     ordering_fields = '__all__'
     ordering = ('name', 'version', 'project__name')
     search_fields = ['fullname']
@@ -450,7 +450,10 @@ class PackageViewSet(
         Returns packages that are not in any deployment
         """
         serializer = PackageSerializer(
-            Package.objects.filter(deployment__id=None),
+            Package.objects.filter(
+                deployment__id=None,
+                store__isnull=False
+            ),
             many=True
         )
 
@@ -521,7 +524,7 @@ class InternalSourceViewSet(viewsets.ModelViewSet, MigasViewSet):
 
     @action(methods=['get'], detail=True)
     def metadata(self, request, pk=None):
-        get_object_or_404(InternalSource, pk=pk)
+        self.get_object()
         tasks.create_repository_metadata.delay(pk)
 
         return Response(
