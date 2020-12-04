@@ -139,9 +139,15 @@ class Package(models.Model, MigasLink):
     @staticmethod
     def orphan_count(user=None):
         if not user:
-            return Package.objects.filter(deployment__id=None).count()
+            return Package.objects.filter(
+                deployment__id=None,
+                store__isnull=False
+            ).count()
 
-        return Package.objects.scope(user).filter(deployment__id=None).count()
+        return Package.objects.scope(user).filter(
+            deployment__id=None,
+            store__isnull=False
+        ).count()
 
     @staticmethod
     def path(project_name, store_name, fullname):
