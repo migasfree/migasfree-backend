@@ -32,7 +32,7 @@ from .store import Store
 
 class DomainPackageManager(models.Manager):
     def scope(self, user):
-        qs = super(DomainPackageManager, self).get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects())
 
@@ -182,7 +182,7 @@ class Package(models.Model, MigasLink):
             )
 
     def clean(self):
-        super(Package, self).clean()
+        super().clean()
 
         if not hasattr(self, 'project'):
             return False
@@ -199,15 +199,16 @@ class Package(models.Model, MigasLink):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.create_dir()
-        super(Package, self).save(force_insert, force_update, using, update_fields)
+        super().save(force_insert, force_update, using, update_fields)
 
     def delete(self, using=None, keep_parents=False):
-        from migasfree.client.models import PackageHistory
+        from ...client.models import PackageHistory
+
         if PackageHistory.objects.filter(package__id=self.pk).exists():
             self.store = None
             self.save()
         else:
-            super(Package, self).delete(using=using, keep_parents=keep_parents)
+            super().delete(using=using, keep_parents=keep_parents)
 
     def __str__(self):
         # return _('%s at project %s') % (self.fullname, self.project.name)
