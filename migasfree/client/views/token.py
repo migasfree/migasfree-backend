@@ -132,7 +132,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
     @action(methods=['get'], detail=True, url_name='devices')
     def devices(self, request, pk=None):
-        computer = get_object_or_404(models.Computer, pk=pk)
+        computer = self.get_object()
         serializer = serializers.ComputerDevicesSerializer(computer, context={'request': request})
 
         return Response(
@@ -142,7 +142,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
     @action(methods=['get'], detail=True)
     def label(self, request, pk=None):
-        computer = get_object_or_404(models.Computer, pk=pk)
+        computer = self.get_object()
 
         response = {
             'uuid': computer.uuid,
@@ -161,7 +161,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         """
         Returns installed packages in a computer
         """
-        computer = get_object_or_404(models.Computer, pk=pk)
+        computer = self.get_object()
 
         data = list(
             computer.packagehistory_set.filter(
@@ -188,7 +188,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         """
         Returns software history of a computer
         """
-        computer = get_object_or_404(models.Computer, pk=pk)
+        computer = self.get_object()
 
         return Response(
             computer.get_software_history(),
@@ -204,7 +204,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         }
         Changes computer status
         """
-        computer = get_object_or_404(models.Computer, pk=pk)
+        computer = self.get_object()
 
         ret = computer.change_status(request.data.get('status'))
         if not ret:
@@ -235,7 +235,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
     @action(methods=['get'], detail=True)
     def errors(self, request, pk=None):
-        get_object_or_404(models.Computer, pk=pk)
+        self.get_object()
 
         return Response(
             {
@@ -247,7 +247,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
     @action(methods=['get'], detail=True)
     def faults(self, request, pk=None):
-        get_object_or_404(models.Computer, pk=pk)
+        self.get_object()
 
         return Response(
             {
@@ -265,7 +265,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         }
         Exchanges tags and status
         """
-        source = get_object_or_404(models.Computer, pk=pk)
+        source = self.get_object()
         target = get_object_or_404(
             models.Computer, id=request.data.get('target')
         )
@@ -350,7 +350,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
                 ]
             }
         """
-        computer = get_object_or_404(models.Computer, pk=pk)
+        computer = self.get_object()
         serializer = serializers.ComputerSyncSerializer(computer, context={'request': request})
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -375,7 +375,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
             }
         """
         user = request.user.userprofile
-        computer = get_object_or_404(models.Computer, pk=pk)
+        computer = self.get_object()
         date = request.GET.get('date', datetime.now())
 
         migration = models.Migration.situation(computer.id, date, user)
@@ -401,7 +401,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
     @action(methods=['get'], detail=True, url_path='sync/simulation')
     def simulate_sync(self, request, pk=None):
-        computer = get_object_or_404(models.Computer, pk=pk)
+        computer = self.get_object()
         user = request.user
         user.userprofile.check_scope(pk)
 
