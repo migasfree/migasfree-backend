@@ -27,6 +27,7 @@ from wsgiref.util import FileWrapper
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
@@ -444,6 +445,36 @@ class PackageViewSet(
 
         return qs
 
+    def create(self, request, *args, **kwargs):
+        data = dict(request.data)
+
+        if 'fullname' not in data and 'files' in data and len(data['files']) > 0:
+            data['fullname'] = data['files'][0].name
+
+        if 'name' not in data:
+            data['name'], data['version'], data['architecture'] = Package.normalized_name(data['fullname'])
+
+        store = get_object_or_404(Store, pk=data['store'][0])
+
+        try:
+            package = Package.objects.create(
+                fullname=data['fullname'],
+                name=data['name'],
+                version=data['version'],
+                architecture=data['architecture'],
+                project=store.project,
+                store=store,
+                file_=data['files'][0]
+            )
+
+            serializer = PackageSerializer(package)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except IntegrityError:
+            return Response(
+                {'detail': gettext('Package already exists')},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
     @action(methods=['get'], detail=False)
     def orphan(self, request):
         """
@@ -644,15 +675,22 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         _file = request.FILES.get('file')
 
         if claims.get('is_package'):
-            package = Package.objects.filter(name=_file.name, project=project)
+            package = Package.objects.filter(
+                fullname=_file.name,
+                project=project
+            )
             if package:
                 package[0].update_store(store)
             else:
+                name, version, architecture = Package.normalized_name(_file.name)
                 Package.objects.create(
-                    name=_file.name,
+                    fullname=_file.name,
+                    name=name,
+                    version=version,
+                    architecture=architecture,
                     project=project,
                     store=store,
-                    file_list=[_file]
+                    file_=_file
                 )
 
         target = Package.path(project.slug, store.slug, _file.name)
@@ -692,16 +730,20 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         )
 
         package = Package.objects.filter(
-            name=packageset, project=project
+            fullname=packageset, project=project
         )
         if package:
             package[0].update_store(store)
         else:
+            name, version, architecture = Package.normalized_name(packageset)
             Package.objects.create(
-                name=packageset,
+                fullname=packageset,
+                name=name,
+                version=version,
+                architecture=architecture,
                 project=project,
                 store=store,
-                file_list=[_file]
+                file_=_file
             )
 
         Package.handle_uploaded_file(_file, target)
@@ -744,7 +786,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         project = get_object_or_404(Project, name=claims.get('project'))
         package = get_object_or_404(
             Package,
-            name=os.path.basename(claims.get('packageset')),
+            fullname=os.path.basename(claims.get('packageset')),
             project=project
         )
 
