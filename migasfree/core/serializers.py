@@ -138,7 +138,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class ProjectWriteSerializer(serializers.ModelSerializer):
     def init(self, *args, **kwargs):
-        super(ProjectWriteSerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['pms'].validators.append(validate_project_pms)
 
     class Meta:
@@ -282,8 +282,8 @@ class PackageSerializer(serializers.ModelSerializer):
         allow_empty_file=False,
         validators=[MimetypeValidator(get_available_mimetypes())]
     )
-    name = serializers.CharField(
-        max_length=100,
+    fullname = serializers.CharField(
+        max_length=170,
         required=False,
         allow_blank=True
     )
@@ -306,21 +306,25 @@ class PackageSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        file_list = validated_data['files']
-        if not isinstance(file_list, list):
-            file_list = [file_list]  # always multiple files
+        file_ = validated_data['files']
 
-        validate_package_name(validated_data['name'], file_list)
-        if validated_data['name'] == '' and len(file_list) == 1:
-            validated_data['name'] = file_list[0].name
+        # validate_package_name(validated_data['name'], file_)
+        if validated_data['fullname'] == '' and file_:
+            validated_data['fullname'] = file_.name
         else:
-            validated_data['name'] = slugify(validated_data['name'])
+            validated_data['fullname'] = slugify(validated_data['fullname'])
+
+        if validated_data['name'] == '':
+            validated_data['name'], validated_data['version'], validated_data['architecture'] = Package.normalized_name(validated_data['fullname'])
 
         return Package.objects.create(
+            fullname=validated_data['fullname'],
             name=validated_data['name'],
+            version=validated_data['version'],
+            architecture=validated_data['architecture'],
             project=validated_data['project'],
             store=validated_data['store'],
-            file_list=file_list
+            file_=file_
         )
 
     class Meta:
@@ -427,7 +431,7 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
         if 'default_excluded_packages' in data:
             data['default_excluded_packages'] = '\n'.join(data.get('default_excluded_packages', []))
 
-        return super(DeploymentWriteSerializer, self).to_internal_value(data)
+        return super().to_internal_value(data)
 
     def _validate_active_computers(self, att_list):
         for attribute in att_list:
@@ -460,7 +464,7 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
 
 class InternalSourceWriteSerializer(DeploymentWriteSerializer):
     def create(self, validated_data):
-        deploy = super(InternalSourceWriteSerializer, self).create(validated_data)
+        deploy = super().create(validated_data)
         tasks.create_repository_metadata.delay(deploy.id)
         return deploy
 
@@ -472,9 +476,7 @@ class InternalSourceWriteSerializer(DeploymentWriteSerializer):
         old_name = old_obj.name
 
         # https://github.com/tomchristie/django-rest-framework/issues/2442
-        instance = super(InternalSourceWriteSerializer, self).update(
-            instance, validated_data
-        )
+        instance = super().update(instance, validated_data)
         new_pkgs = sorted(
             instance.available_packages.values_list('id', flat=True)
         )
@@ -602,7 +604,7 @@ class UserProfileSerializer(UserDetailsSerializer):
         domain_preference = profile_data.get('domain_preference')
         scope_preference = profile_data.get('scope_preference')
 
-        instance = super(UserProfileSerializer, self).update(instance, validated_data)
+        instance = super().update(instance, validated_data)
 
         # get and update user profile
         profile = instance.userprofile
