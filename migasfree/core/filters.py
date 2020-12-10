@@ -141,4 +141,8 @@ class ScheduleDelayFilter(filters.FilterSet):
 class StoreFilter(filters.FilterSet):
     class Meta:
         model = Store
-        fields = ['id', 'name', 'project__id']
+        fields = {
+            'id': ['exact'],
+            'name': ['icontains'],
+            'project__id': ['exact']
+        }
