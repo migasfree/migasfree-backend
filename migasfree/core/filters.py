@@ -77,7 +77,8 @@ class ProjectFilter(filters.FilterSet):
             'id': ['exact'],
             'platform__id': ['exact'],
             'name': ['exact', 'icontains'],
-            'pms': ['exact', 'icontains']
+            'pms': ['exact', 'icontains'],
+            'auto_register_computers': ['exact'],
         }
 
 
