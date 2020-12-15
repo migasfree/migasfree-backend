@@ -45,6 +45,8 @@ from ..device.models import Logical
 from ..device.serializers import LogicalSerializer
 from ..utils import read_remote_chunks
 
+from .pms import get_available_pms
+
 from .models import (
     Platform, Project, Store,
     ServerProperty, ClientProperty,
@@ -801,6 +803,15 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             self.create_response(gettext('Data received')),
             status=status.HTTP_200_OK
         )
+
+
+@permission_classes((permissions.AllowAny,))
+class PmsView(views.APIView):
+    def get(self, request, format=None):
+        """
+        Returns available PMS
+        """
+        return Response(dict(get_available_pms()))
 
 
 @permission_classes((permissions.AllowAny,))
