@@ -180,6 +180,7 @@ class ProjectViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     filterset_class = ProjectFilter
     ordering_fields = '__all__'
     ordering = ('name',)
+    search_fields = ['name']
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
