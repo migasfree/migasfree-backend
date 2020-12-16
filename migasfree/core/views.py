@@ -260,6 +260,18 @@ class ClientPropertyViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = ClientProperty.objects.filter(sort__in=['client', 'basic'])
     serializer_class = ClientPropertySerializer
     filterset_class = PropertyFilter
+    search_fields = ('name', 'prefix')
+
+    @action(methods=['get'], detail=False)
+    def kind(self, request):
+        """
+        Returns kind definition
+        """
+
+        return Response(
+            dict(ClientProperty.KIND_CHOICES),
+            status=status.HTTP_200_OK
+        )
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
