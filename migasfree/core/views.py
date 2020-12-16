@@ -247,6 +247,17 @@ class PropertyViewSet(viewsets.ModelViewSet, MigasViewSet):
 
         return PropertySerializer
 
+    @action(methods=['get'], detail=False)
+    def kind(self, request):
+        """
+        Returns kind definition
+        """
+
+        return Response(
+            dict(Property.KIND_CHOICES),
+            status=status.HTTP_200_OK
+        )
+
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class ServerPropertyViewSet(viewsets.ModelViewSet, MigasViewSet):
@@ -260,18 +271,7 @@ class ClientPropertyViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = ClientProperty.objects.filter(sort__in=['client', 'basic'])
     serializer_class = ClientPropertySerializer
     filterset_class = PropertyFilter
-    search_fields = ('name', 'prefix')
-
-    @action(methods=['get'], detail=False)
-    def kind(self, request):
-        """
-        Returns kind definition
-        """
-
-        return Response(
-            dict(ClientProperty.KIND_CHOICES),
-            status=status.HTTP_200_OK
-        )
+    search_fields = ['name', 'prefix']
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -824,6 +824,15 @@ class PmsView(views.APIView):
         Returns available PMS
         """
         return Response(dict(get_available_pms()))
+
+
+@permission_classes((permissions.AllowAny,))
+class ProgrammingLanguagesView(views.APIView):
+    def get(self, request, format=None):
+        """
+        Returns available programming languages (to formulas and faults definitions)
+        """
+        return Response(dict(settings.MIGASFREE_PROGRAMMING_LANGUAGES))
 
 
 @permission_classes((permissions.AllowAny,))
