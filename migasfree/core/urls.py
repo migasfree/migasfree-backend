@@ -18,12 +18,16 @@
 
 from django.conf.urls import include, url
 
-from .views import ServerInfoView, GetSourceFileView, PmsView
+from .views import (
+    ServerInfoView, GetSourceFileView,
+    PmsView, ProgrammingLanguagesView,
+)
 
 public_patterns = [
     url(r'server/info/', ServerInfoView.as_view()),
     url(r'^src/', GetSourceFileView.as_view()),
-    url(r'pms/', PmsView.as_view())
+    url(r'pms/', PmsView.as_view()),
+    url(r'languages', ProgrammingLanguagesView.as_view()),
 ]
 
 urlpatterns = [
