@@ -42,7 +42,8 @@ router.register(r'scopes', views.ScopeViewSet)
 router.register(r'user-profiles', views.UserProfileViewSet)
 # router.register(r'auth', views.AuthViewSet, basename='auth')
 # router.register(r'accounts', views.UserViewSet)
-# router.register(r'account-groups', views.GroupViewSet)
+router.register(r'accounts/groups', views.GroupViewSet)
+router.register(r'accounts/permissions', views.PermissionViewSet)
 
 safe_router = routers.DefaultRouter()
 
