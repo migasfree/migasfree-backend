@@ -27,7 +27,11 @@ from .models import (
 class AttributeSetFilter(filters.FilterSet):
     class Meta:
         model = AttributeSet
-        fields = ['id', 'name', 'enabled']
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
+            'enabled': ['exact'],
+        }
 
 
 class DeploymentFilter(filters.FilterSet):
