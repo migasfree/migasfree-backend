@@ -26,6 +26,7 @@ from wsgiref.util import FileWrapper
 
 from django.apps import apps
 from django.conf import settings
+from django.contrib.auth.models import Group, Permission
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.http import HttpResponse
@@ -70,6 +71,7 @@ from .serializers import (
     DomainWriteSerializer, DomainSerializer,
     ScopeSerializer, ScopeWriteSerializer,
     UserProfileSerializer, UserProfileWriteSerializer,
+    GroupSerializer, GroupWriteSerializer, PermissionSerializer,
     AttributeSetSerializer, AttributeSetWriteSerializer,
     PropertySerializer, PropertyWriteSerializer,
     ExternalSourceSerializer, ExternalSourceWriteSerializer,
@@ -637,6 +639,25 @@ class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet):
             return UserProfileWriteSerializer
 
         return UserProfileSerializer
+
+
+@permission_classes((permissions.DjangoModelPermissions,))
+class GroupViewSet(viewsets.ModelViewSet):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return GroupWriteSerializer
+
+        return GroupSerializer
+
+
+@permission_classes((permissions.DjangoModelPermissions,))
+class PermissionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    queryset = Permission.objects.all()
+    serializer_class = PermissionSerializer
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
