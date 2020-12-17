@@ -264,6 +264,7 @@ class ServerPropertyViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = ServerProperty.objects.filter(sort='server')
     serializer_class = ServerPropertySerializer
     filterset_class = PropertyFilter
+    search_fields = ['name', 'prefix']
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
