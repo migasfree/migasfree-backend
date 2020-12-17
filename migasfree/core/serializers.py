@@ -544,13 +544,6 @@ class UserProfileInfoSerializer(serializers.ModelSerializer):
         fields = ('id', 'username')
 
 
-"""
-class UserProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
-        fields = '__all__'
-"""
-
 class UserProfileWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
@@ -586,10 +579,30 @@ class PermissionInfoSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permission
+        fields = '__all__'
+
+
 class GroupInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ('id', 'name')
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    permissions = PermissionInfoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Group
+        fields = '__all__'
+
+
+class GroupWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = '__all__'
 
 
 class UserProfileSerializer(UserDetailsSerializer):
