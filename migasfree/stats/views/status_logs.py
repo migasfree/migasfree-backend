@@ -16,9 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from collections import defaultdict
-
-from django.db.models.aggregates import Count
 from django.utils.translation import gettext as _
 from rest_framework import status, permissions
 from rest_framework.decorators import action, permission_classes
@@ -33,56 +30,19 @@ from .events import event_by_month, month_interval, EventViewSet
 class StatusLogStatsViewSet(EventViewSet):
     @action(methods=['get'], detail=False, url_path='status')
     def by_status(self, request, format=None):
-        user = request.user.userprofile
-        total = StatusLog.objects.scope(user).count()
-
-        values = defaultdict(list)
-        for item in StatusLog.objects.scope(user).values(
-            'status',
-        ).annotate(
-            count=Count('id')
-        ).order_by('status', '-count'):
-            values[item.get('status')].append(
-                {
-                    'name': _(dict(Computer.STATUS_CHOICES)[item.get('status')]),
-                    'value': item.get('count'),
-                    'status_in': item.get('status'),
-                }
-            )
-
-        subscribed = 0
-        subscribed += values['intended'][0]['value'] if 'intended' in values else 0
-        subscribed += values['reserved'][0]['value'] if 'reserved' in values else 0
-        subscribed += values['unknown'][0]['value'] if 'unknown' in values else 0
-        subscribed += values['available'][0]['value'] if 'available' in values else 0
-        subscribed += values['in repair'][0]['value'] if 'in repair' in values else 0
-        unsubscribed = values['unsubscribed'][0]['value'] if 'unsubscribed' in values else 0
-        data = [
-            {
-                'name': _('Subscribed'),
-                'value': subscribed,
-                'status_in': 'intended,reserved,unknown,available,in repair',
-                'data': values.get('intended', []) + values.get('reserved', [])
-                + values.get('unknown', []) + values.get('available', []) + values.get('in repair', [])
-            },
-            {
-                'name': _('unsubscribed'),
-                'value': unsubscribed,
-                'status_in': 'unsubscribed',
-                'data': values.get('unsubscribed', [])
-            },
-        ]
+        data = StatusLog.by_status(request.user.userprofile)
 
         return Response(
             {
                 'title': _('Status Logs / Status'),
-                'total': total,
-                'data': data,
+                'total': data['total'],
+                'inner': data['inner'],
+                'outer': data['outer']
             },
             status=status.HTTP_200_OK
         )
 
-    @action(methods=['get'], detail=False, url_path='status/month')
+    @action(methods=['get'], detail=False, url_path='month')
     def status_by_month(self, request, format=None):
         begin_date, end_date = month_interval()
 
