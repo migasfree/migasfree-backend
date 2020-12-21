@@ -24,7 +24,7 @@ from ..hardware.models import Node
 
 from .models import (
     PackageHistory, Error, Notification, FaultDefinition, Fault,
-    Computer, Migration, StatusLog, Synchronization,
+    Computer, Migration, StatusLog, Synchronization, User,
 )
 
 
@@ -249,4 +249,14 @@ class SynchronizationFilter(filters.FilterSet):
             'computer__name': ['icontains'],
             'pms_status_ok': ['exact'],
             'consumer': ['icontains']
+        }
+
+
+class UserFilter(filters.FilterSet):
+    class Meta:
+        model = User
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
+            'fullname': ['exact', 'icontains'],
         }
