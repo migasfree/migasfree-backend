@@ -224,7 +224,12 @@ class StatusLogFilter(filters.FilterSet):
 
     class Meta:
         model = StatusLog
-        fields = ['id', 'computer__id']
+        fields = {
+            'id': ['exact'],
+            'computer__id': ['exact'],
+            'computer__name': ['icontains'],
+            'status': ['exact', 'in'],
+        }
 
 
 class SynchronizationFilter(filters.FilterSet):
