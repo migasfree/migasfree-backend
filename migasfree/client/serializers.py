@@ -223,6 +223,7 @@ class PackageHistorySerializer(serializers.ModelSerializer):
 
 
 class StatusLogSerializer(serializers.ModelSerializer):
+    computer = ComputerInfoSerializer(many=False, read_only=True)
     status = serializers.SerializerMethodField()
 
     def get_status(self, obj):
