@@ -21,7 +21,7 @@ from rest_framework import serializers
 from ..core.serializers import (
     ClientAttributeSerializer, ProjectInfoSerializer,
     AttributeInfoSerializer, PackageInfoSerializer,
-    ProjectNestedInfoSerializer,
+    ProjectNestedInfoSerializer, UserProfileInfoSerializer,
 )
 from ..device.serializers import LogicalInfoSerializer
 from . import models
@@ -154,13 +154,9 @@ class FaultDefinitionInfoSerializer(serializers.ModelSerializer):
 
 
 class FaultDefinitionSerializer(serializers.ModelSerializer):
-    language = serializers.SerializerMethodField()
     included_attributes = AttributeInfoSerializer(many=True, read_only=True)
     excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
-    users = UserInfoSerializer(many=True, read_only=True)
-
-    def get_language(self, obj):
-        return obj.get_language_display()
+    users = UserProfileInfoSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.FaultDefinition
