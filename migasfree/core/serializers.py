@@ -538,16 +538,9 @@ class DomainWriteSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class UserProfileInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
+class UserProfileInfoSerializer(UserDetailsSerializer):
+    class Meta(UserDetailsSerializer.Meta):
         fields = ('id', 'username')
-
-
-class UserProfileWriteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
-        fields = '__all__'
 
 
 class ScopeInfoSerializer(serializers.ModelSerializer):
@@ -602,6 +595,12 @@ class GroupSerializer(serializers.ModelSerializer):
 class GroupWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
+        fields = '__all__'
+
+
+class UserProfileWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
         fields = '__all__'
 
 
