@@ -631,7 +631,7 @@ class StatusLogViewSet(
     queryset = models.StatusLog.objects.all()
     serializer_class = serializers.StatusLogSerializer
     filterset_class = StatusLogFilter
-    search_fields = ['status']
+    search_fields = ['status', 'computer__name']
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
