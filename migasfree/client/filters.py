@@ -139,10 +139,13 @@ class ErrorFilter(filters.FilterSet):
 class FaultDefinitionFilter(filters.FilterSet):
     class Meta:
         model = FaultDefinition
-        fields = [
-            'id', 'name', 'enabled',
-            'included_attributes__id', 'excluded_attributes__id'
-        ]
+        fields = {
+            'id': ['exact'],
+            'name': ['icontains'],
+            'enabled': ['exact'],
+            'included_attributes__id': ['exact'],
+            'excluded_attributes__id': ['exact'],
+        }
 
 
 class FaultFilter(filters.FilterSet):
