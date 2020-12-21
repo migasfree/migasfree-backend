@@ -568,6 +568,7 @@ class MigrationViewSet(
     queryset = models.Migration.objects.all()
     serializer_class = serializers.MigrationSerializer
     filterset_class = MigrationFilter
+    search_fields = ['computer__name', 'computer__id']
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
