@@ -42,6 +42,7 @@ from ..filters import (
     PackageHistoryFilter, ErrorFilter, NotificationFilter,
     FaultDefinitionFilter, FaultFilter, ComputerFilter,
     MigrationFilter, StatusLogFilter, SynchronizationFilter,
+    UserFilter,
 )
 
 
@@ -696,6 +697,8 @@ class UserViewSet(
 ):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
+    filterset_class = UserFilter
+    search_fields = ['name', 'fullname']
     ordering_fields = '__all__'
     ordering = ('name',)
 
