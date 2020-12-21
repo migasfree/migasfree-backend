@@ -503,6 +503,7 @@ class FaultDefinitionViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = models.FaultDefinition.objects.all()
     serializer_class = serializers.FaultDefinitionSerializer
     filterset_class = FaultDefinitionFilter
+    search_fields = ['name']
     ordering_fields = '__all__'
     ordering = ('name',)
 
