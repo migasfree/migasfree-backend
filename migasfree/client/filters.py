@@ -191,7 +191,13 @@ class MigrationFilter(filters.FilterSet):
 
     class Meta:
         model = Migration
-        fields = ['id', 'project__id', 'computer__id']
+        fields = {
+            'id': ['exact'],
+            'project__id': ['exact'],
+            'project__platform__id': ['exact'],
+            'computer__id': ['exact'],
+            'computer__name': ['icontains'],
+        }
 
 
 class NotificationFilter(filters.FilterSet):
