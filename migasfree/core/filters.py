@@ -17,7 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django_filters import rest_framework as filters
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Permission, Group
 
 from .models import (
     Deployment, Package, ClientAttribute, ServerAttribute, Attribute,
@@ -169,6 +169,15 @@ class UserProfileFilter(filters.FilterSet):
 class PermissionFilter(filters.FilterSet):
     class Meta:
         model = Permission
+        fields = {
+            'id': ['exact'],
+            'name': ['icontains'],
+        }
+
+
+class GroupFilter(filters.FilterSet):
+    class Meta:
+        model = Group
         fields = {
             'id': ['exact'],
             'name': ['icontains'],
