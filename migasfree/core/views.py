@@ -82,6 +82,7 @@ from .filters import (
     ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
     AttributeSetFilter, PropertyFilter, AttributeFilter, PlatformFilter,
     UserProfileFilter, PermissionFilter, GroupFilter, DomainFilter,
+    ScopeFilter,
 )
 
 from . import tasks
@@ -689,6 +690,8 @@ class DomainViewSet(viewsets.ModelViewSet, MigasViewSet):
 class ScopeViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = Scope.objects.all()
     serializer_class = ScopeSerializer
+    filterset_class = ScopeFilter
+    search_fields = ['name']
     ordering_fields = '__all__'
     ordering = ('name',)
 
