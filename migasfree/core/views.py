@@ -81,7 +81,7 @@ from .filters import (
     DeploymentFilter, PackageFilter, ProjectFilter, StoreFilter,
     ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
     AttributeSetFilter, PropertyFilter, AttributeFilter, PlatformFilter,
-    UserProfileFilter, PermissionFilter,
+    UserProfileFilter, PermissionFilter, GroupFilter,
 )
 
 from . import tasks
@@ -648,6 +648,9 @@ class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet):
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+    filterset_class = GroupFilter
+    search_fields = ['name']
+    ordering = ('name',)
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
