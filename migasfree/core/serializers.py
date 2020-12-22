@@ -608,8 +608,10 @@ class UserProfileSerializer(UserDetailsSerializer):
     groups = GroupInfoSerializer(many=True, read_only=True)
     user_permissions = PermissionInfoSerializer(many=True, read_only=True)
     domains = DomainInfoSerializer(many=True, read_only=True, source='userprofile.domains')
-    domain_preference = serializers.IntegerField(source='userprofile.domain_preference.id', allow_null=True)
-    scope_preference = serializers.IntegerField(source='userprofile.scope_preference.id', allow_null=True)
+    # domain_preference = serializers.IntegerField(source='userprofile.domain_preference.id', allow_null=True)
+    domain_preference = DomainInfoSerializer(many=False, read_only=True)
+    # scope_preference = serializers.IntegerField(source='userprofile.scope_preference.id', allow_null=True)
+    scope_preference = ScopeInfoSerializer(many=False, read_only=True)
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('userprofile', {})
@@ -642,5 +644,5 @@ class UserProfileSerializer(UserDetailsSerializer):
         fields = UserDetailsSerializer.Meta.fields + (
             'domains', 'domain_preference', 'scope_preference',
             'groups', 'user_permissions', 'is_superuser', 'is_staff',
-            'is_active', 'last_login', 'id',
+            'is_active', 'last_login', 'date_joined', 'id',
         )
