@@ -22,7 +22,7 @@ from django.contrib.auth.models import Permission, Group
 from .models import (
     Deployment, Package, ClientAttribute, ServerAttribute, Attribute,
     Project, ScheduleDelay, Store, AttributeSet, Property, Platform,
-    UserProfile, Domain,
+    UserProfile, Domain, Scope,
 )
 
 
@@ -190,4 +190,14 @@ class DomainFilter(filters.FilterSet):
         fields = {
             'id': ['exact'],
             'name': ['exact', 'icontains'],
+        }
+
+
+class ScopeFilter(filters.FilterSet):
+    class Meta:
+        model = Scope
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
+            'user': ['exact'],
         }
