@@ -22,7 +22,7 @@ from django.contrib.auth.models import Permission, Group
 from .models import (
     Deployment, Package, ClientAttribute, ServerAttribute, Attribute,
     Project, ScheduleDelay, Store, AttributeSet, Property, Platform,
-    UserProfile,
+    UserProfile, Domain,
 )
 
 
@@ -181,4 +181,13 @@ class GroupFilter(filters.FilterSet):
         fields = {
             'id': ['exact'],
             'name': ['icontains'],
+        }
+
+
+class DomainFilter(filters.FilterSet):
+    class Meta:
+        model = Domain
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
         }
