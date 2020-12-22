@@ -642,5 +642,5 @@ class UserProfileSerializer(UserDetailsSerializer):
         fields = UserDetailsSerializer.Meta.fields + (
             'domains', 'domain_preference', 'scope_preference',
             'groups', 'user_permissions', 'is_superuser', 'is_staff',
-            'is_active', 'last_login',
+            'is_active', 'last_login', 'id',
         )
