@@ -28,10 +28,11 @@ from .user_profile import UserProfile
 
 
 class ScopeManager(models.Manager):
-    def create(self, user, name, included_attributes, excluded_attributes):
+    def create(self, user, name, domain, included_attributes, excluded_attributes):
         obj = Scope()
         obj.name = name
         obj.user = user
+        obj.domain = domain
         obj.included_attributes = included_attributes
         obj.excluded_attributes = excluded_attributes
         obj.save()
