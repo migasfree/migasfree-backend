@@ -81,6 +81,7 @@ from .filters import (
     DeploymentFilter, PackageFilter, ProjectFilter, StoreFilter,
     ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
     AttributeSetFilter, PropertyFilter, AttributeFilter, PlatformFilter,
+    UserProfileFilter, PermissionFilter,
 )
 
 from . import tasks
@@ -630,6 +631,8 @@ class ExternalSourceViewSet(viewsets.ModelViewSet, MigasViewSet):
 class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
+    filterset_class = UserProfileFilter
+    search_fields = ['username', 'first_name', 'last_name']
     ordering_fields = '__all__'
     ordering = ('username',)
 
@@ -658,6 +661,8 @@ class GroupViewSet(viewsets.ModelViewSet):
 class PermissionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Permission.objects.all()
     serializer_class = PermissionSerializer
+    filterset_class = PermissionFilter
+    search_fields = ['name']
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
