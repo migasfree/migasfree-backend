@@ -81,7 +81,7 @@ from .filters import (
     DeploymentFilter, PackageFilter, ProjectFilter, StoreFilter,
     ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
     AttributeSetFilter, PropertyFilter, AttributeFilter, PlatformFilter,
-    UserProfileFilter, PermissionFilter, GroupFilter,
+    UserProfileFilter, PermissionFilter, GroupFilter, DomainFilter,
 )
 
 from . import tasks
@@ -672,6 +672,8 @@ class PermissionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 class DomainViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = Domain.objects.all()
     serializer_class = DomainSerializer
+    filterset_class = DomainFilter
+    search_fields = ['name']
     ordering_fields = '__all__'
     ordering = ('name',)
 
