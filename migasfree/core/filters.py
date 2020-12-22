@@ -17,10 +17,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django_filters import rest_framework as filters
+from django.contrib.auth.models import Permission
 
 from .models import (
     Deployment, Package, ClientAttribute, ServerAttribute, Attribute,
     Project, ScheduleDelay, Store, AttributeSet, Property, Platform,
+    UserProfile,
 )
 
 
@@ -150,4 +152,24 @@ class StoreFilter(filters.FilterSet):
             'id': ['exact'],
             'name': ['icontains'],
             'project__id': ['exact']
+        }
+
+
+class UserProfileFilter(filters.FilterSet):
+    class Meta:
+        model = UserProfile
+        fields = {
+            'id': ['exact'],
+            'username': ['exact', 'icontains'],
+            'first_name': ['exact', 'icontains'],
+            'last_name': ['exact', 'icontains'],
+        }
+
+
+class PermissionFilter(filters.FilterSet):
+    class Meta:
+        model = Permission
+        fields = {
+            'id': ['exact'],
+            'name': ['icontains'],
         }
