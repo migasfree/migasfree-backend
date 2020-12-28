@@ -22,7 +22,7 @@ from django.utils.translation import gettext_lazy as _
 from ...core.models import Project, MigasLink
 from ...utils import to_list
 from .model import Model
-from .feature import Feature
+from .capability import Capability
 
 
 class Driver(models.Model, MigasLink):
@@ -45,10 +45,10 @@ class Driver(models.Model, MigasLink):
         verbose_name=_("project")
     )
 
-    feature = models.ForeignKey(
-        Feature,
+    capability = models.ForeignKey(
+        Capability,
         on_delete=models.CASCADE,
-        verbose_name=_("feature")
+        verbose_name=_("capability")
     )
 
     packages_to_install = models.TextField(
@@ -76,5 +76,5 @@ class Driver(models.Model, MigasLink):
         app_label = 'device'
         verbose_name = _("Driver")
         verbose_name_plural = _("Drivers")
-        unique_together = (("model", "project", "feature"),)
+        unique_together = (("model", "project", "capability"),)
         ordering = ['model', 'name']
