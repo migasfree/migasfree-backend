@@ -28,14 +28,15 @@ from .user_profile import UserProfile
 
 
 class ScopeManager(models.Manager):
-    def create(self, user, name, domain, included_attributes, excluded_attributes):
+    def create(self, user, name, domain, included_attributes=None, excluded_attributes=None):
         obj = Scope()
         obj.name = name
         obj.user = user
         obj.domain = domain
-        obj.included_attributes = included_attributes
-        obj.excluded_attributes = excluded_attributes
         obj.save()
+
+        obj.included_attributes.set(included_attributes or [])
+        obj.excluded_attributes.set(excluded_attributes or [])
 
         return obj
 
@@ -96,7 +97,7 @@ class Scope(models.Model, MigasLink):
         Returns Queryset with the related computers based in attributes
         """
         if model == 'computer':
-            from migasfree.client.models import Computer
+            from ...client.models import Computer
 
             qs = Computer.productive.scope(user)
             if self.domain:
