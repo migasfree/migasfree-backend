@@ -30,7 +30,10 @@ from .models import (
     Capability, Logical, Manufacturer,
     Model, Type
 )
-from .filters import DeviceFilter, DriverFilter, ManufacturerFilter
+from .filters import (
+    DeviceFilter, DriverFilter,
+    ManufacturerFilter, CapabilityFilter,
+)
 from . import serializers
 
 
@@ -113,6 +116,8 @@ class DriverViewSet(viewsets.ModelViewSet, MigasViewSet):
 class CapabilityViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = Capability.objects.all()
     serializer_class = serializers.CapabilitySerializer
+    filterset_class = CapabilityFilter
+    search_fields = ['name']
     ordering_fields = '__all__'
     ordering = ('name',)
 
