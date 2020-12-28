@@ -33,7 +33,7 @@ class DriverFilter(filters.FilterSet):
         fields = [
             'project__id', 'project__name',
             'model__id', 'model__name',
-            'feature__id', 'feature__name'
+            'capability__id', 'capability__name'
         ]
 
 
