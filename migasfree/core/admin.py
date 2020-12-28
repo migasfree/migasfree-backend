@@ -658,7 +658,7 @@ class DomainAdmin(admin.ModelAdmin):
     fieldsets = (
         (_('General'), {
             'fields': (
-                'name', 'comment',
+                'name', 'comment', 'users',
             ),
         }),
         (_('Attributes'), {
