@@ -18,7 +18,16 @@
 
 from django_filters import rest_framework as filters
 
-from .models import Device, Driver, Manufacturer
+from .models import Device, Driver, Manufacturer, Capability
+
+
+class CapabilityFilter(filters.FilterSet):
+    class Meta:
+        model = Capability
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
+        }
 
 
 class DeviceFilter(filters.FilterSet):
