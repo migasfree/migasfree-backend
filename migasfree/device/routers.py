@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ router = routers.DefaultRouter()
 router.register(r'connections', views.ConnectionViewSet)
 router.register(r'devices', views.DeviceViewSet)
 router.register(r'drivers', views.DriverViewSet)
-router.register(r'features', views.FeatureViewSet)
+router.register(r'capabilities', views.CapabilityViewSet)
 router.register(r'logical', views.LogicalViewSet)
 router.register(r'manufacturers', views.ManufacturerViewSet)
 router.register(r'models', views.ModelViewSet)
