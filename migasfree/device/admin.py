@@ -23,7 +23,7 @@ from django.utils.translation import gettext_lazy as _
 
 from migasfree.core.models import Attribute
 from .models import (
-    Type, Feature, Manufacturer, Connection,
+    Type, Capability, Manufacturer, Connection,
     Driver, Logical, Model, Device
 )
 
@@ -34,8 +34,8 @@ class TypeAdmin(admin.ModelAdmin):
     ordering = ('name',)
 
 
-@admin.register(Feature)
-class FeatureAdmin(admin.ModelAdmin):
+@admin.register(Capability)
+class CapabilityAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     ordering = ('name',)
 
@@ -56,7 +56,7 @@ class ConnectionAdmin(admin.ModelAdmin):
 
 @admin.register(Driver)
 class DriverAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'model', 'project', 'feature')
+    list_display = ('__str__', 'model', 'project', 'capability')
     list_display_links = ('__str__',)
     list_filter = ('project', 'model')
     search_fields = ('name',)
@@ -71,17 +71,17 @@ class LogicalForm(forms.ModelForm):
 @admin.register(Logical)
 class LogicalAdmin(admin.ModelAdmin):
     form = LogicalForm
-    fields = ('device', 'feature', 'alternative_feature_name', 'attributes')
-    list_select_related = ('device', 'feature',)
-    list_display = ('device', 'feature')
-    list_filter = ('device__model', 'feature')
-    ordering = ('device__name', 'feature__name')
+    fields = ('device', 'capability', 'alternative_capability_name', 'attributes')
+    list_select_related = ('device', 'capability',)
+    list_display = ('device', 'capability')
+    list_filter = ('device__model', 'capability')
+    ordering = ('device__name', 'capability__name')
     search_fields = (
         'id',
         'device__name',
         'device__model__name',
         'device__model__manufacturer__name',
-        'feature__name',
+        'capability__name',
     )
 
     def get_queryset(self, request):
@@ -98,7 +98,7 @@ class LogicalAdmin(admin.ModelAdmin):
 class LogicalInline(admin.TabularInline):
     model = Logical
     form = LogicalForm
-    fields = ('feature', 'alternative_feature_name', 'attributes')
+    fields = ('capability', 'alternative_capability_name', 'attributes')
     extra = 0
 
     def get_queryset(self, request):
@@ -150,23 +150,23 @@ class DeviceAdmin(admin.ModelAdmin):
         super(DeviceAdmin, self).save_related(request, form, formsets, change)
         device = form.instance
 
-        for feature in Feature.objects.filter(
+        for capability in Capability.objects.filter(
             driver__model__id=device.model.id
         ).distinct():
             if Logical.objects.filter(
                 device__id=device.id,
-                feature=feature
+                capability=capability
             ).count() == 0:
                 device.logical_set.create(
                     device=device,
-                    feature=feature
+                    capability=capability
                 )
 
 
 class DriverInline(admin.TabularInline):
     model = Driver
-    fields = ('project', 'feature', 'name', 'packages_to_install')
-    ordering = ('project', 'feature')
+    fields = ('project', 'capability', 'name', 'packages_to_install')
+    ordering = ('project', 'capability')
     extra = 1
 
 
