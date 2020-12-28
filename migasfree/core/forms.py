@@ -22,6 +22,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -274,6 +275,10 @@ class ScopeForm(forms.ModelForm):
 
 
 class DomainForm(forms.ModelForm):
+    users = forms.MultipleChoiceField(choices=[(i.id, i.username) for i in UserProfile.objects.filter(
+        groups__in=[Group.objects.get(name="Domain Admin")]
+    ).order_by('username')], required=False)
+
     def __init__(self, *args, **kwargs):
         super(DomainForm, self).__init__(*args, **kwargs)
 
