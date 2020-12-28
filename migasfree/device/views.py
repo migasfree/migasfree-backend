@@ -27,7 +27,7 @@ from ..core.views import MigasViewSet
 
 from .models import (
     Connection, Device, Driver,
-    Feature, Logical, Manufacturer,
+    Capability, Logical, Manufacturer,
     Model, Type
 )
 from .filters import DeviceFilter, DriverFilter, ManufacturerFilter
@@ -110,9 +110,9 @@ class DriverViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class FeatureViewSet(viewsets.ModelViewSet, MigasViewSet):
-    queryset = Feature.objects.all()
-    serializer_class = serializers.FeatureSerializer
+class CapabilityViewSet(viewsets.ModelViewSet, MigasViewSet):
+    queryset = Capability.objects.all()
+    serializer_class = serializers.CapabilitySerializer
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -132,7 +132,7 @@ class LogicalViewSet(viewsets.ModelViewSet, MigasViewSet):
         return serializers.LogicalSerializer
 
     def get_queryset(self):
-        return self.queryset.select_related('device', 'feature')
+        return self.queryset.select_related('device', 'capability')
 
     @action(methods=['get'], detail=False)
     def available(self, request):
@@ -150,7 +150,7 @@ class LogicalViewSet(viewsets.ModelViewSet, MigasViewSet):
 
         results = Logical.objects.filter(
             device__available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True)
-        ).order_by('device__name', 'feature__name').distinct()
+        ).order_by('device__name', 'capability__name').distinct()
         if query:
             results = results.filter(Q(device__name__icontains=query) | Q(device__data__icontains=query))
         if device:
