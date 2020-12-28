@@ -30,7 +30,7 @@ from .models import (
     Feature, Logical, Manufacturer,
     Model, Type
 )
-from .filters import DeviceFilter, DriverFilter
+from .filters import DeviceFilter, DriverFilter, ManufacturerFilter
 from . import serializers
 
 
@@ -169,6 +169,8 @@ class LogicalViewSet(viewsets.ModelViewSet, MigasViewSet):
 class ManufacturerViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = Manufacturer.objects.all()
     serializer_class = serializers.ManufacturerSerializer
+    filterset_class = ManufacturerFilter
+    search_fields = ['name']
     ordering_fields = '__all__'
     ordering = ('name',)
 
