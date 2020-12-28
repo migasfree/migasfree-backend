@@ -280,7 +280,7 @@ class DomainForm(forms.ModelForm):
     ).order_by('username')], required=False)
 
     def __init__(self, *args, **kwargs):
-        super(DomainForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if self.instance.id:
             self.fields['users'].initial = self.instance.domains.values_list('id', flat=True)
@@ -291,7 +291,7 @@ class DomainForm(forms.ModelForm):
         users = self.cleaned_data.get('users', [])
         self.instance.update_domain_admins(list(map(int, users)))
 
-        return super(DomainForm, self).save(commit=commit)
+        return super().save(commit=commit)
 
     class Meta:
         model = Domain
