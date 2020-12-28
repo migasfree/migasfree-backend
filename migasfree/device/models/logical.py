@@ -23,13 +23,13 @@ from django.utils.translation import gettext_lazy as _
 
 from ...core.models import Attribute, MigasLink
 from .device import Device
-from .feature import Feature
+from .capability import Capability
 from .driver import Driver
 
 
 class LogicalManager(models.Manager):
-    def create(self, device, feature, name=None):
-        obj = Logical(device=device, feature=feature, name=name)
+    def create(self, device, capability, name=None):
+        obj = Logical(device=device, capability=capability, name=name)
         obj.save()
 
         return obj
@@ -51,14 +51,14 @@ class Logical(models.Model, MigasLink):
         verbose_name=_("device")
     )
 
-    feature = models.ForeignKey(
-        Feature,
+    capability = models.ForeignKey(
+        Capability,
         on_delete=models.CASCADE,
-        verbose_name=_("feature")
+        verbose_name=_("capability")
     )
 
-    alternative_feature_name = models.CharField(
-        verbose_name=_('alternative feature name'),
+    alternative_capability_name = models.CharField(
+        verbose_name=_('alternative capability name'),
         max_length=50,
         null=True,
         blank=True,
@@ -75,7 +75,7 @@ class Logical(models.Model, MigasLink):
     objects = LogicalManager()
 
     def get_name(self):
-        return self.alternative_feature_name if self.alternative_feature_name else self.feature.name
+        return self.alternative_capability_name if self.alternative_capability_name else self.capability.name
 
     def as_dict(self, project):
         driver_as_dict = {}
@@ -83,7 +83,7 @@ class Logical(models.Model, MigasLink):
             driver = Driver.objects.filter(
                 project__id=project.id,
                 model__id=self.device.model.id,
-                feature__id=self.feature.id
+                capability__id=self.capability.id
             )[0]
             if driver:
                 driver_as_dict = driver.as_dict()
@@ -92,7 +92,7 @@ class Logical(models.Model, MigasLink):
 
         ret = {
             self.device.connection.device_type.name: {
-                'feature': self.get_name(),
+                'capability': self.get_name(),
                 'id': self.id,
                 'manufacturer': self.device.model.manufacturer.name
             }
@@ -124,8 +124,8 @@ class Logical(models.Model, MigasLink):
         )
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        if isinstance(self.alternative_feature_name, str):
-            self.alternative_feature_name = self.alternative_feature_name.replace(" ", "_")
+        if isinstance(self.alternative_capability_name, str):
+            self.alternative_capability_name = self.alternative_capability_name.replace(" ", "_")
 
         super(Logical, self).save(force_insert, force_update, using, update_fields)
 
@@ -133,4 +133,4 @@ class Logical(models.Model, MigasLink):
         app_label = 'device'
         verbose_name = _("Device Logical")
         verbose_name_plural = _("Devices Logical")
-        unique_together = (("device", "feature"),)
+        unique_together = (("device", "capability"),)
