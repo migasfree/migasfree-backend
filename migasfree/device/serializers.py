@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 from rest_framework import serializers
 
-from migasfree.core.serializers import AttributeInfoSerializer, ProjectInfoSerializer
+from ..core.serializers import AttributeInfoSerializer, ProjectInfoSerializer
 
 from ..utils import to_list
 from . import models
@@ -72,9 +72,9 @@ class DeviceSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class FeatureInfoSerializer(serializers.ModelSerializer):
+class CapabilityInfoSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Feature
+        model = models.Capability
         fields = ('id', 'name')
 
 
@@ -93,7 +93,7 @@ class DriverWriteSerializer(serializers.ModelSerializer):
 class DriverSerializer(serializers.ModelSerializer):
     model = ModelInfoSerializer(many=False, read_only=True)
     project = ProjectInfoSerializer(many=False, read_only=True)
-    feature = FeatureInfoSerializer(many=False, read_only=True)
+    capability = CapabilityInfoSerializer(many=False, read_only=True)
     packages_to_install = serializers.SerializerMethodField()
 
     def get_packages_to_install(self, obj):
@@ -104,24 +104,24 @@ class DriverSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class FeatureSerializer(serializers.ModelSerializer):
+class CapabilitySerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Feature
+        model = models.Capability
         fields = '__all__'
 
 
 class LogicalInfoSerializer(serializers.ModelSerializer):
     device = DeviceInfoSerializer(many=False, read_only=True)
-    feature = FeatureSerializer(many=False, read_only=True)
+    capability = CapabilitySerializer(many=False, read_only=True)
 
     class Meta:
         model = models.Logical
-        fields = ('id', 'device', 'feature')
+        fields = ('id', 'device', 'capability')
 
 
 class LogicalSerializer(serializers.ModelSerializer):
     device = DeviceInfoSerializer(many=False, read_only=True)
-    feature = FeatureSerializer(many=False, read_only=True)
+    capability = CapabilitySerializer(many=False, read_only=True)
 
     class Meta:
         model = models.Logical
