@@ -22,7 +22,7 @@ from django.utils.translation import gettext_lazy as _
 from ...core.models import MigasLink
 
 
-class Feature(models.Model, MigasLink):
+class Capability(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_("name"),
         max_length=50,
@@ -34,5 +34,5 @@ class Feature(models.Model, MigasLink):
 
     class Meta:
         app_label = 'device'
-        verbose_name = _("Feature")
-        verbose_name_plural = _("Features")
+        verbose_name = _('Capability')
+        verbose_name_plural = _('Capabilities')
