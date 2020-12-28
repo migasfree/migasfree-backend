@@ -589,6 +589,16 @@ class ScopeSerializer(serializers.ModelSerializer):
 
 
 class ScopeWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+        if obj.user:
+            representation['user'] = {
+                'id': obj.user.id,
+                'username': obj.user.username
+            }
+
+        return representation
+
     class Meta:
         model = Scope
         fields = '__all__'
