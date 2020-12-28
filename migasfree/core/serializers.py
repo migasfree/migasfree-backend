@@ -516,6 +516,11 @@ class ExternalSourceWriteSerializer(DeploymentWriteSerializer):
         )
 
 
+class UserProfileInfoSerializer(UserDetailsSerializer):
+    class Meta(UserDetailsSerializer.Meta):
+        fields = ('id', 'username')
+
+
 class DomainInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Domain
@@ -526,6 +531,10 @@ class DomainSerializer(serializers.ModelSerializer):
     included_attributes = AttributeInfoSerializer(many=True, read_only=True)
     excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
     tags = AttributeInfoSerializer(many=True, read_only=True)
+    domain_admins = serializers.SerializerMethodField()
+
+    def get_domain_admins(self, obj):
+        return obj.get_domain_admins()
 
     class Meta:
         model = Domain
@@ -533,14 +542,33 @@ class DomainSerializer(serializers.ModelSerializer):
 
 
 class DomainWriteSerializer(serializers.ModelSerializer):
+    domain_admins = serializers.ListField(
+        child=serializers.IntegerField(),
+        allow_empty=True,
+        write_only=True
+    )
+
+    def create(self, validated_data):
+        users = validated_data.pop('domain_admins', None)
+        instance = super().create(validated_data)
+        instance.update_domain_admins(users)
+
+        return instance
+
+    def update(self, instance, validated_data):
+        users = validated_data.pop('domain_admins', None)
+        instance = super().update(instance, validated_data)
+        instance.update_domain_admins(users)
+
+        return instance
+
     class Meta:
         model = Domain
-        fields = '__all__'
-
-
-class UserProfileInfoSerializer(UserDetailsSerializer):
-    class Meta(UserDetailsSerializer.Meta):
-        fields = ('id', 'username')
+        fields = (
+            'id', 'name',
+            'included_attributes', 'excluded_attributes',
+            'tags', 'domain_admins'
+        )
 
 
 class ScopeInfoSerializer(serializers.ModelSerializer):
