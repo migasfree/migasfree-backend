@@ -644,6 +644,20 @@ class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet):
 
         return UserProfileSerializer
 
+    @action(methods=['get'], detail=False, url_path='domain-admins')
+    def domain_admins(self, request, format=None):
+        serializer = UserProfileSerializer(
+            UserProfile.objects.filter(
+                groups__in=[Group.objects.get(name="Domain Admin")]
+            ).order_by('username'),
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class GroupViewSet(viewsets.ModelViewSet):
