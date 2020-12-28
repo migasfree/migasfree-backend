@@ -104,6 +104,9 @@ class Domain(models.Model, MigasLink):
 
         return tags
 
+    def get_domain_admins(self):
+        return list(self.domains.values('id', 'username'))
+
     def update_domain_admins(self, users):
         """
         :param users: [id1, id2, id3, ...]
@@ -133,7 +136,7 @@ class Domain(models.Model, MigasLink):
         Returns Queryset with the related computers based in attributes
         """
         if model == 'computer':
-            from migasfree.client.models import Computer
+            from ...client.models import Computer
 
             return Computer.productive.scope(user).filter(
                 sync_attributes__in=self.included_attributes.all()
