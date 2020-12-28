@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 from django_filters import rest_framework as filters
 
-from .models import Device, Driver
+from .models import Device, Driver, Manufacturer
 
 
 class DeviceFilter(filters.FilterSet):
@@ -35,3 +35,12 @@ class DriverFilter(filters.FilterSet):
             'model__id', 'model__name',
             'feature__id', 'feature__name'
         ]
+
+
+class ManufacturerFilter(filters.FilterSet):
+    class Meta:
+        model = Manufacturer
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
+        }
