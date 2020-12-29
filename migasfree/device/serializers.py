@@ -44,6 +44,12 @@ class ConnectionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ConnectionWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Connection
+        fields = '__all__'
+
+
 class ManufacturerInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Manufacturer
