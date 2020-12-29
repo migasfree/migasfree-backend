@@ -18,7 +18,10 @@
 
 from django_filters import rest_framework as filters
 
-from .models import Device, Driver, Manufacturer, Capability, Type
+from .models import (
+    Device, Driver, Manufacturer,
+    Capability, Type, Connection,
+)
 
 
 class CapabilityFilter(filters.FilterSet):
@@ -30,20 +33,39 @@ class CapabilityFilter(filters.FilterSet):
         }
 
 
+class ConnectionFilter(filters.FilterSet):
+    class Meta:
+        model = Connection
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
+            'device_type__id': ['exact'],
+            'device_type__name': ['exact', 'icontains'],
+        }
+
+
 class DeviceFilter(filters.FilterSet):
     class Meta:
         model = Device
-        fields = ['model__id', 'model__name']
+        fields = {
+            'id': ['exact'],
+            'model__id': ['exact'],
+            'model__name': ['exact', 'icontains'],
+        }
 
 
 class DriverFilter(filters.FilterSet):
     class Meta:
         model = Driver
-        fields = [
-            'project__id', 'project__name',
-            'model__id', 'model__name',
-            'capability__id', 'capability__name'
-        ]
+        fields = {
+            'id': ['exact'],
+            'project__id': ['exact'],
+            'project__name': ['exact', 'icontains'],
+            'model__id': ['exact'],
+            'model__name': ['exact', 'icontains'],
+            'capability__id': ['exact'],
+            'capability__name': ['exact', 'icontains'],
+        }
 
 
 class ManufacturerFilter(filters.FilterSet):
