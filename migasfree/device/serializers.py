@@ -30,7 +30,15 @@ class ConnectionInfoSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
+class TypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Type
+        fields = '__all__'
+
+
 class ConnectionSerializer(serializers.ModelSerializer):
+    device_type = TypeSerializer(many=False, read_only=True)
+
     class Meta:
         model = models.Connection
         fields = '__all__'
@@ -137,12 +145,6 @@ class LogicalWriteSerializer(serializers.ModelSerializer):
 class ManufacturerSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Manufacturer
-        fields = '__all__'
-
-
-class TypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Type
         fields = '__all__'
 
 
