@@ -50,6 +50,13 @@ class ConnectionViewSet(viewsets.ModelViewSet, MigasViewSet):
     def get_queryset(self):
         return self.queryset.select_related('device_type')
 
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return serializers.ConnectionWriteSerializer
+
+        return serializers.ConnectionSerializer
+
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class DeviceViewSet(viewsets.ModelViewSet, MigasViewSet):
