@@ -33,7 +33,7 @@ from .models import (
 from .filters import (
     DeviceFilter, DriverFilter,
     ManufacturerFilter, CapabilityFilter,
-    TypeFilter,
+    TypeFilter, ConnectionFilter,
 )
 from . import serializers
 
@@ -42,11 +42,13 @@ from . import serializers
 class ConnectionViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = Connection.objects.all()
     serializer_class = serializers.ConnectionSerializer
+    filterset_class = ConnectionFilter
+    search_fields = ['name']
     ordering_fields = '__all__'
     ordering = ('id',)
 
     def get_queryset(self):
-        return self.queryset.select_related('type')
+        return self.queryset.select_related('device_type')
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
