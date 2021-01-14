@@ -330,7 +330,6 @@ class Node(models.Model, MigasLink):
     def get_storage(computer_id):
         query = Node.objects.filter(
             computer=computer_id,
-            name='disk',
             class_name='disk',
             size__gt=0
         )
