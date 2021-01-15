@@ -94,6 +94,7 @@ class LogicalFilter(filters.FilterSet):
             'id': ['exact'],
             'device__id': ['exact'],
             'device__name': ['exact', 'icontains'],
+            'device__model__id': ['exact'],
             'capability__id': ['exact'],
             'capability__name': ['exact', 'icontains'],
         }
