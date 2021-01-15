@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ from django_filters import rest_framework as filters
 from .models import (
     Device, Driver, Manufacturer,
     Capability, Type, Connection,
+    Logical,
 )
 
 
@@ -83,4 +84,16 @@ class TypeFilter(filters.FilterSet):
         fields = {
             'id': ['exact'],
             'name': ['exact', 'icontains'],
+        }
+
+
+class LogicalFilter(filters.FilterSet):
+    class Meta:
+        model = Logical
+        fields = {
+            'id': ['exact'],
+            'device__id': ['exact'],
+            'device__name': ['exact', 'icontains'],
+            'capability__id': ['exact'],
+            'capability__name': ['exact', 'icontains'],
         }
