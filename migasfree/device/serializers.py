@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -130,16 +130,22 @@ class LogicalInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Logical
-        fields = ('id', 'device', 'capability')
+        fields = ('id', 'device', 'capability', '__str__')
 
 
 class LogicalSerializer(serializers.ModelSerializer):
     device = DeviceInfoSerializer(many=False, read_only=True)
     capability = CapabilitySerializer(many=False, read_only=True)
+    attributes = AttributeInfoSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Logical
-        fields = '__all__'
+        fields = (
+            'id', '__str__',
+            'device',
+            'capability', 'alternative_capability_name',
+            'attributes'
+        )
 
 
 class LogicalWriteSerializer(serializers.ModelSerializer):
