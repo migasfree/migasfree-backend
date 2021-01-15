@@ -156,8 +156,14 @@ class ComputerStatsViewSet(viewsets.ViewSet):
 
     @action(methods=['get'], detail=False, url_path='status')
     def by_status(self, request, format=None):
-        # TODO response format (inner, outer)
-        total = Computer.objects.scope(request.user.userprofile).exclude(status='unsubscribed').count()
+        total = Computer.objects.scope(request.user.userprofile).exclude(
+            status='unsubscribed'
+        ).count()
+
+        data = {
+            'inner': [],
+            'outer': [],
+        }
 
         values = dict()
         for item in Computer.objects.scope(
@@ -179,34 +185,30 @@ class ComputerStatsViewSet(viewsets.ViewSet):
         count_productive = values.get('intended', {}).get('value', 0) \
             + values.get('reserved', {}).get('value', 0) \
             + values.get('unknown', {}).get('value', 0)
-        data_productive = []
         if 'intended' in values:
-            data_productive.append(values['intended'])
+            data['outer'].append(values['intended'])
         if 'reserved' in values:
-            data_productive.append(values['reserved'])
+            data['outer'].append(values['reserved'])
         if 'unknown' in values:
-            data_productive.append(values['unknown'])
+            data['outer'].append(values['unknown'])
 
         count_unproductive = values.get('available', {}).get('value', 0) \
             + values.get('in repair', {}).get('value', 0)
-        data_unproductive = []
         if 'available' in values:
-            data_unproductive.append(values['available'])
+            data['outer'].append(values['available'])
         if 'in repair' in values:
-            data_unproductive.append(values['in repair'])
+            data['outer'].append(values['in repair'])
 
-        data = [
+        data['inner'] = [
             {
                 'name': _('Productive'),
                 'value': count_productive,
                 'status__in': 'intended,reserved,unknown',
-                'data': data_productive,
             },
             {
                 'name': _('Unproductive'),
                 'value': count_unproductive,
-                'status__in': 'available,in repair',
-                'data': data_unproductive,
+                'status__in': 'in repair,available',
             },
         ]
 
@@ -214,8 +216,8 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             {
                 'title': _('Subscribed Computers / Status'),
                 'total': total,
-                'data': data,
-                'status__in': 'intended,reserved,unknown,available,in repair',
+                'inner': data['inner'],
+                'outer': data['outer'],
             },
             status=status.HTTP_200_OK
         )
