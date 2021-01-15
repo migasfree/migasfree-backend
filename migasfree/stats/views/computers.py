@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                     {
                         'name': _('Virtual'),
                         'value': count_subscribed_virtual,
-                        'status__in': 'intended,reserved,unknown,available,in repair',
+                        'status__in': 'intended,reserved,unknown,in repair,available',
                         'machine': 'V'
                     }
                 )
@@ -102,7 +102,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                     {
                         'name': _('Physical'),
                         'value': count_subscribed_physical,
-                        'status__in': 'intended,reserved,unknown,available,in repair',
+                        'status__in': 'intended,reserved,unknown,in repair,available',
                         'machine': 'P'
                     }
                 )
@@ -111,7 +111,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                 {
                     'name': _('Subscribed'),
                     'value': count_subscribed,
-                    'status__in': 'intended,reserved,unknown,available,in repair'
+                    'status__in': 'intended,reserved,unknown,in repair,available'
                 },
             )
 
