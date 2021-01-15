@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2016-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ from .filters import (
     DeviceFilter, DriverFilter,
     ManufacturerFilter, CapabilityFilter,
     TypeFilter, ConnectionFilter,
+    LogicalFilter,
 )
 from . import serializers
 
@@ -136,6 +137,11 @@ class CapabilityViewSet(viewsets.ModelViewSet, MigasViewSet):
 class LogicalViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = Logical.objects.all()
     serializer_class = serializers.LogicalSerializer
+    filterset_class = LogicalFilter
+    search_fields = [
+        'device__name', 'device__model__name',
+        'device__model__manufacturer__name', 'capability__name',
+    ]
     ordering_fields = '__all__'
     ordering = ('device__name',)
 
