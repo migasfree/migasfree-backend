@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
             'project',
             'sync_user',
             'default_logical_device',
-            'default_logical_device__feature',
+            'default_logical_device__capability',
             'default_logical_device__device',
         ).prefetch_related(
             Prefetch('node_set', queryset=Node.objects.filter(parent=None)),
@@ -101,14 +101,14 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
                 logical_device = Logical.objects.get(pk=item)
                 model = Model.objects.get(device=logical_device.device)
                 if not Driver.objects.filter(
-                        feature=logical_device.feature,
+                        capability=logical_device.capability,
                         model=model,
                         project=computer.project
                 ):
                     return Response(
-                        _('Error in feature %s for assign computer %s.'
+                        _('Error in capability %s for assign computer %s.'
                           ' There is no driver defined for project %s in model %s.') % (
-                                logical_device.feature,
+                                logical_device.capability,
                                 computer,
                                 computer.project,
                                 "<a href='{}'>{}</a>".format(
@@ -125,11 +125,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
             computer.update_logical_devices(assigned_logical_devices_to_cid)
 
-        return super(ComputerViewSet, self).partial_update(
-            request,
-            *args,
-            **kwargs
-        )
+        return super().partial_update(request, *args, **kwargs)
 
     @action(methods=['get'], detail=True, url_name='devices')
     def devices(self, request, pk=None):
