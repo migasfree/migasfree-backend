@@ -76,8 +76,8 @@ class DeviceViewSet(viewsets.ModelViewSet, MigasViewSet):
 
     def get_queryset(self):
         return self.queryset.select_related(
-            'connection', 'connection__type',
-            'model', 'model__manufacturer', 'model__type',
+            'connection', 'connection__device_type',
+            'model', 'model__manufacturer', 'model__device_type',
         )
 
     @action(methods=['get'], detail=False)
