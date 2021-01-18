@@ -64,6 +64,7 @@ class DeviceViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = Device.objects.all()
     serializer_class = serializers.DeviceSerializer
     filterset_class = DeviceFilter
+    search_fields = ['name', 'model__name', 'model__manufacturer__name', 'data']
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -79,6 +80,12 @@ class DeviceViewSet(viewsets.ModelViewSet, MigasViewSet):
             'connection', 'connection__device_type',
             'model', 'model__manufacturer', 'model__device_type',
         )
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+
+        return context
 
     @action(methods=['get'], detail=False)
     def available(self, request):
