@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,8 +28,12 @@ from .driver import Driver
 
 
 class LogicalManager(models.Manager):
-    def create(self, device, capability, name=None):
-        obj = Logical(device=device, capability=capability, name=name)
+    def create(self, device, capability, alternative_capability_name=None):
+        obj = Logical(
+            device=device,
+            capability=capability,
+            alternative_capability_name=alternative_capability_name
+        )
         obj.save()
 
         return obj
@@ -127,10 +131,10 @@ class Logical(models.Model, MigasLink):
         if isinstance(self.alternative_capability_name, str):
             self.alternative_capability_name = self.alternative_capability_name.replace(" ", "_")
 
-        super(Logical, self).save(force_insert, force_update, using, update_fields)
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
         app_label = 'device'
-        verbose_name = _("Device Logical")
-        verbose_name_plural = _("Devices Logical")
-        unique_together = (("device", "capability"),)
+        verbose_name = _("Logical Device")
+        verbose_name_plural = _("Logical Devices")
+        unique_together = (('device', 'capability'),)
