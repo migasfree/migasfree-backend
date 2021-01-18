@@ -149,6 +149,24 @@ class LogicalSerializer(serializers.ModelSerializer):
 
 
 class LogicalWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+        representation['__str__'] = obj.__str__()
+
+        if obj.device:
+            representation['device'] = {
+                'id': obj.device.id,
+                'name': obj.device.name
+            }
+
+        if obj.capability:
+            representation['capability'] = {
+                'id': obj.capability.id,
+                'name': obj.capability.name
+            }
+
+        return representation
+
     class Meta:
         model = models.Logical
         fields = '__all__'
