@@ -22,6 +22,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from ...core.models import Attribute, MigasLink
+from ...utils import swap_m2m
 from .connection import Connection
 from .model import Model
 
@@ -110,18 +111,61 @@ class Device(models.Model, MigasLink):
     def __str__(self):
         return self.name
 
-    def related_objects(self, model, user):
+    def related_objects(self, model, user=None):
         """
         Returns Queryset with the related computers based in logical device attributes
         """
         if model == 'computer':
             from ...client.models import Computer
 
-            return Computer.productive.scope(user).filter(
-                sync_attributes__in=Attribute.objects.filter(logical__device__id=self.id)
-            ).distinct()
+            if user and not user.userprofile.is_view_all():
+                return Computer.productive.scope(user.userprofile).filter(
+                    sync_attributes__in=Attribute.objects.filter(logical__device__id=self.id)
+                ).distinct()
+
+            else:
+                return Computer.productive.filter(
+                    sync_attributes__in=Attribute.objects.filter(logical__device__id=self.id)
+                ).distinct()
 
         return None
+
+    def logical_devices_allocated(self):
+        return self.devicelogical_set.exclude(attributes=None)
+
+    def incompatible_features(self, target):
+        features = []
+        for x in self.logical_devices_allocated():
+            if target.devicelogical_set.filter(feature=x.feature).count() == 0:
+                features.append(str(x.feature))
+
+        for x in target.logical_devices_allocated():
+            if self.devicelogical_set.filter(feature=x.feature).count() == 0:
+                features.append(str(x.feature))
+
+        return features
+
+    def common_features_allocated(self, target):
+        features = []
+        for x in self.logical_devices_allocated():
+            if target.devicelogical_set.filter(feature=x.feature).count() > 0:
+                features.append(x.feature)
+
+        for x in target.logical_devices_allocated():
+            if self.devicelogical_set.filter(feature=x.feature).count() > 0:
+                if x.feature not in features:
+                    features.append(x.feature)
+
+        return features
+
+    @staticmethod
+    def replacement(source, target):
+        # Moves computers from logical device
+        for feature in source.common_features_allocated(target):
+            swap_m2m(
+                source.devicelogical_set.get(feature=feature).attributes,
+                target.devicelogical_set.get(feature=feature).attributes
+            )
 
     def save(self, *args, **kwargs):
         data = json.loads(self.data)
@@ -129,7 +173,7 @@ class Device(models.Model, MigasLink):
             data['NAME'] = data['NAME'].replace(' ', '_')
             self.data = json.dumps(data)
 
-        super(Device, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     class Meta:
         app_label = 'device'
