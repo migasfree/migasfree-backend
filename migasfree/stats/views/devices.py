@@ -81,7 +81,7 @@ class DeviceStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(methods=['get'], detail=False, url_path='model/manufacturer')
+    @action(methods=['get'], detail=False, url_path='models/manufacturer')
     def models_by_manufacturer(self, request, format=None):
         return Response(
             {
@@ -90,8 +90,8 @@ class DeviceStatsViewSet(viewsets.ViewSet):
                 'data': replace_keys(
                     list(Model.group_by_manufacturer()),
                     {
-                        'model__manufacturer__name': 'name',
-                        'model__manufacturer__id': 'manufacturer_id',
+                        'manufacturer__name': 'name',
+                        'manufacturer__id': 'manufacturer_id',
                         'count': 'value'
                     }
                 ),
