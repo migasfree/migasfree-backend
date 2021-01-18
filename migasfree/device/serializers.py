@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import json
+
 from rest_framework import serializers
 
 from ..core.serializers import AttributeInfoSerializer, ProjectInfoSerializer
@@ -80,6 +82,23 @@ class DeviceSerializer(serializers.ModelSerializer):
     connection = ConnectionInfoSerializer(many=False, read_only=True)
     model = ModelInfoSerializer(many=False, read_only=True)
     available_for_attributes = AttributeInfoSerializer(many=True, read_only=True)
+    data = serializers.SerializerMethodField()
+    location = serializers.SerializerMethodField()
+    total_computers = serializers.SerializerMethodField()
+
+    def get_total_computers(self, obj):
+        if self.context.get('request'):
+            related_objects = obj.related_objects('computer', user=self.context['request'].user)
+        else:
+            related_objects = obj.related_objects('computer')
+
+        return related_objects.count() if related_objects else 0
+
+    def get_data(self, obj):
+        return json.loads(obj.data)
+
+    def get_location(self, obj):
+        return obj.location()
 
     class Meta:
         model = models.Device
