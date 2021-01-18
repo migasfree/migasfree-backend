@@ -52,6 +52,10 @@ class DeviceFilter(filters.FilterSet):
             'id': ['exact'],
             'model__id': ['exact'],
             'model__name': ['exact', 'icontains'],
+            'model__manufacturer__id': ['exact'],
+            'model__manufacturer__name': ['exact', 'icontains'],
+            'connection__id': ['exact'],
+            'connection__name': ['exact', 'icontains'],
         }
 
 
