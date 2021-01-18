@@ -21,7 +21,7 @@ from django_filters import rest_framework as filters
 from .models import (
     Device, Driver, Manufacturer,
     Capability, Type, Connection,
-    Logical,
+    Logical, Model,
 )
 
 
@@ -101,4 +101,17 @@ class LogicalFilter(filters.FilterSet):
             'device__model__id': ['exact'],
             'capability__id': ['exact'],
             'capability__name': ['exact', 'icontains'],
+        }
+
+
+class ModelFilter(filters.FilterSet):
+    class Meta:
+        model = Model
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
+            'manufacturer__id': ['exact'],
+            'manufacturer__name': ['exact', 'icontains'],
+            'device_type__id': ['exact'],
+            'device_type__name': ['exact', 'icontains'],
         }
