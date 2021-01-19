@@ -131,40 +131,40 @@ class Device(models.Model, MigasLink):
         return None
 
     def logical_devices_allocated(self):
-        return self.devicelogical_set.exclude(attributes=None)
+        return self.logical_set.exclude(attributes=None)
 
-    def incompatible_features(self, target):
-        features = []
+    def incompatible_capabilities(self, target):
+        capabilities = []
         for x in self.logical_devices_allocated():
-            if target.devicelogical_set.filter(feature=x.feature).count() == 0:
-                features.append(str(x.feature))
+            if target.logical_set.filter(capability=x.capability).count() == 0:
+                capabilities.append(str(x.capability))
 
         for x in target.logical_devices_allocated():
-            if self.devicelogical_set.filter(feature=x.feature).count() == 0:
-                features.append(str(x.feature))
+            if self.logical_set.filter(capability=x.capability).count() == 0:
+                capabilities.append(str(x.capability))
 
-        return features
+        return capabilities
 
-    def common_features_allocated(self, target):
-        features = []
+    def common_capabilities_allocated(self, target):
+        capabilities = []
         for x in self.logical_devices_allocated():
-            if target.devicelogical_set.filter(feature=x.feature).count() > 0:
-                features.append(x.feature)
+            if target.logical_set.filter(capability=x.capability).count() > 0:
+                capabilities.append(x.capability)
 
         for x in target.logical_devices_allocated():
-            if self.devicelogical_set.filter(feature=x.feature).count() > 0:
-                if x.feature not in features:
-                    features.append(x.feature)
+            if self.logical_set.filter(capability=x.capability).count() > 0:
+                if x.capability not in capabilities:
+                    capabilities.append(x.capability)
 
-        return features
+        return capabilities
 
     @staticmethod
     def replacement(source, target):
         # Moves computers from logical device
-        for feature in source.common_features_allocated(target):
+        for capability in source.common_capabilities_allocated(target):
             swap_m2m(
-                source.devicelogical_set.get(feature=feature).attributes,
-                target.devicelogical_set.get(feature=feature).attributes
+                source.logical_set.get(capability=capability).attributes,
+                target.logical_set.get(capability=capability).attributes
             )
 
     def save(self, *args, **kwargs):
