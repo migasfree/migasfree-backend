@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -629,7 +629,7 @@ class Computer(models.Model, MigasLink):
         # SWAP CID
         source_cid = source.get_cid_attribute()
         target_cid = target.get_cid_attribute()
-        swap_m2m(source_cid.devicelogical_set, target_cid.devicelogical_set)
+        swap_m2m(source_cid.logical_set, target_cid.logical_set)
         swap_m2m(source_cid.faultdefinition_set, target_cid.faultdefinition_set)
         swap_m2m(source_cid.deployment_set, target_cid.deployment_set)
         swap_m2m(source_cid.ExcludeAttribute, target_cid.ExcludeAttribute)
@@ -783,7 +783,7 @@ def post_save_computer(sender, instance, created, **kwargs):
     if instance.status in ['available', 'unsubscribed']:
         instance.tags.clear()
         cid = instance.get_cid_attribute()
-        cid.devicelogical_set.clear()
+        cid.logical_set.clear()
         cid.faultdefinition_set.clear()
         cid.deployment_set.clear()
         cid.ExcludeAttribute.clear()
