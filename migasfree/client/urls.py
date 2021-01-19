@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.conf.urls import include, url
+from django.conf.urls import include
+from django.urls import re_path
 
 from .views import (
     PackagerKeysView, ProjectKeysView,
@@ -25,22 +26,22 @@ from .views import (
 )
 
 keys_patterns = [
-    url(r'^packager/$', PackagerKeysView.as_view()),
-    url(r'^project/$', ProjectKeysView.as_view()),
-    url(r'^repositories/$', RepositoriesKeysView.as_view()),
+    re_path(r'^packager/$', PackagerKeysView.as_view()),
+    re_path(r'^project/$', ProjectKeysView.as_view()),
+    re_path(r'^repositories/$', RepositoriesKeysView.as_view()),
 ]
 
 public_patterns = [
-    url(r'keys/', include(keys_patterns)),
+    re_path(r'keys/', include(keys_patterns)),
 ]
 
 safe_patterns = [
-    url(r'^eot/$', SafeEndOfTransmissionView.as_view()),
-    url(r'^synchronizations/$', SafeSynchronizationView.as_view()),
+    re_path(r'^eot/$', SafeEndOfTransmissionView.as_view()),
+    re_path(r'^synchronizations/$', SafeSynchronizationView.as_view()),
 ]
 
 urlpatterns = [
-    url(r'public/', include(public_patterns)),
-    url(r'safe/', include(safe_patterns)),
-    # url(r'token/', include(token_patterns)),
+    re_path(r'public/', include(public_patterns)),
+    re_path(r'safe/', include(safe_patterns)),
+    # re_path(r'token/', include(token_patterns)),
 ]

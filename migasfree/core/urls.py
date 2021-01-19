@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2018-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.conf.urls import include, url
+from django.conf.urls import include
+from django.urls import re_path
 
 from .views import (
     ServerInfoView, GetSourceFileView,
@@ -24,12 +25,12 @@ from .views import (
 )
 
 public_patterns = [
-    url(r'server/info/', ServerInfoView.as_view()),
-    url(r'^src/', GetSourceFileView.as_view()),
-    url(r'pms/', PmsView.as_view()),
-    url(r'languages', ProgrammingLanguagesView.as_view()),
+    re_path(r'server/info/', ServerInfoView.as_view()),
+    re_path(r'^src/', GetSourceFileView.as_view()),
+    re_path(r'pms/', PmsView.as_view()),
+    re_path(r'languages', ProgrammingLanguagesView.as_view()),
 ]
 
 urlpatterns = [
-    url(r'public/', include(public_patterns)),
+    re_path(r'public/', include(public_patterns)),
 ]

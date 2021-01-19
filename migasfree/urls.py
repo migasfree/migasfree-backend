@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,10 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.conf.urls import include, url
+from django.conf.urls import include
 from django.conf.urls.static import static
 from django.conf import settings
-from django.urls import path
+from django.urls import path, re_path
 from graphene_django.views import GraphQLView
 from rest_framework import permissions, routers
 from rest_framework.authtoken import views
@@ -78,38 +78,38 @@ safe_router.registry.extend(client_safe_router.registry)
 safe_router.registry.extend(hardware_safe_router.registry)
 
 urlpatterns = [
-    url(r'^grappelli/', include('grappelli.urls')),
-    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    url(r'^admin/', admin.site.urls),
-    url(r'^markdownx/', include('markdownx.urls')),
+    re_path(r'^grappelli/', include('grappelli.urls')),
+    re_path(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    re_path(r'^admin/', admin.site.urls),
+    re_path(r'^markdownx/', include('markdownx.urls')),
 
-    url(r'^api/v1/token/', include(token_router.urls)),
-    url(r'^api/v1/token/devices/', include(device_router.urls)),
-    url(r'^api/v1/token/catalog/', include(catalog_router.urls)),
-    url(r'^api/v1/safe/', include(safe_router.urls)),
-    url(r'^api/v1/', include('migasfree.core.urls')),
-    url(r'^api/v1/', include('migasfree.client.urls')),
+    re_path(r'^api/v1/token/', include(token_router.urls)),
+    re_path(r'^api/v1/token/devices/', include(device_router.urls)),
+    re_path(r'^api/v1/token/catalog/', include(catalog_router.urls)),
+    re_path(r'^api/v1/safe/', include(safe_router.urls)),
+    re_path(r'^api/v1/', include('migasfree.core.urls')),
+    re_path(r'^api/v1/', include('migasfree.client.urls')),
 
-    url(r'^token-auth/$', views.obtain_auth_token),
+    re_path(r'^token-auth/$', views.obtain_auth_token),
     path('token-auth-jwt/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token-refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-    url(r'^rest-auth/', include('rest_auth.urls')),
+    re_path(r'^rest-auth/', include('rest_auth.urls')),
 
-    url(r'^', include('django.contrib.auth.urls')),
-    url(r'^api-docs/', include_docs_urls(title=TITLE)),
-    # url(r'^auth/', include('djoser.urls')),
+    re_path(r'^', include('django.contrib.auth.urls')),
+    re_path(r'^api-docs/', include_docs_urls(title=TITLE)),
+    # re_path(r'^auth/', include('djoser.urls')),
 
-    url(r'^docs(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    url(r'^docs/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    url(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    re_path(r'^docs(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    re_path(r'^docs/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('graphql', GraphQLView.as_view(graphiql=True)),
 ]
 
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns += [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
+        re_path(r'^__debug__/', include(debug_toolbar.urls)),
     ]
 
     if settings.MEDIA_ROOT is not None:
