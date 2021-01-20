@@ -314,35 +314,42 @@ class ServerAttributeViewSet(viewsets.ModelViewSet, MigasViewSet):
 
         return ServerAttributeSerializer
 
-    @action(methods=['get'], detail=True)
+    @action(methods=['get', 'patch'], detail=True)
     def computers(self, request, pk=None):
         tag = self.get_object()
 
-        computers = Computer.productive.scope(
-            request.user.userprofile
-        ).filter(tags__in=[tag])
-        serializerComputers = ComputerInfoSerializer(
-            computers,
-            context={'request': request},
-            many=True, read_only=True
-        )
+        if request.method == 'GET':
+            computers = Computer.productive.scope(
+                request.user.userprofile
+            ).filter(tags__in=[tag])
+            serializerComputers = ComputerInfoSerializer(
+                computers,
+                context={'request': request},
+                many=True, read_only=True
+            )
 
-        inflicted = Computer.productive.filter(
-            sync_attributes__in=[tag]
-        ).exclude(tags__in=[tag])
-        serializerInflicted = ComputerInfoSerializer(
-            inflicted,
-            context={'request': request},
-            many=True, read_only=True
-        )
+            inflicted = Computer.productive.filter(
+                sync_attributes__in=[tag]
+            ).exclude(tags__in=[tag])
+            serializerInflicted = ComputerInfoSerializer(
+                inflicted,
+                context={'request': request},
+                many=True, read_only=True
+            )
 
-        return Response(
-            {
-                'computers': serializerComputers.data,
-                'inflicted': serializerInflicted.data
-            },
-            status=status.HTTP_200_OK
-        )
+            return Response(
+                {
+                    'computers': serializerComputers.data,
+                    'inflicted': serializerInflicted.data
+                },
+                status=status.HTTP_200_OK
+            )
+
+        if request.method == 'PATCH':
+            computers = request.data.get('computers', [])
+            tag.update_computers(computers)
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
