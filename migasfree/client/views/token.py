@@ -255,7 +255,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         Input: {
             'target': id
         }
-        Exchanges tags and status
+        Exchanges tags, status and devices
         """
         source = self.get_object()
         target = get_object_or_404(
