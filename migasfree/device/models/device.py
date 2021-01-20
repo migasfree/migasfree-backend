@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ class DeviceManager(models.Manager):
         qs = super(DeviceManager, self).get_queryset()
         if not user.is_view_all():
             user_attributes = user.get_attributes()
-            qs = qs.filter(devicelogical__attributes__in=user_attributes).distinct()
+            qs = qs.filter(logical__attributes__in=user_attributes).distinct()
 
         return qs
 
