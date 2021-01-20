@@ -89,7 +89,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
             'assigned_logical_devices_to_cid[]',
             data.get('assigned_logical_devices_to_cid', None)
         )
-        if devices:
+        if devices or isinstance(devices, list):
             computer = get_object_or_404(models.Computer, pk=kwargs['pk'])
 
             try:
