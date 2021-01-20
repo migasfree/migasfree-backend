@@ -42,6 +42,8 @@ from rest_framework.response import Response
 
 from .mixins import SafeConnectionMixin
 
+from ..client.models import Computer
+from ..client.serializers import ComputerInfoSerializer
 from ..device.models import Logical
 from ..device.serializers import LogicalSerializer
 from ..utils import read_remote_chunks
@@ -311,6 +313,36 @@ class ServerAttributeViewSet(viewsets.ModelViewSet, MigasViewSet):
             return ServerAttributeWriteSerializer
 
         return ServerAttributeSerializer
+
+    @action(methods=['get'], detail=True)
+    def computers(self, request, pk=None):
+        tag = self.get_object()
+
+        computers = Computer.productive.scope(
+            request.user.userprofile
+        ).filter(tags__in=[tag])
+        serializerComputers = ComputerInfoSerializer(
+            computers,
+            context={'request': request},
+            many=True, read_only=True
+        )
+
+        inflicted = Computer.productive.filter(
+            sync_attributes__in=[tag]
+        ).exclude(tags__in=[tag])
+        serializerInflicted = ComputerInfoSerializer(
+            inflicted,
+            context={'request': request},
+            many=True, read_only=True
+        )
+
+        return Response(
+            {
+                'computers': serializerComputers.data,
+                'inflicted': serializerInflicted.data
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
