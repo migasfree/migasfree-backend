@@ -120,7 +120,7 @@ class DriverViewSet(viewsets.ModelViewSet, MigasViewSet):
     serializer_class = serializers.DriverSerializer
     filterset_class = DriverFilter
     ordering_fields = '__all__'
-    ordering = ('name',)
+    ordering = ('model', 'project', 'capability')
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
@@ -170,7 +170,7 @@ class LogicalViewSet(viewsets.ModelViewSet, MigasViewSet):
             q string (name or data contains...),
             did (device Id) int,
             page int
-        :return: DeviceLogicalSerializer set
+        :return: LogicalSerializer set
         """
         computer = get_object_or_404(Computer, pk=request.GET.get('cid', 0))
         query = request.GET.get('q', '')
