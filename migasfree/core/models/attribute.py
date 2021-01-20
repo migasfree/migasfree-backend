@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -259,6 +259,13 @@ class ServerAttributeManager(DomainAttributeManager):
 
 class ServerAttribute(Attribute):  # tag
     objects = ServerAttributeManager()
+
+    def update_computers(self, computers):
+        self.computer_set.clear()
+        for item in computers:
+            self.computer_set.add(item)
+
+        self.save()
 
     class Meta:
         verbose_name = _("Tag")
