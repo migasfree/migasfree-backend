@@ -101,26 +101,21 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
                 logical_device = Logical.objects.get(pk=item)
                 model = Model.objects.get(device=logical_device.device)
                 if not Driver.objects.filter(
-                        capability=logical_device.capability,
-                        model=model,
-                        project=computer.project
+                    capability=logical_device.capability,
+                    model=model,
+                    project=computer.project
                 ):
                     return Response(
-                        _('Error in capability %s for assign computer %s.'
-                          ' There is no driver defined for project %s in model %s.') % (
+                        {
+                            'error': _('Error in capability %s for assign computer %s.'
+                                      ' There is no driver defined for project %s in model %s.') % (
                                 logical_device.capability,
                                 computer,
                                 computer.project,
-                                "<a href='{}'>{}</a>".format(
-                                    reverse(
-                                        'admin:server_devicemodel_change',
-                                        args=(model.pk,)
-                                    ),
-                                    model
-                                )
+                                model
                             ),
+                        },
                         status=status.HTTP_400_BAD_REQUEST,
-                        content_type='text/plain'
                     )
 
             computer.update_logical_devices(assigned_logical_devices_to_cid)
