@@ -304,6 +304,5 @@ def create_initial_data():
                 'fixtures',
                 '{0}.{1}'.format(name, ext)
             ),
-            interactive=False,
             verbosity=1
         )
