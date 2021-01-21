@@ -261,9 +261,9 @@ class ServerAttribute(Attribute):  # tag
     objects = ServerAttributeManager()
 
     def update_computers(self, computers):
-        self.computer_set.clear()
+        self.tags.clear()
         for item in computers:
-            self.computer_set.add(item)
+            self.tags.add(item)
 
         self.save()
 
