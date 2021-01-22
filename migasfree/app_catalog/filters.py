@@ -40,7 +40,11 @@ class PackagesByProjectFilter(django_filters.FilterSet):
 
     class Meta:
         model = PackagesByProject
-        fields = ['project__id', 'project__name']
+        fields = {
+            'application__id': ['exact'],
+            'project__id': ['exact'],
+            'project__name': ['exact', 'icontains'],
+        }
 
 
 class PolicyFilter(django_filters.FilterSet):
