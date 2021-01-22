@@ -231,24 +231,25 @@ class ClientAttributeWriteSerializer(serializers.ModelSerializer):
         fields = ('id', 'property_att', 'value', 'description')
 
 
+class ScheduleInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Schedule
+        fields = ('id', 'name')
+
+
 class ScheduleDelaySerializer(serializers.ModelSerializer):
     attributes = AttributeSerializer(many=True)
+    schedule = ScheduleInfoSerializer(many=False, read_only=True)
 
     class Meta:
         model = ScheduleDelay
-        fields = ('id', 'delay', 'duration', 'attributes')
+        fields = ('id', 'delay', 'duration', 'attributes', 'schedule')
 
 
 class ScheduleDelayWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScheduleDelay
         fields = '__all__'
-
-
-class ScheduleInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Schedule
-        fields = ('id', 'name')
 
 
 class ScheduleWriteSerializer(serializers.ModelSerializer):
@@ -258,11 +259,9 @@ class ScheduleWriteSerializer(serializers.ModelSerializer):
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
-    delays = ScheduleDelaySerializer(many=True)
-
     class Meta:
         model = Schedule
-        fields = ('id', 'name', 'description', 'delays')
+        fields = ('id', 'name', 'description', 'delays_count')
 
 
 class PackageInfoSerializer(serializers.ModelSerializer):
