@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -236,7 +236,7 @@ class ScheduleDelaySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ScheduleDelay
-        fields = '__all__'
+        fields = ('id', 'delay', 'duration', 'attributes')
 
 
 class ScheduleDelayWriteSerializer(serializers.ModelSerializer):
@@ -262,7 +262,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Schedule
-        fields = ('id', 'name', 'description', 'number_delays', 'delays')
+        fields = ('id', 'name', 'description', 'delays')
 
 
 class PackageInfoSerializer(serializers.ModelSerializer):
