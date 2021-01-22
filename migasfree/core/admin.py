@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -68,9 +68,7 @@ class StoreAdmin(admin.ModelAdmin):
     fields = ('name', 'project')
 
     def get_queryset(self, request):
-        return super(StoreAdmin, self).get_queryset(
-            request
-        ).select_related('project')
+        return super().get_queryset(request).select_related('project')
 
 
 class ClientPropertyFilter(SimpleListFilter):
@@ -219,7 +217,7 @@ class AttributeSetAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
-        return super(AttributeSetAdmin, self).get_queryset(
+        return super().get_queryset(
             request
         ).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
@@ -249,7 +247,7 @@ class ScheduleDelayLine(admin.TabularInline):
         self.request = request
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return super(ScheduleDelayLine, self).get_queryset(
+        return super().get_queryset(
             request
         ).prefetch_related(
             Prefetch('attributes', queryset=qs),
@@ -259,7 +257,7 @@ class ScheduleDelayLine(admin.TabularInline):
 
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'number_delays')
+    list_display = ('name', 'description', 'delays_count')
     search_fields = ('name', 'description')
     ordering = ('name',)
     inlines = [ScheduleDelayLine, ]
@@ -277,9 +275,7 @@ class ScheduleAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         self.request = request
 
-        return super(ScheduleAdmin, self).get_queryset(
-            request
-        )
+        return super().get_queryset(request)
 
 
 @admin.register(Package)
@@ -293,10 +289,13 @@ class PackageAdmin(admin.ModelAdmin):
     ordering = ('name',)
 
     def get_queryset(self, request):
-        return super(PackageAdmin, self).get_queryset(
+        return super().get_queryset(
             request
         ).prefetch_related(
-            Prefetch('deployment_set', queryset=Deployment.objects.scope(request.user.userprofile))
+            Prefetch(
+                'deployment_set',
+                queryset=Deployment.objects.scope(request.user.userprofile)
+            )
         )
 
     def save_model(self, request, obj, form, change):
@@ -307,7 +306,7 @@ class PackageAdmin(admin.ModelAdmin):
                     package_file,
                     os.path.join(Store.path(obj.project.slug, obj.store.slug), obj.fullname)
                 )
-            super(PackageAdmin, self).save_model(request, obj, form, change)
+            super().save_model(request, obj, form, change)
         else:
             Package.objects.create(
                 fullname=obj.fullname, project=obj.project,
@@ -332,9 +331,7 @@ class PackageSetAdmin(admin.ModelAdmin):
 
             return db_field.formfield(**kwargs)
 
-        return super(PackageSetAdmin, self).formfield_for_manytomany(
-            db_field, request, **kwargs
-        )
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
 @admin.register(Deployment)
@@ -407,7 +404,7 @@ class DeploymentAdmin(admin.ModelAdmin):
             if not obj.name.startswith(user.domain_preference.name.lower()):
                 obj.name = '{}_{}'.format(user.domain_preference.name.lower(), obj.name)
 
-        super(DeploymentAdmin, self).save_model(request, obj, form, change)
+        super().save_model(request, obj, form, change)
 
         # create repository metadata when packages has been changed
         # or repository not have packages at first time
@@ -429,7 +426,7 @@ class DeploymentAdmin(admin.ModelAdmin):
         self.user = request.user
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return super(DeploymentAdmin, self).get_queryset(
+        return super().get_queryset(
             request
         ).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
@@ -573,14 +570,14 @@ class UserProfileAdmin(admin.ModelAdmin):
     activate_users.short_description = _('Activate Users')
 
     def get_actions(self, request):
-        actions = super(UserProfileAdmin, self).get_actions(request)
+        actions = super().get_actions(request)
         if not request.user.has_perm('auth.change_user'):
             del actions['activate_users']
 
         return actions
 
     def get_form(self, request, obj=None, **kwargs):
-        form = super(UserProfileAdmin, self).get_form(request, obj, **kwargs)
+        form = super().get_form(request, obj, **kwargs)
         is_superuser = request.user.is_superuser
         disabled_fields = set()
 
@@ -639,7 +636,7 @@ class ScopeAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return super(ScopeAdmin, self).get_queryset(
+        return super().get_queryset(
             request
         ).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
@@ -678,4 +675,4 @@ class DomainAdmin(admin.ModelAdmin):
         user_profile = UserProfile.objects.get(id=request.user.id)
         user_profile.update_scope(0)
 
-        return super(DomainAdmin, self).get_queryset(request)
+        return super().get_queryset(request)
