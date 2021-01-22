@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,6 +36,9 @@ class ApplicationViewSet(viewsets.ModelViewSet, MigasViewSet):
     serializer_class = serializers.ApplicationSerializer
     filterset_class = ApplicationFilter
     permission_classes = (PublicPermission,)
+    search_fields = ['name']
+    ordering_fields = '__all__'
+    ordering = ('name',)
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
