@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ router.register(r'formulas', views.ClientPropertyViewSet)
 router.register(r'tags', views.ServerAttributeViewSet)
 router.register(r'features', views.ClientAttributeViewSet)
 router.register(r'schedules', views.ScheduleViewSet)
+router.register(r'schedule-delays', views.ScheduleDelayViewSet)
 router.register(r'packages', views.PackageViewSet)
 router.register(r'deployments/internal-sources', views.InternalSourceViewSet)
 router.register(r'deployments/external-sources', views.ExternalSourceViewSet)
