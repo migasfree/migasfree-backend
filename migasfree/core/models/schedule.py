@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,10 +37,17 @@ class Schedule(models.Model, MigasLink):
         blank=True
     )
 
-    def number_delays(self):
+    def delays_count(self):
         return self.delays.count()
 
-    number_delays.short_description = _("Number of delays")
+    delays_count.short_description = _("Delays count")
+
+    def update_delays(self, delays):
+        self.delays.clear()
+        for item in delays:
+            self.delays.add(item)
+
+        self.save()
 
     def __str__(self):
         return self.name
