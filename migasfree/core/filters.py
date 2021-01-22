@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ from django.contrib.auth.models import Permission, Group
 from .models import (
     Deployment, Package, ClientAttribute, ServerAttribute, Attribute,
     Project, ScheduleDelay, Store, AttributeSet, Property, Platform,
-    UserProfile, Domain, Scope,
+    UserProfile, Domain, Scope, Schedule,
 )
 
 
@@ -136,6 +136,15 @@ class ServerAttributeFilter(filters.FilterSet):
             'value': ['exact', 'icontains'],
             'description': ['icontains'],
             'property_att__sort': ['exact'],
+        }
+
+
+class ScheduleFilter(filters.FilterSet):
+    class Meta:
+        model = Schedule
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
         }
 
 
