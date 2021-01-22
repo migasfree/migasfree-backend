@@ -84,7 +84,7 @@ from .filters import (
     ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
     AttributeSetFilter, PropertyFilter, AttributeFilter, PlatformFilter,
     UserProfileFilter, PermissionFilter, GroupFilter, DomainFilter,
-    ScopeFilter,
+    ScopeFilter, ScheduleFilter,
 )
 
 from . import tasks
@@ -465,6 +465,8 @@ class ScheduleDelayViewSet(viewsets.ModelViewSet, MigasViewSet):
 class ScheduleViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
+    filterset_class = ScheduleFilter
+    search_fields = ['name']
     ordering_fields = '__all__'
     ordering = ('name',)
 
