@@ -83,6 +83,7 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Packages by Project',
                 'verbose_name_plural': 'Packages by Projects',
+                'ordering': ['application__id', 'project__name'],
                 'unique_together': {('application', 'project')},
             },
             bases=(models.Model, migasfree.core.models.migas_link.MigasLink),
