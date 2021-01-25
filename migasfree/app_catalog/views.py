@@ -18,7 +18,7 @@
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status, permissions
+from rest_framework import viewsets, status, permissions, parsers
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
@@ -35,6 +35,7 @@ class ApplicationViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = models.Application.objects.all()
     serializer_class = serializers.ApplicationSerializer
     filterset_class = ApplicationFilter
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
     permission_classes = (PublicPermission,)
     search_fields = ['name']
     ordering_fields = '__all__'
