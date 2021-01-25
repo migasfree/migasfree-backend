@@ -180,6 +180,7 @@ class PackagesByProject(models.Model, MigasLink):
         verbose_name = _('Packages by Project')
         verbose_name_plural = _('Packages by Projects')
         unique_together = (('application', 'project'),)
+        ordering = ['application__id', 'project__name']
 
 
 class Policy(models.Model, MigasLink):
