@@ -113,6 +113,9 @@ class ApplicationWriteSerializer(serializers.ModelSerializer):
             except ValueError:
                 data['available_for_attributes'] = []
 
+        if 'icon' in data and isinstance(data['icon'], list):
+            data['icon'] = data['icon'][0]
+
         return super().to_internal_value(data)
 
     class Meta:
