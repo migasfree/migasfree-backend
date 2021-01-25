@@ -52,10 +52,12 @@ class PackagesByProjectWriteSerializer(serializers.ModelSerializer):
         }
         :return: PackagesByProject object
         """
-        if 'packages_to_install' in data:
-            data['packages_to_install'] = '\n'.join(data.get('packages_to_install', []))
+        data_copy = data.copy()
+        if 'packages_to_install' in data_copy \
+                and isinstance(data_copy['packages_to_install'], list):
+            data_copy['packages_to_install'] = '\n'.join(data.get('packages_to_install', []))
 
-        return super().to_internal_value(data)
+        return super().to_internal_value(data_copy)
 
     class Meta:
         model = models.PackagesByProject
@@ -67,6 +69,10 @@ class PackagesByProjectSerializer(serializers.ModelSerializer):
 
     def to_representation(self, obj):
         return {
+            'id': obj.id,
+            'application': {
+                'id': obj.application.id
+            },
             'project': {
                 'id': obj.project.id,
                 'name': obj.project.name
