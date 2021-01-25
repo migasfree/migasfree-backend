@@ -104,6 +104,7 @@ class PackagesByProjectViewSet(viewsets.ModelViewSet, MigasViewSet):
     serializer_class = serializers.PackagesByProjectSerializer
     filterset_class = PackagesByProjectFilter
     permission_classes = (PublicPermission,)
+    ordering = ['application__id', 'project__name']
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
