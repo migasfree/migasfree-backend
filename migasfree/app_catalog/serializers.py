@@ -157,6 +157,21 @@ class PolicyInfoSerializer(serializers.ModelSerializer):
 
 
 class PolicyWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['included_attributes'] = []
+        for item in obj.included_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['included_attributes'].append(attribute)
+
+        representation['excluded_attributes'] = []
+        for item in obj.excluded_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['excluded_attributes'].append(attribute)
+
+        return representation
+
     class Meta:
         model = models.Policy
         fields = '__all__'
@@ -172,6 +187,26 @@ class PolicySerializer(serializers.ModelSerializer):
 
 
 class PolicyGroupWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['included_attributes'] = []
+        for item in obj.included_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['included_attributes'].append(attribute)
+
+        representation['excluded_attributes'] = []
+        for item in obj.excluded_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['excluded_attributes'].append(attribute)
+
+        representation['applications'] = []
+        for item in obj.applications.all():
+            app = ApplicationInfoSerializer(item).data
+            representation['applications'].append(app)
+
+        return representation
+
     class Meta:
         model = models.PolicyGroup
         fields = '__all__'
