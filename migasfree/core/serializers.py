@@ -563,7 +563,6 @@ class DomainWriteSerializer(serializers.ModelSerializer):
     )
 
     def to_representation(self, obj):
-        print(obj, dir(obj))
         representation = super().to_representation(obj)
 
         representation['included_attributes'] = []
@@ -631,11 +630,22 @@ class ScopeSerializer(serializers.ModelSerializer):
 class ScopeWriteSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
+
+        representation['included_attributes'] = []
+        for item in obj.included_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['included_attributes'].append(attribute)
+
+        representation['excluded_attributes'] = []
+        for item in obj.excluded_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['excluded_attributes'].append(attribute)
+
         if obj.user:
-            representation['user'] = {
-                'id': obj.user.id,
-                'username': obj.user.username
-            }
+            representation['user'] = UserProfileInfoSerializer(obj.user).data
+
+        if obj.domain:
+            representation['domain'] = DomainInfoSerializer(obj.domain).data
 
         return representation
 
