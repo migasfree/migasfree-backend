@@ -119,6 +119,9 @@ class PolicyViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = models.Policy.objects.all()
     serializer_class = serializers.PolicySerializer
     filterset_class = PolicyFilter
+    search_fields = ['name']
+    ordering_fields = '__all__'
+    ordering = ('name',)
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
