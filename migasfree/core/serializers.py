@@ -651,6 +651,26 @@ class GroupWriteSerializer(serializers.ModelSerializer):
 
 
 class UserProfileWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['groups'] = []
+        for item in obj.groups.all():
+            group = GroupInfoSerializer(item).data
+            representation['groups'].append(group)
+
+        representation['user_permissions'] = []
+        for item in obj.user_permissions.all():
+            permission = PermissionInfoSerializer(item).data
+            representation['user_permissions'].append(permission)
+
+        representation['domains'] = []
+        for item in obj.domains.all():
+            domain = DomainInfoSerializer(item).data
+            representation['domains'].append(domain)
+
+        return representation
+
     class Meta:
         model = UserProfile
         fields = UserDetailsSerializer.Meta.fields + (
@@ -664,9 +684,7 @@ class UserProfileSerializer(UserDetailsSerializer):
     groups = GroupInfoSerializer(many=True, read_only=True)
     user_permissions = PermissionInfoSerializer(many=True, read_only=True)
     domains = DomainInfoSerializer(many=True, read_only=True, source='userprofile.domains')
-    # domain_preference = serializers.IntegerField(source='userprofile.domain_preference.id', allow_null=True)
     domain_preference = DomainInfoSerializer(many=False, read_only=True)
-    # scope_preference = serializers.IntegerField(source='userprofile.scope_preference.id', allow_null=True)
     scope_preference = ScopeInfoSerializer(many=False, read_only=True)
 
     def update(self, instance, validated_data):
