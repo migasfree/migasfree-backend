@@ -562,6 +562,32 @@ class DomainWriteSerializer(serializers.ModelSerializer):
         write_only=True
     )
 
+    def to_representation(self, obj):
+        print(obj, dir(obj))
+        representation = super().to_representation(obj)
+
+        representation['included_attributes'] = []
+        for item in obj.included_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['included_attributes'].append(attribute)
+
+        representation['excluded_attributes'] = []
+        for item in obj.excluded_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['excluded_attributes'].append(attribute)
+
+        representation['tags'] = []
+        for item in obj.tags.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['tags'].append(attribute)
+
+        representation['domain_admins'] = []
+        for item in obj.domains.all():
+            admin = UserProfileInfoSerializer(item).data
+            representation['domain_admins'].append(admin)
+
+        return representation
+
     def create(self, validated_data):
         users = validated_data.pop('domain_admins', None)
         instance = super().create(validated_data)
