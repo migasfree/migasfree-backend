@@ -48,10 +48,11 @@ class PackagesByProjectFilter(django_filters.FilterSet):
 
 
 class PolicyFilter(django_filters.FilterSet):
-    name = django_filters.CharFilter(
-        field_name='name', lookup_expr='icontains'
-    )
-
     class Meta:
         model = Policy
-        fields = ['name']
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
+            'enabled': ['exact'],
+            'exclusive': ['exact'],
+        }
