@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -164,6 +164,26 @@ class FaultDefinitionSerializer(serializers.ModelSerializer):
 
 
 class FaultDefinitionWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['included_attributes'] = []
+        for item in obj.included_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['included_attributes'].append(attribute)
+
+        representation['excluded_attributes'] = []
+        for item in obj.excluded_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['excluded_attributes'].append(attribute)
+
+        representation['users'] = []
+        for item in obj.users.all():
+            user = UserProfileInfoSerializer(item).data
+            representation['users'].append(user)
+
+        return representation
+
     class Meta:
         model = models.FaultDefinition
         fields = '__all__'
