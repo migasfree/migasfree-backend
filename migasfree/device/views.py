@@ -113,6 +113,23 @@ class DeviceViewSet(viewsets.ModelViewSet, MigasViewSet):
         serializer = self.get_serializer(results, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(methods=['post'], detail=True)
+    def replacement(self, request, pk=None):
+        """
+        Input: {
+            'target': id
+        }
+        Exchanges computers from logical devices
+        """
+        source = self.get_object()
+        target = get_object_or_404(
+            Device, id=request.data.get('target')
+        )
+
+        Device.replacement(source, target)
+
+        return Response(status=status.HTTP_200_OK)
+
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class DriverViewSet(viewsets.ModelViewSet, MigasViewSet):
