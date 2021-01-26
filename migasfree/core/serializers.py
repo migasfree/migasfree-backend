@@ -100,6 +100,21 @@ class AttributeSetSerializer(serializers.ModelSerializer):
 
 
 class AttributeSetWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['included_attributes'] = []
+        for item in obj.included_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['included_attributes'].append(attribute)
+
+        representation['excluded_attributes'] = []
+        for item in obj.excluded_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['excluded_attributes'].append(attribute)
+
+        return representation
+
     class Meta:
         model = AttributeSet
         fields = '__all__'
