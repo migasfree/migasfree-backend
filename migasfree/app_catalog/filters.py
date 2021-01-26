@@ -18,7 +18,7 @@
 
 import django_filters
 
-from .models import Application, PackagesByProject, Policy
+from .models import Application, PackagesByProject, Policy, PolicyGroup
 
 
 class ApplicationFilter(django_filters.FilterSet):
@@ -55,4 +55,14 @@ class PolicyFilter(django_filters.FilterSet):
             'name': ['exact', 'icontains'],
             'enabled': ['exact'],
             'exclusive': ['exact'],
+        }
+
+
+class PolicyGroupFilter(django_filters.FilterSet):
+    class Meta:
+        model = PolicyGroup
+        fields = {
+            'id': ['exact'],
+            'policy__id': ['exact'],
+            'priority': ['exact'],
         }
