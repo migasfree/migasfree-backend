@@ -27,7 +27,10 @@ from ..core.views import MigasViewSet
 from ..client.models import Computer
 
 from . import models, serializers
-from .filters import ApplicationFilter, PackagesByProjectFilter, PolicyFilter
+from .filters import (
+    ApplicationFilter, PackagesByProjectFilter,
+    PolicyFilter, PolicyGroupFilter,
+)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -135,6 +138,8 @@ class PolicyViewSet(viewsets.ModelViewSet, MigasViewSet):
 class PolicyGroupViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = models.PolicyGroup.objects.all()
     serializer_class = serializers.PolicyGroupSerializer
+    filterset_class = PolicyGroupFilter
+    ordering = ('policy__id', 'priority')
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
