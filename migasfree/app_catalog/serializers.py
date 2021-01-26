@@ -124,6 +124,16 @@ class ApplicationWriteSerializer(serializers.ModelSerializer):
 
         return super().to_internal_value(data)
 
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['available_for_attributes'] = []
+        for item in obj.available_for_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['available_for_attributes'].append(attribute)
+
+        return representation
+
     class Meta:
         model = models.Application
         fields = '__all__'
