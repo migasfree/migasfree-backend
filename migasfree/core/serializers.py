@@ -645,6 +645,16 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class GroupWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['permissions'] = []
+        for item in obj.permissions.all():
+            permission = PermissionInfoSerializer(item).data
+            representation['permissions'].append(permission)
+
+        return representation
+
     class Meta:
         model = Group
         fields = '__all__'
