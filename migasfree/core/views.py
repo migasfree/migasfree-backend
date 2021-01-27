@@ -560,6 +560,7 @@ class DeploymentViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = Deployment.objects.all()
     serializer_class = DeploymentSerializer
     filterset_class = DeploymentFilter
+    search_fields = ['name']
     ordering_fields = '__all__'
     ordering = ('-start_date', 'name')
 
