@@ -381,7 +381,6 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                 }
             )
 
-        data = []
         inner = []
         outer = []
         for project in Project.objects.scope(request.user.userprofile).all():
