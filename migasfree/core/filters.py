@@ -38,13 +38,13 @@ class AttributeSetFilter(filters.FilterSet):
 
 class DeploymentFilter(filters.FilterSet):
     included_attributes = filters.CharFilter(
-        field_name='included_attributes__value', lookup_expr='contains'
+        field_name='included_attributes__value', lookup_expr='icontains'
     )
     excluded_attributes = filters.CharFilter(
-        field_name='excluded_attributes__value', lookup_expr='contains'
+        field_name='excluded_attributes__value', lookup_expr='icontains'
     )
     available_packages = filters.CharFilter(
-        field_name='available_packages__name', lookup_expr='contains'
+        field_name='available_packages__name', lookup_expr='icontains'
     )
 
     class Meta:
@@ -55,6 +55,7 @@ class DeploymentFilter(filters.FilterSet):
             'project__id': ['exact'],
             'enabled': ['exact'],
             'source': ['exact'],
+            'schedule': ['isnull'],
             'schedule__id': ['exact'],
             'domain__id': ['exact'],
         }
