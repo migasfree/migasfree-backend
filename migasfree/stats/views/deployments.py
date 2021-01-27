@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -203,7 +203,9 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
 
     @action(methods=['get'], detail=False, url_path='enabled/project')
     def enabled_by_project(self, request, format=None):
-        total = Deployment.objects.scope(request.user.userprofile).filter(enabled=True).count()
+        total = Deployment.objects.scope(request.user.userprofile).filter(
+            enabled=True
+        ).count()
 
         values_null = defaultdict(list)
         for item in Deployment.objects.scope(
@@ -245,31 +247,31 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                 }
             )
 
-        data = []
+        inner = []
+        outer = []
         for project in Project.objects.scope(request.user.userprofile).all():
             count = 0
-            data_project = []
+            outer_project = {}
             if project.id in values_null:
                 count += values_null[project.id][0]['value']
-                data_project.append(values_null[project.id][0])
+                outer_project = values_null[project.id][0]
             if project.id in values_not_null:
                 count += values_not_null[project.id][0]['value']
-                data_project.append(values_not_null[project.id][0])
+                outer_project = values_not_null[project.id][0]
             if count:
-                data.append(
-                    {
-                        'name': project.name,
-                        'value': count,
-                        'project_id': project.id,
-                        'data': data_project
-                    }
-                )
+                inner.append({
+                    'name': project.name,
+                    'value': count,
+                    'project_id': project.id,
+                })
+                outer.append(outer_project)
 
         return Response(
             {
                 'title': _('Enabled Deployments'),
                 'total': total,
-                'data': data,
+                'inner': inner,
+                'outer': outer
             },
             status=status.HTTP_200_OK
         )
@@ -312,31 +314,31 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                 }
             )
 
-        data = []
+        inner = []
+        outer = []
         for project in Project.objects.scope(request.user.userprofile).all():
             count = 0
-            data_project = []
+            outer_project = {}
             if project.id in values_null:
                 count += values_null[project.id][0]['value']
-                data_project.append(values_null[project.id][0])
+                outer_project = values_null[project.id][0]
             if project.id in values_not_null:
                 count += values_not_null[project.id][0]['value']
-                data_project.append(values_not_null[project.id][0])
+                outer_project = values_not_null[project.id][0]
             if count:
-                data.append(
-                    {
-                        'name': project.name,
-                        'value': count,
-                        'project_id': project.id,
-                        'data': data_project
-                    }
-                )
+                inner.append({
+                    'name': project.name,
+                    'value': count,
+                    'project_id': project.id,
+                })
+                outer.append(outer_project)
 
         return Response(
             {
                 'title': _('Deployments / Enabled'),
                 'total': total,
-                'data': data,
+                'inner': inner,
+                'outer': outer
             },
             status=status.HTTP_200_OK
         )
@@ -380,30 +382,34 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
             )
 
         data = []
+        inner = []
+        outer = []
         for project in Project.objects.scope(request.user.userprofile).all():
             count = 0
             data_project = []
+            outer_project = {}
             if project.id in values_null:
                 count += values_null[project.id][0]['value']
                 data_project.append(values_null[project.id][0])
+                outer_project = values_null[project.id][0]
             if project.id in values_not_null:
                 count += values_not_null[project.id][0]['value']
                 data_project.append(values_not_null[project.id][0])
+                outer_project = values_not_null[project.id][0]
             if count:
-                data.append(
-                    {
-                        'name': project.name,
-                        'value': count,
-                        'project_id': project.id,
-                        'data': data_project
-                    }
-                )
+                inner.append({
+                    'name': project.name,
+                    'value': count,
+                    'project_id': project.id,
+                })
+                outer.append(outer_project)
 
         return Response(
             {
                 'title': _('Deployments / Schedule'),
                 'total': total,
-                'data': data,
+                'inner': inner,
+                'outer': outer
             },
             status=status.HTTP_200_OK
         )
