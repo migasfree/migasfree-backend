@@ -213,13 +213,13 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         ).filter(
             enabled=True, schedule=None
         ).values(
-            'project__id',
+            'project__id', 'project__name'
         ).annotate(
             count=Count('id')
         ).order_by('project__id', '-count'):
             values_null[item.get('project__id')].append(
                 {
-                    'name': _('Without schedule'),
+                    'name': '{} ({})'.format(_('Without schedule'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
                     'schedule': False
@@ -234,13 +234,13 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         ).filter(
             ~Q(schedule=None)
         ).values(
-            'project__id',
+            'project__id', 'project__name'
         ).annotate(
             count=Count('id')
         ).order_by('project__id', '-count'):
             values_not_null[item.get('project__id')].append(
                 {
-                    'name': _('With schedule'),
+                    'name': '{} ({})'.format(_('With schedule'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
                     'schedule': True
@@ -284,13 +284,13 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         for item in Deployment.objects.scope(request.user.userprofile).filter(
             enabled=True
         ).values(
-            'project__id',
+            'project__id', 'project__name'
         ).annotate(
             count=Count('id')
         ).order_by('project__id', '-count'):
             values_null[item.get('project__id')].append(
                 {
-                    'name': _('Enabled'),
+                    'name': '{} ({})'.format(_('Enabled'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
                     'enabled': True,
@@ -301,13 +301,13 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         for item in Deployment.objects.scope(request.user.userprofile).filter(
             enabled=False,
         ).values(
-            'project__id',
+            'project__id', 'project__name'
         ).annotate(
             count=Count('id')
         ).order_by('project__id', '-count'):
             values_not_null[item.get('project__id')].append(
                 {
-                    'name': _('Disabled'),
+                    'name': '{} ({})'.format(_('Disabled'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
                     'enabled': False
@@ -351,13 +351,13 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         for item in Deployment.objects.scope(request.user.userprofile).filter(
             schedule=None
         ).values(
-            'project__id',
+            'project__id', 'project__name'
         ).annotate(
             count=Count('id')
         ).order_by('project__id', '-count'):
             values_null[item.get('project__id')].append(
                 {
-                    'name': _('Without schedule'),
+                    'name': '{} ({})'.format(_('Without schedule'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
                     'schedule': False
@@ -368,13 +368,13 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         for item in Deployment.objects.scope(request.user.userprofile).filter(
             ~Q(schedule=None)
         ).values(
-            'project__id',
+            'project__id', 'project__name'
         ).annotate(
             count=Count('id')
         ).order_by('project__id', '-count'):
             values_not_null[item.get('project__id')].append(
                 {
-                    'name': _('With schedule'),
+                    'name': '{} ({})'.format(_('With schedule'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
                     'schedule': True
