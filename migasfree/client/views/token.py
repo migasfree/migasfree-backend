@@ -31,6 +31,7 @@ from rest_framework.response import Response
 
 from ...core.models import Deployment
 from ...device.models import Logical, Driver, Model
+from ...device.serializers import LogicalInfoSerializer
 from ...hardware.models import Node
 from ...app_catalog.models import Policy
 from ...core.serializers import PlatformSerializer
@@ -399,7 +400,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
         repos = Deployment.available_deployments(
             computer, computer.get_all_attributes()
-        ).values('id', 'name')
+        ).values('id', 'name', 'source')
         definitions = models.FaultDefinition.enabled_for_attributes(
             computer.get_all_attributes()
         ).values('id', 'name')
@@ -432,7 +433,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
         logical_devices = []
         for device in computer.logical_devices():
-            logical_devices.append(device.as_dict(computer.project))
+            logical_devices.append(LogicalInfoSerializer(device).data)
 
         if computer.default_logical_device:
             default_logical_device = computer.default_logical_device.id
