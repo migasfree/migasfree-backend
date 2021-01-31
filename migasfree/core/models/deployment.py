@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -243,7 +243,7 @@ class Deployment(models.Model, MigasLink):
         else:
             percent = 100
 
-        return percent
+        return int(percent)
 
     def schedule_timeline(self):
         if self.schedule is None:
@@ -265,7 +265,7 @@ class Deployment(models.Model, MigasLink):
         return {
             'begin_date': str(begin_date),
             'end_date': str(end_date),
-            'percent': '%d' % self.get_percent(begin_date, end_date)
+            'percent': self.get_percent(begin_date, end_date)
         }
 
     def timeline(self):
