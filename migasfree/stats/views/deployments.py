@@ -183,9 +183,9 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                     duration += 1
 
                 labels.append(loop_date.strftime(date_format))
-                provided_data.append(value)
+                provided_data.append({'value': value})
                 if loop_date <= now:
-                    available_data.append(value)
+                    available_data.append({'value': value})
 
             lst_attributes += lst_att_delay
             rolling_date = end_horizon.date()
