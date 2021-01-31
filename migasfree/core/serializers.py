@@ -346,8 +346,15 @@ class PackageSerializer(serializers.ModelSerializer):
         fields = ('id', 'fullname', 'name', 'project', 'store', 'files')
 
 
+class DomainInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Domain
+        fields = ('id', 'name')
+
+
 class DeploymentSerializer(serializers.ModelSerializer):
     project = ProjectInfoSerializer(many=False, read_only=True)
+    domain = DomainInfoSerializer(many=False, read_only=True)
     schedule = ScheduleInfoSerializer(many=False, read_only=True)
     included_attributes = AttributeInfoSerializer(many=True, read_only=True)
     excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
@@ -357,6 +364,9 @@ class DeploymentSerializer(serializers.ModelSerializer):
     default_preincluded_packages = serializers.SerializerMethodField()
     default_included_packages = serializers.SerializerMethodField()
     default_excluded_packages = serializers.SerializerMethodField()
+
+    available_packages = PackageInfoSerializer(many=True, read_only=True)
+    # TODO available_package_sets = PackageSetInfoSerializer(many=True, read_only=True)
 
     def get_packages_to_install(self, obj):
         return to_list(obj.packages_to_install)
@@ -417,7 +427,8 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
             "domain": id,
             "name": "string",
             "comment": "string",
-            "available_packages": ["string", ...],
+            "available_packages": [id1, id2, ...],
+            "available_package_sets": [id1, id2, ...],
             "start_date": "string",
             "packages_to_install": [],
             "packages_to_remove": [],
@@ -447,6 +458,40 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
 
         return super().to_internal_value(data)
 
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['included_attributes'] = []
+        for item in obj.included_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['included_attributes'].append(attribute)
+
+        representation['excluded_attributes'] = []
+        for item in obj.excluded_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['excluded_attributes'].append(attribute)
+
+        representation['available_packages'] = []
+        for item in obj.available_packages.all():
+            pkg = PackageInfoSerializer(item).data
+            representation['available_packages'].append(pkg)
+
+        """
+        TODO
+        representation['available_package_sets'] = []
+        for item in obj.available_package_sets.all():
+            pkg = PackageSetInfoSerializer(item).data
+            representation['available_package_sets'].append(pkg)
+        """
+
+        representation['packages_to_install'] = to_list(obj.packages_to_install)
+        representation['packages_to_remove'] = to_list(obj.packages_to_remove)
+        representation['default_preincluded_packages'] = to_list(obj.default_preincluded_packages)
+        representation['default_included_packages'] = to_list(obj.default_included_packages)
+        representation['default_excluded_packages'] = to_list(obj.default_excluded_packages)
+
+        return representation
+
     def _validate_active_computers(self, att_list):
         for attribute in att_list:
             if attribute.property_att.prefix == 'CID':
@@ -471,40 +516,43 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
 
         return data
 
+    def create(self, validated_data):
+        deploy = super().create(validated_data)
+        if deploy.source == Deployment.SOURCE_INTERNAL:
+            tasks.create_repository_metadata.delay(deploy.id)
+        return deploy
+
+    def update(self, instance, validated_data):
+        if instance.source == Deployment.SOURCE_INTERNAL:
+            old_obj = self.Meta.model.objects.get(id=instance.id)
+            old_pkgs = sorted(
+                old_obj.available_packages.values_list('id', flat=True)
+            )
+            old_name = old_obj.name
+
+        # https://github.com/tomchristie/django-rest-framework/issues/2442
+        instance = super().update(instance, validated_data)
+        if instance.source == Deployment.SOURCE_INTERNAL:
+            new_pkgs = sorted(
+                instance.available_packages.values_list('id', flat=True)
+            )
+
+            if cmp(old_pkgs, new_pkgs) != 0 or old_name != validated_data['name']:
+                tasks.create_repository_metadata.delay(instance.id)
+
+                if old_name != validated_data['name']:
+                    tasks.remove_repository_metadata.delay(
+                        instance.id, old_obj.slug
+                    )
+
+        return instance
+
     class Meta:
         model = Deployment
         fields = '__all__'
 
 
 class InternalSourceWriteSerializer(DeploymentWriteSerializer):
-    def create(self, validated_data):
-        deploy = super().create(validated_data)
-        tasks.create_repository_metadata.delay(deploy.id)
-        return deploy
-
-    def update(self, instance, validated_data):
-        old_obj = self.Meta.model.objects.get(id=instance.id)
-        old_pkgs = sorted(
-            old_obj.available_packages.values_list('id', flat=True)
-        )
-        old_name = old_obj.name
-
-        # https://github.com/tomchristie/django-rest-framework/issues/2442
-        instance = super().update(instance, validated_data)
-        new_pkgs = sorted(
-            instance.available_packages.values_list('id', flat=True)
-        )
-
-        if cmp(old_pkgs, new_pkgs) != 0 or old_name != validated_data['name']:
-            tasks.create_repository_metadata.delay(instance.id)
-
-            if old_name != validated_data['name']:
-                tasks.remove_repository_metadata.delay(
-                    instance.id, old_obj.slug
-                )
-
-        return instance
-
     class Meta:
         model = InternalSource
         fields = (
@@ -533,12 +581,6 @@ class ExternalSourceWriteSerializer(DeploymentWriteSerializer):
 class UserProfileInfoSerializer(UserDetailsSerializer):
     class Meta(UserDetailsSerializer.Meta):
         fields = ('id', 'username')
-
-
-class DomainInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Domain
-        fields = ('id', 'name')
 
 
 class DomainSerializer(serializers.ModelSerializer):
