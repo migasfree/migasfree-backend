@@ -46,7 +46,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         )
 
         return Response(
-            list(response),
+            list(map(int, response)),
             status=status.HTTP_200_OK
         )
 
@@ -58,7 +58,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         response = con.smembers('migasfree:deployments:%d:ok' % deploy.id)
 
         return Response(
-            list(response),
+            list(map(int, response)),
             status=status.HTTP_200_OK
         )
 
@@ -70,7 +70,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         response = con.smembers('migasfree:deployments:%d:error' % deploy.id)
 
         return Response(
-            list(response),
+            list(map(int, response)),
             status=status.HTTP_200_OK
         )
 
