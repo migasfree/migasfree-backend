@@ -69,7 +69,7 @@ from .serializers import (
     AttributeSerializer,
     ScheduleSerializer, ScheduleWriteSerializer,
     ScheduleDelaySerializer, ScheduleDelayWriteSerializer,
-    PackageSerializer, DeploymentSerializer,
+    PackageSerializer, DeploymentSerializer, DeploymentWriteSerializer,
     DomainWriteSerializer, DomainSerializer,
     ScopeSerializer, ScopeWriteSerializer,
     UserProfileSerializer, UserProfileWriteSerializer,
@@ -564,14 +564,12 @@ class DeploymentViewSet(viewsets.ModelViewSet, MigasViewSet):
     ordering_fields = '__all__'
     ordering = ('-start_date', 'name')
 
-    """ FIXME
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
                 or self.action == 'partial_update':
             return DeploymentWriteSerializer
 
         return DeploymentSerializer
-    """
 
     def get_queryset(self):
         if self.request is None:
