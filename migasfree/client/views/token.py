@@ -713,17 +713,19 @@ class MessageViewSet(viewsets.ViewSet):
     def list(self, request):
         # TODO from django.core.paginator import Paginator
         con = get_redis_connection()
-        keys = list(con.smembers('migasfree:watch:msg'))
+        items = list(con.smembers('migasfree:watch:msg'))
 
         results = []
-        for key in keys:
+        for key in items:
             item = decode_dict(con.hgetall('migasfree:msg:%d' % int(key)))
             results.append({
                 'id': int(key),
                 'date': item['date'],
                 'computer': {
                     'id': item['computer_id'],
-                    'name': item['computer_name']
+                    '__str__': item['computer_name'],
+                    'status': item['computer_status'],
+                    'summary': item['computer_summary']
                 },
                 'project': {
                     'id': item['project_id'],
@@ -733,11 +735,13 @@ class MessageViewSet(viewsets.ViewSet):
                     'id': item['user_id'],
                     'name': item['user_name']
                 },
-                'ip_address': item['ip_address'],
-                'msg': item['msg']
+                'message': item['msg']
             })
 
-        return Response({'results': results}, status=status.HTTP_200_OK)
+        return Response(
+            {'results': results, 'count': len(items)},
+            status=status.HTTP_200_OK
+        )
 
     def destroy(self, request, pk=None):
         remove_computer_messages(int(pk))
