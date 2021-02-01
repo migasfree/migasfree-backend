@@ -22,7 +22,7 @@ from django.contrib.auth.models import Permission, Group
 from .models import (
     Deployment, Package, ClientAttribute, ServerAttribute, Attribute,
     Project, ScheduleDelay, Store, AttributeSet, Property, Platform,
-    UserProfile, Domain, Scope, Schedule,
+    UserProfile, Domain, Scope, Schedule, PackageSet,
 )
 
 
@@ -72,6 +72,17 @@ class PackageFilter(filters.FilterSet):
             'architecture': ['exact', 'icontains'],
             'project__id': ['exact'],
             'deployment__id': ['exact'],
+            'store__id': ['exact']
+        }
+
+
+class PackageSetFilter(filters.FilterSet):
+    class Meta:
+        model = PackageSet
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
+            'project__id': ['exact'],
             'store__id': ['exact']
         }
 
