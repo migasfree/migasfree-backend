@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -68,7 +68,9 @@ def add_computer_message(computer, message):
 def remove_computer_messages(computer_id):
     con = get_redis_connection()
     keys = con.hkeys('migasfree:msg:%d' % computer_id)
-    con.hdel('migasfree:msg:%d' % computer_id, *keys)
+    if keys:
+        con.hdel('migasfree:msg:%d' % computer_id, *keys)
+
     con.srem('migasfree:watch:msg', computer_id)
 
 
