@@ -555,6 +555,24 @@ class PackageViewSet(
             status=status.HTTP_200_OK
         )
 
+    @action(methods=['get'], detail=True)
+    def info(self, request, pk=None):
+        obj = self.get_object()
+
+        if obj.store is None:
+            return Response(
+                {
+                    'detail': gettext('The package has no store on the server')
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        response = obj.pms().package_info(
+            Package.path(obj.project.name, obj.store.name, obj.fullname)
+        )
+
+        return Response({'data': response}, status=status.HTTP_200_OK)
+
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
