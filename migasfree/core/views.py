@@ -55,7 +55,7 @@ from .models import (
     ServerProperty, ClientProperty,
     ServerAttribute, ClientAttribute, Attribute,
     Schedule, ScheduleDelay,
-    Package, Deployment,
+    Package, PackageSet, Deployment,
     ExternalSource, InternalSource,
     Domain, Scope, UserProfile,
     AttributeSet, Property,
@@ -69,7 +69,8 @@ from .serializers import (
     AttributeSerializer,
     ScheduleSerializer, ScheduleWriteSerializer,
     ScheduleDelaySerializer, ScheduleDelayWriteSerializer,
-    PackageSerializer, DeploymentSerializer, DeploymentWriteSerializer,
+    PackageSerializer, PackageSetSerializer, PackageSetWriteSerializer,
+    DeploymentSerializer, DeploymentWriteSerializer,
     DomainWriteSerializer, DomainSerializer,
     ScopeSerializer, ScopeWriteSerializer,
     UserProfileSerializer, UserProfileWriteSerializer,
@@ -84,7 +85,7 @@ from .filters import (
     ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
     AttributeSetFilter, PropertyFilter, AttributeFilter, PlatformFilter,
     UserProfileFilter, PermissionFilter, GroupFilter, DomainFilter,
-    ScopeFilter, ScheduleFilter,
+    ScopeFilter, ScheduleFilter, PackageSetFilter,
 )
 
 from . import tasks
@@ -553,6 +554,23 @@ class PackageViewSet(
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+@permission_classes((permissions.DjangoModelPermissions,))
+class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
+    queryset = PackageSet.objects.all()
+    serializer_class = PackageSetSerializer
+    filterset_class = PackageSetFilter
+    search_fields = ['name']
+    ordering_fields = '__all__'
+    ordering = ('project__name', 'name')
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update' \
+                or self.action == 'partial_update':
+            return PackageSetWriteSerializer
+
+        return PackageSetSerializer
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
