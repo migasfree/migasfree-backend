@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
 
 import os
 import shutil
+
+from importlib import import_module
 
 from django.db import models
 from django.db.models.signals import pre_delete
@@ -148,6 +150,10 @@ class Package(models.Model, MigasLink):
             deployment__id=None,
             store__isnull=False
         ).count()
+
+    def pms(self):
+        mod = import_module('migasfree.core.pms.{}'.format(self.project.pms))
+        return getattr(mod, self.project.pms.capitalize())()
 
     @staticmethod
     def path(project_name, store_name, fullname):
