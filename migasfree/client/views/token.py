@@ -36,7 +36,7 @@ from ...hardware.models import Node
 from ...app_catalog.models import Policy
 from ...core.serializers import PlatformSerializer
 from ...core.views import MigasViewSet, ExportViewSet
-from ...utils import replace_keys, remove_duplicates_preserving_order
+from ...utils import replace_keys, remove_duplicates_preserving_order, decode_dict
 
 from .. import models, serializers
 from ..filters import (
@@ -45,6 +45,7 @@ from ..filters import (
     MigrationFilter, StatusLogFilter, SynchronizationFilter,
     UserFilter,
 )
+from .safe import remove_computer_messages
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -705,3 +706,40 @@ class UserViewSet(
             qs = qs.filter(computer__in=user.get_computers())
 
         return qs
+
+
+@permission_classes((permissions.IsAuthenticated,))
+class MessageViewSet(viewsets.ViewSet):
+    def list(self, request):
+        # TODO from django.core.paginator import Paginator
+        con = get_redis_connection()
+        keys = list(con.smembers('migasfree:watch:msg'))
+
+        results = []
+        for key in keys:
+            item = decode_dict(con.hgetall('migasfree:msg:%d' % int(key)))
+            results.append({
+                'id': int(key),
+                'date': item['date'],
+                'computer': {
+                    'id': item['computer_id'],
+                    'name': item['computer_name']
+                },
+                'project': {
+                    'id': item['project_id'],
+                    'name': item['project_name']
+                },
+                'user': {
+                    'id': item['user_id'],
+                    'name': item['user_name']
+                },
+                'ip_address': item['ip_address'],
+                'msg': item['msg']
+            })
+
+        return Response({'results': results}, status=status.HTTP_200_OK)
+
+    def destroy(self, request, pk=None):
+        remove_computer_messages(int(pk))
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
