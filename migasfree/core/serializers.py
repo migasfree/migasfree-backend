@@ -36,9 +36,10 @@ from .pms import get_available_mimetypes
 from .models import (
     Platform, Project, Store,
     ServerProperty, ClientProperty, Property,
-    Attribute, ServerAttribute, ClientAttribute,
+    Attribute, AttributeSet,
+    ServerAttribute, ClientAttribute,
     Schedule, ScheduleDelay,
-    Package, Deployment, AttributeSet,
+    Package, PackageSet, Deployment,
     Domain, Scope, UserProfile,
     InternalSource, ExternalSource,
 )
@@ -344,6 +345,22 @@ class PackageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Package
         fields = ('id', 'fullname', 'name', 'project', 'store', 'files')
+
+
+class PackageSetSerializer(serializers.ModelSerializer):
+    project = ProjectInfoSerializer(many=False, read_only=True)
+    store = StoreInfoSerializer(many=False, read_only=True)
+    packages = PackageInfoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = PackageSet
+        fields = '__all__'
+
+
+class PackageSetWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PackageSet
+        fields = '__all__'
 
 
 class DomainInfoSerializer(serializers.ModelSerializer):
