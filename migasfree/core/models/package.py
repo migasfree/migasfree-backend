@@ -23,6 +23,7 @@ from importlib import import_module
 
 from django.db import models
 from django.db.models.signals import pre_delete
+from django.db.models.aggregates import Count
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
@@ -169,6 +170,28 @@ class Package(models.Model, MigasLink):
                     shutil.rmtree(path, ignore_errors=True)
             except OSError:
                 pass
+
+    @staticmethod
+    def by_store(user):
+        total = Package.objects.scope(user).count()
+
+        stores = list(Package.objects.scope(user).values(
+            'project__id', 'store__id', 'store__name'
+        ).annotate(
+            count=Count('id')
+        ).order_by('project__id', 'store__name', '-count'))
+
+        projects = list(Package.objects.scope(user).values(
+            'project__id', 'project__name'
+        ).annotate(
+            count=Count('id')
+        ).order_by('project__id', '-count'))
+
+        return {
+            'total': total,
+            'inner': projects,
+            'outer': stores,
+        }
 
     def create_dir(self):
         if self.store:
