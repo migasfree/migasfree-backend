@@ -579,6 +579,7 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = PackageSet.objects.all()
     serializer_class = PackageSetSerializer
     filterset_class = PackageSetFilter
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
     search_fields = ['name']
     ordering_fields = '__all__'
     ordering = ('project__name', 'name')
@@ -589,6 +590,29 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
             return PackageSetWriteSerializer
 
         return PackageSetSerializer
+
+    """
+    def create(self, request):
+        return super().create(request)
+
+    def partial_update(self, request, pk=None):
+        data = dict(request.data)
+
+        # files = data.get('files', [])
+        files = request.data.get('files', [])
+        print(files)
+        for file_ in files:
+            print(file_, type(file_), file_.name)
+            print(file_, vars(file_), dir(file_))
+        return super().partial_update(request, pk)
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def perform_update(self, serializer):
+        print(serializer.validated_data)
+        serializer.save()
+    """
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
