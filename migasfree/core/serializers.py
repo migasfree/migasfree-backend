@@ -358,6 +358,21 @@ class PackageSetSerializer(serializers.ModelSerializer):
 
 
 class PackageSetWriteSerializer(serializers.ModelSerializer):
+    """
+    files = serializers.ListField(
+        child=serializers.FileField(
+            allow_empty_file=True,
+            validators=[MimetypeValidator(get_available_mimetypes())]
+        ),
+        required=False,
+    )
+    files = serializers.FileField(
+        allow_empty_file=True,
+        validators=[MimetypeValidator(get_available_mimetypes())],
+        required=False,
+    )
+    """
+
     class Meta:
         model = PackageSet
         fields = '__all__'
