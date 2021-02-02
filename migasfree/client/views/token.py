@@ -710,17 +710,27 @@ class UserViewSet(
 
 @permission_classes((permissions.IsAuthenticated,))
 class MessageViewSet(viewsets.ViewSet):
-    def list(self, request):
+    def get_queryset(self):
         # TODO from django.core.paginator import Paginator
+        project_filter = self.request.query_params.get('project__id', None)
+        created_at_lt_filter = self.request.query_params.get('created_at__lt', None)
+
         con = get_redis_connection()
         items = list(con.smembers('migasfree:watch:msg'))
 
         results = []
         for key in items:
             item = decode_dict(con.hgetall('migasfree:msg:%d' % int(key)))
+
+            if project_filter and item['project_id'] != project_filter:
+                continue
+
+            if created_at_lt_filter and item['date'] >= created_at_lt_filter:
+                continue
+
             results.append({
                 'id': int(key),
-                'date': item['date'],
+                'created_at': item['date'],
                 'computer': {
                     'id': item['computer_id'],
                     '__str__': item['computer_name'],
@@ -738,8 +748,15 @@ class MessageViewSet(viewsets.ViewSet):
                 'message': item['msg']
             })
 
+        sorted_results = sorted(results, key=lambda d: d['created_at'])
+
+        return sorted_results
+
+    def list(self, request):
+        results = self.get_queryset()
+
         return Response(
-            {'results': results, 'count': len(items)},
+            {'results': results, 'count': len(results)},
             status=status.HTTP_200_OK
         )
 
