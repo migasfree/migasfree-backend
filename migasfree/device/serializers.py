@@ -47,6 +47,17 @@ class ConnectionSerializer(serializers.ModelSerializer):
 
 
 class ConnectionWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        if obj.device_type:
+            representation['device_type'] = {
+                'id': obj.device_type.id,
+                'name': obj.device_type.name
+            }
+
+        return representation
+
     class Meta:
         model = models.Connection
         fields = '__all__'
