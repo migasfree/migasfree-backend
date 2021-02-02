@@ -180,6 +180,14 @@ class StoreSerializer(serializers.ModelSerializer):
 
 
 class StoreWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        if obj.project:
+            representation['project'] = ProjectInfoSerializer(obj.project).data
+
+        return representation
+
     class Meta:
         model = Store
         fields = ('id', 'name', 'project')
