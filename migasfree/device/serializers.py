@@ -198,6 +198,28 @@ class ManufacturerSerializer(serializers.ModelSerializer):
 
 
 class ModelWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        if obj.device_type:
+            representation['device_type'] = {
+                'id': obj.device_type.id,
+                'name': obj.device_type.name
+            }
+
+        if obj.manufacturer:
+            representation['manufacturer'] = {
+                'id': obj.manufacturer.id,
+                'name': obj.manufacturer.name
+            }
+
+        representation['connections'] = []
+        for item in obj.connections.all():
+            conn = ConnectionInfoSerializer(item).data
+            representation['connections'].append(conn)
+
+        return representation
+
     class Meta:
         model = models.Model
         fields = '__all__'
