@@ -714,6 +714,8 @@ class MessageViewSet(viewsets.ViewSet):
         # TODO from django.core.paginator import Paginator
         project_filter = self.request.query_params.get('project__id', None)
         created_at_lt_filter = self.request.query_params.get('created_at__lt', None)
+        created_at_gte_filter = self.request.query_params.get('created_at__gte', None)
+        search_filter = self.request.query_params.get('search', None)
 
         con = get_redis_connection()
         items = list(con.smembers('migasfree:watch:msg'))
@@ -722,27 +724,33 @@ class MessageViewSet(viewsets.ViewSet):
         for key in items:
             item = decode_dict(con.hgetall('migasfree:msg:%d' % int(key)))
 
-            if project_filter and item['project_id'] != project_filter:
+            if project_filter and int(item['project_id']) != project_filter:
                 continue
 
             if created_at_lt_filter and item['date'] >= created_at_lt_filter:
+                continue
+
+            if created_at_gte_filter and item['date'] < created_at_gte_filter:
+                continue
+
+            if search_filter and search_filter.lower() not in item['msg'].lower():
                 continue
 
             results.append({
                 'id': int(key),
                 'created_at': item['date'],
                 'computer': {
-                    'id': item['computer_id'],
+                    'id': int(item['computer_id']),
                     '__str__': item['computer_name'],
                     'status': item['computer_status'],
                     'summary': item['computer_summary']
                 },
                 'project': {
-                    'id': item['project_id'],
+                    'id': int(item['project_id']),
                     'name': item['project_name']
                 },
                 'user': {
-                    'id': item['user_id'],
+                    'id': int(item['user_id']),
                     'name': item['user_name']
                 },
                 'message': item['msg']
