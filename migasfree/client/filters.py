@@ -209,7 +209,11 @@ class NotificationFilter(filters.FilterSet):
 
     class Meta:
         model = Notification
-        fields = ['id', 'checked']
+        fields = {
+            'id': ['exact'],
+            'checked': ['exact'],
+            'message': ['icontains'],
+        }
 
 
 class PackageHistoryFilter(filters.FilterSet):
