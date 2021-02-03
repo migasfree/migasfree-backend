@@ -594,25 +594,46 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
     """
     def create(self, request):
         return super().create(request)
+    """
 
     def partial_update(self, request, pk=None):
-        data = dict(request.data)
+        obj = self.get_object()
 
-        # files = data.get('files', [])
-        files = request.data.get('files', [])
-        print(files)
+        files = request.data.getlist('files')
+        new_pkgs = []
         for file_ in files:
-            print(file_, type(file_), file_.name)
-            print(file_, vars(file_), dir(file_))
+            name, version, architecture = Package.normalized_name(file_.name)
+            if not name or not version or not architecture:
+                return Response(
+                    {
+                        'error': gettext('Package %s has an incorrect name format') % file_.name
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            try:
+                pkg = Package.objects.create(
+                    fullname=file_.name,
+                    name=name, version=version, architecture=architecture,
+                    project=obj.project,
+                    store=obj.store,
+                    file_=file_
+                )
+            except IntegrityError:
+                return Response(
+                    {
+                        'error': gettext('Package %s is duplicated in store %s') % (file_.name, obj.store)
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            new_pkgs.append(str(pkg.id))
+
+        packages = request.data.getlist('packages', [])
+        packages.extend(new_pkgs)
+        request.data.setlist('packages', packages)
+
         return super().partial_update(request, pk)
-
-    def perform_create(self, serializer):
-        serializer.save()
-
-    def perform_update(self, serializer):
-        print(serializer.validated_data)
-        serializer.save()
-    """
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
