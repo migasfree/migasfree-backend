@@ -19,6 +19,7 @@
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.core.serializers import serialize
 from django.http import QueryDict
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
@@ -452,6 +453,20 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         }
 
         return Response(response, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], detail=True)
+    def hardware(self, request, pk=None):
+        request.user.userprofile.check_scope(pk)
+
+        return Response(
+            serialize(
+                'python',
+                Node.objects.filter(computer__id=pk).order_by(
+                    'id', 'parent_id', 'level'
+                )
+            ),
+            status=status.HTTP_200_OK
+        )
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
