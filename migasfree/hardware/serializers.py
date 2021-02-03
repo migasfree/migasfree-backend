@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,9 +18,15 @@
 
 from rest_framework import serializers
 
-from migasfree.client.serializers import ComputerInfoSerializer
+from ..client.serializers import ComputerInfoSerializer
 
 from . import models
+
+
+class NodeInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Node
+        fields = ('id', 'name')
 
 
 class NodeSerializer(serializers.ModelSerializer):
@@ -29,3 +35,21 @@ class NodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Node
         fields = '__all__'
+
+
+class CapabilityInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Capability
+        fields = ('id', 'name', 'description')
+
+
+class ConfigurationInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Configuration
+        fields = ('id', 'name', 'value')
+
+
+class LogicalNameInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.LogicalName
+        fields = ('id', 'name')
