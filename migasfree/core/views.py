@@ -591,47 +591,63 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
 
         return PackageSetSerializer
 
-    """
+    def _upload_packages(self, project, store, files):
+        new_pkgs = []
+        for file_ in files:
+            name, version, architecture = Package.normalized_name(file_.name)
+            if not name or not version or not architecture:
+                return Response(
+                    {
+                        'error': gettext('Package %s has an incorrect name format') % file_.name
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            try:
+                pkg = Package.objects.create(
+                    fullname=file_.name,
+                    name=name, version=version, architecture=architecture,
+                    project=project,
+                    store=store,
+                    file_=file_
+                )
+            except IntegrityError:
+                return Response(
+                    {
+                        'error': gettext('Package %s is duplicated in store %s') % (file_.name, obj.store)
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            new_pkgs.append(str(pkg.id))
+
+        return new_pkgs
+
     def create(self, request):
+        files = request.data.getlist('files')
+        if files:
+            project_id = request.data.get('project', 0)
+            store_id = request.data.get('store', 0)
+
+            project = Project.objects.get(id=project_id)
+            store = Store.objects.get(id=store_id)
+
+            if project and store:
+                packages = request.data.getlist('packages', [])
+                packages = list(filter(None, packages))
+                packages.extend(self._upload_packages(project, store, files))
+                request.data.setlist('packages', packages)
+
         return super().create(request)
-    """
 
     def partial_update(self, request, pk=None):
         obj = self.get_object()
 
         files = request.data.getlist('files')
         if files:
-            new_pkgs = []
-            for file_ in files:
-                name, version, architecture = Package.normalized_name(file_.name)
-                if not name or not version or not architecture:
-                    return Response(
-                        {
-                            'error': gettext('Package %s has an incorrect name format') % file_.name
-                        },
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                try:
-                    pkg = Package.objects.create(
-                        fullname=file_.name,
-                        name=name, version=version, architecture=architecture,
-                        project=obj.project,
-                        store=obj.store,
-                        file_=file_
-                    )
-                except IntegrityError:
-                    return Response(
-                        {
-                            'error': gettext('Package %s is duplicated in store %s') % (file_.name, obj.store)
-                        },
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                new_pkgs.append(str(pkg.id))
-
             packages = request.data.getlist('packages', [])
-            packages.extend(new_pkgs)
+            packages = list(filter(None, packages))
+            packages.extend(self._upload_packages(obj.project, obj.store, files))
             request.data.setlist('packages', packages)
 
         return super().partial_update(request, pk)
