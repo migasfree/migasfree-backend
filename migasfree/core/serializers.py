@@ -369,6 +369,12 @@ class PackageSerializer(serializers.ModelSerializer):
         fields = ('id', 'fullname', 'name', 'project', 'store', 'files')
 
 
+class PackageSetInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PackageSet
+        fields = ('id', 'name')
+
+
 class PackageSetSerializer(serializers.ModelSerializer):
     project = ProjectInfoSerializer(many=False, read_only=True)
     store = StoreInfoSerializer(many=False, read_only=True)
@@ -420,7 +426,7 @@ class DeploymentSerializer(serializers.ModelSerializer):
     default_excluded_packages = serializers.SerializerMethodField()
 
     available_packages = PackageInfoSerializer(many=True, read_only=True)
-    # TODO available_package_sets = PackageSetInfoSerializer(many=True, read_only=True)
+    available_package_sets = PackageSetInfoSerializer(many=True, read_only=True)
 
     def get_packages_to_install(self, obj):
         return to_list(obj.packages_to_install)
@@ -530,13 +536,10 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
             pkg = PackageInfoSerializer(item).data
             representation['available_packages'].append(pkg)
 
-        """
-        TODO
         representation['available_package_sets'] = []
         for item in obj.available_package_sets.all():
             pkg = PackageSetInfoSerializer(item).data
             representation['available_package_sets'].append(pkg)
-        """
 
         representation['packages_to_install'] = to_list(obj.packages_to_install)
         representation['packages_to_remove'] = to_list(obj.packages_to_remove)
