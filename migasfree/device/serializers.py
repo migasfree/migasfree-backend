@@ -51,10 +51,7 @@ class ConnectionWriteSerializer(serializers.ModelSerializer):
         representation = super().to_representation(obj)
 
         if obj.device_type:
-            representation['device_type'] = {
-                'id': obj.device_type.id,
-                'name': obj.device_type.name
-            }
+            representation['device_type'] = TypeSerializer(obj.device_type).data
 
         return representation
 
@@ -184,16 +181,15 @@ class LogicalWriteSerializer(serializers.ModelSerializer):
         representation['__str__'] = obj.__str__()
 
         if obj.device:
-            representation['device'] = {
-                'id': obj.device.id,
-                'name': obj.device.name
-            }
+            representation['device'] = DeviceInfoSerializer(obj.device).data
 
         if obj.capability:
-            representation['capability'] = {
-                'id': obj.capability.id,
-                'name': obj.capability.name
-            }
+            representation['capability'] = CapabilityInfoSerializer(obj.capability).data
+
+        representation['attributes'] = []
+        for item in obj.attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['attributes'].append(attribute)
 
         return representation
 
@@ -213,16 +209,10 @@ class ModelWriteSerializer(serializers.ModelSerializer):
         representation = super().to_representation(obj)
 
         if obj.device_type:
-            representation['device_type'] = {
-                'id': obj.device_type.id,
-                'name': obj.device_type.name
-            }
+            representation['device_type'] = TypeSerializer(obj.device_type).data
 
         if obj.manufacturer:
-            representation['manufacturer'] = {
-                'id': obj.manufacturer.id,
-                'name': obj.manufacturer.name
-            }
+            representation['manufacturer'] = ManufacturerInfoSerializer(obj.manufacturer).data
 
         representation['connections'] = []
         for item in obj.connections.all():
