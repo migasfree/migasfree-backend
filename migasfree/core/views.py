@@ -600,38 +600,39 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
         obj = self.get_object()
 
         files = request.data.getlist('files')
-        new_pkgs = []
-        for file_ in files:
-            name, version, architecture = Package.normalized_name(file_.name)
-            if not name or not version or not architecture:
-                return Response(
-                    {
-                        'error': gettext('Package %s has an incorrect name format') % file_.name
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+        if files:
+            new_pkgs = []
+            for file_ in files:
+                name, version, architecture = Package.normalized_name(file_.name)
+                if not name or not version or not architecture:
+                    return Response(
+                        {
+                            'error': gettext('Package %s has an incorrect name format') % file_.name
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
 
-            try:
-                pkg = Package.objects.create(
-                    fullname=file_.name,
-                    name=name, version=version, architecture=architecture,
-                    project=obj.project,
-                    store=obj.store,
-                    file_=file_
-                )
-            except IntegrityError:
-                return Response(
-                    {
-                        'error': gettext('Package %s is duplicated in store %s') % (file_.name, obj.store)
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                try:
+                    pkg = Package.objects.create(
+                        fullname=file_.name,
+                        name=name, version=version, architecture=architecture,
+                        project=obj.project,
+                        store=obj.store,
+                        file_=file_
+                    )
+                except IntegrityError:
+                    return Response(
+                        {
+                            'error': gettext('Package %s is duplicated in store %s') % (file_.name, obj.store)
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
 
-            new_pkgs.append(str(pkg.id))
+                new_pkgs.append(str(pkg.id))
 
-        packages = request.data.getlist('packages', [])
-        packages.extend(new_pkgs)
-        request.data.setlist('packages', packages)
+            packages = request.data.getlist('packages', [])
+            packages.extend(new_pkgs)
+            request.data.setlist('packages', packages)
 
         return super().partial_update(request, pk)
 
