@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,20 +25,26 @@ from rest_framework.response import Response
 from ..core.mixins import SafeConnectionMixin
 from ..core.views import MigasViewSet
 from ..client.models import Computer
+from ..client.serializers import ComputerInfoSerializer
 
-from .models import Node
+from .models import Node, Capability, LogicalName, Configuration
 from .filters import NodeFilter
 from . import tasks, serializers
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class HardwareComputerViewSet(viewsets.ViewSet):
-    queryset = Node.objects.all()  # FIXME
+    # FIXME It's in use?
+    queryset = Node.objects.all()
 
     @action(methods=['get'], detail=True)
     def hardware(self, request, pk=None):
         computer = get_object_or_404(Computer, pk=pk)
-        nodes = Node.objects.filter(computer=computer).order_by('id')
+        request.user.userprofile.check_scope(pk)
+
+        nodes = Node.objects.filter(computer=computer).order_by(
+            'id', 'parent_id', 'level'
+        )
 
         serializer = serializers.NodeSerializer(nodes, many=True)
         return Response(
@@ -70,6 +76,44 @@ class HardwareViewSet(
             qs = qs.filter(computer_id__in=user.get_computers())
 
         return qs
+
+    @action(methods=['get'], detail=True)
+    def info(self, request, pk=None):
+        node = self.get_object()
+        request.user.userprofile.check_scope(node.computer.id)
+
+        capability = Capability.objects.filter(node=node.id).values(
+            'name', 'description'
+        )
+        logical_name = LogicalName.objects.filter(node=node.id).values('name')
+        configuration = Configuration.objects.filter(node=node.id).values(
+            'name', 'value'
+        )
+
+        name = node.__str__()
+        if not name:
+            name = node.description
+            if node.product:
+                name = '{}: {}'.format(name, node.product)
+
+        data = {
+            'name': name,
+            'computer': ComputerInfoSerializer(node.computer).data,
+            'capability': serializers.CapabilityInfoSerializer(
+                capability, many=True
+            ).data,
+            'logical_name': serializers.LogicalNameInfoSerializer(
+                logical_name, many=True
+            ).data,
+            'configuration': serializers.ConfigurationInfoSerializer(
+                configuration, many=True
+            ).data,
+        }
+
+        return Response(
+            data,
+            status=status.HTTP_200_OK
+        )
 
 
 @permission_classes((permissions.AllowAny,))
