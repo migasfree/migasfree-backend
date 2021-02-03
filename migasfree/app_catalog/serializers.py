@@ -132,6 +132,12 @@ class ApplicationWriteSerializer(serializers.ModelSerializer):
             attribute = AttributeInfoSerializer(item).data
             representation['available_for_attributes'].append(attribute)
 
+        if obj.level:
+            representation['level'] = LevelSerializer(obj.level).data
+
+        if obj.category:
+            representation['category'] = CategorySerializer(obj.category).data
+
         return representation
 
     class Meta:
