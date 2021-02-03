@@ -157,6 +157,13 @@ class ProjectWriteSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
         self.fields['pms'].validators.append(validate_project_pms)
 
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['platform'] = PlatformSerializer(obj.platform).data
+
+        return representation
+
     class Meta:
         model = Project
         fields = (
@@ -233,6 +240,13 @@ class ServerAttributeSerializer(serializers.ModelSerializer):
 
 
 class ServerAttributeWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['property_att'] = ServerPropertyInfoSerializer(obj.property_att).data
+
+        return representation
+
     class Meta:
         model = ServerAttribute
         fields = ('id', 'property_att', 'value', 'description')
