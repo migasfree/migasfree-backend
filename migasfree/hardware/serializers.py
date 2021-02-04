@@ -29,6 +29,20 @@ class NodeInfoSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
+class NodeOnlySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Node
+        fields = (
+            'id', 'parent', 'level',
+            'width', 'name', 'class_name',
+            'enabled', 'claimed', 'description',
+            'vendor', 'product', 'version',
+            'serial', 'bus_info', 'physid',
+            'slot', 'size', 'capacity',
+            'clock', 'dev'
+        )
+
+
 class NodeSerializer(serializers.ModelSerializer):
     computer = ComputerInfoSerializer(many=False, read_only=True)
 
