@@ -34,6 +34,7 @@ from ...core.models import Deployment
 from ...device.models import Logical, Driver, Model
 from ...device.serializers import LogicalInfoSerializer
 from ...hardware.models import Node
+from ...hardware.serializers import NodeOnlySerializer
 from ...app_catalog.models import Policy
 from ...core.serializers import PlatformSerializer
 from ...core.views import MigasViewSet, ExportViewSet
@@ -458,13 +459,12 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     def hardware(self, request, pk=None):
         request.user.userprofile.check_scope(pk)
 
+        results = Node.objects.filter(computer__id=pk).order_by(
+            'id', 'parent_id', 'level'
+        )
+
         return Response(
-            serialize(
-                'python',
-                Node.objects.filter(computer__id=pk).order_by(
-                    'id', 'parent_id', 'level'
-                )
-            ),
+            NodeOnlySerializer(results, many=True).data,
             status=status.HTTP_200_OK
         )
 
