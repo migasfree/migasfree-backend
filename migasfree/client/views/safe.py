@@ -58,8 +58,8 @@ def add_computer_message(computer, message):
             'computer_summary': computer.get_summary(),
             'project_id': computer.project.id,
             'project_name': computer.project.name,
-            'user_id': computer.sync_user.id,
-            'user_name': computer.sync_user.name,
+            'user_id': computer.sync_user.id if computer.sync_user else 0,
+            'user_name': computer.sync_user.name if computer.sync_user else '',
             'msg': message
         }
     )
