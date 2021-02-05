@@ -814,6 +814,16 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
             domain = DomainInfoSerializer(item).data
             representation['domains'].append(domain)
 
+        if obj.domain_preference:
+            representation['domain_preference'] = DomainInfoSerializer(
+                obj.domain_preference
+            ).data
+
+        if obj.scope_preference:
+            representation['scope_preference'] = ScopeInfoSerializer(
+                obj.scope_preference
+            ).data
+
         return representation
 
     class Meta:
