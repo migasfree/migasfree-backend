@@ -23,7 +23,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
-from rest_auth.serializers import UserDetailsSerializer
+from dj_rest_auth.serializers import UserDetailsSerializer
 
 from ..client.models import Computer
 
