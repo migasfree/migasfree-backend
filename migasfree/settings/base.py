@@ -111,7 +111,7 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'drf_yasg',
     'rest_framework_filters',
-    'rest_auth',
+    'dj_rest_auth',
     'django_filters',
     'corsheaders',
     'djoser',
