@@ -848,33 +848,6 @@ class UserProfileSerializer(UserDetailsSerializer):
         many=False, read_only=True, source='userprofile.scope_preference'
     )
 
-    def update(self, instance, validated_data):
-        profile_data = validated_data.pop('userprofile', {})
-        domain_preference = profile_data.get('domain_preference')
-        scope_preference = profile_data.get('scope_preference')
-
-        instance = super().update(instance, validated_data)
-
-        # get and update user profile
-        profile = instance.userprofile
-        if domain_preference:
-            pk = domain_preference.get('id', 0)
-            if pk:
-                domain = get_object_or_404(Domain, pk=pk)
-                if domain.id in list(profile.domains.values_list('id', flat=True)):
-                    profile.update_domain(domain)
-            else:
-                profile.update_domain(0)
-        if scope_preference:
-            pk = scope_preference.get('id', 0)
-            if pk:
-                scope = get_object_or_404(Scope, pk=pk)
-                profile.update_scope(scope)
-            else:
-                profile.update_scope(0)
-
-        return instance
-
     class Meta(UserDetailsSerializer.Meta):
         fields = UserDetailsSerializer.Meta.fields + (
             'domains', 'domain_preference', 'scope_preference',
