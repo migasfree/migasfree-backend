@@ -94,7 +94,7 @@ urlpatterns = [
     path('token-auth-jwt/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token-refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-    re_path(r'^rest-auth/', include('rest_auth.urls')),
+    re_path(r'^rest-auth/', include('dj_rest_auth.urls')),
 
     re_path(r'^', include('django.contrib.auth.urls')),
     re_path(r'^api-docs/', include_docs_urls(title=TITLE)),
