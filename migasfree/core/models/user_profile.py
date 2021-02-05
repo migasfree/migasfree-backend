@@ -103,7 +103,7 @@ class UserProfile(UserSystem, MigasLink):
         SELECT attribute_id
         FROM core_scope_included_attributes
         WHERE scope_id=%(scope)s
-    ) AND server_computer.status in %(status)s
+    ) AND client_computer.status in %(status)s
     EXCEPT
     SELECT DISTINCT computer_id
     FROM client_computer_sync_attributes
