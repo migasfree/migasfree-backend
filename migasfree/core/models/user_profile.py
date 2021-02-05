@@ -161,7 +161,7 @@ SELECT ARRAY(
             cursor = connection.cursor()
             cursor.execute(
                 """SELECT ARRAY(
-                    SELECT coreattribute_id
+                    SELECT serverattribute_id
                     FROM core_domain_tags
                     WHERE domain_id=%s
                 ) AS attributes """ % self.domain_preference.id
