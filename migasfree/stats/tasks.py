@@ -48,8 +48,8 @@ def add_orphan_packages():
             'api': json.dumps({
                 'model': 'packages',
                 'query': {
-                    'enabled': True,
-                    'store': False
+                    'deployment': True,  # isnull = True
+                    'store': True  # isnull = True
                 }
             })
         }
