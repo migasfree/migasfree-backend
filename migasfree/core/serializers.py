@@ -838,9 +838,15 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(UserDetailsSerializer):
     groups = GroupInfoSerializer(many=True, read_only=True)
     user_permissions = PermissionInfoSerializer(many=True, read_only=True)
-    domains = DomainInfoSerializer(many=True, read_only=True, source='userprofile.domains')
-    domain_preference = DomainInfoSerializer(many=False, read_only=True)
-    scope_preference = ScopeInfoSerializer(many=False, read_only=True)
+    domains = DomainInfoSerializer(
+        many=True, read_only=True, source='userprofile.domains'
+    )
+    domain_preference = DomainInfoSerializer(
+        many=False, read_only=True, source='userprofile.domain_preference'
+    )
+    scope_preference = ScopeInfoSerializer(
+        many=False, read_only=True, source='userprofile.scope_preference'
+    )
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('userprofile', {})
