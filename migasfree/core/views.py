@@ -73,7 +73,7 @@ from .serializers import (
     DeploymentSerializer, DeploymentWriteSerializer,
     DomainWriteSerializer, DomainSerializer,
     ScopeSerializer, ScopeWriteSerializer,
-    UserProfileSerializer, UserProfileWriteSerializer,
+    UserProfileSerializer, UserProfileWriteSerializer, ChangePasswordSerializer,
     GroupSerializer, GroupWriteSerializer, PermissionSerializer,
     AttributeSetSerializer, AttributeSetWriteSerializer,
     PropertySerializer, PropertyWriteSerializer,
@@ -794,6 +794,29 @@ class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet):
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
+        )
+
+    @action(
+        methods=['put'],
+        detail=True,
+        serializer_class=ChangePasswordSerializer,
+        url_path='change-password'
+    )
+    def set_password(self, request, pk=None):
+        user = self.get_object()
+        serializer = ChangePasswordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            user.update_password(serializer.data.get('password'))
+
+            return Response(
+                {'detail': gettext('Password changed!')},
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
         )
 
 
