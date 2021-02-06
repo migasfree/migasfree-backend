@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2018-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -207,6 +207,11 @@ SELECT ARRAY(
                 return True
 
         return False
+
+    def update_password(self, new_password):
+        # set_password also hashes the password that the user will get
+        self.set_password(new_password)
+        self.save()
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if not (
