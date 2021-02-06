@@ -854,3 +854,21 @@ class UserProfileSerializer(UserDetailsSerializer):
             'groups', 'user_permissions', 'is_superuser', 'is_staff',
             'is_active', 'last_login', 'date_joined', 'id',
         )
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True, required=True)
+    password2 = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, attrs):
+        if len(attrs['password']) < 8:
+            raise serializers.ValidationError(
+                {'password': _('Minimum length is %d characters') % 8}
+            )
+
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError(
+                {'password': _("Password fields didn't match.")}
+            )
+
+        return attrs
