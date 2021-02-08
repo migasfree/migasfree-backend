@@ -49,7 +49,7 @@ def add_orphan_packages():
                 'model': 'packages',
                 'query': {
                     'deployment': True,  # isnull = True
-                    'store': True  # isnull = True
+                    'store': False  # isnull = False
                 }
             })
         }
