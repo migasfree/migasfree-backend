@@ -123,7 +123,12 @@ def add_generating_repos():
             'target': 'server',
             'level': 'info',
             'result': result,
-            'api': reverse('internalsource-generating')
+            'api': json.dumps({
+                'model': 'deployments',
+                'query': {
+                    'id_in': ','.join(con.smembers('migasfree:watch:repos'))
+                }
+            })
         }
     )
     con.sadd('migasfree:watch:chk', 'repos')
