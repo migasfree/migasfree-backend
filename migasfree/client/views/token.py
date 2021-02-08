@@ -730,6 +730,7 @@ class MessageViewSet(viewsets.ViewSet):
         project_filter = self.request.query_params.get('project__id', None)
         created_at_lt_filter = self.request.query_params.get('created_at__lt', None)
         created_at_gte_filter = self.request.query_params.get('created_at__gte', None)
+        status_filter = self.request.query_params.get('computer__status__in', None)
         search_filter = self.request.query_params.get('search', None)
 
         con = get_redis_connection()
@@ -746,6 +747,9 @@ class MessageViewSet(viewsets.ViewSet):
                 continue
 
             if created_at_gte_filter and item['date'] < created_at_gte_filter:
+                continue
+
+            if status_filter and item['computer_status'] not in status_filter:
                 continue
 
             if search_filter and search_filter.lower() not in item['msg'].lower():
