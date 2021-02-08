@@ -81,6 +81,18 @@ class DeviceInfoSerializer(serializers.ModelSerializer):
 
 
 class DeviceWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['connection'] = ConnectionInfoSerializer(obj.connection).data
+
+        representation['available_for_attributes'] = []
+        for item in obj.available_for_attributes.all():
+            attribute = AttributeInfoSerializer(item).data
+            representation['available_for_attributes'].append(attribute)
+
+        return representation
+
     class Meta:
         model = models.Device
         fields = '__all__'
