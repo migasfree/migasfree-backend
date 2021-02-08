@@ -17,6 +17,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.db import models, connection
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import (
@@ -24,6 +27,7 @@ from django.contrib.auth.models import (
     UserManager,
     Group,
 )
+from rest_framework.authtoken.models import Token
 
 from .migas_link import MigasLink
 
@@ -168,6 +172,7 @@ SELECT ARRAY(
             )
             tags = cursor.fetchall()[0][0]
             cursor.close()
+
         return tags
 
     def get_projects(self):
@@ -218,11 +223,17 @@ SELECT ARRAY(
             self.password.startswith('sha1$')
             or self.password.startswith('pbkdf2')
         ):
-            super(UserProfile, self).set_password(self.password)
+            super().set_password(self.password)
 
-        super(UserProfile, self).save(force_insert, force_update, using, update_fields)
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
         app_label = 'core'
         verbose_name = _('User Profile')
         verbose_name_plural = _('User Profiles')
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
