@@ -50,7 +50,7 @@ class DeploymentFilter(filters.FilterSet):
     class Meta:
         model = Deployment
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'project__id': ['exact'],
             'enabled': ['exact'],
