@@ -204,7 +204,7 @@ def add_active_schedule_deployments():
                 'model': 'deployments',
                 'query': {
                     'enabled': True,
-                    'schedule__isnull': False
+                    'schedule': False  # isnull = False
                 }
             })
         }
@@ -233,7 +233,7 @@ def add_finished_schedule_deployments():
                 'model': 'deployments',
                 'query': {
                     'enabled': True,
-                    'schedule__isnull': False
+                    'schedule': False  # isnull = False
                 }
             })
         }
