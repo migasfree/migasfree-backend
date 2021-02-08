@@ -225,7 +225,7 @@ class ModelViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = Model.objects.all()
     serializer_class = serializers.ModelSerializer
     filterset_class = ModelFilter
-    search_fields = ['name']
+    search_fields = ['name', 'manufacturer__name']
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -235,6 +235,20 @@ class ModelViewSet(viewsets.ModelViewSet, MigasViewSet):
             return serializers.ModelWriteSerializer
 
         return serializers.ModelSerializer
+
+    """
+    @action(methods=['get'], detail=True)
+    def connections(self, request, pk=None):
+        model = self.get_object()
+        print(model, vars(model))
+
+        connections = Connection.objects.filter(
+            id__in=Model.objects.get(
+                id=pk
+            ).connections
+        )
+        print(connections)
+    """
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
