@@ -150,7 +150,12 @@ def add_synchronizing_computers():
             'target': 'computer',
             'level': 'info',
             'result': result,
-            'api': reverse('computer-synchronizing')
+            'api': json.dumps({
+                'model': 'messages',
+                'query': {
+                    'created_at__gte': datetime.strftime(delayed_time, '%Y-%m-%dT%H:%M:%S')
+                }
+            })
         }
     )
     con.sadd('migasfree:watch:chk', 'syncs')
@@ -177,7 +182,12 @@ def add_delayed_computers():
             'target': 'computer',
             'level': 'critical',
             'result': result,
-            'api': reverse('computer-delayed')
+            'api': json.dumps({
+                'model': 'messages',
+                'query': {
+                    'created_at__lt': datetime.strftime(delayed_time, '%Y-%m-%dT%H:%M:%S')
+                }
+            })
         }
     )
     con.sadd('migasfree:watch:chk', 'delayed')
