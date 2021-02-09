@@ -29,7 +29,8 @@ class ApplicationFilter(django_filters.FilterSet):
             'name': ['exact', 'icontains'],
             'level': ['exact'],
             'category': ['exact'],
-            'score': ['exact']
+            'score': ['exact'],
+            'available_for_attributes__id': ['exact'],
         }
 
 
