@@ -30,7 +30,7 @@ from . import models
 class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
-        fields = ('id', 'name')
+        fields = ('id', 'name', '__str__')
 
 
 class ComputerInfoSerializer(serializers.ModelSerializer):
@@ -253,12 +253,12 @@ class StatusLogSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
-        fields = '__all__'
+        fields = ('id', 'name', 'fullname', '__str__')
 
 
 class SynchronizationSerializer(serializers.ModelSerializer):
     project = ProjectInfoSerializer(many=False, read_only=True)
-    user = UserSerializer(many=False, read_only=True)
+    user = UserInfoSerializer(many=False, read_only=True)
     computer = ComputerInfoSerializer(many=False, read_only=True)
 
     class Meta:
