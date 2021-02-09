@@ -194,11 +194,19 @@ class MigasLink(object):
                                 })
 
                 data.append({
-                    'url': '{}?{}__id__exact={}'.format(
-                        related_link,
-                        obj.remote_field.name if _name != 'serverattribute' else 'computer',
-                        self.pk
-                    ),
+                    #'url': '{}?{}__id__exact={}'.format(
+                    #    related_link,
+                    #    obj.remote_field.name if _name != 'serverattribute' else 'computer',
+                    #    self.pk
+                    #),
+                    'api': {
+                        'model': obj.remote_field.model._meta.verbose_name_plural.lower(),
+                        'query': {
+                            '{}__id'.format(
+                                obj.remote_field.name if _name != 'serverattribute' else 'computer'
+                            ): self.pk
+                        }
+                    },
                     'text': gettext(obj.remote_field.field.verbose_name),
                     'count': count,
                     'actions': actions
@@ -231,7 +239,8 @@ class MigasLink(object):
                             )
 
                         count = rel_objects.count()
-                        if count:
+                        # print(related_model._meta.app_label, related_model.__name__.lower())
+                        if count and related_model._meta.app_label != 'authtoken':
                             related_link = reverse(
                                 'admin:{}_{}_changelist'.format(
                                     related_model._meta.app_label,
@@ -262,11 +271,19 @@ class MigasLink(object):
 
                             if related_model.__name__.lower() == 'computer':
                                 data.append({
-                                    'url': '{}?{}={}&status__in=intended,reserved,unknown'.format(
-                                        related_link,
-                                        _field,
-                                        self.id
-                                    ),
+                                    # 'url': '{}?{}={}&status__in=intended,reserved,unknown'.format(
+                                    #    related_link,
+                                    #    _field,
+                                    #    self.id
+                                    # ),
+                                    'api': {
+                                        # 'model': related_model.__name__.lower(),
+                                        'model': related_model._meta.verbose_name_plural.lower(),
+                                        'query': {
+                                            _field: self.id,
+                                            'status__in': 'intended,reserved,unknown'
+                                        }
+                                    },
                                     'text': '{} [{}]'.format(
                                         gettext(related_model._meta.verbose_name_plural),
                                         gettext(related_object.field.verbose_name)
@@ -275,12 +292,20 @@ class MigasLink(object):
                                     'actions': actions
                                 })
                             else:
+                                # print(related_model._meta, dir(related_model._meta), vars(related_model._meta))
                                 data.append({
-                                    'url': '{}?{}={}'.format(
-                                        related_link,
-                                        _field,
-                                        self.id
-                                    ),
+                                    # 'url': '{}?{}={}'.format(
+                                    #    related_link,
+                                    #    _field,
+                                    #    self.id
+                                    # ),
+                                    'api': {
+                                        # 'model': related_model.__name__.lower(),
+                                        'model': related_model._meta.verbose_name_plural.lower(),
+                                        'query': {
+                                            _field: self.id
+                                        }
+                                    },
                                     'text': '{} [{}]'.format(
                                         gettext(related_model._meta.verbose_name_plural),
                                         gettext(related_object.field.verbose_name)
@@ -369,12 +394,19 @@ class MigasLink(object):
                         _model_name
                     )
                 )
+                # print('debug', related_model)
                 data.append({
-                    'url': '{}?{}__id__exact={}'.format(
-                        related_link,
-                        _field_name,
-                        self.id
-                    ),
+                    #'url': '{}?{}__id__exact={}'.format(
+                    #    related_link,
+                    #    _field_name,
+                    #    self.id
+                    #),
+                    'api': {
+                        'model': self._meta.verbose_name_plural.lower(),
+                        'query': {
+                            '{}__id'.format(_field_name): self.id
+                        }
+                    },
                     'text': '{} [{}]'.format(
                         gettext(_model_name),
                         gettext(_field_name)
@@ -572,19 +604,24 @@ class MigasLink(object):
         if obj.related_model._meta.label_lower == 'client.computer' and \
                 self.__class__.__name__ in ['ClientAttribute', 'Attribute'] and \
                 self.property_att.prefix == 'CID':
-            return Computer, 'sync_attributes__id__exact'
+            # return Computer, 'sync_attributes__id__exact'
+            return Computer, 'sync_attributes__id'
 
         if obj.related_model._meta.label_lower == 'core.attribute':
             if self.sort == 'server':
-                return ServerAttribute, 'Tag'
+                # return ServerAttribute, 'Tag'
+                return ServerAttribute, 'property__id'
             else:
-                return ClientAttribute, 'Attribute'
+                # return ClientAttribute, 'Attribute'
+                return ClientAttribute, 'property__id'
         elif obj.related_model._meta.label_lower == 'client.computer':
             if self.__class__.__name__ == ['ClientAttribute', 'Attribute', 'ServerAttribute']:
                 if obj.field.related_model._meta.model_name == 'serverattribute':
-                    return Computer, 'tags__id__exact'
+                    # return Computer, 'tags__id__exact'
+                    return Computer, 'tags__id'
                 elif obj.field.related_model._meta.model_name == 'attribute':
-                    return Computer, 'sync_attributes__id__exact'
+                    # return Computer, 'sync_attributes__id__exact'
+                    return Computer, 'sync_attributes__id'
         elif obj.related_model._meta.label_lower in [
             'admin.logentry',
             'core.scheduledelay',
@@ -593,9 +630,11 @@ class MigasLink(object):
             return '', ''  # Excluded
 
         if obj.field.__class__.__name__ in ['ManyRelatedManager', 'OneToOneField', 'ForeignKey']:
-            return obj.related_model, '{}__id__exact'.format(obj.field.name)
+            # return obj.related_model, '{}__id__exact'.format(obj.field.name)
+            return obj.related_model, '{}__id'.format(obj.field.name)
         else:
-            return obj.related_model, '{}__{}__exact'.format(
+            # return obj.related_model, '{}__{}__exact'.format(
+            return obj.related_model, '{}__{}'.format(
                 obj.field.name,
                 obj.field.m2m_reverse_target_field_name()
             )
