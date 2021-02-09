@@ -29,7 +29,7 @@ from .property import Property
 
 class DomainAttributeManager(models.Manager):
     def scope(self, user):
-        qs = super(DomainAttributeManager, self).get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             qs = qs.filter(
                 Q(id__in=user.get_attributes()) |
@@ -84,10 +84,7 @@ class AttributeManager(DomainAttributeManager):
             Notification.objects.create(
                 _('The value of the attribute [%s] has more than %d characters. '
                   'The original value is truncated: %s') % (
-                    '<a href="{}">{}</a>'.format(
-                        reverse('admin:server_attribute_change', args=(obj.id,)),
-                        obj
-                    ),
+                    obj.value,
                     Attribute.VALUE_LEN,
                     original_value
                 )
@@ -201,7 +198,7 @@ class Attribute(models.Model, MigasLink):
     def delete(self, using=None, keep_parents=False):
         # Not allowed delete attribute of basic properties
         if self.property_att.sort != 'basic':
-            return super(Attribute, self).delete(using, keep_parents)
+            return super().delete(using, keep_parents)
 
     @staticmethod
     def process_kind_property(property_att, value):
@@ -245,15 +242,16 @@ class Attribute(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = _("Attribute")
-        verbose_name_plural = _("Attributes")
+        verbose_name = 'Attribute'
+        verbose_name_plural = 'Attributes'
         unique_together = (("property_att", "value"),)
         ordering = ['property_att__prefix', 'value']
 
 
 class ServerAttributeManager(DomainAttributeManager):
     def scope(self, user):
-        qs = super(ServerAttributeManager, self).scope(user)
+        qs = super().scope(user)
+
         return qs.filter(property_att__sort='server')
 
 
@@ -268,14 +266,15 @@ class ServerAttribute(Attribute):  # tag
         self.save()
 
     class Meta:
-        verbose_name = _("Tag")
-        verbose_name_plural = _("Tags")
+        verbose_name = 'Tag'
+        verbose_name_plural = 'Tags'
         proxy = True
 
 
 class ClientAttributeManager(DomainAttributeManager):
     def scope(self, user):
-        qs = super(ClientAttributeManager, self).scope(user)
+        qs = super().scope(user)
+
         return qs.filter(
             Q(property_att__sort='client') |
             Q(property_att__sort='basic')
@@ -286,14 +285,15 @@ class ClientAttribute(Attribute):
     objects = ClientAttributeManager()
 
     class Meta:
-        verbose_name = _("Feature")
-        verbose_name_plural = _("Features")
+        verbose_name = 'Feature'
+        verbose_name_plural = 'Features'
         proxy = True
 
 
 class BasicAttributeManager(DomainAttributeManager):
     def scope(self, user):
-        qs = super(BasicAttributeManager, self).scope(user)
+        qs = super().scope(user)
+
         return qs.filter(property_att__sort='basic')
 
 
@@ -356,6 +356,6 @@ class BasicAttribute(Attribute):
         return basic_attributes
 
     class Meta:
-        verbose_name = _("Basic Attribute")
-        verbose_name_plural = _("Basic Attributes")
+        verbose_name = 'Basic Attribute'
+        verbose_name_plural = 'Basic Attributes'
         proxy = True

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -54,5 +54,5 @@ class PackageHistory(models.Model, MigasLink):
 
     class Meta:
         app_label = 'client'
-        verbose_name = _('Package History')
-        verbose_name_plural = _('Packages History')
+        verbose_name = 'Package History'
+        verbose_name_plural = 'Packages History'

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ class Notification(models.Model, MigasLink):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.message = self.message.replace("\r\n", "\n")
-        super(Notification, self).save(force_insert, force_update, using, update_fields)
+        super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return '{} ({:%Y-%m-%d %H:%M:%S})'.format(self.id, self.created_at)
@@ -85,5 +85,5 @@ class Notification(models.Model, MigasLink):
 
     class Meta:
         app_label = 'client'
-        verbose_name = _("Notification")
-        verbose_name_plural = _("Notifications")
+        verbose_name = 'Notification'
+        verbose_name_plural = 'Notifications'

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ from .event import Event
 
 class DomainErrorManager(models.Manager):
     def scope(self, user):
-        qs = super(DomainErrorManager, self).get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             qs = qs.filter(
                 project_id__in=user.get_projects(),
@@ -39,14 +39,10 @@ class DomainErrorManager(models.Manager):
 
 class UncheckedManager(DomainErrorManager):
     def get_queryset(self):
-        return super(UncheckedManager, self).get_queryset().filter(
-            checked=0
-        )
+        return super().get_queryset().filter(checked=0)
 
     def scope(self, user):
-        return super(UncheckedManager, self).scope(user).filter(
-            checked=0
-        )
+        return super().scope(user).filter(checked=0)
 
 
 class ErrorManager(DomainErrorManager):
@@ -143,9 +139,10 @@ class Error(Event):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.description = self.description.replace("\r\n", "\n")
-        super(Error, self).save(force_insert, force_update, using, update_fields)
+
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
         app_label = 'client'
-        verbose_name = _("Error")
-        verbose_name_plural = _("Errors")
+        verbose_name = 'Error'
+        verbose_name_plural = 'Errors'

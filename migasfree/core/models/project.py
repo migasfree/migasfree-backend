@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ from . import Platform, MigasLink
 
 class DomainProjectManager(models.Manager):
     def scope(self, user):
-        qs = super(DomainProjectManager, self).get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             qs = qs.filter(id__in=user.get_projects())
 
@@ -141,12 +141,12 @@ class Project(models.Model, MigasLink):
         self.slug = slugify(self.name)
         self._create_dirs()
 
-        super(Project, self).save(force_insert, force_update, using, update_fields)
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
         app_label = 'core'
-        verbose_name = _("Project")
-        verbose_name_plural = _("Projects")
+        verbose_name = 'Project'
+        verbose_name_plural = 'Projects'
         ordering = ['name']
 
 

@@ -25,13 +25,13 @@ import datetime
 from importlib import import_module
 
 from django.db import models
-from django.template.defaultfilters import slugify
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
 from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
+from django.template.defaultfilters import slugify
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from django_redis import get_redis_connection
 
 from ...utils import time_horizon
@@ -48,7 +48,7 @@ from .domain import Domain
 
 class DeploymentManager(models.Manager):
     def scope(self, user):
-        qs = super(DeploymentManager, self).get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects())
             domain = user.domain_preference
@@ -313,7 +313,7 @@ class Deployment(models.Model, MigasLink):
         if self.default_excluded_packages:
             self.default_excluded_packages = self.default_excluded_packages.replace("\r\n", "\n")
 
-        super(Deployment, self).save(force_insert, force_update, using, update_fields)
+        super().save(force_insert, force_update, using, update_fields)
 
         try:
             from ...stats import tasks
@@ -439,8 +439,8 @@ class Deployment(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = _('Deployment')
-        verbose_name_plural = _('Deployments')
+        verbose_name = 'Deployment'
+        verbose_name_plural = 'Deployments'
         unique_together = (('name', 'project'),)
         ordering = ['project__name', 'name']
 
@@ -471,7 +471,7 @@ def pre_delete_deployment(sender, instance, **kwargs):
 
 class InternalSourceManager(models.Manager):
     def scope(self, user):
-        qs = super(InternalSourceManager, self).get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects())
             domain = user.domain_preference
@@ -489,19 +489,19 @@ class InternalSource(Deployment):
     objects = InternalSourceManager()
 
     def __init__(self, *args, **kwargs):
-        super(InternalSource, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.source = Deployment.SOURCE_INTERNAL
 
     class Meta:
         app_label = 'core'
-        verbose_name = _("Deployment (internal source)")
-        verbose_name_plural = _("Deployments (internal source)")
+        verbose_name = 'Deployment (internal source)'
+        verbose_name_plural = 'Deployments (internal source)'
         proxy = True
 
 
 class ExternalSourceManager(models.Manager):
     def scope(self, user):
-        qs = super(ExternalSourceManager, self).get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects())
             domain = user.domain_preference
@@ -519,11 +519,11 @@ class ExternalSource(Deployment):
     objects = ExternalSourceManager()
 
     def __init__(self, *args, **kwargs):
-        super(ExternalSource, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.source = Deployment.SOURCE_EXTERNAL
 
     class Meta:
         app_label = 'core'
-        verbose_name = _("Deployment (external source)")
-        verbose_name_plural = _("Deployments (external source)")
+        verbose_name = 'Deployment (external source)'
+        verbose_name_plural = 'Deployments (external source)'
         proxy = True

@@ -54,5 +54,5 @@ class Schedule(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = _('Schedule')
-        verbose_name_plural = _('Schedules')
+        verbose_name = 'Schedule'
+        verbose_name_plural = 'Schedules'

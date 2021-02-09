@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@
 
 from django.db import models
 from django.db.models import Q
-from django.core.exceptions import ValidationError
-from django.utils.translation import gettext, gettext_lazy as _
 from django.db.models.signals import pre_delete, pre_save, m2m_changed
 from django.dispatch import receiver
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext, gettext_lazy as _
 
 from ...utils import sort_depends
 from . import Property, Attribute, MigasLink
@@ -29,7 +29,7 @@ from . import Property, Attribute, MigasLink
 
 class AttributeSetManager(models.Manager):
     def scope(self, user):
-        qs = super(AttributeSetManager, self).get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             qs = qs.filter(
                 included_attributes__in=user.get_attributes()
@@ -98,7 +98,7 @@ class AttributeSet(models.Model, MigasLink):
         Returns Queryset with the related computers based in attributes
         """
         if model == 'computer':
-            from migasfree.client.models import Computer
+            from ...client.models import Computer
 
             return Computer.productive.scope(user).filter(
                 sync_attributes__in=self.included_attributes.all()
@@ -109,7 +109,7 @@ class AttributeSet(models.Model, MigasLink):
         return None
 
     def clean(self):
-        super(AttributeSet, self).clean()
+        super().clean()
 
         if self.id:
             att_set = AttributeSet.objects.get(pk=self.id)
@@ -121,7 +121,7 @@ class AttributeSet(models.Model, MigasLink):
                 raise ValidationError(_('Duplicated name'))
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        super(AttributeSet, self).save(force_insert, force_update, using, update_fields)
+        super().save(force_insert, force_update, using, update_fields)
 
         Attribute.objects.get_or_create(
             property_att=Property.objects.get(prefix='SET', sort='basic'),
@@ -184,8 +184,8 @@ class AttributeSet(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = _("Attribute Set")
-        verbose_name_plural = _("Attribute Sets")
+        verbose_name = 'Attribute Set'
+        verbose_name_plural = 'Attribute Sets'
 
 
 @receiver(pre_save, sender=AttributeSet)
@@ -236,4 +236,6 @@ def prevent_circular_dependencies(sender, instance, action, reverse, model, pk_s
             review = list(AttributeSet.objects.filter(
                 id__in=list(depends.keys())
             ).values_list('name', flat=True))
-            raise ValidationError(_('Review circular dependencies: %s') % ', '.join(review))
+            raise ValidationError(
+                _('Review circular dependencies: %s') % ', '.join(review)
+            )

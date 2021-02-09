@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from .attribute import Attribute
 
 class ScheduleDelayManager(models.Manager):
     def scope(self, user):
-        qs = super(ScheduleDelayManager, self).get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             qs = qs.filter(
                 Q(attributes__in=user.get_attributes()) |
@@ -89,6 +89,6 @@ class ScheduleDelay(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = _("Schedule Delay")
-        verbose_name_plural = _("Schedule Delays")
+        verbose_name = 'Schedule Delay'
+        verbose_name_plural = 'Schedule Delays'
         unique_together = (("schedule", "delay"),)

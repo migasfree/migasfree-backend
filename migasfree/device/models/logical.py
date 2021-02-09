@@ -39,7 +39,7 @@ class LogicalManager(models.Manager):
         return obj
 
     def scope(self, user):
-        qs = super(LogicalManager, self).get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             qs = qs.filter(
                 attributes__in=user.get_attributes()
@@ -52,13 +52,13 @@ class Logical(models.Model, MigasLink):
     device = models.ForeignKey(
         Device,
         on_delete=models.CASCADE,
-        verbose_name=_("device")
+        verbose_name=_('device')
     )
 
     capability = models.ForeignKey(
         Capability,
         on_delete=models.CASCADE,
-        verbose_name=_("capability")
+        verbose_name=_('capability')
     )
 
     alternative_capability_name = models.CharField(
@@ -72,8 +72,8 @@ class Logical(models.Model, MigasLink):
     attributes = models.ManyToManyField(
         Attribute,
         blank=True,
-        verbose_name=_("attributes"),
-        help_text=_("Assigned Attributes")
+        verbose_name=_('attributes'),
+        help_text=_('Assigned Attributes')
     )
 
     objects = LogicalManager()
@@ -135,6 +135,6 @@ class Logical(models.Model, MigasLink):
 
     class Meta:
         app_label = 'device'
-        verbose_name = _("Logical Device")
-        verbose_name_plural = _("Logical Devices")
+        verbose_name = 'Logical Device'
+        verbose_name_plural = 'Logical Devices'
         unique_together = (('device', 'capability'),)

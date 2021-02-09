@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,6 +48,6 @@ class Connection(models.Model, MigasLink):
 
     class Meta:
         app_label = 'device'
-        verbose_name = _("Connection")
-        verbose_name_plural = _("Connections")
+        verbose_name = 'Connection'
+        verbose_name_plural = 'Connections'
         unique_together = (("device_type", "name"),)

@@ -29,7 +29,7 @@ from .model import Model
 
 class DeviceManager(models.Manager):
     def scope(self, user):
-        qs = super(DeviceManager, self).get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             user_attributes = user.get_attributes()
             qs = qs.filter(logical__attributes__in=user_attributes).distinct()
@@ -177,6 +177,6 @@ class Device(models.Model, MigasLink):
 
     class Meta:
         app_label = 'device'
-        verbose_name = _("Device")
-        verbose_name_plural = _("Devices")
+        verbose_name = 'Device'
+        verbose_name_plural = 'Devices'
         unique_together = (("connection", "name"),)

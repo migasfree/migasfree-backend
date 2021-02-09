@@ -53,74 +53,50 @@ class DomainComputerManager(models.Manager):
 
 class ProductiveManager(DomainComputerManager):
     def get_queryset(self):
-        return super(ProductiveManager, self).get_queryset().filter(
-            status__in=Computer.PRODUCTIVE_STATUS
-        )
+        return super().get_queryset().filter(status__in=Computer.PRODUCTIVE_STATUS)
 
     def scope(self, user):
-        return super(ProductiveManager, self).scope(user).filter(
-            status__in=Computer.PRODUCTIVE_STATUS
-        )
+        return super().scope(user).filter(status__in=Computer.PRODUCTIVE_STATUS)
 
 
 class UnproductiveManager(DomainComputerManager):
     def get_queryset(self):
-        return super(UnproductiveManager, self).get_queryset().exclude(
-            status__in=Computer.PRODUCTIVE_STATUS
-        )
+        return super().get_queryset().exclude(status__in=Computer.PRODUCTIVE_STATUS)
 
     def scope(self, user):
-        return super(UnproductiveManager, self).scope(user).exclude(
-            status__in=Computer.PRODUCTIVE_STATUS
-        )
+        return super().scope(user).exclude(status__in=Computer.PRODUCTIVE_STATUS)
 
 
 class SubscribedManager(DomainComputerManager):
     def get_queryset(self):
-        return super(SubscribedManager, self).get_queryset().exclude(
-            status='unsubscribed'
-        )
+        return super().get_queryset().exclude(status='unsubscribed')
 
     def scope(self, user):
-        return super(SubscribedManager, self).scope(user).exclude(
-            status='unsubscribed'
-        )
+        return super().scope(user).exclude(status='unsubscribed')
 
 
 class UnsubscribedManager(DomainComputerManager):
     def get_queryset(self):
-        return super(UnsubscribedManager, self).get_queryset().filter(
-            status='unsubscribed'
-        )
+        return super().get_queryset().filter(status='unsubscribed')
 
     def scope(self, user):
-        return super(UnsubscribedManager, self).scope(user).filter(
-            status='unsubscribed'
-        )
+        return super().scope(user).filter(status='unsubscribed')
 
 
 class ActiveManager(DomainComputerManager):
     def get_queryset(self):
-        return super(ActiveManager, self).get_queryset().filter(
-            status__in=Computer.ACTIVE_STATUS
-        )
+        return super().get_queryset().filter(status__in=Computer.ACTIVE_STATUS)
 
     def scope(self, user):
-        return super(ActiveManager, self).scope(user).filter(
-            status__in=Computer.ACTIVE_STATUS
-        )
+        return super().scope(user).filter(status__in=Computer.ACTIVE_STATUS)
 
 
 class InactiveManager(DomainComputerManager):
     def get_queryset(self):
-        return super(InactiveManager, self).get_queryset().exclude(
-            status__in=Computer.ACTIVE_STATUS
-        )
+        return super().get_queryset().exclude(status__in=Computer.ACTIVE_STATUS)
 
     def scope(self, user):
-        return super(InactiveManager, self).scope(user).exclude(
-            status__in=Computer.ACTIVE_STATUS
-        )
+        return super().scope(user).exclude(status__in=Computer.ACTIVE_STATUS)
 
 
 class ComputerManager(DomainComputerManager):
@@ -331,7 +307,9 @@ class Computer(models.Model, MigasLink):
         ).annotate(
             year=ExtractYear('created_at'),
             month=ExtractMonth('created_at')
-        ).order_by('year', 'month', field).values('year', 'month', field).annotate(
+        ).order_by('year', 'month', field).values(
+            'year', 'month', field
+        ).annotate(
             count=Count('id')
         ))
 
@@ -760,8 +738,8 @@ class Computer(models.Model, MigasLink):
 
     class Meta:
         app_label = 'client'
-        verbose_name = _("Computer")
-        verbose_name_plural = _("Computers")
+        verbose_name = 'Computer'
+        verbose_name_plural = 'Computers'
 
 
 from .status_log import StatusLog

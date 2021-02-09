@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from .event import Event
 
 class DomainStatusLogManager(models.Manager):
     def scope(self, user):
-        qs = super(DomainStatusLogManager, self).get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             qs = qs.filter(computer_id__in=user.get_computers())
 
@@ -105,5 +105,5 @@ class StatusLog(Event):
 
     class Meta:
         app_label = 'client'
-        verbose_name = _("Status Log")
-        verbose_name_plural = _("Status Logs")
+        verbose_name = 'Status Log'
+        verbose_name_plural = 'Status Logs'

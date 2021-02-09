@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2018-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -148,12 +148,12 @@ class Domain(models.Model, MigasLink):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.name = slugify(self.name).upper()
-        super(Domain, self).save(force_insert, force_update, using, update_fields)
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
         app_label = 'core'
-        verbose_name = _('Domain')
-        verbose_name_plural = _('Domains')
+        verbose_name = 'Domain'
+        verbose_name_plural = 'Domains'
 
 
 @receiver(post_save, sender=Domain)

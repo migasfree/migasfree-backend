@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -65,11 +65,11 @@ class Model(models.Model, MigasLink):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.name = self.name.replace(" ", "_")
-        super(Model, self).save(force_insert, force_update, using, update_fields)
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
         app_label = 'device'
-        verbose_name = _("Model")
-        verbose_name_plural = _("Models")
-        unique_together = (("device_type", "manufacturer", "name"),)
+        verbose_name = 'Model'
+        verbose_name_plural = 'Models'
+        unique_together = (('device_type', 'manufacturer', 'name'),)
         ordering = ['manufacturer', 'name']

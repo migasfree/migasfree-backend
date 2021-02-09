@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ from ...core.models import Attribute, UserProfile, MigasLink
 
 class DomainFaultDefinitionManager(models.Manager):
     def scope(self, user):
-        qs = super(DomainFaultDefinitionManager, self).get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             user_attributes = user.get_attributes()
             qs = qs.filter(included_attributes__id__in=user_attributes)
@@ -125,13 +125,13 @@ class FaultDefinition(models.Model, MigasLink):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.code = self.code.replace("\r\n", "\n")
 
-        super(FaultDefinition, self).save(force_insert, force_update, using, update_fields)
+        super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.name
 
     class Meta:
         app_label = 'client'
-        verbose_name = _("Fault Definition")
-        verbose_name_plural = _("Fault Definitions")
+        verbose_name = 'Fault Definition'
+        verbose_name_plural = 'Fault Definitions'
         ordering = ['name']

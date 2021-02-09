@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ class PackageSet(models.Model, MigasLink):
     )
 
     def clean(self):
-        super(PackageSet, self).clean()
+        super().clean()
 
         if not hasattr(self, 'project'):
             return False
@@ -73,5 +73,5 @@ class PackageSet(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = _("Package Set")
-        verbose_name_plural = _("Package Sets")
+        verbose_name = 'Package Set'
+        verbose_name_plural = 'Package Sets'

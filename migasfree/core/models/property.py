@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,16 +25,12 @@ from .migas_link import MigasLink
 
 class ClientPropertyManager(models.Manager):
     def get_queryset(self):
-        return super(ClientPropertyManager, self).get_queryset().filter(
-            sort__in=['client', 'basic']
-        )
+        return super().get_queryset().filter(sort__in=['client', 'basic'])
 
 
 class ServerPropertyManager(models.Manager):
     def get_queryset(self):
-        return super(ServerPropertyManager, self).get_queryset().filter(
-            sort='server'
-        )
+        return super().get_queryset().filter(sort='server')
 
 
 class Property(models.Model, MigasLink):
@@ -113,7 +109,7 @@ class Property(models.Model, MigasLink):
     def delete(self, using=None, keep_parents=False):
         # Not allowed delete basic properties
         if self.sort != 'basic':
-            return super(Property, self).delete(using, keep_parents)
+            return super().delete(using, keep_parents)
 
     @staticmethod
     def enabled_client_properties():
@@ -129,8 +125,8 @@ class Property(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = _("Property")
-        verbose_name_plural = _("Properties")
+        verbose_name = 'Property'
+        verbose_name_plural = 'Properties'
         ordering = ['name']
 
 
@@ -140,11 +136,11 @@ class ServerProperty(Property):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.sort = 'server'
         self.code = ''
-        super(ServerProperty, self).save(force_insert, force_update, using, update_fields)
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
-        verbose_name = _("Stamp")
-        verbose_name_plural = _("Stamps")
+        verbose_name = 'Stamp'
+        verbose_name_plural = 'Stamps'
         proxy = True
 
 
@@ -154,11 +150,11 @@ class ClientProperty(Property):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.sort = 'client'
         self.code = self.code.replace("\r\n", "\n")
-        super(ClientProperty, self).save(force_insert, force_update, using, update_fields)
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
-        verbose_name = _("Formula")
-        verbose_name_plural = _("Formulas")
+        verbose_name = 'Formula'
+        verbose_name_plural = 'Formulas'
         proxy = True
 
 
@@ -166,9 +162,9 @@ class BasicProperty(Property):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.sort = 'basic'
         self.code = self.code.replace("\r\n", "\n")
-        super(BasicProperty, self).save(force_insert, force_update, using, update_fields)
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
-        verbose_name = _("Basic Property")
-        verbose_name_plural = _("Basic Properties")
+        verbose_name = 'Basic Property'
+        verbose_name_plural = 'Basic Properties'
         proxy = True

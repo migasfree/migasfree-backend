@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2018-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class ScopeManager(models.Manager):
         return obj
 
     def scope(self, user):
-        qs = super(ScopeManager, self).get_queryset()
+        qs = super().get_queryset()
         qs = qs.filter(user=user)
         if user.domain_preference:
             qs = qs.filter(domain=user.domain_preference)
@@ -127,15 +127,14 @@ class Scope(models.Model, MigasLink):
         ).exists():
             raise ValidationError(_("Duplicated name"))
 
-        super(Scope, self).validate_unique(exclude)
+        super().validate_unique(exclude)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.name = slugify(self.name)
-        super(Scope, self).save(force_insert, force_update, using, update_fields)
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
         app_label = 'core'
-        verbose_name = _('Scope')
-        verbose_name_plural = _('Scopes')
+        verbose_name = 'Scope'
+        verbose_name_plural = 'Scopes'
         unique_together = (('name', 'domain', 'user'),)
-

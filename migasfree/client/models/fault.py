@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from .fault_definition import FaultDefinition
 
 class DomainFaultManager(models.Manager):
     def scope(self, user):
-        qs = super(DomainFaultManager, self).get_queryset()
+        qs = super().get_queryset()
         if user and not user.is_view_all():
             qs = qs.filter(
                 project_id__in=user.get_projects(),
@@ -40,12 +40,10 @@ class DomainFaultManager(models.Manager):
 
 class UncheckedManager(DomainFaultManager):
     def get_queryset(self):
-        return super(UncheckedManager, self).get_queryset().filter(
-            checked=0
-        )
+        return super().get_queryset().filter(checked=0)
 
     def scope(self, user):
-        qs = super(UncheckedManager, self).scope(user).filter(checked=0)
+        qs = super().scope(user).filter(checked=0)
 
         if user:
             qs = qs.filter(models.Q(fault_definition__users__id__in=[user.id, ])
@@ -155,5 +153,5 @@ class Fault(Event):
 
     class Meta:
         app_label = 'client'
-        verbose_name = _("Fault")
-        verbose_name_plural = _("Faults")
+        verbose_name = 'Fault'
+        verbose_name_plural = 'Faults'

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -64,17 +64,15 @@ class Driver(models.Model, MigasLink):
         }
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.packages_to_install = self.packages_to_install.replace(
-            "\r\n", "\n"
-        )
-        super(Driver, self).save(force_insert, force_update, using, update_fields)
+        self.packages_to_install = self.packages_to_install.replace("\r\n", "\n")
+        super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.name.split('/')[-1] if self.name else ''
 
     class Meta:
         app_label = 'device'
-        verbose_name = _("Driver")
-        verbose_name_plural = _("Drivers")
-        unique_together = (("model", "project", "capability"),)
+        verbose_name = 'Driver'
+        verbose_name_plural = 'Drivers'
+        unique_together = (('model', 'project', 'capability'),)
         ordering = ['model', 'name']

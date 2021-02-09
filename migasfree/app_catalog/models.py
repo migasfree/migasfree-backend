@@ -56,7 +56,7 @@ class PackagesByProjectManager(DomainPackagesByProjectManager):
 class MediaFileSystemStorage(FileSystemStorage):
     def get_available_name(self, name, max_length=None):
         if max_length and len(name) > max_length:
-            raise Exception("name's length is greater than max_length")
+            raise Exception(_("name's length is greater than max length"))
 
         return name
 
@@ -64,7 +64,7 @@ class MediaFileSystemStorage(FileSystemStorage):
         if self.exists(name):
             os.remove(os.path.join(settings.MIGASFREE_PUBLIC_DIR, name))
 
-        return super(MediaFileSystemStorage, self)._save(name, content)
+        return super()._save(name, content)
 
 
 def upload_path_handler(instance, filename):
@@ -147,8 +147,8 @@ class Application(models.Model, MigasLink):
 
     class Meta:
         app_label = 'app_catalog'
-        verbose_name = _('Application')
-        verbose_name_plural = _('Applications')
+        verbose_name = 'Application'
+        verbose_name_plural = 'Applications'
 
 
 class PackagesByProject(models.Model, MigasLink):
@@ -177,8 +177,8 @@ class PackagesByProject(models.Model, MigasLink):
 
     class Meta:
         app_label = 'app_catalog'
-        verbose_name = _('Packages by Project')
-        verbose_name_plural = _('Packages by Projects')
+        verbose_name = 'Packages by Project'
+        verbose_name_plural = 'Packages by Projects'
         unique_together = (('application', 'project'),)
         ordering = ['application__id', 'project__name']
 
@@ -292,8 +292,8 @@ class Policy(models.Model, MigasLink):
 
     class Meta:
         app_label = 'app_catalog'
-        verbose_name = _('Policy')
-        verbose_name_plural = _('Policies')
+        verbose_name = 'Policy'
+        verbose_name_plural = 'Policies'
         unique_together = ('name',)
         ordering = ['name']
 
@@ -334,8 +334,8 @@ class PolicyGroup(models.Model, MigasLink):
 
     class Meta:
         app_label = 'app_catalog'
-        verbose_name = _('Policy Group')
-        verbose_name_plural = _('Policy Groups')
+        verbose_name = 'Policy Group'
+        verbose_name_plural = 'Policy Groups'
         unique_together = (('policy', 'priority'),)
         ordering = ['policy__name', 'priority']
 

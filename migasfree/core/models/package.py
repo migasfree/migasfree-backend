@@ -22,8 +22,8 @@ import shutil
 from importlib import import_module
 
 from django.db import models
-from django.db.models.signals import pre_delete
 from django.db.models.aggregates import Count
+from django.db.models.signals import pre_delete
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
@@ -245,8 +245,8 @@ class Package(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = _('Package')
-        verbose_name_plural = _('Packages')
+        verbose_name = 'Package'
+        verbose_name_plural = 'Packages'
         unique_together = (('fullname', 'project'),)
 
 

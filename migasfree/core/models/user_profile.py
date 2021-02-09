@@ -16,17 +16,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.db import models, connection
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.conf import settings
-from django.core.exceptions import PermissionDenied
-from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import (
     User as UserSystem,
     UserManager,
     Group,
 )
+from django.core.exceptions import PermissionDenied
+from django.db import models, connection
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.models import Token
 
 from .migas_link import MigasLink
@@ -229,8 +229,8 @@ SELECT ARRAY(
 
     class Meta:
         app_label = 'core'
-        verbose_name = _('User Profile')
-        verbose_name_plural = _('User Profiles')
+        verbose_name = 'User Profile'
+        verbose_name_plural = 'User Profiles'
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ from .migas_link import MigasLink
 
 class DomainPlatformManager(models.Manager):
     def scope(self, user):
-        qs = super(DomainPlatformManager, self).get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects()).distinct()
 
@@ -71,6 +71,6 @@ class Platform(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = _('Platform')
-        verbose_name_plural = _('Platforms')
+        verbose_name = 'Platform'
+        verbose_name_plural = 'Platforms'
         ordering = ['name']
