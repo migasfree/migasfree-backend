@@ -131,7 +131,9 @@ class AttributeFilter(filters.FilterSet):
             'property_att__prefix': ['exact'],
             'value': ['exact', 'icontains'],
             'description': ['icontains'],
-            'property_att__sort': ['exact']
+            'property_att__sort': ['exact'],
+            'attributeset__id': ['exact'],
+            'faultdefinition__id': ['exact'],
         }
 
 
@@ -145,6 +147,8 @@ class ClientAttributeFilter(filters.FilterSet):
             'value': ['exact', 'icontains'],
             'description': ['icontains'],
             'property_att__sort': ['exact'],
+            'attributeset__id': ['exact'],
+            'faultdefinition__id': ['exact'],
         }
 
 
@@ -158,6 +162,8 @@ class ServerAttributeFilter(filters.FilterSet):
             'value': ['exact', 'icontains'],
             'description': ['icontains'],
             'property_att__sort': ['exact'],
+            'attributeset__id': ['exact'],
+            'faultdefinition__id': ['exact'],
         }
 
 
@@ -194,6 +200,7 @@ class UserProfileFilter(filters.FilterSet):
             'username': ['exact', 'icontains'],
             'first_name': ['exact', 'icontains'],
             'last_name': ['exact', 'icontains'],
+            'faultdefinition__id': ['exact'],
         }
 
 
