@@ -81,10 +81,20 @@ class DeviceInfoSerializer(serializers.ModelSerializer):
 
 
 class DeviceWriteSerializer(serializers.ModelSerializer):
+    def to_internal_value(self, data):
+        if 'data' in data:
+            data['data'] = json.dumps(data.get('data', {}))
+
+        return super().to_internal_value(data)
+
     def to_representation(self, obj):
         representation = super().to_representation(obj)
 
         representation['connection'] = ConnectionInfoSerializer(obj.connection).data
+        representation['model'] = ModelInfoSerializer(obj.model).data
+
+        if obj.data:
+            representation['data'] = json.loads(obj.data)
 
         representation['available_for_attributes'] = []
         for item in obj.available_for_attributes.all():
@@ -136,7 +146,7 @@ class DriverWriteSerializer(serializers.ModelSerializer):
         if 'packages_to_install' in data:
             data['packages_to_install'] = '\n'.join(data.get('packages_to_install', []))
 
-        return super(DriverWriteSerializer, self).to_internal_value(data)
+        return super().to_internal_value(data)
 
     class Meta:
         model = models.Driver
