@@ -145,6 +145,7 @@ class FaultDefinitionFilter(filters.FilterSet):
             'enabled': ['exact'],
             'included_attributes__id': ['exact'],
             'excluded_attributes__id': ['exact'],
+            'users__id': ['exact'],
         }
 
 
