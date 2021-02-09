@@ -255,6 +255,8 @@ class SynchronizationFilter(filters.FilterSet):
             'project__platform__id': ['exact'],
             'computer__id': ['exact'],
             'computer__name': ['icontains'],
+            'user__id': ['exact'],
+            'user__name': ['icontains'],
             'pms_status_ok': ['exact'],
             'consumer': ['icontains']
         }
