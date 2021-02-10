@@ -232,6 +232,7 @@ class NotificationWriteSerializer(serializers.ModelSerializer):
 
 class PackageHistorySerializer(serializers.ModelSerializer):
     package = PackageInfoSerializer(many=False, read_only=True)
+    computer = ComputerInfoSerializer(many=False, read_only=True)
 
     class Meta:
         model = models.PackageHistory
