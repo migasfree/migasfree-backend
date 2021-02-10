@@ -42,6 +42,7 @@ class ConnectionFilter(filters.FilterSet):
             'name': ['exact', 'icontains'],
             'device_type__id': ['exact'],
             'device_type__name': ['exact', 'icontains'],
+            'model__id': ['exact'],
         }
 
 
@@ -101,6 +102,7 @@ class LogicalFilter(filters.FilterSet):
             'device__model__id': ['exact'],
             'capability__id': ['exact'],
             'capability__name': ['exact', 'icontains'],
+            'attributes__id': ['exact'],
         }
 
 
@@ -114,4 +116,5 @@ class ModelFilter(filters.FilterSet):
             'manufacturer__name': ['exact', 'icontains'],
             'device_type__id': ['exact'],
             'device_type__name': ['exact', 'icontains'],
+            'connections__id': ['exact'],
         }
