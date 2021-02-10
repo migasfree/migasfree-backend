@@ -165,12 +165,12 @@ class MigasLink(object):
             count = rel_objects.count()
 
             if count:
-                related_link = reverse(
-                    'admin:{}_{}_changelist'.format(
-                        obj.remote_field.model._meta.app_label,
-                        _name
-                    )
-                )
+                #related_link = reverse(
+                #    'admin:{}_{}_changelist'.format(
+                #        obj.remote_field.model._meta.app_label,
+                #        _name
+                #    )
+                #)
 
                 actions = []
                 if _name in settings.MIGASFREE_EXTERNAL_ACTIONS:
@@ -203,7 +203,7 @@ class MigasLink(object):
                         'model': obj.remote_field.model._meta.verbose_name_plural.lower(),
                         'query': {
                             '{}__id'.format(
-                                obj.remote_field.name if _name != 'serverattribute' else 'computer'
+                                obj.remote_field.name if _name != 'serverattribute' else 'tags'
                             ): self.pk
                         }
                     },
@@ -223,7 +223,6 @@ class MigasLink(object):
                         related_model._meta.model_name,
                         _field
                     ) in self._exclude_links:
-
                         if hasattr(related_model.objects, 'scope'):
                             if related_model.__name__.lower() == 'computer':
                                 rel_objects = related_model.productive.scope(user).filter(
@@ -344,11 +343,17 @@ class MigasLink(object):
 
                     if self._meta.model_name.lower() == 'platform':
                         data.append({
-                            'url': '{}?{}={}'.format(
-                                '/admin/server/{}/'.format('computer'),
-                                'project__platform__id__exact',
-                                str(self.id)
-                            ),
+                            #'url': '{}?{}={}'.format(
+                            #    '/admin/server/{}/'.format('computer'),
+                            #    'project__platform__id__exact',
+                            #    str(self.id)
+                            #),
+                            'api': {
+                                'model': 'computers',
+                                'query': {
+                                    'platform': self.id
+                                }
+                            },
                             'text': gettext(self.related_title(rel_objects)),
                             'count': rel_objects.count(),
                             'actions': actions
@@ -620,6 +625,7 @@ class MigasLink(object):
         from ...client.models import Computer
         from . import ClientAttribute, ServerAttribute
 
+        # print(obj.related_model._meta.label_lower, self.__class__.__name__)
         if obj.related_model._meta.label_lower == 'client.computer' and \
                 self.__class__.__name__ in ['ClientAttribute', 'Attribute'] and \
                 self.property_att.prefix == 'CID':
