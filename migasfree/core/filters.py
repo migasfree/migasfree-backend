@@ -183,6 +183,7 @@ class ServerAttributeFilter(filters.FilterSet):
             'deployment__id': ['exact'],
             'application__id': ['exact'],
             'computer__id': ['exact'],
+            'tags__id': ['exact'],
         }
 
 
