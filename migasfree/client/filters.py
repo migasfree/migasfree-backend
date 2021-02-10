@@ -109,12 +109,14 @@ class ComputerFilter(filters.FilterSet):
             'status': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'uuid': ['exact'],
-            'sync_attributes__id': ['exact'],
+            'sync_attributes__id': ['exact', 'in'],
             'tags__id': ['exact'],
             'machine': ['exact'],
+            'sync_user__id': ['exact'],
             'sync_user__name': ['exact', 'icontains'],
             'sync_end_date': ['lt', 'gte', 'isnull'],
             'product': ['exact', 'icontains'],
+            'default_logical_device__id': ['exact'],
         }
 
 
