@@ -33,6 +33,8 @@ class AttributeSetFilter(filters.FilterSet):
             'id': ['exact'],
             'name': ['exact', 'icontains'],
             'enabled': ['exact'],
+            'included_attributes__id': ['exact'],
+            'excluded_attributes__id': ['exact'],
         }
 
 
@@ -74,7 +76,8 @@ class PackageFilter(filters.FilterSet):
             'deployment': ['isnull'],
             'deployment__id': ['exact'],
             'store': ['isnull'],
-            'store__id': ['exact']
+            'store__id': ['exact'],
+            'packageset__id': ['exact'],
         }
 
 
@@ -85,7 +88,8 @@ class PackageSetFilter(filters.FilterSet):
             'id': ['exact'],
             'name': ['exact', 'icontains'],
             'project__id': ['exact'],
-            'store__id': ['exact']
+            'store__id': ['exact'],
+            'packages__id': ['exact'],
         }
 
 
@@ -134,6 +138,11 @@ class AttributeFilter(filters.FilterSet):
             'property_att__sort': ['exact'],
             'attributeset__id': ['exact'],
             'faultdefinition__id': ['exact'],
+            'device__id': ['exact'],
+            'logical__id': ['exact'],
+            'deployment__id': ['exact'],
+            'application__id': ['exact'],
+            'computer__id': ['exact'],
         }
 
 
@@ -149,6 +158,11 @@ class ClientAttributeFilter(filters.FilterSet):
             'property_att__sort': ['exact'],
             'attributeset__id': ['exact'],
             'faultdefinition__id': ['exact'],
+            'device__id': ['exact'],
+            'logical__id': ['exact'],
+            'deployment__id': ['exact'],
+            'application__id': ['exact'],
+            'computer__id': ['exact'],
         }
 
 
@@ -164,6 +178,11 @@ class ServerAttributeFilter(filters.FilterSet):
             'property_att__sort': ['exact'],
             'attributeset__id': ['exact'],
             'faultdefinition__id': ['exact'],
+            'device__id': ['exact'],
+            'logical__id': ['exact'],
+            'deployment__id': ['exact'],
+            'application__id': ['exact'],
+            'computer__id': ['exact'],
         }
 
 
@@ -201,6 +220,7 @@ class UserProfileFilter(filters.FilterSet):
             'first_name': ['exact', 'icontains'],
             'last_name': ['exact', 'icontains'],
             'faultdefinition__id': ['exact'],
+            'domains__id': ['exact'],
         }
 
 
