@@ -70,10 +70,11 @@ from .serializers import (
     ScheduleSerializer, ScheduleWriteSerializer,
     ScheduleDelaySerializer, ScheduleDelayWriteSerializer,
     PackageSerializer, PackageSetSerializer, PackageSetWriteSerializer,
-    DeploymentSerializer, DeploymentWriteSerializer,
+    DeploymentSerializer, DeploymentWriteSerializer, DeploymentListSerializer,
     DomainWriteSerializer, DomainSerializer,
     ScopeSerializer, ScopeWriteSerializer,
-    UserProfileSerializer, UserProfileWriteSerializer, ChangePasswordSerializer,
+    UserProfileSerializer, UserProfileWriteSerializer,
+    ChangePasswordSerializer, UserProfileListSerializer,
     GroupSerializer, GroupWriteSerializer, PermissionSerializer,
     AttributeSetSerializer, AttributeSetWriteSerializer,
     PropertySerializer, PropertyWriteSerializer,
@@ -159,6 +160,20 @@ class AttributeSetViewSet(viewsets.ModelViewSet, MigasViewSet):
             return AttributeSetWriteSerializer
 
         return AttributeSetSerializer
+
+    def get_queryset(self):
+        if self.request is None:
+            return AttributeSet.objects.none()
+
+        user = self.request.user.userprofile
+        qs = self.queryset.prefetch_related(
+            'included_attributes__property_att',
+            'excluded_attributes__property_att',
+        )
+        if not user.is_view_all():
+            qs = qs.filter(id__in=user.get_attributes()).distinct()
+
+        return qs
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -315,6 +330,17 @@ class ServerAttributeViewSet(viewsets.ModelViewSet, MigasViewSet):
 
         return ServerAttributeSerializer
 
+    def get_queryset(self):
+        if self.request is None:
+            return ServerAttribute.objects.none()
+
+        user = self.request.user.userprofile
+        qs = self.queryset.select_related('property_att')
+        if not user.is_view_all():
+            qs = qs.filter(id__in=user.get_attributes()).distinct()
+
+        return qs
+
     @action(methods=['get', 'patch'], detail=True)
     def computers(self, request, pk=None):
         tag = self.get_object()
@@ -461,6 +487,16 @@ class ScheduleDelayViewSet(viewsets.ModelViewSet, MigasViewSet):
 
         return ScheduleDelaySerializer
 
+    def get_queryset(self):
+        if self.request is None:
+            return ScheduleDelay.objects.none()
+
+        qs = self.queryset.prefetch_related(
+            'attributes__property_att', 'schedule'
+        )
+
+        return qs
+
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class ScheduleViewSet(viewsets.ModelViewSet, MigasViewSet):
@@ -477,6 +513,14 @@ class ScheduleViewSet(viewsets.ModelViewSet, MigasViewSet):
             return ScheduleWriteSerializer
 
         return ScheduleSerializer
+
+    def get_queryset(self):
+        if self.request is None:
+            return Schedule.objects.none()
+
+        qs = self.queryset.prefetch_related('delays')
+
+        return qs
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -667,6 +711,9 @@ class DeploymentViewSet(viewsets.ModelViewSet, MigasViewSet):
                 or self.action == 'partial_update':
             return DeploymentWriteSerializer
 
+        if self.action == 'list':
+            return DeploymentListSerializer
+
         return DeploymentSerializer
 
     def get_queryset(self):
@@ -674,7 +721,7 @@ class DeploymentViewSet(viewsets.ModelViewSet, MigasViewSet):
             return Deployment.objects.none()
 
         user = self.request.user.userprofile
-        qs = self.queryset.select_related('project', 'schedule')
+        qs = self.queryset.select_related('project', 'schedule', 'domain')
         if not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects())
             if user.domain_preference:
@@ -780,7 +827,24 @@ class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet):
                 or self.action == 'partial_update':
             return UserProfileWriteSerializer
 
+        if self.action == 'list':
+            return UserProfileListSerializer
+
         return UserProfileSerializer
+
+    def get_queryset(self):
+        if self.request is None:
+            return UserProfile.objects.none()
+
+        qs = self.queryset.select_related(
+            'domain_preference', 'scope_preference'
+        ).prefetch_related(
+            'domains',
+            'groups',
+            'user_permissions',
+        )
+
+        return qs
 
     @action(methods=['get'], detail=False, url_path='domain-admins')
     def domain_admins(self, request, format=None):
@@ -860,6 +924,20 @@ class DomainViewSet(viewsets.ModelViewSet, MigasViewSet):
 
         return DomainSerializer
 
+    def get_queryset(self):
+        if self.request is None:
+            return Domain.objects.none()
+
+        qs = self.queryset.prefetch_related(
+            'included_attributes',
+            'included_attributes__property_att',
+            'excluded_attributes',
+            'excluded_attributes__property_att',
+            'tags',
+        )
+
+        return qs
+
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class ScopeViewSet(viewsets.ModelViewSet, MigasViewSet):
@@ -876,6 +954,21 @@ class ScopeViewSet(viewsets.ModelViewSet, MigasViewSet):
             return ScopeWriteSerializer
 
         return ScopeSerializer
+
+    def get_queryset(self):
+        if self.request is None:
+            return Scope.objects.none()
+
+        qs = self.queryset.select_related(
+            'domain', 'user'
+        ).prefetch_related(
+            'included_attributes',
+            'included_attributes__property_att',
+            'excluded_attributes',
+            'excluded_attributes__property_att',
+        )
+
+        return qs
 
 
 @permission_classes((permissions.AllowAny,))
