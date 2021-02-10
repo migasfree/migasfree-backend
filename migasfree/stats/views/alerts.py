@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2020-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2020-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+import json
 
 from rest_framework.response import Response
 from rest_framework import viewsets, status, permissions
@@ -40,5 +42,8 @@ class AlertsViewSet(viewsets.ViewSet):
             decode_dict(con.hgetall('migasfree:chk:faults')),
             decode_dict(con.hgetall('migasfree:chk:errors')),
         ]
+
+        for item in response:
+            item['api'] = json.loads(item['api'])
 
         return Response(response, status=status.HTTP_200_OK)
