@@ -43,6 +43,7 @@ from rest_framework.response import Response
 from .mixins import SafeConnectionMixin
 
 from ..client.models import Computer
+from ..client.resources import ComputerResource
 from ..client.serializers import ComputerInfoSerializer
 from ..device.models import Logical
 from ..device.serializers import LogicalSerializer
