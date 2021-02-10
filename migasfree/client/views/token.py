@@ -71,6 +71,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         user = self.request.user.userprofile
         qs = self.queryset.select_related(
             'project',
+            'project__platform',
             'sync_user',
             'default_logical_device',
             'default_logical_device__capability',
@@ -496,6 +497,8 @@ class ErrorViewSet(
         qs = self.queryset.select_related(
             'project',
             'computer',
+            'computer__project',
+            'computer__sync_user',
         )
         if not user.is_view_all():
             qs = qs.filter(
@@ -521,6 +524,20 @@ class FaultDefinitionViewSet(viewsets.ModelViewSet, MigasViewSet):
             return serializers.FaultDefinitionWriteSerializer
 
         return serializers.FaultDefinitionSerializer
+
+    def get_queryset(self):
+        if self.request is None:
+            return models.FaultDefinition.objects.none()
+
+        qs = self.queryset.prefetch_related(
+            'included_attributes',
+            'included_attributes__property_att',
+            'excluded_attributes',
+            'excluded_attributes__property_att',
+            'users',
+        )
+
+        return qs
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -551,6 +568,8 @@ class FaultViewSet(
             'project',
             'fault_definition',
             'computer',
+            'computer__project',
+            'computer__sync_user',
         )
         if not user.is_view_all():
             qs = qs.filter(
@@ -590,6 +609,8 @@ class MigrationViewSet(
         qs = self.queryset.select_related(
             'project',
             'computer',
+            'computer__project',
+            'computer__sync_user',
         )
         if not user.is_view_all():
             qs = qs.filter(
@@ -628,8 +649,25 @@ class PackageHistoryViewSet(
     queryset = models.PackageHistory.objects.all()
     serializer_class = serializers.PackageHistorySerializer
     filterset_class = PackageHistoryFilter
+    search_fields = ['computer__name', 'package__fullname']
     ordering_fields = '__all__'
-    ordering = ('computer', 'package__fullname',)
+    ordering = ('computer__name', 'package__fullname',)
+
+    def get_queryset(self):
+        if self.request is None:
+            return models.PackageHistory.objects.none()
+
+        user = self.request.user.userprofile
+        qs = self.queryset.select_related(
+            'computer',
+            'package',
+            'computer__project',
+            'computer__sync_user',
+        )
+        if not user.is_view_all():
+            qs = qs.filter(computer_id__in=user.get_computers())
+
+        return qs
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -651,7 +689,7 @@ class StatusLogViewSet(
 
         user = self.request.user.userprofile
         qs = self.queryset.select_related(
-            'computer',
+            'computer', 'computer__project', 'computer__sync_user'
         )
         if not user.is_view_all():
             qs = qs.filter(computer_id__in=user.get_computers())
@@ -686,6 +724,8 @@ class SynchronizationViewSet(
         user = self.request.user.userprofile
         qs = self.queryset.select_related(
             'computer',
+            'computer__project',
+            'computer__sync_user',
             'project',
             'user',
         )
