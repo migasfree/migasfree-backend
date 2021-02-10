@@ -71,7 +71,9 @@ class HardwareViewSet(
             return Node.objects.none()
 
         user = self.request.user.userprofile
-        qs = self.queryset
+        qs = self.queryset.select_related(
+            'computer', 'computer__project', 'computer__sync_user'
+        )
         if not user.is_view_all():
             qs = qs.filter(computer_id__in=user.get_computers())
 
