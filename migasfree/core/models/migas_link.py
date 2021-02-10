@@ -356,30 +356,49 @@ class MigasLink(object):
                     elif self._meta.model_name.lower() == 'device':
                         from .attribute import Attribute
                         data.append({
-                            'url': '{}?{}={}&status__in=intended,reserved,unknown'.format(
-                                '/admin/server/{}/'.format('computer'),
-                                'sync_attributes__id__in',
-                                str(list(
-                                    Attribute.objects.scope(
-                                        request.user.userprofile
-                                    ).filter(
-                                        logical__device__id=self.id
-                                    ).values_list('id', flat=True)
-                                )).replace(" ", "").replace("[", "").replace("]", "")
-                            ),
+                            #'url': '{}?{}={}&status__in=intended,reserved,unknown'.format(
+                            #    '/admin/server/{}/'.format('computer'),
+                            #    'sync_attributes__id__in',
+                            #    str(list(
+                            #        Attribute.objects.scope(
+                            #            request.user.userprofile
+                            #        ).filter(
+                            #            logical__device__id=self.id
+                            #        ).values_list('id', flat=True)
+                            #    )).replace(" ", "").replace("[", "").replace("]", "")
+                            #),
+                            'api': {
+                                'model': 'computers',
+                                'query': {
+                                    'sync_attributes__id__in': ','.join(map(str, list(
+                                        Attribute.objects.scope(
+                                            request.user.userprofile
+                                        ).filter(
+                                            logical__device__id=self.id
+                                        ).values_list('id', flat=True)))
+                                    ),
+                                    'status__in': 'intended,reserved,unknown'
+                                }
+                            },
                             'text': gettext(self.related_title(rel_objects)),
                             'count': rel_objects.count(),
                             'actions': actions
                         })
                     else:
                         data.append({
-                            'url': '{}?{}={}'.format(
-                                '/admin/server/{}/'.format('computer'),
-                                'id__in',
-                                str(list(
-                                    rel_objects.values_list('id', flat=True)
-                                )).replace(" ", "").replace("[", "").replace("]", "")
-                            ),
+                            #'url': '{}?{}={}'.format(
+                            #    '/admin/server/{}/'.format('computer'),
+                            #    'id__in',
+                            #    str(list(
+                            #        rel_objects.values_list('id', flat=True)
+                            #    )).replace(" ", "").replace("[", "").replace("]", "")
+                            #),
+                            'api': {
+                                'model': 'computers',
+                                'query': {
+                                    'id__in': ','.join(map(str, list(rel_objects.values_list('id', flat=True))))
+                                }
+                            },
                             'text': gettext(self.related_title(rel_objects)),
                             'count': rel_objects.count(),
                             'actions': actions
