@@ -220,12 +220,15 @@ class NotificationFilter(filters.FilterSet):
 
 
 class PackageHistoryFilter(filters.FilterSet):
-    computer = filters.CharFilter(field_name='computer__name', lookup_expr='contains')
-    package = filters.CharFilter(field_name='package__fullname', lookup_expr='contains')
-
     class Meta:
         model = PackageHistory
-        fields = '__all__'
+        fields = {
+            'id': ['exact'],
+            'computer__id': ['exact'],
+            'computer__name': ['exact', 'icontains'],
+            'package__id': ['exact'],
+            'package__fullname': ['icontains'],
+        }
 
 
 class StatusLogFilter(filters.FilterSet):
