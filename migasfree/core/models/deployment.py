@@ -401,7 +401,7 @@ class Deployment(models.Model, MigasLink):
                                 ).filter(
                                     Q(sync_attributes__id__in=delay_attributes)
                                 ).extra(
-                                    where=['mod(server_computer.id, {}) = {}'.format(delay.duration, duration)]
+                                    where=['MOD(client_computer.id, {}) = {}'.format(delay.duration, duration)]
                                 )
                                 computers = (computers | computers_schedule)
                             else:
