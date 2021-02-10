@@ -412,6 +412,21 @@ class DomainInfoSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
+class DeploymentListSerializer(serializers.ModelSerializer):
+    project = ProjectInfoSerializer(many=False, read_only=True)
+    domain = DomainInfoSerializer(many=False, read_only=True)
+    schedule = ScheduleInfoSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Deployment
+        fields = (
+            'id', 'project', 'domain',
+            'schedule', 'source',
+            'name', 'comment',
+            'start_date', 'enabled',
+        )
+
+
 class DeploymentSerializer(serializers.ModelSerializer):
     project = ProjectInfoSerializer(many=False, read_only=True)
     domain = DomainInfoSerializer(many=False, read_only=True)
@@ -831,6 +846,22 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
         fields = UserDetailsSerializer.Meta.fields + (
             'domains', 'domain_preference', 'scope_preference',
             'groups', 'user_permissions', 'is_superuser', 'is_staff',
+            'is_active', 'last_login', 'date_joined', 'id',
+        )
+
+
+class UserProfileListSerializer(UserDetailsSerializer):
+    domain_preference = DomainInfoSerializer(
+        many=False, read_only=True, source='userprofile.domain_preference'
+    )
+    scope_preference = ScopeInfoSerializer(
+        many=False, read_only=True, source='userprofile.scope_preference'
+    )
+
+    class Meta(UserDetailsSerializer.Meta):
+        fields = UserDetailsSerializer.Meta.fields + (
+            'domain_preference', 'scope_preference',
+            'is_superuser', 'is_staff',
             'is_active', 'last_login', 'date_joined', 'id',
         )
 
