@@ -29,10 +29,52 @@ from ...utils import escape_format_string
 class MigasLink(object):
     PROTOCOL = 'mea'
 
+    ROUTES = {
+        'auth.group': 'groups',
+        'app_catalog.application': 'catalog/applications',
+        'app_catalog.packagesbyproject': 'catalog/packages',
+        'app_catalog.policy': 'catalog/policies',
+        'app_catalog.policygroup': 'catalog/policy-groups',
+        'client.computer': 'computers',
+        'client.error': 'errors',
+        'client.faultdefinition': 'fault-definitions',
+        'client.fault': 'faults',
+        'client.migration': 'migrations',
+        'client.packagehistory': 'packages-history',
+        'client.statuslog': 'status-logs',
+        'client.synchronization': 'synchronizations',
+        'client.user': 'users',
+        'core.clientattribute': 'attributes',
+        'core.serverattribute': 'tags',
+        'core.attributeset': 'attribute-sets',
+        'core.domain': 'domains',
+        'core.deployment': 'deployments',
+        'core.packageset': 'package-sets',
+        'core.package': 'packages',
+        'core.platform': 'platforms',
+        'core.project': 'projects',
+        'core.clientproperty': 'formulas',
+        'core.serverproperty': 'stamps',
+        'core.scheduledelay': 'schedule-delays',
+        'core.schedule': 'schedules',
+        'core.scope': 'scopes',
+        'core.userprofile': 'user-profiles',
+        'device.capability': 'devices/capabilities',
+        'device.connection': 'devices/connections',
+        'device.driver': 'devices/drivers',
+        'device.logical': 'devices/logical',
+        'device.manufacturer': 'devices/manufacturers',
+        'device.model': 'devices/models',
+        'device.type': 'devices/types',
+    }
+
     def __init__(self):
         self._actions = None
         self._exclude_links = []
         self._include_links = []
+
+    def model_to_route(self, app, model):
+        return self.ROUTES.get('{}.{}'.format(app, model), '')
 
     @staticmethod
     def related_title(related_objects):
@@ -127,6 +169,8 @@ class MigasLink(object):
                         'description': self.get_description(element[action]),
                     })
 
+        # print(dir(self._meta), self._meta.model, self._meta.model_name, self._meta.object_name)
+        # print(self.model_to_route(self._meta.app_label, self._meta.model_name))
         data.append({
             #'url': reverse(
             #    'admin:{}_{}_changelist'.format(
@@ -134,7 +178,7 @@ class MigasLink(object):
             #        self._meta.model_name
             #    )
             #) + str(self.id),
-            'model': self._meta.verbose_name_plural.lower(),
+            'model': self.model_to_route(self._meta.app_label, self._meta.model_name),
             'pk': self.id,
             'text': '{} {}'.format(self._meta.verbose_name, self.__str__()),
             'count': 1,
@@ -200,7 +244,10 @@ class MigasLink(object):
                     #    self.pk
                     #),
                     'api': {
-                        'model': obj.remote_field.model._meta.verbose_name_plural.lower(),
+                        'model': self.model_to_route(
+                            obj.remote_field.model._meta.app_label,
+                            obj.remote_field.model._meta.model_name
+                        ),
                         'query': {
                             '{}__id'.format(
                                 obj.remote_field.name if _name != 'serverattribute' else 'tags'
@@ -277,7 +324,10 @@ class MigasLink(object):
                                     # ),
                                     'api': {
                                         # 'model': related_model.__name__.lower(),
-                                        'model': related_model._meta.verbose_name_plural.lower(),
+                                        'model': self.model_to_route(
+                                            related_model._meta.app_label,
+                                            related_model._meta.model_name
+                                        ),
                                         'query': {
                                             _field: self.id,
                                             'status__in': 'intended,reserved,unknown'
@@ -300,7 +350,10 @@ class MigasLink(object):
                                     # ),
                                     'api': {
                                         # 'model': related_model.__name__.lower(),
-                                        'model': related_model._meta.verbose_name_plural.lower(),
+                                        'model': self.model_to_route(
+                                            related_model._meta.app_label,
+                                            related_model._meta.model_name
+                                        ),
                                         'query': {
                                             _field: self.id
                                         }
@@ -426,7 +479,7 @@ class MigasLink(object):
                     #    self.id
                     #),
                     'api': {
-                        'model': self._meta.verbose_name_plural.lower(),
+                        'model': self.model_to_route(self._meta.app_label, self._meta.model_name),
                         'query': {
                             '{}__id'.format(_field_name): self.id
                         }
