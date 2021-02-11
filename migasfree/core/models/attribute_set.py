@@ -59,13 +59,14 @@ class AttributeSet(models.Model, MigasLink):
 
     included_attributes = models.ManyToManyField(
         Attribute,
+        related_name='attributeset_included',
         blank=True,
         verbose_name=_("included attributes"),
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
-        related_name="ExcludedAttributesGroup",
+        related_name='attributeset_excluded',
         blank=True,
         verbose_name=_("excluded attributes"),
     )
