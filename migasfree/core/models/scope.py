@@ -75,14 +75,14 @@ class Scope(models.Model, MigasLink):
 
     included_attributes = models.ManyToManyField(
         Attribute,
-        related_name='ScopeIncludedAttribute',
+        related_name='scope_included',
         blank=True,
         verbose_name=_('included attributes')
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
-        related_name='ScopeExcludedAttribute',
+        related_name='scope_excluded',
         blank=True,
         verbose_name=_('excluded attributes')
     )
