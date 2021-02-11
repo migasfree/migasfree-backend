@@ -240,6 +240,7 @@ class GroupFilter(filters.FilterSet):
         fields = {
             'id': ['exact'],
             'name': ['icontains'],
+            'user__id': ['exact'],
         }
 
 
