@@ -209,14 +209,14 @@ class Policy(models.Model, MigasLink):
 
     included_attributes = models.ManyToManyField(
         Attribute,
-        related_name='PolicyIncludedAttributes',
+        related_name='policy_included',
         blank=True,
         verbose_name=_('included attributes'),
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
-        related_name='PolicyExcludedAttributes',
+        related_name='policy_excluded',
         blank=True,
         verbose_name=_('excluded attributes'),
     )
@@ -311,14 +311,14 @@ class PolicyGroup(models.Model, MigasLink):
 
     included_attributes = models.ManyToManyField(
         Attribute,
-        related_name='PolicyGroupIncludedAttributes',
+        related_name='policygroup_included',
         blank=True,
         verbose_name=_('included attributes'),
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
-        related_name='PolicyGroupExcludedAttributes',
+        related_name='policygroup_excluded',
         blank=True,
         verbose_name=_('excluded attributes'),
     )
