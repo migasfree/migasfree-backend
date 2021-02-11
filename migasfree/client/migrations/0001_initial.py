@@ -146,9 +146,9 @@ class Migration(migrations.Migration):
                 ('enabled', models.BooleanField(default=True, verbose_name='enabled')),
                 ('language', models.IntegerField(choices=[(0, 'bash'), (1, 'python'), (2, 'perl'), (3, 'php'), (4, 'ruby'), (5, 'cmd'), (6, 'powershell')], default=0, verbose_name='programming language')),
                 ('code', models.TextField(blank=True, verbose_name='code')),
-                ('excluded_attributes', models.ManyToManyField(blank=True, related_name='ExcludeAttributeFaultDefinition', to='core.Attribute', verbose_name='excluded attributes')),
-                ('included_attributes', models.ManyToManyField(blank=True, to='core.Attribute', verbose_name='included attributes')),
-                ('users', models.ManyToManyField(blank=True, to='core.UserProfile', verbose_name='users')),
+                ('excluded_attributes', models.ManyToManyField(blank=True, related_name='faultdefinition_excluded', to='core.Attribute', verbose_name='excluded attributes')),
+                ('included_attributes', models.ManyToManyField(blank=True, related_name='faultdefinition_included', to='core.Attribute', verbose_name='included attributes')),
+                ('users', models.ManyToManyField(blank=True, related_name='faultdefinition_users__id', to='core.UserProfile', verbose_name='users')),
             ],
             options={
                 'verbose_name': 'Fault Definition',

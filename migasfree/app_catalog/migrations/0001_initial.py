@@ -43,8 +43,8 @@ class Migration(migrations.Migration):
                 ('enabled', models.BooleanField(default=True, help_text='if you uncheck this field, the policy is disabled for all computers.', verbose_name='enabled')),
                 ('exclusive', models.BooleanField(default=True, verbose_name='exclusive')),
                 ('comment', models.TextField(blank=True, null=True, verbose_name='comment')),
-                ('excluded_attributes', models.ManyToManyField(blank=True, related_name='PolicyExcludedAttributes', to='core.Attribute', verbose_name='excluded attributes')),
-                ('included_attributes', models.ManyToManyField(blank=True, related_name='PolicyIncludedAttributes', to='core.Attribute', verbose_name='included attributes')),
+                ('excluded_attributes', models.ManyToManyField(blank=True, related_name='policy_excluded', to='core.Attribute', verbose_name='excluded attributes')),
+                ('included_attributes', models.ManyToManyField(blank=True, related_name='policy_included', to='core.Attribute', verbose_name='included attributes')),
             ],
             options={
                 'verbose_name': 'Policy',
@@ -60,8 +60,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('priority', models.IntegerField(verbose_name='priority')),
                 ('applications', models.ManyToManyField(blank=True, to='app_catalog.Application', verbose_name='application')),
-                ('excluded_attributes', models.ManyToManyField(blank=True, related_name='PolicyGroupExcludedAttributes', to='core.Attribute', verbose_name='excluded attributes')),
-                ('included_attributes', models.ManyToManyField(blank=True, related_name='PolicyGroupIncludedAttributes', to='core.Attribute', verbose_name='included attributes')),
+                ('excluded_attributes', models.ManyToManyField(blank=True, related_name='policygroup_excluded', to='core.Attribute', verbose_name='excluded attributes')),
+                ('included_attributes', models.ManyToManyField(blank=True, related_name='policygroup_included', to='core.Attribute', verbose_name='included attributes')),
                 ('policy', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app_catalog.policy', verbose_name='policy')),
             ],
             options={
