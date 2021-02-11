@@ -44,6 +44,7 @@ class MigasLink(object):
         'client.statuslog': 'status-logs',
         'client.synchronization': 'synchronizations',
         'client.user': 'users',
+        'core.attribute': 'attributes',
         'core.clientattribute': 'attributes',
         'core.serverattribute': 'tags',
         'core.attributeset': 'attribute-sets',
@@ -61,6 +62,7 @@ class MigasLink(object):
         'core.userprofile': 'user-profiles',
         'device.capability': 'devices/capabilities',
         'device.connection': 'devices/connections',
+        'device.device': 'devices/devices',
         'device.driver': 'devices/drivers',
         'device.logical': 'devices/logical',
         'device.manufacturer': 'devices/manufacturers',
@@ -74,6 +76,7 @@ class MigasLink(object):
         self._include_links = []
 
     def model_to_route(self, app, model):
+        print(app, model)
         return self.ROUTES.get('{}.{}'.format(app, model), '')
 
     @staticmethod
@@ -171,19 +174,21 @@ class MigasLink(object):
 
         # print(dir(self._meta), self._meta.model, self._meta.model_name, self._meta.object_name)
         # print(self.model_to_route(self._meta.app_label, self._meta.model_name))
-        data.append({
-            #'url': reverse(
-            #    'admin:{}_{}_changelist'.format(
-            #        self._meta.app_label,
-            #        self._meta.model_name
-            #    )
-            #) + str(self.id),
-            'model': self.model_to_route(self._meta.app_label, self._meta.model_name),
-            'pk': self.id,
-            'text': '{} {}'.format(self._meta.verbose_name, self.__str__()),
-            'count': 1,
-            'actions': actions
-        })
+        # print(self, dir(self))
+        if actions:
+            data.append({
+                #'url': reverse(
+                #    'admin:{}_{}_changelist'.format(
+                #        self._meta.app_label,
+                #        self._meta.model_name
+                #    )
+                #) + str(self.id),
+                'model': self.model_to_route(self._meta.app_label, self._meta.model_name),
+                'pk': self.id,
+                'text': '{} {}'.format(self._meta.verbose_name, self.__str__()),
+                'count': 1,
+                'actions': actions
+            })
 
         for obj, _ in objs:
             if obj.remote_field.field.remote_field.parent_link:
@@ -250,7 +255,7 @@ class MigasLink(object):
                         ),
                         'query': {
                             '{}__id'.format(
-                                obj.remote_field.name if _name != 'serverattribute' else 'tags'
+                                obj.remote_field.name # if _name != 'serverattribute' else 'tags'
                             ): self.pk
                         }
                     },
