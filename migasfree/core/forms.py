@@ -275,12 +275,14 @@ class ScopeForm(forms.ModelForm):
 
 
 class DomainForm(forms.ModelForm):
-    users = forms.MultipleChoiceField(choices=[(i.id, i.username) for i in UserProfile.objects.filter(
-        groups__in=[Group.objects.get(name="Domain Admin")]
-    ).order_by('username')], required=False)
+    users = forms.MultipleChoiceField(required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.fields['users'].choices = [(i.id, i.username) for i in UserProfile.objects.filter(
+            groups__in=[Group.objects.get(name="Domain Admin")]
+        ).order_by('username')]
 
         if self.instance.id:
             self.fields['users'].initial = self.instance.domains.values_list('id', flat=True)
