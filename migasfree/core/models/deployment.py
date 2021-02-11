@@ -120,13 +120,14 @@ class Deployment(models.Model, MigasLink):
 
     included_attributes = models.ManyToManyField(
         Attribute,
+        related_name='deployment_included',
         blank=True,
         verbose_name=_('included attributes')
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
-        related_name='ExcludeAttribute',
+        related_name='deployment_excluded',
         blank=True,
         verbose_name=_('excluded attributes')
     )
