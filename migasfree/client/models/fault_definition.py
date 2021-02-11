@@ -65,19 +65,21 @@ class FaultDefinition(models.Model, MigasLink):
 
     included_attributes = models.ManyToManyField(
         Attribute,
+        related_name='faultdefinition_included',
         blank=True,
         verbose_name=_("included attributes")
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
-        related_name="ExcludeAttributeFaultDefinition",
+        related_name='faultdefinition_excluded',
         blank=True,
         verbose_name=_("excluded attributes")
     )
 
     users = models.ManyToManyField(
         UserProfile,
+        related_name='faultdefinition_users',
         blank=True,
         verbose_name=_("users")
     )
