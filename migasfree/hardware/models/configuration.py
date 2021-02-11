@@ -59,6 +59,6 @@ class Configuration(models.Model):
 
     class Meta:
         app_label = 'hardware'
-        verbose_name = 'Hardware Configuration'
-        verbose_name_plural = 'Hardware Configurations'
+        verbose_name = _('Hardware Configuration')
+        verbose_name_plural = _('Hardware Configurations')
         unique_together = (('name', 'node'),)

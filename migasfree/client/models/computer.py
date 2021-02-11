@@ -738,8 +738,8 @@ class Computer(models.Model, MigasLink):
 
     class Meta:
         app_label = 'client'
-        verbose_name = 'Computer'
-        verbose_name_plural = 'Computers'
+        verbose_name = _('Computer')
+        verbose_name_plural = _('Computers')
 
 
 from .status_log import StatusLog

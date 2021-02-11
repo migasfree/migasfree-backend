@@ -34,5 +34,5 @@ class Capability(models.Model, MigasLink):
 
     class Meta:
         app_label = 'device'
-        verbose_name = 'Capability'
-        verbose_name_plural = 'Capabilities'
+        verbose_name = _('Capability')
+        verbose_name_plural = _('Capabilities')

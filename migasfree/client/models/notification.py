@@ -85,5 +85,5 @@ class Notification(models.Model, MigasLink):
 
     class Meta:
         app_label = 'client'
-        verbose_name = 'Notification'
-        verbose_name_plural = 'Notifications'
+        verbose_name = _('Notification')
+        verbose_name_plural = _('Notifications')

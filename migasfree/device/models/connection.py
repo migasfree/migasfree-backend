@@ -48,6 +48,6 @@ class Connection(models.Model, MigasLink):
 
     class Meta:
         app_label = 'device'
-        verbose_name = 'Connection'
-        verbose_name_plural = 'Connections'
-        unique_together = (("device_type", "name"),)
+        verbose_name = _('Connection')
+        verbose_name_plural = _('Connections')
+        unique_together = (('device_type', 'name'),)

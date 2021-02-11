@@ -89,6 +89,6 @@ class ScheduleDelay(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Schedule Delay'
-        verbose_name_plural = 'Schedule Delays'
-        unique_together = (("schedule", "delay"),)
+        verbose_name = _('Schedule Delay')
+        verbose_name_plural = _('Schedule Delays')
+        unique_together = (('schedule', 'delay'),)

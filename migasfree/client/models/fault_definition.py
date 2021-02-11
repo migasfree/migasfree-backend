@@ -132,6 +132,6 @@ class FaultDefinition(models.Model, MigasLink):
 
     class Meta:
         app_label = 'client'
-        verbose_name = 'Fault Definition'
-        verbose_name_plural = 'Fault Definitions'
+        verbose_name = _('Fault Definition')
+        verbose_name_plural = _('Fault Definitions')
         ordering = ['name']

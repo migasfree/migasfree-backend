@@ -153,5 +153,5 @@ class Fault(Event):
 
     class Meta:
         app_label = 'client'
-        verbose_name = 'Fault'
-        verbose_name_plural = 'Faults'
+        verbose_name = _('Fault')
+        verbose_name_plural = _('Faults')

@@ -72,7 +72,7 @@ class Driver(models.Model, MigasLink):
 
     class Meta:
         app_label = 'device'
-        verbose_name = 'Driver'
-        verbose_name_plural = 'Drivers'
+        verbose_name = _('Driver')
+        verbose_name_plural = _('Drivers')
         unique_together = (('model', 'project', 'capability'),)
         ordering = ['model', 'name']

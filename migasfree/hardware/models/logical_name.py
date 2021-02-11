@@ -52,5 +52,5 @@ class LogicalName(models.Model):
 
     class Meta:
         app_label = 'hardware'
-        verbose_name = 'Hardware Logical Name'
-        verbose_name_plural = 'Hardware Logical Names'
+        verbose_name = _('Hardware Logical Name')
+        verbose_name_plural = _('Hardware Logical Names')

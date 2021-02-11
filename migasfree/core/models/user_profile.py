@@ -229,8 +229,8 @@ SELECT ARRAY(
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'User Profile'
-        verbose_name_plural = 'User Profiles'
+        verbose_name = _('User Profile')
+        verbose_name_plural = _('User Profiles')
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

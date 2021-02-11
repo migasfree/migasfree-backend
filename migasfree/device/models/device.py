@@ -177,6 +177,6 @@ class Device(models.Model, MigasLink):
 
     class Meta:
         app_label = 'device'
-        verbose_name = 'Device'
-        verbose_name_plural = 'Devices'
-        unique_together = (("connection", "name"),)
+        verbose_name = _('Device')
+        verbose_name_plural = _('Devices')
+        unique_together = (('connection', 'name'),)

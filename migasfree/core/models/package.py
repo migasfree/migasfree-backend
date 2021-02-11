@@ -245,8 +245,8 @@ class Package(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Package'
-        verbose_name_plural = 'Packages'
+        verbose_name = _('Package')
+        verbose_name_plural = _('Packages')
         unique_together = (('fullname', 'project'),)
 
 

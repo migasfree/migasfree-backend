@@ -242,8 +242,8 @@ class Attribute(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Attribute'
-        verbose_name_plural = 'Attributes'
+        verbose_name = _('Attribute')
+        verbose_name_plural = _('Attributes')
         unique_together = (("property_att", "value"),)
         ordering = ['property_att__prefix', 'value']
 
@@ -266,8 +266,8 @@ class ServerAttribute(Attribute):  # tag
         self.save()
 
     class Meta:
-        verbose_name = 'Tag'
-        verbose_name_plural = 'Tags'
+        verbose_name = _('Tag')
+        verbose_name_plural = _('Tags')
         proxy = True
 
 
@@ -285,8 +285,8 @@ class ClientAttribute(Attribute):
     objects = ClientAttributeManager()
 
     class Meta:
-        verbose_name = 'Feature'
-        verbose_name_plural = 'Features'
+        verbose_name = _('Feature')
+        verbose_name_plural = _('Features')
         proxy = True
 
 
@@ -356,6 +356,6 @@ class BasicAttribute(Attribute):
         return basic_attributes
 
     class Meta:
-        verbose_name = 'Basic Attribute'
-        verbose_name_plural = 'Basic Attributes'
+        verbose_name = _('Basic Attribute')
+        verbose_name_plural = _('Basic Attributes')
         proxy = True

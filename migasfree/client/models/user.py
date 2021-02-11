@@ -68,6 +68,6 @@ class User(models.Model, MigasLink):
 
     class Meta:
         app_label = 'client'
-        verbose_name = 'User'
-        verbose_name_plural = 'Users'
+        verbose_name = _('User')
+        verbose_name_plural = _('Users')
         unique_together = (('name', 'fullname'),)

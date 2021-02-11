@@ -71,6 +71,6 @@ class Platform(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Platform'
-        verbose_name_plural = 'Platforms'
+        verbose_name = _('Platform')
+        verbose_name_plural = _('Platforms')
         ordering = ['name']

@@ -69,7 +69,7 @@ class Model(models.Model, MigasLink):
 
     class Meta:
         app_label = 'device'
-        verbose_name = 'Model'
-        verbose_name_plural = 'Models'
+        verbose_name = _('Model')
+        verbose_name_plural = _('Models')
         unique_together = (('device_type', 'manufacturer', 'name'),)
         ordering = ['manufacturer', 'name']

@@ -105,5 +105,5 @@ class StatusLog(Event):
 
     class Meta:
         app_label = 'client'
-        verbose_name = 'Status Log'
-        verbose_name_plural = 'Status Logs'
+        verbose_name = _('Status Log')
+        verbose_name_plural = _('Status Logs')

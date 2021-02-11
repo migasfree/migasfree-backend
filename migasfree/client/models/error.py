@@ -144,5 +144,5 @@ class Error(Event):
 
     class Meta:
         app_label = 'client'
-        verbose_name = 'Error'
-        verbose_name_plural = 'Errors'
+        verbose_name = _('Error')
+        verbose_name_plural = _('Errors')

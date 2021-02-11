@@ -125,8 +125,8 @@ class Property(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Property'
-        verbose_name_plural = 'Properties'
+        verbose_name = _('Property')
+        verbose_name_plural = _('Properties')
         ordering = ['name']
 
 
@@ -139,8 +139,8 @@ class ServerProperty(Property):
         super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
-        verbose_name = 'Stamp'
-        verbose_name_plural = 'Stamps'
+        verbose_name = _('Stamp')
+        verbose_name_plural = _('Stamps')
         proxy = True
 
 
@@ -153,8 +153,8 @@ class ClientProperty(Property):
         super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
-        verbose_name = 'Formula'
-        verbose_name_plural = 'Formulas'
+        verbose_name = _('Formula')
+        verbose_name_plural = _('Formulas')
         proxy = True
 
 
@@ -165,6 +165,6 @@ class BasicProperty(Property):
         super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
-        verbose_name = 'Basic Property'
-        verbose_name_plural = 'Basic Properties'
+        verbose_name = _('Basic Property')
+        verbose_name_plural = _('Basic Properties')
         proxy = True

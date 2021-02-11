@@ -439,8 +439,8 @@ class Deployment(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Deployment'
-        verbose_name_plural = 'Deployments'
+        verbose_name = _('Deployment')
+        verbose_name_plural = _('Deployments')
         unique_together = (('name', 'project'),)
         ordering = ['project__name', 'name']
 
@@ -494,8 +494,8 @@ class InternalSource(Deployment):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Deployment (internal source)'
-        verbose_name_plural = 'Deployments (internal source)'
+        verbose_name = _('Deployment (internal source)')
+        verbose_name_plural = _('Deployments (internal source)')
         proxy = True
 
 
@@ -524,6 +524,6 @@ class ExternalSource(Deployment):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Deployment (external source)'
-        verbose_name_plural = 'Deployments (external source)'
+        verbose_name = _('Deployment (external source)')
+        verbose_name_plural = _('Deployments (external source)')
         proxy = True

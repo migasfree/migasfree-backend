@@ -145,8 +145,8 @@ class Project(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Project'
-        verbose_name_plural = 'Projects'
+        verbose_name = _('Project')
+        verbose_name_plural = _('Projects')
         ordering = ['name']
 
 

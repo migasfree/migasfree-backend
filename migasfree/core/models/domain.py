@@ -152,8 +152,8 @@ class Domain(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Domain'
-        verbose_name_plural = 'Domains'
+        verbose_name = _('Domain')
+        verbose_name_plural = _('Domains')
 
 
 @receiver(post_save, sender=Domain)

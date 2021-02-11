@@ -34,5 +34,5 @@ class Type(models.Model, MigasLink):
 
     class Meta:
         app_label = 'device'
-        verbose_name = 'Type'
-        verbose_name_plural = 'Types'
+        verbose_name = _('Type')
+        verbose_name_plural = _('Types')

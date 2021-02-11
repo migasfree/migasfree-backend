@@ -340,5 +340,5 @@ class Node(models.Model, MigasLink):
 
     class Meta:
         app_label = 'hardware'
-        verbose_name = 'Hardware Node'
-        verbose_name_plural = 'Hardware Nodes'
+        verbose_name = _('Hardware Node')
+        verbose_name_plural = _('Hardware Nodes')

@@ -34,6 +34,6 @@ class Manufacturer(models.Model, MigasLink):
 
     class Meta:
         app_label = 'device'
-        verbose_name = 'Manufacturer'
-        verbose_name_plural = 'Manufacturers'
+        verbose_name = _('Manufacturer')
+        verbose_name_plural = _('Manufacturers')
         ordering = ['name']

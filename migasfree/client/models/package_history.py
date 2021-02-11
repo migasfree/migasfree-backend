@@ -54,5 +54,5 @@ class PackageHistory(models.Model, MigasLink):
 
     class Meta:
         app_label = 'client'
-        verbose_name = 'Package History'
-        verbose_name_plural = 'Packages History'
+        verbose_name = _('Package History')
+        verbose_name_plural = _('Packages History')

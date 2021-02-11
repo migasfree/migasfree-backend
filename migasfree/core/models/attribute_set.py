@@ -184,8 +184,8 @@ class AttributeSet(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Attribute Set'
-        verbose_name_plural = 'Attribute Sets'
+        verbose_name = _('Attribute Set')
+        verbose_name_plural = _('Attribute Sets')
 
 
 @receiver(pre_save, sender=AttributeSet)

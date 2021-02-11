@@ -73,5 +73,5 @@ class PackageSet(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Package Set'
-        verbose_name_plural = 'Package Sets'
+        verbose_name = _('Package Set')
+        verbose_name_plural = _('Package Sets')

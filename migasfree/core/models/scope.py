@@ -135,6 +135,6 @@ class Scope(models.Model, MigasLink):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Scope'
-        verbose_name_plural = 'Scopes'
+        verbose_name = _('Scope')
+        verbose_name_plural = _('Scopes')
         unique_together = (('name', 'domain', 'user'),)

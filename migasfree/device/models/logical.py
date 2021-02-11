@@ -135,6 +135,6 @@ class Logical(models.Model, MigasLink):
 
     class Meta:
         app_label = 'device'
-        verbose_name = 'Logical Device'
-        verbose_name_plural = 'Logical Devices'
+        verbose_name = _('Logical Device')
+        verbose_name_plural = _('Logical Devices')
         unique_together = (('device', 'capability'),)

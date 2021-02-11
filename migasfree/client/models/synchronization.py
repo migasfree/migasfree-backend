@@ -116,8 +116,8 @@ class Synchronization(Event):
 
     class Meta:
         app_label = 'client'
-        verbose_name = 'Synchronization'
-        verbose_name_plural = 'Synchronizations'
+        verbose_name = _('Synchronization')
+        verbose_name_plural = _('Synchronizations')
 
 
 @receiver(post_save, sender=Synchronization)

@@ -147,8 +147,8 @@ class Application(models.Model, MigasLink):
 
     class Meta:
         app_label = 'app_catalog'
-        verbose_name = 'Application'
-        verbose_name_plural = 'Applications'
+        verbose_name = _('Application')
+        verbose_name_plural = _('Applications')
 
 
 class PackagesByProject(models.Model, MigasLink):
@@ -177,8 +177,8 @@ class PackagesByProject(models.Model, MigasLink):
 
     class Meta:
         app_label = 'app_catalog'
-        verbose_name = 'Packages by Project'
-        verbose_name_plural = 'Packages by Projects'
+        verbose_name = _('Packages by Project')
+        verbose_name_plural = _('Packages by Projects')
         unique_together = (('application', 'project'),)
         ordering = ['application__id', 'project__name']
 
@@ -292,8 +292,8 @@ class Policy(models.Model, MigasLink):
 
     class Meta:
         app_label = 'app_catalog'
-        verbose_name = 'Policy'
-        verbose_name_plural = 'Policies'
+        verbose_name = _('Policy')
+        verbose_name_plural = _('Policies')
         unique_together = ('name',)
         ordering = ['name']
 
@@ -334,8 +334,8 @@ class PolicyGroup(models.Model, MigasLink):
 
     class Meta:
         app_label = 'app_catalog'
-        verbose_name = 'Policy Group'
-        verbose_name_plural = 'Policy Groups'
+        verbose_name = _('Policy Group')
+        verbose_name_plural = _('Policy Groups')
         unique_together = (('policy', 'priority'),)
         ordering = ['policy__name', 'priority']
 

@@ -62,5 +62,5 @@ class Migration(Event):
 
     class Meta:
         app_label = 'client'
-        verbose_name = 'Migration'
-        verbose_name_plural = 'Migrations'
+        verbose_name = _('Migration')
+        verbose_name_plural = _('Migrations')

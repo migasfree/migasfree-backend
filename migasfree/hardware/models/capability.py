@@ -63,6 +63,6 @@ class Capability(models.Model):
 
     class Meta:
         app_label = 'hardware'
-        verbose_name = 'Hardware Capability'
-        verbose_name_plural = 'Hardware Capabilities'
+        verbose_name = _('Hardware Capability')
+        verbose_name_plural = _('Hardware Capabilities')
         unique_together = (('name', 'node'),)
