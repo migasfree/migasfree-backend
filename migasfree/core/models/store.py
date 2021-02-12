@@ -64,8 +64,7 @@ class Store(models.Model, MigasLink):
 
     slug = models.SlugField(
         verbose_name=_("slug"),
-        max_length=50,
-        unique=True
+        max_length=50
     )
 
     project = models.ForeignKey(
