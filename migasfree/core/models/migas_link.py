@@ -18,10 +18,10 @@
 
 import json
 
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.utils.translation import gettext
-from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
 
 from ...utils import escape_format_string
 
@@ -76,7 +76,6 @@ class MigasLink(object):
         self._include_links = []
 
     def model_to_route(self, app, model):
-        print(app, model)
         return self.ROUTES.get('{}.{}'.format(app, model), '')
 
     @staticmethod
@@ -172,17 +171,8 @@ class MigasLink(object):
                         'description': self.get_description(element[action]),
                     })
 
-        # print(dir(self._meta), self._meta.model, self._meta.model_name, self._meta.object_name)
-        # print(self.model_to_route(self._meta.app_label, self._meta.model_name))
-        # print(self, dir(self))
         if actions:
             data.append({
-                #'url': reverse(
-                #    'admin:{}_{}_changelist'.format(
-                #        self._meta.app_label,
-                #        self._meta.model_name
-                #    )
-                #) + str(self.id),
                 'model': self.model_to_route(self._meta.app_label, self._meta.model_name),
                 'pk': self.id,
                 'text': '{} {}'.format(self._meta.verbose_name, self.__str__()),
@@ -214,13 +204,6 @@ class MigasLink(object):
             count = rel_objects.count()
 
             if count:
-                #related_link = reverse(
-                #    'admin:{}_{}_changelist'.format(
-                #        obj.remote_field.model._meta.app_label,
-                #        _name
-                #    )
-                #)
-
                 actions = []
                 if _name in settings.MIGASFREE_EXTERNAL_ACTIONS:
                     element = settings.MIGASFREE_EXTERNAL_ACTIONS[_name]
@@ -243,20 +226,13 @@ class MigasLink(object):
                                 })
 
                 data.append({
-                    #'url': '{}?{}__id__exact={}'.format(
-                    #    related_link,
-                    #    obj.remote_field.name if _name != 'serverattribute' else 'computer',
-                    #    self.pk
-                    #),
                     'api': {
                         'model': self.model_to_route(
                             obj.remote_field.model._meta.app_label,
                             obj.remote_field.model._meta.model_name
                         ),
                         'query': {
-                            '{}__id'.format(
-                                obj.remote_field.name # if _name != 'serverattribute' else 'tags'
-                            ): self.pk
+                            '{}__id'.format(obj.remote_field.name): self.pk
                         }
                     },
                     'text': gettext(obj.remote_field.field.verbose_name),
@@ -290,15 +266,7 @@ class MigasLink(object):
                             )
 
                         count = rel_objects.count()
-                        # print(related_model._meta.app_label, related_model.__name__.lower())
                         if count and related_model._meta.app_label != 'authtoken':
-                            related_link = reverse(
-                                'admin:{}_{}_changelist'.format(
-                                    related_model._meta.app_label,
-                                    related_model.__name__.lower()
-                                )
-                            )
-
                             actions = []
                             if related_model.__name__.lower() in settings.MIGASFREE_EXTERNAL_ACTIONS:
                                 element = settings.MIGASFREE_EXTERNAL_ACTIONS[related_model.__name__.lower()]
@@ -322,13 +290,7 @@ class MigasLink(object):
 
                             if related_model.__name__.lower() == 'computer':
                                 data.append({
-                                    # 'url': '{}?{}={}&status__in=intended,reserved,unknown'.format(
-                                    #    related_link,
-                                    #    _field,
-                                    #    self.id
-                                    # ),
                                     'api': {
-                                        # 'model': related_model.__name__.lower(),
                                         'model': self.model_to_route(
                                             related_model._meta.app_label,
                                             related_model._meta.model_name
@@ -346,15 +308,8 @@ class MigasLink(object):
                                     'actions': actions
                                 })
                             else:
-                                # print(related_model._meta, dir(related_model._meta), vars(related_model._meta))
                                 data.append({
-                                    # 'url': '{}?{}={}'.format(
-                                    #    related_link,
-                                    #    _field,
-                                    #    self.id
-                                    # ),
                                     'api': {
-                                        # 'model': related_model.__name__.lower(),
                                         'model': self.model_to_route(
                                             related_model._meta.app_label,
                                             related_model._meta.model_name
@@ -401,11 +356,6 @@ class MigasLink(object):
 
                     if self._meta.model_name.lower() == 'platform':
                         data.append({
-                            #'url': '{}?{}={}'.format(
-                            #    '/admin/server/{}/'.format('computer'),
-                            #    'project__platform__id__exact',
-                            #    str(self.id)
-                            #),
                             'api': {
                                 'model': 'computers',
                                 'query': {
@@ -419,17 +369,6 @@ class MigasLink(object):
                     elif self._meta.model_name.lower() == 'device':
                         from .attribute import Attribute
                         data.append({
-                            #'url': '{}?{}={}&status__in=intended,reserved,unknown'.format(
-                            #    '/admin/server/{}/'.format('computer'),
-                            #    'sync_attributes__id__in',
-                            #    str(list(
-                            #        Attribute.objects.scope(
-                            #            request.user.userprofile
-                            #        ).filter(
-                            #            logical__device__id=self.id
-                            #        ).values_list('id', flat=True)
-                            #    )).replace(" ", "").replace("[", "").replace("]", "")
-                            #),
                             'api': {
                                 'model': 'computers',
                                 'query': {
@@ -449,13 +388,6 @@ class MigasLink(object):
                         })
                     else:
                         data.append({
-                            #'url': '{}?{}={}'.format(
-                            #    '/admin/server/{}/'.format('computer'),
-                            #    'id__in',
-                            #    str(list(
-                            #        rel_objects.values_list('id', flat=True)
-                            #    )).replace(" ", "").replace("[", "").replace("]", "")
-                            #),
                             'api': {
                                 'model': 'computers',
                                 'query': {
@@ -470,21 +402,12 @@ class MigasLink(object):
         for _include in self._include_links:
             try:
                 _model_name, _field_name = _include.split(' - ')
-                related_link = reverse(
-                    'admin:{}_{}_changelist'.format(
-                        self._meta.app_label,
-                        _model_name
-                    )
-                )
-                # print('debug', related_model)
                 data.append({
-                    #'url': '{}?{}__id__exact={}'.format(
-                    #    related_link,
-                    #    _field_name,
-                    #    self.id
-                    #),
                     'api': {
-                        'model': self.model_to_route(self._meta.app_label, self._meta.model_name),
+                        'model': self.model_to_route(
+                            self._meta.app_label,
+                            _model_name
+                        ),
                         'query': {
                             '{}__id'.format(_field_name): self.id
                         }
@@ -505,12 +428,8 @@ class MigasLink(object):
         if self._meta.model_name == 'node':
             from ...client.models import Computer
             data.append({
-                #'url': '{}?{}'.format(
-                #    reverse('admin:server_computer_changelist'),
-                #    urlencode({'product': self.computer.product}),
-                #),
                 'model': 'computers',
-                'query': [{'product': self.computer.product}],
+                'query': {'product': self.computer.product},
                 'text': '{} [{}]'.format(
                     gettext('computer'),
                     gettext('product')
@@ -646,9 +565,6 @@ class MigasLink(object):
 
         lnk = {
             'text': escape_format_string(self.__str__()),
-            # 'app': self._meta.app_label,
-            # 'class': self._meta.model_name,
-            # 'pk': self.id
         }
         if self._meta.model_name == 'computer':
             lnk['status'] = self.status
@@ -683,27 +599,21 @@ class MigasLink(object):
         from ...client.models import Computer
         from . import ClientAttribute, ServerAttribute
 
-        # print(obj.related_model._meta.label_lower, self.__class__.__name__)
         if obj.related_model._meta.label_lower == 'client.computer' and \
                 self.__class__.__name__ in ['ClientAttribute', 'Attribute'] and \
                 self.property_att.prefix == 'CID':
-            # return Computer, 'sync_attributes__id__exact'
             return Computer, 'sync_attributes__id'
 
         if obj.related_model._meta.label_lower == 'core.attribute':
             if self.sort == 'server':
-                # return ServerAttribute, 'Tag'
                 return ServerAttribute, 'property__id'
             else:
-                # return ClientAttribute, 'Attribute'
                 return ClientAttribute, 'property__id'
         elif obj.related_model._meta.label_lower == 'client.computer':
             if self.__class__.__name__ == ['ClientAttribute', 'Attribute', 'ServerAttribute']:
                 if obj.field.related_model._meta.model_name == 'serverattribute':
-                    # return Computer, 'tags__id__exact'
                     return Computer, 'tags__id'
                 elif obj.field.related_model._meta.model_name == 'attribute':
-                    # return Computer, 'sync_attributes__id__exact'
                     return Computer, 'sync_attributes__id'
         elif obj.related_model._meta.label_lower in [
             'admin.logentry',
@@ -713,10 +623,8 @@ class MigasLink(object):
             return '', ''  # Excluded
 
         if obj.field.__class__.__name__ in ['ManyRelatedManager', 'OneToOneField', 'ForeignKey']:
-            # return obj.related_model, '{}__id__exact'.format(obj.field.name)
             return obj.related_model, '{}__id'.format(obj.field.name)
         else:
-            # return obj.related_model, '{}__{}__exact'.format(
             return obj.related_model, '{}__{}'.format(
                 obj.field.name,
                 obj.field.m2m_reverse_target_field_name()
