@@ -55,7 +55,9 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = models.Computer.objects.all()
     serializer_class = serializers.ComputerSerializer
     filterset_class = ComputerFilter
-    search_fields = settings.MIGASFREE_COMPUTER_SEARCH_FIELDS
+    search_fields = settings.MIGASFREE_COMPUTER_SEARCH_FIELDS + (
+        'sync_user__name', 'sync_user__fullname',
+    )
     ordering = (settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0],)
 
     def get_serializer_class(self):
@@ -77,6 +79,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
             'default_logical_device__capability',
             'default_logical_device__device',
         ).prefetch_related(
+            'tags',
             Prefetch('node_set', queryset=Node.objects.filter(parent=None)),
         )
         if not user.is_view_all():
