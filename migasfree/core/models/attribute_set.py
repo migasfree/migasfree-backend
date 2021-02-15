@@ -137,7 +137,7 @@ class AttributeSet(models.Model, MigasLink):
             sets[item.id] = []
 
             for subset in item.included_attributes.filter(
-                ~Q(value='All Systems')
+                ~Q(value__iexact='All Systems')
             ).filter(
                 property_att__prefix='SET'
             ).filter(
@@ -146,7 +146,7 @@ class AttributeSet(models.Model, MigasLink):
                 sets[item.id].append(AttributeSet.objects.get(name=subset.value).id)
 
             for subset in item.excluded_attributes.filter(
-                ~Q(value='All Systems')
+                ~Q(value__iexact='All Systems')
             ).filter(
                 property_att__prefix='SET'
             ).filter(
