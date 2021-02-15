@@ -213,7 +213,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('enabled', models.BooleanField(default=True, help_text='if you uncheck this field, deployment is disabled for all computers.', verbose_name='enabled')),
                 ('name', models.CharField(max_length=50, verbose_name='name')),
-                ('slug', models.SlugField(unique=True, verbose_name='slug')),
+                ('slug', models.SlugField(verbose_name='slug')),
                 ('comment', models.TextField(blank=True, null=True, verbose_name='comment')),
                 ('packages_to_install', models.TextField(blank=True, help_text='Mandatory packages to install each time', null=True, verbose_name='packages to install')),
                 ('packages_to_remove', models.TextField(blank=True, help_text='Mandatory packages to remove each time', null=True, verbose_name='packages to remove')),

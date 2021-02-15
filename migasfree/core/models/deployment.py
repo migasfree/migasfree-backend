@@ -80,7 +80,6 @@ class Deployment(models.Model, MigasLink):
 
     slug = models.SlugField(
         max_length=50,
-        unique=True,
         verbose_name=_('slug')
     )
 
