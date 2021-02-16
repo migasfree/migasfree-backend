@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ from rest_framework import status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
-from ...client.models import StatusLog, Computer
+from ...client.models import StatusLog
 
 from .events import event_by_month, month_interval, EventViewSet
 
@@ -47,7 +47,9 @@ class StatusLogStatsViewSet(EventViewSet):
         begin_date, end_date = month_interval()
 
         data = event_by_month(
-            StatusLog.stacked_by_month(request.user.userprofile, begin_date, field='status'),
+            StatusLog.stacked_by_month(
+                request.user.userprofile, begin_date, field='status'
+            ),
             begin_date,
             end_date,
             'statuslog',
