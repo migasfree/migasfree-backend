@@ -19,11 +19,9 @@
 from datetime import datetime, timedelta
 
 from django.conf import settings
-from django.core.serializers import serialize
 from django.http import QueryDict
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django_redis import get_redis_connection
 from rest_framework import viewsets, exceptions, status, mixins, permissions
@@ -133,7 +131,9 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     @action(methods=['get'], detail=True, url_name='devices')
     def devices(self, request, pk=None):
         computer = self.get_object()
-        serializer = serializers.ComputerDevicesSerializer(computer, context={'request': request})
+        serializer = serializers.ComputerDevicesSerializer(
+            computer, context={'request': request}
+        )
 
         return Response(
             serializer.data,
