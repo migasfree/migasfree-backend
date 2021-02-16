@@ -28,7 +28,6 @@ from django.conf import settings
 from django.utils.translation import gettext
 from celery import shared_task
 from django_redis import get_redis_connection
-from rest_framework.reverse import reverse
 
 from ..core.models import Package, Deployment
 from ..client.models import Notification, Fault, Error, Computer
