@@ -20,7 +20,6 @@ import json
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.urls import reverse
 from django.utils.translation import gettext
 
 from ...utils import escape_format_string
