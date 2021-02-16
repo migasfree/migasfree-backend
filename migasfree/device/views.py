@@ -177,7 +177,9 @@ class LogicalViewSet(viewsets.ModelViewSet, MigasViewSet):
         return serializers.LogicalSerializer
 
     def get_queryset(self):
-        return self.queryset.select_related('device', 'capability')
+        return self.queryset.select_related(
+            'device', 'capability'
+        ).prefetch_related('attributes')
 
     @action(methods=['get'], detail=False)
     def available(self, request):
