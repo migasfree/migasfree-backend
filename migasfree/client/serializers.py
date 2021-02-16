@@ -71,22 +71,11 @@ class ComputerWriteSerializer(serializers.ModelSerializer):
         )
 
 
-class ComputerSerializer(serializers.ModelSerializer):
+class ComputerListSerializer(serializers.ModelSerializer):
     project = ProjectNestedInfoSerializer(many=False, read_only=True)
-    software_inventory = serializers.HyperlinkedIdentityField(
-        view_name='computer-software_inventory'
-    )
-    software_history = serializers.HyperlinkedIdentityField(
-        view_name='computer-software_history'
-    )
-    tags = AttributeInfoSerializer(many=True, read_only=True)
     sync_user = UserInfoSerializer(many=False, read_only=True)
-    architecture = serializers.SerializerMethodField()
     product_system = serializers.SerializerMethodField()
     summary = serializers.SerializerMethodField()
-
-    def get_architecture(self, obj):
-        return obj.get_architecture()
 
     def get_product_system(self, obj):
         return obj.product_system()
@@ -97,15 +86,34 @@ class ComputerSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Computer
         fields = (
-            'id', 'uuid', 'name', 'fqdn', 'project',
-            'ip_address', 'forwarded_ip_address', 'tags',
-            'software_inventory', 'software_history', 'has_software_inventory',
-            'status', 'product', 'machine', 'product_system',
-            'cpu', 'architecture', 'ram',
-            'storage', 'disks', 'mac_address', 'comment',
+            'id', 'uuid', 'name', 'project',
+            'status', 'product', 'product_system',
             'created_at', 'last_hardware_capture',
             'sync_user', 'sync_end_date',
             '__str__', 'summary'
+        )
+
+
+class ComputerSerializer(ComputerListSerializer):
+    software_inventory = serializers.HyperlinkedIdentityField(
+        view_name='computer-software_inventory'
+    )
+    software_history = serializers.HyperlinkedIdentityField(
+        view_name='computer-software_history'
+    )
+    tags = AttributeInfoSerializer(many=True, read_only=True)
+    architecture = serializers.SerializerMethodField()
+
+    def get_architecture(self, obj):
+        return obj.get_architecture()
+
+    class Meta:
+        model = models.Computer
+        fields = ComputerListSerializer.Meta.fields + (
+            'fqdn', 'ip_address', 'forwarded_ip_address', 'tags',
+            'software_inventory', 'software_history', 'has_software_inventory',
+            'machine', 'cpu', 'architecture', 'ram',
+            'storage', 'disks', 'mac_address', 'comment',
         )
 
 
