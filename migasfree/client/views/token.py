@@ -62,6 +62,9 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         if self.action == 'update' or self.action == 'partial_update':
             return serializers.ComputerWriteSerializer
 
+        if self.action == 'list':
+            return serializers.ComputerListSerializer
+
         return serializers.ComputerSerializer
 
     def get_queryset(self):
