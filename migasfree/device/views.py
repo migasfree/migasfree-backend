@@ -236,20 +236,6 @@ class ModelViewSet(viewsets.ModelViewSet, MigasViewSet):
 
         return serializers.ModelSerializer
 
-    """
-    @action(methods=['get'], detail=True)
-    def connections(self, request, pk=None):
-        model = self.get_object()
-        print(model, vars(model))
-
-        connections = Connection.objects.filter(
-            id__in=Model.objects.get(
-                id=pk
-            ).connections
-        )
-        print(connections)
-    """
-
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class TypeViewSet(viewsets.ModelViewSet, MigasViewSet):
