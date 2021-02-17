@@ -86,7 +86,8 @@ def add_unchecked_faults():
             'api': json.dumps({
                 'model': 'faults',
                 'query': {
-                    'checked': False
+                    'checked': False,
+                    'user': 'me',
                 }
             })
         }
