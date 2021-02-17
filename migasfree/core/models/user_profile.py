@@ -214,8 +214,7 @@ SELECT ARRAY(
         return False
 
     def update_password(self, new_password):
-        # set_password also hashes the password that the user will get
-        self.set_password(new_password)
+        self.password = new_password
         self.save()
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
