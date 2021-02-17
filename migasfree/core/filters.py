@@ -250,6 +250,9 @@ class UserProfileFilter(filters.FilterSet):
             'last_name': ['exact', 'icontains'],
             'faultdefinition_users__id': ['exact'],
             'domains__id': ['exact'],
+            'is_active': ['exact'],
+            'is_staff': ['exact'],
+            'is_superuser': ['exact'],
         }
 
 
