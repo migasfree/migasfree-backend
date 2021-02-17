@@ -872,7 +872,7 @@ class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet):
         serializer = ChangePasswordSerializer(data=request.data)
 
         if serializer.is_valid():
-            user.update_password(serializer.data.get('password'))
+            user.update_password(serializer.validated_data.get('password'))
 
             return Response(
                 {'detail': gettext('Password changed!')},
