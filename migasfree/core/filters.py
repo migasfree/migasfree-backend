@@ -60,6 +60,7 @@ class DeploymentFilter(filters.FilterSet):
             'schedule': ['isnull'],
             'schedule__id': ['exact'],
             'domain__id': ['exact'],
+            'available_packages__id': ['exact'],
         }
 
 
