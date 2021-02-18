@@ -195,6 +195,7 @@ class EventViewSet(viewsets.ViewSet):
         now = timezone.now()
         fmt = '%Y-%m-%dT%H'
         human_fmt = '%Y-%m-%d %H:%M:%S'
+        value_fmt = '%Y-%m-%dT%H:%M:%S'
 
         end = request.query_params.get('end', '')
         try:
@@ -215,8 +216,14 @@ class EventViewSet(viewsets.ViewSet):
         stats = []
 
         for item in datetime_iterator(begin, end - timedelta(hours=1), delta=timedelta(hours=1)):
+            next_item = item + timedelta(hours=1)
             labels.append(time.strftime(human_fmt, item.timetuple()))
-            stats.append({'value': events[item]['count'] if item in events else 0})
+            stats.append({
+                'model': event_class._meta.model_name,
+                'created_at__gte': time.strftime(value_fmt, item.timetuple()),
+                'created_at__lt': time.strftime(value_fmt, next_item.timetuple()),
+                'value': events[item]['count'] if item in events else 0
+            })
 
         return Response(
             {
