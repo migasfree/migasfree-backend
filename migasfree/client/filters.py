@@ -30,8 +30,8 @@ from .models import (
 
 class ComputerFilter(filters.FilterSet):
     platform = filters.CharFilter(field_name='project__platform__id')
-    created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
-    created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
+    created_at__gte = filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
+    created_at__lt = filters.DateTimeFilter(field_name='created_at', lookup_expr='lt')
     sync_attributes = filters.CharFilter(
         field_name='sync_attributes__value', lookup_expr='contains'
     )
@@ -121,8 +121,8 @@ class ComputerFilter(filters.FilterSet):
 
 
 class ErrorFilter(filters.FilterSet):
-    created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
-    created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
+    created_at__gte = filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
+    created_at__lt = filters.DateTimeFilter(field_name='created_at', lookup_expr='lt')
 
     class Meta:
         model = Error
@@ -152,8 +152,8 @@ class FaultDefinitionFilter(filters.FilterSet):
 
 
 class FaultFilter(filters.FilterSet):
-    created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
-    created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
+    created_at__gte = filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
+    created_at__lt = filters.DateTimeFilter(field_name='created_at', lookup_expr='lt')
 
     user = filters.ChoiceFilter(
         choices=Fault.USER_FILTER_CHOICES,
@@ -192,8 +192,8 @@ class FaultFilter(filters.FilterSet):
 
 
 class MigrationFilter(filters.FilterSet):
-    created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
-    created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
+    created_at__gte = filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
+    created_at__lt = filters.DateTimeFilter(field_name='created_at', lookup_expr='lt')
 
     class Meta:
         model = Migration
@@ -207,8 +207,8 @@ class MigrationFilter(filters.FilterSet):
 
 
 class NotificationFilter(filters.FilterSet):
-    created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
-    created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
+    created_at__gte = filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
+    created_at__lt = filters.DateTimeFilter(field_name='created_at', lookup_expr='lt')
 
     class Meta:
         model = Notification
@@ -234,8 +234,8 @@ class PackageHistoryFilter(filters.FilterSet):
 
 
 class StatusLogFilter(filters.FilterSet):
-    created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
-    created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
+    created_at__gte = filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
+    created_at__lt = filters.DateTimeFilter(field_name='created_at', lookup_expr='lt')
 
     class Meta:
         model = StatusLog
@@ -248,11 +248,11 @@ class StatusLogFilter(filters.FilterSet):
 
 
 class SynchronizationFilter(filters.FilterSet):
-    created_at__gte = filters.DateFilter(field_name='created_at', lookup_expr='gte')
-    created_at__lt = filters.DateFilter(field_name='created_at', lookup_expr='lt')
+    created_at__gte = filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
+    created_at__lt = filters.DateTimeFilter(field_name='created_at', lookup_expr='lt')
 
-    start_date__gte = filters.DateFilter(field_name='start_date', lookup_expr='gte')
-    start_date__lt = filters.DateFilter(field_name='start_date', lookup_expr='lt')
+    start_date__gte = filters.DateTimeFilter(field_name='start_date', lookup_expr='gte')
+    start_date__lt = filters.DateTimeFilter(field_name='start_date', lookup_expr='lt')
 
     class Meta:
         model = Synchronization
