@@ -220,7 +220,7 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
         serializer = serializers.SynchronizationWriteSerializer(data=data)
 
         add_computer_message(
-            computer, gettext('Sending synchronization response...')
+            computer, gettext('Sending synchronization...')
         )
 
         if serializer.is_valid():
@@ -468,7 +468,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             computer, context={'request': request}
         )
 
-        add_computer_message(computer, gettext('Sending attributes response...'))
+        add_computer_message(computer, gettext('Sending attributes...'))
 
         return Response(
             self.create_response(serializer.data),
@@ -585,7 +585,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 serializer = serializers.FaultSerializer(obj)
                 ret.append(serializer.data)
 
-        add_computer_message(computer, gettext('Sending faults response...'))
+        add_computer_message(computer, gettext('Sending faults...'))
 
         return Response(
             self.create_response(list(ret)),
@@ -610,7 +610,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         serializer = serializers.ErrorSafeWriteSerializer(data=claims)
 
-        add_computer_message(computer, gettext('Sending errors response...'))
+        add_computer_message(computer, gettext('Sending errors...'))
 
         if serializer.is_valid():
             serializer.save()
@@ -949,7 +949,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         capture = computer.hardware_capture_is_required()
 
         add_computer_message(
-            computer, gettext('Sending hardware capture response...')
+            computer, gettext('Sending hardware capture...')
         )
 
         return Response(
@@ -986,7 +986,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             computer.id, claims.get('inventory')
         )
 
-        add_computer_message(computer, gettext('Sending software response...'))
+        add_computer_message(computer, gettext('Sending software...'))
 
         return Response(
             self.create_response(gettext('Data received')),
