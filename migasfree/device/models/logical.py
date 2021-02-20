@@ -137,4 +137,8 @@ class Logical(models.Model, MigasLink):
         app_label = 'device'
         verbose_name = _('Logical Device')
         verbose_name_plural = _('Logical Devices')
+        ordering = [
+            'device__model__manufacturer__name', 'device__model__name',
+            'alternative_capability_name', 'capability__name', 'device__name'
+        ]
         unique_together = (('device', 'capability'),)

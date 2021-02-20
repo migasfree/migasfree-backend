@@ -115,6 +115,10 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Logical Device',
                 'verbose_name_plural': 'Logical Devices',
+                'ordering': [
+                    'device__model__manufacturer__name', 'device__model__name',
+                    'alternative_capability_name', 'capability__name', 'device__name'
+                ],
                 'unique_together': {('device', 'capability')},
             },
             bases=(models.Model, migasfree.core.models.migas_link.MigasLink),
