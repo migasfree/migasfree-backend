@@ -21,10 +21,12 @@ import os
 import django
 import django.conf.global_settings as DEFAULT_SETTINGS
 
+from corsheaders.defaults import default_headers
+
 from .migasfree import BASE_DIR, MIGASFREE_TMP_DIR
 
-if django.VERSION < (3, 0, 0, 'final'):
-    print('Migasfree requires Django 3.0.0 at least. Please, update it.')
+if django.VERSION < (3, 1, 0, 'final'):
+    print('Migasfree requires Django 3.1.0 at least. Please, update it.')
     exit(1)
 
 ADMINS = (
@@ -147,6 +149,10 @@ REST_AUTH_SERIALIZERS = {
 GRAPHENE = {
     'SCHEMA': 'migasfree.schema.schema'
 }
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'accept-language',
+]
 
 # http://docs.python.org/2/howto/logging-cookbook.html
 # http://docs.python.org/2/library/logging.html#logrecord-attributes
