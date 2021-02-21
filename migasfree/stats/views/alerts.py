@@ -18,6 +18,7 @@
 
 import json
 
+from django.utils.translation import gettext
 from rest_framework.response import Response
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import permission_classes
@@ -45,5 +46,6 @@ class AlertsViewSet(viewsets.ViewSet):
 
         for item in response:
             item['api'] = json.loads(item['api'])
+            item['msg'] = gettext(item['msg'])
 
         return Response(response, status=status.HTTP_200_OK)
