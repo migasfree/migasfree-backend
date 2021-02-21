@@ -107,7 +107,7 @@ class ProjectFilter(filters.FilterSet):
     class Meta:
         model = Project
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'platform__id': ['exact'],
             'name': ['exact', 'icontains'],
             'pms': ['exact', 'icontains'],
@@ -131,7 +131,7 @@ class AttributeFilter(filters.FilterSet):
     class Meta:
         model = Attribute
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'property_att__id': ['exact'],
             'property_att__prefix': ['exact'],
             'value': ['exact', 'icontains'],
@@ -160,7 +160,7 @@ class ClientAttributeFilter(filters.FilterSet):
     class Meta:
         model = ClientAttribute
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'property_att__id': ['exact'],
             'property_att__prefix': ['exact'],
             'value': ['exact', 'icontains'],
@@ -189,7 +189,7 @@ class ServerAttributeFilter(filters.FilterSet):
     class Meta:
         model = ServerAttribute
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'property_att__id': ['exact'],
             'property_att__prefix': ['exact'],
             'value': ['exact', 'icontains'],
