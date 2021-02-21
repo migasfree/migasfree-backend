@@ -54,4 +54,4 @@ class ProjectResource(resources.ModelResource):
 
     class Meta:
         model = Project
-        fields = ('name', 'pms', 'auto_register_computers', 'platform__name')
+        fields = ('id', 'name', 'pms', 'auto_register_computers', 'platform__name')
