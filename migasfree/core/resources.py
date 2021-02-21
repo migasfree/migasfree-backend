@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 from import_export import resources, fields, widgets
 
-from .models import Attribute, Project
+from .models import Attribute, ClientAttribute, ServerAttribute, Project
 
 
 class AttributeResource(resources.ModelResource):
@@ -30,10 +30,20 @@ class AttributeResource(resources.ModelResource):
         export_order = ('id', 'property_att', 'prefix', 'value', 'description', 'computers')
 
     def dehydrate_computers(self, attribute):
-        return attribute.total_computers
+        return attribute.total_computers()
 
     def dehydrate_prefix(self, attribute):
         return attribute.property_att.prefix
+
+
+class ClientAttributeResource(AttributeResource):
+    class Meta:
+        model = ClientAttribute
+
+
+class ServerAttributeResource(AttributeResource):
+    class Meta:
+        model = ServerAttribute
 
 
 class ProjectResource(resources.ModelResource):
