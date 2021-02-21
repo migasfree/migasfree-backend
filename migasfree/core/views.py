@@ -45,6 +45,7 @@ from .mixins import SafeConnectionMixin
 from ..client.models import Computer
 from ..client.resources import ComputerResource
 from ..client.serializers import ComputerInfoSerializer
+from .resources import ClientAttributeResource, ServerAttributeResource, ProjectResource
 from ..device.models import Logical
 from ..device.serializers import LogicalSerializer
 from ..utils import read_remote_chunks
@@ -104,7 +105,13 @@ class SafePackagerConnectionMixin(SafeConnectionMixin):
 class ExportViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False)
     def export(self, request, format=None):
-        resource = globals()['{}Resource'.format(self.basename.capitalize())]
+        class_name = self.basename.capitalize()
+        if class_name.lower() == 'clientattribute':
+            class_name = 'ClientAttribute'
+        if class_name.lower() == 'serverattribute':
+            class_name = 'ServerAttribute'
+
+        resource = globals()['{}Resource'.format(class_name)]
         obj = resource()
         data = obj.export(
             self.filter_queryset(self.get_queryset())
@@ -318,7 +325,7 @@ class AttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ServerAttributeViewSet(viewsets.ModelViewSet, MigasViewSet):
+class ServerAttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = ServerAttribute.objects.filter(property_att__sort='server')
     serializer_class = ServerAttributeSerializer
     filterset_class = ServerAttributeFilter
@@ -381,7 +388,7 @@ class ServerAttributeViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ClientAttributeViewSet(viewsets.ModelViewSet, MigasViewSet):
+class ClientAttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = ClientAttribute.objects.filter(property_att__sort__in=['client', 'basic'])
     serializer_class = ClientAttributeSerializer
     filterset_class = ClientAttributeFilter
