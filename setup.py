@@ -1,8 +1,7 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,8 +29,8 @@
 
 import sys
 
-if not hasattr(sys, 'version_info') or sys.version_info < (2, 7, 0, 'final'):
-    raise SystemExit('migasfree-backend requires Python 2.7 or later.')
+if not hasattr(sys, 'version_info') or sys.version_info < (3, 6, 0, 'final'):
+    raise SystemExit('migasfree-backend requires Python 3.6 or later.')
 
 import os
 
@@ -145,6 +144,7 @@ setup(
             'core/fixtures/*',
             'client/fixtures/*',
             'device/fixtures/*',
+            'stats/management/commands/*'
         ],
     },
     data_files=[
