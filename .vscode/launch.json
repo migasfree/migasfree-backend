@@ -17,7 +17,7 @@
             "django": true
         },
         {
-            "name": "Python: Celery",
+            "name": "Python: Celery default queue",
             "type": "python",
             "request": "launch",
             "module": "celery",
@@ -30,6 +30,24 @@
                 "-Q",
                 "default",
                 "-B",
+            ],
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "migasfree.settings.development"
+            },
+        },
+        {
+            "name": "Python: Celery repository queue",
+            "type": "python",
+            "request": "launch",
+            "module": "celery",
+            "console": "integratedTerminal",
+            "args": [
+                "--without-gossip",
+                "--concurrency=10",
+                "--app=migasfree.celery.app",
+                "worker",
+                "-Q",
+                "repository",
             ],
             "env": {
                 "DJANGO_SETTINGS_MODULE": "migasfree.settings.development"
