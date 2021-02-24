@@ -535,6 +535,8 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
 
+        representation['project'] = ProjectInfoSerializer(obj.project).data
+
         representation['included_attributes'] = []
         for item in obj.included_attributes.all():
             attribute = AttributeInfoSerializer(item).data
