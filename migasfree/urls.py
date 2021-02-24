@@ -41,6 +41,8 @@ from .device.routers import router as device_router
 from .stats.routers import router as stats_router
 from .app_catalog.routers import router as catalog_router
 
+from .api_v4.views import api_v4
+
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
@@ -95,6 +97,8 @@ urlpatterns = [
     path('token-refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     re_path(r'^rest-auth/', include('dj_rest_auth.urls')),
+
+    re_path(r'^api/$', api_v4, name='api_v4'),
 
     re_path(r'^', include('django.contrib.auth.urls')),
     re_path(r'^api-docs/', include_docs_urls(title=TITLE)),
