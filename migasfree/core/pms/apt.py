@@ -96,8 +96,8 @@ function create_deploy {
 
   mv $_F Release
 
-  gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg --clearsign -o InRelease Release
-  gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg -abs -o Release.gpg Release
+  gpg --no-tty -u migasfree-repository --homedir %(keys_path)s/.gnupg --clearsign -o InRelease Release
+  gpg --no-tty -u migasfree-repository --homedir %(keys_path)s/.gnupg -abs -o Release.gpg Release
 }
 
 cd dists/$_NAME
