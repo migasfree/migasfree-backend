@@ -125,6 +125,7 @@ INSTALLED_APPS = (
     'migasfree.stats',
     'migasfree.hardware',
     'migasfree.device',
+    'migasfree.api_v4',
 )
 
 REST_FRAMEWORK = {
