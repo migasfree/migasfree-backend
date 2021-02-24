@@ -125,7 +125,7 @@ class Package(models.Model, MigasLink):
                 name = slices[0]
                 version, architecture = slices[1].rsplit('_', 1)
 
-        architecture = architecture.split('.')[0]
+        architecture = architecture.split('.')[0] if architecture else ''
 
         return name, version, architecture
 
