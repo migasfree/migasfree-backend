@@ -232,6 +232,11 @@ def list_difference(l1, l2):
     return list(set(l1).difference(l2))
 
 
+def list_common(l1, l2):
+    """ uses l1 as reference, returns list of items in l2 (api_v4) """
+    return list(set(l1).intersection(l2))
+
+
 def sort_depends(data):
     # if something fails, ask @agacias
     ret = []
