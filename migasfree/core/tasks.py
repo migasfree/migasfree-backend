@@ -45,10 +45,10 @@ def remove_repository_metadata(deployment_id, old_slug=''):
 
 
 def symlink_pkg(pkg, source_path, target_path):
-    target = os.path.join(target_path, pkg.name)
+    target = os.path.join(target_path, pkg.fullname)
     if not os.path.lexists(target):
         os.symlink(
-            os.path.join(source_path, pkg.store.slug, pkg.name),
+            os.path.join(source_path, pkg.store.slug, pkg.fullname),
             target
         )
 
@@ -73,7 +73,7 @@ def create_repository_metadata(deployment_id):
     stores_path = Store.path(deploy.project.slug, '')[:-1]  # remove trailing slash
     slug_tmp_path = os.path.join(
         tmp_path,
-        deploy.pms.relative_path
+        deploy.pms().relative_path
     )
 
     if slug_tmp_path.endswith('/'):
@@ -92,11 +92,11 @@ def create_repository_metadata(deployment_id):
         symlink_pkg(pkg, stores_path, pkg_tmp_path)
 
     for set_ in deploy.available_package_sets.all():
-        for pkg in set_.packages:
+        for pkg in set_.packages.all():
             symlink_pkg(pkg, stores_path, pkg_tmp_path)
 
     source = os.path.join(slug_tmp_path, deploy.slug)
-    ret, output, error = deploy.pms.create_repository(
+    ret, output, error = deploy.pms().create_repository(
         path=source,
         arch=deploy.project.architecture
     )
