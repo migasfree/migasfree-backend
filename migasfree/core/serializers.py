@@ -87,7 +87,7 @@ class AttributeInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Attribute
-        fields = ('id', 'property_att', 'value')
+        fields = ('id', 'property_att', 'value', 'description')
 
 
 class AttributeSetSerializer(serializers.ModelSerializer):
