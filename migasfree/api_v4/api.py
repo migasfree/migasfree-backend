@@ -611,14 +611,15 @@ def register_computer(request, name, uuid, computer, data):
                 )
 
         # Add Computer
-        computer = check_computer(
+        is_computer_changed(
             computer,
             name,
-            fqdn,
-            project_name,
+            Project.objects.get(name=project_name),
             data.get('ip', ''),
-            get_client_ip(request),
             uuid
+        )
+        computer.update_identification(
+            name, fqdn, Project.objects.get(name=project_name), uuid, data.get('ip', ''), get_client_ip(request)
         )
 
         if notify_platform:
