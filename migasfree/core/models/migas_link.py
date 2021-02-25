@@ -563,11 +563,12 @@ class MigasLink(object):
                     pass
 
         lnk = {
+            'pk': self.id,
             'text': escape_format_string(self.__str__()),
         }
         if self._meta.model_name == 'computer':
             lnk['status'] = self.status
-            lnk['trans_status'] = '{}, {}, {}, {}'.format(
+            lnk['summary'] = '{}, {}, {}, {}'.format(
                 gettext(self.status),
                 self.project,
                 self.ip_address,
@@ -575,22 +576,22 @@ class MigasLink(object):
             )
         elif self._meta.model_name == 'domain':
             lnk['status'] = 'domain'
-            lnk['trans_status'] = gettext(self._meta.verbose_name)
+            lnk['summary'] = gettext(self._meta.verbose_name)
         elif self._meta.model_name == 'serverattribute' \
                 or (self._meta.model_name == 'attribute' and self.property_att.sort == 'server'):
             lnk['status'] = 'tag'
-            lnk['trans_status'] = gettext(self._meta.verbose_name)
+            lnk['summary'] = gettext(self._meta.verbose_name)
         elif self._meta.model_name == 'attributeset' \
                 or (self._meta.model_name in ['clientattribute', 'attribute'] and self.id == 1):
             lnk['status'] = 'set'
-            lnk['trans_status'] = '({}) {}'.format(gettext(self._meta.verbose_name), self.description)
+            lnk['summary'] = '({}) {}'.format(gettext(self._meta.verbose_name), self.description)
         elif self._meta.model_name == 'clientattribute' \
                 or (self._meta.model_name == 'attribute' and self.property_att.sort == 'client'):
             lnk['status'] = 'attribute'
-            lnk['trans_status'] = self.description
+            lnk['summary'] = self.description
         elif self._meta.model_name == 'policy':
             lnk['status'] = 'policy'
-            lnk['trans_status'] = gettext(self._meta.verbose_name)
+            lnk['summary'] = gettext(self._meta.verbose_name)
 
         return lnk
 
