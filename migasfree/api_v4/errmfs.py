@@ -6,7 +6,7 @@ import traceback
 import tempfile
 
 from django.conf import settings
-from django.template.loader import render_to_string
+from django.template import Context, Template
 from django.utils.translation import ugettext as _
 
 
@@ -38,6 +38,29 @@ ERROR_INFO = {
     GENERIC: _("Generic error")
 }
 
+ERROR_TEMPLATE = """
+<html>
+<head>
+    <title>{{ description }}</title>
+</head>
+<body>
+    <h1>{{ description }}</h1>
+
+    {% for row in traceback %}
+        <p>
+            <strong>
+                File: {{ row.filename }}
+                <br />Name: {{ row.name }}
+                <br />Line: {{ row.line }}
+            </strong>
+        </p>
+        {% for variable in row.locals %}
+            <pre>{{ variable.key }}={{ variable.value }}</pre>
+        {% endfor %}
+    {% endfor %}
+</body>
+</html>
+"""
 
 def error_info(number):
     """
@@ -122,14 +145,14 @@ def print_exc_plus(etype, evalue):
         fr["locals"] = variables
         ret.append(fr)
 
-    return render_to_string(
-        'error.html',
-        {
-            "description": '%s: %s %s' % (
-                _("Generic error in server"),
-                str(etype),
-                str(evalue)
-            ),
-            "traceback": ret
-        }
-    )
+    template = Template(ERROR_TEMPLATE)
+    context = Context({
+        "description": '%s: %s %s' % (
+            _("Generic error in server"),
+            str(etype),
+            str(evalue)
+        ),
+        "traceback": ret
+    })
+
+    return template.render(context)
