@@ -229,7 +229,7 @@ class PackageHistoryFilter(filters.FilterSet):
             'package__id': ['exact'],
             'package__fullname': ['icontains'],
             'install_date': ['gte', 'lt'],
-            'uninstall_date': ['gte', 'lt'],
+            'uninstall_date': ['gte', 'lt', 'isnull'],
         }
 
 
