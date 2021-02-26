@@ -400,10 +400,8 @@ class MigasLink(object):
 
         if self._meta.model_name.lower() == 'computer':
             # special case installed packages
-            from ...client.models import PackageHistory
-
-            installed_packages_count = PackageHistory.objects.filter(
-                computer=self,
+            installed_packages_count = self.packagehistory_set.filter(
+                package__project=self.project,
                 uninstall_date__isnull=True
             ).count()
             if installed_packages_count > 0:
@@ -413,6 +411,7 @@ class MigasLink(object):
                         'query': {
                             'computer__id': self.id,
                             'uninstall_date': True  # isnull = True
+                            # TODO package project
                         },
                     },
                     'text': '{} [{}]'.format(
