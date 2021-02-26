@@ -31,7 +31,7 @@ class MigasLink(object):
     ROUTES = {
         'auth.group': 'groups',
         'app_catalog.application': 'catalog/applications',
-        'app_catalog.packagesbyproject': 'catalog/packages',
+        'app_catalog.packagesbyproject': 'catalog/project-packages',
         'app_catalog.policy': 'catalog/policies',
         'app_catalog.policygroup': 'catalog/policy-groups',
         'client.computer': 'computers',
