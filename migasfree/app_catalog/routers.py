@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,6 +22,6 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register(r'apps', views.ApplicationViewSet)
-router.register(r'packages', views.PackagesByProjectViewSet)
+router.register(r'project-packages', views.PackagesByProjectViewSet)
 router.register(r'policies', views.PolicyViewSet)
 router.register(r'policy-groups', views.PolicyGroupViewSet)
