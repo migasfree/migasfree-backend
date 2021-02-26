@@ -398,6 +398,31 @@ class MigasLink(object):
                             'actions': actions
                         })
 
+        if self._meta.model_name.lower() == 'computer':
+            # special case installed packages
+            from ...client.models import PackageHistory
+
+            installed_packages_count = PackageHistory.objects.filter(
+                computer=self,
+                uninstall_date__isnull=True
+            ).count()
+            if installed_packages_count > 0:
+                data.append({
+                    'api': {
+                        'model': self.model_to_route('client', 'packagehistory'),
+                        'query': {
+                            'computer__id': self.id,
+                            'uninstall_date': True  # isnull = True
+                        },
+                    },
+                    'text': '{} [{}]'.format(
+                        gettext('Installed Packages'),
+                        gettext('computer')
+                    ),
+                    'count': installed_packages_count,
+                    'actions': actions
+                })
+
         for _include in self._include_links:
             try:
                 _model_name, _field_name = _include.split(' - ')
@@ -427,15 +452,18 @@ class MigasLink(object):
         if self._meta.model_name == 'node':
             from ...client.models import Computer
             data.append({
-                'model': 'computers',
-                'query': {'product': self.computer.product},
+                'api': {
+                    'model': 'computers',
+                    'query': {'product': self.computer.product},
+                },
                 'text': '{} [{}]'.format(
                     gettext('computer'),
                     gettext('product')
                 ),
                 'count': Computer.productive.scope(request.user.userprofile).filter(
                     product=self.computer.product
-                ).count()
+                ).count(),
+                'actions': []
             })
 
             return data
