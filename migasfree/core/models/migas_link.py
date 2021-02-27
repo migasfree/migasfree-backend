@@ -422,6 +422,28 @@ class MigasLink(object):
                     'actions': actions
                 })
 
+        if self._meta.model_name.lower() == 'package':
+            # special case computers with package installed
+            computers_count = self.packagehistory_set.filter(
+                package=self,
+                uninstall_date__isnull=True
+            ).count()
+            if computers_count > 0:
+                data.append({
+                    'api': {
+                        'model': self.model_to_route('client', 'computer'),
+                        'query': {
+                            'installed_package': self.id
+                        },
+                    },
+                    'text': '{} [{}]'.format(
+                        gettext('Installed package'),
+                        gettext('computer')
+                    ),
+                    'count': computers_count,
+                    'actions': actions
+                })
+
         for _include in self._include_links:
             try:
                 _model_name, _field_name = _include.split(' - ')
