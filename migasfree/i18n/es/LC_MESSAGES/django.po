@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-20 13:43+0100\n"
-"PO-Revision-Date: 2021-02-21 08:40+0100\n"
+"POT-Creation-Date: 2021-02-27 08:17+0100\n"
+"PO-Revision-Date: 2021-02-27 08:20+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es\n"
@@ -17,6 +17,78 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.3\n"
+
+#: migasfree/api_v4/api.py:46
+#, python-format
+msgid "Platform [%s] registered by computer [%s]."
+msgstr "Plataforma [%s] registrada por el ordenador [%s]."
+
+#: migasfree/api_v4/api.py:52
+#, python-format
+msgid "Project [%s] with P.M.S. [%s] registered by computer [%s]."
+msgstr "Projecto [%s] con PMS [%s] registrado por el ordenador [%s]."
+
+#: migasfree/api_v4/errmfs.py:27
+msgid "No errors"
+msgstr "Sin errores"
+
+#: migasfree/api_v4/errmfs.py:28
+msgid "User unauthenticated"
+msgstr "Usuario no autenticado"
+
+#: migasfree/api_v4/errmfs.py:29
+msgid "User can not register computers"
+msgstr "El usuario no puede registrar ordenadores"
+
+#: migasfree/api_v4/errmfs.py:30
+msgid "Method GET not allowed"
+msgstr "Método GET no permitido"
+
+#: migasfree/api_v4/errmfs.py:31
+msgid "Command not found"
+msgstr "Comando no encontrado"
+
+#: migasfree/api_v4/errmfs.py:32
+msgid "Signature is not valid"
+msgstr "La firma no es válida"
+
+#: migasfree/api_v4/errmfs.py:33 migasfree/client/views/safe.py:317
+msgid "Computer not found"
+msgstr "Ordenador no encontrado"
+
+#: migasfree/api_v4/errmfs.py:34
+msgid "Device not found"
+msgstr "Dispositivo no encontrado"
+
+#: migasfree/api_v4/errmfs.py:35
+msgid "Project not found"
+msgstr "Proyecto no encontrado"
+
+#: migasfree/api_v4/errmfs.py:36
+msgid "User does not have permission"
+msgstr "El usuario no tiene permiso"
+
+#: migasfree/api_v4/errmfs.py:37 migasfree/client/views/safe.py:328
+#: migasfree/client/views/safe.py:333
+msgid "Unsubscribed computer"
+msgstr "Ordenador de baja"
+
+#: migasfree/api_v4/errmfs.py:38
+msgid "Generic error"
+msgstr "Error genérico"
+
+#: migasfree/api_v4/errmfs.py:96
+msgid "Traceback"
+msgstr "Rastreo"
+
+#: migasfree/api_v4/errmfs.py:151
+msgid "Generic error in server"
+msgstr "Error genérico en el servidor"
+
+#: migasfree/api_v4/views/client_api.py:122 migasfree/client/views/safe.py:185
+#, python-format
+msgid "Computer [%s] with available status, has been synchronized"
+msgstr "Ordenador [%s] con estado disponible, ha sido sincronizado"
 
 #: migasfree/app_catalog/admin.py:140 migasfree/client/admin.py:88
 #: migasfree/core/admin.py:349 migasfree/core/admin.py:452
@@ -265,7 +337,7 @@ msgstr "Grupos de políticas"
 msgid "Hardware"
 msgstr "Hardware"
 
-#: migasfree/client/admin.py:113 migasfree/client/models/synchronization.py:119
+#: migasfree/client/admin.py:113 migasfree/client/models/synchronization.py:223
 msgid "Synchronization"
 msgstr "Sincronización"
 
@@ -410,7 +482,7 @@ msgid "attributes sent"
 msgstr "atributos enviados"
 
 #: migasfree/client/models/computer.py:240
-#: migasfree/core/models/migas_link.py:434
+#: migasfree/core/models/migas_link.py:460
 #: migasfree/hardware/models/node.py:139
 msgid "product"
 msgstr "producto"
@@ -528,7 +600,8 @@ msgstr "Errores"
 
 #: migasfree/client/models/event.py:37
 #: migasfree/client/models/package_history.py:32
-#: migasfree/core/models/migas_link.py:433 migasfree/hardware/models/node.py:96
+#: migasfree/core/models/migas_link.py:419
+#: migasfree/core/models/migas_link.py:459 migasfree/hardware/models/node.py:96
 msgid "computer"
 msgstr "ordenador"
 
@@ -666,7 +739,7 @@ msgstr "Estado del PMS OK"
 msgid "indicates the status of transactions with PMS"
 msgstr "indica el estado de las transacciones con el PMS"
 
-#: migasfree/client/models/synchronization.py:120
+#: migasfree/client/models/synchronization.py:224
 msgid "Synchronizations"
 msgstr "Sincronizaciones"
 
@@ -709,11 +782,6 @@ msgstr "Ordenador con id=[%s]: IP [%s] cambiada por [%s]"
 msgid "Computer id=[%s]: UUID [%s] changed by [%s]"
 msgstr "Ordenador con id=[%s]: UUID [%s] cambiado por [%s]"
 
-#: migasfree/client/views/safe.py:185
-#, python-format
-msgid "Computer [%s] with available status, has been synchronized"
-msgstr "Ordenador [%s] con estado disponible, ha sido sincronizado"
-
 #: migasfree/client/views/safe.py:190
 msgid "EOT OK"
 msgstr "Fin de la transmisión correcto"
@@ -731,18 +799,10 @@ msgstr "Enviando sincronización..."
 msgid "New Computer added id=[%s]: NAME=[%s] UUID=[%s]"
 msgstr "Ordenador añadido con id=[%s]: Nombre=[%s] UUID=[%s]"
 
-#: migasfree/client/views/safe.py:310 migasfree/core/views.py:1101
+#: migasfree/client/views/safe.py:310 migasfree/core/views.py:1108
 #: migasfree/hardware/views.py:135
 msgid "Malformed claims"
 msgstr "Solicitud mal formada"
-
-#: migasfree/client/views/safe.py:317
-msgid "Computer not found"
-msgstr "Ordenador no encontrado"
-
-#: migasfree/client/views/safe.py:328 migasfree/client/views/safe.py:333
-msgid "Unsubscribed computer"
-msgstr "Ordenador de baja"
 
 #: migasfree/client/views/safe.py:342
 #, python-format
@@ -873,8 +933,8 @@ msgstr "Solicitud incorrecta"
 msgid "Sending software..."
 msgstr "Enviando software..."
 
-#: migasfree/client/views/safe.py:992 migasfree/core/views.py:1019
-#: migasfree/core/views.py:1085 migasfree/core/views.py:1119
+#: migasfree/client/views/safe.py:992 migasfree/core/views.py:1026
+#: migasfree/core/views.py:1092 migasfree/core/views.py:1126
 #: migasfree/hardware/views.py:151
 msgid "Data received"
 msgstr "Datos recibidos"
@@ -973,7 +1033,7 @@ msgstr "La versión es obligatoria"
 msgid "Architecture is required"
 msgstr "La arquitectura es obligatoria"
 
-#: migasfree/core/forms.py:203 migasfree/core/serializers.py:572
+#: migasfree/core/forms.py:203 migasfree/core/serializers.py:574
 #, python-format
 msgid "It is not possible to assign an inactive computer (%s) as an attribute"
 msgstr "No es posible asignar un ordenador inactivo (%s) como atributo"
@@ -982,7 +1042,7 @@ msgstr "No es posible asignar un ordenador inactivo (%s) como atributo"
 msgid "Project is required"
 msgstr "El proyecto es obligatorio"
 
-#: migasfree/core/forms.py:217 migasfree/core/serializers.py:580
+#: migasfree/core/forms.py:217 migasfree/core/serializers.py:582
 #, python-format
 msgid "Package %s must belong to the project %s"
 msgstr "El paquete %s debe pertenecer al proyecto %s"
@@ -1154,7 +1214,7 @@ msgstr "paquetes disponibles"
 #: migasfree/core/models/deployment.py:184
 msgid "If a computer has installed one of these packages it will be updated"
 msgstr ""
-"si un ordenador tiene instalado uno de estos paquetes, será actualizado"
+"Si un ordenador tiene instalado uno de estos paquetes, será actualizado"
 
 #: migasfree/core/models/deployment.py:183
 msgid "available package sets"
@@ -1220,6 +1280,10 @@ msgstr "Dominio"
 #: migasfree/core/models/domain.py:156
 msgid "Domains"
 msgstr "Dominios"
+
+#: migasfree/core/models/migas_link.py:418
+msgid "Installed Packages"
+msgstr "Paquetes instalados"
 
 #: migasfree/core/models/package.py:86 migasfree/hardware/models/node.py:145
 msgid "version"
@@ -1454,12 +1518,12 @@ msgstr "Perfil de usuario"
 msgid "User Profiles"
 msgstr "Perfiles de usuarios"
 
-#: migasfree/core/serializers.py:896
+#: migasfree/core/serializers.py:898
 #, python-format
 msgid "Minimum length is %d characters"
 msgstr "La longitud mínima es %d caracteres"
 
-#: migasfree/core/serializers.py:901
+#: migasfree/core/serializers.py:903
 msgid "Password fields didn't match."
 msgstr "Los campos de contraseña no coinciden."
 
@@ -1476,29 +1540,29 @@ msgstr "Este valor no puede ser validado como tipo de fichero"
 msgid "When more than one file is uploaded, name is required"
 msgstr "Cuando más de un fichero es subido, el nombre es obligatorio"
 
-#: migasfree/core/views.py:581
+#: migasfree/core/views.py:588
 msgid "Package already exists"
 msgstr "El paquete ya existe"
 
-#: migasfree/core/views.py:610
+#: migasfree/core/views.py:617
 msgid "The package has no store on the server"
 msgstr "Este paquete no está almacenado en el servidor"
 
-#: migasfree/core/views.py:646
+#: migasfree/core/views.py:653
 #, python-format
 msgid "Package %s has an incorrect name format"
 msgstr "El paquete %s tiene un formato de nombre incorrecto"
 
-#: migasfree/core/views.py:662
+#: migasfree/core/views.py:669
 #, python-format
 msgid "Package %s is duplicated in store %s"
 msgstr "El paquete %s está duplicado en el almacén %s"
 
-#: migasfree/core/views.py:768
+#: migasfree/core/views.py:775
 msgid "Operation received"
 msgstr "Operación recibida"
 
-#: migasfree/core/views.py:878
+#: migasfree/core/views.py:885
 msgid "Password changed!"
 msgstr "¡Contraseña cambiada!"
 
