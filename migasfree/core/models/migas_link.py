@@ -410,8 +410,8 @@ class MigasLink(object):
                         'model': self.model_to_route('client', 'packagehistory'),
                         'query': {
                             'computer__id': self.id,
+                            'package__project__id': self.project.id,
                             'uninstall_date': True  # isnull = True
-                            # TODO package project
                         },
                     },
                     'text': '{} [{}]'.format(
