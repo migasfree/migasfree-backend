@@ -56,6 +56,10 @@ class ComputerFilter(filters.FilterSet):
             ('desktop', 'desktop'),
         )
     )
+    installed_package = filters.NumberFilter(
+        method='filter_installed_package',
+        label='installed_package'
+    )
 
     def filter_has_software_inventory(self, qs, name, value):
         if value:
@@ -100,6 +104,12 @@ class ComputerFilter(filters.FilterSet):
             )
 
         return qs
+
+    def filter_installed_package(self, qs, name, value):
+        return qs.filter(
+            packagehistory__package__id=value,
+            packagehistory__uninstall_date__isnull=True
+        )
 
     class Meta:
         model = Computer
