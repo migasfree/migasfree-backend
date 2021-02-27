@@ -239,8 +239,18 @@ class NotificationWriteSerializer(serializers.ModelSerializer):
 
 
 class PackageHistorySerializer(serializers.ModelSerializer):
-    package = PackageInfoSerializer(many=False, read_only=True)
-    computer = ComputerInfoSerializer(many=False, read_only=True)
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['package'] = {
+            'id': obj.package.id,
+            'fullname': obj.package.fullname,
+            'project': ProjectInfoSerializer(obj.package.project).data
+        }
+
+        representation['computer'] = ComputerInfoSerializer(obj.computer).data
+
+        return representation
 
     class Meta:
         model = models.PackageHistory
