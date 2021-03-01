@@ -31,6 +31,7 @@ from django_redis import get_redis_connection
 
 from ..core.models import Package, Deployment
 from ..client.models import Notification, Fault, Error, Computer
+from ..utils import decode_set
 
 import logging
 logger = logging.getLogger('celery')
@@ -126,7 +127,7 @@ def add_generating_repos():
             'api': json.dumps({
                 'model': 'deployments',
                 'query': {
-                    'id_in': ','.join(con.smembers('migasfree:watch:repos'))
+                    'id_in': ','.join(decode_set(con.smembers('migasfree:watch:repos')))
                 }
             })
         }
