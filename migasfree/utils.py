@@ -285,6 +285,10 @@ def decode_dict(value):
     return {y.decode(): value.get(y).decode() for y in value.keys()}
 
 
+def decode_set(value):
+    return {i.decode() for i in value}
+
+
 def to_heatmap(results, range_name='day'):
     """
     :param results: [{"day": datetime, "count": int}, ...]
