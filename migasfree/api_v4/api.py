@@ -164,7 +164,6 @@ def upload_computer_software_base(request, name, uuid, computer, data):
 def upload_computer_software_history(request, name, uuid, computer, data):
     cmd = str(inspect.getframeinfo(inspect.currentframe()).function)
     try:
-        print(data[cmd])  # DEBUG
         computer.update_software_history(data[cmd])
         ret = return_message(cmd, errmfs.ok())
     except IndexError:
@@ -306,7 +305,6 @@ def upload_computer_info(request, name, uuid, computer, data):
 
     cmd = str(inspect.getframeinfo(inspect.currentframe()).function)
 
-    print(data)  # DEBUG
     computer_info = data.get(cmd).get("computer")
     platform_name = computer_info.get('platform', 'unknown')
     project_name = computer_info.get(
@@ -357,7 +355,6 @@ def upload_computer_info(request, name, uuid, computer, data):
 
         notify_project = True
 
-    print('before try')  # DEBUG
     try:
         client_attributes = data.get(cmd).get("attributes")  # basic and client attributes
         ip_address = computer_info.get("ip", "")
@@ -374,7 +371,6 @@ def upload_computer_info(request, name, uuid, computer, data):
         computer.update_identification(
             name, fqdn, Project.objects.get(name=project_name), uuid, ip_address, forwarded_ip_address
         )
-        print(computer)  # DEBUG
 
         project = Project.objects.get(name=project_name)
 
@@ -411,10 +407,8 @@ def upload_computer_info(request, name, uuid, computer, data):
         )
 
         # client attributes
-        print(client_attributes)  # DEBUG
         for prefix, value in client_attributes.items():
             client_property = Property.objects.get(prefix=prefix)
-            print(client_property, prefix, value)  # DEBUG
             if client_property.sort == 'client':
                 computer.sync_attributes.add(
                     *Attribute.process_kind_property(client_property, value)
@@ -438,7 +432,6 @@ def upload_computer_info(request, name, uuid, computer, data):
                 'name': item.name,
                 'code': item.code
             })
-        print(fault_definitions)  # DEBUG
 
         lst_deploys = []
         lst_pkg_to_remove = []
@@ -496,7 +489,6 @@ def upload_computer_info(request, name, uuid, computer, data):
             "base": False,  # computerbase and base has been removed!!!
             "hardware_capture": capture_hardware
         }
-        print(data)  # DEBUG
 
         ret = return_message(cmd, data)
     except ObjectDoesNotExist:
@@ -558,8 +550,6 @@ def register_computer(request, name, uuid, computer, data):
     pms_name = data.get('pms', 'apt')
     fqdn = data.get('fqdn', None)
 
-    print(data)  # DEBUG
-
     notify_platform = False
     notify_project = False
 
@@ -590,7 +580,7 @@ def register_computer(request, name, uuid, computer, data):
         Project.objects.create(
             name=project_name,
             pms=pms_name,
-            architecture='amd64',
+            architecture='amd64',  # by default
             platform=Platform.objects.get(name=platform_name),
             auto_register_computers=settings.MIGASFREE_AUTOREGISTER
         )
@@ -619,7 +609,8 @@ def register_computer(request, name, uuid, computer, data):
             uuid
         )
         computer.update_identification(
-            name, fqdn, Project.objects.get(name=project_name), uuid, data.get('ip', ''), get_client_ip(request)
+            name, fqdn, Project.objects.get(name=project_name),
+            uuid, data.get('ip', ''), get_client_ip(request)
         )
 
         if notify_platform:
@@ -631,7 +622,9 @@ def register_computer(request, name, uuid, computer, data):
 
         # Add Computer to Domain
         if user and user.userprofile.domain_preference:
-            user.userprofile.domain_preference.included_attributes.add(computer.get_cid_attribute())
+            user.userprofile.domain_preference.included_attributes.add(
+                computer.get_cid_attribute()
+            )
 
         # returns keys to client
         return return_message(cmd, get_keys_to_client(project_name))
