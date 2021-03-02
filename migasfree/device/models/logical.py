@@ -97,6 +97,7 @@ class Logical(models.Model, MigasLink):
         ret = {
             self.device.connection.device_type.name: {
                 'capability': self.get_name(),
+                'feature': self.get_name(),  # compatibility with client 4.x
                 'id': self.id,
                 'manufacturer': self.device.model.manufacturer.name
             }
