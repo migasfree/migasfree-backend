@@ -58,6 +58,7 @@ class MigasLink(object):
         'core.scheduledelay': 'schedule-delays',
         'core.schedule': 'schedules',
         'core.scope': 'scopes',
+        'core.store': 'stores',
         'core.userprofile': 'user-profiles',
         'device.capability': 'devices/capabilities',
         'device.connection': 'devices/connections',
