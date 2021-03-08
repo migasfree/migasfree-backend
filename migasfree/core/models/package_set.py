@@ -26,6 +26,15 @@ from .project import Project
 from .store import Store
 
 
+class DomainPackageSetManager(models.Manager):
+    def scope(self, user):
+        qs = super().get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(project__in=user.get_projects())
+
+        return qs
+
+
 class PackageSet(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_("name"),
@@ -56,6 +65,8 @@ class PackageSet(models.Model, MigasLink):
         blank=True,
         verbose_name=_("packages"),
     )
+
+    objects = DomainPackageSetManager()
 
     def clean(self):
         super().clean()
