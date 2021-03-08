@@ -61,6 +61,7 @@ class DeploymentFilter(filters.FilterSet):
             'schedule__id': ['exact'],
             'domain__id': ['exact'],
             'available_packages__id': ['exact'],
+            'available_package_sets__id': ['exact'],
             'included_attributes__id': ['exact'],
             'excluded_attributes__id': ['exact'],
         }
