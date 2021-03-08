@@ -210,6 +210,14 @@ class Synchronization(Event):
 
         con = get_redis_connection()
         for deploy_id in deployments:
+            con.srem(
+                'migasfree:deployments:{}:ok'.format(deploy_id),
+                self.computer.id
+            )
+            con.srem(
+                'migasfree:deployments:{}:error'.format(deploy_id),
+                self.computer.id
+            )
             con.sadd(
                 'migasfree:deployments:{}:{}'.format(
                     deploy_id,
