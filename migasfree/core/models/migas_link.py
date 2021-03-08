@@ -355,11 +355,13 @@ class MigasLink(object):
                                 })
 
                     if self._meta.model_name.lower() == 'platform':
+                        from ...client.models.computer import Computer
                         data.append({
                             'api': {
                                 'model': 'computers',
                                 'query': {
-                                    'platform': self.id
+                                    'platform': self.id,
+                                    'status__in': ','.join(Computer.PRODUCTIVE_STATUS)
                                 }
                             },
                             'text': gettext(self.related_title(rel_objects)),
