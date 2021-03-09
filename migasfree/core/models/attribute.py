@@ -307,14 +307,9 @@ class BasicAttribute(Attribute):
 
         basic_attributes = []
 
-        """
         if 'SET' in properties.keys():
-            obj, _ = Attribute.objects.get_or_create(
-                property_att=Property.objects.get(pk=properties['SET']),
-                value='All Systems'
-            )
+            obj = Attribute.objects.get(pk=1)  # special case (SET-All Systems)
             basic_attributes.append(obj.id)
-        """
 
         if 'CID' in properties.keys() and 'id' in kwargs:
             description = '{}'.format(kwargs['description'])
