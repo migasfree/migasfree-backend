@@ -545,7 +545,7 @@ class PackageViewSet(
     filterset_class = PackageFilter
     parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
     ordering_fields = '__all__'
-    ordering = ('name', 'version', 'project__name')
+    ordering = ('fullname', 'version', 'project__name')
     search_fields = ['fullname']
 
     def get_queryset(self):
