@@ -202,7 +202,11 @@ def upload_computer_message(request, name, uuid, computer, data):
 
     if data.get(cmd, '') == '':
         remove_computer_messages(computer.id)
-        Synchronization.objects.create(computer, consumer='migasfree_4.x')
+        Synchronization.objects.create(
+            computer,
+            consumer='migasfree_4.x',
+            start_date=datetime.now()
+        )
     else:
         add_computer_message(computer, data.get(cmd, ''))
 
