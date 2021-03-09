@@ -285,6 +285,8 @@ class DomainFilter(filters.FilterSet):
         fields = {
             'id': ['exact'],
             'name': ['exact', 'icontains'],
+            'included_attributes__id': ['exact'],
+            'excluded_attributes__id': ['exact'],
         }
 
 
