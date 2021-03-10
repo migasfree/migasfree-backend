@@ -222,7 +222,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                     'name': '{} ({})'.format(_('Without schedule'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
-                    'schedule': False
+                    'schedule': True  # isnull = True
                 }
             )
 
@@ -243,7 +243,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                     'name': '{} ({})'.format(_('With schedule'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
-                    'schedule': True
+                    'schedule': False  # isnull = False
                 }
             )
 
