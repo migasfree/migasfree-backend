@@ -3,9 +3,13 @@ import json
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse, Http404
 from django.template import Context, Template
+from rest_framework.decorators import permission_classes
+from rest_framework import permissions, views
+from rest_framework.response import Response
 
 from ...utils import uuid_validate
 from .client_api import get_computer
+from ..secure import gpg_get_key
 
 
 LABEL_TEMPLATE = """
@@ -81,3 +85,31 @@ def computer_label(request, uuid=None):
     context = Context(computer_info)
 
     return HttpResponse(template.render(context))
+
+
+def get_key_repositories(request):
+    """
+    Returns the repositories public key
+    """
+    return HttpResponse(
+        gpg_get_key('migasfree-repository'),
+        content_type='text/plain'
+    )
+
+
+@permission_classes((permissions.AllowAny,))
+class ServerInfoView(views.APIView):
+    def post(self, request, format=None):
+        """
+        Returns server info
+        """
+        from ... import __version__, __author__, __contact__, __homepage__
+
+        info = {
+            'version': __version__,
+            'author': __author__,
+            'contact': __contact__,
+            'homepage': __homepage__,
+        }
+
+        return Response(info)
