@@ -4,7 +4,7 @@
         "model": "core.property",
         "fields": {
             "prefix": "SET",
-            "name": "Set of Attributes",
+            "name": "Attribute Set",
             "enabled": true,
             "kind": "N",
             "sort": "basic",
