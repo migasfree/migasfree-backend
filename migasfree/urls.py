@@ -41,7 +41,9 @@ from .device.routers import router as device_router
 from .stats.routers import router as stats_router
 from .app_catalog.routers import router as catalog_router
 
-from .api_v4.views import api_v4, computer_label
+from .api_v4.views import (
+    api_v4, computer_label, get_key_repositories, ServerInfoView,
+)
 
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -104,6 +106,12 @@ urlpatterns = [
         computer_label,
         name='computer_label',
     ),
+    re_path(
+        r'^get_key_repositories/$',
+        get_key_repositories,
+        name='get_key_repositories'
+    ),
+    re_path(r'^api/v1/public/server/info/', ServerInfoView.as_view()),
 
     re_path(r'^', include('django.contrib.auth.urls')),
     re_path(r'^api-docs/', include_docs_urls(title=TITLE)),
