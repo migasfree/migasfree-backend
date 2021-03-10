@@ -224,7 +224,11 @@ class ClientPropertySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClientProperty
-        fields = ('id', 'prefix', 'name', 'kind', 'enabled', 'language', 'code')
+        fields = (
+            'id', 'prefix', 'name',
+            'kind', 'sort', 'enabled',
+            'language', 'code'
+        )
 
 
 class ServerAttributeSerializer(serializers.ModelSerializer):
