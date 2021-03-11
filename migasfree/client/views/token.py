@@ -417,16 +417,16 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
         pkgs = Deployment.available_deployments(
             computer, computer.get_all_attributes()
-        ).values_list('packages_to_install', 'packages_to_remove')
+        ).values_list('packages_to_install', 'packages_to_remove')  #, 'name', 'id')
 
         install = []
         remove = []
         for install_item, remove_item in pkgs:
             if install_item:
-                install = [x for x in install_item.split('\n') if x]
+                install.extend([x for x in install_item.split('\n') if x])
 
             if remove_item:
-                remove = [x for x in remove_item.split('\n') if x]
+                remove.extend([x for x in remove_item.split('\n') if x])
 
         packages = {
             'install': remove_duplicates_preserving_order(install),
