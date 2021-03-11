@@ -657,10 +657,10 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             remove = []
             for install_item, remove_item in pkgs:
                 if install_item:
-                    install = [x for x in install_item.split('\n') if x]
+                    install.extend([x for x in install_item.split('\n') if x])
 
                 if remove_item:
-                    remove = [x for x in remove_item.split('\n') if x]
+                    remove.extend([x for x in remove_item.split('\n') if x])
 
             # policies
             policy_pkg_to_install, policy_pkg_to_remove = Policy.get_packages(computer)
