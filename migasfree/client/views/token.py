@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import json
+
 from datetime import datetime, timedelta
 
 from django.conf import settings
@@ -417,20 +419,20 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
         pkgs = Deployment.available_deployments(
             computer, computer.get_all_attributes()
-        ).values_list('packages_to_install', 'packages_to_remove')  #, 'name', 'id')
+        ).values_list('packages_to_install', 'packages_to_remove', 'name', 'id')
 
-        install = []
-        remove = []
-        for install_item, remove_item in pkgs:
+        install = set()
+        remove = set()
+        for install_item, remove_item, deploy_name, deploy_id in pkgs:
             if install_item:
-                install.extend([x for x in install_item.split('\n') if x])
+                [install.add(json.dumps({'package': x, 'name': deploy_name, 'id': deploy_id}, sort_keys=True)) for x in install_item.split('\n') if x]
 
             if remove_item:
-                remove.extend([x for x in remove_item.split('\n') if x])
+                [remove.add(json.dumps({'package': x, 'name': deploy_name, 'id': deploy_id}, sort_keys=True)) for x in install_item.split('\n') if x]
 
         packages = {
-            'install': remove_duplicates_preserving_order(install),
-            'remove': remove_duplicates_preserving_order(remove)
+            'install': [json.loads(x) for x in install],
+            'remove': [json.loads(x) for x in remove]
         }
 
         policy_pkg_to_install, policy_pkg_to_remove = Policy.get_packages(computer)
