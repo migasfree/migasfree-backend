@@ -87,7 +87,11 @@ class AttributeInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Attribute
-        fields = ('id', 'property_att', 'value', 'description')
+        fields = (
+            'id', 'property_att',
+            'value', 'description',
+            'latitude', 'longitude'
+        )
 
 
 class AttributeSetSerializer(serializers.ModelSerializer):
@@ -238,7 +242,8 @@ class ServerAttributeSerializer(serializers.ModelSerializer):
         model = ServerAttribute
         fields = (
             'id', 'property_att',
-            'value', 'description'
+            'value', 'description',
+            'latitude', 'longitude'
         )
 
 
@@ -252,7 +257,11 @@ class ServerAttributeWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServerAttribute
-        fields = ('id', 'property_att', 'value', 'description')
+        fields = (
+            'id', 'property_att',
+            'value', 'description',
+            'latitude', 'longitude'
+        )
 
 
 class ClientAttributeSerializer(serializers.ModelSerializer):
@@ -262,14 +271,26 @@ class ClientAttributeSerializer(serializers.ModelSerializer):
         model = ClientAttribute
         fields = (
             'id', 'property_att',
-            'value', 'description'
+            'value', 'description',
+            'latitude', 'longitude'
         )
 
 
 class ClientAttributeWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['property_att'] = ServerPropertyInfoSerializer(obj.property_att).data
+
+        return representation
+
     class Meta:
         model = ClientAttribute
-        fields = ('id', 'property_att', 'value', 'description')
+        fields = (
+            'id', 'property_att',
+            'value', 'description',
+            'latitude', 'longitude'
+        )
 
 
 class ScheduleInfoSerializer(serializers.ModelSerializer):
