@@ -109,7 +109,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
 
         rolling_date = deploy.start_date
 
-        available_data = []
+        # available_data = []
         provided_data = []
         labels = []
         chart_data = {}
@@ -184,14 +184,14 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
 
                 labels.append(loop_date.strftime(date_format))
                 provided_data.append({'value': value})
-                if loop_date <= now:
-                    available_data.append({'value': value})
+                # if loop_date <= now:
+                #    available_data.append({'value': value})
 
             lst_attributes += lst_att_delay
             rolling_date = end_horizon.date()
 
         chart_data[_('Provided')] = provided_data
-        chart_data[_('Available')] = available_data
+        # chart_data[_('Available')] = available_data
 
         return Response(
             {
