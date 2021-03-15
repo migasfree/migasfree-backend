@@ -664,8 +664,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
             # policies
             policy_pkg_to_install, policy_pkg_to_remove = Policy.get_packages(computer)
-            install.extend(policy_pkg_to_install)
-            remove.extend(policy_pkg_to_remove)
+            install.extend([x['package'] for x in policy_pkg_to_install])
+            remove.extend([x['package'] for x in policy_pkg_to_remove])
 
             response = {
                 'install': remove_duplicates_preserving_order(install),
