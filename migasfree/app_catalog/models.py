@@ -251,7 +251,12 @@ class Policy(models.Model, MigasLink):
                 'packages_by_project__packages_to_install',
                 flat=True
             ):
-                _packages.extend(to_list(pkgs))
+                for item in to_list(pkgs):
+                    _packages.append({
+                        'package': item,
+                        'name': group.policy.name,
+                        'id': group.policy.id
+                    })
 
         return _packages
 
@@ -268,7 +273,7 @@ class Policy(models.Model, MigasLink):
             ):
                 for group in PolicyGroup.objects.filter(
                         policy=policy
-                ).order_by("priority"):
+                ).order_by('priority'):
                     if policy.belongs_excluding(
                             computer,
                             group.included_attributes.all(),
@@ -280,7 +285,12 @@ class Policy(models.Model, MigasLink):
                             'packages_by_project__packages_to_install',
                             flat=True
                         ):
-                            to_install.extend(to_list(pkgs))
+                            for item in to_list(pkgs):
+                                to_install.append({
+                                    'package': item,
+                                    'name': policy.name,
+                                    'id': policy.id
+                                })
 
                         if policy.exclusive:
                             to_remove.extend(
