@@ -60,6 +60,10 @@ class ComputerFilter(filters.FilterSet):
         method='filter_installed_package',
         label='installed_package'
     )
+    serial = filters.CharFilter(
+        method='filter_serial',
+        label='serial'
+    )
 
     def filter_has_software_inventory(self, qs, name, value):
         if value:
@@ -110,6 +114,9 @@ class ComputerFilter(filters.FilterSet):
             packagehistory__package__id=value,
             packagehistory__uninstall_date__isnull=True
         )
+
+    def filter_serial(self, qs, name, value):
+        return qs.filter(node__serial__icontains=value)
 
     class Meta:
         model = Computer
