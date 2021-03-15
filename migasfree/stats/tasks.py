@@ -186,7 +186,7 @@ def add_delayed_computers():
         'migasfree:chk:delayed', {
             'msg': gettext('Delayed Computers'),
             'target': 'computer',
-            'level': 'critical',
+            'level': 'warning',
             'result': result,
             'api': json.dumps({
                 'model': 'messages',
@@ -220,7 +220,8 @@ def add_active_schedule_deployments():
                 'model': 'deployments',
                 'query': {
                     'enabled': True,
-                    'schedule': False  # isnull = False
+                    'schedule': False,  # isnull = False
+                    'percent__lt': 100
                 }
             })
         }
@@ -249,7 +250,8 @@ def add_finished_schedule_deployments():
                 'model': 'deployments',
                 'query': {
                     'enabled': True,
-                    'schedule': False  # isnull = False
+                    'schedule': False,  # isnull = False
+                    'percent__gte': 100
                 }
             })
         }
