@@ -457,8 +457,8 @@ def upload_computer_info(request, name, uuid, computer, data):
 
         # policies
         policy_pkg_to_install, policy_pkg_to_remove = Policy.get_packages(computer)
-        lst_pkg_to_install.extend(policy_pkg_to_install)
-        lst_pkg_to_remove.extend(policy_pkg_to_remove)
+        lst_pkg_to_install.extend([x['package'] for x in policy_pkg_to_install])
+        lst_pkg_to_remove.extend([x['package'] for x in policy_pkg_to_remove])
 
         # devices
         logical_devices = []
