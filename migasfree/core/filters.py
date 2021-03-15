@@ -48,6 +48,32 @@ class DeploymentFilter(filters.FilterSet):
     available_packages = filters.CharFilter(
         field_name='available_packages__name', lookup_expr='icontains'
     )
+    percent__gte = filters.NumberFilter(
+        method='filter_percent_gte',
+        label='percent__gte',
+    )
+    percent__lt = filters.NumberFilter(
+        method='filter_percent_lt',
+        label='percent__lt'
+    )
+
+    def filter_percent_gte(self, qs, name, value):
+        ret = Deployment.objects.none()
+        for item in qs:
+            percent = item.schedule_timeline().get('percent', 100)
+            if percent >= value:
+                ret |= Deployment.objects.filter(pk=item.pk)
+
+        return ret
+
+    def filter_percent_lt(self, qs, name, value):
+        ret = Deployment.objects.none()
+        for item in qs:
+            percent = item.schedule_timeline().get('percent', 100)
+            if percent < value:
+                ret |= Deployment.objects.filter(pk=item.pk)
+
+        return ret
 
     class Meta:
         model = Deployment
