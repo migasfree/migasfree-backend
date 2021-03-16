@@ -80,21 +80,16 @@ class MigasLink(object):
 
     @staticmethod
     def related_title(related_objects):
-        if related_objects:
-            first = related_objects[0]
-            if related_objects.count() == 1:
-                return first._meta.verbose_name
+        if not related_objects:
+            return ''
 
-            return first._meta.verbose_name_plural
+        first = related_objects[0]
 
-        return ''
+        return first._meta.verbose_name if related_objects.count() == 1 else first._meta.verbose_name_plural
 
     @staticmethod
     def get_description(action):
-        if 'description' in action:
-            return action['description']
-
-        return ''
+        return action.get('description', '')
 
     def is_related(self, action):
         model = self._meta.model_name.lower()
