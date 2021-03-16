@@ -308,6 +308,10 @@ class MigasLink(object):
                                     'actions': actions
                                 })
                             else:
+                                if related_model.__name__.lower() == 'faultdefinition' \
+                                        and _field == 'users__user_ptr':
+                                    _field = 'users__id'
+
                                 data.append({
                                     'api': {
                                         'model': self.model_to_route(
