@@ -205,7 +205,7 @@ def upload_computer_message(request, name, uuid, computer, data):
         Synchronization.objects.create(
             computer,
             consumer='migasfree_4.x',
-            start_date=datetime.now()
+            start_date=computer.sync_start_date
         )
     else:
         add_computer_message(computer, data.get(cmd, ''))
