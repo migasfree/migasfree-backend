@@ -93,6 +93,21 @@ def get_user_or_create(name, fullname, ip_address=None):
 
 # TODO call when computer is updated
 def is_computer_changed(computer, name, project, ip_address, uuid):
+    # compatibility with client apiv4
+    if not computer:
+        computer = models.Computer.objects.create(name, project, uuid)
+        models.Migration.objects.create(computer, project)
+
+        if settings.MIGASFREE_NOTIFY_NEW_COMPUTER:
+            models.Notification.objects.create(
+                _("New Computer added id=[%s]: NAME=[%s] UUID=[%s]") % (
+                    computer.id,
+                    computer,
+                    computer.uuid
+                )
+            )
+    # end compatibility with client apiv4
+
     if computer.project != project:
         models.Migration.objects.create(
             computer=computer,
