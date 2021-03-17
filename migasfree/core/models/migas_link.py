@@ -166,14 +166,13 @@ class MigasLink(object):
                         'description': self.get_description(element[action]),
                     })
 
-        if actions:
-            data.append({
-                'model': self.model_to_route(self._meta.app_label, self._meta.model_name),
-                'pk': self.id,
-                'text': '{} {}'.format(self._meta.verbose_name, self.__str__()),
-                'count': 1,
-                'actions': actions
-            })
+        data.append({
+            'model': self.model_to_route(self._meta.app_label, self._meta.model_name),
+            'pk': self.id,
+            'text': '{} {}'.format(self._meta.verbose_name, self.__str__()),
+            'count': 1,
+            'actions': actions
+        })
 
         for obj, _ in objs:
             if obj.remote_field.field.remote_field.parent_link:
@@ -496,10 +495,10 @@ class MigasLink(object):
                 self._meta.model_name == 'serverattribute' and self.property_att.prefix == 'DMN'
         ):
             if self._meta.model_name == 'domain':
-                from . import Attribute
+                from . import ServerAttribute
                 domain = self
                 try:
-                    att = Attribute.objects.get(
+                    att = ServerAttribute.objects.get(
                         value=str(self.name),
                         property_att__prefix='DMN'
                     )
