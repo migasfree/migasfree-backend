@@ -148,7 +148,7 @@ class Migration(migrations.Migration):
                 ('code', models.TextField(blank=True, verbose_name='code')),
                 ('excluded_attributes', models.ManyToManyField(blank=True, related_name='faultdefinition_excluded', to='core.Attribute', verbose_name='excluded attributes')),
                 ('included_attributes', models.ManyToManyField(blank=True, related_name='faultdefinition_included', to='core.Attribute', verbose_name='included attributes')),
-                ('users', models.ManyToManyField(blank=True, related_name='faultdefinition_users__id', to='core.UserProfile', verbose_name='users')),
+                ('users', models.ManyToManyField(blank=True, related_name='faultdefinition_users', to='core.UserProfile', verbose_name='users')),
             ],
             options={
                 'verbose_name': 'Fault Definition',
@@ -199,5 +199,9 @@ class Migration(migrations.Migration):
             model_name='computer',
             name='tags',
             field=models.ManyToManyField(blank=True, related_name='tags', to='core.ServerAttribute', verbose_name='tags'),
+        ),
+        migrations.AddIndex(
+            model_name='synchronization',
+            index=models.Index(fields=['created_at'], name='client_sync_created_326a8e_idx'),
         ),
     ]
