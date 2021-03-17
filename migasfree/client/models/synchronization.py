@@ -230,6 +230,9 @@ class Synchronization(Event):
         app_label = 'client'
         verbose_name = _('Synchronization')
         verbose_name_plural = _('Synchronizations')
+        indexes = [
+            models.Index(fields=['created_at']),
+        ]
 
 
 @receiver(post_save, sender=Synchronization)
