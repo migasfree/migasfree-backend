@@ -206,7 +206,7 @@ class StoreWriteSerializer(serializers.ModelSerializer):
 class ServerPropertyInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServerProperty
-        fields = ('id', 'prefix', 'name')
+        fields = ('id', 'prefix', 'name', 'sort')
 
 
 class ServerPropertySerializer(serializers.ModelSerializer):
@@ -220,7 +220,7 @@ class ClientPropertyInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClientProperty
-        fields = ('id', 'prefix', 'name')
+        fields = ('id', 'prefix', 'name', 'sort')
 
 
 class ClientPropertySerializer(serializers.ModelSerializer):
