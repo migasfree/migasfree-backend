@@ -45,7 +45,11 @@ from .mixins import SafeConnectionMixin
 from ..client.models import Computer
 from ..client.resources import ComputerResource
 from ..client.serializers import ComputerInfoSerializer
-from .resources import ClientAttributeResource, ServerAttributeResource, ProjectResource
+from .resources import (
+    ClientAttributeResource, ServerAttributeResource,
+    ClientPropertyResource, ServerPropertyResource,
+    ProjectResource,
+)
 from ..device.models import Logical
 from ..device.serializers import LogicalSerializer
 from ..utils import read_remote_chunks
@@ -110,6 +114,10 @@ class ExportViewSet(viewsets.ViewSet):
             class_name = 'ClientAttribute'
         if class_name.lower() == 'serverattribute':
             class_name = 'ServerAttribute'
+        if class_name.lower() == 'clientproperty':
+            class_name = 'ClientProperty'
+        if class_name.lower() == 'serverproperty':
+            class_name = 'ServerProperty'
 
         resource = globals()['{}Resource'.format(class_name)]
         obj = resource()
@@ -262,7 +270,7 @@ class StoreViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class PropertyViewSet(viewsets.ModelViewSet, MigasViewSet):
+class PropertyViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
     filterset_class = PropertyFilter
@@ -290,7 +298,7 @@ class PropertyViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ServerPropertyViewSet(viewsets.ModelViewSet, MigasViewSet):
+class ServerPropertyViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = ServerProperty.objects.filter(sort='server')
     serializer_class = ServerPropertySerializer
     filterset_class = PropertyFilter
@@ -298,7 +306,7 @@ class ServerPropertyViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ClientPropertyViewSet(viewsets.ModelViewSet, MigasViewSet):
+class ClientPropertyViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = ClientProperty.objects.filter(sort__in=['client', 'basic'])
     serializer_class = ClientPropertySerializer
     filterset_class = PropertyFilter
