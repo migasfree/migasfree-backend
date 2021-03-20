@@ -482,7 +482,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 class ErrorViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-    viewsets.GenericViewSet, MigasViewSet
+    viewsets.GenericViewSet, MigasViewSet, ExportViewSet
 ):
     queryset = models.Error.objects.all()
     serializer_class = serializers.ErrorSerializer
@@ -552,7 +552,7 @@ class FaultDefinitionViewSet(viewsets.ModelViewSet, MigasViewSet):
 class FaultViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-    viewsets.GenericViewSet, MigasViewSet
+    viewsets.GenericViewSet, MigasViewSet, ExportViewSet
 ):
     queryset = models.Fault.objects.all()
     serializer_class = serializers.FaultSerializer
@@ -600,7 +600,7 @@ class FaultViewSet(
 class MigrationViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin, viewsets.GenericViewSet,
-    MigasViewSet
+    MigasViewSet, ExportViewSet
 ):
     queryset = models.Migration.objects.all()
     serializer_class = serializers.MigrationSerializer
@@ -682,7 +682,7 @@ class PackageHistoryViewSet(
 class StatusLogViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin, viewsets.GenericViewSet,
-    MigasViewSet
+    MigasViewSet, ExportViewSet
 ):
     queryset = models.StatusLog.objects.all()
     serializer_class = serializers.StatusLogSerializer
@@ -709,7 +709,7 @@ class StatusLogViewSet(
 class SynchronizationViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin, viewsets.GenericViewSet,
-    MigasViewSet
+    MigasViewSet, ExportViewSet
 ):
     queryset = models.Synchronization.objects.all()
     serializer_class = serializers.SynchronizationSerializer
@@ -750,7 +750,7 @@ class SynchronizationViewSet(
 class UserViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin, viewsets.GenericViewSet,
-    MigasViewSet
+    MigasViewSet, ExportViewSet
 ):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
