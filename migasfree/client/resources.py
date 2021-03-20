@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2019-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2019-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,10 @@
 
 from import_export import resources
 
-from .models import Computer
+from .models import (
+    Computer, User,
+    Error, Fault, Migration, StatusLog, Synchronization,
+)
 
 
 class ComputerResource(resources.ModelResource):
@@ -36,3 +39,33 @@ class ComputerResource(resources.ModelResource):
             'sync_attributes',
             'default_logical_device',
         )
+
+
+class UserResource(resources.ModelResource):
+    class Meta:
+        model = User
+
+
+class ErrorResource(resources.ModelResource):
+    class Meta:
+        model = Error
+
+
+class FaultResource(resources.ModelResource):
+    class Meta:
+        model = Fault
+
+
+class MigrationResource(resources.ModelResource):
+    class Meta:
+        model = Migration
+
+
+class StatusLogResource(resources.ModelResource):
+    class Meta:
+        model = StatusLog
+
+
+class SynchronizationResource(resources.ModelResource):
+    class Meta:
+        model = Synchronization
