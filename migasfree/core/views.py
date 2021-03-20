@@ -43,7 +43,11 @@ from rest_framework.response import Response
 from .mixins import SafeConnectionMixin
 
 from ..client.models import Computer
-from ..client.resources import ComputerResource
+from ..client.resources import (
+    ComputerResource, UserResource,
+    ErrorResource, FaultResource, MigrationResource,
+    StatusLogResource, SynchronizationResource,
+)
 from ..client.serializers import ComputerInfoSerializer
 from .resources import (
     ClientAttributeResource, ServerAttributeResource,
@@ -118,6 +122,8 @@ class ExportViewSet(viewsets.ViewSet):
             class_name = 'ClientProperty'
         if class_name.lower() == 'serverproperty':
             class_name = 'ServerProperty'
+        if class_name.lower() == 'statuslog':
+            class_name = 'StatusLog'
 
         resource = globals()['{}Resource'.format(class_name)]
         obj = resource()
