@@ -643,6 +643,17 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
 
         return PackageSetSerializer
 
+    def get_queryset(self):
+        if self.request is None:
+            return PackageSet.objects.none()
+
+        user = self.request.user.userprofile
+        qs = self.queryset.select_related('project', 'store')
+        if not user.is_view_all():
+            qs = qs.filter(project__in=user.get_projects())
+
+        return qs
+
     def _upload_packages(self, project, store, files):
         new_pkgs = []
         for file_ in files:
