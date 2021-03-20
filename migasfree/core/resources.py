@@ -18,7 +18,11 @@
 
 from import_export import resources, fields, widgets
 
-from .models import Attribute, ClientAttribute, ServerAttribute, Project
+from .models import (
+    Attribute, ClientAttribute, ServerAttribute,
+    Property, ClientProperty, ServerProperty,
+    Project,
+)
 
 
 class AttributeResource(resources.ModelResource):
@@ -27,7 +31,11 @@ class AttributeResource(resources.ModelResource):
 
     class Meta:
         model = Attribute
-        export_order = ('id', 'property_att', 'prefix', 'value', 'description', 'computers')
+        export_order = (
+            'id', 'property_att', 'prefix', 'value',
+            'description', 'computers',
+            'latitude', 'longitude'
+        )
 
     def dehydrate_computers(self, attribute):
         return attribute.total_computers()
@@ -44,6 +52,27 @@ class ClientAttributeResource(AttributeResource):
 class ServerAttributeResource(AttributeResource):
     class Meta:
         model = ServerAttribute
+
+
+class PropertyResource(resources.ModelResource):
+    class Meta:
+        model = Property
+        fields = (
+            'id', 'prefix', 'name',
+            'enabled', 'kind', 'sort', 'auto_add',
+            'language', 'code'
+        )
+
+
+class ClientPropertyResource(PropertyResource):
+    class Meta:
+        model = ClientProperty
+
+
+class ServerPropertyResource(resources.ModelResource):
+    class Meta:
+        model = ServerProperty
+        fields = ('id', 'prefix', 'name', 'enabled', 'kind', 'sort')
 
 
 class ProjectResource(resources.ModelResource):
