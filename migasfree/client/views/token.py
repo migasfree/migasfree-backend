@@ -73,8 +73,9 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         if self.request is None:
             return models.Computer.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related(
+        return models.Computer.objects.scope(
+            self.request.user.userprofile
+        ).select_related(
             'project',
             'project__platform',
             'sync_user',
@@ -85,10 +86,6 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
             'tags',
             Prefetch('node_set', queryset=Node.objects.filter(parent=None)),
         )
-        if not user.is_view_all():
-            qs = qs.filter(id__in=user.get_computers())
-
-        return qs
 
     def partial_update(self, request, *args, **kwargs):
         if isinstance(request.data, QueryDict):
@@ -501,20 +498,14 @@ class ErrorViewSet(
         if self.request is None:
             return models.Error.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related(
+        return models.Error.objects.scope(
+            self.request.user.userprofile
+        ).select_related(
             'project',
             'computer',
             'computer__project',
             'computer__sync_user',
         )
-        if not user.is_view_all():
-            qs = qs.filter(
-                project_id__in=user.get_projects(),
-                computer_id__in=user.get_computers()
-            )
-
-        return qs
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -537,15 +528,15 @@ class FaultDefinitionViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return models.FaultDefinition.objects.none()
 
-        qs = self.queryset.prefetch_related(
+        return models.FaultDefinition.objects.scope(
+            self.request.user.userprofile
+        ).prefetch_related(
             'included_attributes',
             'included_attributes__property_att',
             'excluded_attributes',
             'excluded_attributes__property_att',
             'users',
         )
-
-        return qs
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -571,21 +562,15 @@ class FaultViewSet(
         if self.request is None:
             return models.Fault.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related(
+        return models.Fault.objects.scope(
+            self.request.user.userprofile
+        ).select_related(
             'project',
             'fault_definition',
             'computer',
             'computer__project',
             'computer__sync_user',
         )
-        if not user.is_view_all():
-            qs = qs.filter(
-                project_id__in=user.get_projects(),
-                computer_id__in=user.get_computers()
-            )
-
-        return qs
 
     @action(methods=['get'], detail=False, url_path='user')
     def user_choices(self, request, format=None):
@@ -613,20 +598,14 @@ class MigrationViewSet(
         if self.request is None:
             return models.Migration.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related(
+        return models.Migration.objects.scope(
+            self.request.user.userprofile
+        ).select_related(
             'project',
             'computer',
             'computer__project',
             'computer__sync_user',
         )
-        if not user.is_view_all():
-            qs = qs.filter(
-                project_id__in=user.get_projects(),
-                computer_id__in=user.get_computers()
-            )
-
-        return qs
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -665,17 +644,14 @@ class PackageHistoryViewSet(
         if self.request is None:
             return models.PackageHistory.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related(
+        return models.PackageHistory.objects.scope(
+            self.request.user.userprofile
+        ).select_related(
             'computer',
             'package',
             'computer__project',
             'computer__sync_user',
         )
-        if not user.is_view_all():
-            qs = qs.filter(computer_id__in=user.get_computers())
-
-        return qs
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -695,14 +671,11 @@ class StatusLogViewSet(
         if self.request is None:
             return models.StatusLog.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related(
+        return models.StatusLog.objects.scope(
+            self.request.user.userprofile
+        ).select_related(
             'computer', 'computer__project', 'computer__sync_user'
         )
-        if not user.is_view_all():
-            qs = qs.filter(computer_id__in=user.get_computers())
-
-        return qs
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -729,21 +702,15 @@ class SynchronizationViewSet(
         if self.request is None:
             return models.Synchronization.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related(
+        return models.Synchronization.objects.scope(
+            self.request.user.userprofile
+        ).select_related(
             'computer',
             'computer__project',
             'computer__sync_user',
             'project',
             'user',
         )
-        if not user.is_view_all():
-            qs = qs.filter(
-                project_id__in=user.get_projects(),
-                computer_id__in=user.get_computers()
-            )
-
-        return qs
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -763,12 +730,9 @@ class UserViewSet(
         if self.request is None:
             return models.User.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset
-        if not user.is_view_all():
-            qs = qs.filter(computer__in=user.get_computers())
-
-        return qs
+        return models.User.objects.scope(
+            self.request.user.userprofile
+        )
 
 
 @permission_classes((permissions.IsAuthenticated,))

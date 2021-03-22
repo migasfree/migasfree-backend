@@ -76,7 +76,12 @@ class DeviceViewSet(viewsets.ModelViewSet, MigasViewSet):
         return serializers.DeviceSerializer
 
     def get_queryset(self):
-        return self.queryset.select_related(
+        if self.request is None:
+            return Device.objects.none()
+
+        return Device.objects.scope(
+            self.request.user.userprofile
+        ).select_related(
             'connection', 'connection__device_type',
             'model', 'model__manufacturer', 'model__device_type',
         )
@@ -177,7 +182,12 @@ class LogicalViewSet(viewsets.ModelViewSet, MigasViewSet):
         return serializers.LogicalSerializer
 
     def get_queryset(self):
-        return self.queryset.select_related(
+        if self.request is None:
+            return Logical.objects.none()
+
+        return Logical.objects.scope(
+            self.request.user.userprofile
+        ).select_related(
             'device', 'capability'
         ).prefetch_related('attributes')
 

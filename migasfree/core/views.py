@@ -187,15 +187,12 @@ class AttributeSetViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return AttributeSet.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.prefetch_related(
+        return AttributeSet.objects.scope(
+            self.request.user.userprofile
+        ).prefetch_related(
             'included_attributes__property_att',
             'excluded_attributes__property_att',
         )
-        if not user.is_view_all():
-            qs = qs.filter(id__in=user.get_attributes()).distinct()
-
-        return qs
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -211,12 +208,9 @@ class PlatformViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return Platform.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset
-        if not user.is_view_all():
-            qs = qs.filter(project__in=user.get_projects()).distinct()
-
-        return qs
+        return Platform.objects.scope(
+            self.request.user.userprofile
+        )
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -239,12 +233,9 @@ class ProjectViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         if self.request is None:
             return Project.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related('platform')
-        if not user.is_view_all():
-            qs = qs.filter(id__in=user.get_projects())
-
-        return qs
+        return Project.objects.scope(
+            self.request.user.userprofile
+        ).select_related('platform')
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -267,12 +258,9 @@ class StoreViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return Store.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related('project')
-        if not user.is_view_all():
-            qs = qs.filter(project__in=user.get_projects())
-
-        return qs
+        return Store.objects.scope(
+            self.request.user.userprofile
+        ).select_related('project')
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -330,12 +318,9 @@ class AttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         if self.request is None:
             return Attribute.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related('property_att')
-        if not user.is_view_all():
-            qs = qs.filter(id__in=user.get_attributes()).distinct()
-
-        return qs
+        return Attribute.objects.scope(
+            self.request.user.userprofile
+        ).select_related('property_att')
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -356,12 +341,9 @@ class ServerAttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet)
         if self.request is None:
             return ServerAttribute.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related('property_att')
-        if not user.is_view_all():
-            qs = qs.filter(id__in=user.get_attributes()).distinct()
-
-        return qs
+        return ServerAttribute.objects.scope(
+            self.request.user.userprofile
+        ).select_related('property_att')
 
     @action(methods=['get', 'patch'], detail=True)
     def computers(self, request, pk=None):
@@ -419,12 +401,9 @@ class ClientAttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet)
         if self.request is None:
             return ClientAttribute.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related('property_att')
-        if not user.is_view_all():
-            qs = qs.filter(id__in=user.get_attributes()).distinct()
-
-        return qs
+        return ClientAttribute.objects.scope(
+            self.request.user.userprofile
+        ).select_related('property_att')
 
     @action(methods=['get', 'put', 'patch'], detail=True, url_path='logical-devices')
     def logical_devices(self, request, pk=None):
@@ -513,11 +492,11 @@ class ScheduleDelayViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return ScheduleDelay.objects.none()
 
-        qs = self.queryset.prefetch_related(
+        return ScheduleDelay.objects.scope(
+            self.request.user.userprofile
+        ).prefetch_related(
             'attributes__property_att', 'schedule'
         )
-
-        return qs
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -566,12 +545,9 @@ class PackageViewSet(
         if self.request is None:
             return Package.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related('project', 'store')
-        if not user.is_view_all():
-            qs = qs.filter(project__in=user.get_projects())
-
-        return qs
+        return Package.objects.scope(
+            self.request.user.userprofile
+        ).select_related('project', 'store')
 
     def create(self, request, *args, **kwargs):
         data = dict(request.data)
@@ -661,12 +637,9 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return PackageSet.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related('project', 'store')
-        if not user.is_view_all():
-            qs = qs.filter(project__in=user.get_projects())
-
-        return qs
+        return PackageSet.objects.scope(
+            self.request.user.userprofile
+        ).select_related('project', 'store')
 
     def _upload_packages(self, project, store, files):
         new_pkgs = []
@@ -753,14 +726,9 @@ class DeploymentViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return Deployment.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related('project', 'schedule', 'domain')
-        if not user.is_view_all():
-            qs = qs.filter(project__in=user.get_projects())
-            if user.domain_preference:
-                qs = qs.filter(domain=user.domain_preference)
-
-        return qs
+        return Deployment.objects.scope(
+            self.request.user.userprofile
+        ).select_related('project', 'schedule', 'domain')
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -782,14 +750,7 @@ class InternalSourceViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return InternalSource.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.filter(source=Deployment.SOURCE_INTERNAL)
-        if not user.is_view_all():
-            qs = qs.filter(project__in=user.get_projects())
-            if user.domain_preference:
-                qs = qs.filter(domain=user.domain_preference)
-
-        return qs
+        return InternalSource.objects.scope(self.request.user.userprofile)
 
     @action(methods=['get'], detail=True)
     def metadata(self, request, pk=None):
@@ -829,14 +790,7 @@ class ExternalSourceViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return ExternalSource.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.filter(source=Deployment.SOURCE_EXTERNAL)
-        if not user.is_view_all():
-            qs = qs.filter(project__in=user.get_projects())
-            if user.domain_preference:
-                qs = qs.filter(domain=user.domain_preference)
-
-        return qs
+        return ExternalSource.objects.scope(self.request.user.userprofile)
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
@@ -992,7 +946,9 @@ class ScopeViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return Scope.objects.none()
 
-        qs = self.queryset.select_related(
+        return Scope.objects.scope(
+            self.request.user.userprofile
+        ).select_related(
             'domain', 'user'
         ).prefetch_related(
             'included_attributes',
@@ -1000,8 +956,6 @@ class ScopeViewSet(viewsets.ModelViewSet, MigasViewSet):
             'excluded_attributes',
             'excluded_attributes__property_att',
         )
-
-        return qs
 
 
 @permission_classes((permissions.AllowAny,))

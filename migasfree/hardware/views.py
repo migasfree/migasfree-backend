@@ -70,14 +70,11 @@ class HardwareViewSet(
         if self.request is None:
             return Node.objects.none()
 
-        user = self.request.user.userprofile
-        qs = self.queryset.select_related(
+        return Node.objects.scope(
+            self.request.user.userprofile
+        ).select_related(
             'computer', 'computer__project', 'computer__sync_user'
         )
-        if not user.is_view_all():
-            qs = qs.filter(computer_id__in=user.get_computers())
-
-        return qs
 
     @action(methods=['get'], detail=True)
     def info(self, request, pk=None):
