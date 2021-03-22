@@ -33,7 +33,7 @@ class DomainAttributeManager(models.Manager):
             qs = qs.filter(
                 Q(id__in=user.get_attributes()) |
                 Q(id__in=user.get_domain_tags())
-            )
+            ).distinct()
 
         return qs
 
