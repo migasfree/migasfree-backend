@@ -32,7 +32,7 @@ class AttributeSetManager(models.Manager):
         qs = super().get_queryset()
         if not user.is_view_all():
             qs = qs.filter(
-                included_attributes__in=user.get_attributes()
+                id__in=user.get_attributes()
             ).distinct()
 
         return qs
