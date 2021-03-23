@@ -915,15 +915,13 @@ class DomainViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return Domain.objects.none()
 
-        qs = self.queryset.prefetch_related(
+        return self.queryset.prefetch_related(
             'included_attributes',
             'included_attributes__property_att',
             'excluded_attributes',
             'excluded_attributes__property_att',
             'tags',
         )
-
-        return qs
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -946,16 +944,7 @@ class ScopeViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return Scope.objects.none()
 
-        return Scope.objects.scope(
-            self.request.user.userprofile
-        ).select_related(
-            'domain', 'user'
-        ).prefetch_related(
-            'included_attributes',
-            'included_attributes__property_att',
-            'excluded_attributes',
-            'excluded_attributes__property_att',
-        )
+        return Scope.objects.scope(self.request.user.userprofile)
 
 
 @permission_classes((permissions.AllowAny,))
