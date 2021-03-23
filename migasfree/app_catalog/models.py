@@ -34,8 +34,11 @@ _UNSAVED_IMAGEFIELD = 'unsaved_imagefield'
 
 
 class DomainPackagesByProjectManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('project')
+
     def scope(self, user):
-        qs = super(DomainPackagesByProjectManager, self).get_queryset()
+        qs = self.get_queryset()
         if not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects())
 
