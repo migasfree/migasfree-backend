@@ -69,6 +69,7 @@ class ApplicationAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
+
         return super().get_queryset(
             request
         ).prefetch_related(
@@ -93,6 +94,7 @@ class PolicyGroupAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
+
         return super().get_queryset(
             request
         ).prefetch_related(
@@ -114,6 +116,7 @@ class PolicyGroupLine(admin.TabularInline):
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
+
         return super().get_queryset(
             request
         ).prefetch_related(
@@ -155,6 +158,7 @@ class PolicyAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
+
         return super().get_queryset(
             request
         ).prefetch_related(
