@@ -28,8 +28,17 @@ from .user import User
 
 
 class DomainSynchronizationManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related(
+            'computer',
+            'computer__project',
+            'computer__sync_user',
+            'project',
+            'user',
+        )
+
     def scope(self, user):
-        qs = super().get_queryset()
+        qs = self.get_queryset()
         if not user.is_view_all():
             qs = qs.filter(
                 computer_id__in=user.get_computers()
