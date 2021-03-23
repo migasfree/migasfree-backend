@@ -23,6 +23,16 @@ from ...core.models import Package, MigasLink
 from .computer import Computer
 
 
+class PackageHistoryManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related(
+            'computer',
+            'package',
+            'computer__project',
+            'computer__sync_user',
+        )
+
+
 class PackageHistory(models.Model, MigasLink):
     """packages installed or/and uninstalled in computers"""
 
@@ -48,6 +58,8 @@ class PackageHistory(models.Model, MigasLink):
         verbose_name=_('uninstall date'),
         null=True,
     )
+
+    objects = PackageHistoryManager()
 
     def __str__(self):
         return _('%s at computer %s') % (self.package.fullname, self.computer)
