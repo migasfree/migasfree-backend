@@ -27,8 +27,11 @@ from .property import Property
 
 
 class DomainAttributeManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related('property_att')
+
     def scope(self, user):
-        qs = super().get_queryset()
+        qs = self.get_queryset()
         if not user.is_view_all():
             qs = qs.filter(
                 Q(id__in=user.get_attributes()) |
@@ -249,9 +252,7 @@ class Attribute(models.Model, MigasLink):
 
 class ServerAttributeManager(DomainAttributeManager):
     def scope(self, user):
-        qs = super().scope(user)
-
-        return qs.filter(property_att__sort='server')
+        return super().scope(user).filter(property_att__sort='server')
 
 
 class ServerAttribute(Attribute):  # tag
@@ -272,9 +273,7 @@ class ServerAttribute(Attribute):  # tag
 
 class ClientAttributeManager(DomainAttributeManager):
     def scope(self, user):
-        qs = super().scope(user)
-
-        return qs.filter(
+        return super().scope(user).filter(
             Q(property_att__sort='client') |
             Q(property_att__sort='basic')
         )
@@ -291,9 +290,7 @@ class ClientAttribute(Attribute):
 
 class BasicAttributeManager(DomainAttributeManager):
     def scope(self, user):
-        qs = super().scope(user)
-
-        return qs.filter(property_att__sort='basic')
+        return super().scope(user).filter(property_att__sort='basic')
 
 
 class BasicAttribute(Attribute):
