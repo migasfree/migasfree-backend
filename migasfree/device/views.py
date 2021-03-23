@@ -16,13 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
 from ..client.models import Computer
+from ..core.models import Attribute
 from ..core.views import MigasViewSet
 
 from .models import (
@@ -79,12 +80,7 @@ class DeviceViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return Device.objects.none()
 
-        return Device.objects.scope(
-            self.request.user.userprofile
-        ).select_related(
-            'connection', 'connection__device_type',
-            'model', 'model__manufacturer', 'model__device_type',
-        )
+        return Device.objects.scope(self.request.user.userprofile)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -185,11 +181,14 @@ class LogicalViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return Logical.objects.none()
 
+        qs = Attribute.objects.scope(self.request.user.userprofile)
+
         return Logical.objects.scope(
             self.request.user.userprofile
-        ).select_related(
-            'device', 'capability'
-        ).prefetch_related('attributes')
+        ).prefetch_related(
+            Prefetch('attributes', queryset=qs),
+            'attributes__property_att',
+        )
 
     @action(methods=['get'], detail=False)
     def available(self, request):
