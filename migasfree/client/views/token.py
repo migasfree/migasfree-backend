@@ -30,7 +30,7 @@ from rest_framework import viewsets, exceptions, status, mixins, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
-from ...core.models import Deployment
+from ...core.models import Deployment, Attribute
 from ...device.models import Logical, Driver, Model
 from ...device.serializers import LogicalInfoSerializer
 from ...hardware.models import Node
@@ -514,7 +514,17 @@ class FaultDefinitionViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return models.FaultDefinition.objects.none()
 
-        return models.FaultDefinition.objects.scope(self.request.user.userprofile)
+        qs = Attribute.objects.scope(self.request.user.userprofile)
+
+        return models.FaultDefinition.objects.scope(
+            self.request.user.userprofile
+        ).prefetch_related(
+            Prefetch('included_attributes', queryset=qs),
+            Prefetch('excluded_attributes', queryset=qs),
+            'included_attributes__property_att',
+            'excluded_attributes__property_att',
+            'users',
+        )
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
