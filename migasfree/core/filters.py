@@ -324,5 +324,6 @@ class ScopeFilter(filters.FilterSet):
             'name': ['exact', 'icontains'],
             'user': ['exact'],
             'user__id': ['exact'],
-            'user__username': ['exact', 'icontains']
+            'user__username': ['exact', 'icontains'],
+            'domain__id': ['exact'],
         }
