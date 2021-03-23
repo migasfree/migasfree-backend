@@ -47,8 +47,13 @@ from .domain import Domain
 
 
 class DeploymentManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related(
+            'project', 'schedule', 'domain'
+        )
+
     def scope(self, user):
-        qs = super().get_queryset()
+        qs = self.get_queryset()
         if not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects())
             domain = user.domain_preference
@@ -469,20 +474,9 @@ def pre_delete_deployment(sender, instance, **kwargs):
     con.delete('migasfree:deployments:%d:computers' % instance.id)
 
 
-class InternalSourceManager(models.Manager):
+class InternalSourceManager(DeploymentManager):
     def scope(self, user):
-        qs = super().get_queryset()
-        if not user.is_view_all():
-            qs = qs.filter(project__in=user.get_projects())
-            domain = user.domain_preference
-            if domain:
-                qs = qs.filter(
-                    Q(domain_id=domain.id) | Q(domain_id=None)
-                )
-
-        qs = qs.filter(source=Deployment.SOURCE_INTERNAL)
-
-        return qs
+        return super().scope(user).filter(source=Deployment.SOURCE_INTERNAL)
 
 
 class InternalSource(Deployment):
@@ -499,20 +493,9 @@ class InternalSource(Deployment):
         proxy = True
 
 
-class ExternalSourceManager(models.Manager):
+class ExternalSourceManager(DeploymentManager):
     def scope(self, user):
-        qs = super().get_queryset()
-        if not user.is_view_all():
-            qs = qs.filter(project__in=user.get_projects())
-            domain = user.domain_preference
-            if domain:
-                qs = qs.filter(
-                    Q(domain_id=domain.id) | Q(domain_id=None)
-                )
-
-        qs = qs.filter(source=Deployment.SOURCE_EXTERNAL)
-
-        return qs
+        return super().scope(user).filter(source=Deployment.SOURCE_EXTERNAL)
 
 
 class ExternalSource(Deployment):
