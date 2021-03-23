@@ -300,12 +300,13 @@ class FaultDefinitionAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
-        return super().get_queryset(
-            request
+
+        return FaultDefinition.objects.scope(
+            request.user.userprofile
         ).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
-            'included_attributes__property_att',
             Prefetch('excluded_attributes', queryset=qs),
+            'included_attributes__property_att',
             'excluded_attributes__property_att',
             'users',
         )
