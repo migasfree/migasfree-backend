@@ -29,6 +29,7 @@ from django.conf import settings
 from django.contrib.auth.models import Group, Permission
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
+from django.db.models import Prefetch
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
@@ -187,9 +188,13 @@ class AttributeSetViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return AttributeSet.objects.none()
 
+        qs = Attribute.objects.scope(self.request.user.userprofile)
+
         return AttributeSet.objects.scope(
             self.request.user.userprofile
         ).prefetch_related(
+            Prefetch('included_attributes', queryset=qs),
+            Prefetch('excluded_attributes', queryset=qs),
             'included_attributes__property_att',
             'excluded_attributes__property_att',
         )
@@ -208,9 +213,7 @@ class PlatformViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return Platform.objects.none()
 
-        return Platform.objects.scope(
-            self.request.user.userprofile
-        )
+        return Platform.objects.scope(self.request.user.userprofile)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -233,9 +236,7 @@ class ProjectViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         if self.request is None:
             return Project.objects.none()
 
-        return Project.objects.scope(
-            self.request.user.userprofile
-        ).select_related('platform')
+        return Project.objects.scope(self.request.user.userprofile)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -258,9 +259,7 @@ class StoreViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return Store.objects.none()
 
-        return Store.objects.scope(
-            self.request.user.userprofile
-        ).select_related('project')
+        return Store.objects.scope(self.request.user.userprofile)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -318,9 +317,7 @@ class AttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         if self.request is None:
             return Attribute.objects.none()
 
-        return Attribute.objects.scope(
-            self.request.user.userprofile
-        ).select_related('property_att')
+        return Attribute.objects.scope(self.request.user.userprofile)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -341,9 +338,7 @@ class ServerAttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet)
         if self.request is None:
             return ServerAttribute.objects.none()
 
-        return ServerAttribute.objects.scope(
-            self.request.user.userprofile
-        ).select_related('property_att')
+        return ServerAttribute.objects.scope(self.request.user.userprofile)
 
     @action(methods=['get', 'patch'], detail=True)
     def computers(self, request, pk=None):
@@ -401,9 +396,7 @@ class ClientAttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet)
         if self.request is None:
             return ClientAttribute.objects.none()
 
-        return ClientAttribute.objects.scope(
-            self.request.user.userprofile
-        ).select_related('property_att')
+        return ClientAttribute.objects.scope(self.request.user.userprofile)
 
     @action(methods=['get', 'put', 'patch'], detail=True, url_path='logical-devices')
     def logical_devices(self, request, pk=None):
@@ -492,9 +485,12 @@ class ScheduleDelayViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return ScheduleDelay.objects.none()
 
+        qs = Attribute.objects.scope(self.request.user.userprofile)
+
         return ScheduleDelay.objects.scope(
             self.request.user.userprofile
         ).prefetch_related(
+            Prefetch('attributes', queryset=qs),
             'attributes__property_att', 'schedule'
         )
 
@@ -519,9 +515,7 @@ class ScheduleViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return Schedule.objects.none()
 
-        qs = self.queryset.prefetch_related('delays')
-
-        return qs
+        return self.queryset.prefetch_related('delays')
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -545,9 +539,7 @@ class PackageViewSet(
         if self.request is None:
             return Package.objects.none()
 
-        return Package.objects.scope(
-            self.request.user.userprofile
-        ).select_related('project', 'store')
+        return Package.objects.scope(self.request.user.userprofile)
 
     def create(self, request, *args, **kwargs):
         data = dict(request.data)
@@ -637,9 +629,7 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return PackageSet.objects.none()
 
-        return PackageSet.objects.scope(
-            self.request.user.userprofile
-        ).select_related('project', 'store')
+        return PackageSet.objects.scope(self.request.user.userprofile)
 
     def _upload_packages(self, project, store, files):
         new_pkgs = []
@@ -726,9 +716,7 @@ class DeploymentViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return Deployment.objects.none()
 
-        return Deployment.objects.scope(
-            self.request.user.userprofile
-        ).select_related('project', 'schedule', 'domain')
+        return Deployment.objects.scope(self.request.user.userprofile)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -823,15 +811,13 @@ class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return UserProfile.objects.none()
 
-        qs = self.queryset.select_related(
+        return self.queryset.select_related(
             'domain_preference', 'scope_preference'
         ).prefetch_related(
             'domains',
             'groups',
             'user_permissions',
         )
-
-        return qs
 
     @action(methods=['get'], detail=False, url_path='domain-admins')
     def domain_admins(self, request, format=None):
