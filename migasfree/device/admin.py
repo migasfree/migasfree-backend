@@ -87,7 +87,7 @@ class LogicalAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return super(LogicalAdmin, self).get_queryset(
+        return super().get_queryset(
             request
         ).prefetch_related(
             Prefetch('attributes', queryset=qs),
@@ -134,11 +134,8 @@ class DeviceAdmin(admin.ModelAdmin):
         self.user = request.user
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return super(DeviceAdmin, self).get_queryset(
-            request
-        ).select_related(
-            'connection', 'connection__device_type',
-            'model', 'model__manufacturer', 'model__device_type',
+        return Device.objects.scope(
+            request.user.userprofile
         ).prefetch_related(
             Prefetch('logical_set__attributes', queryset=qs),
             'logical_set__attributes__property_att',
