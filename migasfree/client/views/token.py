@@ -75,13 +75,6 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
         return models.Computer.objects.scope(
             self.request.user.userprofile
-        ).select_related(
-            'project',
-            'project__platform',
-            'sync_user',
-            'default_logical_device',
-            'default_logical_device__capability',
-            'default_logical_device__device',
         ).prefetch_related(
             'tags',
             Prefetch('node_set', queryset=Node.objects.filter(parent=None)),
@@ -498,14 +491,7 @@ class ErrorViewSet(
         if self.request is None:
             return models.Error.objects.none()
 
-        return models.Error.objects.scope(
-            self.request.user.userprofile
-        ).select_related(
-            'project',
-            'computer',
-            'computer__project',
-            'computer__sync_user',
-        )
+        return models.Error.objects.scope(self.request.user.userprofile)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -528,15 +514,7 @@ class FaultDefinitionViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return models.FaultDefinition.objects.none()
 
-        return models.FaultDefinition.objects.scope(
-            self.request.user.userprofile
-        ).prefetch_related(
-            'included_attributes',
-            'included_attributes__property_att',
-            'excluded_attributes',
-            'excluded_attributes__property_att',
-            'users',
-        )
+        return models.FaultDefinition.objects.scope(self.request.user.userprofile)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -562,15 +540,7 @@ class FaultViewSet(
         if self.request is None:
             return models.Fault.objects.none()
 
-        return models.Fault.objects.scope(
-            self.request.user.userprofile
-        ).select_related(
-            'project',
-            'fault_definition',
-            'computer',
-            'computer__project',
-            'computer__sync_user',
-        )
+        return models.Fault.objects.scope(self.request.user.userprofile)
 
     @action(methods=['get'], detail=False, url_path='user')
     def user_choices(self, request, format=None):
@@ -598,14 +568,7 @@ class MigrationViewSet(
         if self.request is None:
             return models.Migration.objects.none()
 
-        return models.Migration.objects.scope(
-            self.request.user.userprofile
-        ).select_related(
-            'project',
-            'computer',
-            'computer__project',
-            'computer__sync_user',
-        )
+        return models.Migration.objects.scope(self.request.user.userprofile)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -640,19 +603,6 @@ class PackageHistoryViewSet(
     ordering_fields = '__all__'
     ordering = ('computer__name', 'package__fullname',)
 
-    def get_queryset(self):
-        if self.request is None:
-            return models.PackageHistory.objects.none()
-
-        return models.PackageHistory.objects.scope(
-            self.request.user.userprofile
-        ).select_related(
-            'computer',
-            'package',
-            'computer__project',
-            'computer__sync_user',
-        )
-
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class StatusLogViewSet(
@@ -671,11 +621,7 @@ class StatusLogViewSet(
         if self.request is None:
             return models.StatusLog.objects.none()
 
-        return models.StatusLog.objects.scope(
-            self.request.user.userprofile
-        ).select_related(
-            'computer', 'computer__project', 'computer__sync_user'
-        )
+        return models.StatusLog.objects.scope(self.request.user.userprofile)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -702,15 +648,7 @@ class SynchronizationViewSet(
         if self.request is None:
             return models.Synchronization.objects.none()
 
-        return models.Synchronization.objects.scope(
-            self.request.user.userprofile
-        ).select_related(
-            'computer',
-            'computer__project',
-            'computer__sync_user',
-            'project',
-            'user',
-        )
+        return models.Synchronization.objects.scope(self.request.user.userprofile)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -730,9 +668,7 @@ class UserViewSet(
         if self.request is None:
             return models.User.objects.none()
 
-        return models.User.objects.scope(
-            self.request.user.userprofile
-        )
+        return models.User.objects.scope(self.request.user.userprofile)
 
 
 @permission_classes((permissions.IsAuthenticated,))
