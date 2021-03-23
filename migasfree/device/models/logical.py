@@ -38,8 +38,13 @@ class LogicalManager(models.Manager):
 
         return obj
 
+    def get_queryset(self):
+        return super().get_queryset().select_related(
+            'device', 'capability'
+        )
+
     def scope(self, user):
-        qs = super().get_queryset()
+        qs = self.get_queryset()
         if not user.is_view_all():
             qs = qs.filter(
                 attributes__in=user.get_attributes()
