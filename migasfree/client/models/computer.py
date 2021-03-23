@@ -43,8 +43,16 @@ from .user import User
 
 
 class DomainComputerManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related(
+            'project',
+            'sync_user',
+            'default_logical_device',
+            'default_logical_device__device',
+        )
+
     def scope(self, user):
-        qs = super(DomainComputerManager, self).get_queryset()
+        qs = self.get_queryset()
         if not user.is_view_all():
             qs = qs.filter(id__in=user.get_computers())
 
