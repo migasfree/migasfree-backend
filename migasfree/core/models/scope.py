@@ -40,9 +40,18 @@ class ScopeManager(models.Manager):
 
         return obj
 
+    def get_queryset(self):
+        return super().get_queryset().select_related(
+            'domain', 'user'
+        ).prefetch_related(
+            'included_attributes',
+            'included_attributes__property_att',
+            'excluded_attributes',
+            'excluded_attributes__property_att',
+        )
+
     def scope(self, user):
-        qs = super().get_queryset()
-        qs = qs.filter(user=user)
+        qs = self.get_queryset().filter(user=user)
         if user.domain_preference:
             qs = qs.filter(domain=user.domain_preference)
 
