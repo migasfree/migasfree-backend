@@ -67,9 +67,6 @@ class StoreAdmin(admin.ModelAdmin):
     read_only_fields = ('slug',)
     fields = ('name', 'project')
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('project')
-
 
 class ClientPropertyFilter(SimpleListFilter):
     title = 'Client Property'
@@ -155,6 +152,7 @@ class ClientAttributeAdmin(ImportExportActionModelAdmin):
             if computers:
                 sql += " AND client_computer_sync_attributes.computer_id IN " \
                     + "(" + ",".join(str(x) for x in computers) + ")"
+
         return ClientAttribute.objects.scope(user).extra(
             select={'total_computers': sql}
         )
@@ -192,6 +190,7 @@ class ServerAttributeAdmin(ImportExportActionModelAdmin):
             if computers:
                 sql += " AND client_computer_sync_attributes.computer_id IN " \
                     + "(" + ",".join(str(x) for x in computers) + ")"
+
         return ServerAttribute.objects.scope(user).extra(
             select={'total_computers': sql}
         )
@@ -217,13 +216,14 @@ class AttributeSetAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
-        return super().get_queryset(
-            request
+
+        return AttributeSet.objects.scope(
+            request.user.userprofile
         ).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
-            'included_attributes__property_att',
             Prefetch('excluded_attributes', queryset=qs),
-            'excluded_attributes__property_att'
+            'included_attributes__property_att',
+            'excluded_attributes__property_att',
         )
 
 
@@ -251,7 +251,7 @@ class ScheduleDelayLine(admin.TabularInline):
             request
         ).prefetch_related(
             Prefetch('attributes', queryset=qs),
-            'attributes__property_att',
+            'attributes__property_att', 'schedule'
         )
 
 
@@ -267,15 +267,10 @@ class ScheduleAdmin(admin.ModelAdmin):
         ('', {
             'fields': (
                 'name',
-                'project',
+                'description'
             )
         }),
     )
-
-    def get_queryset(self, request):
-        self.request = request
-
-        return super().get_queryset(request)
 
 
 @admin.register(Package)
@@ -442,7 +437,7 @@ class DeploymentAdmin(admin.ModelAdmin):
                                 'WHERE core_deployment.schedule_id = core_scheduledelay.schedule_id '
                                 'ORDER BY core_scheduledelay.delay DESC LIMIT 1)'
              }
-        ).select_related('project', 'schedule')
+        )
 
 
 @admin.register(ExternalSource)
