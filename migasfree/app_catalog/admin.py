@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ from django.utils.translation import gettext_lazy as _
 
 # from form_utils.widgets import ImageWidget
 
-from migasfree.core.models import Attribute
+from ..core.models import Attribute
 from .models import Application, PackagesByProject, Policy, PolicyGroup
 
 
@@ -35,11 +35,6 @@ class PackagesByProjectAdmin(admin.ModelAdmin):
     list_filter = ('application__name',)
     search_fields = ('application__name', 'packages_to_install')
 
-    def get_queryset(self, request):
-        return super(PackagesByProjectAdmin, self).get_queryset(
-            request
-        ).prefetch_related('project')
-
 
 class PackagesByProjectLine(admin.TabularInline):
     model = PackagesByProject
@@ -48,11 +43,14 @@ class PackagesByProjectLine(admin.TabularInline):
     extra = 0
 
     def get_formset(self, request, obj=None, **kwargs):
-        formset = super(PackagesByProjectLine, self).get_formset(request, obj, **kwargs)
+        formset = super().get_formset(request, obj, **kwargs)
         formset.form.base_fields['project'].widget.can_change_related = False
         formset.form.base_fields['project'].widget.can_add_related = False
 
         return formset
+
+    def get_queryset(self, request):
+        return PackagesByProject.objects.scope(request.user.userprofile)
 
 
 @admin.register(Application)
@@ -71,7 +69,7 @@ class ApplicationAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
-        return super(ApplicationAdmin, self).get_queryset(
+        return super().get_queryset(
             request
         ).prefetch_related(
             Prefetch('available_for_attributes', queryset=qs)
@@ -95,7 +93,7 @@ class PolicyGroupAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
-        return super(PolicyGroupAdmin, self).get_queryset(
+        return super().get_queryset(
             request
         ).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
@@ -116,7 +114,7 @@ class PolicyGroupLine(admin.TabularInline):
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
-        return super(PolicyGroupLine, self).get_queryset(
+        return super().get_queryset(
             request
         ).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
@@ -157,7 +155,7 @@ class PolicyAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
-        return super(PolicyAdmin, self).get_queryset(
+        return super().get_queryset(
             request
         ).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
