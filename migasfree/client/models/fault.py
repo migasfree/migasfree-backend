@@ -27,8 +27,17 @@ from .fault_definition import FaultDefinition
 
 
 class DomainFaultManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related(
+            'project',
+            'fault_definition',
+            'computer',
+            'computer__project',
+            'computer__sync_user',
+        )
+
     def scope(self, user):
-        qs = super().get_queryset()
+        qs = self.get_queryset()
         if user and not user.is_view_all():
             qs = qs.filter(
                 project_id__in=user.get_projects(),
