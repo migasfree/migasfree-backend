@@ -31,9 +31,7 @@ class AttributeSetManager(models.Manager):
     def scope(self, user):
         qs = super().get_queryset()
         if not user.is_view_all():
-            qs = qs.filter(
-                id__in=user.get_attributes()
-            ).distinct()
+            qs = qs.filter(id__in=user.get_attributes()).distinct()
 
         return qs
 
