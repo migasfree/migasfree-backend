@@ -210,12 +210,7 @@ class ComputerAdmin(admin.ModelAdmin):
         return False
 
     def get_queryset(self, request):
-        return Computer.objects.scope(request.user.userprofile).select_related(
-            'project',
-            'sync_user',
-            'default_logical_device',
-            'default_logical_device__device',
-        ).prefetch_related(
+        return Computer.objects.scope(request.user.userprofile).prefetch_related(
             Prefetch('node_set', queryset=Node.objects.filter(parent=None)),
         )
 
@@ -230,13 +225,6 @@ class PackageHistoryAdmin(admin.ModelAdmin):
         'computer', 'package',
         'install_date', 'uninstall_date'
     )
-
-    def get_queryset(self, request):
-        return super(PackageHistoryAdmin, self).get_queryset(
-            request
-        ).select_related(
-            'computer', 'package'
-        )
 
     def has_add_permission(self, request):
         return False
@@ -280,6 +268,9 @@ class ErrorAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+    def get_queryset(self, request):
+        return Error.objects.scope(request.user.userprofile)
+
 
 @admin.register(FaultDefinition)
 class FaultDefinitionAdmin(admin.ModelAdmin):
@@ -309,7 +300,7 @@ class FaultDefinitionAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
-        return super(FaultDefinitionAdmin, self).get_queryset(
+        return super().get_queryset(
             request
         ).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
@@ -382,6 +373,9 @@ class FaultAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+    def get_queryset(self, request):
+        return Fault.objects.scope(request.user.userprofile)
+
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
@@ -407,6 +401,9 @@ class MigrationAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+    def get_queryset(self, request):
+        return Migration.objects.scope(request.user.userprofile)
+
 
 @admin.register(Synchronization)
 class SynchronizationAdmin(admin.ModelAdmin):
@@ -423,6 +420,9 @@ class SynchronizationAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+    def get_queryset(self, request):
+        return Synchronization.objects.scope(request.user.userprofile)
 
 
 @admin.register(Notification)
@@ -449,3 +449,6 @@ class StatusLogAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+    def get_queryset(self, request):
+        return StatusLog.objects.scope(request.user.userprofile)
