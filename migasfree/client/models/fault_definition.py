@@ -25,17 +25,8 @@ from ...core.models import Attribute, UserProfile, MigasLink
 
 
 class DomainFaultDefinitionManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().prefetch_related(
-            'included_attributes',
-            'included_attributes__property_att',
-            'excluded_attributes',
-            'excluded_attributes__property_att',
-            'users',
-        )
-
     def scope(self, user):
-        qs = self.get_queryset()
+        qs = super().get_queryset()
         if not user.is_view_all():
             user_attributes = user.get_attributes()
             qs = qs.filter(included_attributes__id__in=user_attributes)
