@@ -28,11 +28,18 @@ from .model import Model
 
 
 class DeviceManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related(
+            'connection', 'connection__device_type',
+            'model', 'model__manufacturer', 'model__device_type',
+        )
+
     def scope(self, user):
-        qs = super().get_queryset()
+        qs = self.get_queryset()
         if not user.is_view_all():
-            user_attributes = user.get_attributes()
-            qs = qs.filter(logical__attributes__in=user_attributes).distinct()
+            qs = qs.filter(
+                logical__attributes__in=user.get_attributes()
+            ).distinct()
 
         return qs
 
