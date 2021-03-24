@@ -43,8 +43,10 @@ class ScopeManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().select_related('domain', 'user')
 
-    def scope(self, user):
-        qs = self.get_queryset().filter(user=user)
+    def scope(self, user, filter_by_user=True):
+        qs = self.get_queryset()
+        if filter_by_user:
+            qs = qs.filter(user=user)
         if user.domain_preference:
             qs = qs.filter(domain=user.domain_preference)
 
