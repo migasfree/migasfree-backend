@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,11 +50,12 @@ DATABASES = {
 }
 
 # python manage.py graph_models -a -o myapp_models.png
-INSTALLED_APPS += ('debug_toolbar', 'django_extensions')
-INTERNAL_IPS = ("127.0.0.1",)
+INSTALLED_APPS += ('debug_toolbar', 'django_extensions', 'silk')
+INTERNAL_IPS = ('127.0.0.1',)
 
 MIDDLEWARE += [
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'silk.middleware.SilkyMiddleware',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
