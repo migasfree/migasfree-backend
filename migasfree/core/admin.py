@@ -631,8 +631,8 @@ class ScopeAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return super().get_queryset(
-            request
+        return Scope.objects.scope(
+            request.user.userprofile
         ).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
             'included_attributes__property_att',
