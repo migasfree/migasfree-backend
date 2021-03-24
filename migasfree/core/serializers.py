@@ -681,6 +681,12 @@ class UserProfileInfoSerializer(UserDetailsSerializer):
         fields = ('id', 'username')
 
 
+class DomainListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Domain
+        fields = ('id', 'name', 'comment')
+
+
 class DomainSerializer(serializers.ModelSerializer):
     included_attributes = AttributeInfoSerializer(many=True, read_only=True)
     excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
@@ -754,6 +760,15 @@ class ScopeInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scope
         fields = ('id', 'name')
+
+
+class ScopeListSerializer(serializers.ModelSerializer):
+    user = UserProfileInfoSerializer(many=False, read_only=True)
+    domain = DomainInfoSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Scope
+        fields = ('id', 'name', 'user', 'domain')
 
 
 class ScopeSerializer(serializers.ModelSerializer):
