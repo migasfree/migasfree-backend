@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ def event_by_month(data, begin_date, end_date, model, field='project_id'):
     chart_data = {}
 
     if field == 'project_id':
-        projects = Project.objects.only('id', 'name')
+        projects = Project.objects.only('id', 'name', 'platform')
         for project in projects:
             new_data[project.id] = []
             labels[project.id] = project.name
