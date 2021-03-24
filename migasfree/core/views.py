@@ -939,7 +939,13 @@ class ScopeViewSet(viewsets.ModelViewSet, MigasViewSet):
         if self.request is None:
             return Scope.objects.none()
 
-        qs = Scope.objects.scope(self.request.user.userprofile)
+        filter_by_user = True
+        if self.action == 'list':
+            filter_by_user = not (self.request.user.userprofile.is_superuser and self.request.GET.get('page', 0))
+        else:
+            filter_by_user = not self.request.user.userprofile.is_superuser
+
+        qs = Scope.objects.scope(self.request.user.userprofile, filter_by_user)
         if self.action == 'list':
             return qs
 
