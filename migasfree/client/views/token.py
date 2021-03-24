@@ -700,9 +700,22 @@ class MessageViewSet(viewsets.ViewSet):
         con = get_redis_connection()
         items = list(con.smembers('migasfree:watch:msg'))
 
+        projects = []
+        computers = []
+        user = self.request.user.userprofile
+        if not user.is_view_all():
+            projects = user.get_projects()
+            computers = user.get_computers()
+
         results = []
         for key in items:
             item = decode_dict(con.hgetall('migasfree:msg:%d' % int(key)))
+
+            if projects and int(item['project_id']) not in projects:
+                continue
+
+            if computers and int(item['computer_id']) not in computers:
+                continue
 
             if project_filter and int(item['project_id']) != project_filter:
                 continue
