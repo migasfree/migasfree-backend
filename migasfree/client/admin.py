@@ -229,6 +229,9 @@ class PackageHistoryAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+    def get_queryset(self, request):
+        return PackageHistory.objects.scope(request.user.userprofile)
+
 
 @admin.register(Error)
 class ErrorAdmin(admin.ModelAdmin):
