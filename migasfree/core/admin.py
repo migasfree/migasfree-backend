@@ -57,6 +57,9 @@ class ProjectAdmin(ImportExportActionModelAdmin):
     search_fields = ('name',)
     prepopulated_fields = {'slug': ('name',)}
 
+    def get_queryset(self, request):
+        return Project.objects.scope(request.user.userprofile)
+
 
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
@@ -66,6 +69,9 @@ class StoreAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     read_only_fields = ('slug',)
     fields = ('name', 'project')
+
+    def get_queryset(self, request):
+        return Store.objects.scope(request.user.userprofile)
 
 
 class ClientPropertyFilter(SimpleListFilter):
@@ -247,8 +253,8 @@ class ScheduleDelayLine(admin.TabularInline):
         self.request = request
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return super().get_queryset(
-            request
+        return ScheduleDelay.objects.scope(
+            request.user.userprofile
         ).prefetch_related(
             Prefetch('attributes', queryset=qs),
             'attributes__property_att', 'schedule'
@@ -284,8 +290,8 @@ class PackageAdmin(admin.ModelAdmin):
     ordering = ('name',)
 
     def get_queryset(self, request):
-        return super().get_queryset(
-            request
+        return Package.objects.scope(
+            request.user.userprofile
         ).prefetch_related(
             Prefetch(
                 'deployment_set',
@@ -317,6 +323,9 @@ class PackageSetAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
     search_fields = ('name',)
     ordering = ('name',)
+
+    def get_queryset(self, request):
+        return PackageSet.objects.scope(request.user.userprofile)
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == 'packages':
@@ -421,8 +430,8 @@ class DeploymentAdmin(admin.ModelAdmin):
         self.user = request.user
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return super().get_queryset(
-            request
+        return Deployment.objects.scope(
+            request.user.userprofile
         ).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
             'included_attributes__property_att',
