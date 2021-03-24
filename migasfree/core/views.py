@@ -82,8 +82,8 @@ from .serializers import (
     ScheduleDelaySerializer, ScheduleDelayWriteSerializer,
     PackageSerializer, PackageSetSerializer, PackageSetWriteSerializer,
     DeploymentSerializer, DeploymentWriteSerializer, DeploymentListSerializer,
-    DomainWriteSerializer, DomainSerializer,
-    ScopeSerializer, ScopeWriteSerializer,
+    DomainWriteSerializer, DomainSerializer, DomainListSerializer,
+    ScopeSerializer, ScopeWriteSerializer, ScopeListSerializer,
     UserProfileSerializer, UserProfileWriteSerializer,
     ChangePasswordSerializer, UserProfileListSerializer,
     GroupSerializer, GroupWriteSerializer, PermissionSerializer,
@@ -895,11 +895,17 @@ class DomainViewSet(viewsets.ModelViewSet, MigasViewSet):
                 or self.action == 'partial_update':
             return DomainWriteSerializer
 
+        if self.action == 'list':
+            return DomainListSerializer
+
         return DomainSerializer
 
     def get_queryset(self):
         if self.request is None:
             return Domain.objects.none()
+
+        if self.action == 'list':
+            return self.queryset
 
         return self.queryset.prefetch_related(
             'included_attributes',
@@ -924,13 +930,27 @@ class ScopeViewSet(viewsets.ModelViewSet, MigasViewSet):
                 or self.action == 'partial_update':
             return ScopeWriteSerializer
 
+        if self.action == 'list':
+            return ScopeListSerializer
+
         return ScopeSerializer
 
     def get_queryset(self):
         if self.request is None:
             return Scope.objects.none()
 
-        return Scope.objects.scope(self.request.user.userprofile)
+        qs = Scope.objects.scope(self.request.user.userprofile)
+        if self.action == 'list':
+            return qs
+
+        qs_att = Attribute.objects.scope(self.request.user.userprofile)
+
+        return qs.prefetch_related(
+            Prefetch('included_attributes', queryset=qs_att),
+            'included_attributes__property_att',
+            Prefetch('excluded_attributes', queryset=qs_att),
+            'excluded_attributes__property_att'
+        )
 
 
 @permission_classes((permissions.AllowAny,))
