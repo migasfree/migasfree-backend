@@ -32,6 +32,13 @@ class PackageHistoryManager(models.Manager):
             'computer__sync_user',
         )
 
+    def scope(self, user):
+        qs = self.get_queryset()
+        if not user.is_view_all():
+            qs = qs.filter(computer__in=user.get_computers())
+
+        return qs
+
 
 class PackageHistory(models.Model, MigasLink):
     """packages installed or/and uninstalled in computers"""
