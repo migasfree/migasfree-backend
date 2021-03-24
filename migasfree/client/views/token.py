@@ -613,6 +613,12 @@ class PackageHistoryViewSet(
     ordering_fields = '__all__'
     ordering = ('computer__name', 'package__fullname',)
 
+    def get_queryset(self):
+        if self.request is None:
+            return models.PackageHistory.objects.none()
+
+        return models.PackageHistory.objects.scope(self.request.user.userprofile)
+
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class StatusLogViewSet(
