@@ -7,7 +7,7 @@ import tempfile
 
 from django.conf import settings
 from django.template import Context, Template
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 
 ALL_OK = 0
