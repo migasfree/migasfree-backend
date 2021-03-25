@@ -96,9 +96,11 @@ DEFAULT_CHARSET = 'utf-8'
 
 ROOT_URLCONF = 'migasfree.urls'
 
+ASGI_APPLICATION = 'migasfree.asgi.application'
 WSGI_APPLICATION = 'migasfree.wsgi.application'
 
 INSTALLED_APPS = (
+    'asgi_runserver',
     'grappelli',
     'django.contrib.admin',
     'django.contrib.auth',
