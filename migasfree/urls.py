@@ -41,11 +41,6 @@ from .device.routers import router as device_router
 from .stats.routers import router as stats_router
 from .app_catalog.routers import router as catalog_router
 
-from .api_v4.views import (
-    api_v4, computer_label, ServerInfoView,
-    get_key_repositories, get_computer_info,
-)
-
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
@@ -101,24 +96,6 @@ urlpatterns = [
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     re_path(r'^rest-auth/', include('dj_rest_auth.urls')),
 
-    re_path(r'^api/$', api_v4, name='api_v4'),
-    re_path(
-        r'^computer/(?P<uuid>.+)/label/$',
-        computer_label,
-        name='computer_label',
-    ),
-    re_path(
-        r'^get_key_repositories/$',
-        get_key_repositories,
-        name='get_key_repositories'
-    ),
-    re_path(
-        r'^get_computer_info/$',
-        get_computer_info,
-        name='get_computer_info'
-    ),
-    re_path(r'^api/v1/public/server/info/', ServerInfoView.as_view()),
-
     re_path(r'^', include('django.contrib.auth.urls')),
     re_path(r'^api-docs/', include_docs_urls(title=TITLE)),
     # re_path(r'^auth/', include('djoser.urls')),
@@ -127,6 +104,8 @@ urlpatterns = [
     re_path(r'^docs/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('graphql', GraphQLView.as_view(graphiql=True)),
+
+    path('', include('migasfree.api_v4.urls')),
 ]
 
 if settings.DEBUG:
