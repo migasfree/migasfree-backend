@@ -134,7 +134,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         ).values('id').distinct().count()
 
         date_format = '%Y-%m-%d'
-        now = datetime.now()
+        # now = datetime.now()
 
         delays = ScheduleDelay.objects.filter(
             schedule__id=deploy.schedule.id
@@ -251,20 +251,18 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         outer = []
         for project in Project.objects.scope(request.user.userprofile).all():
             count = 0
-            outer_project = {}
             if project.id in values_null:
                 count += values_null[project.id][0]['value']
-                outer_project = values_null[project.id][0]
+                outer.append(values_null[project.id][0])
             if project.id in values_not_null:
                 count += values_not_null[project.id][0]['value']
-                outer_project = values_not_null[project.id][0]
+                outer.append(values_not_null[project.id][0])
             if count:
                 inner.append({
                     'name': project.name,
                     'value': count,
                     'project_id': project.id,
                 })
-                outer.append(outer_project)
 
         return Response(
             {
@@ -318,20 +316,18 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         outer = []
         for project in Project.objects.scope(request.user.userprofile).all():
             count = 0
-            outer_project = {}
             if project.id in values_null:
                 count += values_null[project.id][0]['value']
-                outer_project = values_null[project.id][0]
+                outer.append(values_null[project.id][0])
             if project.id in values_not_null:
                 count += values_not_null[project.id][0]['value']
-                outer_project = values_not_null[project.id][0]
+                outer.append(values_not_null[project.id][0])
             if count:
                 inner.append({
                     'name': project.name,
                     'value': count,
                     'project_id': project.id,
                 })
-                outer.append(outer_project)
 
         return Response(
             {
@@ -360,7 +356,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                     'name': '{} ({})'.format(_('Without schedule'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
-                    'schedule': False
+                    'schedule': True  # isnull = True
                 }
             )
 
@@ -377,7 +373,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                     'name': '{} ({})'.format(_('With schedule'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
-                    'schedule': True
+                    'schedule': False  # isnull = False
                 }
             )
 
@@ -385,23 +381,18 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         outer = []
         for project in Project.objects.scope(request.user.userprofile).all():
             count = 0
-            data_project = []
-            outer_project = {}
             if project.id in values_null:
                 count += values_null[project.id][0]['value']
-                data_project.append(values_null[project.id][0])
-                outer_project = values_null[project.id][0]
+                outer.append(values_null[project.id][0])
             if project.id in values_not_null:
                 count += values_not_null[project.id][0]['value']
-                data_project.append(values_not_null[project.id][0])
-                outer_project = values_not_null[project.id][0]
+                outer.append(values_not_null[project.id][0])
             if count:
                 inner.append({
                     'name': project.name,
                     'value': count,
                     'project_id': project.id,
                 })
-                outer.append(outer_project)
 
         return Response(
             {
