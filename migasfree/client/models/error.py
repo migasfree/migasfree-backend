@@ -22,6 +22,7 @@ from django.utils.translation import gettext_lazy as _
 
 from ...core.models import Project
 
+from .computer import Computer
 from .event import Event
 
 
@@ -134,6 +135,9 @@ class Error(Event):
         ).annotate(
             count=Count('id')
         ).order_by('computer__status', '-count'))
+
+        for item in status:
+            item['computer__status'] = _(dict(Computer.STATUS_CHOICES)[item.get('computer__status')])
 
         return {
             'total': total,
