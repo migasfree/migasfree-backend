@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from past.builtins import cmp
-
 from django.contrib.auth.models import Group, Permission
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -25,6 +23,7 @@ from rest_framework import serializers
 from dj_rest_auth.serializers import UserDetailsSerializer
 
 from ..client.models import Computer
+from ..utils import cmp
 
 from . import tasks
 
