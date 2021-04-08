@@ -60,8 +60,4 @@ MIDDLEWARE += [
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-DEBUG_TOOLBAR_CONFIG = {
-    'JQUERY_URL': '/static/grappelli/jquery/jquery.min.js'
-}
-
 ALLOWED_HOSTS = ['*']
