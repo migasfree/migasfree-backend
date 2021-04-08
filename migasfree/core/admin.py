@@ -18,8 +18,6 @@
 
 import os
 
-from past.builtins import cmp
-
 from django.db.models import Q, Prefetch
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
@@ -28,6 +26,7 @@ from django.utils.translation import gettext_lazy as _
 from import_export.admin import ImportExportActionModelAdmin
 
 from ..client.models import Computer
+from ..utils import cmp
 
 from .resources import AttributeResource, ProjectResource
 from . import tasks
