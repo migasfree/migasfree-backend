@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from past.builtins import execfile
-
 from .migasfree import *
 from .base import *
 from .celery import *
@@ -49,6 +47,6 @@ DATABASES = {
 }
 
 try:
-    execfile(MIGASFREE_SETTINGS_OVERRIDE, globals(), locals())
+    exec(open(MIGASFREE_SETTINGS_OVERRIDE).read(), globals=globals(), locals=locals())
 except IOError:
     pass
