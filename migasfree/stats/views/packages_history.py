@@ -40,7 +40,7 @@ class PackageHistoryStatsViewSet(viewsets.ViewSet):
             data.append({
                 'name': item.get('package__project__name'),
                 'value': item.get('count'),
-                'project_id': item.get('package__project__id'),
+                'package_project_id': item.get('package__project__id'),
             })
 
         return Response(
