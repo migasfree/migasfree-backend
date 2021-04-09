@@ -12,6 +12,7 @@ from .errors import ErrorStatsViewSet
 from .faults import FaultStatsViewSet
 from .migrations import MigrationStatsViewSet
 from .notifications import NotificationStatsViewSet
+from .packages_history import PackageHistoryStatsViewSet
 from .packages import PackageStatsViewSet
 from .status_logs import StatusLogStatsViewSet
 from .stores import StoreStatsViewSet
