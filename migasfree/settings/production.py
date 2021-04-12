@@ -47,6 +47,6 @@ DATABASES = {
 }
 
 try:
-    exec(open(MIGASFREE_SETTINGS_OVERRIDE).read(), globals=globals(), locals=locals())
+    exec(open(MIGASFREE_SETTINGS_OVERRIDE).read(), globals(), locals())
 except IOError:
     pass
