@@ -20,16 +20,20 @@ import json
 
 from datetime import datetime, timedelta
 
+from asgiref.sync import async_to_sync
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
+from django.utils import translation
 from django.utils.translation import gettext
 from celery import shared_task
+from channels.layers import get_channel_layer
 from django_redis import get_redis_connection
 
 from ..core.models import Package, Deployment
 from ..client.models import Notification, Fault, Error, Computer
-from ..utils import decode_set
+from ..utils import decode_set, decode_dict
+
 
 import logging
 logger = logging.getLogger('celery')
@@ -257,6 +261,31 @@ def add_finished_schedule_deployments():
     con.sadd('migasfree:watch:chk', 'finished_deploys')
 
 
+def get_alerts():
+    con = get_redis_connection()
+
+    response = [
+        decode_dict(con.hgetall('migasfree:chk:repos')),
+        decode_dict(con.hgetall('migasfree:chk:syncs')),
+        decode_dict(con.hgetall('migasfree:chk:active_deploys')),
+        decode_dict(con.hgetall('migasfree:chk:orphan')),
+        decode_dict(con.hgetall('migasfree:chk:notifications')),
+        decode_dict(con.hgetall('migasfree:chk:delayed')),
+        decode_dict(con.hgetall('migasfree:chk:finished_deploys')),
+        decode_dict(con.hgetall('migasfree:chk:faults')),
+        decode_dict(con.hgetall('migasfree:chk:errors')),
+    ]
+
+    # translation.activate('es')
+
+    for item in response:
+        item['api'] = json.loads(item['api'])
+        item['msg'] = gettext(item['msg'])
+        print(item['msg'])
+
+    return response
+
+
 @shared_task(queue='default')
 def alerts():
     con = get_redis_connection()
@@ -277,6 +306,12 @@ def alerts():
     add_unchecked_errors()
 
     logger.debug(con.smembers('migasfree:watch:chk'))
+
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)('stats', {
+        'type': 'send_alerts',
+        'text': get_alerts()
+    })
 
 
 def assigned_computers_to_deployment(deployment_id):
