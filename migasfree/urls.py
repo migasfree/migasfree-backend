@@ -78,7 +78,6 @@ safe_router.registry.extend(client_safe_router.registry)
 safe_router.registry.extend(hardware_safe_router.registry)
 
 urlpatterns = [
-    re_path(r'^grappelli/', include('grappelli.urls')),
     re_path(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     re_path(r'^admin/', admin.site.urls),
     re_path(r'^markdownx/', include('markdownx.urls')),
