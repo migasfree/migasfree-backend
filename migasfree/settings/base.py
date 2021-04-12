@@ -100,7 +100,6 @@ ASGI_APPLICATION = 'migasfree.asgi.application'
 WSGI_APPLICATION = 'migasfree.wsgi.application'
 
 INSTALLED_APPS = (
-    'asgi_runserver',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -120,6 +119,7 @@ INSTALLED_APPS = (
     'djoser',
     'import_export',
     'markdownx',
+    'channels',
     'migasfree.core',
     'migasfree.app_catalog',
     'migasfree.client',
