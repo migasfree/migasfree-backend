@@ -16,36 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import json
-
-from django.utils.translation import gettext
 from rest_framework.response import Response
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import permission_classes
-from django_redis import get_redis_connection
 
-from ...utils import decode_dict
+from ..tasks import get_alerts
 
 
 @permission_classes((permissions.IsAuthenticated,))
 class AlertsViewSet(viewsets.ViewSet):
     def list(self, request, format=None):
-        con = get_redis_connection()
-
-        response = [
-            decode_dict(con.hgetall('migasfree:chk:repos')),
-            decode_dict(con.hgetall('migasfree:chk:syncs')),
-            decode_dict(con.hgetall('migasfree:chk:active_deploys')),
-            decode_dict(con.hgetall('migasfree:chk:orphan')),
-            decode_dict(con.hgetall('migasfree:chk:notifications')),
-            decode_dict(con.hgetall('migasfree:chk:delayed')),
-            decode_dict(con.hgetall('migasfree:chk:finished_deploys')),
-            decode_dict(con.hgetall('migasfree:chk:faults')),
-            decode_dict(con.hgetall('migasfree:chk:errors')),
-        ]
-
-        for item in response:
-            item['api'] = json.loads(item['api'])
-            item['msg'] = gettext(item['msg'])
-
-        return Response(response, status=status.HTTP_200_OK)
+        return Response(get_alerts(), status=status.HTTP_200_OK)
