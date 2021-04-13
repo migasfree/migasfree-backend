@@ -43,7 +43,7 @@ def add_orphan_packages():
     con = get_redis_connection()
     con.hmset(
         'migasfree:chk:orphan', {
-            'msg': gettext('Orphan Package/Set'),
+            'msg': gettext('Orphan Packages'),
             'target': 'server',
             'level': 'warning',
             'result': Package.orphan_count(),
