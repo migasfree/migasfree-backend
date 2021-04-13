@@ -276,12 +276,9 @@ def get_alerts():
         decode_dict(con.hgetall('migasfree:chk:errors')),
     ]
 
-    # translation.activate('es')
-
     for item in response:
         item['api'] = json.loads(item['api'])
         item['msg'] = gettext(item['msg'])
-        print(item['msg'])
 
     return response
 
