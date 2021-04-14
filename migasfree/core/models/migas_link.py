@@ -358,7 +358,7 @@ class MigasLink(object):
                             'api': {
                                 'model': 'computers',
                                 'query': {
-                                    'platform': self.id,
+                                    'platform__id': self.id,
                                     'status__in': ','.join(Computer.PRODUCTIVE_STATUS)
                                 }
                             },
