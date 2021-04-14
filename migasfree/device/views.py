@@ -247,6 +247,16 @@ class ModelViewSet(viewsets.ModelViewSet, MigasViewSet):
 
         return serializers.ModelSerializer
 
+    def get_queryset(self):
+        if self.request is None:
+            return Model.objects.none()
+
+        return super().get_queryset().select_related(
+            'device_type', 'manufacturer'
+        ). prefetch_related(
+            'connections'
+        )
+
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class TypeViewSet(viewsets.ModelViewSet, MigasViewSet):
