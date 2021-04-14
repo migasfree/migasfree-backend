@@ -14,7 +14,8 @@
                 "0.0.0.0:2345",
                 "--settings=migasfree.settings.development"
             ],
-            "django": true
+            "django": true,
+            "subProcess": false
         },
         {
             "name": "Python: Celery default queue",
