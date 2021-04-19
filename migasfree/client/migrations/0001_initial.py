@@ -204,4 +204,8 @@ class Migration(migrations.Migration):
             model_name='synchronization',
             index=models.Index(fields=['created_at'], name='client_sync_created_326a8e_idx'),
         ),
+        migrations.AddIndex(
+            model_name='computer',
+            index=models.Index(fields=['name'], name='client_comp_name_e8d405_idx'),
+        ),
     ]
