@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from datetime import datetime
+
 from django.core.management.base import BaseCommand, CommandError
 from django_redis import get_redis_connection
 
@@ -25,18 +27,54 @@ from ....client.models import Synchronization
 class Command(BaseCommand):
     help = 'Refresh redis syncs stats'
 
-    def handle(self, *args, **options):
-        # first, reset stats
-        con = get_redis_connection()
-        for x in con.keys('migasfree:stats*'):
-            con.delete(x)
-        for x in con.keys('migasfree:watch:stats*'):
-            con.delete(x)
+    INITIAL_YEAR = 2010
+    CURRENT_YEAR = datetime.today().year
 
-        self.stdout.write(self.style.SUCCESS('Redis stats reset!'))
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '-s', '--since',
+            type=int, action='store', default=self.INITIAL_YEAR,
+            help='Format: YYYY'
+        )
+        parser.add_argument(
+            '-u', '--until',
+            type=int, action='store', default=self.CURRENT_YEAR,
+            help='Format: YYYY'
+        )
+
+    def handle(self, *args, **options):
+        since = options['since']
+        until = options['until']
+        if since > self.CURRENT_YEAR:
+            since = self.INITIAL_YEAR
+        if until < since:
+            until = self.CURRENT_YEAR
+
+        self.stdout.write(self.style.NOTICE('Since year {}'.format(since)))
+        self.stdout.write(self.style.NOTICE('Until year {}'.format(until)))
+
+        con = get_redis_connection()
+
+        # first, reset redis stats
+        for year in range(since, until + 1):
+            for interval in ['years', 'months', 'days', 'hours']:
+                for x in con.keys('migasfree:stats:{}:{}*'.format(interval, year)):
+                    con.delete(x)
+
+                for x in con.keys('migasfree:watch:stats:{}:{}*'.format(interval, year)):
+                    con.delete(x)
+
+                for x in con.keys('migasfree:stats:*:{}:{}*'.format(interval, year)):
+                    con.delete(x)
+
+                for x in con.keys('migasfree:watch:stats:*:{}:{}*'.format(interval, year)):
+                    con.delete(x)
 
         # then, update db syncs
-        for sync in Synchronization.objects.all():
+        for sync in Synchronization.objects.filter(
+                created_at__year__gte=since,
+                created_at__year__lte=until
+        ):
             sync.add_to_redis()
 
         self.stdout.write(self.style.SUCCESS('Redis stats refreshed!'))
