@@ -24,7 +24,7 @@ class StatsConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_add('stats', self.channel_name)
         await self.accept()
 
-    async def disconnect(self):
+    async def disconnect(self, code):
         await self.channel_layer.group_discard('stats', self.channel_name)
 
     async def send_alerts(self, event):
