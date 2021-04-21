@@ -21,7 +21,8 @@ from django.contrib.auth.models import Permission, Group
 
 from .models import (
     Deployment, Package, ClientAttribute, ServerAttribute, Attribute,
-    Project, ScheduleDelay, Store, AttributeSet, Property, Platform,
+    Project, ScheduleDelay, Store, AttributeSet, Platform,
+    Property, ClientProperty,
     UserProfile, Domain, Scope, Schedule, PackageSet,
 )
 
@@ -153,6 +154,19 @@ class PropertyFilter(filters.FilterSet):
             'enabled': ['exact'],
             'sort': ['exact'],
             'kind': ['exact'],
+        }
+
+
+class ClientPropertyFilter(filters.FilterSet):
+    class Meta:
+        model = ClientProperty
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
+            'enabled': ['exact'],
+            'sort': ['exact'],
+            'kind': ['exact'],
+            'language': ['exact'],
         }
 
 
