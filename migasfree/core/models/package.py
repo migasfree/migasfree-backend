@@ -24,6 +24,7 @@ from importlib import import_module
 from django.db import models
 from django.db.models.aggregates import Count
 from django.db.models.signals import pre_delete
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
@@ -158,6 +159,18 @@ class Package(models.Model, MigasLink):
     def pms(self):
         mod = import_module('migasfree.core.pms.{}'.format(self.project.pms))
         return getattr(mod, self.project.pms.capitalize())()
+
+    def url(self):
+        if not self.store:
+            return ''
+
+        return '{}{}/{}/{}/{}'.format(
+            settings.MEDIA_URL,
+            self.project.slug,
+            Project.STORE_TRAILING_PATH,
+            self.store.slug,
+            self.fullname
+        )
 
     @staticmethod
     def path(project_name, store_name, fullname):
