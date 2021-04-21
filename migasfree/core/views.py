@@ -97,7 +97,7 @@ from .filters import (
     ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
     AttributeSetFilter, PropertyFilter, AttributeFilter, PlatformFilter,
     UserProfileFilter, PermissionFilter, GroupFilter, DomainFilter,
-    ScopeFilter, ScheduleFilter, PackageSetFilter,
+    ScopeFilter, ScheduleFilter, PackageSetFilter, ClientPropertyFilter,
 )
 
 from . import tasks
@@ -302,7 +302,7 @@ class ServerPropertyViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 class ClientPropertyViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = ClientProperty.objects.filter(sort__in=['client', 'basic'])
     serializer_class = ClientPropertySerializer
-    filterset_class = PropertyFilter
+    filterset_class = ClientPropertyFilter
     search_fields = ['name', 'prefix']
 
 
