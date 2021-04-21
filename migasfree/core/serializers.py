@@ -362,7 +362,8 @@ class PackageSerializer(serializers.ModelSerializer):
             'store': {
                 'id': obj.store.id if obj.store else 0,
                 'name': obj.store.name if obj.store else ''
-            }
+            },
+            'url': obj.url()
         }
 
     def create(self, validated_data):
