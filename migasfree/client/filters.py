@@ -162,6 +162,7 @@ class FaultDefinitionFilter(filters.FilterSet):
             'id': ['exact'],
             'name': ['icontains'],
             'enabled': ['exact'],
+            'language': ['exact'],
             'included_attributes__id': ['exact'],
             'excluded_attributes__id': ['exact'],
             'users__id': ['exact'],
