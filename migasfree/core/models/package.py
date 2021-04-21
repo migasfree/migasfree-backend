@@ -203,15 +203,19 @@ class Package(models.Model, MigasLink):
                 os.makedirs(path)
 
     def update_store(self, store):
+        previous_store = None
         if self.store != store:
-            previous_store = self.store.slug
+            if self.store:
+                previous_store = self.store.slug
+
             self.store = store
             self.save()
 
-            shutil.move(
-                self.path(self.project.slug, previous_store, self.name),
-                self.path(self.project.slug, self.store, self.name)
-            )
+            if previous_store:
+                shutil.move(
+                    self.path(self.project.slug, previous_store, self.name),
+                    self.path(self.project.slug, self.store, self.name)
+                )
 
     def clean(self):
         super().clean()
