@@ -74,7 +74,7 @@ class Command(BaseCommand):
         for sync in Synchronization.objects.filter(
                 created_at__year__gte=since,
                 created_at__year__lte=until
-        ):
+        ).iterator():
             sync.add_to_redis()
 
         self.stdout.write(self.style.SUCCESS('Redis stats refreshed!'))
