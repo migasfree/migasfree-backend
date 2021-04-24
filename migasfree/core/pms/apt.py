@@ -173,7 +173,7 @@ dpkg-deb -c %(pkg)s | awk '{print $6}'
         dict package_metadata(string package)
         """
 
-        _cmd = 'dpkg-deb --showformat="${Package}_${Version}_${Architecture}" --show %s' % package
+        _cmd = "dpkg-deb --showformat='${Package}_${Version}_${Architecture}' --show %s" % package
         _ret, _output, _error = execute(_cmd)
         if _ret == 0:
             name, version, architecture = _output.split('_')
