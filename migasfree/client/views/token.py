@@ -418,7 +418,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
                 [install.add(json.dumps({'package': x, 'name': deploy_name, 'id': deploy_id}, sort_keys=True)) for x in install_item.split('\n') if x]
 
             if remove_item:
-                [remove.add(json.dumps({'package': x, 'name': deploy_name, 'id': deploy_id}, sort_keys=True)) for x in install_item.split('\n') if x]
+                [remove.add(json.dumps({'package': x, 'name': deploy_name, 'id': deploy_id}, sort_keys=True)) for x in remove_item.split('\n') if x]
 
         packages = {
             'install': [json.loads(x) for x in install],
