@@ -129,6 +129,8 @@ INSTALLED_APPS = (
     'migasfree.api_v4',
 )
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 100  # 100 MB
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
