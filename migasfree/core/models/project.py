@@ -19,6 +19,8 @@
 import os
 import shutil
 
+from importlib import import_module
+
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -139,6 +141,10 @@ class Project(models.Model, MigasLink):
     @staticmethod
     def get_project_names():
         return Project.objects.values_list('id', 'name').order_by('name')
+
+    def get_pms(self):
+        mod = import_module('migasfree.core.pms.{}'.format(self.pms))
+        return getattr(mod, self.pms.capitalize())()
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.name)
