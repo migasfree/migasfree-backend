@@ -84,6 +84,11 @@ def execute(cmd, verbose=False, interactive=False):
     if not interactive and _output_buffer:
         _output = _output_buffer
 
+    if isinstance(_output, bytes) and not isinstance(_output, str):
+        _output = str(_output, encoding='utf8')
+    if isinstance(_error, bytes) and not isinstance(_error, str):
+        _error = str(_error, encoding='utf8')
+
     return _process.returncode, _output, _error
 
 
@@ -280,6 +285,19 @@ def read_remote_chunks(local_file, remote, chunk_size=8192):
         os.fsync(tmp_file.fileno())
 
     shutil.move(tmp, local_file)
+
+
+def save_tempfile(file_):
+    tempf, tempfn = tempfile.mkstemp()
+    try:
+        for chunk in file_.chunks():
+            os.write(tempf, chunk)
+    except:
+        raise Exception("Problem with the input file %s" % file_.name)
+    finally:
+        os.close(tempf)
+
+    return tempfn
 
 
 def decode_dict(value):
