@@ -57,7 +57,7 @@ from .resources import (
 )
 from ..device.models import Logical
 from ..device.serializers import LogicalSerializer
-from ..utils import read_remote_chunks
+from ..utils import read_remote_chunks, save_tempfile
 
 from .pms import get_available_pms
 
@@ -553,15 +553,13 @@ class PackageViewSet(
         store = get_object_or_404(Store, pk=data['store'][0])
 
         if not data['name']:
-            response = obj.pms().package_metadata(
-                Package.path(store.project.name, store.name, data['fullname'])
-            )
+            path = save_tempfile(data['files'][0])
+            response = store.project.get_pms().package_metadata(path)
+            os.remove(path)
             if response['name']:
                 data['name'] = response['name']
                 data['version'] = response['version']
                 data['architecture'] = response['architecture']
-
-        print(data)  # DEBUG
 
         try:
             package = Package.objects.create(
