@@ -644,6 +644,15 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
         new_pkgs = []
         for file_ in files:
             name, version, architecture = Package.normalized_name(file_.name)
+            if not name:
+                path = save_tempfile(file_)
+                response = project.get_pms().package_metadata(path)
+                os.remove(path)
+                if response['name']:
+                    name = response['name']
+                    version = response['version']
+                    architecture = response['architecture']
+
             if not name or not version or not architecture:
                 return Response(
                     {
