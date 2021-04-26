@@ -81,7 +81,7 @@ def create_repository_metadata(deployment_id):
     pkg_tmp_path = os.path.join(
         slug_tmp_path,
         deploy.slug,
-        'PKGS'  # FIXME hardcoded path!!!
+        Deployment.PACKAGES_PATH
     )
     if not os.path.exists(pkg_tmp_path):
         os.makedirs(pkg_tmp_path)
