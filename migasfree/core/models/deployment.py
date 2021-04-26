@@ -70,6 +70,8 @@ class Deployment(models.Model, MigasLink):
         (SOURCE_EXTERNAL, _('External')),
     )
 
+    PACKAGES_PATH = 'PKGS'
+
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
         default=True,
