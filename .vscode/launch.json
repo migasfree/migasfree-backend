@@ -18,26 +18,22 @@
             "subProcess": false
         },
         {
-            "name": "Python: Celery default queue",
+            "name": "Python: Celery beat",
             "type": "python",
             "request": "launch",
             "module": "celery",
             "console": "integratedTerminal",
             "args": [
                 "--app=migasfree.celery.app",
-                "worker",
-                "--without-gossip",
-                "--concurrency=10",
-                "-Q",
-                "default",
-                "-B",
+                "beat",
+                "--loglevel=INFO",
             ],
             "env": {
                 "DJANGO_SETTINGS_MODULE": "migasfree.settings.development"
             },
         },
         {
-            "name": "Python: Celery repository queue",
+            "name": "Python: Celery queues",
             "type": "python",
             "request": "launch",
             "module": "celery",
@@ -47,8 +43,8 @@
                 "worker",
                 "--without-gossip",
                 "--concurrency=10",
-                "-Q",
-                "repository",
+                "--queues=default,repository",
+                "--loglevel=INFO",
             ],
             "env": {
                 "DJANGO_SETTINGS_MODULE": "migasfree.settings.development"
