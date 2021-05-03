@@ -728,15 +728,11 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         """
         claims = {'id': 1}
 
-        Returns: [
-            {
-                "name": ["PR1-value1", "PR2-value2"]
-            },
-            {
-                "name2": ["PR3-value3"]
-            },
+        Returns: {
+            "name": ["PR1-value1", "PR2-value2"]
+            "name2": ["PR3-value3"]
             ...
-        ]
+        }
         """
 
         claims = self.get_claims(request.data)
@@ -748,6 +744,13 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         # Computer tags
         for tag in computer.tags.all():
+            """ TODO think about this!
+            if tag.property_att.name not in available:
+                available[tag.property_att.name] = [tag.__str__()]
+            else:
+                available[tag.property_att.name].append(tag.__str__())
+            """
+
             # if tag is a domain, includes all domain's tags
             if tag.property_att.prefix == 'DMN':
                 for tag_dmn in Domain.objects.get(name=tag.value.split('.')[0]).get_tags():
@@ -785,11 +788,13 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Sending available tags...'))
 
+        """ TODO think about this!
         if not available:
             return Response(
                 self.create_response(gettext('There are not available tags')),
                 status=status.HTTP_404_NOT_FOUND
             )
+        """
 
         return Response(
             self.create_response(available),
@@ -820,13 +825,17 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         tags = claims.get('tags')
         tag_objs = Attribute.objects.filter_by_prefix_value(tags)
         if not tag_objs:
+            computer.tags.clear()
+            tag_ids = []
+            """
             return Response(
                 self.create_response(gettext('Invalid tags')),
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        computer.tags = tag_objs
-        tag_ids = tag_objs.values_list('id', flat=True)
+            """
+        else:
+            computer.tags.set(tag_objs)
+            tag_ids = tag_objs.values_list('id', flat=True)
 
         old_tags = list(set(computer_tags_ids) - set(tag_ids))
         new_tags = list(set(tag_ids) - set(computer_tags_ids))
@@ -897,9 +906,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     default_preincluded_packages.split('\n') if x]
 
         ret = {
-            "preinstall": remove_duplicates_preserving_order(preinstall),
-            "install": remove_duplicates_preserving_order(install),
-            "remove": remove_duplicates_preserving_order(remove),
+            'preinstall': remove_duplicates_preserving_order(preinstall),
+            'install': remove_duplicates_preserving_order(install),
+            'remove': remove_duplicates_preserving_order(remove),
         }
 
         add_computer_message(computer, gettext('Sending tags...'))
