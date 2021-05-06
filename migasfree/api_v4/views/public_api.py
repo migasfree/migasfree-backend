@@ -7,9 +7,10 @@ from rest_framework.decorators import permission_classes
 from rest_framework import permissions, views
 from rest_framework.response import Response
 
+from ...core.models import Project
 from ...utils import uuid_validate
-from .client_api import get_computer
 from ..secure import gpg_get_key
+from .client_api import get_computer
 
 
 LABEL_TEMPLATE = """
@@ -95,6 +96,25 @@ def get_key_repositories(request):
         gpg_get_key('migasfree-repository'),
         content_type='text/plain'
     )
+
+
+@permission_classes((permissions.AllowAny,))
+class RepositoriesUrlTemplateView(views.APIView):
+    def post(self, request, format=None):
+        """
+        Returns the repositories URL template
+        (compatibility for migasfree-client <= 4.16)
+        """
+        protocol = 'https' if request.is_secure() else 'http'
+
+        return Response(
+            '{}://{{server}}{}{{project}}/{}'.format(
+                protocol,
+                settings.MEDIA_URL,
+                Project.REPOSITORY_TRAILING_PATH
+            ),
+            content_type='text/plain'
+        )
 
 
 @permission_classes((permissions.AllowAny,))
