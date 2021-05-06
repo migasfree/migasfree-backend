@@ -106,7 +106,7 @@ echo
         _cmd = 'rpm -qp --queryformat "%%{NAME}_%%{VERSION}-%%{RELEASE}_%%{ARCH}" %s 2>/dev/null' % package
         _ret, _output, _error = execute(_cmd)
         if _ret == 0:
-            name, version, architecture = _output.split('_')
+            name, version, architecture = _output.split('_', 2)
         else:
             name, version, architecture = [None, None, None]
 
