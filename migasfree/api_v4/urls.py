@@ -3,7 +3,7 @@
 from django.urls import re_path
 
 from .views import (
-    api_v4, computer_label, ServerInfoView,
+    api_v4, computer_label, ServerInfoView, RepositoriesUrlTemplateView,
     get_key_repositories, get_computer_info,
 )
 
@@ -25,5 +25,6 @@ urlpatterns = [
         get_computer_info,
         name='get_computer_info'
     ),
+    re_path(r'^api/v1/public/repository-url-template/', RepositoriesUrlTemplateView.as_view()),
     re_path(r'^api/v1/public/server/info/', ServerInfoView.as_view()),
 ]
