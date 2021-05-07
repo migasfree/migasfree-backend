@@ -103,10 +103,10 @@ echo
         dict package_metadata(string package)
         """
 
-        _cmd = 'rpm -qp --queryformat "%%{NAME}_%%{VERSION}-%%{RELEASE}_%%{ARCH}" %s 2>/dev/null' % package
+        _cmd = 'rpm -qp --queryformat "%%{NAME}___%%{VERSION}-%%{RELEASE}___%%{ARCH}" %s 2>/dev/null' % package
         _ret, _output, _error = execute(_cmd)
         if _ret == 0:
-            name, version, architecture = _output.split('_', 2)
+            name, version, architecture = _output.split('___', 2)
         else:
             name, version, architecture = [None, None, None]
 
