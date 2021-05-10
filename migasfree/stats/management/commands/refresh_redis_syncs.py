@@ -41,10 +41,16 @@ class Command(BaseCommand):
             type=int, action='store', default=self.CURRENT_YEAR,
             help='Format: YYYY'
         )
+        parser.add_argument(
+            '-r', '--remove',
+            action='store_true',
+            help='Remove Redis stats'
+        )
 
     def handle(self, *args, **options):
         since = options['since']
         until = options['until']
+        remove = options['remove']
         if since > self.CURRENT_YEAR:
             since = self.INITIAL_YEAR
         if until < since:
@@ -52,6 +58,8 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.NOTICE('Since year {}'.format(since)))
         self.stdout.write(self.style.NOTICE('Until year {}'.format(until)))
+        if remove:
+            self.stdout.write(self.style.NOTICE('Remove only'))
 
         con = get_redis_connection()
 
@@ -70,11 +78,12 @@ class Command(BaseCommand):
                 for x in con.keys('migasfree:watch:stats:*:{}:{}*'.format(interval, year)):
                     con.delete(x)
 
-        # then, update db syncs
-        for sync in Synchronization.objects.filter(
-                created_at__year__gte=since,
-                created_at__year__lte=until
-        ).iterator():
-            sync.add_to_redis()
+        if not remove:
+            # then, update db syncs
+            for sync in Synchronization.objects.filter(
+                    created_at__year__gte=since,
+                    created_at__year__lte=until
+            ).iterator():
+                sync.add_to_redis()
 
         self.stdout.write(self.style.SUCCESS('Redis stats refreshed!'))
