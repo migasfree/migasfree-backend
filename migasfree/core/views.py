@@ -611,7 +611,7 @@ class PackageViewSet(
             )
 
         response = obj.pms().package_info(
-            Package.path(obj.project.name, obj.store.name, obj.fullname)
+            Package.path(obj.project.slug, obj.store.slug, obj.fullname)
         )
 
         return Response({'data': response}, status=status.HTTP_200_OK)
