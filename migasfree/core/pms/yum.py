@@ -46,14 +46,13 @@ class Yum(Pms):
         """
 
         _cmd = '''
-_DIR=%(path)s/%(name)s
+_DIR=%(path)s
 rm -rf $_DIR/repodata
 rm -rf $_DIR/checksum
 createrepo --cachedir checksum $_DIR
 gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg --detach-sign --armor $_DIR/repodata/repomd.xml
         ''' % {
             'path': path,
-            'name': os.path.basename(path),
             'keys_path': settings.MIGASFREE_KEYS_DIR
         }
 
