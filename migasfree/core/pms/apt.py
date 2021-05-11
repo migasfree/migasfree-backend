@@ -51,15 +51,15 @@ _ARCHS=("%(arch)s")
 for _ARCH in ${_ARCHS[@]}
 do
   cd %(path)s
-  mkdir -p $_NAME/PKGS/binary-$_ARCH/
+  mkdir -p PKGS/binary-$_ARCH/
   cd ..
 
-  ionice -c 3 dpkg-scanpackages -m dists/$_NAME/PKGS > dists/$_NAME/PKGS/binary-$_ARCH/Packages 2> /tmp/$_NAME
+  ionice -c 3 dpkg-scanpackages -m $_NAME/PKGS > $_NAME/PKGS/binary-$_ARCH/Packages 2> /tmp/$_NAME
   if [ $? != 0 ]
   then
     (>&2 cat /tmp/$_NAME)
   fi
-  gzip -9c dists/$_NAME/PKGS/binary-$_ARCH/Packages > dists/$_NAME/PKGS/binary-$_ARCH/Packages.gz
+  gzip -9c $_NAME/PKGS/binary-$_ARCH/Packages > $_NAME/PKGS/binary-$_ARCH/Packages.gz
 done
 
 function calculate_hash {
@@ -100,7 +100,7 @@ function create_deploy {
   gpg --no-tty -u migasfree-repository --homedir %(keys_path)s/.gnupg -abs -o Release.gpg Release
 }
 
-cd dists/$_NAME
+cd $_NAME
 create_deploy
 ''' % {
             'path': path,
