@@ -19,14 +19,10 @@
 from django.conf.urls import include
 from django.urls import re_path
 
-from .views import (
-    ServerInfoView, GetSourceFileView,
-    PmsView, ProgrammingLanguagesView,
-)
+from .views import ServerInfoView, PmsView, ProgrammingLanguagesView
 
 public_patterns = [
     re_path(r'server/info/', ServerInfoView.as_view()),
-    re_path(r'^src/', GetSourceFileView.as_view()),
     re_path(r'pms/', PmsView.as_view()),
     re_path(r'languages', ProgrammingLanguagesView.as_view()),
 ]
