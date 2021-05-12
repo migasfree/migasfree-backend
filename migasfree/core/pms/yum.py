@@ -140,12 +140,12 @@ gpgkey=file://{{keys_path}}/{{server}}/repositories.pub
         elif deploy.source == Deployment.SOURCE_EXTERNAL:
             normal_template = """[EXTERNAL-{name}]
 name=EXTERNAL-{name}
-baseurl={{protocol}}://{{server}}/src/{project}/EXTERNAL/{name}/{suite}/$basearch/
+baseurl={{protocol}}://{{server}}/src/{project}/{trailing_path}/{name}/{suite}/$basearch/
 {options}
 """
             components_template = """[EXTERNAL-{name}]
 name=EXTERNAL-{name}
-baseurl={{protocol}}://{{server}}/src/{project}/EXTERNAL/{name}/{suite}/{component}
+baseurl={{protocol}}://{{server}}/src/{project}/{trailing_path}/{name}/{suite}/{component}
 {options}
 """
             if deploy.components:
@@ -154,6 +154,7 @@ baseurl={{protocol}}://{{server}}/src/{project}/EXTERNAL/{name}/{suite}/{compone
                     template += components_template.format(
                         project=deploy.project.slug,
                         name='{}-{}'.format(deploy.slug, component.replace('/', '-')),
+                        trailing_path=Project.EXTERNAL_TRAILING_PATH,
                         suite=deploy.suite,
                         options=deploy.options.replace(' ', '\n') if deploy.options else '',
                         component=component
@@ -164,6 +165,7 @@ baseurl={{protocol}}://{{server}}/src/{project}/EXTERNAL/{name}/{suite}/{compone
                 return normal_template.format(
                     project=deploy.project.slug,
                     name=deploy.slug,
+                    trailing_path=Project.EXTERNAL_TRAILING_PATH,
                     suite=deploy.suite,
                     options=deploy.options.replace(' ', '\n') if deploy.options else '',
                 )
