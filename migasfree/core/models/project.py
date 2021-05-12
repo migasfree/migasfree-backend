@@ -68,6 +68,7 @@ class Project(models.Model, MigasLink):
 
     REPOSITORY_TRAILING_PATH = 'repos'
     STORE_TRAILING_PATH = 'stores'
+    EXTERNAL_TRAILING_PATH = 'external'
 
     name = models.CharField(
         verbose_name=_("name"),
