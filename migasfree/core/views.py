@@ -1173,7 +1173,11 @@ class GetSourceFileView(views.APIView):
         _path = request.get_full_path()
         project_slug = _path.split('/')[2]
         source_slug = _path.split('/')[4]
-        resource = _path.split('/src/{}/EXTERNAL/{}/'.format(project_slug, source_slug))[1]
+        resource = _path.split(
+            '/src/{}/{}/{}/'.format(
+                project_slug, Project.EXTERNAL_TRAILING_PATH, source_slug
+            )
+        )[1]
 
         _file_local = os.path.join(settings.MIGASFREE_PUBLIC_DIR, _path.split('/src/')[1])
 
@@ -1181,7 +1185,6 @@ class GetSourceFileView(views.APIView):
         if not (_file_local.endswith('.deb') or _file_local.endswith('.rpm')):  # is a metadata file
             try:
                 source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
-                logger.info(source)
             except ObjectDoesNotExist:
                 return HttpResponse(
                     'URL not exists: {}'.format(_path),
@@ -1210,6 +1213,8 @@ class GetSourceFileView(views.APIView):
                     )
 
             url = '{}/{}'.format(source.base_url, resource)
+            logger.debug('get url %s' % url)
+            print(url)
 
             try:
                 ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
