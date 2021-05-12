@@ -41,6 +41,8 @@ from .device.routers import router as device_router
 from .stats.routers import router as stats_router
 from .app_catalog.routers import router as catalog_router
 
+from .core.views import GetSourceFileView
+
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
@@ -88,6 +90,8 @@ urlpatterns = [
     re_path(r'^api/v1/safe/', include(safe_router.urls)),
     re_path(r'^api/v1/', include('migasfree.core.urls')),
     re_path(r'^api/v1/', include('migasfree.client.urls')),
+
+    re_path(r'^src/', GetSourceFileView.as_view()),
 
     re_path(r'^token-auth/$', views.obtain_auth_token),
     path('token-auth-jwt/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
