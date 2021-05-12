@@ -102,6 +102,9 @@ from .filters import (
 
 from . import tasks
 
+import logging
+logger = logging.getLogger('migasfree')
+
 
 class SafePackagerConnectionMixin(SafeConnectionMixin):
     decrypt_key = settings.MIGASFREE_PRIVATE_KEY
@@ -1168,15 +1171,22 @@ class GetSourceFileView(views.APIView):
         source = None
 
         _path = request.get_full_path()
-        project_name = _path.split('/')[2]
-        source_name = _path.split('/')[4]
-        resource = _path.split('/src/{}/EXTERNAL/{}/'.format(project_name, source_name))[1]
+        project_slug = _path.split('/')[2]
+        source_slug = _path.split('/')[4]
+        resource = _path.split('/src/{}/EXTERNAL/{}/'.format(project_slug, source_slug))[1]
 
         _file_local = os.path.join(settings.MIGASFREE_PUBLIC_DIR, _path.split('/src/')[1])
 
         # FIXME PMS dependency
         if not (_file_local.endswith('.deb') or _file_local.endswith('.rpm')):  # is a metadata file
-            source = ExternalSource.objects.get(project__name=project_name, name=source_name)
+            try:
+                source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
+                logger.info(source)
+            except ObjectDoesNotExist:
+                return HttpResponse(
+                    'URL not exists: {}'.format(_path),
+                    status=status.HTTP_404_NOT_FOUND
+                )
 
             if not source.frozen:
                 # expired metadata
@@ -1191,7 +1201,13 @@ class GetSourceFileView(views.APIView):
                 os.makedirs(os.path.dirname(_file_local))
 
             if not source:
-                source = ExternalSource.objects.get(project__name=project_name, name=source_name)
+                try:
+                    source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
+                except ObjectDoesNotExist:
+                    return HttpResponse(
+                        'URL not exists: {}'.format(_path),
+                        status=status.HTTP_404_NOT_FOUND
+                    )
 
             url = '{}/{}'.format(source.base_url, resource)
 
