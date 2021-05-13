@@ -899,7 +899,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 [install.append(x) for x in
                     default_included_packages.split('\n') if x]
 
-        pkgs = new_deploys.values_list('default_preincluded_packages')
+        pkgs = new_deploys.values_list('default_preincluded_packages', flat=True)
         for default_preincluded_packages in pkgs:
             if default_preincluded_packages:
                 [preinstall.append(x) for x in
