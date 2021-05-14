@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -96,5 +96,23 @@ class DeviceStatsViewSet(viewsets.ViewSet):
                     }
                 ),
             },
+            status=status.HTTP_200_OK
+        )
+
+    @action(methods=['get'], detail=False, url_path='models/project')
+    def models_by_project(self, request, format=None):
+        total = Model.objects.count()
+
+        x_axe = []
+        data = []
+        for item in Model.group_by_project():
+            x_axe.append(item['drivers__project__name'])
+            data.append({
+                'value': item['count'],
+                'drivers__project__id': item['drivers__project__id']
+            })
+
+        return Response(
+            {'x_labels': x_axe, 'data': data, 'total': total},
             status=status.HTTP_200_OK
         )
