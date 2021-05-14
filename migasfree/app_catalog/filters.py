@@ -31,6 +31,7 @@ class ApplicationFilter(django_filters.FilterSet):
             'category': ['exact'],
             'score': ['exact'],
             'available_for_attributes__id': ['exact'],
+            'packages_by_project__project__id': ['exact'],
         }
 
 
