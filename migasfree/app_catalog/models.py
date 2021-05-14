@@ -145,6 +145,31 @@ class Application(models.Model, MigasLink):
         verbose_name=_('available for attributes')
     )
 
+    @staticmethod
+    def group_by_category():
+        return Application.objects.values(
+            'category',
+        ).annotate(
+            count=models.aggregates.Count('category')
+        ).order_by('-count')
+
+    @staticmethod
+    def group_by_level():
+        return Application.objects.values(
+            'level',
+        ).annotate(
+            count=models.aggregates.Count('level')
+        ).order_by('-count')
+
+    @staticmethod
+    def group_by_project():
+        return Application.objects.values(
+            'packages_by_project__project__name',
+            'packages_by_project__project__id'
+        ).annotate(
+            count=models.aggregates.Count('id', distinct=True)
+        ).order_by('packages_by_project__project__name')
+
     def __str__(self):
         return self.name
 
