@@ -60,6 +60,15 @@ class Model(models.Model, MigasLink):
             count=models.aggregates.Count('id')
         ).order_by('-count')
 
+    @staticmethod
+    def group_by_project():
+        return Model.objects.values(
+            'drivers__project__name',
+            'drivers__project__id'
+        ).annotate(
+            count=models.aggregates.Count('id', distinct=True)
+        ).order_by('drivers__project__name')
+
     def __str__(self):
         return self.name
 
