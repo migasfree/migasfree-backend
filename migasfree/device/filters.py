@@ -117,4 +117,5 @@ class ModelFilter(filters.FilterSet):
             'device_type__id': ['exact'],
             'device_type__name': ['exact', 'icontains'],
             'connections__id': ['exact'],
+            'drivers__project__id': ['exact'],
         }
