@@ -130,7 +130,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(blank=True, max_length=100, null=True, verbose_name='name')),
                 ('packages_to_install', models.TextField(blank=True, null=True, verbose_name='packages to install')),
                 ('capability', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='device.capability', verbose_name='capability')),
-                ('model', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='device.model', verbose_name='model')),
+                ('model', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='drivers', to='device.model', verbose_name='model')),
                 ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.project', verbose_name='project')),
             ],
             options={
