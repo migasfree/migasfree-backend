@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.db.models.aggregates import Count
 from django.utils.translation import gettext as _
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
@@ -32,13 +31,9 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
         total = Application.objects.count()
 
         data = []
-        for item in Application.objects.values(
-            'category',
-        ).annotate(
-            count=Count('category')
-        ).order_by('-count'):
+        for item in Application.group_by_category():
             data.append({
-                'name': '{}'.format(dict(Application.CATEGORIES)[item.get('category')]),
+                'name': dict(Application.CATEGORIES)[item.get('category')],
                 'value': item.get('count'),
                 'category': item.get('category')
             })
@@ -57,13 +52,9 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
         total = Application.objects.count()
 
         data = []
-        for item in Application.objects.values(
-            'level',
-        ).annotate(
-            count=Count('level')
-        ).order_by('-count'):
+        for item in Application.group_by_level():
             data.append({
-                'name': '{}'.format(dict(Application.LEVELS)[item.get('level')]),
+                'name': dict(Application.LEVELS)[item.get('level')],
                 'value': item.get('count'),
                 'level': item.get('level')
             })
@@ -74,5 +65,23 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
                 'total': total,
                 'data': data,
             },
+            status=status.HTTP_200_OK
+        )
+
+    @action(methods=['get'], detail=False, url_path='project')
+    def by_project(self, request, format=None):
+        total = Application.objects.count()
+
+        x_axe = []
+        data = []
+        for item in Application.group_by_project():
+            x_axe.append(item['packages_by_project__project__name'])
+            data.append({
+                'value': item['count'],
+                'packages_by_project__project__id': item['packages_by_project__project__id']
+            })
+
+        return Response(
+            {'x_labels': x_axe, 'data': data, 'total': total},
             status=status.HTTP_200_OK
         )
