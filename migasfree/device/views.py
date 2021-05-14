@@ -255,7 +255,7 @@ class ModelViewSet(viewsets.ModelViewSet, MigasViewSet):
             'device_type', 'manufacturer'
         ). prefetch_related(
             'connections'
-        )
+        ).distinct()
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
