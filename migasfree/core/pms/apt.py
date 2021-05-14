@@ -117,50 +117,56 @@ create_deploy
         """
 
         _cmd = '''
-echo "****INFO****"
+echo "## Info"
+echo "~~~"
 dpkg -I %(pkg)s
+echo "~~~"
 echo
+echo "## Requires"
+echo "~~~"
+dpkg-deb --showformat='${Depends}\n' --show %(pkg)s
+echo "~~~"
 echo
-echo ****REQUIRES****
-dpkg-deb --showformat='${Depends}' --show %(pkg)s
+echo "## Provides"
+echo "~~~"
+dpkg-deb --showformat='${Provides}\n' --show %(pkg)s
+echo "~~~"
 echo
+echo "## Obsoletes"
+echo "~~~"
+dpkg-deb --showformat='${Replaces}\n' --show %(pkg)s
+echo "~~~"
 echo
-echo ****PROVIDES****
-dpkg-deb --showformat='${Provides}' --show %(pkg)s
-echo
-echo
-echo ****OBSOLETES****
-dpkg-deb --showformat='${Replaces}' --show %(pkg)s
-echo
-echo
-echo "****SCRIPT PREINST****"
+echo "## Script PreInst"
+echo "~~~"
 dpkg-deb -I %(pkg)s preinst
+echo "~~~"
 echo
-echo
-
-echo "****SCRIPT POSTINST****"
+echo "## Script PostInst"
+echo "~~~"
 dpkg-deb -I %(pkg)s postinst
+echo "~~~"
 echo
-echo
-
-echo "****SCRIPT PRERM****"
+echo "## Script PreRm"
+echo "~~~"
 dpkg-deb -I %(pkg)s prerm
+echo "~~~"
 echo
-echo
-
-echo "****SCRIPT POSTRM****"
+echo "## Script PostRm"
+echo "~~~"
 dpkg-deb -I %(pkg)s postrm
+echo "~~~"
 echo
-echo
-
-echo ****CHANGELOG****
+echo "## Changelog"
 _NAME=$(dpkg-deb --showformat='${Package}' --show %(pkg)s)
+echo "~~~"
 dpkg-deb --fsys-tarfile %(pkg)s | tar -O -xvf - ./usr/share/doc/$_NAME/changelog.Debian.gz | gunzip
+echo "~~~"
 echo
-echo
-
-echo ****FILES****
+echo "## Files"
+echo "~~~"
 dpkg-deb -c %(pkg)s | awk '{print $6}'
+echo "~~~"
         ''' % {'pkg': package}
 
         _ret, _output, _error = execute(_cmd)

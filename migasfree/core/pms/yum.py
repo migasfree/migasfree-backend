@@ -64,33 +64,40 @@ gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg --detach-sign --armor
         """
 
         _cmd = '''
-echo ****INFO****
+echo "## Info"
+echo "~~~"
 rpm -qp --info %(pkg)s
+echo "~~~"
 echo
-echo
-echo ****REQUIRES****
+echo "## Requires"
+echo "~~~"
 rpm -qp --requires %(pkg)s
+echo "~~~"
 echo
-echo
-echo ****PROVIDES****
+echo "## Provides"
+echo "~~~"
 rpm -qp --provides %(pkg)s
+echo "~~~"
 echo
-echo
-echo ****OBSOLETES****
+echo "## Obsoletes"
+echo "~~~"
 rpm -qp --obsoletes %(pkg)s
+echo "~~~"
 echo
-echo
-echo ****SCRIPTS****
+echo "## Scripts"
+echo "~~~"
 rpm -qp --scripts %(pkg)s
+echo "~~~"
 echo
-echo
-echo ****CHANGELOG****
+echo "## Changelog"
+echo "~~~"
 rpm -qp --changelog %(pkg)s
+echo "~~~"
 echo
-echo
-echo ****FILES****
+echo "## Files"
+echo "~~~"
 rpm -qp --list %(pkg)s
-echo
+echo "~~~"
         ''' % {'pkg': package}
 
         _ret, _output, _error = execute(_cmd)
