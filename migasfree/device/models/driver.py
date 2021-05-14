@@ -36,13 +36,14 @@ class Driver(models.Model, MigasLink):
     model = models.ForeignKey(
         Model,
         on_delete=models.CASCADE,
-        verbose_name=_("model")
+        verbose_name=_('model'),
+        related_name='drivers'
     )
 
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        verbose_name=_("project")
+        verbose_name=_('project')
     )
 
     capability = models.ForeignKey(
