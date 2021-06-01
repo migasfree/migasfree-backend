@@ -137,6 +137,7 @@ class Error(Event):
         ).order_by('computer__status', '-count'))
 
         for item in status:
+            item['status'] = item.get('computer__status')
             item['computer__status'] = _(dict(Computer.STATUS_CHOICES)[item.get('computer__status')])
 
         return {
