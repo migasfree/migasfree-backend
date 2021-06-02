@@ -174,6 +174,9 @@ class Attribute(models.Model, MigasLink):
     def prefix_value(self):
         return self.__str__()
 
+    def has_location(self):
+        return self.longitude is not None and self.latitude is not None
+
     def total_computers(self, user=None):
         from ...client.models import Computer
 
