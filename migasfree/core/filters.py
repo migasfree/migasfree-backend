@@ -171,6 +171,19 @@ class ClientPropertyFilter(filters.FilterSet):
 
 
 class AttributeFilter(filters.FilterSet):
+    has_location = filters.BooleanFilter(
+        method='filter_has_location',
+        label='has_location',
+    )
+
+    def filter_has_location(self, qs, name, value):
+        ret = Attribute.objects.none()
+        for item in qs:
+            if item.has_location() == value:
+                ret |= Attribute.objects.filter(pk=item.pk)
+
+        return ret
+
     class Meta:
         model = Attribute
         fields = {
@@ -199,7 +212,7 @@ class AttributeFilter(filters.FilterSet):
         }
 
 
-class ClientAttributeFilter(filters.FilterSet):
+class ClientAttributeFilter(AttributeFilter):
     class Meta:
         model = ClientAttribute
         fields = {
@@ -228,7 +241,7 @@ class ClientAttributeFilter(filters.FilterSet):
         }
 
 
-class ServerAttributeFilter(filters.FilterSet):
+class ServerAttributeFilter(AttributeFilter):
     class Meta:
         model = ServerAttribute
         fields = {
