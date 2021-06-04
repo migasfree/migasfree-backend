@@ -50,7 +50,7 @@ def get_available_pms():
     discovered_plugins = get_discovered_plugins()
     for item in discovered_plugins.keys():
         pms = item.split('.')[-1]
-        ret.append((pms, pms))
+        ret.append((pms, 'plugins.{}'.format(pms)))
 
     return tuple(sorted(ret, key=lambda x: x[0]))
 
