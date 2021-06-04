@@ -29,6 +29,8 @@ from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
+from ..pms import get_available_pms
+
 from .migas_link import MigasLink
 from .project import Project
 from .store import Store
@@ -157,7 +159,10 @@ class Package(models.Model, MigasLink):
         ).count()
 
     def pms(self):
-        mod = import_module('migasfree.core.pms.{}'.format(self.project.pms))
+        available_pms = dict(get_available_pms())
+        mod = import_module(
+            'migasfree.core.pms.{}'.format(available_pms.get(self.project.pms))
+        )
         return getattr(mod, self.project.pms.capitalize())()
 
     def url(self):
