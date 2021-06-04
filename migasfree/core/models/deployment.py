@@ -32,6 +32,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_redis import get_redis_connection
 
+from ..pms import get_available_pms
 from ...utils import time_horizon
 
 from .migas_link import MigasLink
@@ -422,7 +423,10 @@ class Deployment(models.Model, MigasLink):
         return None
 
     def pms(self):
-        mod = import_module('migasfree.core.pms.{}'.format(self.project.pms))
+        available_pms = dict(get_available_pms())
+        mod = import_module(
+            'migasfree.core.pms.{}'.format(available_pms.get(self.project.pms))
+        )
         return getattr(mod, self.project.pms.capitalize())()
 
     def path(self, name=None):
