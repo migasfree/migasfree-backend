@@ -147,7 +147,7 @@ def upload_computer_software_base_diff(request, name, uuid, computer, data):
         clean_packages = []
         for i in packages:
             clean_packages.append(i[1:])
-        update_software_inventory(computer.id, clean_packages)
+        update_software_inventory.delay(computer.id, clean_packages)
         ret = return_message(cmd, errmfs.ok())
     except IndexError:
         ret = return_message(cmd, errmfs.error(errmfs.GENERIC))
