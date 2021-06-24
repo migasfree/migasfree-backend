@@ -881,7 +881,7 @@ def set_computer_tags(request, name, uuid, computer, data):
             "remove": lst_pkg_remove,
         }
 
-        computer.tags = lst_tags_obj
+        computer.tags.set(lst_tags_obj)
 
         ret = return_message(cmd, ret_data)
     except ObjectDoesNotExist:
