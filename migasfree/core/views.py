@@ -763,8 +763,11 @@ class InternalSourceViewSet(viewsets.ModelViewSet, MigasViewSet):
 
     @action(methods=['get'], detail=True)
     def metadata(self, request, pk=None):
-        self.get_object()
-        tasks.create_repository_metadata.delay(pk)
+        deploy = self.get_object()
+        tasks.create_repository_metadata.apply_async(
+            queue='pms-{}'.format(deploy.pms().name),
+            kwargs={'deployment_id': deploy.id}
+        )
 
         return Response(
             {'detail': gettext('Operation received')},
@@ -1121,7 +1124,10 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             available_packages__id=package.id
         )
         for deploy in deployments:
-            tasks.create_repository_metadata.delay(deploy.id)
+            tasks.create_repository_metadata.apply_async(
+                queue='pms-{}'.format(deploy.pms().name),
+                kwargs={'deployment_id': deploy.id}
+            )
 
         return Response(
             self.create_response(gettext('Data received')),
