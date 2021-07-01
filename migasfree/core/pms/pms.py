@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from ...utils import get_setting
+
 
 class Pms(object):
     """
@@ -27,6 +29,10 @@ class Pms(object):
     name = ''  # Package Management System name
     relative_path = ''
     mimetype = ''
+
+    def __init__(self):
+        self.keys_path = get_setting('MIGASFREE_KEYS_DIR')
+        self.media_url = get_setting('MEDIA_URL')
 
     def __str__(self):
         """
