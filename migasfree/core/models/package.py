@@ -293,4 +293,7 @@ def delete_package(sender, instance, **kwargs):
     )
     for deploy in queryset:
         deploy.available_packages.remove(instance)
-        tasks.create_repository_metadata.delay(deploy.id)
+        tasks.create_repository_metadata.apply_async(
+            queue='pms-{}'.format(deploy.pms().name),
+            kwargs={'deployment_id': deploy.id}
+        )
