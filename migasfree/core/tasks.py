@@ -27,7 +27,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from .models import Deployment, Store
 
 
-@shared_task(queue='repository')
+@shared_task
 def remove_repository_metadata(deployment_id, old_slug=''):
     try:
         deploy = Deployment.objects.get(id=deployment_id)
@@ -51,7 +51,7 @@ def symlink_pkg(pkg, source_path, target_path):
         )
 
 
-@shared_task(queue='repository')
+@shared_task
 def create_repository_metadata(deployment_id):
     try:
         deploy = Deployment.objects.get(id=deployment_id)
