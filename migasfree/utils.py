@@ -25,7 +25,19 @@ import tempfile
 import shutil
 
 from datetime import timedelta
-from django.conf import settings
+
+
+def get_setting(name):
+    ret = os.environ.get(name, None)
+    if not ret:
+        try:
+            from django.conf import settings
+
+            ret = getattr(settings, name, None)
+        except (ImportError, AttributeError):
+            pass
+
+    return ret
 
 
 def cmp(a, b):
@@ -136,7 +148,7 @@ def get_client_ip(request):
 
 def uuid_validate(uuid):
     if len(uuid) == 32:
-        uuid = "%s-%s-%s-%s-%s" % (
+        uuid = '{}-{}-{}-{}-{}'.format(
             uuid[0:8],
             uuid[8:12],
             uuid[12:16],
@@ -144,10 +156,10 @@ def uuid_validate(uuid):
             uuid[20:32]
         )
 
-    if uuid in settings.MIGASFREE_INVALID_UUID:
-        return ""
-    else:
-        return uuid
+    if uuid in get_setting('MIGASFREE_INVALID_UUID'):
+        return ''
+
+    return uuid
 
 
 def uuid_change_format(uuid):
