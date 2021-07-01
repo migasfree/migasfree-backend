@@ -18,8 +18,6 @@
 
 import os
 
-from django.conf import settings
-
 from ...utils import execute
 
 from .pms import Pms
@@ -31,6 +29,8 @@ class Yum(Pms):
     """
 
     def __init__(self):
+        super().__init__()
+
         self.name = 'yum'
         self.relative_path = 'repos'
         self.mimetype = [
@@ -53,7 +53,7 @@ createrepo --cachedir checksum $_DIR
 gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg --detach-sign --armor $_DIR/repodata/repomd.xml
         ''' % {
             'path': path,
-            'keys_path': settings.MIGASFREE_KEYS_DIR
+            'keys_path': self.keys_path
         }
 
         return execute(_cmd)
@@ -139,7 +139,7 @@ repo_gpgcheck=1
 gpgcheck=0
 gpgkey=file://{{keys_path}}/{{server}}/repositories.pub
 """.format(
-                media_url=settings.MEDIA_URL,
+                media_url=self.media_url,
                 project=deploy.project.slug,
                 trailing_path=Project.REPOSITORY_TRAILING_PATH,
                 name=deploy.slug
