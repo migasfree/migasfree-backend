@@ -895,7 +895,7 @@ def create_repositories_package(package_name, project_name):
         project = Project.objects.get(name=project_name)
         package = Package.objects.get(name=package_name, project=project)
         for deploy in Deployment.objects.filter(available_packages__id=package.id):
-            create_repository_metadata(deploy.id)
+            create_repository_metadata.delay(deploy.id)
     except ObjectDoesNotExist:
         pass
 
