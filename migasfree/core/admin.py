@@ -419,7 +419,10 @@ class DeploymentAdmin(admin.ModelAdmin):
                     ),  # packages before
                     sorted(packages_after)
                 ) != 0) or has_slug_changed:
-            tasks.create_repository_metadata.delay(obj.id)
+            tasks.create_repository_metadata.apply_async(
+                queue='pms-{}'.format(obj.pms().name),
+                kwargs={'deployment_id': obj.id}
+            )
 
             # delete old repository when name (slug) has changed
             if has_slug_changed and not is_new:
