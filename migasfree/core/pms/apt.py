@@ -18,8 +18,6 @@
 
 import os
 
-from django.conf import settings
-
 from ...utils import execute
 
 from .pms import Pms
@@ -31,6 +29,8 @@ class Apt(Pms):
     """
 
     def __init__(self):
+        super().__init__()
+
         self.name = 'apt'
         self.relative_path = os.path.join('repos', 'dists')
         self.mimetype = [
@@ -106,7 +106,7 @@ create_deploy
             'path': path,
             'name': os.path.basename(path),
             'arch': arch,
-            'keys_path': settings.MIGASFREE_KEYS_DIR
+            'keys_path': self.keys_path
         }
 
         return execute(_cmd)
@@ -201,7 +201,7 @@ echo "~~~"
 
         if deploy.source == Deployment.SOURCE_INTERNAL:
             return 'deb {{protocol}}://{{server}}{media_url}{project}/{trailing_path} {name} PKGS\n'.format(
-                media_url=settings.MEDIA_URL,
+                media_url=self.media_url,
                 project=deploy.project.slug,
                 trailing_path=Project.REPOSITORY_TRAILING_PATH,
                 name=deploy.slug
