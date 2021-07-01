@@ -43,7 +43,7 @@
                 "worker",
                 "--without-gossip",
                 "--concurrency=10",
-                "--queues=default,repository",
+                "--queues=default,pms-apt,pms-yum,pms-zypper",
                 "--loglevel=INFO",
             ],
             "env": {
