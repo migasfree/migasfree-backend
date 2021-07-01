@@ -617,7 +617,11 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         deploy = super().create(validated_data)
         if deploy.source == Deployment.SOURCE_INTERNAL:
-            tasks.create_repository_metadata.delay(deploy.id)
+            tasks.create_repository_metadata.apply_async(
+                queue='pms-{}'.format(deploy.pms().name),
+                kwargs={'deployment_id': deploy.id}
+            )
+
         return deploy
 
     def update(self, instance, validated_data):
@@ -636,7 +640,10 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
             )
 
             if cmp(old_pkgs, new_pkgs) != 0 or old_name != validated_data['name']:
-                tasks.create_repository_metadata.delay(instance.id)
+                tasks.create_repository_metadata.apply_async(
+                    queue='pms-{}'.format(instance.pms().name),
+                    kwargs={'deployment_id': instance.id}
+                )
 
                 if old_name != validated_data['name']:
                     tasks.remove_repository_metadata.delay(
