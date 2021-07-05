@@ -30,7 +30,7 @@ MAXINT = 9223372036854775807  # sys.maxint = (2**63) - 1
 @shared_task(queue='default')
 def save_computer_hardware(computer_id, node, parent=None, level=1):
     computer = Computer.objects.get(id=computer_id)
-    size = node.get('size', 0)
+    size = int(node.get('size', 0))
     n = Node.objects.create({
         'parent': parent,
         'computer': computer,
