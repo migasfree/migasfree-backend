@@ -34,6 +34,16 @@ from .filters import (
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
+class CategoryViewSet(viewsets.ModelViewSet, MigasViewSet):
+    queryset = models.Category.objects.all()
+    serializer_class = serializers.CategorySerializer
+    permission_classes = (PublicPermission,)
+    search_fields = ['name']
+    ordering_fields = '__all__'
+    ordering = ('name',)
+
+
+@permission_classes((permissions.DjangoModelPermissions,))
 class ApplicationViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = models.Application.objects.all()
     serializer_class = serializers.ApplicationSerializer
@@ -55,13 +65,6 @@ class ApplicationViewSet(viewsets.ModelViewSet, MigasViewSet):
     def levels(self, request):
         return Response(
             dict(models.Application.LEVELS),
-            status=status.HTTP_200_OK
-        )
-
-    @action(methods=['get'], detail=False)
-    def categories(self, request):
-        return Response(
-            dict(models.Application.CATEGORIES),
             status=status.HTTP_200_OK
         )
 
