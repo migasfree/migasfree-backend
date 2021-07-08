@@ -1,0 +1,100 @@
+[
+    {
+        "pk": 1,
+        "model": "app_catalog.category",
+        "fields": {
+            "name": "Accessories"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "app_catalog.category",
+        "fields": {
+            "name": "Books"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "app_catalog.category",
+        "fields": {
+            "name": "Developers Tools"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "app_catalog.category",
+        "fields": {
+            "name": "Education"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "app_catalog.category",
+        "fields": {
+            "name": "Fonts"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "app_catalog.category",
+        "fields": {
+            "name": "Games"
+        }
+    },
+    {
+        "pk": 7,
+        "model": "app_catalog.category",
+        "fields": {
+            "name": "Graphics"
+        }
+    },
+    {
+        "pk": 8,
+        "model": "app_catalog.category",
+        "fields": {
+            "name": "Internet"
+        }
+    },
+    {
+        "pk": 9,
+        "model": "app_catalog.category",
+        "fields": {
+            "name": "Medicine"
+        }
+    },
+    {
+        "pk": 10,
+        "model": "app_catalog.category",
+        "fields": {
+            "name": "Office"
+        }
+    },
+    {
+        "pk": 11,
+        "model": "app_catalog.category",
+        "fields": {
+            "name": "Science & Engineering"
+        }
+    },
+    {
+        "pk": 12,
+        "model": "app_catalog.category",
+        "fields": {
+            "name": "Sound & Video"
+        }
+    },
+    {
+        "pk": 13,
+        "model": "app_catalog.category",
+        "fields": {
+            "name": "Themes & Tweaks"
+        }
+    },
+    {
+        "pk": 14,
+        "model": "app_catalog.category",
+        "fields": {
+            "name": "Universal Access"
+        }
+    }
+]
