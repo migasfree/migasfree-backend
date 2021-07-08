@@ -3,6 +3,7 @@
 include AUTHORS LICENSE README.md MANIFEST.in migasfree-backend.doap
 include bin/*
 include requirements/*
+include migasfree/app_catalog/fixtures/*
 include migasfree/core/fixtures/*
 include migasfree/client/fixtures/*
 recursive-include migasfree *.py
