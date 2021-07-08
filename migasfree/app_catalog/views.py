@@ -34,7 +34,7 @@ from .filters import (
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class CategoryViewSet(viewsets.ModelViewSet, MigasViewSet):
+class CategoryViewSet(viewsets.ModelViewSet):
     queryset = models.Category.objects.all()
     serializer_class = serializers.CategorySerializer
     permission_classes = (PublicPermission,)
