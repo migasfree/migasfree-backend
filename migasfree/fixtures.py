@@ -285,6 +285,7 @@ def create_initial_data():
     configure_default_users()
 
     fixtures = [
+        'app_catalog.category.json',
         'core.property.json',
         'core.attribute.json',
         'core.schedule.json',
