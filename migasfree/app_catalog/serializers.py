@@ -35,6 +35,12 @@ class LevelSerializer(serializers.Serializer):
 
 
 class CategorySerializer(serializers.Serializer):
+    def to_representation(self, obj):
+        return {
+            'id': obj.id,
+            'name': obj.name
+        }
+
     class Meta:
         model = models.Category
         fields = '__all__'
