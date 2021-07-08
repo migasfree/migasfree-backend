@@ -75,27 +75,26 @@ def upload_path_handler(instance, filename):
     return 'catalog_icons/app_{}{}'.format(instance.pk, ext)
 
 
+class Category(models.Model):
+    name = models.CharField(
+        verbose_name=_('name'),
+        max_length=50,
+        unique=True
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        app_label = 'app_catalog'
+        verbose_name = _('Category')
+        verbose_name_plural = _('Categories')
+
+
 class Application(models.Model, MigasLink):
     LEVELS = (
         ('U', _('User')),
         ('A', _('Admin')),
-    )
-
-    CATEGORIES = (
-        (1, _('Accessories')),
-        (2, _('Books')),
-        (3, _('Developers Tools')),
-        (4, _('Education')),
-        (5, _('Fonts')),
-        (6, _('Games')),
-        (7, _('Graphics')),
-        (8, _('Internet')),
-        (9, _('Medicine')),
-        (10, _('Office')),
-        (11, _('Science & Engineering')),
-        (12, _('Sound & Video')),
-        (13, _('Themes & Tweaks')),
-        (14, _('Universal Access')),
     )
 
     name = models.CharField(
@@ -133,10 +132,10 @@ class Application(models.Model, MigasLink):
         choices=LEVELS
     )
 
-    category = models.IntegerField(
-        verbose_name=_('category'),
-        default=1,
-        choices=CATEGORIES
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        verbose_name=_('category')
     )
 
     available_for_attributes = models.ManyToManyField(
@@ -148,9 +147,9 @@ class Application(models.Model, MigasLink):
     @staticmethod
     def group_by_category():
         return Application.objects.values(
-            'category',
+            'category__id', 'category__name'
         ).annotate(
-            count=models.aggregates.Count('category')
+            count=models.aggregates.Count('category__id')
         ).order_by('-count')
 
     @staticmethod
