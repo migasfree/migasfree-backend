@@ -22,6 +22,7 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register(r'apps', views.ApplicationViewSet)
+router.register(r'categories', views.CategoryViewSet)
 router.register(r'project-packages', views.PackagesByProjectViewSet)
 router.register(r'policies', views.PolicyViewSet)
 router.register(r'policy-groups', views.PolicyGroupViewSet)
