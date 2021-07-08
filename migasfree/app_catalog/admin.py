@@ -20,10 +20,12 @@ from django.contrib import admin
 from django.db.models import Prefetch
 from django.utils.translation import gettext_lazy as _
 
-# from form_utils.widgets import ImageWidget
-
 from ..core.models import Attribute
-from .models import Application, PackagesByProject, Policy, PolicyGroup
+
+from .models import (
+    Category, Application, PackagesByProject,
+    Policy, PolicyGroup,
+)
 
 
 @admin.register(PackagesByProject)
@@ -51,6 +53,15 @@ class PackagesByProjectLine(admin.TabularInline):
 
     def get_queryset(self, request):
         return PackagesByProject.objects.scope(request.user.userprofile)
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    ordering = ('name',)
+
+    def __str__(self):
+        return self.name
 
 
 @admin.register(Application)
