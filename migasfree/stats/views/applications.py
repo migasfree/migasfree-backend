@@ -33,9 +33,9 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
         data = []
         for item in Application.group_by_category():
             data.append({
-                'name': dict(Application.CATEGORIES)[item.get('category')],
+                'name': item.get('category__name'),
                 'value': item.get('count'),
-                'category': item.get('category')
+                'category': item.get('category__id')
             })
 
         return Response(
