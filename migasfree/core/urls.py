@@ -24,7 +24,7 @@ from .views import ServerInfoView, PmsView, ProgrammingLanguagesView
 public_patterns = [
     re_path(r'server/info/', ServerInfoView.as_view()),
     re_path(r'pms/', PmsView.as_view()),
-    re_path(r'languages', ProgrammingLanguagesView.as_view()),
+    re_path(r'languages/', ProgrammingLanguagesView.as_view()),
 ]
 
 urlpatterns = [
