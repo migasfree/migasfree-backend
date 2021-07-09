@@ -29,7 +29,7 @@ from ..client.models import Computer
 from . import models, serializers
 from .filters import (
     ApplicationFilter, PackagesByProjectFilter,
-    PolicyFilter, PolicyGroupFilter,
+    PolicyFilter, PolicyGroupFilter, CategoryFilter,
 )
 
 
@@ -37,6 +37,7 @@ from .filters import (
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = models.Category.objects.all()
     serializer_class = serializers.CategorySerializer
+    filterset_class = CategoryFilter
     permission_classes = (PublicPermission,)
     search_fields = ['name']
     ordering_fields = '__all__'
