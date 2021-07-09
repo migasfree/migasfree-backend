@@ -18,7 +18,19 @@
 
 import django_filters
 
-from .models import Application, PackagesByProject, Policy, PolicyGroup
+from .models import (
+    Application, Category,
+    PackagesByProject, Policy, PolicyGroup,
+)
+
+
+class CategoryFilter(django_filters.FilterSet):
+    class Meta:
+        model = Category
+        fields = {
+            'id': ['exact'],
+            'name': ['exact', 'icontains'],
+        }
 
 
 class ApplicationFilter(django_filters.FilterSet):
