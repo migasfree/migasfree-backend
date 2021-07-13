@@ -132,7 +132,7 @@ class PlatformSerializer(serializers.ModelSerializer):
 class ProjectInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'slug')
 
 
 class ProjectNestedInfoSerializer(serializers.ModelSerializer):
@@ -140,7 +140,7 @@ class ProjectNestedInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ('id', 'name', 'platform')
+        fields = ('id', 'name', 'slug', 'platform')
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -149,7 +149,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = (
-            'id', 'name', 'pms',
+            'id', 'name', 'slug', 'pms',
             'architecture', 'auto_register_computers', 'platform'
         )
 
@@ -177,7 +177,7 @@ class ProjectWriteSerializer(serializers.ModelSerializer):
 class StoreInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Store
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'slug')
 
 
 class StoreSerializer(serializers.ModelSerializer):
@@ -185,7 +185,7 @@ class StoreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Store
-        fields = ('id', 'name', 'project')
+        fields = ('id', 'name', 'slug', 'project')
 
 
 class StoreWriteSerializer(serializers.ModelSerializer):
@@ -446,7 +446,7 @@ class DeploymentListSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'project', 'domain',
             'schedule', 'source',
-            'name', 'comment',
+            'name', 'slug', 'comment',
             'start_date', 'enabled',
         )
 
