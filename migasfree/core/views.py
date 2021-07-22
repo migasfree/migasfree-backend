@@ -1181,7 +1181,7 @@ class GetSourceFileView(views.APIView):
         source_slug = _path.split('/')[4]
         resource = _path.split(
             '/src/{}/{}/{}/'.format(
-                project_slug, Project.EXTERNAL_TRAILING_PATH, source_slug
+                project_slug, settings.MIGASFREE_EXTERNAL_TRAILING_PATH, source_slug
             )
         )[1]
 
