@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,6 +27,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 MAX_FILE_SIZE = 1024 * 1024 * 50  # 50 MB
 
+MIGASFREE_FQDN = 'localhost'
+
+MIGASFREE_STORE_TRAILING_PATH = 'stores'
+MIGASFREE_REPOSITORY_TRAILING_PATH = 'repos'
+MIGASFREE_EXTERNAL_TRAILING_PATH = 'external'
+MIGASFREE_TMP_TRAILING_PATH = 'tmp'
+
 MIGASFREE_AUTOREGISTER = True
 
 MIGASFREE_COMPUTER_SEARCH_FIELDS = ('id', 'name')
@@ -39,6 +46,7 @@ MIGASFREE_SETTINGS_OVERRIDE = '/var/lib/migasfree-backend/conf/settings.py'
 MIGASFREE_APP_DIR = BASE_DIR
 MIGASFREE_PROJECT_DIR = os.path.dirname(MIGASFREE_APP_DIR)
 MIGASFREE_TMP_DIR = '/tmp'
+MIGASFREE_SECRET_DIR = os.path.join(BASE_DIR, 'secrets')
 
 """
 MIGASFREE_EXTERNAL_ACTIONS
