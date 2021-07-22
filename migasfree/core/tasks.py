@@ -17,95 +17,211 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import sys
+import shutil
+import redis
+import requests
+import json
 import shutil
 
-from celery import shared_task
+from celery import Celery
 from celery.exceptions import Ignore
-from django_redis import get_redis_connection
-from django.core.exceptions import ObjectDoesNotExist
-
-from .models import Deployment, Store
 
 
-@shared_task
-def remove_repository_metadata(deployment_id, old_slug=''):
-    try:
-        deploy = Deployment.objects.get(id=deployment_id)
-    except ObjectDoesNotExist:
-        raise Ignore()
+from .pms import get_pms
 
-    if old_slug:
-        slug = old_slug
-    else:
-        slug = deploy.slug
-
-    shutil.rmtree(deploy.path(slug), ignore_errors=True)
+from ..utils import get_secret, get_setting
 
 
-def symlink_pkg(pkg, source_path, target_path):
-    target = os.path.join(target_path, pkg.fullname)
+MIGASFREE_FQDN = get_setting('MIGASFREE_FQDN')
+MIGASFREE_PUBLIC_DIR = get_setting('MIGASFREE_PUBLIC_DIR')
+MIGASFREE_STORE_TRAILING_PATH = get_setting('MIGASFREE_STORE_TRAILING_PATH')
+MIGASFREE_TMP_TRAILING_PATH = get_setting('MIGASFREE_TMP_TRAILING_PATH')
+
+REDIS_HOST = get_setting('REDIS_HOST')
+REDIS_PORT = get_setting('REDIS_PORT')
+REDIS_DB = get_setting('REDIS_DB')
+
+BROKER_URL = get_setting('BROKER_URL')
+
+AUTH_TOKEN = 'Token {}'.format(get_secret('token_admin'))
+
+API_URL = 'http://{}/api/v1/token'.format(MIGASFREE_FQDN)
+
+REQUESTS_OK_CODES = [
+    requests.codes.ok, requests.codes.created,
+    requests.codes.moved, requests.codes.found,
+    requests.codes.temporary_redirect, requests.codes.resume
+]
+
+app = Celery('migasfree', broker=BROKER_URL, backend=BROKER_URL)
+
+
+def symlink(source_path, target_path, name):
+    """
+    SAMPLE:
+    source_path: /var/lib/migasfree-backend/public/prj1/tmp/dists/prj1/PKGS
+    target_path: ../../../../stores/org
+    name: migasfree-play_1.8.1_amd64.deb
+    """
+
+    target = os.path.join(source_path, name)
     if not os.path.lexists(target):
         os.symlink(
-            os.path.join(source_path, pkg.store.slug, pkg.fullname),
+            os.path.join(target_path, name),
             target
         )
 
 
-@shared_task
+@app.task
 def create_repository_metadata(deployment_id):
-    try:
-        deploy = Deployment.objects.get(id=deployment_id)
-    except:
+    r = requests.get(
+        '{}/deployments/{}/'.format(API_URL, deployment_id),
+        headers={'Authorization': AUTH_TOKEN},
+        verify=False  # TODO
+    )
+
+    if r.status_code not in REQUESTS_OK_CODES:
         raise Ignore()
 
-    con = get_redis_connection()
+    deployment = r.json()
+    project = deployment["project"]
+
+    pms = get_pms(project["pms"])
+
+    # ADD INFO IN REDIS
+    con = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
     con.hmset(
-        'migasfree:repos:%d' % deploy.id, {
-            'name': deploy.name,
-            'project': deploy.project.name
+        'migasfree:repos:%d' % deployment_id, {
+            'name': deployment["name"],
+            'project': project["name"]
         }
     )
-    con.sadd('migasfree:watch:repos', deploy.id)
+    con.sadd('migasfree:watch:repos', deployment_id)
 
-    tmp_path = deploy.path('tmp')
-    stores_path = Store.path(deploy.project.slug, '')[:-1]  # remove trailing slash
-    slug_tmp_path = os.path.join(
-        tmp_path,
-        deploy.pms().relative_path
+    tmp_path = os.path.join(
+        MIGASFREE_PUBLIC_DIR,
+        project["slug"],
+        os.path.join(
+            MIGASFREE_TMP_TRAILING_PATH,
+            "/".join(pms.relative_path.split("/")[1:])
+        ),
+        deployment["slug"]
+    )
+    stores_path = os.path.join(
+        "../" * (len(os.path.join(project["slug"], pms.relative_path).split("/")) + 1),
+        MIGASFREE_STORE_TRAILING_PATH
+    )  # IMPORTANT! -> IS RELATIVE
+
+
+    repository_path = os.path.join(
+        MIGASFREE_PUBLIC_DIR,
+        project["slug"],
+        pms.relative_path,
+        deployment["slug"]
     )
 
-    if slug_tmp_path.endswith('/'):
-        # remove trailing slash for replacing in template
-        slug_tmp_path = slug_tmp_path[:-1]
-
-    pkg_tmp_path = os.path.join(
-        slug_tmp_path,
-        deploy.slug,
-        Deployment.PACKAGES_PATH
-    )
+    pkg_tmp_path = os.path.join(tmp_path, pms.components)
     if not os.path.exists(pkg_tmp_path):
         os.makedirs(pkg_tmp_path)
 
-    for pkg in deploy.available_packages.all():
-        symlink_pkg(pkg, stores_path, pkg_tmp_path)
+    # PACKAGES SYMLINK
+    for package in deployment["available_packages"]:
+        package_name = package["fullname"]
 
-    for set_ in deploy.available_package_sets.all():
-        for pkg in set_.packages.all():
-            symlink_pkg(pkg, stores_path, pkg_tmp_path)
+        r = requests.get(
+            '{}/packages/{}/'.format(API_URL, package["id"]),
+            headers={'Authorization': AUTH_TOKEN},
+            verify=False  # TODO
+        )
+        store_name = r.json()["store"]["name"]
 
-    source = os.path.join(slug_tmp_path, deploy.slug)
-    ret, output, error = deploy.pms().create_repository(
-        path=source,
-        arch=deploy.project.architecture
-    )
+        """
+        _dst = os.path.join(pkg_tmp_path, package_name)
+        if not os.path.lexists(_dst):
+            os.symlink(
+                os.path.join(stores_path, store_name, package_name),
+                _dst
+            )
+        """
+        symlink(
+            pkg_tmp_path,
+            os.path.join(stores_path, store_name),
+            package_name
+        )
 
-    target = deploy.path()
-    shutil.rmtree(target, ignore_errors=True)
 
-    shutil.copytree(source, target, symlinks=True)
+    # PACKAGES SETS SYMLINKS
+    for _set in deployment["available_package_sets"]:
+        _set_name = _set["name"]
+
+        r = requests.get(
+            '{}/packages-sets/{}/'.format(API_URL, _set["id"]),
+            headers={'Authorization': AUTH_TOKEN},
+            verify=False  # TODO
+        )
+        store_name = r.json()["store"]["name"]
+
+        """
+        _dst = os.path.join(pkg_tmp_path, _set_name)
+        if not os.path.lexists(_dst):
+            os.symlink(
+                os.path.join(stores_path, store_name, _set _name),
+                _dst
+            )
+        """
+        symlink(
+            pkg_tmp_path,
+            os.path.join(stores_path, store_name),
+            _set_name
+        )
+
+
+    # Metadata in TMP
+    print("Creating repository metadata for deployment: '{}' in project: '{}'".format(deployment["name"], project["name"]))  # DEBUG
+
+    ret, output, error = pms.create_repository(path=tmp_path, arch=project["architecture"])
+    print(output if ret == 0 else error)  # DEBUG
+
+
+    # Move from TMP to REPOSITORY
+    shutil.rmtree(repository_path, ignore_errors=True)
+    shutil.copytree(tmp_path, repository_path, symlinks=True)
     shutil.rmtree(tmp_path)
 
-    con.hdel('migasfree:repos:%d' % deploy.id, '*')
-    con.srem('migasfree:watch:repos', deploy.id)
+    # REMOVE INFO IN REDIS
+    con.hdel('migasfree:repos:%d' % deployment_id, '*')
+    con.srem('migasfree:watch:repos', deployment_id)
+    con.close()
 
     return ret, output if ret == 0 else error
+
+
+@app.task
+def remove_repository_metadata(deployment_id, old_slug=''):
+    r = requests.get(
+        '{}/deployments/{}/'.format(API_URL, deployment_id),
+        headers={'Authorization': AUTH_TOKEN},
+        verify=False  # TODO
+    )
+
+    if r.status_code not in REQUESTS_OK_CODES:
+        raise Ignore()
+
+    deployment = r.json()
+    project = deployment["project"]
+
+    pms = get_pms(project["pms"])
+
+    if old_slug:
+        slug = old_slug
+    else:
+        slug = deployment["slug"]
+
+    deployment_path = os.path.join(
+        MIGASFREE_PUBLIC_DIR,
+        project["slug"],
+        pms.relative_path,
+        slug
+    )
+    shutil.rmtree(deployment_path, ignore_errors=True)
