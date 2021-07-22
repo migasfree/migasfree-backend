@@ -23,6 +23,8 @@ import pkgutil
 
 import migasfree.core.pms.plugins
 
+from importlib import import_module
+
 from .apt import Apt
 from .yum import Yum
 from .zypper import Zypper
@@ -65,3 +67,12 @@ def get_available_mimetypes():
                 ret += class_[1]().mimetype
 
     return ';'.join(ret)
+
+
+def get_pms(name):
+    available_pms = dict(get_available_pms())
+    mod = import_module(
+        'migasfree.core.pms.{}'.format(available_pms.get(name))
+    )
+
+    return getattr(mod, name.capitalize())()
