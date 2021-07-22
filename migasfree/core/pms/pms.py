@@ -29,6 +29,7 @@ class Pms(object):
     name = ''  # Package Management System name
     relative_path = ''
     mimetype = ''
+    components = 'PKGS'
 
     def __init__(self):
         self.keys_path = get_setting('MIGASFREE_KEYS_DIR')
