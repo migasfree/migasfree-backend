@@ -83,7 +83,7 @@ class Store(models.Model, MigasLink):
         return os.path.join(
             settings.MIGASFREE_PUBLIC_DIR,
             project_name,
-            Project.STORE_TRAILING_PATH,
+            settings.MIGASFREE_STORE_TRAILING_PATH,
             name
         )
 
