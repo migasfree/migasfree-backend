@@ -20,8 +20,6 @@ import os
 import shutil
 import datetime
 
-from importlib import import_module
-
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import pre_save, pre_delete
@@ -32,7 +30,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_redis import get_redis_connection
 
-from ..pms import get_available_pms
+from ..pms import get_available_pms, get_pms
 from ...utils import time_horizon
 
 from .migas_link import MigasLink
@@ -70,8 +68,6 @@ class Deployment(models.Model, MigasLink):
         (SOURCE_INTERNAL, _('Internal')),
         (SOURCE_EXTERNAL, _('External')),
     )
-
-    PACKAGES_PATH = 'PKGS'
 
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
@@ -423,11 +419,7 @@ class Deployment(models.Model, MigasLink):
         return None
 
     def pms(self):
-        available_pms = dict(get_available_pms())
-        mod = import_module(
-            'migasfree.core.pms.{}'.format(available_pms.get(self.project.pms))
-        )
-        return getattr(mod, self.project.pms.capitalize())()
+        return get_pms(self.project.pms)
 
     def path(self, name=None):
         return os.path.join(
