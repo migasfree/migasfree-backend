@@ -111,7 +111,7 @@ class RepositoriesUrlTemplateView(views.APIView):
             '{}://{{server}}{}{{project}}/{}'.format(
                 protocol,
                 settings.MEDIA_URL,
-                Project.REPOSITORY_TRAILING_PATH
+                settings.MIGASFREE_REPOSITORY_TRAILING_PATH
             ),
             content_type='text/plain'
         )
