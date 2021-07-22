@@ -18,7 +18,7 @@
 
 import os
 
-from ...utils import execute
+from ...utils import execute, get_setting
 
 from .pms import Pms
 
@@ -32,7 +32,7 @@ class Yum(Pms):
         super().__init__()
 
         self.name = 'yum'
-        self.relative_path = 'repos'
+        self.relative_path = get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH')
         self.mimetype = [
             'application/x-rpm',
             'application/x-redhat-package-manager'
@@ -127,7 +127,7 @@ echo "~~~"
         string source_template(Deployment deploy)
         """
 
-        from ..models import Deployment, Project
+        from ..models import Deployment
 
         if deploy.source == Deployment.SOURCE_INTERNAL:
             return """[REPO-{name}]
@@ -141,7 +141,7 @@ gpgkey=file://{{keys_path}}/{{server}}/repositories.pub
 """.format(
                 media_url=self.media_url,
                 project=deploy.project.slug,
-                trailing_path=Project.REPOSITORY_TRAILING_PATH,
+                trailing_path=get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH'),
                 name=deploy.slug
             )
         elif deploy.source == Deployment.SOURCE_EXTERNAL:
@@ -161,7 +161,7 @@ baseurl={{protocol}}://{{server}}/src/{project}/{trailing_path}/{name}/{suite}/{
                     template += components_template.format(
                         project=deploy.project.slug,
                         name='{}-{}'.format(deploy.slug, component.replace('/', '-')),
-                        trailing_path=Project.EXTERNAL_TRAILING_PATH,
+                        trailing_path=get_settings('MIGASFREE_EXTERNAL_TRAILING_PATH'),
                         suite=deploy.suite,
                         options=deploy.options.replace(' ', '\n') if deploy.options else '',
                         component=component
@@ -172,7 +172,7 @@ baseurl={{protocol}}://{{server}}/src/{project}/{trailing_path}/{name}/{suite}/{
                 return normal_template.format(
                     project=deploy.project.slug,
                     name=deploy.slug,
-                    trailing_path=Project.EXTERNAL_TRAILING_PATH,
+                    trailing_path=get_setting('MIGASFREE_EXTERNAL_TRAILING_PATH'),
                     suite=deploy.suite,
                     options=deploy.options.replace(' ', '\n') if deploy.options else '',
                 )
