@@ -40,6 +40,12 @@ def get_setting(name):
     return ret
 
 
+def get_secret(name):
+    return read_file(
+        os.path.join(get_setting('MIGASFREE_SECRET_DIR'), name)
+    ).decode().strip()
+
+
 def cmp(a, b):
     return (a > b) - (a < b)
 
