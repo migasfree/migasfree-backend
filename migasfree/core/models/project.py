@@ -19,8 +19,6 @@
 import os
 import shutil
 
-from importlib import import_module
-
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -28,7 +26,7 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 
-from ..pms import get_available_pms
+from ..pms import get_available_pms, get_pms
 from ..validators import validate_project_pms
 
 from . import Platform, MigasLink
@@ -65,10 +63,6 @@ class Project(models.Model, MigasLink):
     This is 'your personal distribution', a set of computers with a determinate
     Distribution for customize.
     """
-
-    REPOSITORY_TRAILING_PATH = 'repos'
-    STORE_TRAILING_PATH = 'stores'
-    EXTERNAL_TRAILING_PATH = 'external'
 
     name = models.CharField(
         verbose_name=_("name"),
@@ -120,14 +114,14 @@ class Project(models.Model, MigasLink):
     def repositories_path(name):
         return os.path.join(
             Project.path(name),
-            Project.REPOSITORY_TRAILING_PATH
+            settings.MIGASFREE_REPOSITORY_TRAILING_PATH
         )
 
     @staticmethod
     def stores_path(name):
         return os.path.join(
             Project.path(name),
-            Project.STORE_TRAILING_PATH
+            settings.MIGASFREE_STORE_TRAILING_PATH
         )
 
     def _create_dirs(self):
@@ -144,8 +138,7 @@ class Project(models.Model, MigasLink):
         return Project.objects.values_list('id', 'name').order_by('name')
 
     def get_pms(self):
-        mod = import_module('migasfree.core.pms.{}'.format(self.pms))
-        return getattr(mod, self.pms.capitalize())()
+        return get_pms(self.pms)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.name)
