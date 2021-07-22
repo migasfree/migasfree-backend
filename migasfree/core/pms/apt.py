@@ -18,7 +18,7 @@
 
 import os
 
-from ...utils import execute
+from ...utils import execute, get_setting
 
 from .pms import Pms
 
@@ -32,7 +32,9 @@ class Apt(Pms):
         super().__init__()
 
         self.name = 'apt'
-        self.relative_path = os.path.join('repos', 'dists')
+        self.relative_path = os.path.join(
+            get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH'), 'dists'
+        )
         self.mimetype = [
             'application/x-debian-package',
             'application/vnd.debian.binary-package',
@@ -50,16 +52,15 @@ _NAME=%(name)s
 _ARCHS=("%(arch)s")
 for _ARCH in ${_ARCHS[@]}
 do
-  cd %(path)s
-  mkdir -p PKGS/binary-$_ARCH/
-  cd ..
+  mkdir -p "%(path)s/%(components)s/binary-$_ARCH/"
+  cd %(path)s/../..
 
-  ionice -c 3 dpkg-scanpackages -m $_NAME/PKGS > $_NAME/PKGS/binary-$_ARCH/Packages 2> /tmp/$_NAME
+  ionice -c 3 dpkg-scanpackages -m dists/$_NAME/%(components)s> dists/$_NAME/%(components)s/binary-$_ARCH/Packages 2> /tmp/$_NAME
   if [ $? != 0 ]
   then
     (>&2 cat /tmp/$_NAME)
   fi
-  gzip -9c $_NAME/PKGS/binary-$_ARCH/Packages > $_NAME/PKGS/binary-$_ARCH/Packages.gz
+  gzip -9c dists/$_NAME/%(components)s/binary-$_ARCH/Packages > dists/$_NAME/%(components)s/binary-$_ARCH/Packages.gz
 done
 
 function calculate_hash {
@@ -74,6 +75,7 @@ function calculate_hash {
 }
 
 function create_deploy {
+  cd %(path)s
   _F="$(mktemp /var/tmp/deploy-XXXXX)"
 
   rm Release 2>/dev/null || :
@@ -83,7 +85,7 @@ function create_deploy {
 
   echo "Architectures: ${_ARCHS[@]}" > $_F
   echo "Codename: $_NAME" >> $_F
-  echo "Components: PKGS" >> $_F
+  echo "Components: %(components)s" >> $_F
   echo "Date: $(date -u '+%%a, %%d %%b %%Y %%H:%%M:%%S UTC')" >> $_F
   echo "Label: migasfree $_NAME repository" >> $_F
   echo "Origin: migasfree" >> $_F
@@ -100,13 +102,13 @@ function create_deploy {
   gpg --no-tty -u migasfree-repository --homedir %(keys_path)s/.gnupg -abs -o Release.gpg Release
 }
 
-cd $_NAME
 create_deploy
 ''' % {
             'path': path,
             'name': os.path.basename(path),
             'arch': arch,
-            'keys_path': self.keys_path
+            'keys_path': self.keys_path,
+            'components': self.components
         }
 
         return execute(_cmd)
@@ -197,21 +199,22 @@ echo "~~~"
         string source_template(Deployment deploy)
         """
 
-        from ..models import Deployment, Project
+        from ..models import Deployment
 
         if deploy.source == Deployment.SOURCE_INTERNAL:
-            return 'deb {{protocol}}://{{server}}{media_url}{project}/{trailing_path} {name} PKGS\n'.format(
+            return 'deb {{protocol}}://{{server}}{media_url}{project}/{trailing_path} {name} {components}\n'.format(
                 media_url=self.media_url,
                 project=deploy.project.slug,
-                trailing_path=Project.REPOSITORY_TRAILING_PATH,
-                name=deploy.slug
+                trailing_path=get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH'),
+                name=deploy.slug,
+                components=self.components
             )
         elif deploy.source == Deployment.SOURCE_EXTERNAL:
             return 'deb {options} {{protocol}}://{{server}}/src/{project}/{trailing_path}/{name} ' \
                    '{suite} {components}\n'.format(
                 options=deploy.options if deploy.options else '',
                 project=deploy.project.slug,
-                trailing_path=Project.EXTERNAL_TRAILING_PATH,
+                trailing_path=get_setting('MIGASFREE_EXTERNAL_TRAILING_PATH'),
                 name=deploy.slug,
                 suite=deploy.suite,
                 components=deploy.components
