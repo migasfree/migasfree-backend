@@ -172,7 +172,7 @@ class Package(models.Model, MigasLink):
         return '{}{}/{}/{}/{}'.format(
             settings.MEDIA_URL,
             self.project.slug,
-            Project.STORE_TRAILING_PATH,
+            settings.MIGASFREE_STORE_TRAILING_PATH,
             self.store.slug,
             self.fullname
         )
