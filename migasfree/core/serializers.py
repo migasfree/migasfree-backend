@@ -132,7 +132,7 @@ class PlatformSerializer(serializers.ModelSerializer):
 class ProjectInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ('id', 'name', 'slug')
+        fields = ('id', 'name', 'slug', 'pms', 'architecture')
 
 
 class ProjectNestedInfoSerializer(serializers.ModelSerializer):
