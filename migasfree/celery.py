@@ -19,7 +19,10 @@
 import os
 
 from celery import Celery
-from django.conf import settings
+try:
+    from django.conf import settings
+except ImportError:
+    pass
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'migasfree.settings.production')
 
