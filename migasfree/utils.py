@@ -41,9 +41,11 @@ def get_setting(name):
 
 
 def get_secret(name):
-    return read_file(
-        os.path.join(get_setting('MIGASFREE_SECRET_DIR'), name)
-    ).decode().strip()
+    file_ = os.path.join(get_setting('MIGASFREE_SECRET_DIR'), name)
+    if os.path.exists(file_):
+        return read_file(file_).decode().strip()
+
+    return ''
 
 
 def cmp(a, b):
