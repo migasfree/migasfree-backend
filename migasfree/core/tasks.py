@@ -27,11 +27,9 @@ import shutil
 from celery import Celery
 from celery.exceptions import Ignore
 
-
 from .pms import get_pms
 
 from ..utils import get_secret, get_setting
-
 
 MIGASFREE_FQDN = get_setting('MIGASFREE_FQDN')
 MIGASFREE_PUBLIC_DIR = get_setting('MIGASFREE_PUBLIC_DIR')
@@ -113,7 +111,6 @@ def create_repository_metadata(deployment_id):
         MIGASFREE_STORE_TRAILING_PATH
     )  # IMPORTANT! -> IS RELATIVE
 
-
     repository_path = os.path.join(
         MIGASFREE_PUBLIC_DIR,
         project["slug"],
@@ -125,7 +122,7 @@ def create_repository_metadata(deployment_id):
     if not os.path.exists(pkg_tmp_path):
         os.makedirs(pkg_tmp_path)
 
-    # PACKAGES SYMLINK
+    # Packages Symbolic Links
     for package in deployment["available_packages"]:
         package_name = package["fullname"]
 
@@ -136,53 +133,36 @@ def create_repository_metadata(deployment_id):
         )
         store_name = r.json()["store"]["name"]
 
-        """
-        _dst = os.path.join(pkg_tmp_path, package_name)
-        if not os.path.lexists(_dst):
-            os.symlink(
-                os.path.join(stores_path, store_name, package_name),
-                _dst
-            )
-        """
         symlink(
             pkg_tmp_path,
             os.path.join(stores_path, store_name),
             package_name
         )
 
-
-    # PACKAGES SETS SYMLINKS
+    # Package Sets Symbolic Links
     for _set in deployment["available_package_sets"]:
         _set_name = _set["name"]
 
         r = requests.get(
-            '{}/packages-sets/{}/'.format(API_URL, _set["id"]),
+            '{}/package-sets/{}/'.format(API_URL, _set["id"]),
             headers={'Authorization': AUTH_TOKEN},
             verify=False  # TODO
         )
         store_name = r.json()["store"]["name"]
 
-        """
-        _dst = os.path.join(pkg_tmp_path, _set_name)
-        if not os.path.lexists(_dst):
-            os.symlink(
-                os.path.join(stores_path, store_name, _set _name),
-                _dst
-            )
-        """
         symlink(
             pkg_tmp_path,
             os.path.join(stores_path, store_name),
             _set_name
         )
 
-
     # Metadata in TMP
-    print("Creating repository metadata for deployment: '{}' in project: '{}'".format(deployment["name"], project["name"]))  # DEBUG
+    print("Creating repository metadata for deployment: '{}' in project: '{}'".format(
+        deployment["name"], project["name"]
+    ))  # DEBUG
 
     ret, output, error = pms.create_repository(path=tmp_path, arch=project["architecture"])
     print(output if ret == 0 else error)  # DEBUG
-
 
     # Move from TMP to REPOSITORY
     shutil.rmtree(repository_path, ignore_errors=True)
