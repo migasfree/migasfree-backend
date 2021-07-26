@@ -122,38 +122,30 @@ def create_repository_metadata(deployment_id):
     if not os.path.exists(pkg_tmp_path):
         os.makedirs(pkg_tmp_path)
 
-    # Packages Symbolic Links
-    for package in deployment["available_packages"]:
-        package_name = package["fullname"]
+    # Packages
+    packages = deployment["available_packages"]
 
+    # Package Sets
+    for package_set in deployment["available_package_sets"]:
+        r = requests.get(
+            '{}/package-sets/{}/'.format(API_URL, package_set["id"]),
+            headers={'Authorization': AUTH_TOKEN}
+        )
+        # concatenates packages
+        packages = [*packages, *r.json()["packages"]]
+
+    # Symlinks for packages
+    for package in packages:
         r = requests.get(
             '{}/packages/{}/'.format(API_URL, package["id"]),
-            headers={'Authorization': AUTH_TOKEN},
-            verify=False  # TODO
+            headers={'Authorization': AUTH_TOKEN}
         )
         store_name = r.json()["store"]["name"]
 
         symlink(
             pkg_tmp_path,
             os.path.join(stores_path, store_name),
-            package_name
-        )
-
-    # Package Sets Symbolic Links
-    for _set in deployment["available_package_sets"]:
-        _set_name = _set["name"]
-
-        r = requests.get(
-            '{}/package-sets/{}/'.format(API_URL, _set["id"]),
-            headers={'Authorization': AUTH_TOKEN},
-            verify=False  # TODO
-        )
-        store_name = r.json()["store"]["name"]
-
-        symlink(
-            pkg_tmp_path,
-            os.path.join(stores_path, store_name),
-            _set_name
+            package["fullname"]
         )
 
     # Metadata in TMP
