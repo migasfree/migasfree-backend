@@ -98,7 +98,7 @@ class PackageFilter(filters.FilterSet):
     class Meta:
         model = Package
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'fullname': ['icontains'],
             'name': ['exact', 'icontains'],
             'version': ['exact', 'icontains'],
