@@ -130,8 +130,9 @@ def create_repository_metadata(deployment_id):
             '{}/package-sets/{}/'.format(API_URL, package_set["id"]),
             headers={'Authorization': AUTH_TOKEN}
         )
-        # concatenates packages
-        packages = [*packages, *r.json()["packages"]]
+        if r.status_code in REQUESTS_OK_CODES:
+            # concatenates packages
+            packages = [*packages, *r.json()["packages"]]
 
     # Symlinks for packages
     for package in packages:
@@ -139,13 +140,12 @@ def create_repository_metadata(deployment_id):
             '{}/packages/{}/'.format(API_URL, package["id"]),
             headers={'Authorization': AUTH_TOKEN}
         )
-        store_name = r.json()["store"]["name"]
-
-        symlink(
-            pkg_tmp_path,
-            os.path.join(stores_path, store_name),
-            package["fullname"]
-        )
+        if r.status_code in REQUESTS_OK_CODES:
+            symlink(
+                pkg_tmp_path,
+                os.path.join(stores_path, r.json()["store"]["name"]),
+                package["fullname"]
+            )
 
     # Metadata in TMP
     print("Creating repository metadata for deployment: '{}' in project: '{}'".format(
