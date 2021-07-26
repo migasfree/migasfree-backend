@@ -75,8 +75,7 @@ def symlink(source_path, target_path, name):
 def create_repository_metadata(deployment_id):
     r = requests.get(
         '{}/deployments/{}/'.format(API_URL, deployment_id),
-        headers={'Authorization': AUTH_TOKEN},
-        verify=False  # TODO
+        headers={'Authorization': AUTH_TOKEN}
     )
 
     if r.status_code not in REQUESTS_OK_CODES:
@@ -173,8 +172,7 @@ def create_repository_metadata(deployment_id):
 def remove_repository_metadata(deployment_id, old_slug=''):
     r = requests.get(
         '{}/deployments/{}/'.format(API_URL, deployment_id),
-        headers={'Authorization': AUTH_TOKEN},
-        verify=False  # TODO
+        headers={'Authorization': AUTH_TOKEN}
     )
 
     if r.status_code not in REQUESTS_OK_CODES:
