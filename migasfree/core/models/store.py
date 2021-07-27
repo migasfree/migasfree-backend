@@ -114,7 +114,7 @@ class Store(models.Model, MigasLink):
         app_label = 'core'
         verbose_name = _('Store')
         verbose_name_plural = _('Stores')
-        unique_together = (('name', 'project'),)
+        unique_together = (('name', 'project'), ('project', 'slug'))
         ordering = ['name', 'project']
 
 
