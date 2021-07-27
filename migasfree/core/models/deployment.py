@@ -442,7 +442,7 @@ class Deployment(models.Model, MigasLink):
         app_label = 'core'
         verbose_name = _('Deployment')
         verbose_name_plural = _('Deployments')
-        unique_together = (('name', 'project'),)
+        unique_together = (('name', 'project'), ('project', 'slug'))
         ordering = ['project__name', 'name']
 
 
