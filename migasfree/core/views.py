@@ -557,7 +557,12 @@ class PackageViewSet(
 
         if not data['name']:
             path = save_tempfile(data['files'][0])
-            response = store.project.get_pms().package_metadata(path)
+
+            response = tasks.package_metadata.apply_async(
+                kwargs={'pms_name': store.project.pms, 'package': path}, 
+                queue="pms-{}".format(store.project.pms)
+            ).get()
+
             os.remove(path)
             if response['name']:
                 data['name'] = response['name']
@@ -613,10 +618,14 @@ class PackageViewSet(
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        response = obj.pms().package_info(
-            Package.path(obj.project.slug, obj.store.slug, obj.fullname)
-        )
-
+        response = tasks.package_info.apply_async(
+            kwargs={
+                'pms_name': obj.project.pms, 
+                'package': Package.path(obj.project.slug, obj.store.slug, obj.fullname)
+            }, 
+            queue="pms-{}".format(obj.project.pms)
+        ).get()
+                
         return Response({'data': response}, status=status.HTTP_200_OK)
 
 
@@ -649,7 +658,12 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
             name, version, architecture = Package.normalized_name(file_.name)
             if not name:
                 path = save_tempfile(file_)
-                response = project.get_pms().package_metadata(path)
+                
+                response = tasks.package_metadata.apply_async(
+                    kwargs={'pms_name': project.pms, 'package': path},
+                    queue="pms-{}".format(project.pms)
+                ).get()
+
                 os.remove(path)
                 if response['name']:
                     name = response['name']
