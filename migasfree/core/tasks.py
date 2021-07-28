@@ -72,6 +72,16 @@ def symlink(source_path, target_path, name):
 
 
 @app.task
+def package_metadata(pms_name, package):
+    return get_pms(pms_name).package_metadata(package)
+
+
+@app.task
+def package_info(pms_name, package):
+    return get_pms(pms_name).package_info(package)
+
+
+@app.task
 def create_repository_metadata(deployment_id):
     r = requests.get(
         '{}/deployments/{}/'.format(API_URL, deployment_id),
