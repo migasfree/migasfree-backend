@@ -308,7 +308,9 @@ def read_remote_chunks(local_file, remote, chunk_size=8192):
 
 
 def save_tempfile(file_):
-    tempf, tempfn = tempfile.mkstemp()
+    # prefix must ends always in slash
+    prefix = os.path.join(get_setting('MIGASFREE_TMP_DIR'), '')
+    tempf, tempfn = tempfile.mkstemp(prefix=prefix)
     try:
         for chunk in file_.chunks():
             os.write(tempf, chunk)
