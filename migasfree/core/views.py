@@ -556,14 +556,15 @@ class PackageViewSet(
         store = get_object_or_404(Store, pk=data['store'][0])
 
         if not data['name']:
-            path = save_tempfile(data['files'][0])
-
+            package_path = save_tempfile(data['files'][0])
             response = tasks.package_metadata.apply_async(
-                kwargs={'pms_name': store.project.pms, 'package': path}, 
-                queue="pms-{}".format(store.project.pms)
+                kwargs={
+                    'pms_name': store.project.pms,
+                    'package': package_path
+                },
+                queue='pms-{}'.format(store.project.pms)
             ).get()
-
-            os.remove(path)
+            os.remove(package_path)
             if response['name']:
                 data['name'] = response['name']
                 data['version'] = response['version']
@@ -620,12 +621,12 @@ class PackageViewSet(
 
         response = tasks.package_info.apply_async(
             kwargs={
-                'pms_name': obj.project.pms, 
+                'pms_name': obj.project.pms,
                 'package': Package.path(obj.project.slug, obj.store.slug, obj.fullname)
-            }, 
+            },
             queue="pms-{}".format(obj.project.pms)
         ).get()
-                
+
         return Response({'data': response}, status=status.HTTP_200_OK)
 
 
@@ -657,14 +658,15 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
         for file_ in files:
             name, version, architecture = Package.normalized_name(file_.name)
             if not name:
-                path = save_tempfile(file_)
-                
+                package_path = save_tempfile(file_)
                 response = tasks.package_metadata.apply_async(
-                    kwargs={'pms_name': project.pms, 'package': path},
-                    queue="pms-{}".format(project.pms)
+                    kwargs={
+                        'pms_name': project.pms,
+                        'package': package_path
+                    },
+                    queue='pms-{}'.format(project.pms)
                 ).get()
-
-                os.remove(path)
+                os.remove(package_path)
                 if response['name']:
                     name = response['name']
                     version = response['version']
@@ -1027,6 +1029,21 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                 package[0].update_store(store)
             else:
                 name, version, architecture = Package.normalized_name(_file.name)
+                if not name:
+                    package_path = save_tempfile(_file)
+                    response = tasks.package_metadata.apply_async(
+                        kwargs={
+                            'pms_name': project.pms,
+                            'package': package_path
+                        },
+                        queue='pms-{}'.format(project.pms)
+                    ).get()
+                    os.remove(package_path)
+                    if response['name']:
+                        name = response['name']
+                        version = response['version']
+                        architecture = response['architecture']
+
                 Package.objects.create(
                     fullname=_file.name,
                     name=name,
@@ -1037,8 +1054,10 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                     file_=_file
                 )
 
-        target = Package.path(project.slug, store.slug, _file.name)
-        Package.handle_uploaded_file(_file, target)
+        Package.handle_uploaded_file(
+            _file,
+            Package.path(project.slug, store.slug, _file.name)
+        )
 
         return Response(
             self.create_response(gettext('Data received')),
