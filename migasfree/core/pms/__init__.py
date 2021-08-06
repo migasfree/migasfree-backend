@@ -26,6 +26,7 @@ import migasfree.core.pms.plugins
 from importlib import import_module
 
 from .apt import Apt
+from .pacman import Pacman
 from .yum import Yum
 from .zypper import Zypper
 
@@ -45,6 +46,7 @@ def get_discovered_plugins():
 def get_available_pms():
     ret = [
         ('apt', 'apt'),
+        ('pacman', 'Pacman'),
         ('yum', 'yum'),
         ('zypper', 'zypper'),
     ]
