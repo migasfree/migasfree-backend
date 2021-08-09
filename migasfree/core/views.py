@@ -691,7 +691,7 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
             except IntegrityError:
                 return Response(
                     {
-                        'error': gettext('Package %s is duplicated in store %s') % (file_.name, obj.store)
+                        'error': gettext('Package %s is duplicated in store %s') % (file_.name, store.name)
                     },
                     status=status.HTTP_400_BAD_REQUEST
                 )
@@ -1206,6 +1206,16 @@ class ServerInfoView(views.APIView):
 
 @permission_classes((permissions.AllowAny,))
 class GetSourceFileView(views.APIView):
+    @action(methods=['head'], detail=False)
+    def exists(self, request, *args, **kwargs):
+        _path = request.get_full_path()
+        _local_file = os.path.join(settings.MIGASFREE_PUBLIC_DIR, _path.split('/src/')[1])
+
+        if os.path.getsize(_local_file):
+            return Response(status=status.HTTP_200_OK)
+
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
     def get(self, request, format=None):
         source = None
 
