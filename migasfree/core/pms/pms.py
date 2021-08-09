@@ -28,7 +28,7 @@ class Pms(object):
 
     name = ''  # Package Management System name
     relative_path = ''
-    mimetype = ''
+    mimetype = []
     components = 'PKGS'
     extensions = []
 
