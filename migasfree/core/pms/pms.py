@@ -30,6 +30,7 @@ class Pms(object):
     relative_path = ''
     mimetype = ''
     components = 'PKGS'
+    extensions = []
 
     def __init__(self):
         self.keys_path = get_setting('MIGASFREE_KEYS_DIR')
