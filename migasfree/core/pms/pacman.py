@@ -37,6 +37,7 @@ class Pacman(Pms):
             'application/x-zstd-compressed-alpm-package',
             'application/x-gtar',
         ]
+        self.extensions = ['pkg', 'pkg.tar.zst', 'pkg.tar.gz', 'pkg.tar.xz']
 
     def create_repository(self, path, arch):
         """

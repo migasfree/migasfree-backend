@@ -39,6 +39,7 @@ class Apt(Pms):
             'application/x-debian-package',
             'application/vnd.debian.binary-package',
         ]
+        self.extensions = ['deb']
 
     def create_repository(self, path, arch):
         """
@@ -47,7 +48,7 @@ class Apt(Pms):
         )
         """
 
-        _cmd = '''
+        _cmd = r'''
 _NAME=%(name)s
 _ARCHS=("%(arch)s")
 for _ARCH in ${_ARCHS[@]}

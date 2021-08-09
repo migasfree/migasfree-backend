@@ -37,6 +37,7 @@ class Yum(Pms):
             'application/x-rpm',
             'application/x-redhat-package-manager'
         ]
+        self.extensions = ['rpm']
 
     def create_repository(self, path, arch):
         """
