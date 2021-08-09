@@ -46,7 +46,7 @@ def get_discovered_plugins():
 def get_available_pms():
     ret = [
         ('apt', 'apt'),
-        ('pacman', 'Pacman'),
+        ('pacman', 'pacman'),
         ('yum', 'yum'),
         ('zypper', 'zypper'),
     ]
