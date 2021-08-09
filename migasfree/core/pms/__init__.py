@@ -60,7 +60,7 @@ def get_available_pms():
 
 
 def get_available_mimetypes():
-    ret = Apt().mimetype + Yum().mimetype + Zypper().mimetype
+    ret = Apt().mimetype + Pacman().mimetype + Yum().mimetype + Zypper().mimetype
 
     discovered_plugins = get_discovered_plugins()
     for item in discovered_plugins.keys():
