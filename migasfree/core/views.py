@@ -59,7 +59,7 @@ from ..device.models import Logical
 from ..device.serializers import LogicalSerializer
 from ..utils import read_remote_chunks, save_tempfile
 
-from .pms import get_available_pms
+from .pms import get_available_pms, get_pms
 
 from .models import (
     Platform, Project, Store,
@@ -1174,7 +1174,18 @@ class PmsView(views.APIView):
         """
         Returns available PMS
         """
-        return Response(dict(get_available_pms()))
+        ret = {}
+
+        pms = dict(get_available_pms())
+        for key, value in pms.items():
+            item = get_pms(key)
+            ret[key] = {
+                'module': value,
+                'mimetype': item.mimetype,
+                'extensions': item.extensions
+            }
+
+        return Response(ret)
 
 
 @permission_classes((permissions.AllowAny,))
