@@ -1230,8 +1230,15 @@ class GetSourceFileView(views.APIView):
 
         _file_local = os.path.join(settings.MIGASFREE_PUBLIC_DIR, _path.split('/src/')[1])
 
-        # FIXME PMS dependency
-        if not (_file_local.endswith('.deb') or _file_local.endswith('.rpm')):  # is a metadata file
+        try:
+            project = Project.objects.get(project__slug=project_slug)
+        except ObjectDoesNotExist:
+            return HttpResponse(
+                'Project not exists: {}'.format(project_slug),
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not _file_local.endswith(tuple(project.get_pms().extensions)):  # is a metadata file
             try:
                 source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
             except ObjectDoesNotExist:
@@ -1263,7 +1270,6 @@ class GetSourceFileView(views.APIView):
 
             url = '{}/{}'.format(source.base_url, resource)
             logger.debug('get url %s' % url)
-            print(url)
 
             try:
                 ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
