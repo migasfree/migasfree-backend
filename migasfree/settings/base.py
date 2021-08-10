@@ -108,6 +108,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django-partial-content',
     'graphene_django',
     'rest_framework',
     'rest_framework.authtoken',
