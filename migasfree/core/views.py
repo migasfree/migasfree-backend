@@ -1242,7 +1242,7 @@ class GetSourceFileView(views.APIView):
         _file_local = os.path.join(settings.MIGASFREE_PUBLIC_DIR, _path.split('/src/')[1])
 
         try:
-            project = Project.objects.get(project__slug=project_slug)
+            project = Project.objects.get(slug=project_slug)
         except ObjectDoesNotExist:
             return HttpResponse(
                 'Project not exists: {}'.format(project_slug),
