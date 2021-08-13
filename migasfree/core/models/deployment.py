@@ -30,7 +30,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_redis import get_redis_connection
 
-from ..pms import get_available_pms, get_pms
+from ..pms import get_pms
 from ...utils import time_horizon
 
 from .migas_link import MigasLink
