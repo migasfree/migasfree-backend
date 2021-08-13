@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -87,7 +86,7 @@ class PackageForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
-        super(PackageForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.fields['fullname'].required = False
         self.fields['name'].required = False
@@ -109,7 +108,7 @@ class PackageForm(forms.ModelForm):
         if self['package_file'].value() is not None and not self['store'].value():
             raise ValidationError(_('Store is required with package file'))
 
-        cleaned_data = super(PackageForm, self).clean()
+        cleaned_data = super().clean()
         if self['fullname'].value() == '':
             cleaned_data['fullname'] = self['package_file'].value().name
         else:
@@ -132,7 +131,7 @@ class PackageForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
-        instance = super(PackageForm, self).save(commit=False)
+        instance = super().save(commit=False)
         if instance.fullname is None:
             instance.fullname = self['package_file'].value().name
         if commit:
@@ -148,7 +147,7 @@ class PackageForm(forms.ModelForm):
 class StoreForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
-        super(StoreForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         user = None
         if self.request:
@@ -171,7 +170,7 @@ class StoreForm(forms.ModelForm):
 class DeploymentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
-        super(DeploymentForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         user = self.request.user.userprofile if self.request else None
         self.fields['start_date'].initial = datetime.date.today()
 
@@ -206,7 +205,7 @@ class DeploymentForm(forms.ModelForm):
 
     def clean(self):
         # http://stackoverflow.com/questions/7986510/django-manytomany-model-validation
-        cleaned_data = super(DeploymentForm, self).clean()
+        cleaned_data = super().clean()
 
         if 'project' not in cleaned_data:
             raise ValidationError(_('Project is required'))
@@ -254,14 +253,14 @@ class ClientPropertyForm(forms.ModelForm):
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
-        super(ClientPropertyForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['code'].required = True
 
 
 class ScopeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
-        super(ScopeForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         try:
             self.fields['user'].initial = self.request.user.userprofile
@@ -302,7 +301,7 @@ class DomainForm(forms.ModelForm):
 
 class UserProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(UserProfileForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['groups'].help_text = ''
         if self.instance.id:
             self.fields['username'].help_text += '<p><a href="{}">{}</a></p>'.format(
@@ -311,7 +310,7 @@ class UserProfileForm(forms.ModelForm):
             )
 
     def clean(self):
-        cleaned_data = super(UserProfileForm, self).clean()
+        cleaned_data = super().clean()
 
         if not cleaned_data['is_superuser'] and len(cleaned_data['domains']) == 0:
             domain_admin_group = Group.objects.filter(name='Domain Admin')
