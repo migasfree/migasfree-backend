@@ -38,7 +38,7 @@ from ...hardware.serializers import NodeOnlySerializer
 from ...app_catalog.models import Policy
 from ...core.serializers import PlatformSerializer
 from ...core.views import MigasViewSet, ExportViewSet
-from ...utils import replace_keys, remove_duplicates_preserving_order, decode_dict
+from ...utils import replace_keys, decode_dict
 
 from .. import models, serializers
 from ..filters import (
