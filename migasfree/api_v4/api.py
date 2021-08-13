@@ -9,7 +9,6 @@ from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import auth
 from django.conf import settings
-from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from ..app_catalog.models import Policy
@@ -19,7 +18,7 @@ from ..core.models import (
     Deployment, Store, ServerAttribute, Project, Domain,
 )
 from ..client.models import (
-    Computer, Error, Fault, FaultDefinition, Migration, Notification,
+    Computer, Error, Fault, FaultDefinition, Notification,
     Synchronization, User,
 )
 from ..hardware.models import Node
