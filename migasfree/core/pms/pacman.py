@@ -18,7 +18,7 @@
 
 import os
 
-from ...utils import execute, get_setting
+from ...utils import execute
 
 from .pms import Pms
 
