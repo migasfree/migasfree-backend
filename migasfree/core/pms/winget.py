@@ -26,7 +26,7 @@ from .pms import Pms
 
 try:
     import yaml
-except:
+except ImportError:
     pass
 
 
@@ -39,17 +39,17 @@ def get_id(con, cursor, table, field, value):
         cursor.execute('SELECT MAX(rowid) + 1 FROM {}'.format(table))
         con.commit()
 
-        id = cursor.fetchall()[0][0]
-        if not id:
-            id = 1
+        id_ = cursor.fetchall()[0][0]
+        if not id_:
+            id_ = 1
 
         cursor.execute(
             'INSERT INTO {} (rowid, {}) VALUES (?,?)'.format(table, field),
-            (id, value)
+            (id_, value)
         )
         con.commit()
 
-        return id
+        return id_
 
     return row[0][0]
 
@@ -145,7 +145,7 @@ class Winget(Pms):
                         print(exc)
 
                     # IDS
-                    id = get_id(con, cursor, 'ids', 'id', data['PackageIdentifier'])
+                    id_ = get_id(con, cursor, 'ids', 'id', data['PackageIdentifier'])
 
                     # NAMES
                     if not 'PackageName' in data:
@@ -170,7 +170,7 @@ class Winget(Pms):
                     # MANIFEST
                     cursor.execute(
                         'INSERT INTO manifest (rowid, id, name, moniker, version, channel, pathpart) VALUES (?,?,?,?,?,?,?)',
-                        (manifest, id, name, moniker, version, 1, pathpart)
+                        (manifest, id_, name, moniker, version, 1, pathpart)
                     )
                     con.commit()
 
@@ -266,7 +266,6 @@ fi
             'path': path,
             'name': os.path.basename(path),
             'arch': arch,
-            'keys_path': self.keys_path,
             'components': self.components,
             'certificates_path': get_setting('MIGASFREE_CERTIFICATES_DIR')
         }
