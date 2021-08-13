@@ -24,7 +24,6 @@ from asgiref.sync import async_to_sync
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
-from django.utils import translation
 from django.utils.translation import gettext
 from celery import shared_task
 from channels.layers import get_channel_layer
