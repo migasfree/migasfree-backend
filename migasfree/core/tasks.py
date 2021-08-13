@@ -17,12 +17,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import sys
 import shutil
 import redis
 import requests
-import json
-import shutil
 
 from celery import Celery
 from celery.exceptions import Ignore
