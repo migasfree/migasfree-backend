@@ -27,6 +27,7 @@ from importlib import import_module
 
 from .apt import Apt
 from .pacman import Pacman
+from .winget import Winget
 from .yum import Yum
 from .zypper import Zypper
 
@@ -47,6 +48,7 @@ def get_available_pms():
     ret = [
         ('apt', 'apt'),
         ('pacman', 'pacman'),
+        ('winget', 'winget'),
         ('yum', 'yum'),
         ('zypper', 'zypper'),
     ]
@@ -60,7 +62,7 @@ def get_available_pms():
 
 
 def get_available_mimetypes():
-    ret = Apt().mimetype + Pacman().mimetype + Yum().mimetype + Zypper().mimetype
+    ret = Apt().mimetype + Pacman().mimetype + Winget().mimetype + Yum().mimetype + Zypper().mimetype
 
     discovered_plugins = get_discovered_plugins()
     for item in discovered_plugins.keys():
