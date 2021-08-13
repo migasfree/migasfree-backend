@@ -5,7 +5,6 @@ import json
 
 from django.conf import settings
 from django.http import HttpResponse
-from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 
