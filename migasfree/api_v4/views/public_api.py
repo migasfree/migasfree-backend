@@ -7,7 +7,6 @@ from rest_framework.decorators import permission_classes
 from rest_framework import permissions, views
 from rest_framework.response import Response
 
-from ...core.models import Project
 from ...utils import uuid_validate
 from ..secure import gpg_get_key
 from .client_api import get_computer
