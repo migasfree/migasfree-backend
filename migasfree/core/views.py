@@ -19,6 +19,8 @@
 import os
 import time
 import ssl
+import re
+import mimetypes
 
 from urllib.error import URLError, HTTPError
 from urllib.request import urlopen
@@ -30,7 +32,7 @@ from django.contrib.auth.models import Group, Permission
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db.models import Prefetch
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
 from django_redis import get_redis_connection
@@ -1307,9 +1309,74 @@ class GetSourceFileView(views.APIView):
         else:
             if not os.path.isfile(_file_local):
                 return HttpResponse(status=status.HTTP_204_NO_CONTENT)
-            else:
-                response = HttpResponse(FileWrapper(open(_file_local, 'rb')), content_type='application/octet-stream')
-                response['Content-Disposition'] = 'attachment; filename={}'.format(os.path.basename(_file_local))
-                response['Content-Length'] = os.path.getsize(_file_local)
+
+            range_header = request.META.get('HTTP_RANGE', '').strip()
+            range_re = re.compile(r'bytes\s*=\s*(\d+)\s*-\s*(\d*)', re.I)
+            range_match = range_re.match(range_header)
+            if range_match and os.path.exists(os.path.dirname(_file_local)):
+                size = os.path.getsize(_file_local)
+                content_type, encoding = mimetypes.guess_type(_file_local)
+                content_type = content_type or 'application/octet-stream'
+                first_byte, last_byte = range_match.groups()
+                first_byte = int(first_byte) if first_byte else 0
+                last_byte = int(last_byte) if last_byte else size - 1
+                if last_byte >= size:
+                    last_byte = size - 1
+                length = last_byte - first_byte + 1
+                response = StreamingHttpResponse(
+                    RangeFileWrapper(
+                        open(_file_local, 'rb'),
+                        offset=first_byte,
+                        length=length
+                    ),
+                    status=status.HTTP_206_PARTIAL_CONTENT,
+                    content_type=content_type
+                )
+                response['Content-Length'] = str(length)
+                response['Content-Range'] = 'bytes %s-%s/%s' % (first_byte, last_byte, size)
+                response['Accept-Ranges'] = 'bytes'
 
                 return response
+
+            response = HttpResponse(FileWrapper(open(_file_local, 'rb')), content_type='application/octet-stream')
+            response['Content-Disposition'] = 'attachment; filename={}'.format(os.path.basename(_file_local))
+            response['Content-Length'] = os.path.getsize(_file_local)
+
+            return response
+
+
+class RangeFileWrapper(object):
+    # from https://gist.github.com/dcwatson/cb5d8157a8fa5a4a046e
+
+    def __init__(self, fileobject, blksize=8192, offset=0, length=None):
+        self.fileobject = fileobject
+        self.fileobject.seek(offset, os.SEEK_SET)
+        self.remaining = length
+        self.blksize = blksize
+
+    def close(self):
+        if hasattr(self.fileobject, 'close'):
+            self.fileobject.close()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.remaining is None:
+            # If remaining is None, we're reading the entire file
+            data = self.fileobject.read(self.blksize)
+            if data:
+                return data
+
+            raise StopIteration()
+        else:
+            if self.remaining <= 0:
+                raise StopIteration()
+
+            data = self.fileobject.read(min(self.remaining, self.blksize))
+            if not data:
+                raise StopIteration()
+
+            self.remaining -= len(data)
+
+            return data
