@@ -16,54 +16,35 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import time
-import ssl
-import re
-import mimetypes
-
-from urllib.error import URLError, HTTPError
-from urllib.request import urlopen
-from wsgiref.util import FileWrapper
-
 from django.apps import apps
-from django.conf import settings
 from django.contrib.auth.models import Group, Permission
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db.models import Prefetch
-from django.http import HttpResponse, StreamingHttpResponse
-from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
 from django_redis import get_redis_connection
 from rest_framework import (
     viewsets, parsers, status,
-    mixins, views, permissions,
+    mixins, permissions,
 )
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
-from .mixins import SafeConnectionMixin
-
-from ..client.models import Computer
-from ..client.resources import (
+from ...client.models import Computer
+from ...client.resources import (
     ComputerResource, UserResource,
     ErrorResource, FaultResource, MigrationResource,
     StatusLogResource, SynchronizationResource,
 )
-from ..client.serializers import ComputerInfoSerializer
-from .resources import (
+from ...client.serializers import ComputerInfoSerializer
+from ..resources import (
     ClientAttributeResource, ServerAttributeResource,
     ClientPropertyResource, ServerPropertyResource,
     ProjectResource,
 )
-from ..device.models import Logical
-from ..device.serializers import LogicalSerializer
-from ..utils import read_remote_chunks, save_tempfile
+from ...device.models import Logical
+from ...device.serializers import LogicalSerializer
 
-from .pms import get_available_pms, get_pms
-
-from .models import (
+from ..models import (
     Platform, Project, Store,
     ServerProperty, ClientProperty,
     ServerAttribute, ClientAttribute, Attribute,
@@ -73,7 +54,7 @@ from .models import (
     Domain, Scope, UserProfile,
     AttributeSet, Property,
 )
-from .serializers import (
+from ..serializers import (
     PlatformSerializer, ProjectSerializer, ProjectWriteSerializer,
     StoreSerializer, StoreWriteSerializer,
     ServerPropertySerializer, ClientPropertySerializer,
@@ -94,26 +75,13 @@ from .serializers import (
     ExternalSourceSerializer, ExternalSourceWriteSerializer,
     InternalSourceSerializer, InternalSourceWriteSerializer,
 )
-from .filters import (
+from ..filters import (
     DeploymentFilter, PackageFilter, ProjectFilter, StoreFilter,
     ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
     AttributeSetFilter, PropertyFilter, AttributeFilter, PlatformFilter,
     UserProfileFilter, PermissionFilter, GroupFilter, DomainFilter,
     ScopeFilter, ScheduleFilter, PackageSetFilter, ClientPropertyFilter,
 )
-
-from . import tasks
-
-import logging
-logger = logging.getLogger('migasfree')
-
-
-class SafePackagerConnectionMixin(SafeConnectionMixin):
-    decrypt_key = settings.MIGASFREE_PRIVATE_KEY
-    verify_key = settings.MIGASFREE_PACKAGER_PUB_KEY
-
-    sign_key = settings.MIGASFREE_PRIVATE_KEY
-    encrypt_key = settings.MIGASFREE_PACKAGER_PUB_KEY
 
 
 class ExportViewSet(viewsets.ViewSet):
@@ -999,384 +967,3 @@ class ScopeViewSet(viewsets.ModelViewSet, MigasViewSet):
             Prefetch('excluded_attributes', queryset=qs_att),
             'excluded_attributes__property_att'
         )
-
-
-@permission_classes((permissions.AllowAny,))
-class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
-    def create(self, request, format=None):
-        """
-        claims = {
-            'project': project_name,
-            'store': store_name,
-            'is_package': true|false
-        }
-        """
-
-        claims = self.get_claims(request.data)
-        project = get_object_or_404(Project, name=claims.get('project'))
-
-        store, _ = Store.objects.get_or_create(
-            name=claims.get('store'),
-            project=project
-        )
-
-        _file = request.FILES.get('file')
-
-        if claims.get('is_package'):
-            package = Package.objects.filter(
-                fullname=_file.name,
-                project=project
-            )
-            if package:
-                package[0].update_store(store)
-            else:
-                name, version, architecture = Package.normalized_name(_file.name)
-                if not name:
-                    package_path = save_tempfile(_file)
-                    response = tasks.package_metadata.apply_async(
-                        kwargs={
-                            'pms_name': project.pms,
-                            'package': package_path
-                        },
-                        queue='pms-{}'.format(project.pms)
-                    ).get()
-                    os.remove(package_path)
-                    if response['name']:
-                        name = response['name']
-                        version = response['version']
-                        architecture = response['architecture']
-
-                Package.objects.create(
-                    fullname=_file.name,
-                    name=name,
-                    version=version,
-                    architecture=architecture,
-                    project=project,
-                    store=store,
-                    file_=_file
-                )
-
-        Package.handle_uploaded_file(
-            _file,
-            Package.path(project.slug, store.slug, _file.name)
-        )
-
-        return Response(
-            self.create_response(gettext('Data received')),
-            status=status.HTTP_200_OK
-        )
-
-    @action(methods=['post'], detail=False, url_path='set')
-    def packageset(self, request, format=None):
-        """
-        claims = {
-            'project': project_name,
-            'store': store_name,
-            'packageset': string,
-            'path': string
-        }
-        """
-
-        claims = self.get_claims(request.data)
-        project = get_object_or_404(Project, name=claims.get('project'))
-        packageset = os.path.basename(claims.get('packageset'))
-
-        store, _ = Store.objects.get_or_create(
-            name=claims.get('store'),
-            project=project
-        )
-
-        _file = request.FILES.get('file')
-
-        target = os.path.join(
-            Store.path(project.slug, store.slug),
-            packageset,
-            _file.name
-        )
-
-        package = Package.objects.filter(
-            fullname=packageset, project=project
-        )
-        if package:
-            package[0].update_store(store)
-        else:
-            name, version, architecture = Package.normalized_name(packageset)
-            Package.objects.create(
-                fullname=packageset,
-                name=name,
-                version=version,
-                architecture=architecture,
-                project=project,
-                store=store,
-                file_=_file
-            )
-
-        Package.handle_uploaded_file(_file, target)
-
-        # if exists path move it
-        if claims.get('path'):
-            dst = os.path.join(
-                Store.path(project.slug, store.slug),
-                packageset,
-                claims.get('path'),
-                _file.name
-            )
-            try:
-                os.makedirs(os.path.dirname(dst))
-            except OSError:
-                pass
-            os.rename(target, dst)
-
-        return Response(
-            self.create_response(gettext('Data received')),
-            status=status.HTTP_200_OK
-        )
-
-    @action(methods=['post'], detail=False, url_path='repos')
-    def create_repository(self, request, format=None):
-        """
-        claims = {
-            'project': project_name,
-            'packageset': name,
-        }
-        """
-
-        claims = self.get_claims(request.data)
-        if not claims or 'project' not in claims or 'packageset' not in claims:
-            return Response(
-                self.create_response(gettext('Malformed claims')),
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        project = get_object_or_404(Project, name=claims.get('project'))
-        package = get_object_or_404(
-            Package,
-            fullname=os.path.basename(claims.get('packageset')),
-            project=project
-        )
-
-        deployments = Deployment.objects.filter(
-            available_packages__id=package.id
-        )
-        for deploy in deployments:
-            tasks.create_repository_metadata.apply_async(
-                queue='pms-{}'.format(deploy.pms().name),
-                kwargs={'deployment_id': deploy.id}
-            )
-
-        return Response(
-            self.create_response(gettext('Data received')),
-            status=status.HTTP_200_OK
-        )
-
-
-@permission_classes((permissions.AllowAny,))
-class PmsView(views.APIView):
-    def get(self, request, format=None):
-        """
-        Returns available PMS
-        """
-        ret = {}
-
-        pms = dict(get_available_pms())
-        for key, value in pms.items():
-            item = get_pms(key)
-            ret[key] = {
-                'module': value,
-                'mimetype': item.mimetype,
-                'extensions': item.extensions
-            }
-
-        return Response(ret)
-
-
-@permission_classes((permissions.AllowAny,))
-class ProgrammingLanguagesView(views.APIView):
-    def get(self, request, format=None):
-        """
-        Returns available programming languages (to formulas and faults definitions)
-        """
-        return Response(dict(settings.MIGASFREE_PROGRAMMING_LANGUAGES))
-
-
-@permission_classes((permissions.AllowAny,))
-class ServerInfoView(views.APIView):
-    def post(self, request, format=None):
-        """
-        Returns server info
-        """
-        from .. import __version__, __author__, __contact__, __homepage__
-
-        info = {
-            'version': __version__,
-            'author': __author__,
-            'contact': __contact__,
-            'homepage': __homepage__,
-        }
-
-        return Response(info)
-
-
-@permission_classes((permissions.AllowAny,))
-class GetSourceFileView(views.APIView):
-    @action(methods=['head'], detail=False)
-    def exists(self, request, *args, **kwargs):
-        _path = request.get_full_path()
-        _local_file = os.path.join(settings.MIGASFREE_PUBLIC_DIR, _path.split('/src/')[1])
-
-        if os.path.getsize(_local_file):
-            return Response(status=status.HTTP_200_OK)
-
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    def get(self, request, format=None):
-        source = None
-
-        _path = request.get_full_path()
-        project_slug = _path.split('/')[2]
-        source_slug = _path.split('/')[4]
-        resource = _path.split(
-            '/src/{}/{}/{}/'.format(
-                project_slug, settings.MIGASFREE_EXTERNAL_TRAILING_PATH, source_slug
-            )
-        )[1]
-
-        _file_local = os.path.join(settings.MIGASFREE_PUBLIC_DIR, _path.split('/src/')[1])
-
-        try:
-            project = Project.objects.get(slug=project_slug)
-        except ObjectDoesNotExist:
-            return HttpResponse(
-                'Project not exists: {}'.format(project_slug),
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        if not _file_local.endswith(tuple(project.get_pms().extensions)):  # is a metadata file
-            try:
-                source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
-            except ObjectDoesNotExist:
-                return HttpResponse(
-                    'URL not exists: {}'.format(_path),
-                    status=status.HTTP_404_NOT_FOUND
-                )
-
-            if not source.frozen:
-                # expired metadata
-                if os.path.exists(_file_local) and (
-                    source.expire <= 0 or
-                    (time.time() - os.stat(_file_local).st_mtime) / (60 * source.expire) > 1
-                ):
-                    os.remove(_file_local)
-
-        if not os.path.exists(_file_local):
-            if not os.path.exists(os.path.dirname(_file_local)):
-                os.makedirs(os.path.dirname(_file_local))
-
-            if not source:
-                try:
-                    source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
-                except ObjectDoesNotExist:
-                    return HttpResponse(
-                        'URL not exists: {}'.format(_path),
-                        status=status.HTTP_404_NOT_FOUND
-                    )
-
-            url = '{}/{}'.format(source.base_url, resource)
-            logger.debug('get url %s' % url)
-
-            try:
-                ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-                remote_file = urlopen(url, context=ctx)
-                stream = read_remote_chunks(_file_local, remote_file)
-                response = HttpResponse(
-                    stream,
-                    status=status.HTTP_206_PARTIAL_CONTENT,
-                    content_type='application/octet-stream'
-                )
-                response['Cache-Control'] = 'no-cache'
-
-                return response
-            except HTTPError as e:
-                return HttpResponse(
-                    'HTTP Error: {} {}'.format(e.code, url),
-                    status=e.code
-                )
-            except URLError as e:
-                return HttpResponse(
-                    'URL Error: {} {}'.format(e.reason, url),
-                    status=status.HTTP_404_NOT_FOUND
-                )
-        else:
-            if not os.path.isfile(_file_local):
-                return HttpResponse(status=status.HTTP_204_NO_CONTENT)
-
-            range_header = request.META.get('HTTP_RANGE', '').strip()
-            range_re = re.compile(r'bytes\s*=\s*(\d+)\s*-\s*(\d*)', re.I)
-            range_match = range_re.match(range_header)
-            if range_match and os.path.exists(os.path.dirname(_file_local)):
-                size = os.path.getsize(_file_local)
-                content_type, encoding = mimetypes.guess_type(_file_local)
-                content_type = content_type or 'application/octet-stream'
-                first_byte, last_byte = range_match.groups()
-                first_byte = int(first_byte) if first_byte else 0
-                last_byte = int(last_byte) if last_byte else size - 1
-                if last_byte >= size:
-                    last_byte = size - 1
-                length = last_byte - first_byte + 1
-                response = StreamingHttpResponse(
-                    RangeFileWrapper(
-                        open(_file_local, 'rb'),
-                        offset=first_byte,
-                        length=length
-                    ),
-                    status=status.HTTP_206_PARTIAL_CONTENT,
-                    content_type=content_type
-                )
-                response['Content-Length'] = str(length)
-                response['Content-Range'] = 'bytes %s-%s/%s' % (first_byte, last_byte, size)
-                response['Accept-Ranges'] = 'bytes'
-
-                return response
-
-            response = HttpResponse(FileWrapper(open(_file_local, 'rb')), content_type='application/octet-stream')
-            response['Content-Disposition'] = 'attachment; filename={}'.format(os.path.basename(_file_local))
-            response['Content-Length'] = os.path.getsize(_file_local)
-
-            return response
-
-
-class RangeFileWrapper(object):
-    # from https://gist.github.com/dcwatson/cb5d8157a8fa5a4a046e
-
-    def __init__(self, fileobject, blksize=8192, offset=0, length=None):
-        self.fileobject = fileobject
-        self.fileobject.seek(offset, os.SEEK_SET)
-        self.remaining = length
-        self.blksize = blksize
-
-    def close(self):
-        if hasattr(self.fileobject, 'close'):
-            self.fileobject.close()
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if self.remaining is None:
-            # If remaining is None, we're reading the entire file
-            data = self.fileobject.read(self.blksize)
-            if data:
-                return data
-
-            raise StopIteration()
-        else:
-            if self.remaining <= 0:
-                raise StopIteration()
-
-            data = self.fileobject.read(min(self.remaining, self.blksize))
-            if not data:
-                raise StopIteration()
-
-            self.remaining -= len(data)
-
-            return data
