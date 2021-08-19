@@ -16,10 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
 from django.apps import apps
 from django.contrib.auth.models import Group, Permission
 from django.db import IntegrityError
 from django.db.models import Prefetch
+from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
 from django_redis import get_redis_connection
 from rest_framework import (
@@ -36,14 +39,16 @@ from ...client.resources import (
     StatusLogResource, SynchronizationResource,
 )
 from ...client.serializers import ComputerInfoSerializer
+from ...device.models import Logical
+from ...device.serializers import LogicalSerializer
+from ...utils import save_tempfile
+
+from .. import tasks
 from ..resources import (
     ClientAttributeResource, ServerAttributeResource,
     ClientPropertyResource, ServerPropertyResource,
     ProjectResource,
 )
-from ...device.models import Logical
-from ...device.serializers import LogicalSerializer
-
 from ..models import (
     Platform, Project, Store,
     ServerProperty, ClientProperty,
