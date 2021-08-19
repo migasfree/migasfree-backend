@@ -18,7 +18,7 @@
 
 import os
 
-from ...utils import execute
+from ...utils import execute, get_setting
 
 from .pms import Pms
 
@@ -32,6 +32,7 @@ class Pacman(Pms):
         super().__init__()
 
         self.name = 'pacman'
+        self.relative_path = get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH')
         self.mimetype = [
             'application/x-alpm-package',
             'application/x-zstd-compressed-alpm-package',
@@ -50,7 +51,7 @@ class Pacman(Pms):
         _cmd = '''
 function create_deploy {
   cd %(path)s
-  repo-add ./%(name)s.db.tar.gz ./*
+  repo-add ./%(name)s.db.tar.gz ./%(components)s/*
 
   # gpg --no-tty -u migasfree-repository --homedir %(keys_path)s/.gnupg --clearsign -o InRelease Release
   # gpg --no-tty -u migasfree-repository --homedir %(keys_path)s/.gnupg -abs -o Release.gpg Release
@@ -61,6 +62,7 @@ create_deploy
             'path': path,
             'name': os.path.basename(path),
             'keys_path': self.keys_path,
+            'components': self.components
         }
 
         return execute(_cmd)
@@ -73,17 +75,17 @@ create_deploy
         _cmd = '''
 echo "## Info"
 echo "~~~"
-pacman --query --info %(pkg)s
+pacman --query --info --file %(pkg)s
 echo "~~~"
 echo
 echo "## Changelog"
 echo "~~~"
-pacman --query --changelog %(pkg)s
+pacman --query --changelog --file %(pkg)s
 echo "~~~"
 echo
 echo "## Files"
 echo "~~~"
-pacman --query --list --quiet %(pkg)s
+pacman --query --list --quiet --file %(pkg)s
 echo "~~~"
         ''' % {'pkg': package}
 
@@ -97,7 +99,7 @@ echo "~~~"
         dict package_metadata(string package)
         """
 
-        _cmd = 'pacman --query --info {}'.format(package)
+        _cmd = 'pacman --query --info --file {}'.format(package)
         _ret, _output, _error = execute(_cmd)
         if _ret == 0:
             _output = _output.splitlines()
