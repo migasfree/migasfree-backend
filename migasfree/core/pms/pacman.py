@@ -50,11 +50,9 @@ class Pacman(Pms):
 
         _cmd = '''
 function create_deploy {
-  cd %(path)s
-  repo-add ./%(name)s.db.tar.gz ./%(components)s/*
-
-  # gpg --no-tty -u migasfree-repository --homedir %(keys_path)s/.gnupg --clearsign -o InRelease Release
-  # gpg --no-tty -u migasfree-repository --homedir %(keys_path)s/.gnupg -abs -o Release.gpg Release
+  cd %(path)s/%(components)s
+  export GNUPGHOME=%(keys_path)s/.gnupg
+  repo-add --sign --key migasfree-repository ./%(name)s.db.tar.gz ./*
 }
 
 create_deploy
@@ -130,16 +128,18 @@ echo "~~~"
         from ..models import Deployment
 
         if deploy.source == Deployment.SOURCE_INTERNAL:
-            return '[{name}]\nSigLevel = Optional TrustAll\n' \
-                    'Server = {{protocol}}://{{server}}{media_url}{project}/{name}\n\n'.format(
+            return '[{name}]\nSigLevel = Optional TrustAll PackageTrustAll\n' \
+                    'Server = {{protocol}}://{{server}}{media_url}{project}/{trailing_path}/{name}/{components}\n\n'.format(
                 media_url=self.media_url,
+                trailing_path=get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH'),
                 project=deploy.project.slug,
                 name=deploy.slug,
+                components=self.components
             )
         elif deploy.source == Deployment.SOURCE_EXTERNAL:
-            return '[{name}]\nServer = {base_url}/{arch}\n\n'.format(
-                base_url=deploy.base_url,
-                arch=deploy.project.architecture,
+            return '[{name}]\nServer = {{protocol}}://{{server}}/src/{project}/{trailing_path}/{name}\n\n'.format(
+                project=deploy.project.slug,
+                trailing_path=get_setting('MIGASFREE_EXTERNAL_TRAILING_PATH'), 
                 name=deploy.slug,
             )
 
