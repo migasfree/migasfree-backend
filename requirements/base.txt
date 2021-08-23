@@ -3,9 +3,9 @@ celery==5.1.2
 channels==3.0.4
 channels-redis==3.3.0
 coreapi==2.3.3
-Django==3.1.12
-dj-rest-auth==2.1.9
-django-cors-headers==3.7.0
+Django==3.1.13
+dj-rest-auth==2.1.11
+django-cors-headers==3.8.0
 django-filter==2.4.0
 django-import-export==2.5.0
 django-markdownx==3.0.1
@@ -14,11 +14,11 @@ django-redis==5.0.0
 drf-yasg==1.20.0
 djangorestframework==3.12.4
 djangorestframework-filters==1.0.0.dev2
-djangorestframework-simplejwt==4.7.2
+djangorestframework-simplejwt==4.8.0
 djoser==2.1.0
 docutils==0.17.1
 graphene-django==2.15.0
-jwcrypto==0.9.1
+jwcrypto==1.0
 MarkupPy==1.14
 odfpy==1.4.1
 openpyxl==3.0.7
