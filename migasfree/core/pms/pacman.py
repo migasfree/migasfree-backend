@@ -139,7 +139,7 @@ echo "~~~"
         elif deploy.source == Deployment.SOURCE_EXTERNAL:
             return '[{name}]\nServer = {{protocol}}://{{server}}/src/{project}/{trailing_path}/{name}\n\n'.format(
                 project=deploy.project.slug,
-                trailing_path=get_setting('MIGASFREE_EXTERNAL_TRAILING_PATH'), 
+                trailing_path=get_setting('MIGASFREE_EXTERNAL_TRAILING_PATH'),
                 name=deploy.slug,
             )
 
