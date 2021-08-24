@@ -53,8 +53,6 @@ class AttributeManager(DomainAttributeManager):
 
         if value.count('~') == 1:
             value, description = value.split('~')
-        else:
-            description = description
 
         value = value.strip()  # clean field
         original_value = value
