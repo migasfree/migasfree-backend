@@ -23,18 +23,22 @@ class CannotResolve(Exception):
 def _resolve(instance, node):
     if isinstance(node, F):
         return getattr(instance, node.name)
-    elif isinstance(node, Expression):
+
+    if isinstance(node, Expression):
         return _resolve(instance, node)
+
     return node
 
 
 def resolve_expression_node(instance, node):
-    op = EXPRESSION_NODE_CALLBACKS.get(node.connector, None)
-    if not op:
+    exp = EXPRESSION_NODE_CALLBACKS.get(node.connector, None)
+    if not exp:
         raise CannotResolve
+
     runner = _resolve(instance, node.children[0])
-    for n in node.children[1:]:
-        runner = op(runner, _resolve(instance, n))
+    for item in node.children[1:]:
+        runner = exp(runner, _resolve(instance, item))
+
     return runner
 
 
@@ -53,10 +57,10 @@ def update(instance, **kwargs):
     # note that these might slightly differ from the true database values
     # as the DB could have been updated by another thread. callers should
     # retrieve a new copy of the object if up-to-date values are required
-    for k, v in kwargs.items():
-        if isinstance(v, Expression):
-            v = resolve_expression_node(instance, v)
-        setattr(instance, k, v)
+    for key, value in kwargs.items():
+        if isinstance(value, Expression):
+            value = resolve_expression_node(instance, value)
+        setattr(instance, key, value)
 
     # If you use an ORM cache, make sure to invalidate the instance!
     # cache.set(djangocache.get_cache_key(instance=instance), None, 5)
