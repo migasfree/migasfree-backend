@@ -217,14 +217,14 @@ SELECT ARRAY(
         self.password = new_password
         self.save()
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def save(self, *args, **kwargs):
         if not (
             self.password.startswith('sha1$')
             or self.password.startswith('pbkdf2')
         ):
             super().set_password(self.password)
 
-        super().save(force_insert, force_update, using, update_fields)
+        super().save(*args, **kwargs)
 
     class Meta:
         app_label = 'core'
