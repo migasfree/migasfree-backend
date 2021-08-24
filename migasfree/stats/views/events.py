@@ -77,9 +77,9 @@ def event_by_month(data, begin_date, end_date, model, field='project_id'):
             new_data[project.id] = []
             labels[project.id] = project.name
     elif field == 'status':
-        for status in Computer.STATUS_CHOICES:
-            new_data[status[0]] = []
-            labels[status[0]] = _(status[1])
+        for item in Computer.STATUS_CHOICES:
+            new_data[item[0]] = []
+            labels[item[0]] = _(item[1])
     elif field == 'checked':
         new_data[True] = []
         new_data[False] = []
@@ -114,18 +114,18 @@ def event_by_month(data, begin_date, end_date, model, field='project_id'):
                         'value': 0,
                     })
         elif field == 'status':
-            for status in Computer.STATUS_CHOICES:
+            for item in Computer.STATUS_CHOICES:
                 if value:
-                    count = list(filter(lambda item: item['status'] == status[0], value))
-                    new_data[status[0]].append({
+                    count = list(filter(lambda item: item['status'] == item[0], value))
+                    new_data[item[0]].append({
                         'value': count[0]['count'] if count else 0,
                         'model': model,
-                        'status__in': status[0],
+                        'status__in': item[0],
                         'created_at__gte': start_date.strftime('%Y-%m-%d'),
                         'created_at__lt': final_date.strftime('%Y-%m-%d'),
                     })
                 else:
-                    new_data[status[0]].append({
+                    new_data[item[0]].append({
                         'value': 0,
                     })
         elif field == 'checked':
