@@ -137,8 +137,8 @@ def write_file(filename, content):
 
 
 def read_file(filename):
-    with open(filename, 'rb') as fp:
-        ret = fp.read()
+    with open(filename, 'rb') as _file:
+        ret = _file.read()
 
     return ret
 
@@ -285,8 +285,8 @@ def sort_depends(data):
 
         if data_copy:
             raise ValueError(data_copy)
-        else:
-            return ret
+
+        return ret
 
     return sort()
 
