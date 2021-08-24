@@ -677,7 +677,7 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
 
         return new_pkgs
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         files = request.data.getlist('files')
         if files:
             project_id = request.data.get('project', 0)
@@ -692,9 +692,9 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
                 packages.extend(self._upload_packages(project, store, files))
                 request.data.setlist('packages', packages)
 
-        return super().create(request)
+        return super().create(request, *args, **kwargs)
 
-    def partial_update(self, request, pk=None):
+    def partial_update(self, request, *args, **kwargs):
         obj = self.get_object()
 
         files = request.data.getlist('files')
@@ -704,7 +704,7 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
             packages.extend(self._upload_packages(obj.project, obj.store, files))
             request.data.setlist('packages', packages)
 
-        return super().partial_update(request, pk)
+        return super().partial_update(request, *args, **kwargs)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
