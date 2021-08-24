@@ -513,12 +513,12 @@ def upload_computer_faults(request, name, uuid, computer, data):
     faults = data.get(cmd).get("faults")
 
     try:
-        for name, result in faults.items():
+        for fault_name, result in faults.items():
             try:
                 if result:  # something went wrong
                     Fault.objects.create(
                         computer,
-                        FaultDefinition.objects.get(name=name),
+                        FaultDefinition.objects.get(name=fault_name),
                         result
                     )
             except ObjectDoesNotExist:
