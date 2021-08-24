@@ -57,16 +57,16 @@ admin.site.index_title = 'Welcome to Migasfree Backend Portal'
 TITLE = 'Migasfree REST API'
 
 schema_view = get_schema_view(
-   openapi.Info(
+    openapi.Info(
       title=TITLE,
       default_version='v1',
       # description='Test description',
       # terms_of_service='https://www.google.com/policies/terms/',
       contact=openapi.Contact(email='fun.with@migasfree.org'),
       license=openapi.License(name='GPLv3'),
-   ),
-   public=True,
-   permission_classes=(permissions.AllowAny,),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
 )
 
 token_router = routers.DefaultRouter()
