@@ -80,15 +80,15 @@ def package_info(pms_name, package):
 
 @app.task
 def create_repository_metadata(deployment_id):
-    r = requests.get(
+    req = requests.get(
         '{}/deployments/{}/'.format(API_URL, deployment_id),
         headers={'Authorization': AUTH_TOKEN}
     )
 
-    if r.status_code not in REQUESTS_OK_CODES:
+    if req.status_code not in REQUESTS_OK_CODES:
         raise Ignore()
 
-    deployment = r.json()
+    deployment = req.json()
     project = deployment["project"]
 
     pms = get_pms(project["pms"])
@@ -133,24 +133,24 @@ def create_repository_metadata(deployment_id):
 
     # Package Sets
     for package_set in deployment["available_package_sets"]:
-        r = requests.get(
+        req = requests.get(
             '{}/package-sets/{}/'.format(API_URL, package_set["id"]),
             headers={'Authorization': AUTH_TOKEN}
         )
-        if r.status_code in REQUESTS_OK_CODES:
+        if req.status_code in REQUESTS_OK_CODES:
             # concatenates packages
-            packages = [*packages, *r.json()["packages"]]
+            packages = [*packages, *req.json()["packages"]]
 
     # Symlinks for packages
     for package in packages:
-        r = requests.get(
+        req = requests.get(
             '{}/packages/{}/'.format(API_URL, package["id"]),
             headers={'Authorization': AUTH_TOKEN}
         )
-        if r.status_code in REQUESTS_OK_CODES:
+        if req.status_code in REQUESTS_OK_CODES:
             symlink(
                 pkg_tmp_path,
-                os.path.join(stores_path, r.json()["store"]["name"]),
+                os.path.join(stores_path, req.json()["store"]["name"]),
                 package["fullname"]
             )
 
@@ -177,17 +177,16 @@ def create_repository_metadata(deployment_id):
 
 @app.task
 def remove_repository_metadata(deployment_id, old_slug=''):
-    r = requests.get(
+    req = requests.get(
         '{}/deployments/{}/'.format(API_URL, deployment_id),
         headers={'Authorization': AUTH_TOKEN}
     )
 
-    if r.status_code not in REQUESTS_OK_CODES:
+    if req.status_code not in REQUESTS_OK_CODES:
         raise Ignore()
 
-    deployment = r.json()
+    deployment = req.json()
     project = deployment["project"]
-
     pms = get_pms(project["pms"])
 
     if old_slug:
