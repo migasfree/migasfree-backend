@@ -28,7 +28,10 @@ from ..core.models import Attribute
 from ..device.models import Logical
 from ..hardware.models import Node
 
-from .models import *
+from .models import (
+    Computer, PackageHistory, Error, Fault, FaultDefinition,
+    User, Migration, Synchronization, Notification, StatusLog,
+)
 
 
 def add_computer_search_fields(fields_list):
