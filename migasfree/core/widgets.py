@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,10 +27,10 @@ class MultiFileInput(forms.FileInput):
             attrs = {}
 
         attrs['multiple'] = 'multiple'
-        return super(MultiFileInput, self).render(name, None, attrs=attrs)
+        return super().render(name, None, attrs=attrs)
 
     def value_from_datadict(self, data, files, name):
         if hasattr(files, 'getlist'):
             return files.getlist(name)
-        else:
-            return [files.get(name)]
+
+        return [files.get(name)]
