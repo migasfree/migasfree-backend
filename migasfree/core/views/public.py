@@ -190,7 +190,7 @@ class GetSourceFileView(views.APIView):
                     )
 
             url = '{}/{}'.format(source.base_url, resource)
-            logger.debug('get url %s' % url)
+            logger.debug('get url %s', url)
 
             try:
                 ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
