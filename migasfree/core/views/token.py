@@ -20,6 +20,7 @@ import os
 
 from django.apps import apps
 from django.contrib.auth.models import Group, Permission
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db.models import Prefetch
 from django.http import HttpResponse
@@ -327,7 +328,7 @@ class ServerAttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet)
             computers = Computer.productive.scope(
                 request.user.userprofile
             ).filter(tags__in=[tag])
-            serializerComputers = ComputerInfoSerializer(
+            serializer_computers = ComputerInfoSerializer(
                 computers,
                 context={'request': request},
                 many=True, read_only=True
@@ -336,7 +337,7 @@ class ServerAttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet)
             inflicted = Computer.productive.filter(
                 sync_attributes__in=[tag]
             ).exclude(tags__in=[tag])
-            serializerInflicted = ComputerInfoSerializer(
+            serializer_inflicted = ComputerInfoSerializer(
                 inflicted,
                 context={'request': request},
                 many=True, read_only=True
@@ -344,8 +345,8 @@ class ServerAttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet)
 
             return Response(
                 {
-                    'computers': serializerComputers.data,
-                    'inflicted': serializerInflicted.data
+                    'computers': serializer_computers.data,
+                    'inflicted': serializer_inflicted.data
                 },
                 status=status.HTTP_200_OK
             )
