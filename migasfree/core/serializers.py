@@ -27,9 +27,7 @@ from ..utils import cmp
 
 from . import tasks
 
-from .validators import (
-    MimetypeValidator, validate_package_name, validate_project_pms
-)
+from .validators import MimetypeValidator, validate_project_pms
 from .pms import get_available_mimetypes
 from .models import (
     Platform, Project, Store,
