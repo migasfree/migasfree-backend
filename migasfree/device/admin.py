@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -103,7 +103,7 @@ class LogicalInline(admin.TabularInline):
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
-        return super(LogicalInline, self).get_queryset(
+        return super().get_queryset(
             request
         ).prefetch_related(
             Prefetch('attributes', queryset=qs),
@@ -144,7 +144,7 @@ class DeviceAdmin(admin.ModelAdmin):
         )
 
     def save_related(self, request, form, formsets, change):
-        super(DeviceAdmin, self).save_related(request, form, formsets, change)
+        super().save_related(request, form, formsets, change)
         device = form.instance
 
         for capability in Capability.objects.filter(
