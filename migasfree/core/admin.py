@@ -31,7 +31,14 @@ from ..utils import cmp
 from .resources import AttributeResource, ProjectResource
 from . import tasks
 
-from .models import *
+from .models import (
+    Platform, Project, Store,
+    Attribute, ClientAttribute, ServerAttribute, AttributeSet,
+    Property, ClientProperty, ServerProperty,
+    ScheduleDelay, Schedule, Package, PackageSet,
+    Deployment, InternalSource, ExternalSource,
+    UserProfile, Scope, Domain,
+)
 from .forms import (
     PackageForm, DeploymentForm, ClientPropertyForm,
     UserProfileForm, ScopeForm, DomainForm, StoreForm,
@@ -582,8 +589,8 @@ class UserProfileAdmin(admin.ModelAdmin):
 
         return actions
 
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change, **kwargs)
         is_superuser = request.user.is_superuser
         disabled_fields = set()
 
@@ -607,9 +614,9 @@ class UserProfileAdmin(admin.ModelAdmin):
                 'user_permissions',
             }
 
-        for f in disabled_fields:
-            if f in form.base_fields:
-                form.base_fields[f].disabled = True
+        for item in disabled_fields:
+            if item in form.base_fields:
+                form.base_fields[item].disabled = True
 
         return form
 
