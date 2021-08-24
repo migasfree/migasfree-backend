@@ -58,7 +58,7 @@ def get_computer(name, uuid):
     """
     Returns a computer object (or None if not found)
     """
-    logger.debug('name: %s, uuid: %s' % (name, uuid))
+    logger.debug('name: %s, uuid: %s', name, uuid)
     computer = None
 
     try:
@@ -528,13 +528,13 @@ def upload_computer_faults(request, name, uuid, computer, data):
     except AttributeError:
         ret = return_message(cmd, errmfs.error(errmfs.GENERIC))
 
-    logger.debug('upload_computer_faults ret: %s' % ret)
+    logger.debug('upload_computer_faults ret: %s', ret)
     return ret
 
 
 def upload_devices_changes(request, name, uuid, computer, data):
     """ DEPRECATED endpoint for migasfree-client >= 4.13 """
-    logger.debug('upload_devices_changes data: %s' % data)
+    logger.debug('upload_devices_changes data: %s', data)
     cmd = str(inspect.getframeinfo(inspect.currentframe()).function)
 
     return return_message(cmd, errmfs.ok())
@@ -920,10 +920,9 @@ def create_repositories_of_packageset(request, name, uuid, computer, data):
 
 
 def save_request_file(archive, target):
-    fp = open(target, 'wb+')
-    for chunk in archive.chunks():
-        fp.write(chunk)
-    fp.close()
+    with open(target, 'wb+') as _file:
+        for chunk in archive.chunks():
+            _file.write(chunk)
 
     try:
         # https://docs.djangoproject.com/en/dev/topics/http/file-uploads/
