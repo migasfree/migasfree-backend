@@ -434,23 +434,23 @@ class Computer(models.Model, MigasLink):
         installed = defaultdict(list)
         uninstalled = defaultdict(list)
 
-        for k, v in list(
+        for key, value in list(
                 self.packagehistory_set.filter(
                     install_date__isnull=False
                 ).values_list(
                     'install_date', 'package__fullname'
                 ).distinct().order_by('-install_date')
         ):
-            installed[k.strftime('%Y-%m-%d %H:%M:%S')].append('+' + v)
+            installed[key.strftime('%Y-%m-%d %H:%M:%S')].append('+{}'.format(value))
 
-        for k, v in list(
+        for key, value in list(
                 self.packagehistory_set.filter(
                     uninstall_date__isnull=False
                 ).values_list(
                     'uninstall_date', 'package__fullname'
                 ).distinct().order_by('-uninstall_date')
         ):
-            uninstalled[k.strftime('%Y-%m-%d %H:%M:%S')].append('-' + v)
+            uninstalled[key.strftime('%Y-%m-%d %H:%M:%S')].append('-{}'.format(value))
 
         return merge_dicts(installed, uninstalled)
 
