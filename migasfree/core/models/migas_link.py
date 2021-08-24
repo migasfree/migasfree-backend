@@ -241,10 +241,10 @@ class MigasLink(object):
                 if related_model.__name__.lower() != 'computer' or not (
                         self._meta.model_name == 'attribute' and self.property_att.prefix == 'CID'
                 ):
-                    if not '{} - {}'.format(
+                    if '{} - {}'.format(
                         related_model._meta.model_name,
                         _field
-                    ) in self._exclude_links:
+                    ) not in self._exclude_links:
                         if hasattr(related_model.objects, 'scope'):
                             if related_model.__name__.lower() == 'computer':
                                 rel_objects = related_model.productive.scope(user).filter(
