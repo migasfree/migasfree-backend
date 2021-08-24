@@ -19,6 +19,9 @@
 from django.conf.urls import include
 from django.conf.urls.static import static
 from django.conf import settings
+from django.contrib import admin
+from django.core import management
+from django.db import connection
 from django.urls import path, re_path
 from graphene_django.views import GraphQLView
 from rest_framework import permissions, routers
@@ -29,6 +32,8 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
 from .core.routers import router as core_router, safe_router as core_safe_router
 from .client.routers import (
@@ -40,13 +45,9 @@ from .hardware.routers import (
 from .device.routers import router as device_router
 from .stats.routers import router as stats_router
 from .app_catalog.routers import router as catalog_router
-
 from .core.views import GetSourceFileView
+from .fixtures import create_initial_data
 
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
-
-from django.contrib import admin
 admin.autodiscover()
 
 admin.site.site_header = 'Migasfree Backend Admin'
@@ -126,12 +127,6 @@ if settings.DEBUG:
         )
 
 # initial database setup
-
-from django.core import management
-from django.db import connection
-
-from .fixtures import create_initial_data
-
 if not connection.introspection.table_names():
     management.call_command(
         'migrate',
