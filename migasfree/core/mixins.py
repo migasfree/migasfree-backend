@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import gettext_lazy as _
 
-from migasfree import secure
-
+from .. import secure
 from .models import Project
 
 import logging
@@ -56,7 +55,7 @@ class SafeConnectionMixin(object):
             decrypt_key=self.decrypt_key,
             verify_key=self.verify_key
         )
-        logger.debug('get_claims: %s' % claims)
+        logger.debug('get_claims: %s', claims)
         return claims
 
     def create_response(self, data):
@@ -69,7 +68,7 @@ class SafeConnectionMixin(object):
         if not self.project and not self.encrypt_key:
             raise ObjectDoesNotExist(_('No key to sign message'))
 
-        logger.debug('create_response: %s' % data)
+        logger.debug('create_response: %s', data)
         if not self.encrypt_key:
             self.encrypt_key = '{}.pub'.format(self.project.slug)
         msg = secure.wrap(
