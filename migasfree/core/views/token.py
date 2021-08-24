@@ -22,6 +22,7 @@ from django.apps import apps
 from django.contrib.auth.models import Group, Permission
 from django.db import IntegrityError
 from django.db.models import Prefetch
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
 from django_redis import get_redis_connection
@@ -92,17 +93,17 @@ from ..filters import (
 class ExportViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False)
     def export(self, request, format=None):
+        exceptions = {
+            'clientattribute': 'ClientAttribute',
+            'serverattribute': 'ServerAttribute',
+            'clientproperty': 'ClientProperty',
+            'serverproperty': 'ServerProperty',
+            'statuslog': 'StatusLog',
+        }
+
         class_name = self.basename.capitalize()
-        if class_name.lower() == 'clientattribute':
-            class_name = 'ClientAttribute'
-        if class_name.lower() == 'serverattribute':
-            class_name = 'ServerAttribute'
-        if class_name.lower() == 'clientproperty':
-            class_name = 'ClientProperty'
-        if class_name.lower() == 'serverproperty':
-            class_name = 'ServerProperty'
-        if class_name.lower() == 'statuslog':
-            class_name = 'StatusLog'
+        if class_name.lower() in exceptions:
+            class_name = exceptions[class_name.lower()]
 
         resource = globals()['{}Resource'.format(class_name)]
         obj = resource()
