@@ -265,8 +265,6 @@ fi
 ''' % {
             'path': path,
             'name': os.path.basename(path),
-            'arch': arch,
-            'components': self.components,
             'certificates_path': get_setting('MIGASFREE_CERTIFICATES_DIR')
         }
 
@@ -313,16 +311,12 @@ fi
                 project=deploy.project.slug,
                 trailing_path=get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH'),
                 name=deploy.slug,
-                components=self.components
             )
         elif deploy.source == Deployment.SOURCE_EXTERNAL:
             return '{name} {{protocol}}://{{server}}/src/{project}/{trailing_path}/{name}'.format(
-                options=deploy.options if deploy.options else '',
                 project=deploy.project.slug,
                 trailing_path=get_setting('MIGASFREE_EXTERNAL_TRAILING_PATH'),
                 name=deploy.slug,
-                suite=deploy.suite,
-                components=deploy.components
             )
 
         return ''
