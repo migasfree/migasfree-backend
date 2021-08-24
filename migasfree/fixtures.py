@@ -31,7 +31,7 @@ from django.contrib.auth.management import create_permissions
 from django.apps import apps
 from django.conf import settings
 
-from migasfree.core.models import UserProfile
+from .core.models import UserProfile
 
 
 def run(cmd):
@@ -94,7 +94,7 @@ def configure_default_users():
     reader = Group.objects.filter(name='Reader')
     if not reader:
         reader = Group()
-        reader.name = "Reader"
+        reader.name = 'Reader'
         reader.save()
     else:
         reader = reader[0]
@@ -126,7 +126,7 @@ def configure_default_users():
     liberator = Group.objects.filter(name='Liberator')
     if not liberator:
         liberator = Group()
-        liberator.name = "Liberator"
+        liberator.name = 'Liberator'
         liberator.save()
     else:
         liberator = liberator[0]
@@ -144,7 +144,7 @@ def configure_default_users():
     packager = Group.objects.filter(name='Packager')
     if not packager:
         packager = Group()
-        packager.name = "Packager"
+        packager.name = 'Packager'
         packager.save()
     else:
         packager = packager[0]
@@ -158,7 +158,7 @@ def configure_default_users():
     checker = Group.objects.filter(name='Computer Checker')
     if not checker:
         checker = Group()
-        checker.name = "Computer Checker"
+        checker.name = 'Computer Checker'
         checker.save()
     else:
         checker = checker[0]
@@ -174,7 +174,7 @@ def configure_default_users():
     device_installer = Group.objects.filter(name='Device installer')
     if not device_installer:
         device_installer = Group()
-        device_installer.name = "Device installer"
+        device_installer.name = 'Device installer'
         device_installer.save()
     else:
         device_installer = device_installer[0]
@@ -192,7 +192,7 @@ def configure_default_users():
     configurator = Group.objects.filter(name='Configurator')
     if not configurator:
         configurator = Group()
-        configurator.name = "Configurator"
+        configurator.name = 'Configurator'
         configurator.save()
     else:
         configurator = configurator[0]
@@ -210,7 +210,7 @@ def configure_default_users():
     domain_admin = Group.objects.filter(name='Domain Admin')
     if not domain_admin:
         domain_admin = Group()
-        domain_admin.name = "Domain Admin"
+        domain_admin.name = 'Domain Admin'
         domain_admin.save()
     else:
         domain_admin = domain_admin[0]
@@ -261,7 +261,7 @@ def sequence_reset():
     if settings.DATABASES.get('default').get('ENGINE') == \
             'django.db.backends.postgresql_psycopg2':
         _filename = tempfile.mkstemp()[1]
-        with open(_filename, "w") as _file:
+        with open(_filename, 'w', encoding='utf-8') as _file:
             _file.write(commands.getvalue())
             _file.flush()
 
