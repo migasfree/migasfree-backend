@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,10 +40,11 @@ from .events import (
 
 from . import DAILY_RANGE, MONTHLY_RANGE
 
+
 def daterange(start_date, end_date):
     # http://stackoverflow.com/questions/1060279/iterating-through-a-range-of-dates-in-python
-    for n in range(int((end_date - start_date).days)):
-        yield start_date + timedelta(n)
+    for item in range(int((end_date - start_date).days)):
+        yield start_date + timedelta(item)
 
 
 @permission_classes((permissions.IsAuthenticated,))
