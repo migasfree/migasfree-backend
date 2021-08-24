@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2018 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2018 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import gpgme
 import json
+import gpgme
 
 from io import BytesIO
 from jwcrypto import jwk, jwe, jws
@@ -106,13 +106,14 @@ def wrap(data, sign_key, encrypt_key):
         'data': data,
         'sign': sign(data, sign_key)
     }
+
     return encrypt(claims, encrypt_key)
 
 
 def unwrap(data, decrypt_key, verify_key):
     jwt = json.loads(decrypt(data, decrypt_key))
-    jws = verify(jwt['sign'], verify_key)
-    if jws:
+    jws_payload = verify(jwt['sign'], verify_key)
+    if jws_payload:
         return jwt['data']
 
     return None
@@ -159,7 +160,10 @@ def gpg_get_key(name):
         if not os.path.exists(gpg_home):
             os.makedirs(gpg_home, 0o700)
             # creates configuration file
-            write_file(gpg_conf, 'cert-digest-algo SHA256\ndigest-algo SHA256\nuse-agent\npinentry-mode loopback')
+            write_file(
+                gpg_conf,
+                'cert-digest-algo SHA256\ndigest-algo SHA256\nuse-agent\npinentry-mode loopback'
+            )
             os.chmod(gpg_conf, 0o600)
             write_file(gpg_agent_conf, 'allow-loopback-pinentry')
             os.chmod(gpg_agent_conf, 0o600)
