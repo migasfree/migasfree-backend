@@ -278,9 +278,9 @@ class Policy(models.Model, MigasLink):
                 'packages_by_project__packages_to_install',
                 flat=True
             ):
-                for item in to_list(pkgs):
+                for pkg in to_list(pkgs):
                     _packages.append({
-                        'package': item,
+                        'package': pkg,
                         'name': group.policy.name,
                         'id': group.policy.id
                     })
