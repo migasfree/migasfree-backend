@@ -25,10 +25,10 @@ def secret_key(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-    _file = os.path.join(path, 'secret_key.txt')
-    if os.path.exists(_file):
-        with open(_file) as f:
-            key = f.read().strip()
+    filename = os.path.join(path, 'secret_key.txt')
+    if os.path.exists(filename):
+        with open(filename, encoding='utf-8') as _file:
+            key = _file.read().strip()
     else:
         key = ''.join([random.SystemRandom().choice("%s%s%s" % (
             string.ascii_letters,
@@ -36,7 +36,7 @@ def secret_key(path):
             string.punctuation
         )) for i in range(50)])
 
-        with open(_file, 'w') as outfile:
+        with open(filename, 'w', encoding='utf-8') as outfile:
             outfile.write(key)
 
     return key
