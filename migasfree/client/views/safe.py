@@ -143,7 +143,7 @@ def is_computer_changed(computer, name, project, ip_address, uuid):
 
 
 def get_computer(uuid, name):
-    logger.debug('uuid: %s, name: %s' % (uuid, name))
+    logger.debug('uuid: %s, name: %s', uuid, name)
 
     try:
         computer = models.Computer.objects.get(uuid=uuid)
