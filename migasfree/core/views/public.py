@@ -43,7 +43,7 @@ logger = logging.getLogger('migasfree')
 
 @permission_classes((permissions.AllowAny,))
 class PmsView(views.APIView):
-    def get(self, request, format=None):
+    def get(self, request):
         """
         Returns available PMS
         """
@@ -63,7 +63,7 @@ class PmsView(views.APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ProgrammingLanguagesView(views.APIView):
-    def get(self, request, format=None):
+    def get(self, request):
         """
         Returns available programming languages (to formulas and faults definitions)
         """
@@ -72,7 +72,7 @@ class ProgrammingLanguagesView(views.APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ServerInfoView(views.APIView):
-    def post(self, request, format=None):
+    def post(self, request):
         """
         Returns server info
         """
@@ -137,7 +137,7 @@ class GetSourceFileView(views.APIView):
 
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    def get(self, request, format=None):
+    def get(self, request):
         source = None
 
         _path = request.get_full_path()
