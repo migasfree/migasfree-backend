@@ -99,7 +99,7 @@ def get_key_repositories(request):
 
 @permission_classes((permissions.AllowAny,))
 class RepositoriesUrlTemplateView(views.APIView):
-    def post(self, request, format=None):
+    def post(self, request):
         """
         Returns the repositories URL template
         (compatibility for migasfree-client <= 4.16)
@@ -118,7 +118,7 @@ class RepositoriesUrlTemplateView(views.APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ServerInfoView(views.APIView):
-    def post(self, request, format=None):
+    def post(self, request):
         """
         Returns server info
         """
