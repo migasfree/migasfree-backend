@@ -69,7 +69,7 @@ def add_project(project_name, pms, platform, architecture, ip_address=None):
 class PackagerKeysView(views.APIView):
     permission_classes = (permissions.IsPackager,)
 
-    def post(self, request, format=None):
+    def post(self, request):
         """
         Input: {
             "username": "admin",
@@ -118,7 +118,7 @@ class ProjectKeysView(views.APIView):
 
             return project
 
-    def post(self, request, format=None):
+    def post(self, request):
         """
         Input: {
             "project": "Vitalinux",
@@ -174,7 +174,7 @@ class ProjectKeysView(views.APIView):
 
 
 class RepositoriesKeysView(views.APIView):
-    def post(self, request, format=None):
+    def post(self, request):
         """
         Returns the repositories public key
         """
