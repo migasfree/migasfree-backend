@@ -109,7 +109,6 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
 
         rolling_date = deploy.start_date
 
-        # available_data = []
         provided_data = []
         labels = []
         chart_data = {}
@@ -134,7 +133,6 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         ).values('id').distinct().count()
 
         date_format = '%Y-%m-%d'
-        # now = datetime.now()
 
         delays = ScheduleDelay.objects.filter(
             schedule__id=deploy.schedule.id
@@ -184,14 +182,11 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
 
                 labels.append(loop_date.strftime(date_format))
                 provided_data.append({'value': value})
-                # if loop_date <= now:
-                #    available_data.append({'value': value})
 
             lst_attributes += lst_att_delay
             rolling_date = end_horizon.date()
 
         chart_data[_('Provided')] = provided_data
-        # chart_data[_('Available')] = available_data
 
         return Response(
             {
@@ -202,7 +197,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='enabled/project')
-    def enabled_by_project(self, request, format=None):
+    def enabled_by_project(self, request):
         total = Deployment.objects.scope(request.user.userprofile).filter(
             enabled=True
         ).count()
@@ -275,7 +270,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='enabled')
-    def by_enabled(self, request, format=None):
+    def by_enabled(self, request):
         total = Deployment.objects.scope(request.user.userprofile).count()
 
         values_null = defaultdict(list)
@@ -340,7 +335,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='schedule')
-    def by_schedule(self, request, format=None):
+    def by_schedule(self, request):
         total = Deployment.objects.scope(request.user.userprofile).count()
 
         values_null = defaultdict(list)
