@@ -42,7 +42,7 @@ class SafePackagerConnectionMixin(SafeConnectionMixin):
 
 @permission_classes((permissions.AllowAny,))
 class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
-    def create(self, request, format=None):
+    def create(self, request):
         """
         claims = {
             'project': project_name,
@@ -106,7 +106,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False, url_path='set')
-    def packageset(self, request, format=None):
+    def packageset(self, request):
         """
         claims = {
             'project': project_name,
@@ -191,7 +191,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False, url_path='repos')
-    def create_repository(self, request, format=None):
+    def create_repository(self, request):
         """
         claims = {
             'project': project_name,
