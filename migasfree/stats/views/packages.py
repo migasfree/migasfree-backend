@@ -28,7 +28,7 @@ from ...utils import replace_keys
 @permission_classes((permissions.IsAuthenticated,))
 class PackageStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False, url_path='store')
-    def by_store(self, request, format=None):
+    def by_store(self, request):
         data = Package.by_store(request.user.userprofile)
         inner_aliases = {
             'project__id': 'project_id',
