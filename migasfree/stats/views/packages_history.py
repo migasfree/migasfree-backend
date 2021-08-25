@@ -28,7 +28,7 @@ from ...client.models import PackageHistory
 @permission_classes((permissions.IsAuthenticated,))
 class PackageHistoryStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False, url_path='project')
-    def by_project(self, request, format=None):
+    def by_project(self, request):
         total = PackageHistory.objects.scope(request.user.userprofile).count()
 
         data = []
