@@ -36,7 +36,7 @@ from .events import (
 @permission_classes((permissions.IsAuthenticated,))
 class MigrationStatsViewSet(EventViewSet):
     @action(methods=['get'], detail=False, url_path='project')
-    def by_project(self, request, format=None):
+    def by_project(self, request):
         user = request.user.userprofile
         total = Migration.objects.scope(user).count()
 
@@ -80,7 +80,7 @@ class MigrationStatsViewSet(EventViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='project/month')
-    def project_by_month(self, request, format=None):
+    def project_by_month(self, request):
         begin_date, end_date = month_interval()
 
         data = event_by_month(
