@@ -183,7 +183,7 @@ def get_computer(uuid, name):
 
 @permission_classes((permissions.AllowAny,))
 class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
-    def post(self, request, format=None):
+    def post(self, request):
         """
         claims = {"id": id}
 
@@ -208,7 +208,7 @@ class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
 
 @permission_classes((permissions.AllowAny,))
 class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
-    def post(self, request, format=None):
+    def post(self, request):
         """
         claims = {
             "id": id,
@@ -253,7 +253,7 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
 
 @permission_classes((permissions.AllowAny,))
 class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
-    def create(self, request, format=None):
+    def create(self, request):
         """
         claims = {
             'uuid': '01020304050607080910111213141516',
@@ -307,8 +307,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    @action(methods=['post'], detail=False)
-    def id(self, request, format=None):
+    @action(methods=['post'], detail=False, url_path='id')
+    def id_(self, request):
         """
         claims = {
             'uuid': '01020304050607080910111213141516',
@@ -365,7 +365,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False)
-    def properties(self, request, format=None):
+    def properties(self, request):
         """
         claims = {'id': 1}
 
@@ -401,7 +401,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False)
-    def attributes(self, request, format=None):
+    def attributes(self, request):
         """
         claims = {
             'id', 1,
@@ -490,7 +490,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False)
-    def repositories(self, request, format=None):
+    def repositories(self, request):
         """
         claims = {'id': 1}
 
@@ -528,7 +528,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False, url_path='faults/definitions')
-    def fault_definitions(self, request, format=None):
+    def fault_definitions(self, request):
         """
         claims = {'id': 1}
 
@@ -571,7 +571,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False)
-    def faults(self, request, format=None):
+    def faults(self, request):
         """
         claims = {
             'id': 1,
@@ -607,7 +607,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False)
-    def errors(self, request, format=None):
+    def errors(self, request):
         """
         claims = {
             'id': 1,
@@ -639,7 +639,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False, url_path='packages/mandatory')
-    def mandatory_pkgs(self, request, format=None):
+    def mandatory_pkgs(self, request):
         """
         claims = {'id': 1}
 
@@ -699,7 +699,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False, url_path='tags/assigned')
-    def assigned_tags(self, request, format=None):
+    def assigned_tags(self, request):
         """
         claims = {'id': 1}
 
@@ -724,7 +724,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False, url_path='tags/available')
-    def available_tags(self, request, format=None):
+    def available_tags(self, request):
         """
         claims = {'id': 1}
 
@@ -802,7 +802,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False)
-    def tags(self, request, format=None):
+    def tags(self, request):
         """
         claims = {
             'id': 1,
@@ -919,7 +919,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False)
-    def label(self, request, format=None):
+    def label(self, request):
         """
         claims = {
             'id': 1,
@@ -953,7 +953,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False, url_path='hardware/required')
-    def hardware_capture_is_required(self, request, format=None):
+    def hardware_capture_is_required(self, request):
         """
         claims = {'id': 1}
 
@@ -981,7 +981,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False)
-    def software(self, request, format=None):
+    def software(self, request):
         """
         claims = {
             'id', 1,
@@ -1017,7 +1017,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @action(methods=['post'], detail=False)
-    def devices(self, request, format=None):
+    def devices(self, request):
         """
         claims = {'id': 1}
 
