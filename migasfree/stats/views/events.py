@@ -167,7 +167,7 @@ class EventViewSet(viewsets.ViewSet):
         return globals()[event_class]
 
     @action(methods=['get'], detail=False, url_path='by-day')
-    def by_day(self, request, format=None):
+    def by_day(self, request):
         user = request.user.userprofile
         computer_id = request.GET.get('computer_id', 0)
         start_date = request.GET.get('start_date', '')
@@ -184,7 +184,7 @@ class EventViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False)
-    def history(self, request, format=None):
+    def history(self, request):
         """
         Returns events history by hours
         Params:
