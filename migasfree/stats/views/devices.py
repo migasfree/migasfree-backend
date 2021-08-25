@@ -28,7 +28,7 @@ from ...device.models import Device, Model
 @permission_classes((permissions.IsAuthenticated,))
 class DeviceStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False, url_path='connection')
-    def by_connection(self, request, format=None):
+    def by_connection(self, request):
         return Response(
             {
                 'title': _('Devices / Connection'),
@@ -46,7 +46,7 @@ class DeviceStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='model')
-    def by_model(self, request, format=None):
+    def by_model(self, request):
         return Response(
             {
                 'title': _('Devices / Model'),
@@ -64,7 +64,7 @@ class DeviceStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='manufacturer')
-    def by_manufacturer(self, request, format=None):
+    def by_manufacturer(self, request):
         return Response(
             {
                 'title': _('Devices / Manufacturer'),
@@ -82,7 +82,7 @@ class DeviceStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='models/manufacturer')
-    def models_by_manufacturer(self, request, format=None):
+    def models_by_manufacturer(self, request):
         return Response(
             {
                 'title': _('Models / Manufacturer'),
@@ -100,7 +100,7 @@ class DeviceStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='models/project')
-    def models_by_project(self, request, format=None):
+    def models_by_project(self, request):
         total = Model.objects.count()
 
         x_axe = []
