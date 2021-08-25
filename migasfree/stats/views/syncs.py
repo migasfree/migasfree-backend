@@ -50,7 +50,7 @@ def daterange(start_date, end_date):
 @permission_classes((permissions.IsAuthenticated,))
 class SyncStatsViewSet(EventViewSet):
     @action(methods=['get'], detail=False)
-    def yearly(self, request, format=None):
+    def yearly(self, request):
         """
         Returns unique number of synchronized computers
         Params:
@@ -79,7 +79,7 @@ class SyncStatsViewSet(EventViewSet):
         return Response(stats, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False)
-    def monthly(self, request, format=None):
+    def monthly(self, request):
         """
         Returns unique number of synchronized computers
         Params:
@@ -130,7 +130,7 @@ class SyncStatsViewSet(EventViewSet):
         )
 
     @action(methods=['get'], detail=False)
-    def daily(self, request, format=None):
+    def daily(self, request):
         """
         Returns unique number of synchronized computers
         Params:
@@ -181,7 +181,7 @@ class SyncStatsViewSet(EventViewSet):
         )
 
     @action(methods=['get'], detail=False)
-    def hourly(self, request, format=None):
+    def hourly(self, request):
         """
         Returns unique number of synchronized computers
         Params:
@@ -227,7 +227,7 @@ class SyncStatsViewSet(EventViewSet):
         return Response(stats, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False, url_path='project')
-    def by_project(self, request, format=None):
+    def by_project(self, request):
         return Response(
             {
                 'title': _('Synchronizations / Project'),
@@ -245,7 +245,7 @@ class SyncStatsViewSet(EventViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='project/month')
-    def project_by_month(self, request, format=None):
+    def project_by_month(self, request):
         begin_date, end_date = month_interval()
 
         data = event_by_month(
