@@ -15,7 +15,7 @@ from ..app_catalog.models import Policy
 
 from ..core.models import (
     Attribute, AttributeSet, BasicAttribute, Package, Platform, Property,
-    Deployment, Store, ServerAttribute, Project, Domain,
+    Deployment, Store, ServerAttribute, Project, Domain, PackageSet,
 )
 from ..client.models import (
     Computer, Error, Fault, FaultDefinition, Notification,
@@ -28,11 +28,12 @@ from ..client.views.safe import (
 from .secure import get_keys_to_client, get_keys_to_packager
 from ..client.tasks import update_software_inventory
 from ..hardware.tasks import save_computer_hardware
-from ..core.tasks import create_repository_metadata
+from ..core.tasks import create_repository_metadata, package_metadata
 from ..utils import (
     uuid_change_format, get_client_ip,
     list_difference, list_common, to_list,
     remove_duplicates_preserving_order, replace_keys,
+    save_tempfile,
 )
 from . import errmfs
 
@@ -695,17 +696,11 @@ def upload_server_package(request, name, uuid, computer, data):
 
 
 def upload_server_set(request, name, uuid, computer, data):
-    # TODO
     cmd = str(inspect.getframeinfo(inspect.currentframe()).function)
 
     project_name = data.get('version', data.get('project'))
 
-    f = request.FILES["package"]
-    filename = os.path.join(
-        Store.path(project_name, data['store']),
-        data['packageset'],
-        f.name
-    )
+    _file = request.FILES["package"]
 
     try:
         project = Project.objects.get(name=project_name)
@@ -716,29 +711,63 @@ def upload_server_set(request, name, uuid, computer, data):
         name=data['store'], project=project
     )
 
-    # we add the package set and create the directory
-    package, _ = Package.objects.get_or_create(
-        name=data['packageset'],
-        project=project,
-        defaults={'store': store}
-    )
-    package.create_dir()
+    package_set = PackageSet.objects.filter(name=data['packageset'], project=project).first()
+    if package_set:
+        package_set.update_store(store)
+    else:
+        package_set = PackageSet.objects.create(
+            name=data['packageset'],
+            project=project,
+            store=store,
+        )
 
-    save_request_file(f, filename)
+    package = Package.objects.filter(fullname=_file, project=project).first()
+    if package:
+        package.update_store(store)
+    else:
+        name, version, architecture = Package.normalized_name(_file.name)
+        if not name:
+            package_path = save_tempfile(_file)
+            response = package_metadata.apply_async(
+                kwargs={
+                    'pms_name': project.pms,
+                    'package': package_path
+                },
+                queue='pms-{}'.format(project.pms)
+            ).get()
+            os.remove(package_path)
+            if response['name']:
+                name = response['name']
+                version = response['version']
+                architecture = response['architecture']
+
+        package = Package.objects.create(
+            fullname=_file.name,
+            name=name,
+            version=version,
+            architecture=architecture,
+            project=project,
+            store=store,
+            file_=_file
+        )
+
+    target = Package.path(project.slug, store.slug, _file.name)
+    Package.handle_uploaded_file(_file, target)
 
     # if exists path, move it
     if "path" in data and data["path"] != "":
         dst = os.path.join(
-            Store.path(project_name, data['store']),
-            data['packageset'],
+            Store.path(project.slug, store.slug),
             data['path'],
-            f.name
+            _file.name
         )
         try:
             os.makedirs(os.path.dirname(dst))
         except OSError:
             pass
-        os.rename(filename, dst)
+        os.rename(target, dst)
+
+    package_set.packages.add(package.id)
 
     return return_message(cmd, errmfs.ok())
 
