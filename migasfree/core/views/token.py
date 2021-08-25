@@ -93,7 +93,7 @@ from ..filters import (
 
 class ExportViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False)
-    def export(self, request, format=None):
+    def export(self, request):
         exceptions = {
             'clientattribute': 'ClientAttribute',
             'serverattribute': 'ServerAttribute',
@@ -601,7 +601,7 @@ class PackageViewSet(
                 'pms_name': obj.project.pms,
                 'package': Package.path(obj.project.slug, obj.store.slug, obj.fullname)
             },
-            queue="pms-{}".format(obj.project.pms)
+            queue='pms-{}'.format(obj.project.pms)
         ).get()
 
         return Response({'data': response}, status=status.HTTP_200_OK)
@@ -768,7 +768,7 @@ class InternalSourceViewSet(viewsets.ModelViewSet, MigasViewSet):
         )
 
     @action(methods=['get'], detail=False)
-    def generating(self, request, format=None):
+    def generating(self, request):
         con = get_redis_connection()
         result = con.smembers('migasfree:watch:repos')
 
@@ -837,7 +837,7 @@ class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='domain-admins')
-    def domain_admins(self, request, format=None):
+    def domain_admins(self, request):
         serializer = UserProfileSerializer(
             UserProfile.objects.filter(
                 groups__in=[Group.objects.get(name="Domain Admin")]
