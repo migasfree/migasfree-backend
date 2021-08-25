@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
+import shutil
+
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -70,6 +73,25 @@ class PackageSet(models.Model, MigasLink):
     )
 
     objects = DomainPackageSetManager()
+
+    @staticmethod
+    def path(project_name, store_name, name):
+        return os.path.join(Store.path(project_name, store_name), name)
+
+    def update_store(self, store):
+        previous_store = None
+        if self.store != store:
+            if self.store:
+                previous_store = self.store.slug
+
+            self.store = store
+            self.save()
+
+            if previous_store:
+                shutil.move(
+                    self.path(self.project.slug, previous_store, self.name),
+                    self.path(self.project.slug, self.store, self.name)
+                )
 
     def clean(self):
         super().clean()
