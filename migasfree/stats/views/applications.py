@@ -27,7 +27,7 @@ from ...app_catalog.models import Application
 @permission_classes((permissions.IsAuthenticated,))
 class ApplicationStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False, url_path='category')
-    def by_category(self, request, format=None):
+    def by_category(self, request):
         total = Application.objects.count()
 
         data = []
@@ -48,7 +48,7 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='level')
-    def by_level(self, request, format=None):
+    def by_level(self, request):
         total = Application.objects.count()
 
         data = []
@@ -69,7 +69,7 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='project')
-    def by_project(self, request, format=None):
+    def by_project(self, request):
         total = Application.objects.count()
 
         x_axe = []
