@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from .events import event_by_month, month_interval
 @permission_classes((permissions.IsAuthenticated,))
 class NotificationStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False, url_path='month')
-    def by_month(self, request, format=None):
+    def by_month(self, request):
         begin_date, end_date = month_interval()
 
         data = event_by_month(
