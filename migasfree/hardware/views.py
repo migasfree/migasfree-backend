@@ -114,7 +114,7 @@ class HardwareViewSet(
 @permission_classes((permissions.AllowAny,))
 class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
     @action(methods=['post'], detail=False)
-    def hardware(self, request, format=None):
+    def hardware(self, request):
         """
         claims = {
             'id': computer_id,
