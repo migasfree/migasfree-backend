@@ -31,7 +31,7 @@ from .events import event_by_month, month_interval
 @permission_classes((permissions.IsAuthenticated,))
 class ComputerStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False)
-    def projects(self, request, format=None):
+    def projects(self, request):
         data = Computer.group_by_project(request.user.userprofile)
         response = {
             'data': replace_keys(
@@ -51,7 +51,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False)
-    def platforms(self, request, format=None):
+    def platforms(self, request):
         data = Computer.group_by_platform(request.user.userprofile)
         response = {
             'data': replace_keys(
@@ -71,7 +71,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='machine')
-    def by_machine(self, request, format=None):
+    def by_machine(self, request):
         total = Computer.objects.scope(request.user.userprofile).count()
 
         data = {
@@ -155,7 +155,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='status')
-    def by_status(self, request, format=None):
+    def by_status(self, request):
         total = Computer.objects.scope(request.user.userprofile).exclude(
             status='unsubscribed'
         ).count()
@@ -223,7 +223,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='attributes/count')
-    def attributes_count(self, request, format=None):
+    def attributes_count(self, request):
         attributes = request.query_params.getlist('attributes')
         project_id = request.query_params.get('project_id', None)
 
@@ -233,7 +233,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='new/month')
-    def new_by_month(self, request, format=None):
+    def new_by_month(self, request):
         begin_date, end_date = month_interval()
 
         data = event_by_month(
@@ -248,7 +248,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='productive/platform')
-    def productive_by_platform(self, request, format=None):
+    def productive_by_platform(self, request):
         data = Computer.productive_computers_by_platform(request.user.userprofile)
         inner_aliases = {
             'project__platform__id': 'platform_id',
@@ -272,7 +272,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='entry/year')
-    def entry_year(self, request, format=None):
+    def entry_year(self, request):
         results = Computer.entry_year(request.user.userprofile)
         data = [x['count'] for x in results]
         labels = [x['year'] for x in results]
