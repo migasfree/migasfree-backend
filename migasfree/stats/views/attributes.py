@@ -28,7 +28,7 @@ from ...core.models import ClientAttribute, ServerAttribute
 @permission_classes((permissions.IsAuthenticated,))
 class ClientAttributeStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False, url_path='property')
-    def by_property(self, request, format=None):
+    def by_property(self, request):
         total = ClientAttribute.objects.scope(request.user.userprofile).count()
 
         data = []
@@ -56,7 +56,7 @@ class ClientAttributeStatsViewSet(viewsets.ViewSet):
 @permission_classes((permissions.IsAuthenticated,))
 class ServerAttributeStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False, url_path='category')
-    def by_category(self, request, format=None):
+    def by_category(self, request):
         total = ServerAttribute.objects.scope(request.user.userprofile).count()
 
         data = []
