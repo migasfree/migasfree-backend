@@ -29,7 +29,7 @@ from .events import event_by_month, month_interval, EventViewSet
 @permission_classes((permissions.IsAuthenticated,))
 class StatusLogStatsViewSet(EventViewSet):
     @action(methods=['get'], detail=False, url_path='status')
-    def by_status(self, request, format=None):
+    def by_status(self, request):
         data = StatusLog.by_status(request.user.userprofile)
 
         return Response(
@@ -43,7 +43,7 @@ class StatusLogStatsViewSet(EventViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='month')
-    def status_by_month(self, request, format=None):
+    def status_by_month(self, request):
         begin_date, end_date = month_interval()
 
         data = event_by_month(
