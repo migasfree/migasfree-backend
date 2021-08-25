@@ -25,5 +25,5 @@ from ..tasks import get_alerts
 
 @permission_classes((permissions.IsAuthenticated,))
 class AlertsViewSet(viewsets.ViewSet):
-    def list(self, request, format=None):
+    def list(self, request):
         return Response(get_alerts(), status=status.HTTP_200_OK)
