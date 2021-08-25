@@ -855,23 +855,33 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         for packages_to_install, default_preincluded_packages, \
                 default_included_packages in pkgs:
             if packages_to_install:
-                [remove.append(x) for x in packages_to_install.split('\n') if x]
+                for pkg in packages_to_install.split('\n'):
+                    if pkg:
+                        remove.append(pkg)
+
             if default_preincluded_packages:
-                [remove.append(x) for x in
-                    default_preincluded_packages.split('\n') if x]
+                for pkg in default_preincluded_packages.split('\n'):
+                    if pkg:
+                        remove.append(pkg)
+
             if default_included_packages:
-                [remove.append(x) for x in
-                    default_included_packages.split('\n') if x]
+                for pkg in default_included_packages.split('\n'):
+                    if pkg:
+                        remove.append(pkg)
 
         pkgs = old_deploys.values_list(
             'packages_to_remove', 'default_excluded_packages'
         )
         for packages_to_remove, default_excluded_packages in pkgs:
             if packages_to_remove:
-                [install.append(x) for x in packages_to_remove.split('\n') if x]
+                for pkg in packages_to_remove.split('\n'):
+                    if pkg:
+                        install.append(pkg)
+
             if default_excluded_packages:
-                [install.append(x) for x in
-                    default_excluded_packages.split('\n') if x]
+                for pkg in default_excluded_packages.split('\n'):
+                    if pkg:
+                        install.append(pkg)
 
         # New deploys
         new_deploys = Deployment.available_deployments(
@@ -883,21 +893,28 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
         for packages_to_remove, default_excluded_packages in pkgs:
             if packages_to_remove:
-                [remove.append(x) for x in packages_to_remove.split('\n') if x]
+                for pkg in packages_to_remove.split('\n'):
+                    if pkg:
+                        remove.append(pkg)
+
             if default_excluded_packages:
-                [remove.append(x) for x in
-                    default_excluded_packages.split('\n') if x]
+                for pkg in default_excluded_packages.split('\n'):
+                    if pkg:
+                        remove.append(pkg)
 
         pkgs = new_deploys.values_list(
             'packages_to_install', 'default_included_packages'
         )
         for packages_to_install, default_included_packages in pkgs:
             if packages_to_install:
-                [install.append(x) for x in
-                    packages_to_install.split('\n') if x]
+                for pkg in packages_to_install.split('\n'):
+                    if pkg:
+                        install.append(pkg)
+
             if default_included_packages:
-                [install.append(x) for x in
-                    default_included_packages.split('\n') if x]
+                for pkg in default_included_packages.split('\n'):
+                    if pkg:
+                        install.append(pkg)
 
         pkgs = new_deploys.values_list('default_preincluded_packages', flat=True)
         for default_preincluded_packages in pkgs:
