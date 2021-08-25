@@ -29,7 +29,7 @@ from ...utils import save_tempfile
 
 from .. import tasks
 from ..mixins import SafeConnectionMixin
-from ..models import Project, Store, Package, Deployment
+from ..models import Project, Store, Package, PackageSet, Deployment
 
 
 class SafePackagerConnectionMixin(SafeConnectionMixin):
@@ -127,21 +127,38 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
 
         _file = request.FILES.get('file')
 
-        target = os.path.join(
-            Store.path(project.slug, store.slug),
-            packageset,
-            _file.name
-        )
-
-        package = Package.objects.filter(
-            fullname=packageset, project=project
-        )
-        if package:
-            package[0].update_store(store)
+        package_set = PackageSet.objects.filter(name=packageset, project=project).first()
+        if package_set:
+            package_set.update_store(store)
         else:
-            name, version, architecture = Package.normalized_name(packageset)
-            Package.objects.create(
-                fullname=packageset,
+            package_set = PackageSet.objects.create(
+                name=packageset,
+                project=project,
+                store=store,
+            )
+
+        package = Package.objects.filter(fullname=_file, project=project).first()
+        if package:
+            package.update_store(store)
+        else:
+            name, version, architecture = Package.normalized_name(_file.name)
+            if not name:
+                package_path = save_tempfile(_file)
+                response = tasks.package_metadata.apply_async(
+                    kwargs={
+                        'pms_name': project.pms,
+                        'package': package_path
+                    },
+                    queue='pms-{}'.format(project.pms)
+                ).get()
+                os.remove(package_path)
+                if response['name']:
+                    name = response['name']
+                    version = response['version']
+                    architecture = response['architecture']
+
+            package = Package.objects.create(
+                fullname=_file.name,
                 name=name,
                 version=version,
                 architecture=architecture,
@@ -150,13 +167,13 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                 file_=_file
             )
 
+        target = Package.path(project.slug, store.slug, _file.name)
         Package.handle_uploaded_file(_file, target)
 
         # if exists path move it
         if claims.get('path'):
             dst = os.path.join(
                 Store.path(project.slug, store.slug),
-                packageset,
                 claims.get('path'),
                 _file.name
             )
@@ -165,6 +182,8 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             except OSError:
                 pass
             os.rename(target, dst)
+
+        package_set.packages.add(package.id)
 
         return Response(
             self.create_response(gettext('Data received')),
