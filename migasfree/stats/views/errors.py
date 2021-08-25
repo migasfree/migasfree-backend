@@ -29,7 +29,7 @@ from .events import event_by_month, month_interval, EventViewSet
 @permission_classes((permissions.IsAuthenticated,))
 class ErrorStatsViewSet(EventViewSet):
     @action(methods=['get'], detail=False)
-    def unchecked(self, request, format=None):
+    def unchecked(self, request):
         data = Error.unchecked_by_project(request.user.userprofile)
         inner_aliases = {
             'project__platform__id': 'platform_id',
@@ -53,7 +53,7 @@ class ErrorStatsViewSet(EventViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='project/month')
-    def project_by_month(self, request, format=None):
+    def project_by_month(self, request):
         begin_date, end_date = month_interval()
 
         data = event_by_month(
@@ -68,7 +68,7 @@ class ErrorStatsViewSet(EventViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='status/project')
-    def status_by_project(self, request, format=None):
+    def status_by_project(self, request):
         data = Error.status_by_project(request.user.userprofile)
         inner_aliases = {
             'status': 'status',
