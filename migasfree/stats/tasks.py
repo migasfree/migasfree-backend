@@ -343,7 +343,8 @@ def assigned_computers_to_deployment(deployment_id):
     key = 'migasfree:deployments:{}:computers'.format(deployment_id)
     con.delete(key)
     if computers:
-        [con.sadd(key, computer_id) for computer_id in list(computers)]
+        for computer_id in list(computers):
+            con.sadd(key, computer_id)
 
 
 @shared_task(queue='default')
