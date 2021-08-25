@@ -216,7 +216,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         )
 
     @action(methods=['get'], detail=False, url_path='status')
-    def status_choices(self, request, format=None):
+    def status_choices(self, request):
         response = {
             'choices': dict(models.Computer.STATUS_CHOICES),
             'productive': models.Computer.PRODUCTIVE_STATUS,
@@ -270,7 +270,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         return Response(status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False)
-    def synchronizing(self, request, format=None):
+    def synchronizing(self, request):
         con = get_redis_connection()
 
         result = []
@@ -293,7 +293,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         )
 
     @action(methods=['get'], detail=False)
-    def delayed(self, request, format=None):
+    def delayed(self, request):
         con = get_redis_connection()
 
         result = []
@@ -553,7 +553,7 @@ class FaultViewSet(
         return models.Fault.objects.scope(self.request.user.userprofile)
 
     @action(methods=['get'], detail=False, url_path='user')
-    def user_choices(self, request, format=None):
+    def user_choices(self, request):
         response = {
             'choices': dict(models.Fault.USER_FILTER_CHOICES),
         }
