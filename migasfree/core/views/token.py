@@ -650,12 +650,9 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
                     architecture = response['architecture']
 
             if not name or not version or not architecture:
-                return Response(
-                    {
-                        'error': gettext('Package %s has an incorrect name format') % file_.name
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return {
+                    'error': gettext('Package %s has an incorrect name format') % file_.name
+                }
 
             try:
                 pkg = Package.objects.create(
@@ -666,12 +663,9 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
                     file_=file_
                 )
             except IntegrityError:
-                return Response(
-                    {
-                        'error': gettext('Package %s is duplicated in store %s') % (file_.name, store.name)
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return {
+                    'error': gettext('Package %s is duplicated in store %s') % (file_.name, store.name)
+                }
 
             new_pkgs.append(str(pkg.id))
 
@@ -689,7 +683,10 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
             if project and store:
                 packages = request.data.getlist('packages', [])
                 packages = list(filter(None, packages))
-                packages.extend(self._upload_packages(project, store, files))
+                upload_packages = self._upload_packages(project, store, files)
+                if isinstance(upload_packages, dict):
+                    return Response(upload_packages, status=status.HTTP_400_BAD_REQUEST)
+                packages.extend(upload_packages)
                 request.data.setlist('packages', packages)
 
         return super().create(request, *args, **kwargs)
@@ -701,7 +698,10 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
         if files:
             packages = request.data.getlist('packages', [])
             packages = list(filter(None, packages))
-            packages.extend(self._upload_packages(obj.project, obj.store, files))
+            upload_packages = self._upload_packages(obj.project, obj.store, files)
+            if isinstance(upload_packages, dict):
+                return Response(upload_packages, status=status.HTTP_400_BAD_REQUEST)
+            packages.extend(upload_packages)
             request.data.setlist('packages', packages)
 
         return super().partial_update(request, *args, **kwargs)
