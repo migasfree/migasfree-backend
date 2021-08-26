@@ -2,13 +2,14 @@
 
 import os
 import inspect
+import logging
 
 from datetime import datetime, timedelta
 
 from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib import auth
 from django.conf import settings
+from django.contrib import auth
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import gettext as _
 
 from ..app_catalog.models import Policy
@@ -37,7 +38,6 @@ from ..utils import (
 )
 from . import errmfs
 
-import logging
 logger = logging.getLogger('migasfree')
 
 
@@ -373,7 +373,8 @@ def upload_computer_info(request, name, uuid, computer, data):
             uuid
         )
         computer.update_identification(
-            name, fqdn, Project.objects.get(name=project_name), uuid, ip_address, forwarded_ip_address
+            name, fqdn, Project.objects.get(name=project_name), uuid,
+            ip_address, forwarded_ip_address
         )
 
         project = Project.objects.get(name=project_name)
@@ -443,17 +444,18 @@ def upload_computer_info(request, name, uuid, computer, data):
 
         # deployments
         deploys = Deployment.available_deployments(computer, computer.get_all_attributes())
-        for d in deploys:
-            lst_deploys.append({'name': d.name, 'source_template': d.source_template()})
+        for dep in deploys:
+            lst_deploys.append({'name': dep.name, 'source_template': dep.source_template()})
 
-            if d.packages_to_remove:
-                for p in to_list(d.packages_to_remove):
-                    if p != "":
-                        lst_pkg_to_remove.append(p)
-            if d.packages_to_install:
-                for p in to_list(d.packages_to_install):
-                    if p != "":
-                        lst_pkg_to_install.append(p)
+            if dep.packages_to_remove:
+                for pkg in to_list(dep.packages_to_remove):
+                    if pkg != "":
+                        lst_pkg_to_remove.append(pkg)
+
+            if dep.packages_to_install:
+                for pkg in to_list(dep.packages_to_install):
+                    if pkg != "":
+                        lst_pkg_to_install.append(pkg)
 
         # policies
         policy_pkg_to_install, policy_pkg_to_remove = Policy.get_packages(computer)
