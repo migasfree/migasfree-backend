@@ -176,7 +176,6 @@ echo "~~~"
 
         return _output if _ret == 0 else _error
 
-
     def package_metadata(self, package):
         """
         dict package_metadata(string package)
