@@ -56,7 +56,7 @@ do
   mkdir -p "%(path)s/%(components)s/binary-$_ARCH/"
   cd %(path)s/../..
 
-  ionice -c 3 dpkg-scanpackages -m dists/$_NAME/%(components)s> dists/$_NAME/%(components)s/binary-$_ARCH/Packages 2> /tmp/$_NAME
+  ionice -c 3 dpkg-scanpackages --arch $_ARCH dists/$_NAME/%(components)s> dists/$_NAME/%(components)s/binary-$_ARCH/Packages 2> /tmp/$_NAME
   if [ $? != 0 ]
   then
     (>&2 cat /tmp/$_NAME)
