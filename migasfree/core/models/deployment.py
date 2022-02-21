@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -252,10 +252,10 @@ class Deployment(models.Model, MigasLink):
             return None
 
         delays = ScheduleDelay.objects.filter(
-            schedule__id=self.schedule.id
+            schedule__id=self.schedule_id
         ).order_by('delay')
 
-        if len(delays) == 0:
+        if not delays.exists():
             return None
 
         begin_date = time_horizon(self.start_date, delays[0].delay)
@@ -399,7 +399,7 @@ class Deployment(models.Model, MigasLink):
                                 self.start_date, delay.delay + duration
                             ) <= datetime.datetime.now().date():
                                 computers_schedule = Computer.productive.scope(user).filter(
-                                    project_id=self.project.id
+                                    project_id=self.project_id
                                 ).filter(
                                     Q(sync_attributes__id__in=delay_attributes)
                                 ).extra(
@@ -450,7 +450,7 @@ class Deployment(models.Model, MigasLink):
 def pre_save_deployment(sender, instance, **kwargs):
     if instance.id:
         old_obj = Deployment.objects.get(pk=instance.id)
-        if old_obj.project.id != instance.project.id:
+        if old_obj.project_id != instance.project.id:
             raise ValidationError(_('Is not allowed change project'))
 
         if instance.available_packages != old_obj.available_packages \
