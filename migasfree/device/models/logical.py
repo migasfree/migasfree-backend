@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ class Logical(models.Model, MigasLink):
             driver = Driver.objects.filter(
                 project__id=project.id,
                 model__id=self.device.model.id,
-                capability__id=self.capability.id
+                capability__id=self.capability_id
             )[0]
             if driver:
                 driver_as_dict = driver.as_dict()
