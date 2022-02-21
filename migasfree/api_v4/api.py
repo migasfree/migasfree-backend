@@ -677,7 +677,7 @@ def upload_server_package(request, name, uuid, computer, data):
         fullname=_file.name,
         project=project
     )
-    if package:
+    if package.exists():
         package[0].update_store(store)
     else:
         name, version, architecture = Package.normalized_name(_file.name)
