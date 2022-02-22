@@ -328,7 +328,7 @@ def upload_computer_info(request, name, uuid, computer, data):
     notify_project = False
 
     # auto register Platform
-    if not Platform.objects.filter(name=platform_name):
+    if not Platform.objects.filter(name=platform_name).exists():
         if not settings.MIGASFREE_AUTOREGISTER:
             return return_message(
                 cmd,
@@ -341,7 +341,7 @@ def upload_computer_info(request, name, uuid, computer, data):
         notify_platform = True
 
     # auto register project
-    if not Project.objects.filter(name=project_name):
+    if not Project.objects.filter(name=project_name).exists():
         if not settings.MIGASFREE_AUTOREGISTER:
             return return_message(
                 cmd,
@@ -560,7 +560,7 @@ def register_computer(request, name, uuid, computer, data):
     notify_project = False
 
     # auto register Platform
-    if not Platform.objects.filter(name=platform_name):
+    if not Platform.objects.filter(name=platform_name).exists():
         if not settings.MIGASFREE_AUTOREGISTER:
             if not user or not user.has_perm('core.add_platform'):
                 return return_message(
@@ -574,7 +574,7 @@ def register_computer(request, name, uuid, computer, data):
         notify_platform = True
 
     # auto register project
-    if not Project.objects.filter(name=project_name):
+    if not Project.objects.filter(name=project_name).exists():
         if not settings.MIGASFREE_AUTOREGISTER:
             if not user or not user.has_perm('core.add_project'):
                 return return_message(
