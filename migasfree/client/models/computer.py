@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -418,7 +418,7 @@ class Computer(models.Model, MigasLink):
     def has_software_inventory(self):
         from .package_history import PackageHistory
 
-        return PackageHistory.objects.filter(computer__id=self.id).count() > 0
+        return PackageHistory.objects.filter(computer__id=self.id).exists()
 
     def get_software_inventory(self):
         return list(
