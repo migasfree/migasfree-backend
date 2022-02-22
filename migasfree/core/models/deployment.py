@@ -385,7 +385,7 @@ class Deployment(models.Model, MigasLink):
             if self.enabled and (self.start_date <= datetime.datetime.now().date()):
                 # by assigned attributes
                 computers = Computer.productive.scope(user).filter(
-                    project_id=self.project.id
+                    project_id=self.project_id
                 ).filter(
                     Q(sync_attributes__in=self.included_attributes.all())
                 )
