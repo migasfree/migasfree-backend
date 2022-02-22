@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -137,7 +137,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         delays = ScheduleDelay.objects.filter(
             schedule__id=deploy.schedule.id
         ).order_by('delay')
-        len_delays = len(delays)
+        len_delays = delays.count()
 
         for i, item in enumerate(delays):
             lst_att_delay = list(item.attributes.values_list('id', flat=True))
