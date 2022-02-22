@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ def configure_user(name, groups=None):
         groups = []
 
     user = UserProfile.objects.filter(username=name)
-    if not user:
+    if not user.exists():
         user = UserProfile()
         user.username = name
         user.is_staff = True
@@ -92,7 +92,7 @@ def configure_default_users():
 
     # reader group
     reader = Group.objects.filter(name='Reader')
-    if not reader:
+    if not reader.exists():
         reader = Group()
         reader.name = 'Reader'
         reader.save()
@@ -124,7 +124,7 @@ def configure_default_users():
 
     # liberator group
     liberator = Group.objects.filter(name='Liberator')
-    if not liberator:
+    if not liberator.exists():
         liberator = Group()
         liberator.name = 'Liberator'
         liberator.save()
@@ -142,7 +142,7 @@ def configure_default_users():
 
     # packager group
     packager = Group.objects.filter(name='Packager')
-    if not packager:
+    if not packager.exists():
         packager = Group()
         packager.name = 'Packager'
         packager.save()
@@ -156,7 +156,7 @@ def configure_default_users():
 
     # computer checker group
     checker = Group.objects.filter(name='Computer Checker')
-    if not checker:
+    if not checker.exists():
         checker = Group()
         checker.name = 'Computer Checker'
         checker.save()
@@ -172,7 +172,7 @@ def configure_default_users():
 
     # device installer group
     device_installer = Group.objects.filter(name='Device installer')
-    if not device_installer:
+    if not device_installer.exists():
         device_installer = Group()
         device_installer.name = 'Device installer'
         device_installer.save()
@@ -190,7 +190,7 @@ def configure_default_users():
 
     # configurator group
     configurator = Group.objects.filter(name='Configurator')
-    if not configurator:
+    if not configurator.exists():
         configurator = Group()
         configurator.name = 'Configurator'
         configurator.save()
@@ -208,7 +208,7 @@ def configure_default_users():
 
     # domain admin group
     domain_admin = Group.objects.filter(name='Domain Admin')
-    if not domain_admin:
+    if not domain_admin.exists():
         domain_admin = Group()
         domain_admin.name = 'Domain Admin'
         domain_admin.save()
@@ -278,7 +278,7 @@ def sequence_reset():
 
 def create_initial_data():
     perms = Permission.objects.filter(pk=1)
-    if not perms:
+    if not perms.exists():
         for app in apps.get_app_configs():
             create_permissions(app, None, 2)
 
