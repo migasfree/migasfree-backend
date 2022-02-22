@@ -314,7 +314,7 @@ class UserProfileForm(forms.ModelForm):
 
         if not cleaned_data['is_superuser'] and len(cleaned_data['domains']) == 0:
             domain_admin_group = Group.objects.filter(name='Domain Admin')
-            if domain_admin_group:
+            if domain_admin_group.exists():
                 domain_admin_group = domain_admin_group[0]
                 if domain_admin_group.id in list(cleaned_data['groups'].values_list('id', flat=True)):
                     raise ValidationError(_('This user must be one domain at least'))
