@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -223,7 +223,7 @@ class DeploymentForm(forms.ModelForm):
 
         if not cleaned_data['domain']:
             domain_admin_group = Group.objects.filter(name='Domain Admin')
-            if domain_admin_group:
+            if domain_admin_group.exists():
                 domain_admin_group = domain_admin_group.first()
                 if self.request and domain_admin_group.id in list(
                     self.request.user.userprofile.groups.values_list('id', flat=True)
