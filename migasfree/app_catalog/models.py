@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ class MediaFileSystemStorage(FileSystemStorage):
 
 def upload_path_handler(instance, filename):
     _, ext = os.path.splitext(filename)
-    return 'catalog_icons/app_{}{}'.format(instance.pk, ext)
+    return f'catalog_icons/app_{instance.pk}{ext}'
 
 
 class Category(models.Model):
@@ -200,7 +200,7 @@ class PackagesByProject(models.Model, MigasLink):
     objects = PackagesByProjectManager()
 
     def __str__(self):
-        return '{}@{}'.format(self.application, self.project)
+        return f'{self.application}@{self.project}'
 
     class Meta:
         app_label = 'app_catalog'
