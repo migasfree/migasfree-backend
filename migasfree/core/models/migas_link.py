@@ -76,7 +76,7 @@ class MigasLink:
         self._include_links = []
 
     def model_to_route(self, app, model):
-        return self.ROUTES.get('{}.{}'.format(app, model), '')
+        return self.ROUTES.get(f'{app}.{model}', '')
 
     @staticmethod
     def related_title(related_objects):
@@ -161,7 +161,7 @@ class MigasLink:
                     }
 
                     actions.append({
-                        'url': '{}://{}'.format(self.PROTOCOL, json.dumps(action_info)),
+                        'url': f'{self.PROTOCOL}://{json.dumps(action_info)}',
                         'title': element[action]['title'],
                         'description': self.get_description(element[action]),
                     })
@@ -169,7 +169,7 @@ class MigasLink:
         data.append({
             'model': self.model_to_route(self._meta.app_label, self._meta.model_name),
             'pk': self.id,
-            'text': '{} {}'.format(self._meta.verbose_name, self.__str__()),
+            'text': f'{self._meta.verbose_name} {self.__str__()}',
             'count': 1,
             'actions': actions
         })
@@ -214,7 +214,7 @@ class MigasLink:
                                 }
 
                                 actions.append({
-                                    'url': '{}://{}'.format(self.PROTOCOL, json.dumps(info_action)),
+                                    'url': f'{self.PROTOCOL}://{json.dumps(info_action)}',
                                     'title': element[action]['title'],
                                     'description': self.get_description(element[action]),
                                 })
@@ -226,7 +226,7 @@ class MigasLink:
                             obj.remote_field.model._meta.model_name
                         ),
                         'query': {
-                            '{}__id'.format(obj.remote_field.name): self.pk
+                            f'{obj.remote_field.name}__id': self.pk
                         }
                     },
                     'text': gettext(obj.remote_field.field.verbose_name),
@@ -241,10 +241,7 @@ class MigasLink:
                 if related_model.__name__.lower() != 'computer' or not (
                         self._meta.model_name == 'attribute' and self.property_att.prefix == 'CID'
                 ):
-                    if '{} - {}'.format(
-                        related_model._meta.model_name,
-                        _field
-                    ) not in self._exclude_links:
+                    if f'{related_model._meta.model_name} - {_field}' not in self._exclude_links:
                         if hasattr(related_model.objects, 'scope'):
                             if related_model.__name__.lower() == 'computer':
                                 rel_objects = related_model.productive.scope(user).filter(
@@ -277,7 +274,7 @@ class MigasLink:
                                             }
 
                                             actions.append({
-                                                'url': '{}://{}'.format(self.PROTOCOL, json.dumps(info_action)),
+                                                'url': f'{self.PROTOCOL}://{json.dumps(info_action)}',
                                                 'title': element[action]['title'],
                                                 'description': self.get_description(element[action]),
                                             })
@@ -347,7 +344,7 @@ class MigasLink:
                                 }
 
                                 actions.append({
-                                    'url': '{}://{}'.format(self.PROTOCOL, json.dumps(info_action)),
+                                    'url': f'{self.PROTOCOL}://{json.dumps(info_action)}',
                                     'title': element[action]['title'],
                                     'description': self.get_description(element[action]),
                                 })
@@ -415,10 +412,7 @@ class MigasLink:
                             'uninstall_date': True  # isnull = True
                         },
                     },
-                    'text': '{} [{}]'.format(
-                        gettext('Installed Packages'),
-                        gettext('computer')
-                    ),
+                    'text': f'{gettext("Installed Packages")} [{gettext("computer")}]',
                     'count': installed_packages_count,
                     'actions': actions
                 })
@@ -437,10 +431,7 @@ class MigasLink:
                             'installed_package': self.id
                         },
                     },
-                    'text': '{} [{}]'.format(
-                        gettext('Installed package'),
-                        gettext('computer')
-                    ),
+                    'text': f'{gettext("Installed package")} [{gettext("computer")}]',
                     'count': computers_count,
                     'actions': actions
                 })
@@ -455,13 +446,10 @@ class MigasLink:
                             _model_name
                         ),
                         'query': {
-                            '{}__id'.format(_field_name): self.id
+                            f'{_field_name}__id': self.id
                         }
                     },
-                    'text': '{} [{}]'.format(
-                        gettext(_model_name),
-                        gettext(_field_name)
-                    )
+                    'text': f'{gettext(_model_name)} [{gettext(_field_name)}]'
                 })
             except ValueError:
                 pass
@@ -478,10 +466,7 @@ class MigasLink:
                     'model': 'computers',
                     'query': {'product': self.computer.product},
                 },
-                'text': '{} [{}]'.format(
-                    gettext('computer'),
-                    gettext('product')
-                ),
+                'text': f'{gettext("computer")} [{gettext("product")}]',
                 'count': Computer.productive.scope(request.user.userprofile).filter(
                     product=self.computer.product
                 ).count(),
@@ -634,7 +619,7 @@ class MigasLink:
         elif self._meta.model_name == 'attributeset' \
                 or (self._meta.model_name in ['clientattribute', 'attribute'] and self.id == 1):
             lnk['status'] = 'set'
-            lnk['summary'] = '({}) {}'.format(gettext(self._meta.verbose_name), self.description)
+            lnk['summary'] = f'({gettext(self._meta.verbose_name)}) {self.description}'
         elif self._meta.model_name == 'clientattribute' \
                 or (self._meta.model_name == 'attribute' and self.property_att.sort == 'client'):
             lnk['status'] = 'attribute'
@@ -673,7 +658,7 @@ class MigasLink:
             return '', ''  # Excluded
 
         if obj.field.__class__.__name__ in ['ManyRelatedManager', 'OneToOneField', 'ForeignKey']:
-            return obj.related_model, '{}__id'.format(obj.field.name)
+            return obj.related_model, f'{obj.field.name}__id'
         else:
             return obj.related_model, '{}__{}'.format(
                 obj.field.name,
