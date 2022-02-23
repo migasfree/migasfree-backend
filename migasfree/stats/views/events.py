@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -210,7 +210,7 @@ class EventViewSet(viewsets.ViewSet):
             begin = end - timedelta(days=HOURLY_RANGE)
 
         event_class = self.get_event_class()
-        events = dict((i['hour'], i) for i in event_class.by_hour(begin, end, user))
+        events = {i['hour']: i for i in event_class.by_hour(begin, end, user)}
 
         labels = []
         stats = []
