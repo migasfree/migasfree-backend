@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -189,7 +189,7 @@ class ComputerAdmin(admin.ModelAdmin):
             )
             return db_field.formfield(**kwargs)
 
-        return super(ComputerAdmin, self).formfield_for_manytomany(
+        return super().formfield_for_manytomany(
             db_field, request, **kwargs
         )
 
@@ -201,11 +201,8 @@ class ComputerAdmin(admin.ModelAdmin):
                 kwargs['queryset'] = Logical.objects.filter(
                     pk__in=[x.id for x in computer.logical_devices()]
                 )
-        return super(ComputerAdmin, self).formfield_for_foreignkey(
-            db_field,
-            request,
-            **kwargs
-        )
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def has_add_permission(self, request):
         return False
