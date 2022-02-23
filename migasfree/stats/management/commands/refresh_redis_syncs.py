@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2021-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -56,8 +56,8 @@ class Command(BaseCommand):
         if until < since:
             until = self.CURRENT_YEAR
 
-        self.stdout.write(self.style.NOTICE('Since year {}'.format(since)))
-        self.stdout.write(self.style.NOTICE('Until year {}'.format(until)))
+        self.stdout.write(self.style.NOTICE(f'Since year {since}'))
+        self.stdout.write(self.style.NOTICE(f'Until year {until}'))
         if remove:
             self.stdout.write(self.style.NOTICE('Remove only'))
 
@@ -66,16 +66,16 @@ class Command(BaseCommand):
         # first, reset redis stats
         for year in range(since, until + 1):
             for interval in ['years', 'months', 'days', 'hours']:
-                for x in con.keys('migasfree:stats:{}:{}*'.format(interval, year)):
+                for x in con.keys(f'migasfree:stats:{interval}:{year}*'):
                     con.delete(x)
 
-                for x in con.keys('migasfree:watch:stats:{}:{}*'.format(interval, year)):
+                for x in con.keys(f'migasfree:watch:stats:{interval}:{year}*'):
                     con.delete(x)
 
-                for x in con.keys('migasfree:stats:*:{}:{}*'.format(interval, year)):
+                for x in con.keys(f'migasfree:stats:*:{interval}:{year}*'):
                     con.delete(x)
 
-                for x in con.keys('migasfree:watch:stats:*:{}:{}*'.format(interval, year)):
+                for x in con.keys(f'migasfree:watch:stats:*:{interval}:{year}*'):
                     con.delete(x)
 
         if not remove:
