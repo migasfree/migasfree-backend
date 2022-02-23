@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -412,7 +412,7 @@ class DeploymentAdmin(admin.ModelAdmin):
 
         if user.domain_preference and user.domain_preference == obj.domain:
             if not obj.name.startswith(user.domain_preference.name.lower()):
-                obj.name = '{}_{}'.format(user.domain_preference.name.lower(), obj.name)
+                obj.name = f'{user.domain_preference.name.lower()}_{obj.name}'
 
         super().save_model(request, obj, form, change)
 
@@ -427,7 +427,7 @@ class DeploymentAdmin(admin.ModelAdmin):
                     sorted(packages_after)
                 ) != 0) or has_slug_changed:
             tasks.create_repository_metadata.apply_async(
-                queue='pms-{}'.format(obj.pms().name),
+                queue=f'pms-{obj.pms().name}',
                 kwargs={'deployment_id': obj.id}
             )
 
@@ -578,7 +578,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 
     def activate_users(self, request, queryset):
         cnt = queryset.filter(is_active=False).update(is_active=True)
-        self.message_user(request, 'Activated {} users.'.format(cnt))
+        self.message_user(request, f'Activated {cnt} users.')
 
     activate_users.short_description = _('Activate Users')
 
