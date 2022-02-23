@@ -120,11 +120,7 @@ class Logical(models.Model, MigasLink):
     def __str__(self):
         data = json.loads(self.device.data)
         if 'NAME' in data and not (data['NAME'] == 'undefined' or data['NAME'] == ''):
-            return '{}__{}__{}'.format(
-                data['NAME'],
-                self.get_name(),
-                self.device.name,
-            )
+            return f'{data["NAME"]}__{self.get_name()}__{self.device.name}'
 
         return '{}__{}__{}__{}'.format(
             self.device.model.manufacturer.name,
