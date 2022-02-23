@@ -216,7 +216,7 @@ def upload_computer_message(request, name, uuid, computer, data):
 
 
 def return_message(cmd, data):
-    return {'{}.return'.format(cmd): data}
+    return {f'{cmd}.return': data}
 
 
 def get_properties(request, name, uuid, computer, data):
@@ -735,7 +735,7 @@ def upload_server_set(request, name, uuid, computer, data):
                     'pms_name': project.pms,
                     'package': package_path
                 },
-                queue='pms-{}'.format(project.pms)
+                queue=f'pms-{project.pms}'
             ).get()
             os.remove(package_path)
             if response['name']:
@@ -860,7 +860,7 @@ def set_computer_tags(request, name, uuid, computer, data):
             # INVERSE !!!!
             lst_pkg_remove.extend(
                 to_list(
-                    "{} {} {}".format(
+                    '{} {} {}'.format(
                         deploy.packages_to_install,
                         deploy.default_included_packages,
                         deploy.default_preincluded_packages
@@ -869,12 +869,7 @@ def set_computer_tags(request, name, uuid, computer, data):
             )
 
             lst_pkg_install.extend(
-                to_list(
-                    "{} {}".format(
-                        deploy.packages_to_remove,
-                        deploy.default_excluded_packages
-                    )
-                )
+                to_list(f'{deploy.packages_to_remove} {deploy.default_excluded_packages}')
             )
 
         # new deployments
@@ -883,21 +878,11 @@ def set_computer_tags(request, name, uuid, computer, data):
             new_tags_id + com_tags_id
         ):
             lst_pkg_remove.extend(
-                to_list(
-                    "{} {}".format(
-                        deploy.packages_to_remove,
-                        deploy.default_excluded_packages
-                    )
-                )
+                to_list(f'{deploy.packages_to_remove} {deploy.default_excluded_packages}')
             )
 
             lst_pkg_install.extend(
-                to_list(
-                    "{} {}".format(
-                        deploy.packages_to_install,
-                        deploy.default_included_packages
-                    )
-                )
+                to_list(f'{deploy.packages_to_install} {deploy.default_included_packages}')
             )
 
             lst_pkg_preinstall.extend(
@@ -926,7 +911,7 @@ def create_repositories_package(package_name, project_name):
         package = Package.objects.get(name=package_name, project=project)
         for deploy in Deployment.objects.filter(available_packages__id=package.id):
             create_repository_metadata.apply_async(
-                queue='pms-{}'.format(deploy.pms().name),
+                queue=f'pms-{deploy.pms().name}',
                 kwargs={'deployment_id': deploy.id}
             )
     except ObjectDoesNotExist:
