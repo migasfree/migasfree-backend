@@ -49,7 +49,7 @@ class SafeConnectionMixin:
             self.project = get_object_or_404(
                 Project, name=data.get('project')
             )
-            self.verify_key = '{}.pub'.format(self.project.slug)
+            self.verify_key = f'{self.project.slug}.pub'
         claims = secure.unwrap(
             msg,
             decrypt_key=self.decrypt_key,
@@ -70,7 +70,8 @@ class SafeConnectionMixin:
 
         logger.debug('create_response: %s', data)
         if not self.encrypt_key:
-            self.encrypt_key = '{}.pub'.format(self.project.slug)
+            self.encrypt_key = f'{self.project.slug}.pub'
+
         msg = secure.wrap(
             data,
             sign_key=self.sign_key,
