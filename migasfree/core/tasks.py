@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,9 +39,9 @@ REDIS_DB = get_setting('REDIS_DB')
 
 BROKER_URL = get_setting('BROKER_URL')
 
-AUTH_TOKEN = 'Token {}'.format(get_secret('token_admin'))
+AUTH_TOKEN = f'Token {get_secret("token_admin")}'
 
-API_URL = 'http://{}/api/v1/token'.format(MIGASFREE_FQDN)
+API_URL = f'http://{MIGASFREE_FQDN}/api/v1/token'
 
 REQUESTS_OK_CODES = [
     requests.codes.ok, requests.codes.created,
@@ -81,7 +81,7 @@ def package_info(pms_name, package):
 @app.task
 def create_repository_metadata(deployment_id):
     req = requests.get(
-        '{}/deployments/{}/'.format(API_URL, deployment_id),
+        f'{API_URL}/deployments/{deployment_id}/',
         headers={'Authorization': AUTH_TOKEN}
     )
 
@@ -134,7 +134,7 @@ def create_repository_metadata(deployment_id):
     # Package Sets
     for package_set in deployment["available_package_sets"]:
         req = requests.get(
-            '{}/package-sets/{}/'.format(API_URL, package_set["id"]),
+            f'{API_URL}/package-sets/{package_set["id"]}/',
             headers={'Authorization': AUTH_TOKEN}
         )
         if req.status_code in REQUESTS_OK_CODES:
@@ -144,7 +144,7 @@ def create_repository_metadata(deployment_id):
     # Symlinks for packages
     for package in packages:
         req = requests.get(
-            '{}/packages/{}/'.format(API_URL, package["id"]),
+            f'{API_URL}/packages/{package["id"]}/',
             headers={'Authorization': AUTH_TOKEN}
         )
         if req.status_code in REQUESTS_OK_CODES:
@@ -178,7 +178,7 @@ def create_repository_metadata(deployment_id):
 @app.task
 def remove_repository_metadata(deployment_id, old_slug=''):
     req = requests.get(
-        '{}/deployments/{}/'.format(API_URL, deployment_id),
+        f'{API_URL}/deployments/{deployment_id}/',
         headers={'Authorization': AUTH_TOKEN}
     )
 
