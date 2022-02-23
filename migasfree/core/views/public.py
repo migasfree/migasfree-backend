@@ -239,7 +239,7 @@ class GetSourceFileView(views.APIView):
                     content_type=content_type
                 )
                 response['Content-Length'] = str(length)
-                response['Content-Range'] = 'bytes %s-%s/%s' % (first_byte, last_byte, size)
+                response['Content-Range'] = f'bytes {first_byte}-{last_byte}/{size}'
                 response['Accept-Ranges'] = 'bytes'
 
                 return response
