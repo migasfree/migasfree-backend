@@ -714,7 +714,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         add_computer_message(computer, gettext('Getting assigned tags...'))
 
         tags = computer.tags.all()
-        response = list([tag.__str__() for tag in tags])
+        response = [tag.__str__() for tag in tags]
 
         add_computer_message(computer, gettext('Sending assigned tags...'))
 
