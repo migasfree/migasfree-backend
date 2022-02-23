@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,12 +38,12 @@ from setuptools import setup, find_packages
 from distutils.command.install_data import install_data
 
 PATH = os.path.dirname(__file__)
-README = open(os.path.join(PATH, 'README.md')).read()
+README = open(os.path.join(PATH, 'README.md'), encoding='utf_8').read()
 VERSION = __import__('migasfree').__version__
 
 REQUIRES = filter(
     lambda s: len(s) > 0,
-    open(os.path.join(PATH, 'requirements', 'base.txt')).read().split('\n')
+    open(os.path.join(PATH, 'requirements', 'base.txt'), encoding='utf_8').read().split('\n')
 )
 
 
