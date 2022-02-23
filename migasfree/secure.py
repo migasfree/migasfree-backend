@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -127,8 +127,8 @@ def check_keys_path():
 def generate_rsa_keys(name='migasfree-server'):
     check_keys_path()
 
-    private_pem = os.path.join(settings.MIGASFREE_KEYS_DIR, '{}.pri'.format(name))
-    public_pem = os.path.join(settings.MIGASFREE_KEYS_DIR, '{}.pub'.format(name))
+    private_pem = os.path.join(settings.MIGASFREE_KEYS_DIR, f'{name}.pri')
+    public_pem = os.path.join(settings.MIGASFREE_KEYS_DIR, f'{name}.pub')
 
     key = jwk.JWK.generate(kty='RSA', size=2048)
     write_file(public_pem, key.export_to_pem())
@@ -153,7 +153,7 @@ def gpg_get_key(name):
     gpg_home = os.path.join(settings.MIGASFREE_KEYS_DIR, '.gnupg')
     gpg_conf = os.path.join(gpg_home, 'gpg.conf')
     gpg_agent_conf = os.path.join(gpg_home, 'gpg-agent.conf')
-    _file = os.path.join(gpg_home, '{}.gpg'.format(name))
+    _file = os.path.join(gpg_home, f'{name}.gpg')
 
     if not os.path.exists(_file):
         os.environ['GNUPGHOME'] = gpg_home
@@ -175,7 +175,7 @@ Name-Real: %s
 Name-Email: fun.with@migasfree.org
 Expire-Date: 0
 """
-        file_params = os.path.join(gpg_home, '{}.txt'.format(name))
+        file_params = os.path.join(gpg_home, f'{name}.txt')
         write_file(file_params, key_params % name)
 
         os.system(
