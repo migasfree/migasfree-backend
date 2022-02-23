@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ class ServerInfoView(views.APIView):
         return Response(info)
 
 
-class RangeFileWrapper(object):
+class RangeFileWrapper:
     # from https://gist.github.com/dcwatson/cb5d8157a8fa5a4a046e
 
     def __init__(self, file_object, blk_size=8192, offset=0, length=None):
