@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -616,7 +616,7 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
         deploy = super().create(validated_data)
         if deploy.source == Deployment.SOURCE_INTERNAL:
             tasks.create_repository_metadata.apply_async(
-                queue='pms-{}'.format(deploy.pms().name),
+                queue=f'pms-{deploy.pms().name}',
                 kwargs={'deployment_id': deploy.id}
             )
 
@@ -639,7 +639,7 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
 
             if cmp(old_pkgs, new_pkgs) != 0 or old_name != validated_data['name']:
                 tasks.create_repository_metadata.apply_async(
-                    queue='pms-{}'.format(instance.pms().name),
+                    queue=f'pms-{instance.pms().name}',
                     kwargs={'deployment_id': instance.id}
                 )
 
