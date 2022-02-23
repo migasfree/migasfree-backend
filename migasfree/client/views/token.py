@@ -304,7 +304,7 @@ class ComputerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         computers = con.smembers('migasfree:watch:msg')
         for computer_id in computers:
             computer_id = int(computer_id)
-            date = con.hget('migasfree:msg:{}'.format(computer_id), 'date')
+            date = con.hget(f'migasfree:msg:{computer_id}', 'date')
             if date and datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f') <= delayed_time:
                 result.append(computer_id)
 
@@ -721,7 +721,7 @@ class MessageViewSet(viewsets.ViewSet):
 
         results = []
         for key in items:
-            item = decode_dict(con.hgetall('migasfree:msg:%d' % int(key)))
+            item = decode_dict(con.hgetall(f'migasfree:msg:{key}'))
 
             if projects and int(item['project_id']) not in projects:
                 continue
