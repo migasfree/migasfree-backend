@@ -41,9 +41,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         deploy = get_object_or_404(Deployment, pk=pk)
 
         con = get_redis_connection()
-        response = con.smembers(
-            'migasfree:deployments:%d:computers' % deploy.id
-        )
+        response = con.smembers(f'migasfree:deployments:{deploy.id}:computers')
 
         return Response(
             list(map(int, response)),
@@ -55,7 +53,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         deploy = get_object_or_404(Deployment, pk=pk)
 
         con = get_redis_connection()
-        response = con.smembers('migasfree:deployments:%d:ok' % deploy.id)
+        response = con.smembers(f'migasfree:deployments:{deploy.id}:ok')
 
         return Response(
             list(map(int, response)),
@@ -67,7 +65,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         deploy = get_object_or_404(Deployment, pk=pk)
 
         con = get_redis_connection()
-        response = con.smembers('migasfree:deployments:%d:error' % deploy.id)
+        response = con.smembers(f'migasfree:deployments:{deploy.id}:error')
 
         return Response(
             list(map(int, response)),
@@ -82,11 +80,9 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
 
         response = {
             'computers': {
-                'assigned': con.scard(
-                    'migasfree:deployments:%d:computers' % deploy.id
-                ),
-                'ok': con.scard('migasfree:deployments:%d:ok' % deploy.id),
-                'error': con.scard('migasfree:deployments:%d:error' % deploy.id)
+                'assigned': con.scard(f'migasfree:deployments:{deploy.id}:computers'),
+                'ok': con.scard(f'migasfree:deployments:{deploy.id}:ok'),
+                'error': con.scard(f'migasfree:deployments:{deploy.id}:error')
             },
             'schedule': deploy.schedule_timeline()
         }
