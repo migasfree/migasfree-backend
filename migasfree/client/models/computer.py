@@ -346,10 +346,7 @@ class Computer(models.Model, MigasLink):
         return self.sync_attributes.exclude(property_att__prefix='SET')
 
     def login(self):
-        return '{} ({})'.format(
-            self.sync_user.name,
-            self.sync_user.fullname.strip()
-        )
+        return f'{self.sync_user.name} ({self.sync_user.fullname.strip()})'
 
     def hardware(self):
         try:
@@ -441,7 +438,7 @@ class Computer(models.Model, MigasLink):
                     'install_date', 'package__fullname'
                 ).distinct().order_by('-install_date')
         ):
-            installed[key.strftime('%Y-%m-%d %H:%M:%S')].append('+{}'.format(value))
+            installed[key.strftime('%Y-%m-%d %H:%M:%S')].append(f'+{value}')
 
         for key, value in list(
                 self.packagehistory_set.filter(
@@ -450,7 +447,7 @@ class Computer(models.Model, MigasLink):
                     'uninstall_date', 'package__fullname'
                 ).distinct().order_by('-uninstall_date')
         ):
-            uninstalled[key.strftime('%Y-%m-%d %H:%M:%S')].append('-{}'.format(value))
+            uninstalled[key.strftime('%Y-%m-%d %H:%M:%S')].append(f'-{value}')
 
         return merge_dicts(installed, uninstalled)
 
@@ -740,9 +737,9 @@ class Computer(models.Model, MigasLink):
 
     def __str__(self):
         if settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] == 'id':
-            return 'CID-{}'.format(self.id)
+            return f'CID-{self.id}'
         else:
-            return '{} (CID-{})'.format(self.get_cid_description(), self.id)
+            return f'{self.get_cid_description()} (CID-{self.id})'
 
     class Meta:
         app_label = 'client'
