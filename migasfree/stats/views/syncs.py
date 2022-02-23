@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -68,12 +68,12 @@ class SyncStatsViewSet(EventViewSet):
         key = 'migasfree:stats:years'
         if project_id:
             get_object_or_404(Project, pk=project_id)
-            key = 'migasfree:stats:%d:years' % int(project_id)
+            key = f'migasfree:stats:{project_id}:years'
 
         con = get_redis_connection()
         stats = []
         for i in range(begin, end):
-            value = con.get('%s:%04d' % (key, i))
+            value = con.get(f'{key}:{i:04}')
             stats.append([i, int(value) if value else 0])
 
         return Response(stats, status=status.HTTP_200_OK)
@@ -108,7 +108,7 @@ class SyncStatsViewSet(EventViewSet):
         key = 'migasfree:stats:months'
         if project_id:
             get_object_or_404(Project, pk=project_id)
-            key = 'migasfree:stats:%d:months' % int(project_id)
+            key = f'migasfree:stats:{project_id}:months'
 
         con = get_redis_connection()
         labels = []
@@ -117,8 +117,8 @@ class SyncStatsViewSet(EventViewSet):
             begin.month, begin.year,
             end.month, end.year
         ):
-            value = con.get('%s:%04d%02d' % (key, i[0], i[1]))
-            labels.append('%04d-%02d' % (i[0], i[1]))
+            value = con.get(f'{key}:{i[0]:04}{i[1]:02}')
+            labels.append(f'{i[0]:04}-{i[1]:02}')
             stats.append({'value': int(value) if value else 0})
 
         return Response(
@@ -159,16 +159,13 @@ class SyncStatsViewSet(EventViewSet):
         key = 'migasfree:stats:days'
         if project_id:
             get_object_or_404(Project, pk=project_id)
-            key = 'migasfree:stats:%d:days' % int(project_id)
+            key = f'migasfree:stats:{project_id}:days'
 
         con = get_redis_connection()
         labels = []
         stats = []
         for single_date in daterange(begin, end):
-            value = con.get('%s:%s' % (
-                key,
-                time.strftime('%Y%m%d', single_date.timetuple())
-            ))
+            value = con.get(f'{key}:{time.strftime("%Y%m%d", single_date.timetuple())}')
             labels.append(time.strftime(human_fmt, single_date.timetuple()))
             stats.append({'value': int(value) if value else 0})
 
@@ -210,14 +207,12 @@ class SyncStatsViewSet(EventViewSet):
         key = 'migasfree:stats:hours'
         if project_id:
             get_object_or_404(Project, pk=project_id)
-            key = 'migasfree:stats:%d:hours' % int(project_id)
+            key = f'migasfree:stats:{project_id}:hours'
 
         con = get_redis_connection()
         stats = []
         while begin <= end:
-            value = con.get('%s:%s' % (
-                key, begin.strftime('%Y%m%d%H')
-            ))
+            value = con.get(f'{key}:{begin.strftime("%Y%m%d%H")}')
             stats.append([
                 begin.strftime(fmt),
                 int(value) if value else 0
