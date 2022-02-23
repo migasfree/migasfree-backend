@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2020-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2020-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2020-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2020-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ from django.utils.translation import gettext
 from ...utils import escape_format_string
 
 
-class MigasLink(object):
+class MigasLink:
     PROTOCOL = 'mea'
 
     ROUTES = {
