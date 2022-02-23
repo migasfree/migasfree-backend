@@ -164,9 +164,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                 if weekday not in [0, 6]:
                     value += Computer.productive.scope(request.user.userprofile).extra(
                         select={'deployment': 'id'},
-                        where=[
-                            'computer_id %% {} = {}'.format(item.duration, duration)
-                        ]
+                        where=[f'computer_id %% {item.duration} = {duration}']
                     ).filter(
                         ~ Q(sync_attributes__id__in=lst_attributes) &
                         Q(sync_attributes__id__in=lst_att_delay) &
@@ -214,7 +212,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         ).order_by('project__id', '-count'):
             values_null[item.get('project__id')].append(
                 {
-                    'name': '{} ({})'.format(_('Without schedule'), item.get('project__name')),
+                    'name': f'{_("Without schedule")} ({item.get("project__name")})',
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
                     'schedule': True  # isnull = True
@@ -235,7 +233,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         ).order_by('project__id', '-count'):
             values_not_null[item.get('project__id')].append(
                 {
-                    'name': '{} ({})'.format(_('With schedule'), item.get('project__name')),
+                    'name': f'{_("With schedule")} ({item.get("project__name")})',
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
                     'schedule': False  # isnull = False
@@ -283,7 +281,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         ).order_by('project__id', '-count'):
             values_null[item.get('project__id')].append(
                 {
-                    'name': '{} ({})'.format(_('Enabled'), item.get('project__name')),
+                    'name': f'{_("Enabled")} ({item.get("project__name")})',
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
                     'enabled': True,
@@ -300,7 +298,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         ).order_by('project__id', '-count'):
             values_not_null[item.get('project__id')].append(
                 {
-                    'name': '{} ({})'.format(_('Disabled'), item.get('project__name')),
+                    'name': f'{_("Disabled")} ({item.get("project__name")})',
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
                     'enabled': False
@@ -348,7 +346,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         ).order_by('project__id', '-count'):
             values_null[item.get('project__id')].append(
                 {
-                    'name': '{} ({})'.format(_('Without schedule'), item.get('project__name')),
+                    'name': f'{_("Without schedule")} ({item.get("project__name")})',
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
                     'schedule': True  # isnull = True
@@ -365,7 +363,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         ).order_by('project__id', '-count'):
             values_not_null[item.get('project__id')].append(
                 {
-                    'name': '{} ({})'.format(_('With schedule'), item.get('project__name')),
+                    'name': f'{_("With schedule")} ({item.get("project__name")})',
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
                     'schedule': False  # isnull = False
