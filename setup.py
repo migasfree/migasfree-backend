@@ -62,7 +62,7 @@ class InstallData(install_data):
 
             data_files.append(
                 (
-                    '/var/%s' % os.path.join('migasfree-backend', root),
+                    f'/var/{os.path.join("migasfree-backend", root)}',
                     final_files
                 )
             )
@@ -81,7 +81,7 @@ class InstallData(install_data):
 
                 data_files.append(
                     (
-                        '/usr/share/%s' % os.path.join('migasfree-backend', root),
+                        f'/usr/share/{os.path.join("migasfree-backend", root)}',
                         final_files
                     )
                 )
@@ -106,10 +106,7 @@ class InstallData(install_data):
 
             data_files.append(
                 (
-                    '/usr/share/doc/%s' % os.path.join(
-                        'migasfree-backend',
-                        tmp_dir
-                    ),
+                    f'/usr/share/doc/{os.path.join("migasfree-backend", tmp_dir)}',
                     final_files
                 )
             )
