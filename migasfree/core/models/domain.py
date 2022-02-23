@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2018-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ class Domain(models.Model, MigasLink):
         tags = [Attribute.objects.get(property_att__prefix='DMN', value=self.name)]
         for tag in Attribute.objects.filter(
             property_att__prefix='DMN',
-            value__startswith='{}.'.format(self.name)
+            value__startswith=f'{self.name}.'
         ):
             tags.append(tag)
 
