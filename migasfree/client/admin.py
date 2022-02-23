@@ -36,7 +36,7 @@ from .models import (
 
 def add_computer_search_fields(fields_list):
     for field in settings.MIGASFREE_COMPUTER_SEARCH_FIELDS:
-        fields_list.append('computer__{}'.format(field))
+        fields_list.append(f'computer__{field}')
 
     return tuple(fields_list)
 
