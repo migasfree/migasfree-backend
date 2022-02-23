@@ -367,7 +367,7 @@ class PolicyGroup(models.Model, MigasLink):
     )
 
     def __str__(self):
-        return '{} ({})'.format(self.policy.name, self.priority)
+        return f'{self.policy.name} ({self.priority})'
 
     class Meta:
         app_label = 'app_catalog'
