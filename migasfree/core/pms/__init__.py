@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ def get_available_pms():
     discovered_plugins = get_discovered_plugins()
     for item in discovered_plugins.keys():
         pms = item.split('.')[-1]
-        ret.append((pms, 'plugins.{}'.format(pms)))
+        ret.append((pms, f'plugins.{pms}'))
 
     return tuple(sorted(ret, key=lambda x: x[0]))
 
@@ -76,7 +76,7 @@ def get_available_mimetypes():
 def get_pms(name):
     available_pms = dict(get_available_pms())
     mod = import_module(
-        'migasfree.core.pms.{}'.format(available_pms.get(name))
+        f'migasfree.core.pms.{available_pms.get(name)}'
     )
 
     return getattr(mod, name.capitalize())()
