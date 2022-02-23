@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -147,7 +147,7 @@ def add_synchronizing_computers():
     computers = con.smembers('migasfree:watch:msg')
     for computer_id in computers:
         computer_id = int(computer_id)
-        date = con.hget('migasfree:msg:{}'.format(computer_id), 'date')
+        date = con.hget(f'migasfree:msg:{computer_id}', 'date')
         if date and datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f') > delayed_time:
             result += 1
 
@@ -179,7 +179,7 @@ def add_delayed_computers():
     computers = con.smembers('migasfree:watch:msg')
     for computer_id in computers:
         computer_id = int(computer_id)
-        date = con.hget('migasfree:msg:{}'.format(computer_id), 'date')
+        date = con.hget(f'migasfree:msg:{computer_id}', 'date')
         if date and datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f') <= delayed_time:
             result += 1
 
@@ -340,7 +340,7 @@ def assigned_computers_to_deployment(deployment_id):
     ).values_list('id', flat=True)))
 
     con = get_redis_connection()
-    key = 'migasfree:deployments:{}:computers'.format(deployment_id)
+    key = f'migasfree:deployments:{deployment_id}:computers'
     con.delete(key)
     if computers:
         for computer_id in list(computers):
