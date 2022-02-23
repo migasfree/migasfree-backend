@@ -49,7 +49,7 @@ logger = logging.getLogger('migasfree')
 def add_computer_message(computer, message):
     con = get_redis_connection()
     con.hmset(
-        'migasfree:msg:%d' % computer.id, {
+        f'migasfree:msg:{computer.id}', {
             'date': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'),
             'computer_id': computer.id,
             'computer_name': computer.__str__(),
@@ -67,9 +67,9 @@ def add_computer_message(computer, message):
 
 def remove_computer_messages(computer_id):
     con = get_redis_connection()
-    keys = con.hkeys('migasfree:msg:%d' % computer_id)
+    keys = con.hkeys(f'migasfree:msg:{computer_id}')
     if keys:
-        con.hdel('migasfree:msg:%d' % computer_id, *keys)
+        con.hdel(f'migasfree:msg:{computer_id}', *keys)
 
     con.srem('migasfree:watch:msg', computer_id)
 
