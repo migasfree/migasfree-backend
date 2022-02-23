@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -106,7 +106,7 @@ class ExportViewSet(viewsets.ViewSet):
         if class_name.lower() in exceptions:
             class_name = exceptions[class_name.lower()]
 
-        resource = globals()['{}Resource'.format(class_name)]
+        resource = globals()[f'{class_name}Resource']
         obj = resource()
         data = obj.export(
             self.filter_queryset(self.get_queryset())
@@ -117,7 +117,7 @@ class ExportViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK,
             content_type='text/csv',
         )
-        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(self.basename)
+        response['Content-Disposition'] = f'attachment; filename="{self.basename}.csv"'
 
         return response
 
@@ -539,7 +539,7 @@ class PackageViewSet(
                     'pms_name': store.project.pms,
                     'package': package_path
                 },
-                queue='pms-{}'.format(store.project.pms)
+                queue=f'pms-{store.project.pms}'
             ).get()
             os.remove(package_path)
             if response['name']:
@@ -601,7 +601,7 @@ class PackageViewSet(
                 'pms_name': obj.project.pms,
                 'package': Package.path(obj.project.slug, obj.store.slug, obj.fullname)
             },
-            queue='pms-{}'.format(obj.project.pms)
+            queue=f'pms-{obj.project.pms}'
         ).get()
 
         return Response({'data': response}, status=status.HTTP_200_OK)
@@ -641,7 +641,7 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
                         'pms_name': project.pms,
                         'package': package_path
                     },
-                    queue='pms-{}'.format(project.pms)
+                    queue=f'pms-{project.pms}'
                 ).get()
                 os.remove(package_path)
                 if response['name']:
@@ -758,7 +758,7 @@ class InternalSourceViewSet(viewsets.ModelViewSet, MigasViewSet):
     def metadata(self, request, pk=None):
         deploy = self.get_object()
         tasks.create_repository_metadata.apply_async(
-            queue='pms-{}'.format(deploy.pms().name),
+            queue=f'pms-{deploy.pms().name}',
             kwargs={'deployment_id': deploy.id}
         )
 
