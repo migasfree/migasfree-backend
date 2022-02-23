@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -213,12 +213,12 @@ def swap_m2m(source_field, target_field):
 
 
 def remove_empty_elements_from_dict(dic):
-    return dict((k, v) for k, v in dic.items() if v)
+    return {k: v for k, v in dic.items() if v}
 
 
 def replace_keys(data, aliases):
     for i, item in enumerate(data):
-        data[i] = dict((aliases[key], value) for (key, value) in item.items())
+        data[i] = {aliases[key]: value for (key, value) in item.items()}
 
     return data
 
