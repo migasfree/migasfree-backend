@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2018-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -164,11 +164,11 @@ SELECT ARRAY(
 
             cursor = connection.cursor()
             cursor.execute(
-                """SELECT ARRAY(
+                f"""SELECT ARRAY(
                     SELECT serverattribute_id
                     FROM core_domain_tags
-                    WHERE domain_id=%s
-                ) AS attributes """ % self.domain_preference.id
+                    WHERE domain_id={self.domain_preference.id}
+                ) AS attributes """
             )
             tags = cursor.fetchall()[0][0]
             cursor.close()
