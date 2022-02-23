@@ -17,7 +17,7 @@ SIGN_LEN = 256
 def sign(filename):
     os.system("openssl dgst -sha1 -sign %s -out %s %s" % (
         os.path.join(settings.MIGASFREE_KEYS_DIR, 'migasfree-server.pri'),
-        '{}.sign'.format(filename),
+        f'{filename}.sign',
         filename
     ))
 
@@ -26,8 +26,8 @@ def verify(filename, key):
     return os.system(
         "openssl dgst -sha1 -verify %s -signature %s %s 1>/dev/null" %
         (
-            os.path.join(settings.MIGASFREE_KEYS_DIR, '{}.pub'.format(key)),
-            '{}.sign'.format(filename),
+            os.path.join(settings.MIGASFREE_KEYS_DIR, f'{key}.pub'),
+            f'{filename}.sign',
             filename
         )
     ) == 0  # returns True if OK, False otherwise
@@ -45,10 +45,10 @@ def wrap(filename, data):
     sign(filename)
 
     with open(filename, 'ab') as fp:
-        with open('{}.sign'.format(filename), "rb") as fpsign:
+        with open(f'{filename}.sign', 'rb') as fpsign:
             fp.write(fpsign.read())
 
-    os.remove('{}.sign'.format(filename))
+    os.remove(f'{filename}.sign')
 
 
 def unwrap(filename, key):
@@ -60,7 +60,7 @@ def unwrap(filename, key):
 
     n = len(content)
 
-    write_file('{}.sign'.format(filename), content[n - SIGN_LEN:n])
+    write_file(f'{filename}.sign', content[n - SIGN_LEN:n])
     write_file(filename, content[0:n - SIGN_LEN])
 
     if verify(filename, key):
@@ -69,7 +69,7 @@ def unwrap(filename, key):
     else:
         data = errmfs.error(errmfs.INVALID_SIGNATURE)
 
-    os.remove('{}.sign'.format(filename))
+    os.remove(f'{filename}.sign')
 
     return data
 
@@ -82,8 +82,8 @@ def check_keys_path():
 def generate_rsa_keys(name='migasfree-server'):
     check_keys_path()
 
-    private_pem = os.path.join(settings.MIGASFREE_KEYS_DIR, '{}.pri'.format(name))
-    public_pem = os.path.join(settings.MIGASFREE_KEYS_DIR, '{}.pub'.format(name))
+    private_pem = os.path.join(settings.MIGASFREE_KEYS_DIR, f'{name}.pri')
+    public_pem = os.path.join(settings.MIGASFREE_KEYS_DIR, f'{name}.pub')
 
     if not (os.path.exists(private_pem) and os.path.exists(public_pem)):
         key = RSA.generate(2048)
@@ -109,7 +109,7 @@ def gpg_get_key(name):
     gpg_home = os.path.join(settings.MIGASFREE_KEYS_DIR, '.gnupg')
     gpg_conf = os.path.join(gpg_home, 'gpg.conf')
     gpg_agent_conf = os.path.join(gpg_home, 'gpg-agent.conf')
-    _file = os.path.join(gpg_home, '{}.gpg'.format(name))
+    _file = os.path.join(gpg_home, f'{name}.gpg')
 
     if not os.path.exists(_file):
         os.environ['GNUPGHOME'] = gpg_home
@@ -128,7 +128,7 @@ Name-Real: %s
 Name-Email: fun.with@migasfree.org
 Expire-Date: 0
 """
-        file_params = os.path.join(gpg_home, '{}.txt'.format(name))
+        file_params = os.path.join(gpg_home, f'{name}.txt')
         write_file(file_params, key_params % name)
 
         os.system(
@@ -153,9 +153,7 @@ def get_keys_to_client(project):
     """
     Returns the keys for register computer
     """
-    if not os.path.exists(
-        os.path.join(settings.MIGASFREE_KEYS_DIR, '{}.pri'.format(project))
-    ):
+    if not os.path.exists(os.path.join(settings.MIGASFREE_KEYS_DIR, f'{project}.pri')):
         generate_rsa_keys(project)
 
     server_public_key = read_file(os.path.join(
@@ -164,12 +162,12 @@ def get_keys_to_client(project):
     ))
     project_private_key = read_file(os.path.join(
         settings.MIGASFREE_KEYS_DIR,
-        '{}.pri'.format(project)
+        f'{project}.pri'
     ))
 
     return {
         settings.MIGASFREE_PUBLIC_KEY: server_public_key.decode(),
-        "migasfree-client.pri": project_private_key.decode()
+        'migasfree-client.pri': project_private_key.decode()
     }
 
 
