@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -165,9 +165,9 @@ class Attribute(models.Model, MigasLink):
             return self.value
         elif self.property_att.prefix == 'CID' and \
                 settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] != 'id':
-            return '{} (CID-{})'.format(self.description, self.value)
+            return f'{self.description} (CID-{self.value})'
         else:
-            return '{}-{}'.format(self.property_att.prefix, self.value)
+            return f'{self.property_att.prefix}-{self.value}'
 
     def prefix_value(self):
         return self.__str__()
@@ -310,7 +310,7 @@ class BasicAttribute(Attribute):
             basic_attributes.append(obj.id)
 
         if 'CID' in properties.keys() and 'id' in kwargs:
-            description = '{}'.format(kwargs['description'])
+            description = f'{kwargs["description"]}'
             obj, _ = Attribute.objects.get_or_create(
                 property_att=Property.objects.get(pk=properties['CID']),
                 value=str(kwargs['id']),
