@@ -281,8 +281,8 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             data[i] = {
                 'value': data[i],
                 'machine': 'P',
-                'created_at__gte': '{}-01-01'.format(labels[i]),
-                'created_at__lt': '{}-01-01'.format(labels[i] + 1)
+                'created_at__gte': f'{labels[i]}-01-01',
+                'created_at__lt': f'{labels[i] + 1}-01-01'
             }
 
         return Response(
