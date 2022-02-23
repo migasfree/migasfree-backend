@@ -77,7 +77,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                             'pms_name': project.pms,
                             'package': package_path
                         },
-                        queue='pms-{}'.format(project.pms)
+                        queue=f'pms-{project.pms}'
                     ).get()
                     os.remove(package_path)
                     if response['name']:
@@ -149,7 +149,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                         'pms_name': project.pms,
                         'package': package_path
                     },
-                    queue='pms-{}'.format(project.pms)
+                    queue=f'pms-{project.pms}'
                 ).get()
                 os.remove(package_path)
                 if response['name']:
@@ -218,7 +218,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         )
         for deploy in deployments:
             tasks.create_repository_metadata.apply_async(
-                queue='pms-{}'.format(deploy.pms().name),
+                queue=f'pms-{deploy.pms().name}',
                 kwargs={'deployment_id': deploy.id}
             )
 
