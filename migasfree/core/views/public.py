@@ -144,9 +144,7 @@ class GetSourceFileView(views.APIView):
         project_slug = _path.split('/')[2]
         source_slug = _path.split('/')[4]
         resource = _path.split(
-            '/src/{}/{}/{}/'.format(
-                project_slug, settings.MIGASFREE_EXTERNAL_TRAILING_PATH, source_slug
-            )
+            f'/src/{project_slug}/{settings.MIGASFREE_EXTERNAL_TRAILING_PATH}/{source_slug}/'
         )[1]
 
         _file_local = os.path.join(settings.MIGASFREE_PUBLIC_DIR, _path.split('/src/')[1])
@@ -155,7 +153,7 @@ class GetSourceFileView(views.APIView):
             project = Project.objects.get(slug=project_slug)
         except ObjectDoesNotExist:
             return HttpResponse(
-                'Project not exists: {}'.format(project_slug),
+                f'Project not exists: {project_slug}',
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -164,7 +162,7 @@ class GetSourceFileView(views.APIView):
                 source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
             except ObjectDoesNotExist:
                 return HttpResponse(
-                    'URL not exists: {}'.format(_path),
+                    f'URL not exists: {_path}',
                     status=status.HTTP_404_NOT_FOUND
                 )
 
@@ -185,11 +183,11 @@ class GetSourceFileView(views.APIView):
                     source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
                 except ObjectDoesNotExist:
                     return HttpResponse(
-                        'URL not exists: {}'.format(_path),
+                        f'URL not exists: {_path}',
                         status=status.HTTP_404_NOT_FOUND
                     )
 
-            url = '{}/{}'.format(source.base_url, resource)
+            url = f'{source.base_url}/{resource}'
             logger.debug('get url %s', url)
 
             try:
@@ -206,12 +204,12 @@ class GetSourceFileView(views.APIView):
                 return response
             except HTTPError as e:
                 return HttpResponse(
-                    'HTTP Error: {} {}'.format(e.code, url),
+                    f'HTTP Error: {e.code} {url}',
                     status=e.code
                 )
             except URLError as e:
                 return HttpResponse(
-                    'URL Error: {} {}'.format(e.reason, url),
+                    f'URL Error: {e.reason} {url}',
                     status=status.HTTP_404_NOT_FOUND
                 )
         else:
@@ -250,7 +248,7 @@ class GetSourceFileView(views.APIView):
                 FileWrapper(open(_file_local, 'rb')),
                 content_type='application/octet-stream'
             )
-            response['Content-Disposition'] = 'attachment; filename={}'.format(os.path.basename(_file_local))
+            response['Content-Disposition'] = f'attachment; filename={os.path.basename(_file_local)}'
             response['Content-Length'] = os.path.getsize(_file_local)
 
             return response
