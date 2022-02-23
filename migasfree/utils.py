@@ -315,7 +315,7 @@ def save_tempfile(file_):
         for chunk in file_.chunks():
             os.write(tempf, chunk)
     except:
-        raise Exception("Problem with the input file %s" % file_.name)
+        raise Exception(f"Problem with the input file {file_.name}")
     finally:
         os.close(tempf)
 
