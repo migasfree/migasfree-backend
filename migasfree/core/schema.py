@@ -15,7 +15,7 @@ class ProjectType(DjangoObjectType):
         model = Project
 
 
-class Query(object):
+class Query:
     all_platforms = graphene.List(PlatformType)
     all_projects = graphene.List(ProjectType)
 
