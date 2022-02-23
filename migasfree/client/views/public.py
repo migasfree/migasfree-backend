@@ -143,16 +143,14 @@ class ProjectKeysView(views.APIView):
         # FIXME why not validate model in create method?
         available_pms = dict(get_available_pms()).keys()
         if pms not in available_pms:
-            return Response({
-                'error': gettext('PMS must be one of %s' % str(available_pms))
-            })
+            return Response({'error': gettext(f'PMS must be one of {available_pms}')})
 
         project = self.get_object(
             project_name, pms, platform_name, architecture, ip_address
         )
 
         priv_project_key_file = os.path.join(
-            settings.MIGASFREE_KEYS_DIR, "{}.pri".format(project.slug)
+            settings.MIGASFREE_KEYS_DIR, f'{project.slug}.pri'
         )
 
         if not os.path.exists(priv_project_key_file):
