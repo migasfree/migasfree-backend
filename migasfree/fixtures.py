@@ -303,7 +303,7 @@ def create_initial_data():
                 settings.MIGASFREE_APP_DIR,
                 app,
                 'fixtures',
-                '{0}.{1}'.format(name, ext)
+                f'{name}.{ext}'
             ),
             verbosity=1
         )
