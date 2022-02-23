@@ -15,7 +15,7 @@ class ErrorType(DjangoObjectType):
         model = Error
 
 
-class Query(object):
+class Query:
     all_computers = graphene.List(ComputerType)
     all_errors = graphene.List(ErrorType)
 
