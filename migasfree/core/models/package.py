@@ -161,7 +161,7 @@ class Package(models.Model, MigasLink):
     def pms(self):
         available_pms = dict(get_available_pms())
         mod = import_module(
-            'migasfree.core.pms.{}'.format(available_pms.get(self.project.pms))
+            f'migasfree.core.pms.{available_pms.get(self.project.pms)}'
         )
         return getattr(mod, self.project.pms.capitalize())()
 
@@ -294,6 +294,6 @@ def delete_package(sender, instance, **kwargs):
     for deploy in queryset:
         deploy.available_packages.remove(instance)
         tasks.create_repository_metadata.apply_async(
-            queue='pms-{}'.format(deploy.pms().name),
+            queue=f'pms-{deploy.pms().name}',
             kwargs={'deployment_id': deploy.id}
         )
