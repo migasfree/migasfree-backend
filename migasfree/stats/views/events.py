@@ -95,7 +95,7 @@ def event_by_month(data, begin_date, end_date, model, field='project_id'):
         start_date = date(monthly[0], monthly[1], 1)
         final_date = start_date + relativedelta(months=+1)
 
-        key = '%d-%02d' % (monthly[0], monthly[1])
+        key = f'{monthly[0]}-{monthly[1]:02}'
         x_axe.append(key)
         value = list(filter(lambda item: item['year'] == monthly[0] and item['month'] == monthly[1], data))
         if field == 'project_id':
