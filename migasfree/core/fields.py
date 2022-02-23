@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,16 +37,17 @@ class MultiFileField(forms.FileField):
         self.min_num = kwargs.pop('min_num', 0)
         self.max_num = kwargs.pop('max_num', None)
         self.maximum_file_size = kwargs.pop('maximum_file_size', None)
-        super(MultiFileField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def to_python(self, data):
         ret = []
         for item in data:
-            ret.append(super(MultiFileField, self).to_python(item))
+            ret.append(super().to_python(item))
+
         return ret
 
     def validate(self, data):
-        super(MultiFileField, self).validate(data)
+        super().validate(data)
 
         num_files = len(data)
         if len(data) and not data[0]:
