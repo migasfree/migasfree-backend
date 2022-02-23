@@ -97,7 +97,7 @@ def execute(cmd, verbose=False, interactive=False):
                     chunk = _process.stdout.read()
                     if chunk and chunk != '\n':
                         print(chunk)
-                    _output_buffer = '{}{}'.format(_output_buffer, chunk)
+                    _output_buffer = f'{_output_buffer}{chunk}'
 
     _output, _error = _process.communicate()
 
@@ -175,7 +175,7 @@ def uuid_change_format(uuid):
     change to big-endian or little-endian format
     """
     if len(uuid) == 36:
-        return "%s%s%s%s-%s%s-%s%s-%s-%s" % (
+        return '{}{}{}{}-{}{}-{}{}-{}-{}'.format(
             uuid[6:8],
             uuid[4:6],
             uuid[2:4],
