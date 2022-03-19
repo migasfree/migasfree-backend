@@ -22,7 +22,6 @@ import fcntl
 import select
 import copy
 import tempfile
-import shutil
 
 from datetime import timedelta
 
@@ -289,22 +288,6 @@ def sort_depends(data):
         return ret
 
     return sort()
-
-
-def read_remote_chunks(local_file, remote, chunk_size=8192):
-    _, tmp = tempfile.mkstemp()
-    with open(tmp, 'wb') as tmp_file:
-        while True:
-            data = remote.read(chunk_size)
-            if not data:
-                break
-            yield data
-            tmp_file.write(data)
-            tmp_file.flush()
-
-        os.fsync(tmp_file.fileno())
-
-    shutil.move(tmp, local_file)
 
 
 def save_tempfile(file_):
