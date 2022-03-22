@@ -20,6 +20,8 @@ import os
 import re
 import ssl
 import time
+import shutil
+import hashlib
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -28,6 +30,7 @@ from mimetypes import guess_type
 from rest_framework import status, views, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
+from threading import Thread
 from urllib.error import URLError, HTTPError
 from urllib.request import urlopen, urlretrieve
 from wsgiref.util import FileWrapper
@@ -35,16 +38,12 @@ from wsgiref.util import FileWrapper
 from ..pms import get_available_pms, get_pms
 from ..models import Project, ExternalSource
 
-from threading import Thread
-import shutil
-import hashlib
-
 import logging
 logger = logging.getLogger('migasfree')
 
 
 def external_downloads(url, local_file):
-    temp_hash=hashlib.md5(local_file.encode('utf-8')).hexdigest()
+    temp_hash = hashlib.md5(local_file.encode('utf-8')).hexdigest()
     temp_file = f'{settings.MIGASFREE_PUBLIC_DIR}/.external_downloads/{temp_hash}'
     if not os.path.exists(temp_file):
         os.makedirs(os.path.dirname(temp_file), exist_ok=True)
@@ -203,9 +202,12 @@ class GetSourceFileView(views.APIView):
 
             try:
                 # Download remote file in background
-                Thread(target=external_downloads,args=(url, _file_local)).start() 
+                Thread(
+                    target=external_downloads,
+                    args=(url, _file_local)
+                ).start()
+
                 return HttpResponseRedirect(url)
-                
             except HTTPError as e:
                 return HttpResponse(
                     f'HTTP Error: {e.code} {url}',
