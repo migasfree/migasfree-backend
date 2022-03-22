@@ -43,8 +43,12 @@ logger = logging.getLogger('migasfree')
 
 
 def external_downloads(url, local_file):
-    temp_hash = hashlib.md5(local_file.encode('utf-8')).hexdigest()
-    temp_file = f'{settings.MIGASFREE_PUBLIC_DIR}/.external_downloads/{temp_hash}'
+    temp_file = os.path.join(
+        settings.MIGASFREE_PUBLIC_DIR,
+        '.external_downloads',
+        hashlib.md5(local_file.encode('utf-8')).hexdigest()
+    )
+
     if not os.path.exists(temp_file):
         os.makedirs(os.path.dirname(temp_file), exist_ok=True)
         urlretrieve(url, temp_file)
