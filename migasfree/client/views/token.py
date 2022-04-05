@@ -721,7 +721,7 @@ class MessageViewSet(viewsets.ViewSet):
 
         results = []
         for key in items:
-            item = decode_dict(con.hgetall(f'migasfree:msg:{key}'))
+            item = decode_dict(con.hgetall(f'migasfree:msg:{int(key)}'))
 
             if projects and int(item['project_id']) not in projects:
                 continue
