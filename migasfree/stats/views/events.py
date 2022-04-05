@@ -116,7 +116,7 @@ def event_by_month(data, begin_date, end_date, model, field='project_id'):
         elif field == 'status':
             for item in Computer.STATUS_CHOICES:
                 if value:
-                    count = list(filter(lambda item: item['status'] == item[0], value))
+                    count = list(filter(lambda row: row['status'] == item[0], value))
                     new_data[item[0]].append({
                         'value': count[0]['count'] if count else 0,
                         'model': model,
