@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ class CapabilityFilter(filters.FilterSet):
     class Meta:
         model = Capability
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
         }
 
@@ -38,7 +38,7 @@ class ConnectionFilter(filters.FilterSet):
     class Meta:
         model = Connection
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'device_type__id': ['exact'],
             'device_type__name': ['exact', 'icontains'],
@@ -50,7 +50,7 @@ class DeviceFilter(filters.FilterSet):
     class Meta:
         model = Device
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'model__id': ['exact'],
             'model__name': ['exact', 'icontains'],
             'model__manufacturer__id': ['exact'],
@@ -64,7 +64,7 @@ class DriverFilter(filters.FilterSet):
     class Meta:
         model = Driver
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'project__id': ['exact'],
             'project__name': ['exact', 'icontains'],
             'model__id': ['exact'],
@@ -78,7 +78,7 @@ class ManufacturerFilter(filters.FilterSet):
     class Meta:
         model = Manufacturer
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
         }
 
@@ -87,7 +87,7 @@ class TypeFilter(filters.FilterSet):
     class Meta:
         model = Type
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
         }
 
@@ -96,7 +96,7 @@ class LogicalFilter(filters.FilterSet):
     class Meta:
         model = Logical
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'device__id': ['exact'],
             'device__name': ['exact', 'icontains'],
             'device__model__id': ['exact'],
@@ -110,7 +110,7 @@ class ModelFilter(filters.FilterSet):
     class Meta:
         model = Model
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'manufacturer__id': ['exact'],
             'manufacturer__name': ['exact', 'icontains'],
