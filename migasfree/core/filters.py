@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ class AttributeSetFilter(filters.FilterSet):
     class Meta:
         model = AttributeSet
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'enabled': ['exact'],
             'included_attributes__id': ['exact'],
@@ -116,7 +116,7 @@ class PackageSetFilter(filters.FilterSet):
     class Meta:
         model = PackageSet
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'project__id': ['exact'],
             'store__id': ['exact'],
@@ -128,7 +128,7 @@ class PlatformFilter(filters.FilterSet):
     class Meta:
         model = Platform
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains']
         }
 
@@ -149,7 +149,7 @@ class PropertyFilter(filters.FilterSet):
     class Meta:
         model = Property
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'enabled': ['exact'],
             'sort': ['exact'],
@@ -161,7 +161,7 @@ class ClientPropertyFilter(filters.FilterSet):
     class Meta:
         model = ClientProperty
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'enabled': ['exact'],
             'sort': ['exact'],
@@ -276,7 +276,7 @@ class ScheduleFilter(filters.FilterSet):
     class Meta:
         model = Schedule
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
         }
 
@@ -291,7 +291,7 @@ class StoreFilter(filters.FilterSet):
     class Meta:
         model = Store
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['icontains'],
             'project__id': ['exact']
         }
@@ -301,7 +301,7 @@ class UserProfileFilter(filters.FilterSet):
     class Meta:
         model = UserProfile
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'username': ['exact', 'icontains'],
             'first_name': ['exact', 'icontains'],
             'last_name': ['exact', 'icontains'],
@@ -317,7 +317,7 @@ class PermissionFilter(filters.FilterSet):
     class Meta:
         model = Permission
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['icontains'],
         }
 
@@ -326,7 +326,7 @@ class GroupFilter(filters.FilterSet):
     class Meta:
         model = Group
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['icontains'],
             'user__id': ['exact'],
         }
@@ -336,7 +336,7 @@ class DomainFilter(filters.FilterSet):
     class Meta:
         model = Domain
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'included_attributes__id': ['exact'],
             'excluded_attributes__id': ['exact'],
@@ -347,7 +347,7 @@ class ScopeFilter(filters.FilterSet):
     class Meta:
         model = Scope
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'user': ['exact'],
             'user__id': ['exact'],
