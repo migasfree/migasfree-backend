@@ -50,7 +50,7 @@ from ..resources import (
     ClientAttributeResource, ServerAttributeResource,
     ClientPropertyResource, ServerPropertyResource,
     ProjectResource, PlatformResource, AttributeSetResource,
-    UserProfileResource, GroupResource,
+    UserProfileResource, GroupResource, DomainResource, ScopeResource,
 )
 from ..models import (
     Platform, Project, Store,
@@ -903,7 +903,7 @@ class PermissionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class DomainViewSet(viewsets.ModelViewSet, MigasViewSet):
+class DomainViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Domain.objects.all()
     serializer_class = DomainSerializer
     filterset_class = DomainFilter
@@ -938,7 +938,7 @@ class DomainViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ScopeViewSet(viewsets.ModelViewSet, MigasViewSet):
+class ScopeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Scope.objects.all()
     serializer_class = ScopeSerializer
     filterset_class = ScopeFilter
