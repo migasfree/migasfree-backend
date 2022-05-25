@@ -49,7 +49,7 @@ from .. import tasks
 from ..resources import (
     ClientAttributeResource, ServerAttributeResource,
     ClientPropertyResource, ServerPropertyResource,
-    ProjectResource,
+    ProjectResource, PlatformResource,
 )
 from ..models import (
     Platform, Project, Store,
@@ -181,7 +181,7 @@ class AttributeSetViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class PlatformViewSet(viewsets.ModelViewSet, MigasViewSet):
+class PlatformViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Platform.objects.all()
     serializer_class = PlatformSerializer
     filterset_class = PlatformFilter
