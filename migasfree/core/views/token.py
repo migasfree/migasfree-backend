@@ -50,6 +50,7 @@ from ..resources import (
     ClientAttributeResource, ServerAttributeResource,
     ClientPropertyResource, ServerPropertyResource,
     ProjectResource, PlatformResource, AttributeSetResource,
+    UserProfileResource,
 )
 from ..models import (
     Platform, Project, Store,
@@ -102,6 +103,7 @@ class ExportViewSet(viewsets.ViewSet):
             'serverproperty': 'ServerProperty',
             'faultdefinition': 'FaultDefinition',
             'statuslog': 'StatusLog',
+            'userprofile': 'UserProfile',
         }
 
         class_name = self.basename.capitalize()
@@ -808,7 +810,7 @@ class ExternalSourceViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet):
+class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     filterset_class = UserProfileFilter
