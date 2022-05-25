@@ -507,7 +507,7 @@ class ErrorViewSet(
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class FaultDefinitionViewSet(viewsets.ModelViewSet, MigasViewSet):
+class FaultDefinitionViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = models.FaultDefinition.objects.all()
     serializer_class = serializers.FaultDefinitionSerializer
     filterset_class = FaultDefinitionFilter
