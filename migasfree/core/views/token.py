@@ -49,7 +49,7 @@ from .. import tasks
 from ..resources import (
     ClientAttributeResource, ServerAttributeResource,
     ClientPropertyResource, ServerPropertyResource,
-    ProjectResource, PlatformResource,
+    ProjectResource, PlatformResource, AttributeSetResource,
 )
 from ..models import (
     Platform, Project, Store,
@@ -95,6 +95,7 @@ class ExportViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False)
     def export(self, request):
         exceptions = {
+            'attributeset': 'AttributeSet',
             'clientattribute': 'ClientAttribute',
             'serverattribute': 'ServerAttribute',
             'clientproperty': 'ClientProperty',
@@ -149,7 +150,7 @@ class MigasViewSet(viewsets.ViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class AttributeSetViewSet(viewsets.ModelViewSet, MigasViewSet):
+class AttributeSetViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = AttributeSet.objects.all()
     serializer_class = AttributeSetSerializer
     filterset_class = AttributeSetFilter
