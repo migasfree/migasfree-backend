@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from django.contrib.auth.models import Group
 from import_export import resources, fields, widgets
 
 from .models import (
@@ -119,3 +120,8 @@ class UserProfileResource(resources.ModelResource):
     class Meta:
         model = UserProfile
         exclude = ('user_ptr', 'password')
+
+
+class GroupResource(resources.ModelResource):
+    class Meta:
+        model = Group
