@@ -22,7 +22,7 @@ from import_export import resources, fields, widgets
 from .models import (
     Attribute, AttributeSet, ClientAttribute, ServerAttribute,
     Property, ClientProperty, ServerProperty,
-    Project, Platform, UserProfile,
+    Project, Platform, UserProfile, Domain, Scope,
 )
 
 
@@ -125,3 +125,13 @@ class UserProfileResource(resources.ModelResource):
 class GroupResource(resources.ModelResource):
     class Meta:
         model = Group
+
+
+class DomainResource(resources.ModelResource):
+    class Meta:
+        model = Domain
+
+
+class ScopeResource(resources.ModelResource):
+    class Meta:
+        model = Scope
