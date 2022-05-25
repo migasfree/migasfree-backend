@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2019-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2019-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2019-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2019-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 from import_export import resources
 
 from .models import (
-    Computer, User,
+    Computer, User, FaultDefinition,
     Error, Fault, Migration, StatusLog, Synchronization,
 )
 
@@ -49,6 +49,11 @@ class UserResource(resources.ModelResource):
 class ErrorResource(resources.ModelResource):
     class Meta:
         model = Error
+
+
+class FaultDefinitionResource(resources.ModelResource):
+    class Meta:
+        model = FaultDefinition
 
 
 class FaultResource(resources.ModelResource):
