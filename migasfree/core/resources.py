@@ -19,7 +19,7 @@
 from import_export import resources, fields, widgets
 
 from .models import (
-    Attribute, ClientAttribute, ServerAttribute,
+    Attribute, AttributeSet, ClientAttribute, ServerAttribute,
     Property, ClientProperty, ServerProperty,
     Project, Platform,
 )
@@ -42,6 +42,29 @@ class AttributeResource(resources.ModelResource):
 
     def dehydrate_prefix(self, attribute):
         return attribute.property_att.prefix
+
+
+class AttributeSetResource(resources.ModelResource):
+    enabled = fields.Field(
+        attribute='enabled',
+        widget=widgets.BooleanWidget()
+    )
+    included_attributes = fields.Field(
+        attribute='included_attributes',
+        widget=widgets.ManyToManyWidget(Attribute)
+    )
+    excluded_attributes = fields.Field(
+        attribute='excluded_attributes',
+        widget=widgets.ManyToManyWidget(Attribute)
+    )
+
+    class Meta:
+        model = AttributeSet
+        export_order = (
+            'id', 'name', 'enabled', 'description',
+            'included_attributes', 'excluded_attributes',
+            'longitude', 'latitude'
+        )
 
 
 class ClientAttributeResource(AttributeResource):
