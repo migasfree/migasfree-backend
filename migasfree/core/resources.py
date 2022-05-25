@@ -107,6 +107,7 @@ class ProjectResource(resources.ModelResource):
     class Meta:
         model = Project
         fields = ('id', 'name', 'pms', 'auto_register_computers', 'platform__name')
+        export_order = ('id', 'name', 'pms', 'auto_register_computers', 'platform__name')
 
 
 class PlatformResource(resources.ModelResource):
