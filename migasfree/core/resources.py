@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2018-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ from import_export import resources, fields, widgets
 from .models import (
     Attribute, ClientAttribute, ServerAttribute,
     Property, ClientProperty, ServerProperty,
-    Project,
+    Project, Platform,
 )
 
 
@@ -84,3 +84,8 @@ class ProjectResource(resources.ModelResource):
     class Meta:
         model = Project
         fields = ('id', 'name', 'pms', 'auto_register_computers', 'platform__name')
+
+
+class PlatformResource(resources.ModelResource):
+    class Meta:
+        model = Platform
