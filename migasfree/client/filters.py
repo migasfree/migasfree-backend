@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -144,7 +144,7 @@ class ErrorFilter(filters.FilterSet):
     class Meta:
         model = Error
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'project__id': ['exact'],
             'project__platform__id': ['exact'],
             'checked': ['exact'],
@@ -159,7 +159,7 @@ class FaultDefinitionFilter(filters.FilterSet):
     class Meta:
         model = FaultDefinition
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['icontains'],
             'enabled': ['exact'],
             'language': ['exact'],
@@ -198,7 +198,7 @@ class FaultFilter(filters.FilterSet):
     class Meta:
         model = Fault
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'project__id': ['exact'],
             'project__platform__id': ['exact'],
             'checked': ['exact'],
@@ -216,7 +216,7 @@ class MigrationFilter(filters.FilterSet):
     class Meta:
         model = Migration
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'project__id': ['exact'],
             'project__platform__id': ['exact'],
             'computer__id': ['exact'],
@@ -231,7 +231,7 @@ class NotificationFilter(filters.FilterSet):
     class Meta:
         model = Notification
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'checked': ['exact'],
             'message': ['icontains'],
         }
@@ -241,7 +241,7 @@ class PackageHistoryFilter(filters.FilterSet):
     class Meta:
         model = PackageHistory
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'computer__id': ['exact'],
             'computer__name': ['exact', 'icontains'],
             'package__id': ['exact'],
@@ -259,7 +259,7 @@ class StatusLogFilter(filters.FilterSet):
     class Meta:
         model = StatusLog
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'computer__id': ['exact'],
             'computer__name': ['icontains'],
             'status': ['exact', 'in'],
@@ -276,7 +276,7 @@ class SynchronizationFilter(filters.FilterSet):
     class Meta:
         model = Synchronization
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'project__id': ['exact'],
             'project__platform__id': ['exact'],
             'computer__id': ['exact'],
@@ -292,7 +292,7 @@ class UserFilter(filters.FilterSet):
     class Meta:
         model = User
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'fullname': ['exact', 'icontains'],
         }
