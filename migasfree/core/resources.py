@@ -21,7 +21,7 @@ from import_export import resources, fields, widgets
 from .models import (
     Attribute, AttributeSet, ClientAttribute, ServerAttribute,
     Property, ClientProperty, ServerProperty,
-    Project, Platform,
+    Project, Platform, UserProfile,
 )
 
 
@@ -113,3 +113,9 @@ class ProjectResource(resources.ModelResource):
 class PlatformResource(resources.ModelResource):
     class Meta:
         model = Platform
+
+
+class UserProfileResource(resources.ModelResource):
+    class Meta:
+        model = UserProfile
+        exclude = ('user_ptr', 'password')
