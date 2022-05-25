@@ -50,7 +50,7 @@ from ..resources import (
     ClientAttributeResource, ServerAttributeResource,
     ClientPropertyResource, ServerPropertyResource,
     ProjectResource, PlatformResource, AttributeSetResource,
-    UserProfileResource,
+    UserProfileResource, GroupResource,
 )
 from ..models import (
     Platform, Project, Store,
@@ -879,7 +879,7 @@ class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class GroupViewSet(viewsets.ModelViewSet):
+class GroupViewSet(viewsets.ModelViewSet, ExportViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     filterset_class = GroupFilter
