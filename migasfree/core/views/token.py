@@ -36,7 +36,7 @@ from rest_framework.response import Response
 
 from ...client.models import Computer
 from ...client.resources import (
-    ComputerResource, UserResource,
+    ComputerResource, UserResource, FaultDefinitionResource,
     ErrorResource, FaultResource, MigrationResource,
     StatusLogResource, SynchronizationResource,
 )
@@ -100,6 +100,7 @@ class ExportViewSet(viewsets.ViewSet):
             'serverattribute': 'ServerAttribute',
             'clientproperty': 'ClientProperty',
             'serverproperty': 'ServerProperty',
+            'faultdefinition': 'FaultDefinition',
             'statuslog': 'StatusLog',
         }
 
