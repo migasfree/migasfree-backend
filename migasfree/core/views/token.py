@@ -56,7 +56,7 @@ from ..resources import (
     ClientPropertyResource, ServerPropertyResource,
     ProjectResource, PlatformResource, AttributeSetResource,
     UserProfileResource, GroupResource, DomainResource, ScopeResource,
-    DeploymentResource,
+    DeploymentResource, ScheduleResource,
 )
 from ..models import (
     Platform, Project, Store,
@@ -487,7 +487,7 @@ class ScheduleDelayViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ScheduleViewSet(viewsets.ModelViewSet, MigasViewSet):
+class ScheduleViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
     filterset_class = ScheduleFilter
