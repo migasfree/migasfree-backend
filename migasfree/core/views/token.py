@@ -39,6 +39,7 @@ from ...client.resources import (
     ComputerResource, UserResource, FaultDefinitionResource,
     ErrorResource, FaultResource, MigrationResource,
     StatusLogResource, SynchronizationResource, NotificationResource,
+    PackageHistoryResource,
 )
 from ...client.serializers import ComputerInfoSerializer
 from ...device.models import Logical
@@ -102,6 +103,7 @@ class ExportViewSet(viewsets.ViewSet):
             'clientproperty': 'ClientProperty',
             'serverproperty': 'ServerProperty',
             'faultdefinition': 'FaultDefinition',
+            'packagehistory': 'PackageHistory',
             'statuslog': 'StatusLog',
             'userprofile': 'UserProfile',
         }
