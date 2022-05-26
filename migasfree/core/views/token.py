@@ -44,6 +44,10 @@ from ...client.resources import (
 from ...client.serializers import ComputerInfoSerializer
 from ...device.models import Logical
 from ...device.serializers import LogicalSerializer
+from ...device.resources import (
+    CapabilityResource, ConnectionResource, DeviceResource,
+    ManufacturerResource, ModelResource, LogicalResource, TypeResource,
+)
 from ...utils import save_tempfile
 
 from .. import tasks
