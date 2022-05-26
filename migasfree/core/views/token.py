@@ -56,6 +56,7 @@ from ..resources import (
     ClientPropertyResource, ServerPropertyResource,
     ProjectResource, PlatformResource, AttributeSetResource,
     UserProfileResource, GroupResource, DomainResource, ScopeResource,
+    DeploymentResource,
 )
 from ..models import (
     Platform, Project, Store,
@@ -718,7 +719,7 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class DeploymentViewSet(viewsets.ModelViewSet, MigasViewSet):
+class DeploymentViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Deployment.objects.all()
     serializer_class = DeploymentSerializer
     filterset_class = DeploymentFilter
