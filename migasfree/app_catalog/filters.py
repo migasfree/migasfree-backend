@@ -28,7 +28,7 @@ class CategoryFilter(django_filters.FilterSet):
     class Meta:
         model = Category
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
         }
 
@@ -37,7 +37,7 @@ class ApplicationFilter(django_filters.FilterSet):
     class Meta:
         model = Application
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'level': ['exact'],
             'category__id': ['exact'],
@@ -65,7 +65,7 @@ class PolicyFilter(django_filters.FilterSet):
     class Meta:
         model = Policy
         fields = {
-            'id': ['exact'],
+            'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'enabled': ['exact'],
             'exclusive': ['exact'],
