@@ -23,7 +23,7 @@ from .models import (
     Attribute, AttributeSet, ClientAttribute, ServerAttribute,
     Property, ClientProperty, ServerProperty,
     Project, Platform, UserProfile, Domain, Scope,
-    Deployment, Schedule, Store,
+    Deployment, Schedule, Store, Package,
 )
 
 
@@ -151,3 +151,8 @@ class ScheduleResource(resources.ModelResource):
 class StoreResource(resources.ModelResource):
     class Meta:
         model = Store
+
+
+class PackageResource(resources.ModelResource):
+    class Meta:
+        model = Package
