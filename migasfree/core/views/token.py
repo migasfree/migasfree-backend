@@ -34,6 +34,9 @@ from rest_framework import (
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
+from ...app_catalog.resources import (
+    ApplicationResource, CategoryResource, PolicyResource,
+)
 from ...client.models import Computer
 from ...client.resources import (
     ComputerResource, UserResource, FaultDefinitionResource,
