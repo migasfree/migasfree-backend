@@ -21,7 +21,7 @@ from import_export import resources
 from .models import (
     Computer, User, FaultDefinition,
     Error, Fault, Migration, StatusLog, Synchronization,
-    Notification,
+    Notification, PackageHistory,
 )
 
 
@@ -80,3 +80,18 @@ class SynchronizationResource(resources.ModelResource):
 class NotificationResource(resources.ModelResource):
     class Meta:
         model = Notification
+
+
+class PackageHistoryResource(resources.ModelResource):
+    class Meta:
+        model = PackageHistory
+        fields = (
+            'id', 'computer', 'computer__name',
+            'package', 'package__fullname',
+            'install_date', 'uninstall_date'
+        )
+        export_order = (
+            'id', 'computer', 'computer__name',
+            'package', 'package__fullname',
+            'install_date', 'uninstall_date'
+        )
