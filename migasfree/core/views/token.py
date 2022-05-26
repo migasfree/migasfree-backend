@@ -56,7 +56,7 @@ from ..resources import (
     ClientPropertyResource, ServerPropertyResource,
     ProjectResource, PlatformResource, AttributeSetResource,
     UserProfileResource, GroupResource, DomainResource, ScopeResource,
-    DeploymentResource, ScheduleResource, StoreResource,
+    DeploymentResource, ScheduleResource, StoreResource, PackageResource,
 )
 from ..models import (
     Platform, Project, Store,
@@ -516,7 +516,8 @@ class PackageViewSet(
         mixins.DestroyModelMixin,
         mixins.ListModelMixin,
         viewsets.GenericViewSet,
-        MigasViewSet
+        MigasViewSet,
+        ExportViewSet
 ):
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
