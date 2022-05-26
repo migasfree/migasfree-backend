@@ -23,6 +23,7 @@ from .models import (
     Attribute, AttributeSet, ClientAttribute, ServerAttribute,
     Property, ClientProperty, ServerProperty,
     Project, Platform, UserProfile, Domain, Scope,
+    Deployment,
 )
 
 
@@ -135,3 +136,8 @@ class DomainResource(resources.ModelResource):
 class ScopeResource(resources.ModelResource):
     class Meta:
         model = Scope
+
+
+class DeploymentResource(resources.ModelResource):
+    class Meta:
+        model = Deployment
