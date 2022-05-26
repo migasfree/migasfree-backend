@@ -597,7 +597,7 @@ class MigrationViewSet(
 class NotificationViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-    viewsets.GenericViewSet, MigasViewSet
+    viewsets.GenericViewSet, MigasViewSet, ExportViewSet
 ):
     queryset = models.Notification.objects.all()
     serializer_class = serializers.NotificationSerializer
