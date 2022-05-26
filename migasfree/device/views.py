@@ -24,7 +24,7 @@ from rest_framework.response import Response
 
 from ..client.models import Computer
 from ..core.models import Attribute
-from ..core.views import MigasViewSet
+from ..core.views import MigasViewSet, ExportViewSet
 
 from .models import (
     Connection, Device, Driver,
@@ -41,7 +41,7 @@ from . import serializers
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ConnectionViewSet(viewsets.ModelViewSet, MigasViewSet):
+class ConnectionViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Connection.objects.all()
     serializer_class = serializers.ConnectionSerializer
     filterset_class = ConnectionFilter
@@ -61,7 +61,7 @@ class ConnectionViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class DeviceViewSet(viewsets.ModelViewSet, MigasViewSet):
+class DeviceViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Device.objects.all()
     serializer_class = serializers.DeviceSerializer
     filterset_class = DeviceFilter
@@ -149,7 +149,7 @@ class DriverViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class CapabilityViewSet(viewsets.ModelViewSet, MigasViewSet):
+class CapabilityViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Capability.objects.all()
     serializer_class = serializers.CapabilitySerializer
     filterset_class = CapabilityFilter
@@ -159,7 +159,7 @@ class CapabilityViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class LogicalViewSet(viewsets.ModelViewSet, MigasViewSet):
+class LogicalViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Logical.objects.all()
     serializer_class = serializers.LogicalSerializer
     filterset_class = LogicalFilter
@@ -222,7 +222,7 @@ class LogicalViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ManufacturerViewSet(viewsets.ModelViewSet, MigasViewSet):
+class ManufacturerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Manufacturer.objects.all()
     serializer_class = serializers.ManufacturerSerializer
     filterset_class = ManufacturerFilter
@@ -232,7 +232,7 @@ class ManufacturerViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ModelViewSet(viewsets.ModelViewSet, MigasViewSet):
+class ModelViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Model.objects.all()
     serializer_class = serializers.ModelSerializer
     filterset_class = ModelFilter
@@ -259,7 +259,7 @@ class ModelViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class TypeViewSet(viewsets.ModelViewSet, MigasViewSet):
+class TypeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Type.objects.all()
     serializer_class = serializers.TypeSerializer
     filterset_class = TypeFilter
