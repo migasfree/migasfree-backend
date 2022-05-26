@@ -56,7 +56,7 @@ from ..resources import (
     ClientPropertyResource, ServerPropertyResource,
     ProjectResource, PlatformResource, AttributeSetResource,
     UserProfileResource, GroupResource, DomainResource, ScopeResource,
-    DeploymentResource, ScheduleResource,
+    DeploymentResource, ScheduleResource, StoreResource,
 )
 from ..models import (
     Platform, Project, Store,
@@ -231,7 +231,7 @@ class ProjectViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class StoreViewSet(viewsets.ModelViewSet, MigasViewSet):
+class StoreViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
     filterset_class = StoreFilter
