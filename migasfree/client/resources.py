@@ -21,6 +21,7 @@ from import_export import resources
 from .models import (
     Computer, User, FaultDefinition,
     Error, Fault, Migration, StatusLog, Synchronization,
+    Notification,
 )
 
 
@@ -74,3 +75,8 @@ class StatusLogResource(resources.ModelResource):
 class SynchronizationResource(resources.ModelResource):
     class Meta:
         model = Synchronization
+
+
+class NotificationResource(resources.ModelResource):
+    class Meta:
+        model = Notification
