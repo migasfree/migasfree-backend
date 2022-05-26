@@ -57,6 +57,7 @@ from ..resources import (
     ProjectResource, PlatformResource, AttributeSetResource,
     UserProfileResource, GroupResource, DomainResource, ScopeResource,
     DeploymentResource, ScheduleResource, StoreResource, PackageResource,
+    PackageSetResource,
 )
 from ..models import (
     Platform, Project, Store,
@@ -109,6 +110,7 @@ class ExportViewSet(viewsets.ViewSet):
             'serverproperty': 'ServerProperty',
             'faultdefinition': 'FaultDefinition',
             'packagehistory': 'PackageHistory',
+            'packageset': 'PackageSet',
             'statuslog': 'StatusLog',
             'userprofile': 'UserProfile',
         }
@@ -620,7 +622,7 @@ class PackageViewSet(
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet):
+class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = PackageSet.objects.all()
     serializer_class = PackageSetSerializer
     filterset_class = PackageSetFilter
