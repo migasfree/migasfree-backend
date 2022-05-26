@@ -38,7 +38,7 @@ from ...client.models import Computer
 from ...client.resources import (
     ComputerResource, UserResource, FaultDefinitionResource,
     ErrorResource, FaultResource, MigrationResource,
-    StatusLogResource, SynchronizationResource,
+    StatusLogResource, SynchronizationResource, NotificationResource,
 )
 from ...client.serializers import ComputerInfoSerializer
 from ...device.models import Logical
