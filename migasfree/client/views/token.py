@@ -616,7 +616,7 @@ class NotificationViewSet(
 @permission_classes((permissions.DjangoModelPermissions,))
 class PackageHistoryViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet, MigasViewSet
+    viewsets.GenericViewSet, MigasViewSet, ExportViewSet
 ):
     queryset = models.PackageHistory.objects.all()
     serializer_class = serializers.PackageHistorySerializer
