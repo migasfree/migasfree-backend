@@ -16,12 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import csv
 import json
 
 from datetime import datetime, timedelta
 
 from django.conf import settings
-from django.http import QueryDict
+from django.http import QueryDict, HttpResponse
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
@@ -703,6 +704,9 @@ class UserViewSet(
 class MessageViewSet(viewsets.ViewSet):
     def get_queryset(self):
         # TODO from django.core.paginator import Paginator
+        id_filter = self.request.query_params.get('id__in', None)
+        if id_filter:
+            id_filter = list(map(int, id_filter.split(',')))
         project_filter = self.request.query_params.get('project__id', None)
         created_at_lt_filter = self.request.query_params.get('created_at__lt', None)
         created_at_gte_filter = self.request.query_params.get('created_at__gte', None)
@@ -727,6 +731,9 @@ class MessageViewSet(viewsets.ViewSet):
                 continue
 
             if computers and int(item['computer_id']) not in computers:
+                continue
+
+            if id_filter and int(key) not in id_filter:
                 continue
 
             if project_filter and int(item['project_id']) != project_filter:
@@ -780,3 +787,34 @@ class MessageViewSet(viewsets.ViewSet):
         remove_computer_messages(int(pk))
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['get'], detail=False)
+    def export(self, request, *args, **kwargs):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="messages.csv"'
+
+        writer = csv.DictWriter(
+            response,
+            fieldnames=[
+                'created_at',
+                'computer__id', 'computer____str__', 'computer__status', 'computer__summary',
+                'project__id', 'project__name', 'user__id', 'user__name', 'message',
+            ]
+        )
+        writer.writeheader()
+
+        for item in self.get_queryset():
+            writer.writerow({
+                'created_at': item['created_at'],
+                'computer__id': item['computer']['id'],
+                'computer____str__': item['computer']['__str__'],
+                'computer__status': item['computer']['status'],
+                'computer__summary': item['computer']['summary'],
+                'project__id': item['project']['id'],
+                'project__name': item['project']['name'],
+                'user__id': item['user']['id'],
+                'user__name': item['user']['name'],
+                'message': item['message'],
+            })
+
+        return response
