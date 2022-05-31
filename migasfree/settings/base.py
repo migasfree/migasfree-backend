@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import sys
 
 import django
 import django.conf.global_settings as DEFAULT_SETTINGS
@@ -25,8 +26,8 @@ from corsheaders.defaults import default_headers
 
 from .migasfree import BASE_DIR, MIGASFREE_TMP_DIR
 
-if django.VERSION < (3, 1, 0, 'final'):
-    print('Migasfree requires Django 3.1.0 at least. Please, update it.')
+if django.VERSION < (3, 2, 0, 'final'):
+    print('Migasfree requires Django 3.2.0 at least. Please, update it.')
     exit(1)
 
 ADMINS = (
@@ -60,6 +61,8 @@ USE_I18N = True
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale
 USE_L10N = False
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
@@ -99,6 +102,9 @@ ROOT_URLCONF = 'migasfree.urls'
 ASGI_APPLICATION = 'migasfree.asgi.application'
 WSGI_APPLICATION = 'migasfree.wsgi.application'
 
+# Django 3.2: The app label is not a valid Python identifier (hyphens in name)
+sys.modules['django_partial_content'] = __import__('django-partial-content')
+
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -108,7 +114,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django-partial-content',
+    'django_partial_content',
     'graphene_django',
     'rest_framework',
     'rest_framework.authtoken',
