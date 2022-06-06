@@ -25,12 +25,11 @@ import hashlib
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse, StreamingHttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, StreamingHttpResponse
 from mimetypes import guess_type
 from rest_framework import status, views, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
-from threading import Thread
 from urllib.error import URLError, HTTPError
 from urllib.request import urlopen, urlretrieve
 from wsgiref.util import FileWrapper
@@ -141,6 +140,22 @@ class RangeFileWrapper:
 
 @permission_classes((permissions.AllowAny,))
 class GetSourceFileView(views.APIView):
+    def read_remote_chunks(local_file, remote, chunk_size=8192):
+        _, tmp = tempfile.mkstemp()
+        with open(tmp, 'wb') as tmp_file:
+            while True:
+                data = remote.read(chunk_size)
+                if not data:
+                    break
+
+                yield data
+                tmp_file.write(data)
+                tmp_file.flush()
+
+            os.fsync(tmp_file.fileno())
+
+        shutil.move(tmp, local_file)
+
     @action(methods=['head'], detail=False)
     def exists(self, request, *args, **kwargs):
         _path = request.get_full_path()
@@ -205,13 +220,11 @@ class GetSourceFileView(views.APIView):
             logger.debug('get url %s', url)
 
             try:
-                # Download remote file in background
-                Thread(
-                    target=external_downloads,
-                    args=(url, _file_local)
-                ).start()
+                remote_file = urlopen(url, context=ssl.SSLContext(ssl.PROTOCOL_SSLv23))
+                response = StreamingHttpResponse(read_remote_chunks(_file_local, remote_file))
+                response['Content-Type'] = 'application/octet-stream'
 
-                return HttpResponseRedirect(url)
+                return response
             except HTTPError as e:
                 return HttpResponse(
                     f'HTTP Error: {e.code} {url}',
