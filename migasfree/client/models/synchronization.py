@@ -210,9 +210,6 @@ class Synchronization(Event):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         super().save(force_insert, force_update, using, update_fields)
 
-        self.computer.sync_end_date = self.created_at
-        self.computer.save()
-
         deployments = Deployment.available_deployments(
             self.computer, self.computer.get_all_attributes()
         ).values_list('id', flat=True)
@@ -235,6 +232,10 @@ class Synchronization(Event):
                 self.computer.id,
             )
 
+    def save_computer_sync_end_date(self):
+        self.computer.sync_end_date = self.created_at
+        self.computer.save(force_update=True, update_fields=['sync_end_date'])
+
     class Meta:
         app_label = 'client'
         verbose_name = _('Synchronization')
@@ -248,6 +249,9 @@ class Synchronization(Event):
 def post_save_sync(sender, instance, created, **kwargs):
     if created:
         instance.add_to_redis()
+
+    if instance:
+        instance.save_computer_sync_end_date()
 
 
 @receiver(pre_delete, sender=Synchronization)
