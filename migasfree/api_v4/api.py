@@ -372,10 +372,11 @@ def upload_computer_info(request, name, uuid, computer, data):
             ip_address,
             uuid
         )
-        computer.update_identification(
-            name, fqdn, Project.objects.get(name=project_name), uuid,
-            ip_address, forwarded_ip_address
-        )
+        if computer:
+            computer.update_identification(
+                name, fqdn, Project.objects.get(name=project_name), uuid,
+                ip_address, forwarded_ip_address
+            )
 
         project = Project.objects.get(name=project_name)
 
@@ -614,10 +615,11 @@ def register_computer(request, name, uuid, computer, data):
             data.get('ip', ''),
             uuid
         )
-        computer.update_identification(
-            name, fqdn, Project.objects.get(name=project_name),
-            uuid, data.get('ip', ''), get_client_ip(request)
-        )
+        if computer:
+            computer.update_identification(
+                name, fqdn, Project.objects.get(name=project_name),
+                uuid, data.get('ip', ''), get_client_ip(request)
+            )
 
         if notify_platform:
             platform = Platform.objects.get(name=platform_name)
