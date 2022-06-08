@@ -514,7 +514,7 @@ class Computer(models.Model, MigasLink):
 
     def update_last_hardware_capture(self):
         self.last_hardware_capture = datetime.now()
-        self.save()
+        self.save(update_fields=['last_hardware_capture'])
 
     def update_hardware_resume(self):
         from ...hardware.models import Node
@@ -532,7 +532,12 @@ class Computer(models.Model, MigasLink):
         self.disks, self.storage = Node.get_storage(self.id)
         self.mac_address = Node.get_mac_address(self.id)
 
-        self.save()
+        self.save(
+            update_fields=[
+                'product', 'machine', 'cpu', 'ram',
+                'disks', 'storage', 'mac_address'
+            ]
+        )
 
     def update_logical_devices(self, devices):
         """
