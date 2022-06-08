@@ -604,7 +604,7 @@ class MigasLink:
         if self._meta.model_name == 'computer':
             lnk['status'] = self.status
             lnk['summary'] = '{}, {}, {}, {}'.format(
-                gettext(self.status),
+                self.status,
                 self.project,
                 self.ip_address,
                 self.sync_user
