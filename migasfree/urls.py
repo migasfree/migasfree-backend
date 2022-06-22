@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,8 @@ from django.conf import settings
 from django.contrib import admin
 from django.core import management
 from django.db import connection
-from django.urls import path, re_path
+from django.urls import path, re_path, reverse_lazy
+from django.views.generic.base import RedirectView
 from graphene_django.views import GraphQLView
 from rest_framework import permissions, routers
 from rest_framework.authtoken import views
@@ -110,6 +111,7 @@ urlpatterns = [
     path('graphql', GraphQLView.as_view(graphiql=True)),
 
     path('', include('migasfree.api_v4.urls')),
+    path('', RedirectView.as_view(url=reverse_lazy('admin:index'))),
 ]
 
 if settings.DEBUG:
