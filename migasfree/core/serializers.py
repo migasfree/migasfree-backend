@@ -45,7 +45,7 @@ from ..utils import to_list
 class PropertyInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Property
-        fields = ('id', 'prefix')
+        fields = ('id', 'prefix', 'sort')
 
 
 class PropertyWriteSerializer(serializers.ModelSerializer):
