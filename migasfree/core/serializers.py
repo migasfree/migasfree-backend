@@ -755,7 +755,7 @@ class DomainWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Domain
         fields = (
-            'id', 'name',
+            'id', 'name', 'comment',
             'included_attributes', 'excluded_attributes',
             'tags', 'domain_admins'
         )
