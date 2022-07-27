@@ -65,6 +65,7 @@ class DriverFilter(filters.FilterSet):
         model = Driver
         fields = {
             'id': ['exact', 'in'],
+            'name': ['exact', 'icontains'],
             'project__id': ['exact'],
             'project__name': ['exact', 'icontains'],
             'model__id': ['exact'],
