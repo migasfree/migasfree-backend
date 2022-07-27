@@ -137,6 +137,7 @@ class DriverViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = Driver.objects.all()
     serializer_class = serializers.DriverSerializer
     filterset_class = DriverFilter
+    search_fields = ['name', 'model__name']
     ordering_fields = '__all__'
     ordering = ('model', 'project', 'capability')
 
