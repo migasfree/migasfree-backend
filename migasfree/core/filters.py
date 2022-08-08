@@ -119,9 +119,9 @@ class PackageSetFilter(filters.FilterSet):
             'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'project__id': ['exact'],
-            'project__name': ['icontains'],
+            'project__name': ['exact', 'icontains'],
             'store__id': ['exact'],
-            'store__name': ['icontains'],
+            'store__name': ['exact', 'icontains'],
             'packages__id': ['exact'],
         }
 
