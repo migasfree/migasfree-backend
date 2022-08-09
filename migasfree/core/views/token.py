@@ -689,11 +689,6 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         return new_pkgs
 
     def create(self, request, *args, **kwargs):
-        if isinstance(request.data, dict):
-            query_dict = QueryDict('', mutable=True)
-            query_dict.update(request.data)
-            request.data = query_dict
-
         files = request.data.getlist('files')
         if files:
             project_id = request.data.get('project', 0)
@@ -715,11 +710,6 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         obj = self.get_object()
-
-        if isinstance(request.data, dict):
-            query_dict = QueryDict('', mutable=True)
-            query_dict.update(request.data)
-            request.data = query_dict
 
         files = request.data.getlist('files')
         if files:
