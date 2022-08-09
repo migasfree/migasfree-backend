@@ -23,7 +23,7 @@ from django.contrib.auth.models import Group, Permission
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db.models import Prefetch
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
 from django_redis import get_redis_connection
@@ -689,6 +689,11 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
         return new_pkgs
 
     def create(self, request, *args, **kwargs):
+        if isinstance(request.data, dict):
+            query_dict = QueryDict('', mutable=True)
+            query_dict.update(request.data)
+            request.data = query_dict
+
         files = request.data.getlist('files')
         if files:
             project_id = request.data.get('project', 0)
@@ -710,6 +715,11 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         obj = self.get_object()
+
+        if isinstance(request.data, dict):
+            query_dict = QueryDict('', mutable=True)
+            query_dict.update(request.data)
+            request.data = query_dict
 
         files = request.data.getlist('files')
         if files:
