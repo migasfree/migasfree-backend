@@ -101,9 +101,6 @@ from ..filters import (
     ScopeFilter, ScheduleFilter, PackageSetFilter, ClientPropertyFilter,
 )
 
-import logging
-logger = logging.getLogger('migasfree')
-
 
 class ExportViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False)
@@ -714,15 +711,7 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     def partial_update(self, request, *args, **kwargs):
         obj = self.get_object()
 
-        if isinstance(request.data, QueryDict):
-            # data = dict(request.data.lists())
-            files = request.data.getlist('files')
-        else:
-            # data = request.data
-            logger.info('request.data', request.data, dir(request.data))
-            print('request.data', request.data, dir(request.data))
-            files = request.data.files
-
+        files = request.data.getlist('files')
         if files:
             packages = request.data.getlist('packages', [])
             packages = list(filter(None, packages))
