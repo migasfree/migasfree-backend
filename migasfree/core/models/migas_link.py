@@ -328,7 +328,7 @@ class MigasLink:
             'attributeset', 'faultdefinition', 'platform'
         ]:
             rel_objects = self.related_objects('computer', user)
-            if rel_objects.exists():
+            if rel_objects and rel_objects.exists():
                 if 'computer' in settings.MIGASFREE_EXTERNAL_ACTIONS:
                     element = settings.MIGASFREE_EXTERNAL_ACTIONS['computer']
                     for action in element:
