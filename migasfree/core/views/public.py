@@ -96,6 +96,7 @@ class ServerInfoView(views.APIView):
             'author': __author__,
             'contact': __contact__,
             'homepage': __homepage__,
+            'organization': settings.MIGASFREE_ORGANIZATION,
         }
 
         return Response(info)
