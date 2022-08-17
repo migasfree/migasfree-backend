@@ -85,7 +85,7 @@ class ProgrammingLanguagesView(views.APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ServerInfoView(views.APIView):
-    def post(self, request):
+    def get(self, request):
         """
         Returns server info
         """
