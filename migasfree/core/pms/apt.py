@@ -56,11 +56,12 @@ do
   mkdir -p "%(path)s/%(components)s/binary-$_ARCH/"
   cd %(path)s/../..
 
-  ionice -c 3 dpkg-scanpackages --arch $_ARCH dists/$_NAME/%(components)s> dists/$_NAME/%(components)s/binary-$_ARCH/Packages 2> /tmp/$_NAME
-  if [ $? != 0 ]
+  ionice -c 3 apt-ftparchive --arch $_ARCH packages dists/$_NAME/%(components)s > dists/$_NAME/%(components)s/binary-$_ARCH/Packages 2> /tmp/$_NAME
+  if [ $? -ne 0 ]
   then
     (>&2 cat /tmp/$_NAME)
   fi
+  sed -i "s/Filename: .*\//Filename: dists\/$_NAME\/%(components)s\//" dists/$_NAME/%(components)s/binary-$_ARCH/Packages
   gzip -9c dists/$_NAME/%(components)s/binary-$_ARCH/Packages > dists/$_NAME/%(components)s/binary-$_ARCH/Packages.gz
 done
 
