@@ -61,7 +61,8 @@ do
   then
     (>&2 cat /tmp/$_NAME)
   fi
-  sed -i "s/Filename: .*\//Filename: dists\/$_NAME\/%(components)s\//" dists/$_NAME/%(components)s/binary-$_ARCH/Packages
+  sed -i "s/Filename: .*\/%(components)s\//Filename: dists\/$_NAME\/%(components)s\//" dists/$_NAME/%(components)s/binary-$_ARCH/Packages
+  sed -i "s/Filename: .*\/%(store_trailing_path)s\/[^/]*\//Filename: dists\/$_NAME\/%(components)s\//" dists/$_NAME/%(components)s/binary-$_ARCH/Packages
   gzip -9c dists/$_NAME/%(components)s/binary-$_ARCH/Packages > dists/$_NAME/%(components)s/binary-$_ARCH/Packages.gz
 done
 
@@ -110,7 +111,8 @@ create_deploy
             'name': os.path.basename(path),
             'arch': arch,
             'keys_path': self.keys_path,
-            'components': self.components
+            'components': self.components,
+            'store_trailing_path': get_setting('MIGASFREE_STORE_TRAILING_PATH')
         }
 
         return execute(_cmd)
