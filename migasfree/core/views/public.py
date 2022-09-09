@@ -22,6 +22,7 @@ import ssl
 import time
 import shutil
 import hashlib
+import tempfile
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
