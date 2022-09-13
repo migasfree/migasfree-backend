@@ -21,7 +21,7 @@ from datetime import datetime
 from django.db import connection
 from django.core.exceptions import ObjectDoesNotExist
 from celery import shared_task
-from celery.exceptions import Ignore
+from celery.exceptions import Reject
 
 from ..core.models import Package
 from .models import Computer
@@ -32,7 +32,7 @@ def update_software_inventory(computer_id, inventory):
     try:
         computer = Computer.objects.get(pk=computer_id)
     except ObjectDoesNotExist:
-        raise Ignore()
+        raise Reject(reason='Computer does not exist')
 
     if inventory and isinstance(inventory, list):
         pkgs = []
