@@ -102,6 +102,10 @@ class ServerInfoView(views.APIView):
 
         return Response(info)
 
+    def post(self, request):
+        # compatibility with older clients
+        return self.get(request)
+
 
 class RangeFileWrapper:
     # from https://gist.github.com/dcwatson/cb5d8157a8fa5a4a046e
