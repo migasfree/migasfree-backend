@@ -22,7 +22,7 @@ import redis
 import requests
 
 from celery import Celery
-from celery.exceptions import Ignore
+from celery.exceptions import Reject
 
 from .pms import get_pms
 
@@ -86,7 +86,7 @@ def create_repository_metadata(deployment_id):
     )
 
     if req.status_code not in REQUESTS_OK_CODES:
-        raise Ignore()
+        raise Reject(reason='Invalid credentials. Review token.')
 
     deployment = req.json()
     project = deployment["project"]
@@ -183,7 +183,7 @@ def remove_repository_metadata(deployment_id, old_slug=''):
     )
 
     if req.status_code not in REQUESTS_OK_CODES:
-        raise Ignore()
+        raise Reject(reason='Invalid credentials. Review token.')
 
     deployment = req.json()
     project = deployment["project"]
