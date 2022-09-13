@@ -659,7 +659,7 @@ def get_key_packager(request, name, uuid, computer, data):
     return return_message(cmd, get_keys_to_packager())
 
 
-def get_package_data(self, _file, project):
+def get_package_data(_file, project):
     name, version, architecture = Package.normalized_name(_file.name)
     if not name:
         package_path = save_tempfile(_file)
