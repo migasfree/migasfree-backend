@@ -42,6 +42,25 @@ class SafePackagerConnectionMixin(SafeConnectionMixin):
 
 @permission_classes((permissions.AllowAny,))
 class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
+    def get_package_data(self, _file, project):
+        name, version, architecture = Package.normalized_name(_file.name)
+        if not name:
+            package_path = save_tempfile(_file)
+            response = tasks.package_metadata.apply_async(
+                kwargs={
+                    'pms_name': project.pms,
+                    'package': package_path
+                },
+                queue=f'pms-{project.pms}'
+            ).get()
+            os.remove(package_path)
+            if response['name']:
+                name = response['name']
+                version = response['version']
+                architecture = response['architecture']
+
+        return name, version, architecture
+
     def create(self, request):
         """
         claims = {
@@ -66,25 +85,12 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                 fullname=_file.name,
                 project=project
             )
+            name, version, architecture = self.get_package_data(_file, project)
             if package.exists():
                 package[0].update_store(store)
+                if name and version and architecture:
+                    package[0].update_package_data(name, version, architecture)
             else:
-                name, version, architecture = Package.normalized_name(_file.name)
-                if not name:
-                    package_path = save_tempfile(_file)
-                    response = tasks.package_metadata.apply_async(
-                        kwargs={
-                            'pms_name': project.pms,
-                            'package': package_path
-                        },
-                        queue=f'pms-{project.pms}'
-                    ).get()
-                    os.remove(package_path)
-                    if response['name']:
-                        name = response['name']
-                        version = response['version']
-                        architecture = response['architecture']
-
                 Package.objects.create(
                     fullname=_file.name,
                     name=name,
@@ -138,25 +144,12 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             )
 
         package = Package.objects.filter(fullname=_file, project=project).first()
+        name, version, architecture = self.get_package_data(_file, project)
         if package:
             package.update_store(store)
+            if name and version and architecture:
+                package.update_package_data(name, version, architecture)
         else:
-            name, version, architecture = Package.normalized_name(_file.name)
-            if not name:
-                package_path = save_tempfile(_file)
-                response = tasks.package_metadata.apply_async(
-                    kwargs={
-                        'pms_name': project.pms,
-                        'package': package_path
-                    },
-                    queue=f'pms-{project.pms}'
-                ).get()
-                os.remove(package_path)
-                if response['name']:
-                    name = response['name']
-                    version = response['version']
-                    architecture = response['architecture']
-
             package = Package.objects.create(
                 fullname=_file.name,
                 name=name,
