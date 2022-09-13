@@ -235,6 +235,12 @@ class Package(models.Model, MigasLink):
                     self.path(self.project.slug, self.store, self.name)
                 )
 
+    def update_package_data(self, name, version, architecture):
+        self.name = name
+        self.version = version
+        self.architecture = architecture
+        self.save()
+
     def clean(self):
         super().clean()
 
