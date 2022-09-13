@@ -659,6 +659,26 @@ def get_key_packager(request, name, uuid, computer, data):
     return return_message(cmd, get_keys_to_packager())
 
 
+def get_package_data(self, _file, project):
+    name, version, architecture = Package.normalized_name(_file.name)
+    if not name:
+        package_path = save_tempfile(_file)
+        response = package_metadata.apply_async(
+            kwargs={
+                'pms_name': project.pms,
+                'package': package_path
+            },
+            queue=f'pms-{project.pms}'
+        ).get()
+        os.remove(package_path)
+        if response['name']:
+            name = response['name']
+            version = response['version']
+            architecture = response['architecture']
+
+    return name, version, architecture
+
+
 def upload_server_package(request, name, uuid, computer, data):
     cmd = str(inspect.getframeinfo(inspect.currentframe()).function)
 
@@ -679,10 +699,12 @@ def upload_server_package(request, name, uuid, computer, data):
         fullname=_file.name,
         project=project
     )
+    name, version, architecture = get_package_data(_file, project)
     if package.exists():
         package[0].update_store(store)
+        if name and version and architecture:
+            package[0].update_package_data(name, version, architecture)
     else:
-        name, version, architecture = Package.normalized_name(_file.name)
         Package.objects.create(
             fullname=_file.name,
             name=name,
@@ -726,25 +748,12 @@ def upload_server_set(request, name, uuid, computer, data):
         )
 
     package = Package.objects.filter(fullname=_file, project=project).first()
+    name, version, architecture = get_package_data(_file, project)
     if package:
         package.update_store(store)
+        if name and version and architecture:
+            package.update_package_data(name, version, architecture)
     else:
-        name, version, architecture = Package.normalized_name(_file.name)
-        if not name:
-            package_path = save_tempfile(_file)
-            response = package_metadata.apply_async(
-                kwargs={
-                    'pms_name': project.pms,
-                    'package': package_path
-                },
-                queue=f'pms-{project.pms}'
-            ).get()
-            os.remove(package_path)
-            if response['name']:
-                name = response['name']
-                version = response['version']
-                architecture = response['architecture']
-
         package = Package.objects.create(
             fullname=_file.name,
             name=name,
