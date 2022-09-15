@@ -25,6 +25,7 @@ from django.db import IntegrityError
 from django.db.models import Prefetch
 from django.http import HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404
+from django.utils.text import slugify
 from django.utils.translation import gettext
 from django_redis import get_redis_connection
 from rest_framework import (
@@ -233,6 +234,18 @@ class ProjectViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
             return Project.objects.none()
 
         return Project.objects.scope(self.request.user.userprofile)
+
+    def create(self, request, *args, **kwargs):
+        data = dict(request.data)
+
+        slug = slugify(data['name'])
+        if Project.objects.filter(slug=slug).exists():
+            return Response(
+                {'detail': gettext('Project slug already exists')},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return super().create(request, *args, **kwargs)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
