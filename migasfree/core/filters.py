@@ -104,9 +104,11 @@ class PackageFilter(filters.FilterSet):
             'version': ['exact', 'icontains'],
             'architecture': ['exact', 'icontains'],
             'project__id': ['exact'],
+            'project__name': ['exact', 'icontains'],
             'deployment': ['isnull'],
             'deployment__id': ['exact'],
             'store': ['isnull'],
+            'store__name': ['exact', 'icontains'],
             'store__id': ['exact'],
             'packageset__id': ['exact'],
         }
