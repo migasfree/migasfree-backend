@@ -42,7 +42,10 @@ def sign(claims, priv_key):
     jws_token = jws.JWS(str(claims))
     jws_token.add_signature(
         priv_jwk,
-        header=json_encode({'alg': 'RS256', "kid": priv_jwk.thumbprint()})
+        header=json_encode({
+            'alg': 'RS256',
+            'kid': priv_jwk.thumbprint()
+        })
     )
 
     return jws_token.serialize()
@@ -72,19 +75,18 @@ def encrypt(claims, pub_key):
     )
 
     protected_header = {
-        "alg": "RSA-OAEP-256",
-        "enc": "A256CBC-HS512",
-        "typ": "JWE",
-        "kid": pub_jwk.thumbprint(),
+        'alg': 'RSA-OAEP-256',
+        'enc': 'A256CBC-HS512',
+        'typ': 'JWE',
+        'kid': pub_jwk.thumbprint(),
     }
     jwe_token = jwe.JWE(
         json.dumps(claims),
         recipient=pub_jwk,
         protected=protected_header
     )
-    jwt = jwe_token.serialize()
 
-    return jwt
+    return jwe_token.serialize()
 
 
 def decrypt(jwt, priv_key):
