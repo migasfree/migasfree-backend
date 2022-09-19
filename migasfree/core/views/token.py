@@ -880,6 +880,19 @@ class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(methods=['post'], detail=True, url_path='update-token')
+    def set_token(self, request, pk=None):
+        user = self.get_object()
+        token = user.update_token()
+
+        return Response(
+            {
+                'detail': gettext('Token updated!'),
+                'info': token
+            },
+            status=status.HTTP_200_OK
+        )
+
     @action(
         methods=['put'],
         detail=True,
