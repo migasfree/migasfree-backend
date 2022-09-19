@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-15 14:35+0200\n"
-"PO-Revision-Date: 2022-09-15 14:37+0200\n"
+"POT-Creation-Date: 2022-09-19 14:42+0200\n"
+"PO-Revision-Date: 2022-09-19 14:43+0200\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: \n"
 "Language: es\n"
@@ -1448,20 +1448,20 @@ msgstr "dominios"
 msgid "scope"
 msgstr "ámbito"
 
-#: migasfree/core/models/user_profile.py:231
+#: migasfree/core/models/user_profile.py:246
 msgid "User Profile"
 msgstr "Perfil de usuario"
 
-#: migasfree/core/models/user_profile.py:232
+#: migasfree/core/models/user_profile.py:247
 msgid "User Profiles"
 msgstr "Perfiles de usuarios"
 
-#: migasfree/core/serializers.py:943
+#: migasfree/core/serializers.py:947
 #, python-format
 msgid "Minimum length is %d characters"
 msgstr "La longitud mínima es %d caracteres"
 
-#: migasfree/core/serializers.py:948
+#: migasfree/core/serializers.py:952
 msgid "Password fields didn't match."
 msgstr "Los campos de contraseña no coinciden."
 
@@ -1509,7 +1509,11 @@ msgstr "El paquete %s está duplicado en el almacén %s"
 msgid "Operation received"
 msgstr "Operación recibida"
 
-#: migasfree/core/views/token.py:897
+#: migasfree/core/views/token.py:890
+msgid "Token updated!"
+msgstr "¡Token actualizado!"
+
+#: migasfree/core/views/token.py:910
 msgid "Password changed!"
 msgstr "¡Contraseña cambiada!"
 
