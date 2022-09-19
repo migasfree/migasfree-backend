@@ -232,6 +232,7 @@ def configure_default_users():
     configure_user("liberator", [reader, liberator])
     configure_user("checker", [reader, checker])
     configure_user("reader", [reader])
+    configure_user("pms", [packager, liberator])
     configure_user("migasfree-play")
 
     # default user permissions
