@@ -161,7 +161,6 @@ SELECT ARRAY(
     def get_domain_tags(self):
         tags = []
         if self.domain_preference:
-
             cursor = connection.cursor()
             cursor.execute(
                 f"""SELECT ARRAY(
@@ -192,10 +191,26 @@ SELECT ARRAY(
 
         return projects
 
+    def get_token(self):
+        if self.id and Token.objects.filter(user__id=self.id).exists():
+            return Token.objects.filter(user__id=self.id).first().key
+
+        return ''
+
     def check_scope(self, computer_id):
         computers = self.get_computers()
         if computers and int(computer_id) not in computers:
             raise PermissionDenied
+
+    def update_token(self):
+        if self.id:
+            if Token.objects.filter(user__id=self.id).exists():
+                Token.objects.get(user__id=self.id).delete()
+
+            token = Token.objects.create(user=self)
+            return token.key
+
+        return ''
 
     def update_scope(self, value):
         self.scope_preference = value if value > 0 else None
