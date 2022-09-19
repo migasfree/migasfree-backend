@@ -924,12 +924,16 @@ class UserProfileSerializer(UserDetailsSerializer):
     scope_preference = ScopeInfoSerializer(
         many=False, read_only=True, source='userprofile.scope_preference'
     )
+    token = serializers.SerializerMethodField()
+
+    def get_token(self, obj):
+        return obj.get_token()
 
     class Meta(UserDetailsSerializer.Meta):
         fields = UserDetailsSerializer.Meta.fields + (
             'domains', 'domain_preference', 'scope_preference',
             'groups', 'user_permissions', 'is_superuser', 'is_staff',
-            'is_active', 'last_login', 'date_joined', 'id',
+            'is_active', 'last_login', 'date_joined', 'id', 'token',
         )
 
 
