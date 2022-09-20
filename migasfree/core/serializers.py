@@ -927,7 +927,10 @@ class UserProfileSerializer(UserDetailsSerializer):
     token = serializers.SerializerMethodField()
 
     def get_token(self, obj):
-        return obj.get_token()
+        if isinstance(obj, UserProfileSerializer):
+            return obj.get_token()
+
+        return ''  # UserDetailsSerializer
 
     class Meta(UserDetailsSerializer.Meta):
         fields = UserDetailsSerializer.Meta.fields + (
