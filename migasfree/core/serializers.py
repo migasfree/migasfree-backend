@@ -927,10 +927,10 @@ class UserProfileSerializer(UserDetailsSerializer):
     token = serializers.SerializerMethodField()
 
     def get_token(self, obj):
-        if isinstance(obj, UserProfileSerializer):
+        try:
             return obj.get_token()
-
-        return ''  # UserDetailsSerializer
+        except AttributeError:
+            return ''  # rest-auth/user/
 
     class Meta(UserDetailsSerializer.Meta):
         fields = UserDetailsSerializer.Meta.fields + (
