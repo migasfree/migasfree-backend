@@ -602,9 +602,9 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
         for item in data.get('available_packages', []):
             if item.project.id != data['project'].id:
                 raise serializers.ValidationError(
-                    _('Package %s must belong to the project %s') % (
-                        item, data['project']
-                    )
+                    _('Package %(pkg)s must belong to the project %(project)s') % {
+                        'pkg': item, 'project': data['project']
+                    }
                 )
 
         self._validate_active_computers(data.get('included_attributes', []))
