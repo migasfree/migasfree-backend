@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-21 17:30+0200\n"
-"PO-Revision-Date: 2022-09-21 17:30+0200\n"
+"POT-Creation-Date: 2022-09-21 19:44+0200\n"
+"PO-Revision-Date: 2022-09-21 19:45+0200\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: \n"
 "Language: es\n"
@@ -530,8 +530,8 @@ msgstr "Grupos de políticas (excluidas)"
 
 #: migasfree/client/models/computer.py:735 migasfree/core/admin.py:256
 #: migasfree/core/admin.py:402 migasfree/device/admin.py:131
-#: migasfree/stats/views/computers.py:291 migasfree/stats/views/syncs.py:127
-#: migasfree/stats/views/syncs.py:175
+#: migasfree/stats/views/computers.py:291 migasfree/stats/views/syncs.py:128
+#: migasfree/stats/views/syncs.py:177
 msgid "Computers"
 msgstr "Ordenadores"
 
@@ -550,6 +550,8 @@ msgstr "Errores"
 
 #: migasfree/client/models/event.py:37
 #: migasfree/client/models/package_history.py:49
+#: migasfree/core/models/migas_link.py:416
+#: migasfree/core/models/migas_link.py:437
 #: migasfree/hardware/models/node.py:101
 msgid "computer"
 msgstr "ordenador"
@@ -1227,6 +1229,14 @@ msgstr "Dominio"
 msgid "Domains"
 msgstr "Dominios"
 
+#: migasfree/core/models/migas_link.py:416
+msgid "Installed Packages"
+msgstr "Paquetes instalados"
+
+#: migasfree/core/models/migas_link.py:437
+msgid "Installed package"
+msgstr "Paquete instalado"
+
 #: migasfree/core/models/package.py:92 migasfree/hardware/models/node.py:150
 msgid "version"
 msgstr "versión"
@@ -1815,12 +1825,12 @@ msgid "Provided"
 msgstr "Previstos"
 
 #: migasfree/stats/views/deployments.py:211
-#: migasfree/stats/views/deployments.py:346
+#: migasfree/stats/views/deployments.py:345
 msgid "Without schedule"
 msgstr "Sin calendario"
 
 #: migasfree/stats/views/deployments.py:232
-#: migasfree/stats/views/deployments.py:363
+#: migasfree/stats/views/deployments.py:362
 msgid "With schedule"
 msgstr "Con calendario"
 
@@ -1828,20 +1838,19 @@ msgstr "Con calendario"
 msgid "Enabled Deployments"
 msgstr "Despliegues habilitados"
 
-#: migasfree/stats/views/deployments.py:278
-#: migasfree/stats/views/deployments.py:281
+#: migasfree/stats/views/deployments.py:280
 msgid "Enabled"
 msgstr "Habilitado"
 
-#: migasfree/stats/views/deployments.py:298
+#: migasfree/stats/views/deployments.py:297
 msgid "Disabled"
 msgstr "Deshabilitado"
 
-#: migasfree/stats/views/deployments.py:324
+#: migasfree/stats/views/deployments.py:323
 msgid "Deployments / Enabled"
 msgstr "Despliegues / Habilitado"
 
-#: migasfree/stats/views/deployments.py:389
+#: migasfree/stats/views/deployments.py:388
 msgid "Deployments / Schedule"
 msgstr "Despliegues / Calendario"
 
@@ -1893,7 +1902,7 @@ msgstr "Registros de estado / Estado"
 msgid "Stores / Project"
 msgstr "Almacenes / Proyecto"
 
-#: migasfree/stats/views/syncs.py:228
+#: migasfree/stats/views/syncs.py:230
 msgid "Synchronizations / Project"
 msgstr "Sincronizaciones / Proyecto"
 
@@ -1944,12 +1953,6 @@ msgstr "Sincronizaciones / Proyecto"
 
 #~ msgid "Invalid tags"
 #~ msgstr "Etiquetas inválidas"
-
-#~ msgid "Installed Packages"
-#~ msgstr "Paquetes instalados"
-
-#~ msgid "Installed package"
-#~ msgstr "Paquete instalado"
 
 #~ msgid "Sending synchronization response..."
 #~ msgstr "Enviando respuesta de la sincronización..."
