@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import time
+import locale
 
 from datetime import timedelta, datetime
 from dateutil.relativedelta import relativedelta
@@ -138,6 +139,7 @@ class SyncStatsViewSet(EventViewSet):
             end string (Y-m-d)
             project_id int
         """
+        locale.setlocale(locale.LC_ALL, '')  # strftime not using locale settings (python3)
         now = time.localtime()
         fmt = '%Y-%m-%d'
         human_fmt = '%Y-%m-%d (%a)'
