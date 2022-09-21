@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-19 14:42+0200\n"
-"PO-Revision-Date: 2022-09-19 14:43+0200\n"
+"POT-Creation-Date: 2022-09-21 17:30+0200\n"
+"PO-Revision-Date: 2022-09-21 17:30+0200\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: \n"
 "Language: es\n"
@@ -293,7 +293,7 @@ msgstr "Hardware"
 msgid "Synchronization"
 msgstr "Sincronización"
 
-#: migasfree/client/admin.py:122 migasfree/client/models/computer.py:674
+#: migasfree/client/admin.py:122 migasfree/client/models/computer.py:682
 #: migasfree/core/models/attribute.py:271
 msgid "Tags"
 msgstr "Etiquetas"
@@ -314,7 +314,7 @@ msgstr "Inventario de software"
 msgid "Software History"
 msgstr "Histórico de software"
 
-#: migasfree/client/admin.py:183 migasfree/client/models/computer.py:573
+#: migasfree/client/admin.py:183 migasfree/client/models/computer.py:581
 msgid "Inflicted Logical Devices"
 msgstr "Dispositivos lógicos heredados"
 
@@ -461,74 +461,74 @@ msgstr "discos"
 msgid "MAC address"
 msgstr "dirección MAC"
 
-#: migasfree/client/models/computer.py:566
+#: migasfree/client/models/computer.py:574
 #: migasfree/device/models/logical.py:141
 msgid "Logical Devices"
 msgstr "Dispositivos lógicos"
 
-#: migasfree/client/models/computer.py:578
+#: migasfree/client/models/computer.py:586
 msgid "Assigned Logical Devices to CID"
 msgstr "Dispositivos lógicos asignados al CID"
 
-#: migasfree/client/models/computer.py:672
-#: migasfree/client/models/computer.py:726
+#: migasfree/client/models/computer.py:680
+#: migasfree/client/models/computer.py:734
 msgid "Computer"
 msgstr "Ordenador"
 
-#: migasfree/client/models/computer.py:673
+#: migasfree/client/models/computer.py:681
 msgid "Status"
 msgstr "Estado"
 
-#: migasfree/client/models/computer.py:675 migasfree/client/models/fault.py:166
+#: migasfree/client/models/computer.py:683 migasfree/client/models/fault.py:166
 msgid "Faults"
 msgstr "Fallas"
 
-#: migasfree/client/models/computer.py:678
+#: migasfree/client/models/computer.py:686
 #: migasfree/core/models/deployment.py:444
 msgid "Deployments"
 msgstr "Despliegues"
 
-#: migasfree/client/models/computer.py:681
+#: migasfree/client/models/computer.py:689
 msgid "Deployments (excluded)"
 msgstr "Despliegues (excluidos)"
 
-#: migasfree/client/models/computer.py:684
+#: migasfree/client/models/computer.py:692
 msgid "Sets"
 msgstr "Conjuntos"
 
-#: migasfree/client/models/computer.py:687
+#: migasfree/client/models/computer.py:695
 msgid "Sets (excluded)"
 msgstr "Conjuntos (excluidos)"
 
-#: migasfree/client/models/computer.py:690
+#: migasfree/client/models/computer.py:698
 msgid "Delays"
 msgstr "Demoras"
 
-#: migasfree/client/models/computer.py:693
+#: migasfree/client/models/computer.py:701
 msgid "Logical devices"
 msgstr "Dispositivos lógicos"
 
-#: migasfree/client/models/computer.py:696
+#: migasfree/client/models/computer.py:704
 msgid "Default logical device"
 msgstr "Dispositivo lógico por defecto"
 
-#: migasfree/client/models/computer.py:697
+#: migasfree/client/models/computer.py:705
 msgid "Policies (included)"
 msgstr "Políticas (incluidas)"
 
-#: migasfree/client/models/computer.py:700
+#: migasfree/client/models/computer.py:708
 msgid "Policies (excluded)"
 msgstr "Políticas (excluidas)"
 
-#: migasfree/client/models/computer.py:703
+#: migasfree/client/models/computer.py:711
 msgid "Policy Groups (included)"
 msgstr "Grupos de políticas (incluidas)"
 
-#: migasfree/client/models/computer.py:706
+#: migasfree/client/models/computer.py:714
 msgid "Policy Groups (excluded)"
 msgstr "Grupos de políticas (excluidas)"
 
-#: migasfree/client/models/computer.py:727 migasfree/core/admin.py:256
+#: migasfree/client/models/computer.py:735 migasfree/core/admin.py:256
 #: migasfree/core/admin.py:402 migasfree/device/admin.py:131
 #: migasfree/stats/views/computers.py:291 migasfree/stats/views/syncs.py:127
 #: migasfree/stats/views/syncs.py:175
@@ -716,7 +716,7 @@ msgstr "El PMS debe ser uno de {available_pms}"
 msgid "User [%s] registered by IP [%s]."
 msgstr "Usuario [%s] registrado desde la IP [%s]."
 
-#: migasfree/client/views/safe.py:102 migasfree/client/views/safe.py:293
+#: migasfree/client/views/safe.py:102
 #, python-format
 msgid "New Computer added id=[%s]: NAME=[%s] UUID=[%s]"
 msgstr "Ordenador añadido con id=[%s]: Nombre=[%s] UUID=[%s]"
@@ -747,6 +747,11 @@ msgstr "Obteniendo sincronización..."
 #: migasfree/client/views/safe.py:237
 msgid "Sending synchronization..."
 msgstr "Enviando sincronización..."
+
+#: migasfree/client/views/safe.py:293
+#, python-format
+msgid "New Computer added id=[%(id)s]: NAME=[%(name)s] UUID=[%(uuid)s]"
+msgstr "Ordenador añadido con id=[%(id)s]: Nombre=[%(name)s] UUID=[%(uuid)s]"
 
 #: migasfree/client/views/safe.py:324 migasfree/core/views/safe.py:198
 #: migasfree/hardware/views.py:128
@@ -983,7 +988,7 @@ msgstr "No es posible asignar un ordenador inactivo (%s) como atributo"
 msgid "Project is required"
 msgstr "El proyecto es obligatorio"
 
-#: migasfree/core/forms.py:216 migasfree/core/serializers.py:605
+#: migasfree/core/forms.py:216
 #, python-format
 msgid "Package %s must belong to the project %s"
 msgstr "El paquete %s debe pertenecer al proyecto %s"
@@ -1456,12 +1461,17 @@ msgstr "Perfil de usuario"
 msgid "User Profiles"
 msgstr "Perfiles de usuarios"
 
-#: migasfree/core/serializers.py:947
+#: migasfree/core/serializers.py:605
+#, python-format
+msgid "Package %(pkg)s must belong to the project %(project)s"
+msgstr "El paquete %(pkg)s debe pertenecer al proyecto %(project)s"
+
+#: migasfree/core/serializers.py:950
 #, python-format
 msgid "Minimum length is %d characters"
 msgstr "La longitud mínima es %d caracteres"
 
-#: migasfree/core/serializers.py:952
+#: migasfree/core/serializers.py:955
 msgid "Password fields didn't match."
 msgstr "Los campos de contraseña no coinciden."
 
@@ -1804,15 +1814,34 @@ msgstr "Este despliegue no tiene calendario"
 msgid "Provided"
 msgstr "Previstos"
 
+#: migasfree/stats/views/deployments.py:211
+#: migasfree/stats/views/deployments.py:346
+msgid "Without schedule"
+msgstr "Sin calendario"
+
+#: migasfree/stats/views/deployments.py:232
+#: migasfree/stats/views/deployments.py:363
+msgid "With schedule"
+msgstr "Con calendario"
+
 #: migasfree/stats/views/deployments.py:258
 msgid "Enabled Deployments"
 msgstr "Despliegues habilitados"
 
-#: migasfree/stats/views/deployments.py:323
+#: migasfree/stats/views/deployments.py:278
+#: migasfree/stats/views/deployments.py:281
+msgid "Enabled"
+msgstr "Habilitado"
+
+#: migasfree/stats/views/deployments.py:298
+msgid "Disabled"
+msgstr "Deshabilitado"
+
+#: migasfree/stats/views/deployments.py:324
 msgid "Deployments / Enabled"
 msgstr "Despliegues / Habilitado"
 
-#: migasfree/stats/views/deployments.py:388
+#: migasfree/stats/views/deployments.py:389
 msgid "Deployments / Schedule"
 msgstr "Despliegues / Calendario"
 
@@ -1921,18 +1950,6 @@ msgstr "Sincronizaciones / Proyecto"
 
 #~ msgid "Installed package"
 #~ msgstr "Paquete instalado"
-
-#~ msgid "Without schedule"
-#~ msgstr "Sin calendario"
-
-#~ msgid "With schedule"
-#~ msgstr "Con calendario"
-
-#~ msgid "Enabled"
-#~ msgstr "Habilitado"
-
-#~ msgid "Disabled"
-#~ msgstr "Deshabilitado"
 
 #~ msgid "Sending synchronization response..."
 #~ msgstr "Enviando respuesta de la sincronización..."
