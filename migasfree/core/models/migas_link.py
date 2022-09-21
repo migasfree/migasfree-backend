@@ -412,7 +412,9 @@ class MigasLink:
                             'uninstall_date': True  # isnull = True
                         },
                     },
-                    'text': f'{gettext("Installed Packages")} [{gettext("computer")}]',
+                    'text': '{} [{}]'.format(
+                        gettext("Installed Packages"), gettext("computer")
+                    ),
                     'count': installed_packages_count,
                     'actions': actions
                 })
@@ -431,7 +433,9 @@ class MigasLink:
                             'installed_package': self.id
                         },
                     },
-                    'text': f'{gettext("Installed package")} [{gettext("computer")}]',
+                    'text': '{} [{}]'.format(
+                        gettext("Installed package"), gettext("computer")
+                    ),
                     'count': computers_count,
                     'actions': actions
                 })
