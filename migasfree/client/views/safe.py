@@ -290,11 +290,11 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             )
 
             if settings.MIGASFREE_NOTIFY_NEW_COMPUTER:
-                msg = _("New Computer added id=[%s]: NAME=[%s] UUID=[%s]") % (
-                    serializer.data.get('id'),
-                    serializer.data.get('name'),
-                    serializer.data.get('uuid')
-                )
+                msg = _("New Computer added id=[%(id)s]: NAME=[%(name)s] UUID=[%(uuid)s]") % {
+                    'id': serializer.data.get('id'),
+                    'name': serializer.data.get('name'),
+                    'uuid': serializer.data.get('uuid')
+                }
                 models.Notification.objects.create(message=msg)
 
             return Response(
