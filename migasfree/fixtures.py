@@ -79,10 +79,10 @@ def add_perms(group, tables=None, all_perms=True):
         app, name = table.split('.')
         for pattern in perms:
             group.permissions.add(
-                Permission.objects.get(
+                Permission.objects.filter(
                     codename=pattern % name,
                     content_type__app_label=app
-                ).id
+                ).first().id
             )
 
 
@@ -282,7 +282,7 @@ def create_initial_data():
     perms = Permission.objects.filter(pk=1)
     if not perms.exists():
         for app in apps.get_app_configs():
-            create_permissions(app, None, 2)
+            create_permissions(app, verbosity=2)
 
     configure_default_users()
 
