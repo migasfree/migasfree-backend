@@ -73,6 +73,7 @@ def add_perms(group, tables=None, all_perms=True):
     if all_perms:
         perms.append('add_%s')
         perms.append('delete_%s')
+        perms.append('view_%s')
 
     for table in tables:
         app, name = table.split('.')
