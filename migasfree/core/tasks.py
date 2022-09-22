@@ -39,7 +39,7 @@ REDIS_DB = get_setting('REDIS_DB')
 
 BROKER_URL = get_setting('BROKER_URL')
 
-AUTH_TOKEN = f'Token {get_secret("token_admin")}'
+AUTH_TOKEN = f'Token {get_secret("token_pms")}'
 
 API_URL = f'http://{MIGASFREE_FQDN}/api/v1/token'
 
