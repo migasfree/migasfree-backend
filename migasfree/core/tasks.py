@@ -49,7 +49,7 @@ REQUESTS_OK_CODES = [
     requests.codes.temporary_redirect, requests.codes.resume
 ]
 
-app = Celery('migasfree', broker=BROKER_URL, backend=BROKER_URL)
+app = Celery('migasfree', broker=BROKER_URL, backend=BROKER_URL, fixups=[])
 
 
 def symlink(source_path, target_path, name):
