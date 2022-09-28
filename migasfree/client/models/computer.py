@@ -41,6 +41,8 @@ from ...device.models import Logical
 
 from .user import User
 
+from ..messages import remove_computer_messages
+
 
 class DomainComputerManager(models.Manager):
     def get_queryset(self):
@@ -772,3 +774,5 @@ def pre_delete_computer(sender, instance, **kwargs):
         property_att=Property.objects.get(prefix='CID'),
         value=instance.id
     ).delete()
+
+    remove_computer_messages(instance.id)
