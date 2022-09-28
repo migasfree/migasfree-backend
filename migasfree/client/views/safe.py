@@ -26,7 +26,6 @@ from django.utils.translation import gettext, gettext_lazy as _
 from rest_framework import viewsets, status, views, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
-from django_redis import get_redis_connection
 
 from ...utils import (
     uuid_change_format, get_client_ip,
@@ -41,37 +40,10 @@ from ...core.models import (
 from ...app_catalog.models import Policy
 
 from .. import models, serializers, tasks
+from ..messages import add_computer_message, remove_computer_messages
 
 import logging
 logger = logging.getLogger('migasfree')
-
-
-def add_computer_message(computer, message):
-    con = get_redis_connection()
-    con.hmset(
-        f'migasfree:msg:{computer.id}', {
-            'date': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'),
-            'computer_id': computer.id,
-            'computer_name': computer.__str__(),
-            'computer_status': computer.status,
-            'computer_summary': computer.get_summary(),
-            'project_id': computer.project.id,
-            'project_name': computer.project.name,
-            'user_id': computer.sync_user.id if computer.sync_user else 0,
-            'user_name': computer.sync_user.name if computer.sync_user else '',
-            'msg': message
-        }
-    )
-    con.sadd('migasfree:watch:msg', computer.id)
-
-
-def remove_computer_messages(computer_id):
-    con = get_redis_connection()
-    keys = con.hkeys(f'migasfree:msg:{computer_id}')
-    if keys:
-        con.hdel(f'migasfree:msg:{computer_id}', *keys)
-
-    con.srem('migasfree:watch:msg', computer_id)
 
 
 def get_user_or_create(name, fullname, ip_address=None):
