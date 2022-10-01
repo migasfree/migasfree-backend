@@ -291,6 +291,12 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
 
+        if isinstance(claims, str):
+            return Response(
+                self.create_response(claims),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         if not claims or 'uuid' not in claims.keys() or 'name' not in claims.keys():
             return Response(
                 self.create_response(gettext('Malformed claims')),
