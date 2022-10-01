@@ -24,6 +24,7 @@ from io import BytesIO
 from jwcrypto import jwk, jwe, jws
 from jwcrypto.common import json_encode
 from django.conf import settings
+from django.utils.translation import gettext
 
 from .utils import read_file, write_file
 
@@ -113,8 +114,16 @@ def wrap(data, sign_key, encrypt_key):
 
 
 def unwrap(data, decrypt_key, verify_key):
-    jwt = json.loads(decrypt(data, decrypt_key))
-    jws_payload = verify(jwt['sign'], verify_key)
+    try:
+        jwt = json.loads(decrypt(data, decrypt_key))
+    except jwe.InvalidJWEData:
+        return gettext('Invalid Data')
+
+    try:
+        jws_payload = verify(jwt['sign'], verify_key)
+    except jws.InvalidJWSSignature:
+        return gettext('Invalid Signature')
+
     if jws_payload:
         return jwt['data']
 
