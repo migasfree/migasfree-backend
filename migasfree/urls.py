@@ -22,6 +22,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.core import management
 from django.db import connection
+from django.db.utils import OperationalError
 from django.urls import path, re_path, reverse_lazy
 from django.views.generic.base import RedirectView
 from graphene_django.views import GraphQLView
@@ -129,17 +130,20 @@ if settings.DEBUG:
         )
 
 # initial database setup
-if not connection.introspection.table_names():
-    management.call_command(
-        'migrate',
-        'auth',
-        interactive=False,
-        verbosity=1
-    )
+try:
+    if not connection.introspection.table_names():
+        management.call_command(
+            'migrate',
+            'auth',
+            interactive=False,
+            verbosity=1
+        )
 
-    management.call_command(
-        'migrate',
-        interactive=False,
-        verbosity=1
-    )
-    create_initial_data()
+        management.call_command(
+            'migrate',
+            interactive=False,
+            verbosity=1
+        )
+        create_initial_data()
+except OperationalError as e:
+    print(e)
