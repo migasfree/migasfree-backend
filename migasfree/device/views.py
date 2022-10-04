@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2016-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ from rest_framework.response import Response
 from ..client.models import Computer
 from ..core.models import Attribute
 from ..core.views import MigasViewSet, ExportViewSet
+from ..mixins import DatabaseCheckMixin
 
 from .models import (
     Connection, Device, Driver,
@@ -41,7 +42,7 @@ from . import serializers
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ConnectionViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class ConnectionViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Connection.objects.all()
     serializer_class = serializers.ConnectionSerializer
     filterset_class = ConnectionFilter
@@ -61,7 +62,7 @@ class ConnectionViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class DeviceViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Device.objects.all()
     serializer_class = serializers.DeviceSerializer
     filterset_class = DeviceFilter
@@ -133,7 +134,7 @@ class DeviceViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class DriverViewSet(viewsets.ModelViewSet, MigasViewSet):
+class DriverViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
     queryset = Driver.objects.all()
     serializer_class = serializers.DriverSerializer
     filterset_class = DriverFilter
@@ -150,7 +151,7 @@ class DriverViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class CapabilityViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class CapabilityViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Capability.objects.all()
     serializer_class = serializers.CapabilitySerializer
     filterset_class = CapabilityFilter
@@ -160,7 +161,7 @@ class CapabilityViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class LogicalViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class LogicalViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Logical.objects.all()
     serializer_class = serializers.LogicalSerializer
     filterset_class = LogicalFilter
@@ -223,7 +224,7 @@ class LogicalViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ManufacturerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class ManufacturerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Manufacturer.objects.all()
     serializer_class = serializers.ManufacturerSerializer
     filterset_class = ManufacturerFilter
@@ -233,7 +234,7 @@ class ManufacturerViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ModelViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class ModelViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Model.objects.all()
     serializer_class = serializers.ModelSerializer
     filterset_class = ModelFilter
@@ -260,7 +261,7 @@ class ModelViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class TypeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class TypeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Type.objects.all()
     serializer_class = serializers.TypeSerializer
     filterset_class = TypeFilter

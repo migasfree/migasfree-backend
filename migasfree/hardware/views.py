@@ -26,6 +26,7 @@ from ..core.mixins import SafeConnectionMixin
 from ..core.views import MigasViewSet
 from ..client.models import Computer
 from ..client.serializers import ComputerInfoSerializer
+from ..mixins import DatabaseCheckMixin
 
 from .models import Node, Capability, LogicalName, Configuration
 from .filters import NodeFilter
@@ -33,7 +34,7 @@ from . import tasks, serializers
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class HardwareComputerViewSet(viewsets.ViewSet):
+class HardwareComputerViewSet(DatabaseCheckMixin, viewsets.ViewSet):
     # FIXME It's in use?
     queryset = Node.objects.all()
 
@@ -55,6 +56,7 @@ class HardwareComputerViewSet(viewsets.ViewSet):
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class HardwareViewSet(
+    DatabaseCheckMixin,
     mixins.ListModelMixin, mixins.RetrieveModelMixin,
     viewsets.GenericViewSet, MigasViewSet
 ):

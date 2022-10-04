@@ -21,9 +21,10 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import permission_classes
 
 from ..tasks import get_alerts
+from ...mixins import DatabaseCheckMixin
 
 
 @permission_classes((permissions.IsAuthenticated,))
-class AlertsViewSet(viewsets.ViewSet):
+class AlertsViewSet(DatabaseCheckMixin, viewsets.ViewSet):
     def list(self, request):
         return Response(get_alerts(), status=status.HTTP_200_OK)

@@ -52,6 +52,7 @@ from ...device.resources import (
     CapabilityResource, ConnectionResource, DeviceResource,
     ManufacturerResource, ModelResource, LogicalResource, TypeResource,
 )
+from ...mixins import DatabaseCheckMixin
 from ...utils import save_tempfile
 
 from .. import tasks
@@ -166,7 +167,7 @@ class MigasViewSet(viewsets.ViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class AttributeSetViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class AttributeSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = AttributeSet.objects.all()
     serializer_class = AttributeSetSerializer
     filterset_class = AttributeSetFilter
@@ -198,7 +199,7 @@ class AttributeSetViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class PlatformViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class PlatformViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Platform.objects.all()
     serializer_class = PlatformSerializer
     filterset_class = PlatformFilter
@@ -214,7 +215,7 @@ class PlatformViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ProjectViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     filterset_class = ProjectFilter
@@ -249,7 +250,7 @@ class ProjectViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class StoreViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class StoreViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
     filterset_class = StoreFilter
@@ -272,7 +273,7 @@ class StoreViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class PropertyViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class PropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
     filterset_class = PropertyFilter
@@ -300,7 +301,7 @@ class PropertyViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ServerPropertyViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class ServerPropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = ServerProperty.objects.filter(sort='server')
     serializer_class = ServerPropertySerializer
     filterset_class = PropertyFilter
@@ -308,7 +309,7 @@ class ServerPropertyViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ClientPropertyViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class ClientPropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = ClientProperty.objects.filter(sort__in=['client', 'basic'])
     serializer_class = ClientPropertySerializer
     filterset_class = ClientPropertyFilter
@@ -316,7 +317,7 @@ class ClientPropertyViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class AttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class AttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Attribute.objects.all()
     serializer_class = AttributeSerializer
     filterset_class = AttributeFilter
@@ -330,7 +331,7 @@ class AttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ServerAttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class ServerAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = ServerAttribute.objects.filter(property_att__sort='server')
     serializer_class = ServerAttributeSerializer
     filterset_class = ServerAttributeFilter
@@ -388,7 +389,7 @@ class ServerAttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ClientAttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class ClientAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = ClientAttribute.objects.filter(property_att__sort__in=['client', 'basic'])
     serializer_class = ClientAttributeSerializer
     filterset_class = ClientAttributeFilter
@@ -476,7 +477,7 @@ class ClientAttributeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet)
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ScheduleDelayViewSet(viewsets.ModelViewSet, MigasViewSet):
+class ScheduleDelayViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
     queryset = ScheduleDelay.objects.all()
     serializer_class = ScheduleDelaySerializer
     filterset_class = ScheduleDelayFilter
@@ -505,7 +506,7 @@ class ScheduleDelayViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ScheduleViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class ScheduleViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
     filterset_class = ScheduleFilter
@@ -529,6 +530,7 @@ class ScheduleViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 @permission_classes((permissions.DjangoModelPermissions,))
 class PackageViewSet(
+        DatabaseCheckMixin,
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         mixins.DestroyModelMixin,
@@ -638,7 +640,7 @@ class PackageViewSet(
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class PackageSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = PackageSet.objects.all()
     serializer_class = PackageSetSerializer
     filterset_class = PackageSetFilter
@@ -738,7 +740,7 @@ class PackageSetViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class DeploymentViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class DeploymentViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Deployment.objects.all()
     serializer_class = DeploymentSerializer
     filterset_class = DeploymentFilter
@@ -764,7 +766,7 @@ class DeploymentViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class InternalSourceViewSet(viewsets.ModelViewSet, MigasViewSet):
+class InternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
     queryset = InternalSource.objects.all()
     serializer_class = InternalSourceSerializer
     filterset_class = DeploymentFilter
@@ -814,7 +816,7 @@ class InternalSourceViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ExternalSourceViewSet(viewsets.ModelViewSet, MigasViewSet):
+class ExternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
     queryset = ExternalSource.objects.all()
     serializer_class = ExternalSourceSerializer
     filterset_class = DeploymentFilter
@@ -836,7 +838,7 @@ class ExternalSourceViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class UserProfileViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     filterset_class = UserProfileFilter
@@ -918,7 +920,7 @@ class UserProfileViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class GroupViewSet(viewsets.ModelViewSet, ExportViewSet):
+class GroupViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, ExportViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     filterset_class = GroupFilter
@@ -934,7 +936,7 @@ class GroupViewSet(viewsets.ModelViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class PermissionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class PermissionViewSet(DatabaseCheckMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Permission.objects.all()
     serializer_class = PermissionSerializer
     filterset_class = PermissionFilter
@@ -942,7 +944,7 @@ class PermissionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class DomainViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class DomainViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Domain.objects.all()
     serializer_class = DomainSerializer
     filterset_class = DomainFilter
@@ -977,7 +979,7 @@ class DomainViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ScopeViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class ScopeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Scope.objects.all()
     serializer_class = ScopeSerializer
     filterset_class = ScopeFilter

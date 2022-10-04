@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ from rest_framework.response import Response
 from ..core.permissions import PublicPermission
 from ..core.views import MigasViewSet, ExportViewSet
 from ..client.models import Computer
+from ..mixins import DatabaseCheckMixin
 
 from . import models, serializers
 from .filters import (
@@ -37,7 +38,7 @@ from .resources import (
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class CategoryViewSet(viewsets.ModelViewSet, ExportViewSet):
+class CategoryViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, ExportViewSet):
     queryset = models.Category.objects.all()
     serializer_class = serializers.CategorySerializer
     filterset_class = CategoryFilter
@@ -48,7 +49,7 @@ class CategoryViewSet(viewsets.ModelViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class ApplicationViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class ApplicationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = models.Application.objects.all()
     serializer_class = serializers.ApplicationSerializer
     filterset_class = ApplicationFilter
@@ -109,7 +110,7 @@ class ApplicationViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class PackagesByProjectViewSet(viewsets.ModelViewSet, MigasViewSet):
+class PackagesByProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
     queryset = models.PackagesByProject.objects.all()
     serializer_class = serializers.PackagesByProjectSerializer
     filterset_class = PackagesByProjectFilter
@@ -125,7 +126,7 @@ class PackagesByProjectViewSet(viewsets.ModelViewSet, MigasViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class PolicyViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+class PolicyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = models.Policy.objects.all()
     serializer_class = serializers.PolicySerializer
     filterset_class = PolicyFilter
@@ -142,7 +143,7 @@ class PolicyViewSet(viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class PolicyGroupViewSet(viewsets.ModelViewSet, MigasViewSet):
+class PolicyGroupViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
     queryset = models.PolicyGroup.objects.all()
     serializer_class = serializers.PolicyGroupSerializer
     filterset_class = PolicyGroupFilter
