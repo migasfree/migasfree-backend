@@ -780,7 +780,7 @@ class MessageViewSet(viewsets.ViewSet):
                 'message': item['msg']
             })
 
-        sorted_results = sorted(results, key=lambda d: d['created_at'])
+        sorted_results = sorted(results, key=lambda d: d['created_at'], reverse=True)
 
         return sorted_results
 
