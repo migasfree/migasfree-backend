@@ -117,12 +117,9 @@ class DeviceSerializer(serializers.ModelSerializer):
     total_computers = serializers.SerializerMethodField()
 
     def get_total_computers(self, obj):
-        if self.context.get('request'):
-            related_objects = obj.related_objects('computer', user=self.context['request'].user)
-        else:
-            related_objects = obj.related_objects('computer')
-
-        return related_objects.count() if related_objects else 0
+        return obj.total_computers(
+            user=self.context['request'].user if self.context.get('request') else None
+        )
 
     def get_data(self, obj):
         return json.loads(obj.data)
