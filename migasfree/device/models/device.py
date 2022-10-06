@@ -88,6 +88,17 @@ class Device(models.Model, MigasLink):
             self.connection.name: json.loads(self.data),
         }
 
+    def total_computers(self, user=None):
+        if user and not user.userprofile.is_view_all():
+            queryset = self.related_objects('computer', user=user.userprofile)
+        else:
+            queryset = self.related_objects('computer')
+
+        return queryset.count()
+
+    total_computers.admin_order_field = 'total_computers'
+    total_computers.short_description = _('Total computers')
+
     @staticmethod
     def group_by_connection():
         return Device.objects.values(
