@@ -21,6 +21,7 @@ import json
 
 from datetime import datetime, timedelta
 
+from django.core.paginator import Paginator
 from django.conf import settings
 from django.http import QueryDict, HttpResponse
 from django.db.models import Prefetch
@@ -30,6 +31,7 @@ from django_redis import get_redis_connection
 from rest_framework import viewsets, exceptions, status, mixins, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
+from rest_framework.utils.urls import remove_query_param, replace_query_param
 
 from ...core.models import Deployment, Attribute
 from ...device.models import Logical, Driver, Model
@@ -40,6 +42,7 @@ from ...app_catalog.models import Policy
 from ...core.serializers import PlatformSerializer
 from ...core.views import MigasViewSet, ExportViewSet
 from ...mixins import DatabaseCheckMixin
+from ...paginations import DefaultPagination
 from ...utils import replace_keys, decode_dict
 
 from .. import models, serializers
@@ -712,7 +715,6 @@ class UserViewSet(
 @permission_classes((permissions.IsAuthenticated,))
 class MessageViewSet(viewsets.ViewSet):
     def get_queryset(self):
-        # TODO from django.core.paginator import Paginator
         id_filter = self.request.query_params.get('id__in', None)
         if id_filter:
             id_filter = list(map(int, id_filter.split(',')))
@@ -780,16 +782,45 @@ class MessageViewSet(viewsets.ViewSet):
                 'message': item['msg']
             })
 
-        sorted_results = sorted(results, key=lambda d: d['created_at'], reverse=True)
+        return sorted(results, key=lambda d: d['created_at'], reverse=True)
 
-        return sorted_results
+    def _get_next_link(self, request, page):
+        if not page.has_next():
+            return None
+
+        url = request.build_absolute_uri()
+        page_number = page.next_page_number()
+
+        return replace_query_param(url, 'page', page_number)
+
+    def _get_previous_link(self, request, page):
+        if not page.has_previous():
+            return None
+
+        url = self.request.build_absolute_uri()
+        page_number = page.previous_page_number()
+        if page_number == 1:
+            return remove_query_param(url, 'page')
+
+        return replace_query_param(url, 'page', page_number)
 
     def list(self, request):
         results = self.get_queryset()
 
+        paginator = Paginator(
+            results,
+            request.GET.get('page_size', DefaultPagination.page_size)
+        )
+        page_number = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+
         return Response(
-            {'results': results, 'count': len(results)},
-            status=status.HTTP_200_OK
+            {
+                'results': page_obj.object_list,
+                'count': len(results),
+                'next': self._get_next_link(request, page_obj),
+                'previous': self._get_previous_link(request, page_obj)
+            }
         )
 
     def destroy(self, request, pk=None):
