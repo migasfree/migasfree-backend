@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from import_export import resources
+from import_export import resources, fields
 
 from .models import (
     Connection, Device, Driver,
@@ -36,8 +36,17 @@ class ConnectionResource(resources.ModelResource):
 
 
 class DeviceResource(resources.ModelResource):
+    computers = fields.Field()
+
     class Meta:
         model = Device
+        export_order = (
+            'id', 'name', 'model', 'connection',
+            'available_for_attributes', 'data', 'computers'
+        )
+
+    def dehydrate_computers(self, obj):
+        return obj.total_computers()
 
 
 class LogicalResource(resources.ModelResource):
