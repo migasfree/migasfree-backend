@@ -102,7 +102,11 @@ class PackageSet(models.Model, MigasLink):
         if self.store.project.id != self.project_id:
             raise ValidationError(_('Store must belong to the project'))
 
-        # TODO packages must be in the same store
+        for pkg in self.packages:
+            if pkg.store.id != self.store.id:
+                raise ValidationError(
+                    _('Package %s must be in the store %s') % (pkg.fullname, self.store.name)
+                )
 
     def __str__(self):
         return self.name
