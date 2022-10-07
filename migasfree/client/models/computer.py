@@ -17,7 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import datetime, timedelta
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 from django.db import models
 from django.db.models.aggregates import Count
@@ -459,7 +459,9 @@ class Computer(models.Model, MigasLink):
                 'mode': '-'
             })
 
-        return merge_dicts(installed, uninstalled)
+        merged = merge_dicts(installed, uninstalled)
+
+        return dict(OrderedDict(sorted(merged.items(), reverse=True)))
 
     @staticmethod
     def group_by_project(user):
