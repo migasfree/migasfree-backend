@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-01 17:11+0200\n"
-"PO-Revision-Date: 2022-10-01 17:12+0200\n"
+"POT-Creation-Date: 2022-10-07 08:22+0200\n"
+"PO-Revision-Date: 2022-10-07 08:23+0200\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: \n"
 "Language: es\n"
@@ -302,7 +302,7 @@ msgstr "Etiquetas"
 msgid "Software"
 msgstr "Software"
 
-#: migasfree/client/admin.py:132 migasfree/device/models/device.py:188
+#: migasfree/client/admin.py:132 migasfree/device/models/device.py:199
 msgid "Devices"
 msgstr "Dispositivos"
 
@@ -756,7 +756,7 @@ msgid "New Computer added id=[%(id)s]: NAME=[%(name)s] UUID=[%(uuid)s]"
 msgstr "Ordenador añadido con id=[%(id)s]: Nombre=[%(name)s] UUID=[%(uuid)s]"
 
 #: migasfree/client/views/safe.py:302 migasfree/core/views/safe.py:198
-#: migasfree/hardware/views.py:128
+#: migasfree/hardware/views.py:130
 msgid "Malformed claims"
 msgstr "Solicitud mal formada"
 
@@ -777,117 +777,117 @@ msgstr "Enviando propiedades..."
 msgid "Getting attributes..."
 msgstr "Obteniendo atributos..."
 
-#: migasfree/client/views/safe.py:463
+#: migasfree/client/views/safe.py:464
 msgid "Sending attributes..."
 msgstr "Enviando atributos..."
 
-#: migasfree/client/views/safe.py:480
+#: migasfree/client/views/safe.py:481
 msgid "Getting repositories..."
 msgstr "Obteniendo repositorios..."
 
-#: migasfree/client/views/safe.py:493
+#: migasfree/client/views/safe.py:494
 msgid "Sending repositories..."
 msgstr "Enviando repositorios..."
 
-#: migasfree/client/views/safe.py:503
+#: migasfree/client/views/safe.py:504
 msgid "There are not available repositories"
 msgstr "No hay repositorios disponibles"
 
-#: migasfree/client/views/safe.py:525
+#: migasfree/client/views/safe.py:526
 msgid "Getting fault definitions..."
 msgstr "Obteniendo definiciones de fallas..."
 
-#: migasfree/client/views/safe.py:538
+#: migasfree/client/views/safe.py:539
 msgid "Sending fault definitions..."
 msgstr "Enviando definiciones de fallas..."
 
-#: migasfree/client/views/safe.py:566
+#: migasfree/client/views/safe.py:567
 msgid "Getting faults..."
 msgstr "Obteniendo fallas..."
 
-#: migasfree/client/views/safe.py:580
+#: migasfree/client/views/safe.py:581
 msgid "Sending faults..."
 msgstr "Enviando fallas..."
 
-#: migasfree/client/views/safe.py:601
+#: migasfree/client/views/safe.py:602
 msgid "Getting errors..."
 msgstr "Obteniendo errores..."
 
-#: migasfree/client/views/safe.py:605
+#: migasfree/client/views/safe.py:606
 msgid "Sending errors..."
 msgstr "Enviando errores..."
 
-#: migasfree/client/views/safe.py:635
+#: migasfree/client/views/safe.py:636
 msgid "Getting mandatory packages..."
 msgstr "Obteniendo paquetes obligatorios..."
 
-#: migasfree/client/views/safe.py:644
+#: migasfree/client/views/safe.py:645
 msgid "Sending mandatory packages..."
 msgstr "Enviando paquetes obligatorios..."
 
-#: migasfree/client/views/safe.py:674
+#: migasfree/client/views/safe.py:675
 msgid "There are not available mandatory packages"
 msgstr "No hay paquetes obligatorios disponibles"
 
-#: migasfree/client/views/safe.py:692
+#: migasfree/client/views/safe.py:693
 msgid "Getting assigned tags..."
 msgstr "Obteniendo etiquetas asignadas..."
 
-#: migasfree/client/views/safe.py:697
+#: migasfree/client/views/safe.py:698
 msgid "Sending assigned tags..."
 msgstr "Enviando etiquetas asignadas..."
 
-#: migasfree/client/views/safe.py:719
+#: migasfree/client/views/safe.py:720
 msgid "Getting available tags..."
 msgstr "Obteniendo etiquetas disponibles..."
 
-#: migasfree/client/views/safe.py:767
+#: migasfree/client/views/safe.py:768
 msgid "Sending available tags..."
 msgstr "Enviando etiquetas disponibles..."
 
-#: migasfree/client/views/safe.py:800
+#: migasfree/client/views/safe.py:801
 msgid "Getting tags..."
 msgstr "Obteniendo etiquetas..."
 
-#: migasfree/client/views/safe.py:910
+#: migasfree/client/views/safe.py:911
 msgid "Sending tags..."
 msgstr "Enviando etiquetas..."
 
-#: migasfree/client/views/safe.py:935
+#: migasfree/client/views/safe.py:936
 msgid "Getting label..."
 msgstr "Obteniendo identificación..."
 
-#: migasfree/client/views/safe.py:944
+#: migasfree/client/views/safe.py:945
 msgid "Sending label..."
 msgstr "Enviando identificación..."
 
-#: migasfree/client/views/safe.py:965
+#: migasfree/client/views/safe.py:966
 msgid "Getting hardware capture is required..."
 msgstr "Obteniendo captura de hardware requerida..."
 
-#: migasfree/client/views/safe.py:971
+#: migasfree/client/views/safe.py:972
 msgid "Sending hardware capture..."
 msgstr "Enviando captura de hardware..."
 
-#: migasfree/client/views/safe.py:995
+#: migasfree/client/views/safe.py:996
 msgid "Getting software..."
 msgstr "Obteniendo software..."
 
-#: migasfree/client/views/safe.py:999
+#: migasfree/client/views/safe.py:1000
 msgid "Bad request"
 msgstr "Solicitud incorrecta"
 
-#: migasfree/client/views/safe.py:1008
+#: migasfree/client/views/safe.py:1009
 msgid "Sending software..."
 msgstr "Enviando software..."
 
-#: migasfree/client/views/safe.py:1011 migasfree/core/views/safe.py:110
+#: migasfree/client/views/safe.py:1012 migasfree/core/views/safe.py:110
 #: migasfree/core/views/safe.py:182 migasfree/core/views/safe.py:219
-#: migasfree/hardware/views.py:144
+#: migasfree/hardware/views.py:146
 msgid "Data received"
 msgstr "Datos recibidos"
 
-#: migasfree/client/views/token.py:112
+#: migasfree/client/views/token.py:116
 #, python-format
 msgid ""
 "Error in capability %s for assign computer %s. There is no driver defined "
@@ -896,7 +896,7 @@ msgstr ""
 "Error en prestación %s al asignar el ordenador %s. No hay controlador "
 "definido para el proyecto %s en el modelo %s."
 
-#: migasfree/client/views/token.py:208
+#: migasfree/client/views/token.py:212
 #, python-format
 msgid "Status must have one of the values: %s"
 msgstr "El estado debe tener uno de estos valores: %s"
@@ -1047,7 +1047,7 @@ msgstr "longitud"
 msgid "latitude"
 msgstr "latitud"
 
-#: migasfree/core/models/attribute.py:189
+#: migasfree/core/models/attribute.py:189 migasfree/device/models/device.py:100
 msgid "Total computers"
 msgstr "Ordenadores totales"
 
@@ -1270,11 +1270,16 @@ msgstr "Paquetes"
 msgid "packages"
 msgstr "paquetes"
 
-#: migasfree/core/models/package_set.py:112
+#: migasfree/core/models/package_set.py:108
+#, python-format
+msgid "Package %s must be in the store %s"
+msgstr "El paquete %s debe estar en el almacén %s"
+
+#: migasfree/core/models/package_set.py:116
 msgid "Package Set"
 msgstr "Conjunto de paquetes"
 
-#: migasfree/core/models/package_set.py:113
+#: migasfree/core/models/package_set.py:117
 msgid "Package Sets"
 msgstr "Conjuntos de paquetes"
 
@@ -1503,37 +1508,37 @@ msgstr "Cuando más de un fichero es subido, el nombre es obligatorio"
 msgid "PMS must be one of %s"
 msgstr "El PMS debe ser uno de %s"
 
-#: migasfree/core/views/token.py:244
+#: migasfree/core/views/token.py:245
 msgid "Project slug already exists"
 msgstr "El slug del proyecto ya existe"
 
-#: migasfree/core/views/token.py:595
+#: migasfree/core/views/token.py:597
 msgid "Package already exists"
 msgstr "El paquete ya existe"
 
-#: migasfree/core/views/token.py:624
+#: migasfree/core/views/token.py:626
 msgid "The package has no store on the server"
 msgstr "Este paquete no está almacenado en el servidor"
 
-#: migasfree/core/views/token.py:684
+#: migasfree/core/views/token.py:686
 #, python-format
 msgid "Package %s has an incorrect name format"
 msgstr "El paquete %s tiene un formato de nombre incorrecto"
 
-#: migasfree/core/views/token.py:697
+#: migasfree/core/views/token.py:699
 #, python-format
 msgid "Package %s is duplicated in store %s"
 msgstr "El paquete %s está duplicado en el almacén %s"
 
-#: migasfree/core/views/token.py:796
+#: migasfree/core/views/token.py:798
 msgid "Operation received"
 msgstr "Operación recibida"
 
-#: migasfree/core/views/token.py:890
+#: migasfree/core/views/token.py:892
 msgid "Token updated!"
 msgstr "¡Token actualizado!"
 
-#: migasfree/core/views/token.py:910
+#: migasfree/core/views/token.py:912
 msgid "Password changed!"
 msgstr "¡Contraseña cambiada!"
 
@@ -1577,7 +1582,7 @@ msgstr "conexión"
 msgid "data"
 msgstr "datos"
 
-#: migasfree/device/models/device.py:187
+#: migasfree/device/models/device.py:198
 msgid "Device"
 msgstr "Dispositivo"
 
