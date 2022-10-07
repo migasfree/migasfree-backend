@@ -408,8 +408,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
         user = get_user_or_create(
-            claims.get('sync_user'), claims.get('sync_fullname')
-            # claims.get('ip_address')  # TODO for notification
+            claims.get('sync_user'),
+            claims.get('sync_fullname'),
+            claims.get('ip_address')
         )
         user.update_fullname(claims.get('sync_fullname'))
 
