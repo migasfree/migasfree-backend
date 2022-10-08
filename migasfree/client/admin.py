@@ -258,10 +258,10 @@ class ErrorAdmin(admin.ModelAdmin):
     checked_ok.short_description = _("Checking is O.K.")
 
     def truncated_desc(self, obj):
-        if len(obj.description) <= 250:  # FIXME constant
+        if len(obj.description) <= Error.TRUNCATED_DESC_LEN:
             return obj.description
         else:
-            return obj.description[:250] + ' ...'
+            return obj.description[:Error.TRUNCATED_DESC_LEN] + ' ...'
 
     truncated_desc.short_description = _("Truncated description")
     truncated_desc.admin_order_field = 'description'
