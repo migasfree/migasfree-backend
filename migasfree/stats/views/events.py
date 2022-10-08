@@ -21,6 +21,7 @@ import time
 from datetime import timedelta, datetime, date
 from dateutil.relativedelta import relativedelta
 
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import viewsets, status, permissions
@@ -173,6 +174,7 @@ class EventViewSet(viewsets.ViewSet):
         start_date = request.GET.get('start_date', '')
         end_date = request.GET.get('end_date', '')
 
+        get_object_or_404(Computer, pk=computer_id)
         # FIXME validate parameters
 
         event_class = self.get_event_class()
