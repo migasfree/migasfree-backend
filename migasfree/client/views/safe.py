@@ -528,19 +528,16 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         results = models.FaultDefinition.enabled_for_attributes(
             computer.get_all_attributes()
         )
-        definitions = []
+        ret = []
         for item in results:
-            definitions.append({
-                'language': item.get_language_display(),
-                'name': item.name,
-                'code': item.code
-            })
+            serializer = serializers.FaultDefinitionForAttributesSerializer(item)
+            ret.append(serializer.data)
 
         add_computer_message(computer, gettext('Sending fault definitions...'))
 
-        if definitions:
+        if ret:
             return Response(
-                self.create_response(definitions),  # FIXME not serialized!!!
+                self.create_response(list(ret)),
                 status=status.HTTP_200_OK
             )
 
