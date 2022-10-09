@@ -21,13 +21,13 @@ import os
 from django.conf import settings
 from django.utils.translation import gettext, gettext_lazy as _
 from django.http import HttpResponseForbidden
-from rest_framework import views
+from rest_framework import views, status
 from rest_framework.response import Response
 
-from migasfree.utils import get_client_ip, read_file
-from migasfree.core.pms import get_available_pms
-from migasfree import secure
-from migasfree.core.models import Platform, Project
+from ...core.models import Platform, Project
+from ...core.pms import get_available_pms
+from ...secure import create_server_keys, generate_rsa_keys, gpg_get_key
+from ...utils import get_client_ip, read_file
 
 from .. import permissions, models
 
@@ -85,7 +85,7 @@ class PackagerKeysView(views.APIView):
             settings.MIGASFREE_KEYS_DIR, "migasfree-server.pub"
         )
         if not os.path.exists(pub_server_key_file):
-            secure.create_server_keys()
+            create_server_keys()
 
         pub_server_key = read_file(pub_server_key_file)
         priv_packager_key = read_file(os.path.join(
@@ -124,9 +124,7 @@ class ProjectKeysView(views.APIView):
             "project": "Vitalinux",
             "pms": "apt",
             "platform": "Linux",
-            "architecture": "i386",
-            "username": "admin",
-            "password": "admin"
+            "architecture": "i386"
         }
 
         Returns: {
@@ -143,7 +141,10 @@ class ProjectKeysView(views.APIView):
         # FIXME why not validate model in create method?
         available_pms = dict(get_available_pms()).keys()
         if pms not in available_pms:
-            return Response({'error': gettext(f'PMS must be one of {available_pms}')})
+            return Response(
+                {'error': gettext(f'PMS must be one of {available_pms}')}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         project = self.get_object(
             project_name, pms, platform_name, architecture, ip_address
@@ -154,20 +155,20 @@ class ProjectKeysView(views.APIView):
         )
 
         if not os.path.exists(priv_project_key_file):
-            secure.generate_rsa_keys(project.slug)
+            generate_rsa_keys(project.slug)
 
         pub_server_key_file = os.path.join(
-            settings.MIGASFREE_KEYS_DIR, "migasfree-server.pub"
+            settings.MIGASFREE_KEYS_DIR, 'migasfree-server.pub'
         )
         if not os.path.exists(pub_server_key_file):
-            secure.create_server_keys()
+            create_server_keys()
 
         pub_server_key = read_file(pub_server_key_file)
         priv_project_key = read_file(priv_project_key_file)
 
         return Response({
-            "migasfree-server.pub": pub_server_key,
-            "migasfree-client.pri": priv_project_key
+            'migasfree-server.pub': pub_server_key,
+            'migasfree-client.pri': priv_project_key
         })
 
 
@@ -177,6 +178,6 @@ class RepositoriesKeysView(views.APIView):
         Returns the repositories public key
         """
         return Response(
-            secure.gpg_get_key('migasfree-repository'),
+            gpg_get_key('migasfree-repository'),
             content_type='text/plain'
         )
