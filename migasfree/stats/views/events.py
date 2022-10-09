@@ -172,10 +172,11 @@ class EventViewSet(viewsets.ViewSet):
         user = request.user.userprofile
         computer_id = request.GET.get('computer_id', 0)
         start_date = request.GET.get('start_date', '')
-        end_date = request.GET.get('end_date', '')
+        end_date = request.GET.get('end_date', date.today().strftime('%Y-%m-%d'))
 
-        get_object_or_404(Computer, pk=computer_id)
-        # FIXME validate parameters
+        computer = get_object_or_404(Computer, pk=computer_id)
+        if start_date == '':
+            start_date = computer.created_at.strftime('%Y-%m-%d')
 
         event_class = self.get_event_class()
         data = event_class.by_day(computer_id, start_date, end_date, user)
