@@ -50,7 +50,9 @@ def check_tmp_path():
         try:
             os.makedirs(settings.MIGASFREE_TMP_DIR, 0o700)
         except OSError:
-            pass  # FIXME
+            return False
+
+    return True
 
 
 def wrap_command_result(filename, result):
@@ -78,7 +80,14 @@ def get_msg_info(text):
 
 @csrf_exempt
 def api_v4(request):
-    check_tmp_path()
+    if not check_tmp_path():
+        return HttpResponse(
+            return_message(
+                'temporal_path_not_created', 
+                errmfs.error(errmfs.GENERIC)
+            ),
+            content_type='text/plain'
+        )
 
     if request.method != 'POST':
         return HttpResponse(
