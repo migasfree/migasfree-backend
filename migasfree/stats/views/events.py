@@ -28,6 +28,9 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+
 from ...client.models import (
     Computer, Error, Fault,
     Synchronization, Migration, StatusLog,
@@ -36,6 +39,20 @@ from ...core.models import Project
 from ...utils import to_heatmap
 
 from . import MONTHLY_RANGE, HOURLY_RANGE
+
+
+computer_id = openapi.Parameter(
+    'computer_id', openapi.IN_QUERY, 
+    default=0, description='Computer ID', type=openapi.TYPE_INTEGER
+)
+start_date = openapi.Parameter(
+    'start_date', openapi.IN_QUERY, 
+    required=False, default='', description='String in YYYY-MM-DD format', type=openapi.TYPE_STRING
+)
+end_date = openapi.Parameter(
+    'end_date', openapi.IN_QUERY, 
+    required=False, default='', description='String in YYYY-MM-DD format', type=openapi.TYPE_STRING
+)
 
 
 def first_day_month(date_):
@@ -167,6 +184,7 @@ class EventViewSet(viewsets.ViewSet):
 
         return globals()[event_class]
 
+    @swagger_auto_schema(manual_parameters=[computer_id, start_date, end_date])
     @action(methods=['get'], detail=False, url_path='by-day')
     def by_day(self, request):
         user = request.user.userprofile
@@ -175,7 +193,7 @@ class EventViewSet(viewsets.ViewSet):
         end_date = request.GET.get('end_date', date.today().strftime('%Y-%m-%d'))
 
         computer = get_object_or_404(Computer, pk=computer_id)
-        if start_date == '':
+        if not start_date:
             start_date = computer.created_at.strftime('%Y-%m-%d')
 
         event_class = self.get_event_class()
