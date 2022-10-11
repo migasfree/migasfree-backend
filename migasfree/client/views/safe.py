@@ -18,9 +18,10 @@
 
 from datetime import datetime
 
-from django.db.models import Q
+from django.contrib import auth
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext, gettext_lazy as _
 from rest_framework import viewsets, status, views, permissions
@@ -48,18 +49,18 @@ logger = logging.getLogger('migasfree')
 
 def get_user_or_create(name, fullname, ip_address=None):
     user = models.User.objects.filter(name=name, fullname=fullname)
-    if not user.exists():
-        user = models.User.objects.create(name=name, fullname=fullname)
+    if user:
+        return user.first()
 
-        if ip_address:
-            msg = _('User [%s] registered by IP [%s].') % (
-                name, ip_address
-            )
-            models.Notification.objects.create(message=msg)
+    user = models.User.objects.create(name=name, fullname=fullname)
 
-        return user
-    else:
-        return user[0]
+    if ip_address:
+        msg = _('User [%s] registered by IP [%s].') % (
+            name, ip_address
+        )
+        models.Notification.objects.create(message=msg)
+
+    return user
 
 
 # TODO call when computer is updated
@@ -230,7 +231,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = {
             'uuid': '01020304050607080910111213141516',
             'name': 'PC12345',
-            'ip_address': '127.0.0.1'
+            'ip_address': '127.0.0.1',
+            'username': 'admin',
+            'password': 'admin'
         }
         """
 
@@ -247,6 +250,17 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             return Response(
                 self.create_response(serializer.data),
                 status=status.HTTP_200_OK
+            )
+
+        user = auth.authenticate(
+            username=claims.get('username'),
+            password=claims.get('password')
+        )
+        if not self.project.auto_register_computers and \
+                (not user or not user.is_superuser or not user.has_perm('client.add_computer')):
+            return Response(
+                self.create_response(gettext('Computer cannot be registered')),
+                status=status.HTTP_401_UNAUTHORIZED
             )
 
         serializer = serializers.ComputerCreateSerializer(
