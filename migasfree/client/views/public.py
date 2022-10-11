@@ -19,6 +19,7 @@
 import os
 
 from django.conf import settings
+from django.contrib import auth
 from django.utils.translation import gettext, gettext_lazy as _
 from django.http import HttpResponseForbidden
 from rest_framework import views, status
@@ -82,31 +83,34 @@ class PackagerKeysView(views.APIView):
         }
         """
         pub_server_key_file = os.path.join(
-            settings.MIGASFREE_KEYS_DIR, "migasfree-server.pub"
+            settings.MIGASFREE_KEYS_DIR, 'migasfree-server.pub'
         )
         if not os.path.exists(pub_server_key_file):
             create_server_keys()
 
         pub_server_key = read_file(pub_server_key_file)
         priv_packager_key = read_file(os.path.join(
-            settings.MIGASFREE_KEYS_DIR, "migasfree-packager.pri"
+            settings.MIGASFREE_KEYS_DIR, 'migasfree-packager.pri'
         ))
 
         return Response({
-            "migasfree-server.pub": pub_server_key,
-            "migasfree-packager.pri": priv_packager_key
+            'migasfree-server.pub': pub_server_key,
+            'migasfree-packager.pri': priv_packager_key
         })
 
 
 class ProjectKeysView(views.APIView):
-    permission_classes = (permissions.IsClient,)
+    user = None
 
     def get_object(self, name, pms, platform_name, architecture, ip_address):
         try:
             return Project.objects.get(name=name)
         except Project.DoesNotExist:
             if not settings.MIGASFREE_AUTOREGISTER:
-                raise HttpResponseForbidden
+                if not self.user or not self.user.is_superuser \
+                        or not self.user.has_perm('core.add_project') \
+                        or not self.user.has_perm('core.add_platform'):
+                    raise HttpResponseForbidden
 
             platform = get_platform_or_create(platform_name, ip_address)
             if not platform:
@@ -121,10 +125,12 @@ class ProjectKeysView(views.APIView):
     def post(self, request):
         """
         Input: {
+            "user": "admin",
+            "password": "admin",
             "project": "Vitalinux",
             "pms": "apt",
             "platform": "Linux",
-            "architecture": "i386"
+            "architecture": "amd64 i386"
         }
 
         Returns: {
@@ -132,6 +138,11 @@ class ProjectKeysView(views.APIView):
             "migasfree-client.pri": priv_project_key
         }
         """
+        self.user = auth.authenticate(
+            username=request.data.get('username'),
+            password=request.data.get('password')
+        )
+
         ip_address = get_client_ip(request)  # notifications purpose only
         project_name = request.data.get('project')
         pms = request.data.get('pms')
@@ -142,13 +153,18 @@ class ProjectKeysView(views.APIView):
         available_pms = dict(get_available_pms()).keys()
         if pms not in available_pms:
             return Response(
-                {'error': gettext(f'PMS must be one of {available_pms}')}, 
+                {'error': gettext(f'PMS must be one of {available_pms}')},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         project = self.get_object(
             project_name, pms, platform_name, architecture, ip_address
         )
+
+        if not settings.MIGASFREE_AUTOREGISTER and not project.auto_register_computers \
+                and not self.user and not self.user.is_superuser \
+                and not self.user.has_perm('client.add_computer'):
+            raise HttpResponseForbidden
 
         priv_project_key_file = os.path.join(
             settings.MIGASFREE_KEYS_DIR, f'{project.slug}.pri'
