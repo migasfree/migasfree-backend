@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2016 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,22 +31,3 @@ class IsPackager(permissions.BasePermission):
             return False
 
         return user.is_superuser or user.has_perm('core.change_package')
-
-
-class IsClient(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if settings.MIGASFREE_AUTOREGISTER:
-            return True
-
-        user = auth.authenticate(
-            username=request.data.get('username'),
-            password=request.data.get('password')
-        )
-        if not user:
-            return False
-
-        return (
-            user.has_perm('core.change_platform') and
-            user.has_perm('core.change_project') and
-            user.has_perm('client.change_computer')
-        )
