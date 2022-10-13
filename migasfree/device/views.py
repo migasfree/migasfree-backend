@@ -134,7 +134,7 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class DriverViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
+class DriverViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Driver.objects.all()
     serializer_class = serializers.DriverSerializer
     filterset_class = DriverFilter
