@@ -42,15 +42,15 @@ from . import MONTHLY_RANGE, HOURLY_RANGE
 
 
 computer_id = openapi.Parameter(
-    'computer_id', openapi.IN_QUERY, 
+    'computer_id', openapi.IN_QUERY,
     default=0, description='Computer ID', type=openapi.TYPE_INTEGER
 )
 start_date = openapi.Parameter(
-    'start_date', openapi.IN_QUERY, 
+    'start_date', openapi.IN_QUERY,
     required=False, default='', description='String in YYYY-MM-DD format', type=openapi.TYPE_STRING
 )
 end_date = openapi.Parameter(
-    'end_date', openapi.IN_QUERY, 
+    'end_date', openapi.IN_QUERY,
     required=False, default='', description='String in YYYY-MM-DD format', type=openapi.TYPE_STRING
 )
 
