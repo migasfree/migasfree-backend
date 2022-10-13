@@ -49,6 +49,11 @@ class DeviceResource(resources.ModelResource):
         return obj.total_computers()
 
 
+class DriverResource(resources.ModelResource):
+    class Meta:
+        model = Driver
+
+
 class LogicalResource(resources.ModelResource):
     class Meta:
         model = Logical
