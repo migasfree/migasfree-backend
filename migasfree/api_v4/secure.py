@@ -153,21 +153,24 @@ def get_keys_to_client(project):
     """
     Returns the keys for register computer
     """
-    if not os.path.exists(os.path.join(settings.MIGASFREE_KEYS_DIR, f'{project}.pri')):
+    priv_project_key_file = os.path.join(
+        settings.MIGASFREE_KEYS_DIR, f'{project}.pri'
+    )
+    if not os.path.exists(priv_project_key_file):
         generate_rsa_keys(project)
 
-    server_public_key = read_file(os.path.join(
-        settings.MIGASFREE_KEYS_DIR,
-        settings.MIGASFREE_PUBLIC_KEY
-    ))
-    project_private_key = read_file(os.path.join(
-        settings.MIGASFREE_KEYS_DIR,
-        f'{project}.pri'
-    ))
+    pub_server_key_file = os.path.join(
+        settings.MIGASFREE_KEYS_DIR, settings.MIGASFREE_PUBLIC_KEY
+    )
+    if not os.path.exists(pub_server_key_file):
+        create_server_keys()
+
+    pub_server_key = read_file(pub_server_key_file)
+    priv_project_key = read_file(priv_project_key_file)
 
     return {
-        settings.MIGASFREE_PUBLIC_KEY: server_public_key.decode(),
-        'migasfree-client.pri': project_private_key.decode()
+        settings.MIGASFREE_PUBLIC_KEY: pub_server_key.decode(),
+        'migasfree-client.pri': priv_project_key.decode()
     }
 
 
@@ -175,11 +178,14 @@ def get_keys_to_packager():
     """
     Returns the keys for register packager
     """
-    server_public_key = read_file(os.path.join(
-        settings.MIGASFREE_KEYS_DIR,
-        settings.MIGASFREE_PUBLIC_KEY
-    ))
-    packager_private_key = read_file(
+    pub_server_key_file = os.path.join(
+        settings.MIGASFREE_KEYS_DIR, settings.MIGASFREE_PUBLIC_KEY
+    )
+    if not os.path.exists(pub_server_key_file):
+        create_server_keys()
+
+    pub_server_key = read_file(pub_server_key_file)
+    priv_packager_key = read_file(
         os.path.join(
             settings.MIGASFREE_KEYS_DIR,
             settings.MIGASFREE_PACKAGER_PRI_KEY
@@ -187,6 +193,6 @@ def get_keys_to_packager():
     )
 
     return {
-        settings.MIGASFREE_PUBLIC_KEY: server_public_key.decode(),
-        settings.MIGASFREE_PACKAGER_PRI_KEY: packager_private_key.decode()
+        settings.MIGASFREE_PUBLIC_KEY: pub_server_key.decode(),
+        settings.MIGASFREE_PACKAGER_PRI_KEY: priv_packager_key.decode()
     }
