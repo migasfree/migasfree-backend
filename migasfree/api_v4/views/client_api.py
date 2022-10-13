@@ -83,7 +83,7 @@ def api_v4(request):
     if not check_tmp_path():
         return HttpResponse(
             return_message(
-                'temporal_path_not_created', 
+                'temporal_path_not_created',
                 errmfs.error(errmfs.GENERIC)
             ),
             content_type='text/plain'
