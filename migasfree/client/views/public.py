@@ -83,19 +83,19 @@ class PackagerKeysView(views.APIView):
         }
         """
         pub_server_key_file = os.path.join(
-            settings.MIGASFREE_KEYS_DIR, 'migasfree-server.pub'
+            settings.MIGASFREE_KEYS_DIR, settings.MIGASFREE_PUBLIC_KEY
         )
         if not os.path.exists(pub_server_key_file):
             create_server_keys()
 
         pub_server_key = read_file(pub_server_key_file)
         priv_packager_key = read_file(os.path.join(
-            settings.MIGASFREE_KEYS_DIR, 'migasfree-packager.pri'
+            settings.MIGASFREE_KEYS_DIR, settings.MIGASFREE_PACKAGER_PRI_KEY
         ))
 
         return Response({
-            'migasfree-server.pub': pub_server_key,
-            'migasfree-packager.pri': priv_packager_key
+            settings.MIGASFREE_PUBLIC_KEY: pub_server_key,
+            settings.MIGASFREE_PACKAGER_PRI_KEY: priv_packager_key
         })
 
 
@@ -169,12 +169,11 @@ class ProjectKeysView(views.APIView):
         priv_project_key_file = os.path.join(
             settings.MIGASFREE_KEYS_DIR, f'{project.slug}.pri'
         )
-
         if not os.path.exists(priv_project_key_file):
             generate_rsa_keys(project.slug)
 
         pub_server_key_file = os.path.join(
-            settings.MIGASFREE_KEYS_DIR, 'migasfree-server.pub'
+            settings.MIGASFREE_KEYS_DIR, settings.MIGASFREE_PUBLIC_KEY
         )
         if not os.path.exists(pub_server_key_file):
             create_server_keys()
@@ -183,7 +182,7 @@ class ProjectKeysView(views.APIView):
         priv_project_key = read_file(priv_project_key_file)
 
         return Response({
-            'migasfree-server.pub': pub_server_key,
+            settings.MIGASFREE_PUBLIC_KEY: pub_server_key,
             'migasfree-client.pri': priv_project_key
         })
 
