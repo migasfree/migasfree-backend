@@ -440,7 +440,7 @@ class Computer(models.Model, MigasLink):
                     'install_date', 'package__fullname', 'package__id'
                 ).distinct().order_by('-install_date', 'package__fullname')
         ):
-            installed[key.strftime('%Y-%m-%d %H:%M:%S')].append({
+            installed[key.strftime('%Y-%m-%dT%H:%M:%S')].append({
                 'id': _id,
                 'name': pkg,
                 'mode': '+'
@@ -453,7 +453,7 @@ class Computer(models.Model, MigasLink):
                     'uninstall_date', 'package__fullname', 'package__id'
                 ).distinct().order_by('-uninstall_date', 'package__fullname')
         ):
-            uninstalled[key.strftime('%Y-%m-%d %H:%M:%S')].append({
+            uninstalled[key.strftime('%Y-%m-%dT%H:%M:%S')].append({
                 'id': _id,
                 'name': pkg,
                 'mode': '-'
