@@ -309,20 +309,17 @@ def upload_computer_info(request, name, uuid, computer, data):
 
     cmd = str(inspect.getframeinfo(inspect.currentframe()).function)
 
-    computer_info = data.get(cmd).get("computer")
+    computer_info = data.get(cmd).get('computer')
     platform_name = computer_info.get('platform', 'unknown')
     project_name = computer_info.get(
         'version',  # key is version for compatibility!!!
-        computer_info.get(
-            'project',
-            'unknown'
-        )
+        computer_info.get('project', 'unknown')
     )
-    pms_name = computer_info.get(
-        'pms',
-        'apt'
-    )
+    pms_name = computer_info.get('pms', 'apt')
     fqdn = computer_info.get('fqdn', None)
+
+    if pms_name.startswith('apt'):  # normalize PMS name in v5
+        pms_name = 'apt'
 
     notify_platform = False
     notify_project = False
@@ -556,6 +553,9 @@ def register_computer(request, name, uuid, computer, data):
     project_name = data.get('version', data.get('project', 'unknown'))  # key is version for compatibility!!!
     pms_name = data.get('pms', 'apt')
     fqdn = data.get('fqdn', None)
+
+    if pms_name.startswith('apt'):  # normalize PMS name in v5
+        pms_name = 'apt'
 
     notify_platform = False
     notify_project = False
