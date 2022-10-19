@@ -89,6 +89,7 @@ class SyncStatsViewSet(EventViewSet):
             project_id int
         """
         fmt = '%Y-%m'
+        value_fmt = '%Y-%m-%dT%H:%M:%S'
 
         end = request.query_params.get('end', '')
         try:
@@ -118,9 +119,16 @@ class SyncStatsViewSet(EventViewSet):
             begin.month, begin.year,
             end.month, end.year
         ):
+            item_date = datetime(i[0], i[1], 1)
+            next_item_date = item_date + relativedelta(months=+1)
             value = con.get(f'{key}:{i[0]:04}{i[1]:02}')
             labels.append(f'{i[0]:04}-{i[1]:02}')
-            stats.append({'value': int(value) if value else 0})
+            stats.append({
+                'model': Synchronization._meta.model_name,
+                'created_at__gte': time.strftime(value_fmt, item_date.timetuple()),
+                'created_at__lt': time.strftime(value_fmt, next_item_date.timetuple()),
+                'value': int(value) if value else 0
+            })
 
         return Response(
             {
@@ -143,6 +151,7 @@ class SyncStatsViewSet(EventViewSet):
         now = time.localtime()
         fmt = '%Y-%m-%d'
         human_fmt = '%Y-%m-%d (%a)'
+        value_fmt = '%Y-%m-%dT%H:%M:%S'
 
         end = request.query_params.get('end', '')
         try:
@@ -167,9 +176,15 @@ class SyncStatsViewSet(EventViewSet):
         labels = []
         stats = []
         for single_date in daterange(begin, end):
+            next_item_date = single_date + timedelta(days=1)
             value = con.get(f'{key}:{time.strftime("%Y%m%d", single_date.timetuple())}')
             labels.append(time.strftime(human_fmt, single_date.timetuple()))
-            stats.append({'value': int(value) if value else 0})
+            stats.append({
+                'model': Synchronization._meta.model_name,
+                'created_at__gte': time.strftime(value_fmt, single_date.timetuple()),
+                'created_at__lt': time.strftime(value_fmt, next_item_date.timetuple()),
+                'value': int(value) if value else 0
+            })
 
         return Response(
             {
