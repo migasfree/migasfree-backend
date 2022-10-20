@@ -258,7 +258,10 @@ class SyncStatsViewSet(EventViewSet):
 
     @action(methods=['get'], detail=False, url_path='project/month')
     def project_by_month(self, request):
-        begin_date, end_date = month_interval()
+        begin_date, end_date = month_interval(
+            begin_month=request.query_params.get('begin', ''),
+            end_month=request.query_params.get('end', '')
+        )
 
         data = event_by_month(
             Synchronization.stacked_by_month(request.user.userprofile, begin_date),
