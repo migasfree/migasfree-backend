@@ -76,10 +76,31 @@ def month_year_iter(start_month, start_year, end_month, end_year):
         yield y, m + 1
 
 
-def month_interval():
-    delta = relativedelta(months=+1)
-    end_date = date.today() + delta
-    begin_date = end_date - relativedelta(months=+MONTHLY_RANGE)
+def month_interval(begin_month='', end_month=''):
+    # begin_month, end_month format: YYYY-MM
+    if end_month:
+        try:
+            end_date = datetime.strptime(f'{end_month}-01', '%Y-%m-%d')
+        except ValueError:
+            end_date = date.today() + relativedelta(months=+1)
+
+    if begin_month:
+        try:
+            begin_date = datetime.strptime(f'{begin_month}-01', '%Y-%m-%d')
+            if not end_month:
+                end_date = begin_date + relativedelta(months=+MONTHLY_RANGE)
+        except ValueError:
+            if not end_month:
+                end_date = date.today() + relativedelta(months=+1)
+
+            begin_date = end_date - relativedelta(months=+MONTHLY_RANGE)
+
+    if not end_month and not begin_month:
+        end_date = date.today() + relativedelta(months=+1)
+        begin_date = end_date - relativedelta(months=+MONTHLY_RANGE)
+
+    if begin_date > end_date:
+        begin_date, end_date = end_date, begin_date
 
     return first_day_month(begin_date), end_date
 
