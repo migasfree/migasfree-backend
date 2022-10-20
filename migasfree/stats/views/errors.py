@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -54,7 +54,10 @@ class ErrorStatsViewSet(EventViewSet):
 
     @action(methods=['get'], detail=False, url_path='project/month')
     def project_by_month(self, request):
-        begin_date, end_date = month_interval()
+        begin_date, end_date = month_interval(
+            begin_month=request.query_params.get('begin', ''),
+            end_month=request.query_params.get('end', '')
+        )
 
         data = event_by_month(
             Error.stacked_by_month(request.user.userprofile, begin_date),
