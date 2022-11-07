@@ -4,10 +4,10 @@
         "model": "client.faultdefinition",
         "fields": {
             "name": "Low Available Space On System Partition",
-            "description": "Add a fault when available space available on system partition is low",
+            "description": "Add a fault when available space on system partition is low",
             "language": 0,
             "enabled": true,
-            "code": "let limit=90 #% USED SPACE LIMIT\nDEVICE=`mount |grep \" on / \"|awk '{print $1}'`\nlet used=`df -hl| grep $DEVICE| awk '{print $5}'|awk 'BEGIN {FS=\"%\";} {print $1}'`\nif [ $used -gt $limit ] ; then\n  echo \"The used space in / [$DEVICE] is $used%.\"\n  echo \"ACTION: You must delete files\"\nfi",
+            "code": "let LIMIT=90 # % USED SPACE LIMIT\nlet DEVICE=$(mount | grep \" on / \" | awk '{print $1}')\nlet USED=$(df -hl | grep $DEVICE | awk '{print $5}' | awk 'BEGIN {FS=\"%\";} {print $1}')\nif [ $USED -gt $LIMIT ]\nthen\n  echo \"The used space in / [$DEVICE] is $USED%.\"\n  echo \"ACTION: You must delete files\"\nfi",
             "included_attributes": [
                 1
             ]
@@ -21,7 +21,7 @@
             "description": "Add a fault when available space on home partition is low",
             "language": 0,
             "enabled": true,
-            "code": "let limit=90 # % USED SPACE LIMIT\nDEVICE=`mount |grep \" on /home \"|awk '{print $1}'`\nlet used=`df -hl| grep $DEVICE| awk '{print $5}'|awk 'BEGIN {FS=\"%\";} {print $1}'`\nif [ $used -gt $limit ] ; then\n  echo \"The used space in /home [$DEVICE] is $used%.\"\n  echo \"ACTION: You must delete files\"\nfi",
+            "code": "let LIMIT=90 # % USED SPACE LIMIT\nlet DEVICE=$(mount | grep \" on /home \" | awk '{print $1}')\nlet USED=$(df -hl | grep $DEVICE | awk '{print $5}' | awk 'BEGIN {FS=\"%\";} {print $1}')\nif [ $USED -gt $LIMIT ]\nthen\n  echo \"The used space in /home [$DEVICE] is $USED%.\"\n  echo \"ACTION: You must delete files\"\nfi",
             "included_attributes": [
                 1
             ]
