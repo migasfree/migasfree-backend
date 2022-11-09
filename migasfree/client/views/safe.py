@@ -403,8 +403,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             'sync_user': 'inigo',
             'sync_fullname': 'Íñigo Montoya',
             'sync_attributes': {
-                    'NET': '192.168.1.0/24',  # prefix: value
-                    ...,
+                'NET': '192.168.1.0/24',  # prefix: value
+                ...,
             }
         }
         """
@@ -443,7 +443,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         # tags
         for tag in computer.tags.filter(property_att__enabled=True):
-            Attribute.process_kind_property(tag.property_att, tag.value)
+            computer.sync_attributes.add(
+                *Attribute.process_kind_property(tag.property_att, tag.value)
+            )
 
         # basic attributes
         computer.sync_attributes.add(
