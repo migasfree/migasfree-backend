@@ -13,3 +13,25 @@ Systems Management System (backend). Provides a REST API.
 ## Update redis syncs stats (example)
 
 `$ python3 manage.py refresh_redis_syncs --settings=migasfree.settings.development --since 2020 --until=2021`
+
+## Redis stats structure
+
+migasfree:watch:stats:years:YYYY
+migasfree:watch:stats:<project_id>:years:YYYY
+migasfree:stats:years:YYYY
+migasfree:stats:<project_id>:years:YYYY
+
+migasfree:watch:stats:months:YYYYMM
+migasfree:watch:stats:<project_id>:months:YYYYMM
+migasfree:stats:months:YYYYMM
+migasfree:stats:<project_id>:months:YYYYMM
+
+migasfree:watch:stats:days:YYYYMMDD
+migasfree:watch:stats:<project_id>:days:YYYYMMDD
+migasfree:stats:days:YYYYMMDD
+migasfree:stats:<project_id>:days:YYYYMMDD
+
+migasfree:watch:stats:hours:YYYYMMDDHH
+migasfree:watch:stats:<project_id>:hours:YYYYMMDDHH
+migasfree:stats:hours:YYYYMMDDHH
+migasfree:stats:<project_id>:hours:YYYYMMDDHH
