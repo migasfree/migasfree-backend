@@ -125,7 +125,7 @@ class ComputerFilter(filters.FilterSet):
             'project__id': ['exact'],
             'status': ['exact', 'in'],
             'name': ['exact', 'icontains'],
-            'uuid': ['exact'],
+            'uuid': ['exact', 'icontains'],
             'sync_attributes__id': ['exact', 'in'],
             'tags__id': ['exact'],
             'machine': ['exact'],
