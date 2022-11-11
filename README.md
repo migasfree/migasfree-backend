@@ -16,22 +16,22 @@ Systems Management System (backend). Provides a REST API.
 
 ## Redis stats structure
 
-migasfree:watch:stats:years:YYYY
-migasfree:watch:stats:<project_id>:years:YYYY
-migasfree:stats:years:YYYY
-migasfree:stats:<project_id>:years:YYYY
+`migasfree:watch:stats:years:YYYY`<br>
+`migasfree:watch:stats:<project_id>:years:YYYY`<br>
+`migasfree:stats:years:YYYY`<br>
+`migasfree:stats:<project_id>:years:YYYY`
 
-migasfree:watch:stats:months:YYYYMM
-migasfree:watch:stats:<project_id>:months:YYYYMM
-migasfree:stats:months:YYYYMM
-migasfree:stats:<project_id>:months:YYYYMM
+`migasfree:watch:stats:months:YYYYMM`<br>
+`migasfree:watch:stats:<project_id>:months:YYYYMM`<br>
+`migasfree:stats:months:YYYYMM`<br>
+`migasfree:stats:<project_id>:months:YYYYMM`
 
-migasfree:watch:stats:days:YYYYMMDD
-migasfree:watch:stats:<project_id>:days:YYYYMMDD
-migasfree:stats:days:YYYYMMDD
-migasfree:stats:<project_id>:days:YYYYMMDD
+`migasfree:watch:stats:days:YYYYMMDD`<br>
+`migasfree:watch:stats:<project_id>:days:YYYYMMDD`<br>
+`migasfree:stats:days:YYYYMMDD`<br>
+`migasfree:stats:<project_id>:days:YYYYMMDD`
 
-migasfree:watch:stats:hours:YYYYMMDDHH
-migasfree:watch:stats:<project_id>:hours:YYYYMMDDHH
-migasfree:stats:hours:YYYYMMDDHH
-migasfree:stats:<project_id>:hours:YYYYMMDDHH
+`migasfree:watch:stats:hours:YYYYMMDDHH`<br>
+`migasfree:watch:stats:<project_id>:hours:YYYYMMDDHH`<br>
+`migasfree:stats:hours:YYYYMMDDHH`<br>
+`migasfree:stats:<project_id>:hours:YYYYMMDDHH`
