@@ -10,6 +10,6 @@ Systems Management System (backend). Provides a REST API.
 
 `$ DJANGO_SETTINGS_MODULE='migasfree.settings.development' celery --app=migasfree.celery.app worker --without-gossip --concurrency=10 -Q repository`
 
-## Update redis stats (example)
+## Update redis syncs stats (example)
 
 `$ python3 manage.py refresh_redis_syncs --settings=migasfree.settings.development --since 2020 --until=2021`
