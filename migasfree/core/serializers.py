@@ -232,7 +232,7 @@ class ClientPropertySerializer(serializers.ModelSerializer):
         )
 
 
-class ServerAttributeSerializer(serializers.ModelSerializer):
+class ServerAttributeSerializer(AttributeSerializer):
     property_att = ServerPropertyInfoSerializer(many=False, read_only=True)
 
     class Meta:
@@ -240,7 +240,8 @@ class ServerAttributeSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'property_att',
             'value', 'description',
-            'latitude', 'longitude'
+            'latitude', 'longitude',
+            'total_computers',
         )
 
 
@@ -261,7 +262,7 @@ class ServerAttributeWriteSerializer(serializers.ModelSerializer):
         )
 
 
-class ClientAttributeSerializer(serializers.ModelSerializer):
+class ClientAttributeSerializer(AttributeSerializer):
     property_att = ServerPropertyInfoSerializer(many=False, read_only=True)
 
     class Meta:
@@ -269,7 +270,8 @@ class ClientAttributeSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'property_att',
             'value', 'description',
-            'latitude', 'longitude'
+            'latitude', 'longitude',
+            'total_computers',
         )
 
 
