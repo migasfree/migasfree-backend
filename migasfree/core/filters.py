@@ -180,10 +180,23 @@ class AttributeFilter(filters.FilterSet):
         label='has_location',
     )
 
+    total_computers = filters.NumberFilter(
+        method='filter_total_computers',
+        label='total_computers'
+    )
+
     def filter_has_location(self, qs, name, value):
         ret = Attribute.objects.none()
         for item in qs:
             if item.has_location() == value:
+                ret |= Attribute.objects.filter(pk=item.pk)
+
+        return ret
+
+    def filter_total_computers(self, qs, name, value):
+        ret = Attribute.objects.none()
+        for item in qs:
+            if item.total_computers() == value:
                 ret |= Attribute.objects.filter(pk=item.pk)
 
         return ret
