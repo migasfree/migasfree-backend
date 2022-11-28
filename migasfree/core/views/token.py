@@ -746,7 +746,7 @@ class DeploymentViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
     filterset_class = DeploymentFilter
     search_fields = ['name']
     ordering_fields = '__all__'
-    ordering = ('-start_date', 'name')
+    ordering = ('name', 'project__name')
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
@@ -771,7 +771,7 @@ class InternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
     serializer_class = InternalSourceSerializer
     filterset_class = DeploymentFilter
     ordering_fields = '__all__'
-    ordering = ('-start_date', 'name')
+    ordering = ('name', 'project__name')
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' \
@@ -821,7 +821,7 @@ class ExternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
     serializer_class = ExternalSourceSerializer
     filterset_class = DeploymentFilter
     ordering_fields = '__all__'
-    ordering = ('-start_date', 'name')
+    ordering = ('name', 'project__name')
 
     def get_queryset(self):
         if self.request is None:
