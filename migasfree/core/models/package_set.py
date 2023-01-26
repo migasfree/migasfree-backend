@@ -108,6 +108,19 @@ class PackageSet(models.Model, MigasLink):
                     _('Package %s must be in the store %s') % (pkg.fullname, self.store.name)
                 )
 
+    @staticmethod
+    def orphan_count(user=None):
+        if not user:
+            return PackageSet.objects.filter(
+                deployment__isnull=True,
+                packages__isnull=False
+            ).count()
+
+        return PackageSet.objects.scope(user).filter(
+            deployment__isnull=True,
+            packageset__isnull=False
+        ).count()
+
     def __str__(self):
         return self.name
 
