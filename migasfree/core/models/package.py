@@ -151,13 +151,13 @@ class Package(models.Model, MigasLink):
             return Package.objects.filter(
                 deployment__id=None,
                 store__isnull=False,
-                packageset__isnull = False
+                packageset__isnull=False
             ).count()
 
         return Package.objects.scope(user).filter(
             deployment__id=None,
             store__isnull=False,
-            packageset__isnull = False
+            packageset__isnull=False
         ).count()
 
     def pms(self):
