@@ -126,6 +126,8 @@ class PackageSetFilter(filters.FilterSet):
             'store__id': ['exact'],
             'store__name': ['exact', 'icontains'],
             'packages__id': ['exact'],
+            'packages': ['isnull'],
+            'deployment': ['isnull'],
         }
 
 
