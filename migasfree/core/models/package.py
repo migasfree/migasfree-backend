@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -150,12 +150,14 @@ class Package(models.Model, MigasLink):
         if not user:
             return Package.objects.filter(
                 deployment__id=None,
-                store__isnull=False
+                store__isnull=False,
+                packageset__isnull = False
             ).count()
 
         return Package.objects.scope(user).filter(
             deployment__id=None,
-            store__isnull=False
+            store__isnull=False,
+            packageset__isnull = False
         ).count()
 
     def pms(self):
