@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-11 09:10+0200\n"
-"PO-Revision-Date: 2022-10-11 09:11+0200\n"
+"POT-Creation-Date: 2023-01-26 14:03+0100\n"
+"PO-Revision-Date: 2023-01-26 14:04+0100\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: \n"
 "Language: es\n"
@@ -530,8 +530,8 @@ msgstr "Grupos de políticas (excluidas)"
 
 #: migasfree/client/models/computer.py:739 migasfree/core/admin.py:256
 #: migasfree/core/admin.py:402 migasfree/device/admin.py:131
-#: migasfree/stats/views/computers.py:291 migasfree/stats/views/syncs.py:128
-#: migasfree/stats/views/syncs.py:177
+#: migasfree/stats/views/computers.py:294 migasfree/stats/views/syncs.py:136
+#: migasfree/stats/views/syncs.py:192
 msgid "Computers"
 msgstr "Ordenadores"
 
@@ -781,111 +781,111 @@ msgstr "Enviando propiedades..."
 msgid "Getting attributes..."
 msgstr "Obteniendo atributos..."
 
-#: migasfree/client/views/safe.py:478
+#: migasfree/client/views/safe.py:480
 msgid "Sending attributes..."
 msgstr "Enviando atributos..."
 
-#: migasfree/client/views/safe.py:495
+#: migasfree/client/views/safe.py:497
 msgid "Getting repositories..."
 msgstr "Obteniendo repositorios..."
 
-#: migasfree/client/views/safe.py:508
+#: migasfree/client/views/safe.py:510
 msgid "Sending repositories..."
 msgstr "Enviando repositorios..."
 
-#: migasfree/client/views/safe.py:518
+#: migasfree/client/views/safe.py:520
 msgid "There are not available repositories"
 msgstr "No hay repositorios disponibles"
 
-#: migasfree/client/views/safe.py:540
+#: migasfree/client/views/safe.py:542
 msgid "Getting fault definitions..."
 msgstr "Obteniendo definiciones de fallas..."
 
-#: migasfree/client/views/safe.py:550
+#: migasfree/client/views/safe.py:552
 msgid "Sending fault definitions..."
 msgstr "Enviando definiciones de fallas..."
 
-#: migasfree/client/views/safe.py:578
+#: migasfree/client/views/safe.py:580
 msgid "Getting faults..."
 msgstr "Obteniendo fallas..."
 
-#: migasfree/client/views/safe.py:592
+#: migasfree/client/views/safe.py:594
 msgid "Sending faults..."
 msgstr "Enviando fallas..."
 
-#: migasfree/client/views/safe.py:613
+#: migasfree/client/views/safe.py:615
 msgid "Getting errors..."
 msgstr "Obteniendo errores..."
 
-#: migasfree/client/views/safe.py:617
+#: migasfree/client/views/safe.py:619
 msgid "Sending errors..."
 msgstr "Enviando errores..."
 
-#: migasfree/client/views/safe.py:647
+#: migasfree/client/views/safe.py:649
 msgid "Getting mandatory packages..."
 msgstr "Obteniendo paquetes obligatorios..."
 
-#: migasfree/client/views/safe.py:656
+#: migasfree/client/views/safe.py:658
 msgid "Sending mandatory packages..."
 msgstr "Enviando paquetes obligatorios..."
 
-#: migasfree/client/views/safe.py:686
+#: migasfree/client/views/safe.py:688
 msgid "There are not available mandatory packages"
 msgstr "No hay paquetes obligatorios disponibles"
 
-#: migasfree/client/views/safe.py:704
+#: migasfree/client/views/safe.py:706
 msgid "Getting assigned tags..."
 msgstr "Obteniendo etiquetas asignadas..."
 
-#: migasfree/client/views/safe.py:709
+#: migasfree/client/views/safe.py:711
 msgid "Sending assigned tags..."
 msgstr "Enviando etiquetas asignadas..."
 
-#: migasfree/client/views/safe.py:731
+#: migasfree/client/views/safe.py:733
 msgid "Getting available tags..."
 msgstr "Obteniendo etiquetas disponibles..."
 
-#: migasfree/client/views/safe.py:779
+#: migasfree/client/views/safe.py:781
 msgid "Sending available tags..."
 msgstr "Enviando etiquetas disponibles..."
 
-#: migasfree/client/views/safe.py:812
+#: migasfree/client/views/safe.py:814
 msgid "Getting tags..."
 msgstr "Obteniendo etiquetas..."
 
-#: migasfree/client/views/safe.py:922
+#: migasfree/client/views/safe.py:924
 msgid "Sending tags..."
 msgstr "Enviando etiquetas..."
 
-#: migasfree/client/views/safe.py:947
+#: migasfree/client/views/safe.py:949
 msgid "Getting label..."
 msgstr "Obteniendo identificación..."
 
-#: migasfree/client/views/safe.py:956
+#: migasfree/client/views/safe.py:958
 msgid "Sending label..."
 msgstr "Enviando identificación..."
 
-#: migasfree/client/views/safe.py:977
+#: migasfree/client/views/safe.py:979
 msgid "Getting hardware capture is required..."
 msgstr "Obteniendo captura de hardware requerida..."
 
-#: migasfree/client/views/safe.py:983
+#: migasfree/client/views/safe.py:985
 msgid "Sending hardware capture..."
 msgstr "Enviando captura de hardware..."
 
-#: migasfree/client/views/safe.py:1007
+#: migasfree/client/views/safe.py:1009
 msgid "Getting software..."
 msgstr "Obteniendo software..."
 
-#: migasfree/client/views/safe.py:1011
+#: migasfree/client/views/safe.py:1013
 msgid "Bad request"
 msgstr "Solicitud incorrecta"
 
-#: migasfree/client/views/safe.py:1020
+#: migasfree/client/views/safe.py:1022
 msgid "Sending software..."
 msgstr "Enviando software..."
 
-#: migasfree/client/views/safe.py:1023 migasfree/core/views/safe.py:110
+#: migasfree/client/views/safe.py:1025 migasfree/core/views/safe.py:110
 #: migasfree/core/views/safe.py:182 migasfree/core/views/safe.py:219
 #: migasfree/hardware/views.py:146
 msgid "Data received"
@@ -985,7 +985,7 @@ msgstr "La versión es obligatoria"
 msgid "Architecture is required"
 msgstr "La arquitectura es obligatoria"
 
-#: migasfree/core/forms.py:202 migasfree/core/serializers.py:597
+#: migasfree/core/forms.py:202 migasfree/core/serializers.py:599
 #, python-format
 msgid "It is not possible to assign an inactive computer (%s) as an attribute"
 msgstr "No es posible asignar un ordenador inactivo (%s) como atributo"
@@ -1253,20 +1253,20 @@ msgstr "arquitectura"
 msgid "store"
 msgstr "almacén"
 
-#: migasfree/core/models/package.py:251
+#: migasfree/core/models/package.py:253
 #: migasfree/core/models/package_set.py:103
 msgid "Store must belong to the project"
 msgstr "El almacén debe pertenecer al proyecto"
 
-#: migasfree/core/models/package.py:258
+#: migasfree/core/models/package.py:260
 msgid "Duplicated fullname at project"
 msgstr "Nombre completo duplicado en el proyecto"
 
-#: migasfree/core/models/package.py:279
+#: migasfree/core/models/package.py:281
 msgid "Package"
 msgstr "Paquete"
 
-#: migasfree/core/models/package.py:280
+#: migasfree/core/models/package.py:282
 msgid "Packages"
 msgstr "Paquetes"
 
@@ -1279,11 +1279,11 @@ msgstr "paquetes"
 msgid "Package %s must be in the store %s"
 msgstr "El paquete %s debe estar en el almacén %s"
 
-#: migasfree/core/models/package_set.py:116
+#: migasfree/core/models/package_set.py:129
 msgid "Package Set"
 msgstr "Conjunto de paquetes"
 
-#: migasfree/core/models/package_set.py:117
+#: migasfree/core/models/package_set.py:130
 msgid "Package Sets"
 msgstr "Conjuntos de paquetes"
 
@@ -1480,17 +1480,17 @@ msgstr "Perfil de usuario"
 msgid "User Profiles"
 msgstr "Perfiles de usuarios"
 
-#: migasfree/core/serializers.py:605
+#: migasfree/core/serializers.py:607
 #, python-format
 msgid "Package %(pkg)s must belong to the project %(project)s"
 msgstr "El paquete %(pkg)s debe pertenecer al proyecto %(project)s"
 
-#: migasfree/core/serializers.py:950
+#: migasfree/core/serializers.py:952
 #, python-format
 msgid "Minimum length is %d characters"
 msgstr "La longitud mínima es %d caracteres"
 
-#: migasfree/core/serializers.py:955
+#: migasfree/core/serializers.py:957
 msgid "Password fields didn't match."
 msgstr "Los campos de contraseña no coinciden."
 
@@ -1764,35 +1764,39 @@ msgstr "Firma no válida"
 msgid "Orphan Packages"
 msgstr "Paquetes huérfanos"
 
-#: migasfree/stats/tasks.py:65
+#: migasfree/stats/tasks.py:66
+msgid "Orphan Package Sets"
+msgstr "Conjuntos de paquetes huérfanos"
+
+#: migasfree/stats/tasks.py:86
 msgid "Unchecked Notifications"
 msgstr "Notificaciones sin comprobar"
 
-#: migasfree/stats/tasks.py:84
+#: migasfree/stats/tasks.py:105
 msgid "Unchecked Faults"
 msgstr "Fallas sin comprobar"
 
-#: migasfree/stats/tasks.py:104
+#: migasfree/stats/tasks.py:125
 msgid "Unchecked Errors"
 msgstr "Errores sin comprobar"
 
-#: migasfree/stats/tasks.py:124
+#: migasfree/stats/tasks.py:145
 msgid "Generating Repositories"
 msgstr "Generando repositorios"
 
-#: migasfree/stats/tasks.py:156
+#: migasfree/stats/tasks.py:177
 msgid "Synchronizing Computers Now"
 msgstr "Ordenadores sincronizándose"
 
-#: migasfree/stats/tasks.py:188
+#: migasfree/stats/tasks.py:209
 msgid "Delayed Computers"
 msgstr "Ordenadores retrasados"
 
-#: migasfree/stats/tasks.py:216
+#: migasfree/stats/tasks.py:237
 msgid "Active schedule deployments"
 msgstr "Despliegues con calendario activo"
 
-#: migasfree/stats/tasks.py:246
+#: migasfree/stats/tasks.py:267
 msgid "Finished schedule deployments"
 msgstr "Despliegues con calendario finalizado"
 
@@ -1887,15 +1891,15 @@ msgstr "Dispositivos / Fabricante"
 msgid "Models / Manufacturer"
 msgstr "Modelos / Fabricante"
 
-#: migasfree/stats/views/events.py:104
+#: migasfree/stats/views/events.py:125
 msgid "Checked"
 msgstr "Comprobado"
 
-#: migasfree/stats/views/events.py:105
+#: migasfree/stats/views/events.py:126
 msgid "Unchecked"
 msgstr "Sin comprobar"
 
-#: migasfree/stats/views/faults.py:77
+#: migasfree/stats/views/faults.py:80
 msgid "Faults / Fault Definition"
 msgstr "Fallas / Definición de falla"
 
@@ -1919,7 +1923,7 @@ msgstr "Registros de estado / Estado"
 msgid "Stores / Project"
 msgstr "Almacenes / Proyecto"
 
-#: migasfree/stats/views/syncs.py:230
+#: migasfree/stats/views/syncs.py:245
 msgid "Synchronizations / Project"
 msgstr "Sincronizaciones / Proyecto"
 
