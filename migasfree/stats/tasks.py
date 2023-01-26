@@ -29,7 +29,7 @@ from celery import shared_task
 from channels.layers import get_channel_layer
 from django_redis import get_redis_connection
 
-from ..core.models import Package, Deployment
+from ..core.models import Package, PackageSet, Deployment
 from ..client.models import Notification, Fault, Error, Computer
 from ..utils import decode_set, decode_dict
 
@@ -41,7 +41,7 @@ logger = logging.getLogger('celery')
 def add_orphan_packages():
     con = get_redis_connection()
     con.hmset(
-        'migasfree:chk:orphan', {
+        'migasfree:chk:orphan_packages', {
             'msg': gettext('Orphan Packages'),
             'target': 'server',
             'level': 'warning',
@@ -56,7 +56,27 @@ def add_orphan_packages():
             })
         }
     )
-    con.sadd('migasfree:watch:chk', 'orphan')
+    con.sadd('migasfree:watch:chk', 'orphan_packages')
+
+
+def add_orphan_package_sets():
+    con = get_redis_connection()
+    con.hmset(
+        'migasfree:chk:orphan_package_sets', {
+            'msg': gettext('Orphan Package Sets'),
+            'target': 'server',
+            'level': 'warning',
+            'result': PackageSet.orphan_count(),
+            'api': json.dumps({
+                'model': 'package_sets',
+                'query': {
+                    'deployment': True,  # isnull = True
+                    'packages': False  # isnull = False
+                }
+            })
+        }
+    )
+    con.sadd('migasfree:watch:chk', 'orphan_package_sets')
 
 
 def add_unchecked_notifications():
@@ -268,7 +288,8 @@ def get_alerts():
         decode_dict(con.hgetall('migasfree:chk:repos')),
         decode_dict(con.hgetall('migasfree:chk:syncs')),
         decode_dict(con.hgetall('migasfree:chk:active_deploys')),
-        decode_dict(con.hgetall('migasfree:chk:orphan')),
+        decode_dict(con.hgetall('migasfree:chk:orphan_packages')),
+        decode_dict(con.hgetall('migasfree:chk:orphan_package_sets')),
         decode_dict(con.hgetall('migasfree:chk:notifications')),
         decode_dict(con.hgetall('migasfree:chk:delayed')),
         decode_dict(con.hgetall('migasfree:chk:finished_deploys')),
@@ -294,6 +315,7 @@ def alerts():
 
     # warning
     add_orphan_packages()
+    add_orphan_package_sets()
     add_unchecked_notifications()
     add_delayed_computers()
     add_finished_schedule_deployments()
