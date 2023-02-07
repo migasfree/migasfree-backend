@@ -51,7 +51,7 @@ def add_orphan_packages():
                 'query': {
                     'deployment': True,  # isnull = True
                     'store': False,  # isnull = False
-                    'packageset': False  # isnull = False
+                    'packageset': True  # isnull = True
                 }
             })
         }
