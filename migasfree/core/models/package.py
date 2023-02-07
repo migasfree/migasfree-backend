@@ -149,15 +149,15 @@ class Package(models.Model, MigasLink):
     def orphan_count(user=None):
         if not user:
             return Package.objects.filter(
-                deployment__id=None,
+                deployment__isnull=True,
                 store__isnull=False,
-                packageset__isnull=False
+                packageset__isnull=True
             ).count()
 
         return Package.objects.scope(user).filter(
-            deployment__id=None,
+            deployment__isnull=True,
             store__isnull=False,
-            packageset__isnull=False
+            packageset__isnull=True
         ).count()
 
     def pms(self):
