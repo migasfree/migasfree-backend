@@ -106,6 +106,7 @@ WSGI_APPLICATION = 'migasfree.wsgi.application'
 sys.modules['django_partial_content'] = __import__('django-partial-content')
 
 INSTALLED_APPS = (
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
