@@ -381,15 +381,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Sending properties...'))
 
-        if properties:
-            return Response(
-                self.create_response(properties),
-                status=status.HTTP_200_OK
-            )
-
         return Response(
-            self.create_response('There are not properties'),
-            status=status.HTTP_404_NOT_FOUND
+            self.create_response(properties),
+            status=status.HTTP_200_OK
         )
 
     @action(methods=['post'], detail=False)
@@ -509,17 +503,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Sending repositories...'))
 
-        if ret:
-            return Response(
-                self.create_response(ret),
-                status=status.HTTP_200_OK
-            )
-
         return Response(
-            self.create_response(
-                gettext('There are not available repositories')
-            ),
-            status=status.HTTP_404_NOT_FOUND
+            self.create_response(ret),
+            status=status.HTTP_200_OK
         )
 
     @action(methods=['post'], detail=False, url_path='faults/definitions')
@@ -551,15 +537,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Sending fault definitions...'))
 
-        if ret:
-            return Response(
-                self.create_response(list(ret)),
-                status=status.HTTP_200_OK
-            )
-
         return Response(
-            self.create_response('There are not fault definitions'),
-            status=status.HTTP_404_NOT_FOUND
+            self.create_response(list(ret)),
+            status=status.HTTP_200_OK
         )
 
     @action(methods=['post'], detail=False)
@@ -684,10 +664,11 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             )
 
         return Response(
-            self.create_response(
-                gettext('There are not available mandatory packages')
-            ),
-            status=status.HTTP_404_NOT_FOUND
+            self.create_response({
+                'install': [],
+                'remove': []
+            }),
+            status.HTTP_200_OK
         )
 
     @action(methods=['post'], detail=False, url_path='tags/assigned')
@@ -779,14 +760,6 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     available[tag.property_att.name].append(value)
 
         add_computer_message(computer, gettext('Sending available tags...'))
-
-        """ TODO think about this!
-        if not available:
-            return Response(
-                self.create_response(gettext('There are not available tags')),
-                status=status.HTTP_404_NOT_FOUND
-            )
-        """
 
         return Response(
             self.create_response(available),
