@@ -4,7 +4,7 @@ channels==4.0.0
 channels-redis==4.0.0
 coreapi==2.3.3
 daphne==4.0.0
-Django==3.2.17
+Django==3.2.18
 dj-rest-auth==2.2.7
 django-cors-headers==3.13.0
 django-filter==22.1
