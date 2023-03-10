@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -242,7 +242,7 @@ def configure_default_users():
     user.save()
     permissions = Permission.objects.filter(
         codename__in=['change_device.logical'],
-        content_type__app_label='server'
+        content_type__app_label='device'
     )
     user.user_permissions.add(*permissions)
 
