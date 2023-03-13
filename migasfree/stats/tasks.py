@@ -301,7 +301,7 @@ def get_alerts():
         item['api'] = json.loads(item['api'])
         item['msg'] = gettext(item['msg'])
 
-    return response
+    return [item for item in response if not (int(item['result']) == 0)]
 
 
 @shared_task(queue='default')
