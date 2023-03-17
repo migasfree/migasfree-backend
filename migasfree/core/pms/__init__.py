@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import migasfree.core.pms.plugins
 from importlib import import_module
 
 from .apt import Apt
+from .dnf import Dnf
 from .pacman import Pacman
 from .winget import Winget
 from .yum import Yum
@@ -47,6 +48,7 @@ def get_discovered_plugins():
 def get_available_pms():
     ret = [
         ('apt', 'apt'),
+        ('dnf', 'dnf'),
         ('pacman', 'pacman'),
         ('winget', 'winget'),
         ('yum', 'yum'),
@@ -62,7 +64,7 @@ def get_available_pms():
 
 
 def get_available_mimetypes():
-    ret = Apt().mimetype + Pacman().mimetype + Winget().mimetype + Yum().mimetype + Zypper().mimetype
+    ret = Apt().mimetype + Dnf().mimetype + Pacman().mimetype + Winget().mimetype + Yum().mimetype + Zypper().mimetype
 
     discovered_plugins = get_discovered_plugins()
     for item in discovered_plugins.keys():
