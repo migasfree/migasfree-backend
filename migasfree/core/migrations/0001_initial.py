@@ -83,7 +83,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=50, unique=True, verbose_name='name')),
                 ('slug', models.SlugField(unique=True, verbose_name='slug')),
-                ('pms', models.CharField(choices=[('apt', 'apt'), ('yum', 'yum'), ('zypper', 'zypper')], max_length=50, validators=[migasfree.core.validators.validate_project_pms], verbose_name='package management system')),
+                ('pms', models.CharField(choices=[('apt', 'apt'), ('dnf', 'dnf'), ('pacman', 'pacman'), ('winget', 'winget'), ('yum', 'yum'), ('zypper', 'zypper')], max_length=50, validators=[migasfree.core.validators.validate_project_pms], verbose_name='package management system')),
                 ('architecture', models.CharField(max_length=20, verbose_name='architecture')),
                 ('auto_register_computers', models.BooleanField(default=False, help_text='Is not needed a user for register computers in database and get the keys.', verbose_name='auto register computers')),
                 ('platform', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.platform', verbose_name='platform')),
