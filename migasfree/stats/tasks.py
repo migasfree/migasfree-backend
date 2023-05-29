@@ -298,8 +298,8 @@ def get_alerts():
     ]
 
     for item in response:
-        item['api'] = json.loads(item['api'])
-        item['msg'] = gettext(item['msg'])
+        item['api'] = json.loads(item.get('api', '{}'))
+        item['msg'] = gettext(item.get('msg', ''))
 
     return [item for item in response if not (int(item['result']) == 0)]
 
