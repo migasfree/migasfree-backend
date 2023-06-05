@@ -56,14 +56,19 @@ class PackageManager(DomainPackageManager):
                 os.path.join(Store.path(project.slug, store.slug), fullname)
             )
 
-        package = Package(
-            fullname=fullname,
-            name=name,
-            version=version,
-            architecture=architecture,
-            project=project,
-            store=store
-        )
+        if Package.objects.filter(fullname=fullname, project=project).exists() and store and file_:
+            package = Package.objects.get(fullname=fullname, project=project)
+            package.store = store
+        else:
+            package = Package(
+                fullname=fullname,
+                name=name,
+                version=version,
+                architecture=architecture,
+                project=project,
+                store=store
+            )
+
         package.save()
 
         return package
@@ -287,6 +292,9 @@ class Package(models.Model, MigasLink):
 def delete_package(sender, instance, **kwargs):
     from .. import tasks
     from .deployment import Deployment
+
+    if not instance.store:
+        return
 
     path = Package.path(
         instance.project.slug,
