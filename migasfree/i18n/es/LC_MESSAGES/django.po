@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-26 14:03+0100\n"
-"PO-Revision-Date: 2023-01-26 14:04+0100\n"
+"POT-Creation-Date: 2023-06-06 12:20+0200\n"
+"PO-Revision-Date: 2023-06-06 12:21+0200\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: \n"
 "Language: es\n"
@@ -110,7 +110,7 @@ msgstr "la longitud del nombre es mayor que la máxima longitud"
 #: migasfree/client/models/fault_definition.py:39
 #: migasfree/client/models/user.py:46 migasfree/core/models/attribute_set.py:42
 #: migasfree/core/models/deployment.py:80 migasfree/core/models/domain.py:39
-#: migasfree/core/models/package.py:84 migasfree/core/models/package_set.py:46
+#: migasfree/core/models/package.py:89 migasfree/core/models/package_set.py:46
 #: migasfree/core/models/platform.py:49 migasfree/core/models/project.py:68
 #: migasfree/core/models/property.py:59 migasfree/core/models/schedule.py:27
 #: migasfree/core/models/scope.py:69 migasfree/core/models/store.py:64
@@ -201,7 +201,7 @@ msgstr "aplicación"
 #: migasfree/client/models/error.py:85 migasfree/client/models/fault.py:106
 #: migasfree/client/models/migration.py:61
 #: migasfree/client/models/synchronization.py:80
-#: migasfree/core/models/deployment.py:91 migasfree/core/models/package.py:107
+#: migasfree/core/models/deployment.py:91 migasfree/core/models/package.py:112
 #: migasfree/core/models/package_set.py:59 migasfree/core/models/store.py:76
 #: migasfree/device/models/driver.py:46
 msgid "project"
@@ -694,7 +694,7 @@ msgstr "indica el estado de las transacciones con el PMS"
 msgid "Synchronizations"
 msgstr "Sincronizaciones"
 
-#: migasfree/client/models/user.py:52 migasfree/core/models/package.py:77
+#: migasfree/client/models/user.py:52 migasfree/core/models/package.py:82
 msgid "fullname"
 msgstr "nombre completo"
 
@@ -777,115 +777,107 @@ msgstr "Obteniendo propiedades..."
 msgid "Sending properties..."
 msgstr "Enviando propiedades..."
 
-#: migasfree/client/views/safe.py:414
+#: migasfree/client/views/safe.py:408
 msgid "Getting attributes..."
 msgstr "Obteniendo atributos..."
 
-#: migasfree/client/views/safe.py:480
+#: migasfree/client/views/safe.py:474
 msgid "Sending attributes..."
 msgstr "Enviando atributos..."
 
-#: migasfree/client/views/safe.py:497
+#: migasfree/client/views/safe.py:491
 msgid "Getting repositories..."
 msgstr "Obteniendo repositorios..."
 
-#: migasfree/client/views/safe.py:510
+#: migasfree/client/views/safe.py:504
 msgid "Sending repositories..."
 msgstr "Enviando repositorios..."
 
-#: migasfree/client/views/safe.py:520
-msgid "There are not available repositories"
-msgstr "No hay repositorios disponibles"
-
-#: migasfree/client/views/safe.py:542
+#: migasfree/client/views/safe.py:528
 msgid "Getting fault definitions..."
 msgstr "Obteniendo definiciones de fallas..."
 
-#: migasfree/client/views/safe.py:552
+#: migasfree/client/views/safe.py:538
 msgid "Sending fault definitions..."
 msgstr "Enviando definiciones de fallas..."
 
-#: migasfree/client/views/safe.py:580
+#: migasfree/client/views/safe.py:560
 msgid "Getting faults..."
 msgstr "Obteniendo fallas..."
 
-#: migasfree/client/views/safe.py:594
+#: migasfree/client/views/safe.py:574
 msgid "Sending faults..."
 msgstr "Enviando fallas..."
 
-#: migasfree/client/views/safe.py:615
+#: migasfree/client/views/safe.py:595
 msgid "Getting errors..."
 msgstr "Obteniendo errores..."
 
-#: migasfree/client/views/safe.py:619
+#: migasfree/client/views/safe.py:599
 msgid "Sending errors..."
 msgstr "Enviando errores..."
 
-#: migasfree/client/views/safe.py:649
+#: migasfree/client/views/safe.py:629
 msgid "Getting mandatory packages..."
 msgstr "Obteniendo paquetes obligatorios..."
 
-#: migasfree/client/views/safe.py:658
+#: migasfree/client/views/safe.py:638
 msgid "Sending mandatory packages..."
 msgstr "Enviando paquetes obligatorios..."
 
-#: migasfree/client/views/safe.py:688
-msgid "There are not available mandatory packages"
-msgstr "No hay paquetes obligatorios disponibles"
-
-#: migasfree/client/views/safe.py:706
+#: migasfree/client/views/safe.py:687
 msgid "Getting assigned tags..."
 msgstr "Obteniendo etiquetas asignadas..."
 
-#: migasfree/client/views/safe.py:711
+#: migasfree/client/views/safe.py:692
 msgid "Sending assigned tags..."
 msgstr "Enviando etiquetas asignadas..."
 
-#: migasfree/client/views/safe.py:733
+#: migasfree/client/views/safe.py:714
 msgid "Getting available tags..."
 msgstr "Obteniendo etiquetas disponibles..."
 
-#: migasfree/client/views/safe.py:781
+#: migasfree/client/views/safe.py:762
 msgid "Sending available tags..."
 msgstr "Enviando etiquetas disponibles..."
 
-#: migasfree/client/views/safe.py:814
+#: migasfree/client/views/safe.py:787
 msgid "Getting tags..."
 msgstr "Obteniendo etiquetas..."
 
-#: migasfree/client/views/safe.py:924
+#: migasfree/client/views/safe.py:897
 msgid "Sending tags..."
 msgstr "Enviando etiquetas..."
 
-#: migasfree/client/views/safe.py:949
+#: migasfree/client/views/safe.py:922
 msgid "Getting label..."
 msgstr "Obteniendo identificación..."
 
-#: migasfree/client/views/safe.py:958
+#: migasfree/client/views/safe.py:931
 msgid "Sending label..."
 msgstr "Enviando identificación..."
 
-#: migasfree/client/views/safe.py:979
+#: migasfree/client/views/safe.py:952
 msgid "Getting hardware capture is required..."
 msgstr "Obteniendo captura de hardware requerida..."
 
-#: migasfree/client/views/safe.py:985
+#: migasfree/client/views/safe.py:958
 msgid "Sending hardware capture..."
 msgstr "Enviando captura de hardware..."
 
-#: migasfree/client/views/safe.py:1009
+#: migasfree/client/views/safe.py:982
 msgid "Getting software..."
 msgstr "Obteniendo software..."
 
-#: migasfree/client/views/safe.py:1013
+#: migasfree/client/views/safe.py:986
 msgid "Bad request"
 msgstr "Solicitud incorrecta"
 
-#: migasfree/client/views/safe.py:1022
+#: migasfree/client/views/safe.py:995
 msgid "Sending software..."
 msgstr "Enviando software..."
 
-#: migasfree/client/views/safe.py:1025 migasfree/core/views/safe.py:110
+#: migasfree/client/views/safe.py:998 migasfree/core/views/safe.py:110
 #: migasfree/core/views/safe.py:182 migasfree/core/views/safe.py:219
 #: migasfree/hardware/views.py:146
 msgid "Data received"
@@ -1241,32 +1233,32 @@ msgstr "Paquetes instalados"
 msgid "Installed package"
 msgstr "Paquete instalado"
 
-#: migasfree/core/models/package.py:92 migasfree/hardware/models/node.py:150
+#: migasfree/core/models/package.py:97 migasfree/hardware/models/node.py:150
 msgid "version"
 msgstr "versión"
 
-#: migasfree/core/models/package.py:99 migasfree/core/models/project.py:87
+#: migasfree/core/models/package.py:104 migasfree/core/models/project.py:87
 msgid "architecture"
 msgstr "arquitectura"
 
-#: migasfree/core/models/package.py:114 migasfree/core/models/package_set.py:66
+#: migasfree/core/models/package.py:119 migasfree/core/models/package_set.py:66
 msgid "store"
 msgstr "almacén"
 
-#: migasfree/core/models/package.py:253
+#: migasfree/core/models/package.py:258
 #: migasfree/core/models/package_set.py:103
 msgid "Store must belong to the project"
 msgstr "El almacén debe pertenecer al proyecto"
 
-#: migasfree/core/models/package.py:260
+#: migasfree/core/models/package.py:265
 msgid "Duplicated fullname at project"
 msgstr "Nombre completo duplicado en el proyecto"
 
-#: migasfree/core/models/package.py:281
+#: migasfree/core/models/package.py:287
 msgid "Package"
 msgstr "Paquete"
 
-#: migasfree/core/models/package.py:282
+#: migasfree/core/models/package.py:288
 msgid "Packages"
 msgstr "Paquetes"
 
@@ -1520,29 +1512,33 @@ msgstr "El slug del proyecto ya existe"
 msgid "Package already exists"
 msgstr "El paquete ya existe"
 
-#: migasfree/core/views/token.py:626
+#: migasfree/core/views/token.py:608
+msgid "The element has relations and cannot be removed"
+msgstr "El elemento tiene relaciones y no se puede borrar"
+
+#: migasfree/core/views/token.py:639
 msgid "The package has no store on the server"
 msgstr "Este paquete no está almacenado en el servidor"
 
-#: migasfree/core/views/token.py:686
+#: migasfree/core/views/token.py:699
 #, python-format
 msgid "Package %s has an incorrect name format"
 msgstr "El paquete %s tiene un formato de nombre incorrecto"
 
-#: migasfree/core/views/token.py:699
+#: migasfree/core/views/token.py:712
 #, python-format
 msgid "Package %s is duplicated in store %s"
 msgstr "El paquete %s está duplicado en el almacén %s"
 
-#: migasfree/core/views/token.py:798
+#: migasfree/core/views/token.py:811
 msgid "Operation received"
 msgstr "Operación recibida"
 
-#: migasfree/core/views/token.py:892
+#: migasfree/core/views/token.py:905
 msgid "Token updated!"
 msgstr "¡Token actualizado!"
 
-#: migasfree/core/views/token.py:912
+#: migasfree/core/views/token.py:925
 msgid "Password changed!"
 msgstr "¡Contraseña cambiada!"
 
@@ -1926,6 +1922,12 @@ msgstr "Almacenes / Proyecto"
 #: migasfree/stats/views/syncs.py:245
 msgid "Synchronizations / Project"
 msgstr "Sincronizaciones / Proyecto"
+
+#~ msgid "There are not available repositories"
+#~ msgstr "No hay repositorios disponibles"
+
+#~ msgid "There are not available mandatory packages"
+#~ msgstr "No hay paquetes obligatorios disponibles"
 
 #~ msgid "Accessories"
 #~ msgstr "Accesorios"
