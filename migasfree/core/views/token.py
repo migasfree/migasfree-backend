@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -597,6 +597,19 @@ class PackageViewSet(
                 {'detail': gettext('Package already exists')},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+    def destroy(self, request, pk=None):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+
+        queryset = self.filter_queryset(self.get_queryset())
+        if queryset.filter(pk=instance.pk).exists():
+            return Response(
+                {'detail': gettext('The element has relations and cannot be removed')},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=False)
     def orphan(self, request):
