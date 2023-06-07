@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -85,6 +85,8 @@ class Node(models.Model, MigasLink):
         'Bochs': 'kvm',
         'VMware, Inc.': 'vmware'
     }
+
+    MAC_MAX_LEN = 60
 
     parent = models.ForeignKey(
         'self',
@@ -324,12 +326,10 @@ class Node(models.Model, MigasLink):
             name__icontains='network',
             class_name='network'
         )
-        lst = []
-        for iface in query:
-            if validate_mac(iface.serial):
-                lst.append(iface.serial.upper().replace(':', ''))
 
-        return ''.join(lst)
+        return ''.join(
+            iface.serial.upper().replace(':', '') for iface in query if validate_mac(iface.serial)
+        )[:MAC_MAX_LEN]
 
     @staticmethod
     def get_storage(computer_id):
