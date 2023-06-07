@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,17 +31,18 @@ class ClientAttributeStatsViewSet(viewsets.ViewSet):
     def by_property(self, request):
         total = ClientAttribute.objects.scope(request.user.userprofile).count()
 
-        data = []
-        for item in ClientAttribute.objects.scope(request.user.userprofile).values(
-            'property_att__id', 'property_att__name'
-        ).annotate(
-            count=Count('property_att__id')
-        ).order_by('-count'):
-            data.append({
+        data = [
+            {
                 'name': item.get('property_att__name'),
                 'value': item.get('count'),
                 'property_att_id': item.get('property_att__id'),
-            })
+            }
+            for item in ClientAttribute.objects.scope(request.user.userprofile).values(
+                'property_att__id', 'property_att__name'
+            ).annotate(
+                count=Count('property_att__id')
+            ).order_by('-count')
+        ]
 
         return Response(
             {
@@ -59,17 +60,18 @@ class ServerAttributeStatsViewSet(viewsets.ViewSet):
     def by_category(self, request):
         total = ServerAttribute.objects.scope(request.user.userprofile).count()
 
-        data = []
-        for item in ServerAttribute.objects.scope(request.user.userprofile).values(
-            'property_att__id', 'property_att__name'
-        ).annotate(
-            count=Count('property_att__id')
-        ).order_by('-count'):
-            data.append({
+        data = [
+            {
                 'name': item.get('property_att__name'),
                 'value': item.get('count'),
                 'property_att_id': item.get('property_att__id'),
-            })
+            }
+            for item in ServerAttribute.objects.scope(request.user.userprofile).values(
+                'property_att__id', 'property_att__name'
+            ).annotate(
+                count=Count('property_att__id')
+            ).order_by('-count')
+        ]
 
         return Response(
             {
