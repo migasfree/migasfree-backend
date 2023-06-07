@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,19 +34,15 @@ from .. import permissions, models
 
 
 def get_platform_or_create(platform_name, ip_address=None):
-    platform = Platform.objects.filter(name=platform_name)
-    if not platform.exists():
-        platform = Platform.objects.create(name=platform_name)
+    platform, created = Platform.objects.get_or_create(name=platform_name)
 
-        if ip_address:
-            msg = _('Platform [%s] registered by IP [%s].') % (
-                platform_name, ip_address
-            )
-            models.Notification.objects.create(message=msg)
+    if created and ip_address:
+        msg = _('Platform [%s] registered by IP [%s].') % (
+            platform_name, ip_address
+        )
+        models.Notification.objects.create(message=msg)
 
-        return platform
-    else:
-        return platform[0]
+    return platform
 
 
 def add_project(project_name, pms, platform, architecture, ip_address=None):
