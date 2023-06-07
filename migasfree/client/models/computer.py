@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -142,6 +142,8 @@ class Computer(models.Model, MigasLink):
         ('P', _('Physical')),
         ('V', _('Virtual')),
     )
+
+    MAC_MAX_LEN = 60  # size for 5
 
     uuid = models.CharField(
         verbose_name=_("uuid"),
@@ -290,7 +292,7 @@ class Computer(models.Model, MigasLink):
 
     mac_address = models.CharField(
         verbose_name=_("MAC address"),
-        max_length=60,  # size for 5
+        max_length=MAC_MAX_LEN,
         null=True,
         blank=True,
         unique=False
