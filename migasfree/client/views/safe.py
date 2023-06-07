@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,13 +48,9 @@ logger = logging.getLogger('migasfree')
 
 
 def get_user_or_create(name, fullname, ip_address=None):
-    user = models.User.objects.filter(name=name, fullname=fullname)
-    if user:
-        return user.first()
+    user, created = models.User.objects.get_or_create(name=name, fullname=fullname)
 
-    user = models.User.objects.create(name=name, fullname=fullname)
-
-    if ip_address:
+    if created and ip_address:
         msg = _('User [%s] registered by IP [%s].') % (
             name, ip_address
         )
@@ -206,9 +202,7 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
         }
         serializer = serializers.SynchronizationWriteSerializer(data=data)
 
-        add_computer_message(
-            computer, gettext('Sending synchronization...')
-        )
+        add_computer_message(computer, gettext('Sending synchronization...'))
 
         if serializer.is_valid():
             serializer.save()
@@ -530,10 +524,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         results = models.FaultDefinition.enabled_for_attributes(
             computer.get_all_attributes()
         )
-        ret = []
-        for item in results:
-            serializer = serializers.FaultDefinitionForAttributesSerializer(item)
-            ret.append(serializer.data)
+        ret = [serializers.FaultDefinitionForAttributesSerializer(item).data for item in results]
 
         add_computer_message(computer, gettext('Sending fault definitions...'))
 
@@ -624,19 +615,13 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        add_computer_message(
-            computer,
-            gettext('Getting mandatory packages...')
-        )
+        add_computer_message(computer, gettext('Getting mandatory packages...'))
 
         pkgs = Deployment.available_deployments(
             computer, computer.get_all_attributes()
         ).values_list('packages_to_install', 'packages_to_remove')
 
-        add_computer_message(
-            computer,
-            gettext('Sending mandatory packages...')
-        )
+        add_computer_message(computer, gettext('Sending mandatory packages...'))
 
         if pkgs:
             install = []
@@ -1032,14 +1017,13 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        logical_devices = []
-        for device in computer.logical_devices():
-            logical_devices.append(device.as_dict(computer.project))
+        logical_devices = [
+            device.as_dict(computer.project) for device in computer.logical_devices()
+        ]
 
+        default_logical_device = 0
         if computer.default_logical_device:
             default_logical_device = computer.default_logical_device.id
-        else:
-            default_logical_device = 0
 
         logger.debug('logical devices: %s', logical_devices)
         logger.debug('default logical device: %d', default_logical_device)
