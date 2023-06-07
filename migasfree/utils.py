@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -323,13 +323,10 @@ def to_heatmap(results, range_name='day'):
     :return: [["YYYY-MM-DD", int], ...]
     """
 
-    heatmap = []
-    for item in results:
-        heatmap.append(
-            [
-                item[range_name].strftime("%Y-%m-%d"),
-                item['count']
-            ]
-        )
-
-    return heatmap
+    return [
+        [
+            item[range_name].strftime("%Y-%m-%d"),
+            item['count']
+        ]
+        for item in results
+    ]
