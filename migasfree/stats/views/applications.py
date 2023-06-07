@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,13 +30,14 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
     def by_category(self, request):
         total = Application.objects.count()
 
-        data = []
-        for item in Application.group_by_category():
-            data.append({
+        data = [
+            {
                 'name': item.get('category__name'),
                 'value': item.get('count'),
                 'category': item.get('category__id')
-            })
+            }
+            for item in Application.group_by_category()
+        ]
 
         return Response(
             {
@@ -51,13 +52,14 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
     def by_level(self, request):
         total = Application.objects.count()
 
-        data = []
-        for item in Application.group_by_level():
-            data.append({
+        data = [
+            {
                 'name': dict(Application.LEVELS)[item.get('level')],
                 'value': item.get('count'),
                 'level': item.get('level')
-            })
+            }
+            for item in Application.group_by_level()
+        ]
 
         return Response(
             {
