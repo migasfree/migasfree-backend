@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -60,8 +60,7 @@ class ApplicationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
     ordering = ('name',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return serializers.ApplicationWriteSerializer
 
         return serializers.ApplicationSerializer
@@ -118,8 +117,7 @@ class PackagesByProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasV
     ordering = ['application__id', 'project__name']
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return serializers.PackagesByProjectWriteSerializer
 
         return serializers.PackagesByProjectSerializer
@@ -135,8 +133,7 @@ class PolicyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
     ordering = ('name',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return serializers.PolicyWriteSerializer
 
         return serializers.PolicySerializer
@@ -150,8 +147,7 @@ class PolicyGroupViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
     ordering = ('policy__id', 'priority')
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return serializers.PolicyGroupWriteSerializer
 
         return serializers.PolicyGroupSerializer
