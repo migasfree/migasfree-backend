@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2016-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -54,8 +54,7 @@ class ConnectionViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
         return self.queryset.select_related('device_type')
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return serializers.ConnectionWriteSerializer
 
         return serializers.ConnectionSerializer
@@ -71,8 +70,7 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
     ordering = ('name',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return serializers.DeviceWriteSerializer
 
         return serializers.DeviceSerializer
@@ -143,8 +141,7 @@ class DriverViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
     ordering = ('model', 'project', 'capability')
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return serializers.DriverWriteSerializer
 
         return serializers.DriverSerializer
@@ -173,8 +170,7 @@ class LogicalViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
     ordering = ('device__name',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return serializers.LogicalWriteSerializer
 
         return serializers.LogicalSerializer
@@ -243,8 +239,7 @@ class ModelViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Expo
     ordering = ('name',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return serializers.ModelWriteSerializer
 
         return serializers.ModelSerializer
