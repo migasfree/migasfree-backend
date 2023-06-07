@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -125,10 +125,9 @@ class ApplicationWriteSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
 
-        representation['available_for_attributes'] = []
-        for item in obj.available_for_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['available_for_attributes'].append(attribute)
+        representation['available_for_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.available_for_attributes.all()
+        ]
 
         if obj.level:
             representation['level'] = LevelSerializer(obj.level).data
@@ -164,15 +163,13 @@ class PolicyWriteSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
 
-        representation['included_attributes'] = []
-        for item in obj.included_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['included_attributes'].append(attribute)
+        representation['included_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.included_attributes.all()
+        ]
 
-        representation['excluded_attributes'] = []
-        for item in obj.excluded_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['excluded_attributes'].append(attribute)
+        representation['excluded_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
+        ]
 
         return representation
 
@@ -194,20 +191,17 @@ class PolicyGroupWriteSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
 
-        representation['included_attributes'] = []
-        for item in obj.included_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['included_attributes'].append(attribute)
+        representation['included_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.included_attributes.all()
+        ]
 
-        representation['excluded_attributes'] = []
-        for item in obj.excluded_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['excluded_attributes'].append(attribute)
+        representation['excluded_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
+        ]
 
-        representation['applications'] = []
-        for item in obj.applications.all():
-            app = ApplicationInfoSerializer(item).data
-            representation['applications'].append(app)
+        representation['applications'] = [
+            ApplicationInfoSerializer(item).data for item in obj.applications.all()
+        ]
 
         return representation
 
