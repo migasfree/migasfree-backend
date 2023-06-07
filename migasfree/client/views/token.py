@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
     ordering = (settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0],)
 
     def get_serializer_class(self):
-        if self.action == 'update' or self.action == 'partial_update':
+        if self.action in ['update', 'partial_update', 'destroy']:
             return serializers.ComputerWriteSerializer
 
         if self.action == 'list':
@@ -500,7 +500,7 @@ class ErrorViewSet(
     ordering = ('-created_at',)
 
     def get_serializer_class(self):
-        if self.action == 'update' or self.action == 'partial_update':
+        if self.action in ['update', 'partial_update', 'destroy']:
             return serializers.ErrorWriteSerializer
 
         return serializers.ErrorSerializer
@@ -522,8 +522,7 @@ class FaultDefinitionViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
     ordering = ('name',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return serializers.FaultDefinitionWriteSerializer
 
         return serializers.FaultDefinitionSerializer
@@ -560,7 +559,7 @@ class FaultViewSet(
     ordering = ('-created_at',)
 
     def get_serializer_class(self):
-        if self.action == 'update' or self.action == 'partial_update':
+        if self.action in ['update', 'partial_update', 'destroy']:
             return serializers.FaultWriteSerializer
 
         return serializers.FaultSerializer
@@ -616,7 +615,7 @@ class NotificationViewSet(
     ordering = ('-created_at',)
 
     def get_serializer_class(self):
-        if self.action == 'update' or self.action == 'partial_update':
+        if self.action in ['update', 'partial_update', 'destroy']:
             return serializers.NotificationWriteSerializer
 
         return serializers.NotificationSerializer
@@ -678,8 +677,7 @@ class SynchronizationViewSet(
     ordering = ('-created_at',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return serializers.SynchronizationWriteSerializer
 
         return serializers.SynchronizationSerializer
