@@ -86,8 +86,6 @@ class Node(models.Model, MigasLink):
         'VMware, Inc.': 'vmware'
     }
 
-    MAC_MAX_LEN = 60
-
     parent = models.ForeignKey(
         'self',
         on_delete=models.CASCADE,
@@ -329,7 +327,7 @@ class Node(models.Model, MigasLink):
 
         return ''.join(
             iface.serial.upper().replace(':', '') for iface in query if validate_mac(iface.serial)
-        )[:MAC_MAX_LEN]
+        )[:Computer.MAC_MAX_LEN]
 
     @staticmethod
     def get_storage(computer_id):
