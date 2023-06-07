@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -186,20 +186,17 @@ class FaultDefinitionWriteSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
 
-        representation['included_attributes'] = []
-        for item in obj.included_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['included_attributes'].append(attribute)
+        representation['included_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.included_attributes.all()
+        ]
 
-        representation['excluded_attributes'] = []
-        for item in obj.excluded_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['excluded_attributes'].append(attribute)
+        representation['excluded_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
+        ]
 
-        representation['users'] = []
-        for item in obj.users.all():
-            user = UserProfileInfoSerializer(item).data
-            representation['users'].append(user)
+        representation['users'] = [
+            UserProfileInfoSerializer(item).data for item in obj.users.all()
+        ]
 
         return representation
 
