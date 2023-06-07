@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2021-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,17 +31,18 @@ class PackageHistoryStatsViewSet(viewsets.ViewSet):
     def by_project(self, request):
         total = PackageHistory.objects.scope(request.user.userprofile).count()
 
-        data = []
-        for item in PackageHistory.objects.scope(request.user.userprofile).values(
-            'package__project__id', 'package__project__name'
-        ).annotate(
-            count=Count('package__project__id')
-        ).order_by('-count'):
-            data.append({
+        data = [
+            {
                 'name': item.get('package__project__name'),
                 'value': item.get('count'),
                 'package_project_id': item.get('package__project__id'),
-            })
+            }
+            for item in PackageHistory.objects.scope(request.user.userprofile).values(
+                'package__project__id', 'package__project__name'
+            ).annotate(
+                count=Count('package__project__id')
+            ).order_by('-count')
+        ]
 
         return Response(
             {
