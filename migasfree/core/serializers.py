@@ -104,15 +104,13 @@ class AttributeSetWriteSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
 
-        representation['included_attributes'] = []
-        for item in obj.included_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['included_attributes'].append(attribute)
+        representation['included_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.included_attributes.all()
+        ]
 
-        representation['excluded_attributes'] = []
-        for item in obj.excluded_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['excluded_attributes'].append(attribute)
+        representation['excluded_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
+        ]
 
         return representation
 
@@ -562,25 +560,21 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
 
         representation['project'] = ProjectInfoSerializer(obj.project).data
 
-        representation['included_attributes'] = []
-        for item in obj.included_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['included_attributes'].append(attribute)
+        representation['included_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.included_attributes.all()
+        ]
 
-        representation['excluded_attributes'] = []
-        for item in obj.excluded_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['excluded_attributes'].append(attribute)
+        representation['excluded_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
+        ]
 
-        representation['available_packages'] = []
-        for item in obj.available_packages.all():
-            pkg = PackageInfoSerializer(item).data
-            representation['available_packages'].append(pkg)
+        representation['available_packages'] = [
+            PackageInfoSerializer(item).data for item in obj.available_packages.all()
+        ]
 
-        representation['available_package_sets'] = []
-        for item in obj.available_package_sets.all():
-            pkg = PackageSetInfoSerializer(item).data
-            representation['available_package_sets'].append(pkg)
+        representation['available_package_sets'] = [
+            PackageSetInfoSerializer(item).data for item in obj.available_package_sets.all()
+        ]
 
         representation['packages_to_install'] = to_list(obj.packages_to_install)
         representation['packages_to_remove'] = to_list(obj.packages_to_remove)
@@ -718,25 +712,21 @@ class DomainWriteSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
 
-        representation['included_attributes'] = []
-        for item in obj.included_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['included_attributes'].append(attribute)
+        representation['included_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.included_attributes.all()
+        ]
 
-        representation['excluded_attributes'] = []
-        for item in obj.excluded_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['excluded_attributes'].append(attribute)
+        representation['excluded_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
+        ]
 
-        representation['tags'] = []
-        for item in obj.tags.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['tags'].append(attribute)
+        representation['tags'] = [
+            AttributeInfoSerializer(item).data for item in obj.tags.all()
+        ]
 
-        representation['domain_admins'] = []
-        for item in obj.domains.all():
-            admin = UserProfileInfoSerializer(item).data
-            representation['domain_admins'].append(admin)
+        representation['domain_admins'] = [
+            UserProfileInfoSerializer(item).data for item in obj.domains.all()
+        ]
 
         return representation
 
@@ -793,15 +783,13 @@ class ScopeWriteSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
 
-        representation['included_attributes'] = []
-        for item in obj.included_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['included_attributes'].append(attribute)
+        representation['included_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.included_attributes.all()
+        ]
 
-        representation['excluded_attributes'] = []
-        for item in obj.excluded_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['excluded_attributes'].append(attribute)
+        representation['excluded_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
+        ]
 
         if obj.user:
             representation['user'] = UserProfileInfoSerializer(obj.user).data
@@ -846,10 +834,9 @@ class GroupWriteSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
 
-        representation['permissions'] = []
-        for item in obj.permissions.all():
-            permission = PermissionInfoSerializer(item).data
-            representation['permissions'].append(permission)
+        representation['permissions'] = [
+            PermissionInfoSerializer(item).data for item in obj.permissions.all()
+        ]
 
         return representation
 
@@ -862,20 +849,17 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
 
-        representation['groups'] = []
-        for item in obj.groups.all():
-            group = GroupInfoSerializer(item).data
-            representation['groups'].append(group)
+        representation['groups'] = [
+            GroupInfoSerializer(item).data for item in obj.groups.all()
+        ]
 
-        representation['user_permissions'] = []
-        for item in obj.user_permissions.all():
-            permission = PermissionInfoSerializer(item).data
-            representation['user_permissions'].append(permission)
+        representation['user_permissions'] = [
+            PermissionInfoSerializer(item).data for item in obj.user_permissions.all()
+        ]
 
-        representation['domains'] = []
-        for item in obj.domains.all():
-            domain = DomainInfoSerializer(item).data
-            representation['domains'].append(domain)
+        representation['domains'] = [
+            DomainInfoSerializer(item).data for item in obj.domains.all()
+        ]
 
         if obj.domain_preference:
             representation['domain_preference'] = DomainInfoSerializer(
