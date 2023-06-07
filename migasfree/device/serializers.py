@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -97,10 +97,9 @@ class DeviceWriteSerializer(serializers.ModelSerializer):
         if obj.data:
             representation['data'] = json.loads(obj.data)
 
-        representation['available_for_attributes'] = []
-        for item in obj.available_for_attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['available_for_attributes'].append(attribute)
+        representation['available_for_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.available_for_attributes.all()
+        ]
 
         return representation
 
@@ -206,10 +205,9 @@ class LogicalWriteSerializer(serializers.ModelSerializer):
         if obj.capability:
             representation['capability'] = CapabilityInfoSerializer(obj.capability).data
 
-        representation['attributes'] = []
-        for item in obj.attributes.all():
-            attribute = AttributeInfoSerializer(item).data
-            representation['attributes'].append(attribute)
+        representation['attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.attributes.all()
+        ]
 
         return representation
 
@@ -234,10 +232,9 @@ class ModelWriteSerializer(serializers.ModelSerializer):
         if obj.manufacturer:
             representation['manufacturer'] = ManufacturerInfoSerializer(obj.manufacturer).data
 
-        representation['connections'] = []
-        for item in obj.connections.all():
-            conn = ConnectionInfoSerializer(item).data
-            representation['connections'].append(conn)
+        representation['connections'] = [
+            ConnectionInfoSerializer(item).data for item in obj.connections.all()
+        ]
 
         return representation
 
