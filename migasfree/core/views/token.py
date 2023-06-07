@@ -176,8 +176,7 @@ class AttributeSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSe
     ordering = ('name',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return AttributeSetWriteSerializer
 
         return AttributeSetSerializer
@@ -224,8 +223,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
     search_fields = ['name']
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return ProjectWriteSerializer
 
         return ProjectSerializer
@@ -259,8 +257,7 @@ class StoreViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Expo
     search_fields = ['name']
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return StoreWriteSerializer
 
         return StoreSerializer
@@ -282,8 +279,7 @@ class PropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
     search_fields = ['name', 'language', 'code']
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return PropertyWriteSerializer
 
         return PropertySerializer
@@ -338,8 +334,7 @@ class ServerAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
     search_fields = ['value', 'description']
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return ServerAttributeWriteSerializer
 
         return ServerAttributeSerializer
@@ -396,8 +391,7 @@ class ClientAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
     search_fields = ['value', 'description']
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return ClientAttributeWriteSerializer
 
         return ClientAttributeSerializer
@@ -485,8 +479,7 @@ class ScheduleDelayViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewS
     ordering = ('delay',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return ScheduleDelayWriteSerializer
 
         return ScheduleDelaySerializer
@@ -515,8 +508,7 @@ class ScheduleViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
     ordering = ('name',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return ScheduleWriteSerializer
 
         return ScheduleSerializer
@@ -663,8 +655,7 @@ class PackageSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
     ordering = ('project__name', 'name')
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return PackageSetWriteSerializer
 
         return PackageSetSerializer
@@ -762,8 +753,7 @@ class DeploymentViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
     ordering = ('name', 'project__name')
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return DeploymentWriteSerializer
 
         if self.action == 'list':
@@ -787,8 +777,7 @@ class InternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
     ordering = ('name', 'project__name')
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return InternalSourceWriteSerializer
 
         return InternalSourceSerializer
@@ -860,8 +849,7 @@ class UserProfileViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
     ordering = ('username',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return UserProfileWriteSerializer
 
         if self.action == 'list':
@@ -941,8 +929,7 @@ class GroupViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, ExportViewSet):
     ordering = ('name',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return GroupWriteSerializer
 
         return GroupSerializer
@@ -966,8 +953,7 @@ class DomainViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
     ordering = ('name',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return DomainWriteSerializer
 
         if self.action == 'list':
@@ -1001,8 +987,7 @@ class ScopeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Expo
     ordering = ('name',)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return ScopeWriteSerializer
 
         if self.action == 'list':
