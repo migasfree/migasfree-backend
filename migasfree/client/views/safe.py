@@ -237,6 +237,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         computer = get_computer(claims.get('uuid'), claims.get('name'))
         if computer:
+            if self.project.id != computer.project.id:
+                computer.update_project(self.project)
+
             serializer = serializers.ComputerSerializer(
                 computer,
                 context={'request': request}
