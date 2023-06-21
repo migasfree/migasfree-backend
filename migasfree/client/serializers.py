@@ -60,7 +60,7 @@ class ComputerWriteSerializer(serializers.ModelSerializer):
             self.instance.tags.clear()
             del self.fields['tags']
 
-        return super().is_valid(raise_exception)
+        return super().is_valid(raise_exception=raise_exception)
 
     class Meta:
         model = models.Computer
