@@ -110,6 +110,8 @@ def is_computer_changed(computer, name, project, ip_address, uuid):
         models.Notification.objects.create(message=msg)
         computer.update_uuid(uuid)
 
+    return computer
+
 
 def get_computer(uuid, name):
     logger.debug('uuid: %s, name: %s', uuid, name)
@@ -237,8 +239,13 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         computer = get_computer(claims.get('uuid'), claims.get('name'))
         if computer:
-            if self.project.id != computer.project.id:
-                computer.update_project(self.project)
+            computer = is_computer_changed(
+                computer,
+                claims.get('name'),
+                self.project,
+                claims.get('ip_address'),
+                claims.get('uuid')
+            )
 
             serializer = serializers.ComputerSerializer(
                 computer,
