@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import tempfile
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, StreamingHttpResponse
+from django.utils.translation import gettext as _
 from mimetypes import guess_type
 from rest_framework import status, views, permissions
 from rest_framework.decorators import action, permission_classes
@@ -37,9 +38,22 @@ from wsgiref.util import FileWrapper
 
 from ..pms import get_available_pms, get_pms
 from ..models import Project, ExternalSource
+from ...client.models import Notification
+from ...utils import get_client_ip
 
 import logging
 logger = logging.getLogger('migasfree')
+
+
+def add_notification_get_source_file(error, deployment, resource, remote, from_):
+    Notification.objects.create(
+        _("Deployment (external source) [%s]: [%s] resource: [%s], remote file: [%s], from [%s].") % (
+            f'{deployment.name}@{deployment.project.name}',
+            resource,
+            remote,
+            from_
+        )
+    )
 
 
 def external_downloads(url, local_file):
@@ -233,11 +247,25 @@ class GetSourceFileView(views.APIView):
 
                 return response
             except HTTPError as e:
+                add_notification_get_source_file(
+                    f'HTTP Error: {e.code}',
+                    source,
+                    _path,
+                    url,
+                    get_client_ip(request)
+                )
                 return HttpResponse(
                     f'HTTP Error: {e.code} {url}',
                     status=e.code
                 )
             except URLError as e:
+                add_notification_get_source_file(
+                    f'URL Error: {e.reason}',
+                    source,
+                    _path,
+                    url,
+                    get_client_ip(request)
+                )
                 return HttpResponse(
                     f'URL Error: {e.reason} {url}',
                     status=status.HTTP_404_NOT_FOUND
