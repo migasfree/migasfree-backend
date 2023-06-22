@@ -1007,7 +1007,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                         "name": "xxxx",
                         "model": "xxxx",
                         "driver": "xxxx",
-                        "feature": "xxxx",
+                        "capability": "xxxx",
                         "manufacturer": "xxxx",
                         "packages": ["pkg1", "pkg2"],
                         connection: {}
