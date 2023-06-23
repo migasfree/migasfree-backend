@@ -30,7 +30,8 @@ from rest_framework.response import Response
 
 from ...utils import (
     uuid_change_format, get_client_ip,
-    remove_duplicates_preserving_order
+    remove_duplicates_preserving_order,
+    replace_keys,
 )
 from ...model_update import update
 from ...core.mixins import SafeConnectionMixin
@@ -1045,5 +1046,51 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         return Response(
             self.create_response(response),
+            status=status.HTTP_200_OK
+        )
+
+    @action(methods=['post'], detail=False)
+    def traits(self, request):
+        """
+        claims = {'id': 1}
+
+        Returns: {
+            [
+                {
+                    'id': 1,
+                    'description': 'lorem ipsum',
+                    'value': 'x',
+                    'name': 'xxxx',
+                    'prefix': 'xxx',
+                    'sort': 'xxxxxx'
+                },
+                ...
+            ]
+        }
+        """
+        claims = self.get_claims(request.data)
+        computer = get_object_or_404(models.Computer, id=claims.get('id'))
+
+        add_computer_message(computer, gettext('Getting traits...'))
+
+        attributes = replace_keys(
+            list(Attribute.objects.filter(computer__id=computer.id).values(
+                'id', 'description', 'value',
+                'property_att__name', 'property_att__prefix', 'property_att__sort'
+            )),
+            {
+                'id': 'id',
+                'description': 'description',
+                'value': 'value',
+                'property_att__name': 'name',
+                'property_att__prefix': 'prefix',
+                'property_att__sort': 'sort'
+            }
+        )
+
+        add_computer_message(computer, gettext('Sending traits...'))
+
+        return Response(
+            self.create_response(attributes),
             status=status.HTTP_200_OK
         )
