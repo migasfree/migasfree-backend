@@ -92,39 +92,6 @@ class AttributeInfoSerializer(serializers.ModelSerializer):
         )
 
 
-class SingularitySerializer(serializers.ModelSerializer):
-    property_att = PropertyInfoSerializer(many=False, read_only=True)
-    language = serializers.SerializerMethodField()
-    included_attributes = AttributeInfoSerializer(many=True, read_only=True)
-    excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
-
-    def get_language(self, obj):
-        return obj.get_language_display()
-
-    class Meta:
-        model = Singularity
-        fields = '__all__'
-
-
-class SingularityWriteSerializer(serializers.ModelSerializer):
-    def to_representation(self, obj):
-        representation = super().to_representation(obj)
-
-        representation['included_attributes'] = [
-            AttributeInfoSerializer(item).data for item in obj.included_attributes.all()
-        ]
-
-        representation['excluded_attributes'] = [
-            AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
-        ]
-
-        return representation
-
-    class Meta:
-        model = Singularity
-        fields = '__all__'
-
-
 class AttributeSetSerializer(serializers.ModelSerializer):
     included_attributes = AttributeInfoSerializer(many=True, read_only=True)
     excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
@@ -262,6 +229,43 @@ class ClientPropertySerializer(serializers.ModelSerializer):
             'kind', 'sort', 'enabled',
             'language', 'code'
         )
+
+
+class SingularitySerializer(serializers.ModelSerializer):
+    property_att = ServerPropertyInfoSerializer(many=False, read_only=True)
+    language = serializers.SerializerMethodField()
+    included_attributes = AttributeInfoSerializer(many=True, read_only=True)
+    excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
+
+    def get_language(self, obj):
+        return obj.get_language_display()
+
+    class Meta:
+        model = Singularity
+        fields = (
+            'id', '__str__', 'enabled', 'priority',
+            'property_att', 'language', 'code',
+            'included_attributes', 'excluded_attributes',
+        )
+
+
+class SingularityWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['included_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.included_attributes.all()
+        ]
+
+        representation['excluded_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
+        ]
+
+        return representation
+
+    class Meta:
+        model = Singularity
+        fields = '__all__'
 
 
 class ServerAttributeSerializer(AttributeSerializer):
