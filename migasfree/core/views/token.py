@@ -66,7 +66,7 @@ from ..resources import (
 )
 from ..models import (
     Platform, Project, Store,
-    ServerProperty, ClientProperty,
+    ServerProperty, ClientProperty, Singularity,
     ServerAttribute, ClientAttribute, Attribute,
     Schedule, ScheduleDelay,
     Package, PackageSet, Deployment,
@@ -78,6 +78,7 @@ from ..serializers import (
     PlatformSerializer, ProjectSerializer, ProjectWriteSerializer,
     StoreSerializer, StoreWriteSerializer,
     ServerPropertySerializer, ClientPropertySerializer,
+    SingularitySerializer, SingularityWriteSerializer,
     ServerAttributeSerializer, ServerAttributeWriteSerializer,
     ClientAttributeSerializer, ClientAttributeWriteSerializer,
     AttributeSerializer,
@@ -101,6 +102,7 @@ from ..filters import (
     AttributeSetFilter, PropertyFilter, AttributeFilter, PlatformFilter,
     UserProfileFilter, PermissionFilter, GroupFilter, DomainFilter,
     ScopeFilter, ScheduleFilter, PackageSetFilter, ClientPropertyFilter,
+    SingularityFilter,
 )
 
 
@@ -164,6 +166,37 @@ class MigasViewSet(viewsets.ViewSet):
             return Response(response, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@permission_classes((permissions.DjangoModelPermissions,))
+class SingularityViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
+    queryset = Singularity.objects.all()
+    serializer_class = SingularitySerializer
+    filterset_class = SingularityFilter
+    search_fields = ['property_att__name', 'property_att__prefix']
+    ordering_fields = '__all__'
+    ordering = ('property_att__name', 'priority')
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return SingularityWriteSerializer
+
+        return SingularitySerializer
+
+    def get_queryset(self):
+        if self.request is None:
+            return Singularity.objects.none()
+
+        qs = Attribute.objects.scope(self.request.user.userprofile)
+
+        return Singularity.objects.scope(
+            self.request.user.userprofile
+        ).prefetch_related(
+            Prefetch('included_attributes', queryset=qs),
+            Prefetch('excluded_attributes', queryset=qs),
+            'included_attributes__property_att',
+            'excluded_attributes__property_att',
+        )
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
