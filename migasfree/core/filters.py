@@ -22,9 +22,23 @@ from django.contrib.auth.models import Permission, Group
 from .models import (
     Deployment, Package, ClientAttribute, ServerAttribute, Attribute,
     Project, ScheduleDelay, Store, AttributeSet, Platform,
-    Property, ClientProperty,
+    Property, ClientProperty, Singularity,
     UserProfile, Domain, Scope, Schedule, PackageSet,
 )
+
+
+class SingularityFilter(filters.FilterSet):
+    class Meta:
+        model = Singularity
+        fields = {
+            'id': ['exact', 'in'],
+            'property_att__id': ['exact'],
+            'property_att__prefix': ['exact'],
+            'property_att__name': ['exact', 'icontains'],
+            'enabled': ['exact'],
+            'included_attributes__id': ['exact'],
+            'excluded_attributes__id': ['exact'],
+        }
 
 
 class AttributeSetFilter(filters.FilterSet):
