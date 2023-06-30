@@ -31,7 +31,8 @@ from .validators import MimetypeValidator, validate_project_pms
 from .pms import get_available_mimetypes
 from .models import (
     Platform, Project, Store,
-    ServerProperty, ClientProperty, Property,
+    ServerProperty, ClientProperty,
+    Property, Singularity,
     Attribute, AttributeSet,
     ServerAttribute, ClientAttribute,
     Schedule, ScheduleDelay,
@@ -89,6 +90,39 @@ class AttributeInfoSerializer(serializers.ModelSerializer):
             'value', 'description',
             'latitude', 'longitude'
         )
+
+
+class SingularitySerializer(serializers.ModelSerializer):
+    property_att = PropertyInfoSerializer(many=False, read_only=True)
+    language = serializers.SerializerMethodField()
+    included_attributes = AttributeInfoSerializer(many=True, read_only=True)
+    excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
+
+    def get_language(self, obj):
+        return obj.get_language_display()
+
+    class Meta:
+        model = Singularity
+        fields = '__all__'
+
+
+class SingularityWriteSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+
+        representation['included_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.included_attributes.all()
+        ]
+
+        representation['excluded_attributes'] = [
+            AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
+        ]
+
+        return representation
+
+    class Meta:
+        model = Singularity
+        fields = '__all__'
 
 
 class AttributeSetSerializer(serializers.ModelSerializer):
