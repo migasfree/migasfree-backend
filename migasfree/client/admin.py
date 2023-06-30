@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -283,7 +283,7 @@ class FaultDefinitionAdmin(admin.ModelAdmin):
     )
     list_filter = ('enabled', 'users',)
     search_fields = ('name',)
-    filter_horizontal = ('included_attributes',)
+    filter_horizontal = ('included_attributes', 'excluded_attributes')
 
     fieldsets = (
         (None, {
