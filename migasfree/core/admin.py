@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ from . import tasks
 from .models import (
     Platform, Project, Store,
     Attribute, ClientAttribute, ServerAttribute, AttributeSet,
-    Property, ClientProperty, ServerProperty,
+    Property, ClientProperty, ServerProperty, Singularity,
     ScheduleDelay, Schedule, Package, PackageSet,
     Deployment, InternalSource, ExternalSource,
     UserProfile, Scope, Domain,
@@ -127,6 +127,29 @@ class ServerPropertyAdmin(admin.ModelAdmin):
     fields = ('prefix', 'name', 'kind', 'enabled')
     list_filter = (ServerPropertyFilter,)
 
+
+@admin.register(Singularity)
+class SingularityAdmin(admin.ModelAdmin):
+    list_display = (
+        '__str__', 'enabled', 'language',
+        'list_included_attributes', 'list_excluded_attributes'
+    )
+    list_filter = ('enabled',)
+    ordering = ('property_att__name',)
+    search_fields = ('property_att__name', 'property_att__prefix')
+    filter_horizontal = ('included_attributes', 'excluded_attributes')
+
+    def get_queryset(self, request):
+        qs = Attribute.objects.scope(request.user.userprofile)
+
+        return Singularity.objects.scope(
+            request.user.userprofile
+        ).prefetch_related(
+            Prefetch('included_attributes', queryset=qs),
+            Prefetch('excluded_attributes', queryset=qs),
+            'included_attributes__property_att',
+            'excluded_attributes__property_att',
+        )
 
 class ClientAttributeFilter(SimpleListFilter):
     title = 'Client Attribute'
