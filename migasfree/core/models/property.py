@@ -112,14 +112,30 @@ class Property(models.Model, MigasLink):
             return super().delete(using, keep_parents)
 
     @staticmethod
-    def enabled_client_properties():
+    def enabled_client_properties(attributes):
+        from .singularity import Singularity
+
         client_properties = []
         for item in Property.objects.filter(enabled=True, sort='client'):
-            client_properties.append({
-                "language": item.get_language_display(),
-                "prefix": item.prefix,
-                "code": item.code
-            })
+            singularities = Singularity.objects.filter(
+                property_att__id=item.id,
+                enabled=True,
+                included_attributes__id__in=attributes,
+            ).filter(
+                ~models.Q(excluded_attributes__id__in=attributes)
+            ).order_by('-priority')
+            if singularities.count():
+                client_properties.append({
+                    'prefix': item.prefix,
+                    'language': singularities.first().get_language_display(),
+                    'code': singularities.first().code,
+                })
+            else:
+                client_properties.append({
+                    'prefix': item.prefix,
+                    'language': item.get_language_display(),
+                    'code': item.code,
+                })
 
         return client_properties
 
