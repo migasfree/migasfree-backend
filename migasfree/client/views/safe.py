@@ -382,7 +382,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Getting properties...'))
 
-        properties = Property.enabled_client_properties()
+        properties = Property.enabled_client_properties(
+            computer.get_all_attributes()
+        )
 
         add_computer_message(computer, gettext('Sending properties...'))
 
