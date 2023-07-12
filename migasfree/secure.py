@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 import os
 import json
-import gpgme
+import gpg
 
 from io import BytesIO
 from jwcrypto import jwk, jwe, jws
@@ -197,7 +197,7 @@ Expire-Date: 0
         )
 
         # export and save
-        ctx = gpgme.Context()
+        ctx = gpg.Context()
         ctx.armor = True
         key_data = BytesIO()
         ctx.export(name, key_data)

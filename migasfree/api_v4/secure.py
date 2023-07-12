@@ -2,7 +2,7 @@
 
 import os
 import json
-import gpgme
+import gpg
 
 from io import BytesIO
 from Crypto.PublicKey import RSA
@@ -139,7 +139,7 @@ Expire-Date: 0
         )
 
         # export and save
-        ctx = gpgme.Context()
+        ctx = gpg.Context()
         ctx.armor = True
         key_data = BytesIO()
         ctx.export(name, key_data)
