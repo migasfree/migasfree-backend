@@ -1,8 +1,8 @@
 -r base.txt # includes the base.txt requirements file
 
-django-debug-toolbar==4.0.0
-django-extensions==3.2.1
+django-debug-toolbar==4.1.0
+django-extensions==3.2.3
 django-silk==5.0.3
 pydot==1.4.2
-pyparsing==3.0.9
+pyparsing==3.1.0
 sqlparse==0.4.4
