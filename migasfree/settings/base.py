@@ -58,10 +58,6 @@ LANGUAGE_CODE = 'es'
 # to load the internationalization machinery.
 USE_I18N = True
 
-# If you set this to False, Django will not format dates, numbers and
-# calendars according to the current locale
-USE_L10N = True
-
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 STATICFILES_FINDERS = (
