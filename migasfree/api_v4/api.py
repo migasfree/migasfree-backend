@@ -247,7 +247,9 @@ def get_properties(request, name, uuid, computer, data):
         str(inspect.getframeinfo(inspect.currentframe()).function),
         {
             'properties': replace_keys(
-                Property.enabled_client_properties(),
+                Property.enabled_client_properties(
+                    computer.get_all_attributes()
+                ),
                 {'prefix': 'name', 'language': 'language', 'code': 'code'}
             )
         }
