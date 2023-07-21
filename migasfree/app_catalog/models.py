@@ -75,7 +75,7 @@ def upload_path_handler(instance, filename):
     return f'catalog_icons/app_{instance.pk}{ext}'
 
 
-class Category(models.Model):
+class Category(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_('name'),
         max_length=50,
