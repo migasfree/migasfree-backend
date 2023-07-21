@@ -150,7 +150,8 @@ class PlatformFilter(filters.FilterSet):
         model = Platform
         fields = {
             'id': ['exact', 'in'],
-            'name': ['exact', 'icontains']
+            'name': ['exact', 'icontains'],
+            'project__id': ['exact'],
         }
 
 
@@ -163,6 +164,11 @@ class ProjectFilter(filters.FilterSet):
             'name': ['exact', 'icontains'],
             'pms': ['exact', 'icontains'],
             'auto_register_computers': ['exact'],
+            'deployment__id': ['exact'],
+            'store__id': ['exact'],
+            'package__id': ['exact'],
+            'packageset__id': ['exact'],
+            'computer__id': ['exact'],
         }
 
 
@@ -175,6 +181,8 @@ class PropertyFilter(filters.FilterSet):
             'enabled': ['exact'],
             'sort': ['exact'],
             'kind': ['exact'],
+            'singularity__id': ['exact'],
+            'attribute__id': ['exact'],
         }
 
 
@@ -188,6 +196,8 @@ class ClientPropertyFilter(filters.FilterSet):
             'sort': ['exact'],
             'kind': ['exact'],
             'language': ['exact'],
+            'singularity__id': ['exact'],
+            'attribute__id': ['exact'],
         }
 
 
@@ -333,7 +343,8 @@ class StoreFilter(filters.FilterSet):
         fields = {
             'id': ['exact', 'in'],
             'name': ['icontains'],
-            'project__id': ['exact']
+            'project__id': ['exact'],
+            'packageset__id': ['exact'],
         }
 
 
