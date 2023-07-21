@@ -38,7 +38,7 @@ from .resources import (
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class CategoryViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, ExportViewSet):
+class CategoryViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = models.Category.objects.all()
     serializer_class = serializers.CategorySerializer
     filterset_class = CategoryFilter
