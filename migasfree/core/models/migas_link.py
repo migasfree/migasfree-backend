@@ -57,6 +57,7 @@ class MigasLink:
         'core.serverproperty': 'stamps',
         'core.scheduledelay': 'schedule-delays',
         'core.schedule': 'schedules',
+        'core.singularity': 'singularities',
         'core.scope': 'scopes',
         'core.store': 'stores',
         'core.userprofile': 'user-profiles',
