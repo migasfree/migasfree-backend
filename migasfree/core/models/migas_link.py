@@ -31,6 +31,7 @@ class MigasLink:
     ROUTES = {
         'auth.group': 'groups',
         'app_catalog.application': 'catalog/applications',
+        'app_catalog.category': 'catalog/categories',
         'app_catalog.packagesbyproject': 'catalog/project-packages',
         'app_catalog.policy': 'catalog/policies',
         'app_catalog.policygroup': 'catalog/policy-groups',
@@ -53,6 +54,7 @@ class MigasLink:
         'core.package': 'packages',
         'core.platform': 'platforms',
         'core.project': 'projects',
+        'core.property': 'formulas',
         'core.clientproperty': 'formulas',
         'core.serverproperty': 'stamps',
         'core.scheduledelay': 'schedule-delays',
@@ -135,7 +137,7 @@ class MigasLink:
         objs = [
             (f, f.model if f.model != self else None)
             for f in self._meta.get_fields()
-            if f.many_to_many and not f.auto_created
+            if (f.many_to_many or f.many_to_one) and not f.auto_created
         ]
 
         actions = []
@@ -186,6 +188,11 @@ class MigasLink:
                     _name = 'tag'
 
             if _name == 'permission':
+                break
+
+            if _name == 'property' \
+                    and self._meta.model_name in ['serverattribute', 'attribute'] \
+                    and obj.attname == 'property_att_id':
                 break
 
             if hasattr(obj.remote_field.model.objects, 'scope'):
