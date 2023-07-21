@@ -81,6 +81,7 @@ class ManufacturerFilter(filters.FilterSet):
         fields = {
             'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
+            'model__id': ['exact'],
         }
 
 
@@ -90,6 +91,7 @@ class TypeFilter(filters.FilterSet):
         fields = {
             'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
+            'model__id': ['exact'],
         }
 
 
