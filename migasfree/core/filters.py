@@ -243,6 +243,8 @@ class AttributeFilter(filters.FilterSet):
             'policy_included__id': ['exact'],
             'policy_excluded__id': ['exact'],
             'computer__id': ['exact'],
+            'singularity_included__id': ['exact'],
+            'singularity_excluded__id': ['exact'],
         }
 
 
@@ -272,6 +274,8 @@ class ClientAttributeFilter(AttributeFilter):
             'policy_included__id': ['exact'],
             'policy_excluded__id': ['exact'],
             'computer__id': ['exact'],
+            'singularity_included__id': ['exact'],
+            'singularity_excluded__id': ['exact'],
         }
 
 
@@ -303,6 +307,8 @@ class ServerAttributeFilter(AttributeFilter):
             'policy_excluded__id': ['exact'],
             'computer__id': ['exact'],
             'tags__id': ['exact'],
+            'singularity_included__id': ['exact'],
+            'singularity_excluded__id': ['exact'],
         }
 
 
