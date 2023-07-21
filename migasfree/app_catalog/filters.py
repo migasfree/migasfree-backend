@@ -30,6 +30,7 @@ class CategoryFilter(django_filters.FilterSet):
         fields = {
             'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
+            'application__id': ['exact'],
         }
 
 
