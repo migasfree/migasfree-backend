@@ -32,6 +32,7 @@ class SingularityFilter(filters.FilterSet):
         model = Singularity
         fields = {
             'id': ['exact', 'in'],
+            'name': ['exact', 'icontains'],
             'property_att__id': ['exact'],
             'property_att__prefix': ['exact'],
             'property_att__name': ['exact', 'icontains'],
