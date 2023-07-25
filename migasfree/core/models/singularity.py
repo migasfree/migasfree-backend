@@ -40,6 +40,13 @@ class Singularity(models.Model, MigasLink):
         default=True,
     )
 
+    name = models.CharField(
+        max_length=50,
+        unique=True,
+        default=None,
+        verbose_name=_('name'),
+    )
+
     property_att = models.ForeignKey(
         Property,
         on_delete=models.CASCADE,
@@ -85,7 +92,7 @@ class Singularity(models.Model, MigasLink):
     objects = SingularityManager()
 
     def __str__(self):
-        return f'{self.property_att.name} ({self.priority})'
+        return self.name
 
     def list_included_attributes(self):
         return self.included_attributes.values_list('value', flat=True)
@@ -101,4 +108,5 @@ class Singularity(models.Model, MigasLink):
         app_label = 'core'
         verbose_name = _('Singularity')
         verbose_name_plural = _('Singularities')
-        ordering = ['property_att__name', 'priority']
+        unique_together = (('name', 'property_att', 'priority'),)
+        ordering = ['property_att__name', '-priority']
