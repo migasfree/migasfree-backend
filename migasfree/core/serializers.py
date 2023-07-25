@@ -243,7 +243,7 @@ class SingularitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Singularity
         fields = (
-            'id', '__str__', 'enabled', 'priority',
+            'id', 'name', 'enabled', 'priority',
             'property_att', 'language', 'code',
             'included_attributes', 'excluded_attributes',
         )
