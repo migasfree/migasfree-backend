@@ -131,12 +131,13 @@ class ServerPropertyAdmin(admin.ModelAdmin):
 @admin.register(Singularity)
 class SingularityAdmin(admin.ModelAdmin):
     list_display = (
-        '__str__', 'enabled', 'language',
+        'name', 'enabled', 'language',
+        'property_att', 'priority',
         'list_included_attributes', 'list_excluded_attributes'
     )
     list_filter = ('enabled',)
-    ordering = ('property_att__name',)
-    search_fields = ('property_att__name', 'property_att__prefix')
+    ordering = ('property_att__name', '-priority')
+    search_fields = ('name', 'property_att__name', 'property_att__prefix')
     filter_horizontal = ('included_attributes', 'excluded_attributes')
 
     def get_queryset(self, request):
