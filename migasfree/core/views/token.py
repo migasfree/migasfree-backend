@@ -173,9 +173,9 @@ class SingularityViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
     queryset = Singularity.objects.all()
     serializer_class = SingularitySerializer
     filterset_class = SingularityFilter
-    search_fields = ['property_att__name', 'property_att__prefix']
+    search_fields = ['name', 'property_att__name', 'property_att__prefix']
     ordering_fields = '__all__'
-    ordering = ('property_att__name', 'priority')
+    ordering = ('property_att__name', '-priority')
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
