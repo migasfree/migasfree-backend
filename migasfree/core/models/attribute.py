@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+import json
 
 from django.db import models
 from django.db.models import Q
@@ -204,50 +206,96 @@ class Attribute(models.Model, MigasLink):
             return super().delete(using, keep_parents)
 
     @staticmethod
-    def process_kind_property(property_att, value):
+    def _kind_normal(property_att, value):
+        obj = Attribute.objects.create(property_att, value)
+        return [obj.id]
+
+    @staticmethod
+    def _kind_list(property_att, value):
         attributes = []
 
-        if property_att.kind == "N":  # Normal
-            obj = Attribute.objects.create(property_att, value)
-            attributes.append(obj.id)
-
-        if property_att.kind == "-":  # List
-            lst = value.split(",")
-            for item in lst:
-                item = item.replace('\n', '')
-                if item:
-                    obj = Attribute.objects.create(property_att, item)
-                    attributes.append(obj.id)
-
-        if property_att.kind == "R" or property_att.kind == "L":
-            if property_att.sort == 'server':
-                obj = Attribute.objects.create(property_att, '')
+        lst = value.split(',')
+        for item in lst:
+            item = item.replace('\n', '')
+            if item:
+                obj = Attribute.objects.create(property_att, item)
                 attributes.append(obj.id)
 
-            lst = value.split(".")
-            pos = 0
+        return attributes
 
-            if property_att.kind == "R":  # Adds right
-                for item in lst:
-                    obj = Attribute.objects.create(property_att, value[pos:])
-                    attributes.append(obj.id)
-                    pos += len(item) + 1
+    @staticmethod
+    def _kind_by_side(property_att, value):
+        attributes = []
 
-            if property_att.kind == "L":  # Adds left
-                for item in lst:
-                    pos += len(item) + 1
-                    obj = Attribute.objects.create(
-                        property_att, value[0:pos - 1]
-                    )
-                    attributes.append(obj.id)
+        if property_att.sort == 'server':
+            obj = Attribute.objects.create(property_att, '')
+            attributes.append(obj.id)
+
+        lst = value.split('.')
+        pos = 0
+
+        if property_att.kind == 'R':  # Adds right
+            for item in lst:
+                obj = Attribute.objects.create(property_att, value[pos:])
+                attributes.append(obj.id)
+                pos += len(item) + 1
+
+        if property_att.kind == 'L':  # Adds left
+            for item in lst:
+                pos += len(item) + 1
+                obj = Attribute.objects.create(
+                    property_att, value[0:pos - 1]
+                )
+                attributes.append(obj.id)
 
         return attributes
+
+    @staticmethod
+    def _process_json_item(property_att, item):
+        value = item.get('value', None)
+        description = item.get('description', None)
+        if value:
+            obj = Attribute.objects.create(property_att, str(value), str(description) if description else None)
+            return [obj.id]
+
+        return []
+
+    @staticmethod
+    def _kind_json(property_att, value):
+        try:
+            content = json.loads(value)
+        except ValueError:
+            return []
+
+        if type(content) == list:
+            attributes = []
+            for item in content:
+                attributes.extend(Attribute._process_json_item(property_att, item))
+
+            return attributes
+
+        if type(content) == dict:
+            return Attribute._process_json_item(property_att, content)
+
+    @staticmethod
+    def process_kind_property(property_att, value):
+        if property_att.kind not in list(zip(*Property.KIND_CHOICES))[0]:
+            return []
+
+        if property_att.kind == 'N':  # Normal
+            return Attribute._kind_normal(property_att, value)
+        elif property_att.kind == '-':  # List
+            return Attribute._kind_list(property_att, value)
+        elif property_att.kind == 'R' or property_att.kind == 'L':
+            return Attribute._kind_by_side(property_att, value)
+        elif property_att.kind == 'J':  # JSON
+            return Attribute._kind_json(property_att, value)
 
     class Meta:
         app_label = 'core'
         verbose_name = _('Attribute')
         verbose_name_plural = _('Attributes')
-        unique_together = (("property_att", "value"),)
+        unique_together = (('property_att', 'value'),)
         ordering = ['property_att__prefix', 'value']
 
 
