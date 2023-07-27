@@ -686,20 +686,23 @@ class Computer(models.Model, MigasLink):
             gettext("Computer"): self.__str__(),
             gettext("Status"): gettext(self.status),
             gettext("Tags"): ', '.join(str(x) for x in self.tags.all()),
-            gettext("Faults"): ', '.join(
-                str(x) for x in cid.faultdefinition_set.all()
+            gettext("Faults (included)"): ', '.join(
+                str(x) for x in cid.faultdefinition_included.all()
             ),
-            gettext("Deployments"): ', '.join(
-                str(x) for x in cid.deployment_set.all()
+            gettext("Faults (excluded)"): ', '.join(
+                str(x) for x in cid.faultdefinition_excluded.all()
+            ),
+            gettext("Deployments (included)"): ', '.join(
+                str(x) for x in cid.deployment_included.all()
             ),
             gettext("Deployments (excluded)"): ', '.join(
-                str(x) for x in cid.ExcludeAttribute.all()
+                str(x) for x in cid.deployment_excluded.all()
             ),
-            gettext("Sets"): ', '.join(
-                str(x) for x in cid.attributeset_set.all()
+            gettext("Sets (included)"): ', '.join(
+                str(x) for x in cid.attributeset_included.all()
             ),
             gettext("Sets (excluded)"): ', '.join(
-                str(x) for x in cid.ExcludedAttributesGroup.all()
+                str(x) for x in cid.attributeset_excluded.all()
             ),
             gettext("Delays"): ', '.join(
                 str(x) for x in cid.scheduledelay_set.all()
@@ -709,16 +712,28 @@ class Computer(models.Model, MigasLink):
             ),
             gettext("Default logical device"): self.default_logical_device.__str__(),
             gettext("Policies (included)"): ', '.join(
-                str(x) for x in cid.PolicyIncludedAttributes.all()
+                str(x) for x in cid.policy_included.all()
             ),
             gettext("Policies (excluded)"): ', '.join(
-                str(x) for x in cid.PolicyExcludedAttributes.all()
+                str(x) for x in cid.policy_excluded.all()
             ),
             gettext("Policy Groups (included)"): ', '.join(
-                str(x) for x in cid.PolicyGroupIncludedAttributes.all()
+                str(x) for x in cid.policygroup_included.all()
             ),
             gettext("Policy Groups (excluded)"): ', '.join(
-                str(x) for x in cid.PolicyGroupExcludedAttributes.all()
+                str(x) for x in cid.policygroup_excluded.all()
+            ),
+            gettext("Domain (included)"): ', '.join(
+                str(x) for x in cid.domain_included.all()
+            ),
+            gettext("Domain (excluded)"): ', '.join(
+                str(x) for x in cid.domain_excluded.all()
+            ),
+            gettext("Scope (included)"): ', '.join(
+                str(x) for x in cid.scope_included.all()
+            ),
+            gettext("Scope (excluded)"): ', '.join(
+                str(x) for x in cid.scope_excluded.all()
             ),
         })
 
