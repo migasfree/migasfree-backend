@@ -200,12 +200,12 @@ def time_horizon(date, delay):
     return date + timedelta(days=delta)
 
 
-def swap_m2m(source_field, target_field):
-    source_m2m = source_field.all()
-    target_m2m = target_field.all()
+def swap_m2m(source, target, field):
+    source_m2m = list(getattr(source, field).values_list('pk', flat=True))
+    target_m2m = list(getattr(target, field).values_list('pk', flat=True))
 
-    source_field.set(target_m2m)
-    target_field.set(source_m2m)
+    getattr(source, field).set(target_m2m)
+    getattr(target, field).set(source_m2m)
 
 
 def remove_empty_elements_from_dict(dic):
