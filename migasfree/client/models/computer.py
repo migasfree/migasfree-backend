@@ -623,7 +623,7 @@ class Computer(models.Model, MigasLink):
 
     @staticmethod
     def replacement(source, target):
-        swap_m2m(source.tags, target.tags)
+        swap_m2m(source, target, 'tags')
         source.default_logical_device, target.default_logical_device = (
             target.default_logical_device, source.default_logical_device
         )
@@ -632,22 +632,22 @@ class Computer(models.Model, MigasLink):
         source_cid = source.get_cid_attribute()
         target_cid = target.get_cid_attribute()
 
-        swap_m2m(source_cid.logical_set, target_cid.logical_set)
-        swap_m2m(source_cid.faultdefinition_included, target_cid.faultdefinition_included)
-        swap_m2m(source_cid.faultdefinition_excluded, target_cid.faultdefinition_excluded)
-        swap_m2m(source_cid.deployment_included, target_cid.deployment_included)
-        swap_m2m(source_cid.deployment_excluded, target_cid.deployment_excluded)
-        swap_m2m(source_cid.attributeset_included, target_cid.attributeset_included)
-        swap_m2m(source_cid.attributeset_excluded, target_cid.attributeset_excluded)
-        swap_m2m(source_cid.scheduledelay_set, target_cid.scheduledelay_set)
-        swap_m2m(source_cid.policy_included, target_cid.policy_included)
-        swap_m2m(source_cid.policy_excluded, target_cid.policy_excluded)
-        swap_m2m(source_cid.policygroup_included, target_cid.policygroup_included)
-        swap_m2m(source_cid.policygroup_excluded, target_cid.policygroup_excluded)
-        swap_m2m(source_cid.scope_included, target_cid.scope_included)
-        swap_m2m(source_cid.scope_excluded, target_cid.scope_excluded)
-        swap_m2m(source_cid.domain_included, target_cid.domain_included)
-        swap_m2m(source_cid.domain_excluded, target_cid.domain_excluded)
+        swap_m2m(source_cid, target_cid, 'logical_set')
+        swap_m2m(source_cid, target_cid, 'faultdefinition_included')
+        swap_m2m(source_cid, target_cid, 'faultdefinition_excluded')
+        swap_m2m(source_cid, target_cid, 'deployment_included')
+        swap_m2m(source_cid, target_cid, 'deployment_excluded')
+        swap_m2m(source_cid, target_cid, 'attributeset_included')
+        swap_m2m(source_cid, target_cid, 'attributeset_excluded')
+        swap_m2m(source_cid, target_cid, 'scheduledelay_set')
+        swap_m2m(source_cid, target_cid, 'policy_included')
+        swap_m2m(source_cid, target_cid, 'policy_excluded')
+        swap_m2m(source_cid, target_cid, 'policygroup_included')
+        swap_m2m(source_cid, target_cid, 'policygroup_excluded')
+        swap_m2m(source_cid, target_cid, 'scope_included')
+        swap_m2m(source_cid, target_cid, 'scope_excluded')
+        swap_m2m(source_cid, target_cid, 'domain_included')
+        swap_m2m(source_cid, target_cid, 'domain_excluded')
 
         source.status, target.status = target.status, source.status
 
