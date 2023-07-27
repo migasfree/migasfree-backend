@@ -201,14 +201,11 @@ def time_horizon(date, delay):
 
 
 def swap_m2m(source_field, target_field):
-    source_m2m = list(source_field.all())
-    target_m2m = list(target_field.all())
+    source_m2m = source_field.all()
+    target_m2m = target_field.all()
 
-    source_field.clear()
-    source_field.add(*target_m2m)
-
-    target_field.clear()
-    target_field.add(*source_m2m)
+    source_field.set(target_m2m)
+    target_field.set(source_m2m)
 
 
 def remove_empty_elements_from_dict(dic):
