@@ -45,25 +45,21 @@ def run(cmd):
 
 
 def configure_user(name, groups=None):
-    if groups is None:
-        groups = []
+    user, _ = UserProfile.objects.get_or_create(username=name)
 
-    user = UserProfile.objects.filter(username=name)
-    if not user.exists():
-        user = UserProfile()
-        user.username = name
-        user.is_staff = True
-        user.is_active = True
-        user.is_superuser = (name == 'admin')
-        user.set_password(name)
-        user.save()
-    else:
-        user = user[0]
-
-    user.groups.clear()
-    user.groups.add(*groups)
+    user.username = name
+    user.is_staff = True
+    user.is_active = True
+    user.is_superuser = (name == 'admin')
+    user.set_password(name)
     user.save()
 
+    if groups is not None:
+        user.groups.set(groups)
+    else:
+        user.groups.clear()
+
+    user.save()
 
 def add_perms(group, tables=None, all_perms=True):
     if tables is None:
@@ -92,13 +88,9 @@ def configure_default_users():
     """
 
     # reader group
-    reader = Group.objects.filter(name='Reader')
-    if not reader.exists():
-        reader = Group()
-        reader.name = 'Reader'
-        reader.save()
-    else:
-        reader = reader[0]
+    reader, _ = Group.objects.get_or_create(name='Reader')
+    reader.name = 'Reader'
+    reader.save()
 
     tables = [
         "client.computer", "client.user", "client.error",
@@ -124,13 +116,9 @@ def configure_default_users():
     reader.save()
 
     # liberator group
-    liberator = Group.objects.filter(name='Liberator')
-    if not liberator.exists():
-        liberator = Group()
-        liberator.name = 'Liberator'
-        liberator.save()
-    else:
-        liberator = liberator[0]
+    liberator, _ = Group.objects.get_or_create(name='Liberator')
+    liberator.name = 'Liberator'
+    liberator.save()
 
     tables = [
         "core.deployment", "core.schedule", "core.scheduledelay",
@@ -142,13 +130,9 @@ def configure_default_users():
     liberator.save()
 
     # packager group
-    packager = Group.objects.filter(name='Packager')
-    if not packager.exists():
-        packager = Group()
-        packager.name = 'Packager'
-        packager.save()
-    else:
-        packager = packager[0]
+    packager, _ = Group.objects.get_or_create(name='Packager')
+    packager.name = 'Packager'
+    packager.save()
 
     tables = ["core.package", "core.packageset", "core.store"]
     packager.permissions.clear()
@@ -156,13 +140,9 @@ def configure_default_users():
     packager.save()
 
     # computer checker group
-    checker = Group.objects.filter(name='Computer Checker')
-    if not checker.exists():
-        checker = Group()
-        checker.name = 'Computer Checker'
-        checker.save()
-    else:
-        checker = checker[0]
+    checker, _ = Group.objects.get_or_create(name='Computer Checker')
+    checker.name = 'Computer Checker'
+    checker.save()
 
     tables = [
         "client.error", "client.fault", "client.synchronization"
@@ -172,13 +152,9 @@ def configure_default_users():
     checker.save()
 
     # device installer group
-    device_installer = Group.objects.filter(name='Device installer')
-    if not device_installer.exists():
-        device_installer = Group()
-        device_installer.name = 'Device installer'
-        device_installer.save()
-    else:
-        device_installer = device_installer[0]
+    device_installer, _ = Group.objects.get_or_create(name='Device installer')
+    device_installer.name = 'Device installer'
+    device_installer.save()
 
     tables = [
         "device.connection", "device.manufacturer",
@@ -190,13 +166,9 @@ def configure_default_users():
     device_installer.save()
 
     # configurator group
-    configurator = Group.objects.filter(name='Configurator')
-    if not configurator.exists():
-        configurator = Group()
-        configurator.name = 'Configurator'
-        configurator.save()
-    else:
-        configurator = configurator[0]
+    configurator, _ = Group.objects.get_or_create(name='Configurator')
+    configurator.name = 'Configurator'
+    configurator.save()
 
     tables = [
         "client.faultdefinition", "core.property", "core.project",
@@ -208,13 +180,9 @@ def configure_default_users():
     configurator.save()
 
     # domain admin group
-    domain_admin = Group.objects.filter(name='Domain Admin')
-    if not domain_admin.exists():
-        domain_admin = Group()
-        domain_admin.name = 'Domain Admin'
-        domain_admin.save()
-    else:
-        domain_admin = domain_admin[0]
+    domain_admin, _ = Group.objects.get_or_create(name='Domain Admin')
+    domain_admin.name = 'Domain Admin'
+    domain_admin.save()
 
     tables = [
         "core.scope", "core.deployment",
