@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -181,8 +181,9 @@ class Device(models.Model, MigasLink):
         # Moves computers from logical device
         for capability in source.common_capabilities_allocated(target):
             swap_m2m(
-                source.logical_set.get(capability=capability).attributes,
-                target.logical_set.get(capability=capability).attributes
+                source.logical_set.get(capability=capability),
+                target.logical_set.get(capability=capability),
+                'attributes'
             )
 
     def save(self, *args, **kwargs):
