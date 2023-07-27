@@ -308,10 +308,7 @@ class ServerAttribute(Attribute):  # tag
     objects = ServerAttributeManager()
 
     def update_computers(self, computers):
-        self.tags.clear()
-        for item in computers:
-            self.tags.add(item)
-
+        self.tags.set(computers)
         self.save()
 
     class Meta:
