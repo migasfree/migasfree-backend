@@ -779,11 +779,12 @@ def post_save_computer(sender, instance, created, **kwargs):
         instance.tags.clear()
         cid = instance.get_cid_attribute()
         cid.logical_set.clear()
-        cid.faultdefinition_set.clear()
-        cid.deployment_set.clear()
-        cid.ExcludeAttribute.clear()
-        cid.attributeset_set.clear()
-        cid.ExcludedAttributesGroup.clear()
+        cid.faultdefinition_included.clear()
+        cid.faultdefinition_excluded.clear()
+        cid.deployment_included.clear()
+        cid.deployment_excluded.clear()
+        cid.attributeset_included.clear()
+        cid.attributeset_excluded.clear()
         cid.scheduledelay_set.clear()
 
 
