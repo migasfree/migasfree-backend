@@ -38,13 +38,15 @@ from setuptools import setup, find_packages
 from distutils.command.install_data import install_data
 
 PATH = os.path.dirname(__file__)
-README = open(os.path.join(PATH, 'README.md'), encoding='utf_8').read()
+with open(os.path.join(PATH, 'README.md'), encoding='utf_8') as f:
+    README = f.read()
 VERSION = __import__('migasfree').__version__
 
-REQUIRES = filter(
-    lambda s: len(s) > 0,
-    open(os.path.join(PATH, 'requirements', 'base.txt'), encoding='utf_8').read().split('\n')
-)
+with open(os.path.join(PATH, 'requirements', 'base.txt'), encoding='utf_8') as f:
+    REQUIRES = filter(
+        lambda s: len(s) > 0,
+        f.read().split('\n')
+    )
 
 
 class InstallData(install_data):
