@@ -276,36 +276,40 @@ class GetSourceFileView(views.APIView):
 
             range_header = request.META.get('HTTP_RANGE', '').strip()
             range_re = re.compile(r'bytes\s*=\s*(\d+)\s*-\s*(\d*)', re.I)
+
             range_match = range_re.match(range_header)
             if range_match and os.path.exists(os.path.dirname(_file_local)):
                 size = os.path.getsize(_file_local)
+
                 content_type, encoding = guess_type(_file_local)
                 content_type = content_type or 'application/octet-stream'
+
                 first_byte, last_byte = range_match.groups()
                 first_byte = int(first_byte) if first_byte else 0
+
                 last_byte = int(last_byte) if last_byte else size - 1
                 if last_byte >= size:
                     last_byte = size - 1
+
                 length = last_byte - first_byte + 1
-                response = StreamingHttpResponse(
-                    RangeFileWrapper(
-                        open(_file_local, 'rb'),
-                        offset=first_byte,
-                        length=length
-                    ),
-                    status=status.HTTP_206_PARTIAL_CONTENT,
-                    content_type=content_type
-                )
+
+                with open(_file_local, 'rb') as f:
+                    response = StreamingHttpResponse(
+                        RangeFileWrapper(f, offset=first_byte, length=length),
+                        status=status.HTTP_206_PARTIAL_CONTENT,
+                        content_type=content_type
+                    )
                 response['Content-Length'] = str(length)
                 response['Content-Range'] = f'bytes {first_byte}-{last_byte}/{size}'
                 response['Accept-Ranges'] = 'bytes'
 
                 return response
 
-            response = HttpResponse(
-                FileWrapper(open(_file_local, 'rb')),
-                content_type='application/octet-stream'
-            )
+            with open(_file_local, 'rb') as f:
+                response = HttpResponse(
+                    FileWrapper(f),
+                    content_type='application/octet-stream'
+                )
             response['Content-Disposition'] = f'attachment; filename={os.path.basename(_file_local)}'
             response['Content-Length'] = os.path.getsize(_file_local)
 
