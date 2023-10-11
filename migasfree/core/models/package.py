@@ -304,10 +304,7 @@ def delete_package(sender, instance, **kwargs):
     )
     Package.delete_from_store(path)
 
-    queryset = Deployment.objects.filter(
-        available_packages__in=[instance],
-        enabled=True
-    )
+    queryset = Deployment.objects.filter(available_packages__in=[instance])
     for deploy in queryset:
         deploy.available_packages.remove(instance)
         tasks.create_repository_metadata.apply_async(
