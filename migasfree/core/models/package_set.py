@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,8 +19,10 @@
 import os
 import shutil
 
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
+from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
 from .migas_link import MigasLink
@@ -128,3 +130,19 @@ class PackageSet(models.Model, MigasLink):
         app_label = 'core'
         verbose_name = _('Package Set')
         verbose_name_plural = _('Package Sets')
+
+
+@receiver(m2m_changed, sender=PackageSet.packages.through)
+def packages_changed(sender, instance, action, reverse, model, pk_set, **kwargs):
+    if action != 'post_add':
+        return
+
+    from .. import tasks
+    from .deployment import Deployment
+
+    queryset = Deployment.objects.filter(available_package_sets__in=[instance])
+    for deploy in queryset:
+        tasks.create_repository_metadata.apply_async(
+            queue=f'pms-{deploy.pms().name}',
+            kwargs={'deployment_id': deploy.id}
+        )
