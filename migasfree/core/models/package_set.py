@@ -21,7 +21,7 @@ import shutil
 
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.signals import m2m_changed
+from django.db.models.signals import m2m_changed, pre_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
@@ -132,11 +132,8 @@ class PackageSet(models.Model, MigasLink):
         verbose_name_plural = _('Package Sets')
 
 
-@receiver(m2m_changed, sender=PackageSet.packages.through)
-def packages_changed(sender, instance, action, reverse, model, pk_set, **kwargs):
-    if action != 'post_add':
-        return
-
+def _update_repository_metadata(instance):
+    print('inside update repository metadata')
     from .. import tasks
     from .deployment import Deployment
 
@@ -146,3 +143,19 @@ def packages_changed(sender, instance, action, reverse, model, pk_set, **kwargs)
             queue=f'pms-{deploy.pms().name}',
             kwargs={'deployment_id': deploy.id}
         )
+
+
+@receiver(m2m_changed, sender=PackageSet.packages.through)
+def packages_changed(sender, instance, action, reverse, model, pk_set, **kwargs):
+    if action != 'post_add':
+        return
+
+    _update_repository_metadata(instance)
+
+
+@receiver(pre_delete, sender=PackageSet)
+def delete_package_set(sender, instance, **kwargs):
+    if not instance.store:
+        return
+
+    _update_repository_metadata(instance)
