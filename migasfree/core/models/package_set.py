@@ -133,7 +133,6 @@ class PackageSet(models.Model, MigasLink):
 
 
 def _update_repository_metadata(instance):
-    print('inside update repository metadata')
     from .. import tasks
     from .deployment import Deployment
 
