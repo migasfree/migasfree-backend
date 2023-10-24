@@ -241,8 +241,8 @@ class GetSourceFileView(views.APIView):
             logger.debug('get url %s', url)
 
             try:
-                with urlopen(url, context=ssl.SSLContext(ssl.PROTOCOL_SSLv23)) as remote_file:
-                    response = StreamingHttpResponse(self.read_remote_chunks(_file_local, remote_file))
+                remote_file = urlopen(url, context=ssl.SSLContext(ssl.PROTOCOL_SSLv23))
+                response = StreamingHttpResponse(self.read_remote_chunks(_file_local, remote_file))
 
                 response['Content-Type'] = 'application/octet-stream'
 
