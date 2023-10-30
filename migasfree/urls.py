@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,6 +36,13 @@ from rest_framework_simplejwt.views import (
 )
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+"""
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
+"""
 
 from .core.routers import router as core_router, safe_router as core_safe_router
 from .client.routers import (
@@ -109,6 +116,11 @@ urlpatterns = [
     re_path(r'^docs(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^docs/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+
+    # path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    # re_path(r'^docs/$', SpectacularSwaggerView.as_view(url_name='schema'), name='schema-swagger-ui'),
+    # re_path(r'^redoc/$', SpectacularRedocView.as_view(url_name='schema'), name='schema-redoc'),
+
     path('graphql', GraphQLView.as_view(graphiql=True)),
 
     path('', include('migasfree.api_v4.urls')),
