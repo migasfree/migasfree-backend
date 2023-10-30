@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -116,6 +116,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
     'drf_yasg',
+    # 'drf_spectacular',
     'rest_framework_filters',
     'dj_rest_auth',
     'django_filters',
@@ -148,7 +149,17 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'migasfree.paginations.DefaultPagination',
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
+
+"""
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Migasfree REST API',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
+}
+"""
 
 REST_AUTH = {
     'USER_DETAILS_SERIALIZER': 'migasfree.core.serializers.UserProfileSerializer',
