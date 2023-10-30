@@ -49,6 +49,7 @@ admin.site.register(Platform)
 admin.site.register(Attribute)
 admin.site.register(Property)
 
+
 @admin.register(Project)
 class ProjectAdmin(ImportExportActionModelAdmin):
     resource_class = ProjectResource
@@ -151,6 +152,7 @@ class SingularityAdmin(admin.ModelAdmin):
             'included_attributes__property_att',
             'excluded_attributes__property_att',
         )
+
 
 class ClientAttributeFilter(SimpleListFilter):
     title = 'Client Attribute'
