@@ -61,6 +61,7 @@ def configure_user(name, groups=None):
 
     user.save()
 
+
 def add_perms(group, tables=None, all_perms=True):
     if tables is None:
         tables = []
