@@ -59,7 +59,6 @@ class Pms:
 
         raise NotImplementedError
 
-
     def package_metadata(self, package):
         """
         dict package_metadata(string package)
