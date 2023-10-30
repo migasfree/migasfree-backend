@@ -78,7 +78,7 @@ class Winget(Pms):
         )
         """
 
-	    # Copy Files from template (included in container!!!)
+        # Copy Files from template (included in container!!!)
         try:
             shutil.copytree(
                 '/source.template/Assets',
@@ -125,7 +125,7 @@ class Winget(Pms):
         cursor.execute('DELETE FROM norm_publishers;')
         cursor.execute('DELETE FROM norm_publishers_map;')
 
-	    # CREATE SQLITE DATABASE
+        # CREATE SQLITE DATABASE
         manifest = 1
 
         cursor.execute(
@@ -148,13 +148,13 @@ class Winget(Pms):
                     id_ = get_id(con, cursor, 'ids', 'id', data['PackageIdentifier'])
 
                     # NAMES
-                    if not 'PackageName' in data:
+                    if 'PackageName' not in data:
                         data['PackageName'] = data['PackageIdentifier'].split('.')[-1]
 
                     name = get_id(con, cursor, 'names', 'name', data['PackageName'])
 
                     # MONIKERS
-                    if not 'Moniker' in data:
+                    if 'Moniker' not in data:
                         data['Moniker'] = data['PackageName']
 
                     moniker = get_id(con, cursor, 'monikers', 'moniker', data['Moniker'])
@@ -183,7 +183,7 @@ class Winget(Pms):
                     con.commit()
 
                     # NORM_PUBLISHERS
-                    if not 'Publisher' in data:
+                    if 'Publisher' not in data:
                         data['Publisher'] = data['PackageIdentifier'].split('.')[0]
                     norm_publisher = get_id(con, cursor, 'norm_publishers', 'norm_publisher', normalize(data['Publisher']))
                     cursor.execute(
