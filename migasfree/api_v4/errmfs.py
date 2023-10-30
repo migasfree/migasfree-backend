@@ -62,6 +62,7 @@ ERROR_TEMPLATE = """
 </html>
 """
 
+
 def error_info(number):
     """
     string error_info(int number)
