@@ -125,7 +125,7 @@ create_deploy
         _cmd = '''
 echo "## Info"
 echo "~~~"
-dpkg -I %(pkg)s
+dpkg-deb --info %(pkg)s
 echo "~~~"
 echo
 echo "## Requires"
@@ -145,28 +145,29 @@ echo "~~~"
 echo
 echo "## Script PreInst"
 echo "~~~"
-dpkg-deb -I %(pkg)s preinst
+dpkg-deb --info %(pkg)s preinst
 echo "~~~"
 echo
 echo "## Script PostInst"
 echo "~~~"
-dpkg-deb -I %(pkg)s postinst
+dpkg-deb --info %(pkg)s postinst
 echo "~~~"
 echo
 echo "## Script PreRm"
 echo "~~~"
-dpkg-deb -I %(pkg)s prerm
+dpkg-deb --info %(pkg)s prerm
 echo "~~~"
 echo
 echo "## Script PostRm"
 echo "~~~"
-dpkg-deb -I %(pkg)s postrm
+dpkg-deb --info %(pkg)s postrm
 echo "~~~"
 echo
 echo "## Changelog"
 _NAME=$(dpkg-deb --showformat='${Package}' --show %(pkg)s)
 echo "~~~"
 dpkg-deb --fsys-tarfile %(pkg)s | tar -O -xvf - ./usr/share/doc/$_NAME/changelog.Debian.gz | gunzip
+dpkg-deb --fsys-tarfile %(pkg)s | tar -O -xvf - ./usr/share/doc/$_NAME/changelog.gz | gunzip
 echo "~~~"
 echo
 echo "## Files"
