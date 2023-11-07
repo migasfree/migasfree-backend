@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,13 +23,17 @@ REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
 REDIS_DB = 0
 
-BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
+CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
 
+CELERY_ENABLE_UTC = True
+CELERY_TIMEZONE = 'Europe/Madrid'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_DEFAULT_QUEUE = 'default'
-CELERY_RESULT_BACKEND = BROKER_URL
+CELERY_TASK_DEFAULT_QUEUE = 'default'
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 CELERY_IMPORTS = (
     'migasfree.stats.tasks',
@@ -37,7 +41,7 @@ CELERY_IMPORTS = (
     'migasfree.client.tasks',
     'migasfree.hardware.tasks',
 )
-CELERYBEAT_SCHEDULE = {
+CELERY_BEAT_SCHEDULE = {
     'alerts': {
         'task': 'migasfree.stats.tasks.alerts',
         'schedule': timedelta(seconds=10),
@@ -62,7 +66,7 @@ CHANNEL_LAYERS = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": BROKER_URL,
+        "LOCATION": CELERY_BROKER_URL,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
