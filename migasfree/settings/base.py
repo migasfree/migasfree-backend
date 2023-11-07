@@ -26,8 +26,8 @@ from corsheaders.defaults import default_headers
 
 from .migasfree import BASE_DIR, MIGASFREE_TMP_DIR
 
-if django.VERSION < (3, 2, 0, 'final'):
-    print('Migasfree requires Django 3.2.0 at least. Please, update it.')
+if django.VERSION < (4, 2, 0, 'final'):
+    print('Migasfree requires Django 4.2.0 at least. Please, update it.')
     exit(1)
 
 ADMINS = (
@@ -44,7 +44,7 @@ MANAGERS = ADMINS
 TIME_ZONE = 'Europe/Madrid'
 
 # If you set this to False, Django will not use timezone-aware datetimes.
-USE_TZ = False
+USE_TZ = True
 
 FIRST_DAY_OF_WEEK = 1
 DATE_FORMAT = 'Y-m-d'
