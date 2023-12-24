@@ -267,14 +267,14 @@ class Attribute(models.Model, MigasLink):
         except ValueError:
             return []
 
-        if type(content) == list:
+        if isinstance(content, list):
             attributes = []
             for item in content:
                 attributes.extend(Attribute._process_json_item(property_att, item))
 
             return attributes
 
-        if type(content) == dict:
+        if isinstance(content, dict):
             return Attribute._process_json_item(property_att, content)
 
     @staticmethod
