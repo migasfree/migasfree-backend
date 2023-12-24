@@ -412,7 +412,9 @@ class PackageSerializer(serializers.ModelSerializer):
             validated_data['fullname'] = slugify(validated_data['fullname'])
 
         if validated_data['name'] == '':
-            validated_data['name'], validated_data['version'], validated_data['architecture'] = Package.normalized_name(validated_data['fullname'])
+            validated_data['name'], validated_data['version'], validated_data['architecture'] = Package.normalized_name(
+                validated_data['fullname']
+            )
 
         return Package.objects.create(
             fullname=validated_data['fullname'],
