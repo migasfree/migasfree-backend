@@ -169,7 +169,8 @@ class Winget(Pms):
 
                     # MANIFEST
                     cursor.execute(
-                        'INSERT INTO manifest (rowid, id, name, moniker, version, channel, pathpart) VALUES (?,?,?,?,?,?,?)',
+                        'INSERT INTO manifest (rowid, id, name, moniker, version, channel, pathpart) '
+                        'VALUES (?,?,?,?,?,?,?)',
                         (manifest, id_, name, moniker, version, 1, pathpart)
                     )
                     con.commit()
@@ -185,7 +186,10 @@ class Winget(Pms):
                     # NORM_PUBLISHERS
                     if 'Publisher' not in data:
                         data['Publisher'] = data['PackageIdentifier'].split('.')[0]
-                    norm_publisher = get_id(con, cursor, 'norm_publishers', 'norm_publisher', normalize(data['Publisher']))
+                    norm_publisher = get_id(
+                        con, cursor, 'norm_publishers', 'norm_publisher',
+                        normalize(data['Publisher'])
+                    )
                     cursor.execute(
                         'INSERT INTO norm_publishers_map (manifest, norm_publisher) VALUES (?,?)',
                         (manifest, norm_publisher)
