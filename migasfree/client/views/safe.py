@@ -788,17 +788,13 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         tags = claims.get('tags')
         tag_objs = Attribute.objects.filter_by_prefix_value(tags)
         if not tag_objs:
-            computer.tags.clear()
-            tag_ids = []
-            """
             return Response(
                 self.create_response(gettext('Invalid tags')),
                 status=status.HTTP_400_BAD_REQUEST
             )
-            """
-        else:
-            computer.tags.set(tag_objs)
-            tag_ids = tag_objs.values_list('id', flat=True)
+
+        computer.tags.set(tag_objs)
+        tag_ids = tag_objs.values_list('id', flat=True)
 
         old_tags = list(set(computer_tags_ids) - set(tag_ids))
         new_tags = list(set(tag_ids) - set(computer_tags_ids))
