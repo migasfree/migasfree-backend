@@ -55,8 +55,10 @@ class UncheckedManager(DomainFaultManager):
         qs = super().scope(user).filter(checked=0)
 
         if user:
-            qs = qs.filter(models.Q(fault_definition__users__id__in=[user.id, ])
-            | models.Q(fault_definition__users=None))
+            qs = qs.filter(
+                models.Q(fault_definition__users__id__in=[user.id, ])
+                | models.Q(fault_definition__users=None)
+            )
         else:
             qs = qs.filter(fault_definition__users=None)
 
