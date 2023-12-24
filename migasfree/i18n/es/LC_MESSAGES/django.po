@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-21 08:50+0200\n"
-"PO-Revision-Date: 2023-07-21 08:51+0200\n"
+"POT-Creation-Date: 2023-12-24 09:40+0100\n"
+"PO-Revision-Date: 2023-12-24 09:44+0100\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: \n"
 "Language: es\n"
@@ -77,11 +77,11 @@ msgstr "Ordenador de baja"
 msgid "Generic error"
 msgstr "Error genérico"
 
-#: migasfree/api_v4/errmfs.py:96
+#: migasfree/api_v4/errmfs.py:97
 msgid "Traceback"
 msgstr "Rastreo"
 
-#: migasfree/api_v4/errmfs.py:151
+#: migasfree/api_v4/errmfs.py:152
 msgid "Generic error in server"
 msgstr "Error genérico en el servidor"
 
@@ -91,9 +91,9 @@ msgid "Computer [%s] with available status, has been synchronized"
 msgstr "Ordenador [%s] con estado disponible, ha sido sincronizado"
 
 #: migasfree/app_catalog/admin.py:152 migasfree/client/admin.py:89
-#: migasfree/core/admin.py:382 migasfree/core/admin.py:488
-#: migasfree/core/admin.py:535 migasfree/core/admin.py:574
-#: migasfree/core/admin.py:654 migasfree/core/admin.py:692
+#: migasfree/core/admin.py:385 migasfree/core/admin.py:491
+#: migasfree/core/admin.py:538 migasfree/core/admin.py:577
+#: migasfree/core/admin.py:657 migasfree/core/admin.py:695
 msgid "General"
 msgstr "General"
 
@@ -110,11 +110,11 @@ msgstr "la longitud del nombre es mayor que la máxima longitud"
 #: migasfree/client/models/fault_definition.py:39
 #: migasfree/client/models/user.py:46 migasfree/core/models/attribute_set.py:42
 #: migasfree/core/models/deployment.py:80 migasfree/core/models/domain.py:39
-#: migasfree/core/models/package.py:89 migasfree/core/models/package_set.py:46
+#: migasfree/core/models/package.py:89 migasfree/core/models/package_set.py:48
 #: migasfree/core/models/platform.py:49 migasfree/core/models/project.py:68
-#: migasfree/core/models/property.py:59 migasfree/core/models/schedule.py:27
-#: migasfree/core/models/scope.py:69 migasfree/core/models/store.py:64
-#: migasfree/device/models/capability.py:27
+#: migasfree/core/models/property.py:60 migasfree/core/models/schedule.py:27
+#: migasfree/core/models/scope.py:69 migasfree/core/models/singularity.py:47
+#: migasfree/core/models/store.py:64 migasfree/device/models/capability.py:27
 #: migasfree/device/models/connection.py:28
 #: migasfree/device/models/device.py:49 migasfree/device/models/driver.py:30
 #: migasfree/device/models/manufacturer.py:27
@@ -144,9 +144,9 @@ msgstr "Administrador"
 
 #: migasfree/app_catalog/models.py:107 migasfree/client/models/error.py:72
 #: migasfree/client/models/fault_definition.py:45
-#: migasfree/core/models/attribute.py:139
+#: migasfree/core/models/attribute.py:141
 #: migasfree/core/models/attribute_set.py:48
-#: migasfree/core/models/package_set.py:51 migasfree/core/models/schedule.py:35
+#: migasfree/core/models/package_set.py:53 migasfree/core/models/schedule.py:35
 #: migasfree/hardware/models/capability.py:50
 #: migasfree/hardware/models/node.py:132
 msgid "description"
@@ -202,7 +202,7 @@ msgstr "aplicación"
 #: migasfree/client/models/migration.py:61
 #: migasfree/client/models/synchronization.py:80
 #: migasfree/core/models/deployment.py:91 migasfree/core/models/package.py:112
-#: migasfree/core/models/package_set.py:59 migasfree/core/models/store.py:76
+#: migasfree/core/models/package_set.py:61 migasfree/core/models/store.py:76
 #: migasfree/device/models/driver.py:46
 msgid "project"
 msgstr "proyecto"
@@ -223,7 +223,7 @@ msgstr "Paquetes por proyectos"
 #: migasfree/app_catalog/models.py:220
 #: migasfree/client/models/fault_definition.py:51
 #: migasfree/core/models/attribute_set.py:54
-#: migasfree/core/models/deployment.py:73 migasfree/core/models/property.py:64
+#: migasfree/core/models/deployment.py:73 migasfree/core/models/property.py:65
 #: migasfree/core/models/singularity.py:39
 #: migasfree/hardware/models/node.py:122
 msgid "enabled"
@@ -249,8 +249,8 @@ msgstr "comentario"
 #: migasfree/client/models/fault_definition.py:92
 #: migasfree/core/models/attribute_set.py:62
 #: migasfree/core/models/deployment.py:126 migasfree/core/models/domain.py:53
-#: migasfree/core/models/scope.py:84 migasfree/core/models/singularity.py:57
-#: migasfree/core/models/singularity.py:93
+#: migasfree/core/models/scope.py:84 migasfree/core/models/singularity.py:64
+#: migasfree/core/models/singularity.py:100
 msgid "included attributes"
 msgstr "atributos incluidos"
 
@@ -259,8 +259,8 @@ msgstr "atributos incluidos"
 #: migasfree/client/models/fault_definition.py:97
 #: migasfree/core/models/attribute_set.py:69
 #: migasfree/core/models/deployment.py:133 migasfree/core/models/domain.py:60
-#: migasfree/core/models/scope.py:91 migasfree/core/models/singularity.py:64
-#: migasfree/core/models/singularity.py:98
+#: migasfree/core/models/scope.py:91 migasfree/core/models/singularity.py:71
+#: migasfree/core/models/singularity.py:105
 msgid "excluded attributes"
 msgstr "atributos excluidos"
 
@@ -272,7 +272,7 @@ msgstr "Política"
 msgid "Policies"
 msgstr "Políticas"
 
-#: migasfree/app_catalog/models.py:340 migasfree/core/models/singularity.py:50
+#: migasfree/app_catalog/models.py:340 migasfree/core/models/singularity.py:57
 msgid "priority"
 msgstr "prioridad"
 
@@ -297,7 +297,7 @@ msgid "Synchronization"
 msgstr "Sincronización"
 
 #: migasfree/client/admin.py:122 migasfree/client/models/computer.py:688
-#: migasfree/core/models/attribute.py:271
+#: migasfree/core/models/attribute.py:316
 msgid "Tags"
 msgstr "Etiquetas"
 
@@ -305,7 +305,7 @@ msgstr "Etiquetas"
 msgid "Software"
 msgstr "Software"
 
-#: migasfree/client/admin.py:132 migasfree/device/models/device.py:199
+#: migasfree/client/admin.py:132 migasfree/device/models/device.py:200
 msgid "Devices"
 msgstr "Dispositivos"
 
@@ -329,8 +329,8 @@ msgstr "La comprobación es correcta"
 msgid "Truncated description"
 msgstr "Descripción truncada"
 
-#: migasfree/client/admin.py:292 migasfree/core/admin.py:660
-#: migasfree/core/admin.py:697 migasfree/core/models/attribute.py:249
+#: migasfree/client/admin.py:292 migasfree/core/admin.py:663
+#: migasfree/core/admin.py:700 migasfree/core/models/attribute.py:297
 msgid "Attributes"
 msgstr "Atributos"
 
@@ -474,7 +474,7 @@ msgid "Assigned Logical Devices to CID"
 msgstr "Dispositivos lógicos asignados al CID"
 
 #: migasfree/client/models/computer.py:686
-#: migasfree/client/models/computer.py:740
+#: migasfree/client/models/computer.py:755
 msgid "Computer"
 msgstr "Ordenador"
 
@@ -482,57 +482,76 @@ msgstr "Ordenador"
 msgid "Status"
 msgstr "Estado"
 
-#: migasfree/client/models/computer.py:689 migasfree/client/models/fault.py:166
-msgid "Faults"
-msgstr "Fallas"
+#: migasfree/client/models/computer.py:689
+msgid "Faults (included)"
+msgstr "Fallas (incluidas)"
 
 #: migasfree/client/models/computer.py:692
-#: migasfree/core/models/deployment.py:444
-msgid "Deployments"
-msgstr "Despliegues"
+msgid "Faults (excluded)"
+msgstr "Fallas (excluidas)"
 
 #: migasfree/client/models/computer.py:695
+msgid "Deployments (included)"
+msgstr "Despliegues (incluidos)"
+
+#: migasfree/client/models/computer.py:698
 msgid "Deployments (excluded)"
 msgstr "Despliegues (excluidos)"
 
-#: migasfree/client/models/computer.py:698
-msgid "Sets"
-msgstr "Conjuntos"
-
 #: migasfree/client/models/computer.py:701
+msgid "Sets (included)"
+msgstr "Conjuntos (incluidos)"
+
+#: migasfree/client/models/computer.py:704
 msgid "Sets (excluded)"
 msgstr "Conjuntos (excluidos)"
 
-#: migasfree/client/models/computer.py:704
+#: migasfree/client/models/computer.py:707
 msgid "Delays"
 msgstr "Demoras"
 
-#: migasfree/client/models/computer.py:707
+#: migasfree/client/models/computer.py:710
 msgid "Logical devices"
 msgstr "Dispositivos lógicos"
 
-#: migasfree/client/models/computer.py:710
+#: migasfree/client/models/computer.py:713
 msgid "Default logical device"
 msgstr "Dispositivo lógico por defecto"
 
-#: migasfree/client/models/computer.py:711
+#: migasfree/client/models/computer.py:714
 msgid "Policies (included)"
 msgstr "Políticas (incluidas)"
 
-#: migasfree/client/models/computer.py:714
+#: migasfree/client/models/computer.py:717
 msgid "Policies (excluded)"
 msgstr "Políticas (excluidas)"
 
-#: migasfree/client/models/computer.py:717
+#: migasfree/client/models/computer.py:720
 msgid "Policy Groups (included)"
 msgstr "Grupos de políticas (incluidas)"
 
-#: migasfree/client/models/computer.py:720
+#: migasfree/client/models/computer.py:723
 msgid "Policy Groups (excluded)"
 msgstr "Grupos de políticas (excluidas)"
 
-#: migasfree/client/models/computer.py:741 migasfree/core/admin.py:279
-#: migasfree/core/admin.py:425 migasfree/device/admin.py:131
+#: migasfree/client/models/computer.py:726
+msgid "Domain (included)"
+msgstr "Dominio (incluido)"
+
+#: migasfree/client/models/computer.py:729
+msgid "Domain (excluded)"
+msgstr "Dominio (excluido)"
+
+#: migasfree/client/models/computer.py:732
+msgid "Scope (included)"
+msgstr "Ámbito (incluido)"
+
+#: migasfree/client/models/computer.py:735
+msgid "Scope (excluded)"
+msgstr "Ámbito (excluido)"
+
+#: migasfree/client/models/computer.py:756 migasfree/core/admin.py:282
+#: migasfree/core/admin.py:428 migasfree/device/admin.py:131
 #: migasfree/stats/views/computers.py:294 migasfree/stats/views/syncs.py:136
 #: migasfree/stats/views/syncs.py:192
 msgid "Computers"
@@ -553,8 +572,8 @@ msgstr "Errores"
 
 #: migasfree/client/models/event.py:37
 #: migasfree/client/models/package_history.py:49
-#: migasfree/core/models/migas_link.py:417
-#: migasfree/core/models/migas_link.py:438
+#: migasfree/core/models/migas_link.py:424
+#: migasfree/core/models/migas_link.py:445
 #: migasfree/hardware/models/node.py:101
 msgid "computer"
 msgstr "ordenador"
@@ -587,13 +606,17 @@ msgstr "resultado"
 msgid "Fault"
 msgstr "Falla"
 
+#: migasfree/client/models/fault.py:166
+msgid "Faults"
+msgstr "Fallas"
+
 #: migasfree/client/models/fault_definition.py:56
-#: migasfree/core/models/property.py:89 migasfree/core/models/singularity.py:68
+#: migasfree/core/models/property.py:90 migasfree/core/models/singularity.py:75
 msgid "programming language"
 msgstr "lenguaje de programación"
 
 #: migasfree/client/models/fault_definition.py:62
-#: migasfree/core/models/property.py:95 migasfree/core/models/singularity.py:74
+#: migasfree/core/models/property.py:96 migasfree/core/models/singularity.py:81
 msgid "code"
 msgstr "código"
 
@@ -848,49 +871,53 @@ msgstr "Enviando etiquetas disponibles..."
 msgid "Getting tags..."
 msgstr "Obteniendo etiquetas..."
 
-#: migasfree/client/views/safe.py:895
+#: migasfree/client/views/safe.py:792
+msgid "Invalid tags"
+msgstr "Etiquetas no válidas"
+
+#: migasfree/client/views/safe.py:891
 msgid "Sending tags..."
 msgstr "Enviando etiquetas..."
 
-#: migasfree/client/views/safe.py:920
+#: migasfree/client/views/safe.py:916
 msgid "Getting label..."
 msgstr "Obteniendo identificación..."
 
-#: migasfree/client/views/safe.py:929
+#: migasfree/client/views/safe.py:925
 msgid "Sending label..."
 msgstr "Enviando identificación..."
 
-#: migasfree/client/views/safe.py:950
+#: migasfree/client/views/safe.py:946
 msgid "Getting hardware capture is required..."
 msgstr "Obteniendo captura de hardware requerida..."
 
-#: migasfree/client/views/safe.py:956
+#: migasfree/client/views/safe.py:952
 msgid "Sending hardware capture..."
 msgstr "Enviando captura de hardware..."
 
-#: migasfree/client/views/safe.py:980
+#: migasfree/client/views/safe.py:976
 msgid "Getting software..."
 msgstr "Obteniendo software..."
 
-#: migasfree/client/views/safe.py:984
+#: migasfree/client/views/safe.py:980
 msgid "Bad request"
 msgstr "Solicitud incorrecta"
 
-#: migasfree/client/views/safe.py:993
+#: migasfree/client/views/safe.py:989
 msgid "Sending software..."
 msgstr "Enviando software..."
 
-#: migasfree/client/views/safe.py:996 migasfree/core/views/safe.py:110
+#: migasfree/client/views/safe.py:992 migasfree/core/views/safe.py:110
 #: migasfree/core/views/safe.py:182 migasfree/core/views/safe.py:219
 #: migasfree/hardware/views.py:146
 msgid "Data received"
 msgstr "Datos recibidos"
 
-#: migasfree/client/views/safe.py:1076
+#: migasfree/client/views/safe.py:1072
 msgid "Getting traits..."
 msgstr "Obteniendo características..."
 
-#: migasfree/client/views/safe.py:1093
+#: migasfree/client/views/safe.py:1089
 msgid "Sending traits..."
 msgstr "Enviando características..."
 
@@ -908,47 +935,47 @@ msgstr ""
 msgid "Status must have one of the values: %s"
 msgstr "El estado debe tener uno de estos valores: %s"
 
-#: migasfree/core/admin.py:242
+#: migasfree/core/admin.py:245
 msgid "Inflicted Computers"
 msgstr "Ordenadores heredados"
 
-#: migasfree/core/admin.py:385 migasfree/core/admin.py:500
-#: migasfree/core/admin.py:538
+#: migasfree/core/admin.py:388 migasfree/core/admin.py:503
+#: migasfree/core/admin.py:541
 msgid "What (Packages)"
 msgstr "El qué (paquetes)"
 
-#: migasfree/core/admin.py:394 migasfree/core/admin.py:515
-#: migasfree/core/admin.py:555
+#: migasfree/core/admin.py:397 migasfree/core/admin.py:518
+#: migasfree/core/admin.py:558
 msgid "To whom (Attributes)"
 msgstr "A quién (atributos)"
 
-#: migasfree/core/admin.py:402 migasfree/core/admin.py:522
-#: migasfree/core/admin.py:558
+#: migasfree/core/admin.py:405 migasfree/core/admin.py:525
+#: migasfree/core/admin.py:561
 msgid "When (Schedule)"
 msgstr "Cuándo (calendario)"
 
-#: migasfree/core/admin.py:408 migasfree/core/admin.py:507
-#: migasfree/core/admin.py:547
+#: migasfree/core/admin.py:411 migasfree/core/admin.py:510
+#: migasfree/core/admin.py:550
 msgid "Packages by default"
 msgstr "Paquetes por defecto"
 
-#: migasfree/core/admin.py:497
+#: migasfree/core/admin.py:500
 msgid "Source"
 msgstr "Origen"
 
-#: migasfree/core/admin.py:584
+#: migasfree/core/admin.py:587
 msgid "Authorizations"
 msgstr "Autorizaciones"
 
-#: migasfree/core/admin.py:594
+#: migasfree/core/admin.py:597
 msgid "Preferences"
 msgstr "Preferencias"
 
-#: migasfree/core/admin.py:606
+#: migasfree/core/admin.py:609
 msgid "Activate Users"
 msgstr "Usuarios habilitados"
 
-#: migasfree/core/admin.py:703
+#: migasfree/core/admin.py:706
 msgid "Available tags"
 msgstr "Etiquetas disponibles"
 
@@ -1022,11 +1049,11 @@ msgstr "La preferencia de dominio no está en los dominios seleccionados"
 msgid "No key to sign message"
 msgstr "No hay clave para firmar el mensaje"
 
-#: migasfree/core/models/attribute.py:71
+#: migasfree/core/models/attribute.py:73
 msgid "The attribute cannot be created because property prevents it"
 msgstr "El atributo no ha podido ser creado porque la propiedad no lo permite"
 
-#: migasfree/core/models/attribute.py:85
+#: migasfree/core/models/attribute.py:87
 #, python-format
 msgid ""
 "The value of the attribute [%s] has more than %d characters. The original "
@@ -1035,51 +1062,51 @@ msgstr ""
 "El valor del atributo [%s] tiene más de %d caracteres. El valor original ha "
 "sido truncado: %s"
 
-#: migasfree/core/models/attribute.py:130 migasfree/core/models/property.py:144
-#: migasfree/core/models/singularity.py:46
+#: migasfree/core/models/attribute.py:132 migasfree/core/models/property.py:145
+#: migasfree/core/models/singularity.py:53
 msgid "Property"
 msgstr "Propiedad"
 
-#: migasfree/core/models/attribute.py:134
+#: migasfree/core/models/attribute.py:136
 #: migasfree/hardware/models/configuration.py:50
 msgid "value"
 msgstr "valor"
 
-#: migasfree/core/models/attribute.py:145
+#: migasfree/core/models/attribute.py:147
 #: migasfree/core/models/attribute_set.py:73
 msgid "longitude"
 msgstr "longitud"
 
-#: migasfree/core/models/attribute.py:151
+#: migasfree/core/models/attribute.py:153
 #: migasfree/core/models/attribute_set.py:79
 msgid "latitude"
 msgstr "latitud"
 
-#: migasfree/core/models/attribute.py:189 migasfree/device/models/device.py:100
+#: migasfree/core/models/attribute.py:191 migasfree/device/models/device.py:100
 msgid "Total computers"
 msgstr "Ordenadores totales"
 
-#: migasfree/core/models/attribute.py:248
+#: migasfree/core/models/attribute.py:296
 msgid "Attribute"
 msgstr "Atributo"
 
-#: migasfree/core/models/attribute.py:270
+#: migasfree/core/models/attribute.py:315
 msgid "Tag"
 msgstr "Etiqueta"
 
-#: migasfree/core/models/attribute.py:287
+#: migasfree/core/models/attribute.py:332
 msgid "Feature"
 msgstr "Característica"
 
-#: migasfree/core/models/attribute.py:288
+#: migasfree/core/models/attribute.py:333
 msgid "Features"
 msgstr "Características"
 
-#: migasfree/core/models/attribute.py:353
+#: migasfree/core/models/attribute.py:398
 msgid "Basic Attribute"
 msgstr "Atributo básico"
 
-#: migasfree/core/models/attribute.py:354
+#: migasfree/core/models/attribute.py:399
 msgid "Basic Attributes"
 msgstr "Atributos básicos"
 
@@ -1209,6 +1236,10 @@ msgstr "%s/%s días (desde %s a %s)"
 msgid "Deployment"
 msgstr "Despliegue"
 
+#: migasfree/core/models/deployment.py:444
+msgid "Deployments"
+msgstr "Despliegues"
+
 #: migasfree/core/models/deployment.py:454
 msgid "Is not allowed change project"
 msgstr "No está permitido cambiar el proyecto"
@@ -1237,11 +1268,11 @@ msgstr "Dominio"
 msgid "Domains"
 msgstr "Dominios"
 
-#: migasfree/core/models/migas_link.py:417
+#: migasfree/core/models/migas_link.py:424
 msgid "Installed Packages"
 msgstr "Paquetes instalados"
 
-#: migasfree/core/models/migas_link.py:438
+#: migasfree/core/models/migas_link.py:445
 msgid "Installed package"
 msgstr "Paquete instalado"
 
@@ -1253,12 +1284,12 @@ msgstr "versión"
 msgid "architecture"
 msgstr "arquitectura"
 
-#: migasfree/core/models/package.py:119 migasfree/core/models/package_set.py:66
+#: migasfree/core/models/package.py:119 migasfree/core/models/package_set.py:68
 msgid "store"
 msgstr "almacén"
 
 #: migasfree/core/models/package.py:258
-#: migasfree/core/models/package_set.py:103
+#: migasfree/core/models/package_set.py:105
 msgid "Store must belong to the project"
 msgstr "El almacén debe pertenecer al proyecto"
 
@@ -1274,20 +1305,20 @@ msgstr "Paquete"
 msgid "Packages"
 msgstr "Paquetes"
 
-#: migasfree/core/models/package_set.py:72
+#: migasfree/core/models/package_set.py:74
 msgid "packages"
 msgstr "paquetes"
 
-#: migasfree/core/models/package_set.py:108
+#: migasfree/core/models/package_set.py:110
 #, python-format
 msgid "Package %s must be in the store %s"
 msgstr "El paquete %s debe estar en el almacén %s"
 
-#: migasfree/core/models/package_set.py:129
+#: migasfree/core/models/package_set.py:131
 msgid "Package Set"
 msgstr "Conjunto de paquetes"
 
-#: migasfree/core/models/package_set.py:130
+#: migasfree/core/models/package_set.py:132
 msgid "Package Sets"
 msgstr "Conjuntos de paquetes"
 
@@ -1353,27 +1384,31 @@ msgstr "Añadir por la izquierda"
 msgid "Added to the right"
 msgstr "Añadir por la derecha"
 
-#: migasfree/core/models/property.py:53
+#: migasfree/core/models/property.py:48
+msgid "JSON"
+msgstr "JSON"
+
+#: migasfree/core/models/property.py:54
 msgid "prefix"
 msgstr "prefijo"
 
-#: migasfree/core/models/property.py:69
+#: migasfree/core/models/property.py:70
 msgid "kind"
 msgstr "clase"
 
-#: migasfree/core/models/property.py:76
+#: migasfree/core/models/property.py:77
 msgid "sort"
 msgstr "tipo"
 
-#: migasfree/core/models/property.py:83
+#: migasfree/core/models/property.py:84
 msgid "automatically add"
 msgstr "añadir automáticamente"
 
-#: migasfree/core/models/property.py:85
+#: migasfree/core/models/property.py:86
 msgid "automatically add the attribute to database"
 msgstr "añadir automáticamente el atributo a la base de datos"
 
-#: migasfree/core/models/property.py:98 migasfree/core/models/singularity.py:77
+#: migasfree/core/models/property.py:99 migasfree/core/models/singularity.py:84
 msgid ""
 "This code will execute in the client computer, and it must put in the "
 "standard output the value of the attribute correspondent to this property."
@@ -1387,31 +1422,31 @@ msgstr ""
 "opcional.<br><b>Ejemplo de código:</b><br># Crear un atributo con el nombre "
 "del equipo desde bash<br>echo $HOSTNAME"
 
-#: migasfree/core/models/property.py:145
+#: migasfree/core/models/property.py:146
 msgid "Properties"
 msgstr "Propiedades"
 
-#: migasfree/core/models/property.py:158
+#: migasfree/core/models/property.py:159
 msgid "Stamp"
 msgstr "Categoría de etiqueta"
 
-#: migasfree/core/models/property.py:159
+#: migasfree/core/models/property.py:160
 msgid "Stamps"
 msgstr "Categorías de etiquetas"
 
-#: migasfree/core/models/property.py:172
+#: migasfree/core/models/property.py:173
 msgid "Formula"
 msgstr "Fórmula"
 
-#: migasfree/core/models/property.py:173
+#: migasfree/core/models/property.py:174
 msgid "Formulas"
 msgstr "Fórmulas"
 
-#: migasfree/core/models/property.py:184
+#: migasfree/core/models/property.py:185
 msgid "Basic Property"
 msgstr "Propiedad básica"
 
-#: migasfree/core/models/property.py:185
+#: migasfree/core/models/property.py:186
 msgid "Basic Properties"
 msgstr "Propiedades básicas"
 
@@ -1460,11 +1495,11 @@ msgstr "Ámbito"
 msgid "Scopes"
 msgstr "Ámbitos"
 
-#: migasfree/core/models/singularity.py:102
+#: migasfree/core/models/singularity.py:109
 msgid "Singularity"
 msgstr "Singularidad"
 
-#: migasfree/core/models/singularity.py:103
+#: migasfree/core/models/singularity.py:110
 msgid "Singularities"
 msgstr "Singularidades"
 
@@ -1611,7 +1646,7 @@ msgstr "conexión"
 msgid "data"
 msgstr "datos"
 
-#: migasfree/device/models/device.py:198
+#: migasfree/device/models/device.py:199
 msgid "Device"
 msgstr "Dispositivo"
 
@@ -1951,6 +1986,9 @@ msgstr "Almacenes / Proyecto"
 #: migasfree/stats/views/syncs.py:245
 msgid "Synchronizations / Project"
 msgstr "Sincronizaciones / Proyecto"
+
+#~ msgid "Sets"
+#~ msgstr "Conjuntos"
 
 #~ msgid "There are not available repositories"
 #~ msgstr "No hay repositorios disponibles"
