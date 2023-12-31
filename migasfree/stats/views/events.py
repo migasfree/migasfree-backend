@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -252,7 +252,10 @@ class EventViewSet(viewsets.ViewSet):
             begin = end - timedelta(days=HOURLY_RANGE)
 
         event_class = self.get_event_class()
-        events = {i['hour']: i for i in event_class.by_hour(begin, end, user)}
+        events = {
+            i['hour'].strftime(human_fmt): i['count']
+            for i in event_class.by_hour(begin, end, user)
+        }
 
         labels = []
         stats = []
@@ -264,7 +267,7 @@ class EventViewSet(viewsets.ViewSet):
                 'model': event_class._meta.model_name,
                 'created_at__gte': time.strftime(value_fmt, item.timetuple()),
                 'created_at__lt': time.strftime(value_fmt, next_item.timetuple()),
-                'value': events[item]['count'] if item in events else 0
+                'value': events[str(item)] if str(item) in events else 0
             })
 
         return Response(
