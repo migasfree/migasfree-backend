@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -116,23 +116,19 @@ def write_file(filename, content):
     bool write_file(string filename, string content)
     """
 
-    _file = None
     try:
-        _file = open(filename, 'wb')
-        try:
-            _file.write(bytes(content))
-        except TypeError:
-            _file.write(bytes(content, encoding='utf8'))
-        _file.flush()
-        os.fsync(_file.fileno())
-        _file.close()
+        with open(filename, 'wb') as file:
+            try:
+                file.write(content.encode('utf-8'))
+            except AttributeError:
+                file.write(content)
+
+            file.flush()
+            os.fsync(file.fileno())
 
         return True
     except IOError:
         return False
-    finally:
-        if _file is not None:
-            _file.close()
 
 
 def read_file(filename):
@@ -194,8 +190,8 @@ def time_horizon(date, delay):
     """
     No weekends
     """
-    weekday = int(date.strftime("%w"))  # [0(Sunday), 6]
-    delta = delay + (((delay + weekday - 1) / 5) * 2)
+    weekday = date.weekday()  # [0 (Monday), 6 (Sunday)]
+    delta = delay + ((delay + weekday) // 5 * 2)
 
     return date + timedelta(days=delta)
 
@@ -213,13 +209,23 @@ def remove_empty_elements_from_dict(dic):
 
 
 def replace_keys(data, aliases):
-    for i, item in enumerate(data):
-        data[i] = {aliases[key]: value for (key, value) in item.items()}
-
-    return data
+    return [
+        {
+            aliases.get(key, key): value for key, value in item.items()
+        } for item in data
+    ]
 
 
 def remove_duplicates_preserving_order(seq):
+    """
+    Removes duplicates from a sequence while preserving the original order of the elements.
+
+    Args:
+        seq (list): A sequence of elements.
+
+    Returns:
+        list: A new list with the duplicates removed while preserving the original order of the elements.
+    """
     seen = set()
     seen_add = seen.add
 
@@ -242,12 +248,12 @@ def merge_dicts(*dicts):
     Merge dictionaries with lists as values
     """
     ret = {}
-    for item in dicts:
-        for key in item:
-            try:
-                ret[key] += item[key]
-            except KeyError:
-                ret[key] = item[key]
+    for dictionary in dicts:
+        for key, value in dictionary.items():
+            if key in ret and isinstance(ret[key], list):
+                ret[key].extend(value)
+            else:
+                ret[key] = value
 
     return ret
 
@@ -268,19 +274,18 @@ def sort_depends(data):
     data_copy = copy.deepcopy(data)
 
     def sort():
-        for i, s in list(data_copy.items()):
-            if not s:
-                if data_copy:
-                    ret.append(i)
-                    del data_copy[i]
-                    for _, n in list(data_copy.items()):
-                        if i in n:
-                            n.remove(i)
+        for item, dependencies in list(data_copy.items()):
+            if not dependencies and data_copy:
+                ret.append(item)
+                del data_copy[item]
+                for _, other_dependencies in list(data_copy.items()):
+                    if item in other_dependencies:
+                        other_dependencies.remove(item)
 
-                    sort()
+                sort()
 
         if data_copy:
-            raise ValueError(data_copy)
+            raise ValueError("Circular dependencies detected.", data_copy)
 
         return ret
 
@@ -290,14 +295,13 @@ def sort_depends(data):
 def save_tempfile(file_):
     # prefix must ends always in slash
     prefix = os.path.join(get_setting('MIGASFREE_TMP_DIR'), '')
-    tempf, tempfn = tempfile.mkstemp(prefix=prefix)
+    _, tempfn = tempfile.mkstemp(prefix=prefix)
     try:
-        for chunk in file_.chunks():
-            os.write(tempf, chunk)
+        with open(tempfn, 'wb') as temp_file:
+            for chunk in file_.chunks():
+                temp_file.write(chunk)
     except OSError:
         raise Exception(f"Problem with the input file {file_.name}")
-    finally:
-        os.close(tempf)
 
     return tempfn
 
