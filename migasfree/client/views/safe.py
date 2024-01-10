@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -497,16 +497,12 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Getting repositories...'))
 
-        repos = Deployment.available_deployments(
-            computer, computer.get_all_attributes()
-        )
-
-        ret = []
-        for repo in repos:
-            ret.append({
-                'name': repo.slug,
-                'source_template': repo.source_template()
-            })
+        ret = [
+            {'name': repo.slug, 'source_template': repo.source_template()}
+            for repo in Deployment.available_deployments(
+                computer, computer.get_all_attributes()
+            )
+        ]
 
         add_computer_message(computer, gettext('Sending repositories...'))
 
@@ -684,8 +680,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Getting assigned tags...'))
 
-        tags = computer.tags.all()
-        response = [tag.__str__() for tag in tags]
+        response = [str(tag) for tag in computer.tags.all()]
 
         add_computer_message(computer, gettext('Sending assigned tags...'))
 
@@ -716,20 +711,13 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         # Computer tags
         for tag in computer.tags.all():
             """ TODO think about this!
-            if tag.property_att.name not in available:
-                available[tag.property_att.name] = [tag.__str__()]
-            else:
-                available[tag.property_att.name].append(tag.__str__())
+            available.setdefault(tag.property_att.name, []).append(str(tag))
             """
 
             # if tag is a domain, includes all domain's tags
             if tag.property_att.prefix == 'DMN':
                 for tag_dmn in Domain.objects.get(name=tag.value.split('.')[0]).get_tags():
-                    if tag_dmn.property_att.name not in available:
-                        available[tag_dmn.property_att.name] = []
-                    value = tag_dmn.__str__()
-                    if value not in available[tag_dmn.property_att.name]:
-                        available[tag_dmn.property_att.name].append(value)
+                    available.setdefault(tag_dmn.property_att.name, []).append(str(tag_dmn))
 
         # Deployment tags
         for deploy in Deployment.objects.filter(
@@ -738,12 +726,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             for tag in deploy.included_attributes.filter(
                 property_att__sort='server'
             ).filter(property_att__enabled=True):
-                if tag.property_att.name not in available.keys():
-                    available[tag.property_att.name] = []
-
-                value = tag.__str__()
-                if value not in available[tag.property_att.name]:
-                    available[tag.property_att.name].append(value)
+                available.setdefault(tag.property_att.name, []).append(str(tag))
 
         # Domain Tags
         for domain in Domain.objects.filter(
@@ -751,11 +734,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             ~Q(excluded_attributes__in=computer.sync_attributes.all())
         ):
             for tag in domain.tags.all():
-                if tag.property_att.name not in available:
-                    available[tag.property_att.name] = []
-                value = tag.__str__()
-                if value not in available[tag.property_att.name]:
-                    available[tag.property_att.name].append(value)
+                available.setdefault(tag.property_att.name, []).append(str(tag))
 
         add_computer_message(computer, gettext('Sending available tags...'))
 
@@ -813,34 +792,16 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
         for packages_to_install, default_preincluded_packages, \
                 default_included_packages in pkgs:
-            if packages_to_install:
-                for pkg in packages_to_install.split('\n'):
-                    if pkg:
-                        remove.append(pkg)
-
-            if default_preincluded_packages:
-                for pkg in default_preincluded_packages.split('\n'):
-                    if pkg:
-                        remove.append(pkg)
-
-            if default_included_packages:
-                for pkg in default_included_packages.split('\n'):
-                    if pkg:
-                        remove.append(pkg)
+            remove.extend(pkg for pkg in packages_to_install.split('\n') if pkg)
+            remove.extend(pkg for pkg in default_preincluded_packages.split('\n') if pkg)
+            remove.extend(pkg for pkg in default_included_packages.split('\n') if pkg)
 
         pkgs = old_deploys.values_list(
             'packages_to_remove', 'default_excluded_packages'
         )
         for packages_to_remove, default_excluded_packages in pkgs:
-            if packages_to_remove:
-                for pkg in packages_to_remove.split('\n'):
-                    if pkg:
-                        install.append(pkg)
-
-            if default_excluded_packages:
-                for pkg in default_excluded_packages.split('\n'):
-                    if pkg:
-                        install.append(pkg)
+            install.extend(pkg for pkg in packages_to_remove.split('\n') if pkg)
+            install.extend(pkg for pkg in default_excluded_packages.split('\n') if pkg)
 
         # New deploys
         new_deploys = Deployment.available_deployments(
@@ -851,36 +812,19 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             'packages_to_remove', 'default_excluded_packages'
         )
         for packages_to_remove, default_excluded_packages in pkgs:
-            if packages_to_remove:
-                for pkg in packages_to_remove.split('\n'):
-                    if pkg:
-                        remove.append(pkg)
-
-            if default_excluded_packages:
-                for pkg in default_excluded_packages.split('\n'):
-                    if pkg:
-                        remove.append(pkg)
+            remove.extend(pkg for pkg in packages_to_remove.split('\n') if pkg)
+            remove.extend(pkg for pkg in default_excluded_packages.split('\n') if pkg)
 
         pkgs = new_deploys.values_list(
             'packages_to_install', 'default_included_packages'
         )
         for packages_to_install, default_included_packages in pkgs:
-            if packages_to_install:
-                for pkg in packages_to_install.split('\n'):
-                    if pkg:
-                        install.append(pkg)
-
-            if default_included_packages:
-                for pkg in default_included_packages.split('\n'):
-                    if pkg:
-                        install.append(pkg)
+            install.extend(pkg for pkg in packages_to_install.split('\n') if pkg)
+            install.extend(pkg for pkg in default_included_packages.split('\n') if pkg)
 
         pkgs = new_deploys.values_list('default_preincluded_packages', flat=True)
         for default_preincluded_packages in pkgs:
-            if default_preincluded_packages:
-                for pkg in default_preincluded_packages.split('\n'):
-                    if pkg:
-                        preinstall.append(pkg)
+            preinstall.extend(pkg for pkg in default_preincluded_packages.split('\n') if pkg)
 
         ret = {
             'preinstall': remove_duplicates_preserving_order(preinstall),
@@ -1077,9 +1021,6 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 'property_att__name', 'property_att__prefix', 'property_att__sort'
             )),
             {
-                'id': 'id',
-                'description': 'description',
-                'value': 'value',
                 'property_att__name': 'name',
                 'property_att__prefix': 'prefix',
                 'property_att__sort': 'sort'
