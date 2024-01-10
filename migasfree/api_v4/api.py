@@ -109,10 +109,7 @@ def get_computer(name, uuid):
                 logger.debug(message)
 
                 return computer
-            except (
-                Computer.DoesNotExist,
-                Computer.MultipleObjectsReturned
-            ):
+            except (Computer.DoesNotExist, Computer.MultipleObjectsReturned):
                 pass
 
     if computer is None:
@@ -144,9 +141,7 @@ def upload_computer_software_base_diff(request, name, uuid, computer, data):
     cmd = str(inspect.getframeinfo(inspect.currentframe()).function)
     try:
         packages = data[cmd].split('\n')
-        clean_packages = []
-        for i in packages:
-            clean_packages.append(i[1:])
+        clean_packages = [i[1:] for i in packages]
         update_software_inventory.delay(computer.id, clean_packages)
         ret = return_message(cmd, errmfs.ok())
     except IndexError:
@@ -729,7 +724,6 @@ def upload_server_set(request, name, uuid, computer, data):
     cmd = str(inspect.getframeinfo(inspect.currentframe()).function)
 
     project_name = data.get('version', data.get('project'))
-
     _file = request.FILES["package"]
 
     try:
@@ -800,11 +794,7 @@ def get_computer_tags(request, name, uuid, computer, data):
         # if tag is a domain, includes all domain's tags
         if tag.property_att.prefix == 'DMN':
             for tag_dmn in Domain.objects.get(name=tag.value.split('.')[0]).get_tags():
-                if tag_dmn.property_att.name not in available_tags:
-                    available_tags[tag_dmn.property_att.name] = []
-                value = tag_dmn.__str__()
-                if value not in available_tags[tag_dmn.property_att.name]:
-                    available_tags[tag_dmn.property_att.name].append(value)
+                available_tags.setdefault(tag_dmn.property_att.name, []).append(str(tag_dmn))
 
     # DEPLOYMENT TAGS
     for deploy in Deployment.objects.filter(
@@ -815,12 +805,7 @@ def get_computer_tags(request, name, uuid, computer, data):
             property_att__sort='server',
             property_att__enabled=True
         ):
-            if tag.property_att.name not in available_tags:
-                available_tags[tag.property_att.name] = []
-
-            value = tag.__str__()
-            if value not in available_tags[tag.property_att.name]:
-                available_tags[tag.property_att.name].append(value)
+            available_tags.setdefault(tag.property_att.name, []).append(str(tag))
 
     # DOMAIN TAGS
     for domain in Domain.objects.filter(
@@ -828,11 +813,7 @@ def get_computer_tags(request, name, uuid, computer, data):
         ~Q(excluded_attributes__in=computer.sync_attributes.all())
     ):
         for tag in domain.tags.all():
-            if tag.property_att.name not in available_tags:
-                available_tags[tag.property_att.name] = []
-            value = tag.__str__()
-            if value not in available_tags[tag.property_att.name]:
-                available_tags[tag.property_att.name].append(value)
+            available_tags.setdefault(tag.property_att.name, []).append(str(tag))
 
     ret = errmfs.ok()
     ret['available'] = available_tags
