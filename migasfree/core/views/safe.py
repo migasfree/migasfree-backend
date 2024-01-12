@@ -89,15 +89,15 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             package = Package.objects.filter(
                 fullname=_file.name,
                 project=project
-            )
+            ).first()
             name, version, architecture = self.get_package_data(_file, project)
-            if package.exists():
-                package[0].update_store(store)
+            if package:
+                package.update_store(store)
                 if name and version and architecture:
-                    package[0].update_package_data(name, version, architecture)
+                    package.update_package_data(name, version, architecture)
 
                 deployments = Deployment.objects.filter(
-                    available_packages__id=package[0].id
+                    available_packages__id=package.id
                 )
                 for deploy in deployments:
                     tasks.create_repository_metadata.apply_async(
