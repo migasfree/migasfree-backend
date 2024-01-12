@@ -40,6 +40,14 @@ class SafePackagerConnectionMixin(SafeConnectionMixin):
     encrypt_key = settings.MIGASFREE_PACKAGER_PUB_KEY
 
 
+def check_repository_metadata(package_id):
+    for deploy in Deployment.objects.filter(available_packages__id=package_id):
+        tasks.create_repository_metadata.apply_async(
+            queue=f'pms-{deploy.pms().name}',
+            kwargs={'deployment_id': deploy.id}
+        )
+
+
 @permission_classes((permissions.AllowAny,))
 class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
     def get_package_data(self, _file, project):
@@ -96,14 +104,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                 if name and version and architecture:
                     package.update_package_data(name, version, architecture)
 
-                deployments = Deployment.objects.filter(
-                    available_packages__id=package.id
-                )
-                for deploy in deployments:
-                    tasks.create_repository_metadata.apply_async(
-                        queue=f'pms-{deploy.pms().name}',
-                        kwargs={'deployment_id': deploy.id}
-                    )
+                check_repository_metadata(package.id)
             else:
                 Package.objects.create(
                     fullname=_file.name,
@@ -152,12 +153,17 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                 store=store,
             )
 
+        target = Package.path(project.slug, store.slug, _file.name)
+        Package.handle_uploaded_file(_file, target)
+
         package = Package.objects.filter(fullname=_file, project=project).first()
         name, version, architecture = self.get_package_data(_file, project)
         if package:
             package.update_store(store)
             if name and version and architecture:
                 package.update_package_data(name, version, architecture)
+
+            check_repository_metadata(package.id)
         else:
             package = Package.objects.create(
                 fullname=_file.name,
@@ -168,9 +174,6 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                 store=store,
                 file_=_file
             )
-
-        target = Package.path(project.slug, store.slug, _file.name)
-        Package.handle_uploaded_file(_file, target)
 
         # if exists path move it
         if claims.get('path'):
@@ -215,14 +218,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             project=project
         )
 
-        deployments = Deployment.objects.filter(
-            available_packages__id=package.id
-        )
-        for deploy in deployments:
-            tasks.create_repository_metadata.apply_async(
-                queue=f'pms-{deploy.pms().name}',
-                kwargs={'deployment_id': deploy.id}
-            )
+        check_repository_metadata(package.id)
 
         return Response(
             self.create_response(gettext('Data received')),
