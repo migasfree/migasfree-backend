@@ -80,6 +80,11 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
 
         _file = request.FILES.get('file')
 
+        Package.handle_uploaded_file(
+            _file,
+            Package.path(project.slug, store.slug, _file.name)
+        )
+
         if claims.get('is_package'):
             package = Package.objects.filter(
                 fullname=_file.name,
@@ -90,6 +95,15 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                 package[0].update_store(store)
                 if name and version and architecture:
                     package[0].update_package_data(name, version, architecture)
+
+                deployments = Deployment.objects.filter(
+                    available_packages__id=package[0].id
+                )
+                for deploy in deployments:
+                    tasks.create_repository_metadata.apply_async(
+                        queue=f'pms-{deploy.pms().name}',
+                        kwargs={'deployment_id': deploy.id}
+                    )
             else:
                 Package.objects.create(
                     fullname=_file.name,
@@ -100,11 +114,6 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                     store=store,
                     file_=_file
                 )
-
-        Package.handle_uploaded_file(
-            _file,
-            Package.path(project.slug, store.slug, _file.name)
-        )
 
         return Response(
             self.create_response(gettext('Data received')),
