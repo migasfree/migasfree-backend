@@ -139,6 +139,9 @@ def read_file(filename):
 
 
 def get_client_ip(request):
+    if not hasattr(request, 'META') or not isinstance(request.META, dict):
+        return None
+
     # http://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django
     ip = request.META.get('REMOTE_ADDR')
 
@@ -169,6 +172,9 @@ def uuid_change_format(uuid):
     """
     change to big-endian or little-endian format
     """
+    if not uuid:
+        return ''
+
     if len(uuid) == 36:
         return '{}{}{}{}-{}{}-{}{}-{}-{}'.format(
             uuid[6:8],
