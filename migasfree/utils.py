@@ -211,7 +211,7 @@ def swap_m2m(source, target, field):
 
 
 def remove_empty_elements_from_dict(dic):
-    return {k: v for k, v in dic.items() if v}
+    return {k: remove_empty_elements_from_dict(v) if isinstance(v, dict) else v for k, v in dic.items() if v and k}
 
 
 def replace_keys(data, aliases):
