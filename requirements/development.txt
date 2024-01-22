@@ -5,4 +5,5 @@ django-extensions==3.2.3
 django-silk==5.0.4
 pydot==2.0.0
 pyparsing==3.1.1
+pytest==7.4.4
 sqlparse==0.4.4
