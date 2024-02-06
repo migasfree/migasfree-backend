@@ -8,7 +8,7 @@ from rest_framework import permissions, views
 from rest_framework.response import Response
 
 from ...utils import uuid_validate
-from ..secure import gpg_get_key
+from ...secure import gpg_get_key
 from .client_api import get_computer
 
 
