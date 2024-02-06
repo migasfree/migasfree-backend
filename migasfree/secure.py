@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,9 +18,8 @@
 
 import os
 import json
-import gpg
+import subprocess
 
-from io import BytesIO
 from jwcrypto import jwk, jwe, jws
 from jwcrypto.common import json_encode
 from django.conf import settings
@@ -179,29 +178,27 @@ def gpg_get_key(name):
             write_file(gpg_agent_conf, 'allow-loopback-pinentry')
             os.chmod(gpg_agent_conf, 0o600)
 
-        key_params = """
+        key_params = f"""
 Key-Type: RSA
 Key-Length: 4096
-Name-Real: %s
+Name-Real: {name}
 Name-Email: fun.with@migasfree.org
 Expire-Date: 0
 """
-        file_params = os.path.join(gpg_home, f'{name}.txt')
-        write_file(file_params, key_params % name)
 
-        os.system(
-            "echo '' | $(which gpg) --batch "
-            "--passphrase-fd 0 --gen-key %(file)s; rm %(file)s" % {
-                "file": file_params
-            }
-        )
+        command = [
+            'gpg', '--batch', '--generate-key', 
+            '--pinentry-mode', 'loopback', '--passphrase', ''
+        ]
+        subprocess.run(command, input=key_params, text=True, capture_output=True)
 
         # export and save
-        ctx = gpg.Context()
-        ctx.armor = True
-        key_data = BytesIO()
-        ctx.export(name, key_data)
-        write_file(_file, key_data.getvalue())
+        command = ['gpg', '--list-secret-keys', f'{name}']
+        output = subprocess.check_output(command, text=True)
+        fingerprint = output.split('\n')[1].split('/')[-1].strip()
+
+        command = ['gpg', '--armor', '--export-secret-keys', fingerprint, '>', _file]
+        subprocess.check_call(' '.join(command), shell=True)
         os.chmod(_file, 0o600)
 
     return read_file(_file)
