@@ -2,35 +2,47 @@
 
 import os
 import json
-import gpg
+import subprocess
 
-from io import BytesIO
 from Crypto.PublicKey import RSA
 from django.conf import settings
 
 from . import errmfs
 from ..utils import read_file, write_file
+from ..secure import create_server_keys
 
 SIGN_LEN = 256
 
 
 def sign(filename):
-    os.system("openssl dgst -sha1 -sign %s -out %s %s" % (
+    command = [
+        'openssl', 'dgst', '-sha1', '-sign', 
         os.path.join(settings.MIGASFREE_KEYS_DIR, 'migasfree-server.pri'),
-        f'{filename}.sign',
-        filename
-    ))
+        '-out', f'{filename}.sign', filename
+    ]
+
+    try:
+        result = subprocess.run(command, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error signing file: {e}")
 
 
 def verify(filename, key):
-    return os.system(
-        "openssl dgst -sha1 -verify %s -signature %s %s 1>/dev/null" %
-        (
-            os.path.join(settings.MIGASFREE_KEYS_DIR, f'{key}.pub'),
-            f'{filename}.sign',
-            filename
-        )
-    ) == 0  # returns True if OK, False otherwise
+    # returns True if OK, False otherwise
+
+    command = [
+        'openssl', 'dgst', '-sha1', '-verify',
+        os.path.join(settings.MIGASFREE_KEYS_DIR, f'{key}.pub'),
+        '-signature', f'{filename}.sign',
+        filename
+    ]
+
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Error during verification: {e.stderr}")
+        return False
 
 
 def wrap(filename, data):
@@ -93,60 +105,6 @@ def generate_rsa_keys(name='migasfree-server'):
         # read only keys
         os.chmod(private_pem, 0o400)
         os.chmod(public_pem, 0o400)
-
-
-def create_server_keys():
-    generate_rsa_keys("migasfree-server")
-    generate_rsa_keys("migasfree-packager")
-    gpg_get_key("migasfree-repository")
-
-
-def gpg_get_key(name):
-    """
-    Returns GPG keys (if not exists it is created)
-    """
-
-    gpg_home = os.path.join(settings.MIGASFREE_KEYS_DIR, '.gnupg')
-    gpg_conf = os.path.join(gpg_home, 'gpg.conf')
-    gpg_agent_conf = os.path.join(gpg_home, 'gpg-agent.conf')
-    _file = os.path.join(gpg_home, f'{name}.gpg')
-
-    if not os.path.exists(_file):
-        os.environ['GNUPGHOME'] = gpg_home
-        if not os.path.exists(gpg_home):
-            os.makedirs(gpg_home, 0o700)
-            # creates configuration file
-            write_file(gpg_conf, 'cert-digest-algo SHA256\ndigest-algo SHA256\nuse-agent\npinentry-mode loopback')
-            os.chmod(gpg_conf, 0o600)
-            write_file(gpg_agent_conf, 'allow-loopback-pinentry')
-            os.chmod(gpg_agent_conf, 0o600)
-
-        key_params = """
-Key-Type: RSA
-Key-Length: 4096
-Name-Real: %s
-Name-Email: fun.with@migasfree.org
-Expire-Date: 0
-"""
-        file_params = os.path.join(gpg_home, f'{name}.txt')
-        write_file(file_params, key_params % name)
-
-        os.system(
-            "echo '' | $(which gpg) --batch "
-            "--passphrase-fd 0 --gen-key %(file)s; rm %(file)s" % {
-                "file": file_params
-            }
-        )
-
-        # export and save
-        ctx = gpg.Context()
-        ctx.armor = True
-        key_data = BytesIO()
-        ctx.export(name, key_data)
-        write_file(_file, key_data.getvalue())
-        os.chmod(_file, 0o600)
-
-    return read_file(_file)
 
 
 def get_keys_to_client(project):
