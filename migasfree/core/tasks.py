@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,10 +23,12 @@ import requests
 
 from celery import Celery
 from celery.exceptions import Reject
+from django.utils.translation import gettext, activate, get_language
 
 from .pms import get_pms
 
 from ..utils import get_secret, get_setting
+from ..client.models import Notification
 
 MIGASFREE_FQDN = get_setting('MIGASFREE_FQDN')
 MIGASFREE_PUBLIC_DIR = get_setting('MIGASFREE_PUBLIC_DIR')
@@ -80,12 +82,16 @@ def package_info(pms_name, package):
 
 @app.task
 def create_repository_metadata(deployment_id):
+    activate(get_language())
+
     req = requests.get(
         f'{API_URL}/deployments/{deployment_id}/',
         headers={'Authorization': AUTH_TOKEN}
     )
 
     if req.status_code not in REQUESTS_OK_CODES:
+        msg = gettext("Repository metadata creation for deployment ID [%d] could not be performed. Review configuration." % deployment_id)
+        Notification.objects.create(message=msg)
         raise Reject(reason='Invalid credentials. Review token.')
 
     deployment = req.json()
@@ -171,6 +177,11 @@ def create_repository_metadata(deployment_id):
     con.hdel('migasfree:repos:%d' % deployment_id, '*')
     con.srem('migasfree:watch:repos', deployment_id)
     con.close()
+
+    msg = gettext("Repository metadata for deployment [%s] in project [%s] created" % (
+        deployment["name"], project["name"]
+    ))
+    Notification.objects.create(message=msg)
 
     return ret, output if ret == 0 else error
 
