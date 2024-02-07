@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-24 09:40+0100\n"
-"PO-Revision-Date: 2023-12-24 09:44+0100\n"
+"POT-Creation-Date: 2024-02-07 12:50+0100\n"
+"PO-Revision-Date: 2024-02-07 12:53+0100\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: \n"
 "Language: es\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: migasfree/api_v4/api.py:46
 #, python-format
@@ -198,7 +198,7 @@ msgid "application"
 msgstr "aplicación"
 
 #: migasfree/app_catalog/models.py:192 migasfree/client/models/computer.py:184
-#: migasfree/client/models/error.py:85 migasfree/client/models/fault.py:106
+#: migasfree/client/models/error.py:85 migasfree/client/models/fault.py:108
 #: migasfree/client/models/migration.py:61
 #: migasfree/client/models/synchronization.py:80
 #: migasfree/core/models/deployment.py:91 migasfree/core/models/package.py:112
@@ -557,7 +557,7 @@ msgstr "Ámbito (excluido)"
 msgid "Computers"
 msgstr "Ordenadores"
 
-#: migasfree/client/models/error.py:78 migasfree/client/models/fault.py:99
+#: migasfree/client/models/error.py:78 migasfree/client/models/fault.py:101
 #: migasfree/client/models/notification.py:58
 msgid "checked"
 msgstr "comprobado"
@@ -578,35 +578,35 @@ msgstr "Errores"
 msgid "computer"
 msgstr "ordenador"
 
-#: migasfree/client/models/fault.py:80
+#: migasfree/client/models/fault.py:82
 msgid "To check for me"
 msgstr "Para comprobar por mí"
 
-#: migasfree/client/models/fault.py:81
+#: migasfree/client/models/fault.py:83
 msgid "Assigned to me"
 msgstr "Asignadas a mí"
 
-#: migasfree/client/models/fault.py:82
+#: migasfree/client/models/fault.py:84
 msgid "Assigned to others"
 msgstr "Asignadas a otros"
 
-#: migasfree/client/models/fault.py:83
+#: migasfree/client/models/fault.py:85
 msgid "Unassigned"
 msgstr "Sin asignar"
 
-#: migasfree/client/models/fault.py:89
+#: migasfree/client/models/fault.py:91
 msgid "fault definition"
 msgstr "definición de falla"
 
-#: migasfree/client/models/fault.py:93
+#: migasfree/client/models/fault.py:95
 msgid "result"
 msgstr "resultado"
 
-#: migasfree/client/models/fault.py:165
+#: migasfree/client/models/fault.py:167
 msgid "Fault"
 msgstr "Falla"
 
-#: migasfree/client/models/fault.py:166
+#: migasfree/client/models/fault.py:168
 msgid "Faults"
 msgstr "Fallas"
 
@@ -785,7 +785,7 @@ msgstr "El ordenador no puede ser registrado"
 msgid "New Computer added id=[%(id)s]: NAME=[%(name)s] UUID=[%(uuid)s]"
 msgstr "Ordenador añadido con id=[%(id)s]: Nombre=[%(name)s] UUID=[%(uuid)s]"
 
-#: migasfree/client/views/safe.py:321 migasfree/core/views/safe.py:198
+#: migasfree/client/views/safe.py:321 migasfree/core/views/safe.py:210
 #: migasfree/hardware/views.py:130
 msgid "Malformed claims"
 msgstr "Solicitud mal formada"
@@ -815,109 +815,109 @@ msgstr "Enviando atributos..."
 msgid "Getting repositories..."
 msgstr "Obteniendo repositorios..."
 
-#: migasfree/client/views/safe.py:511
+#: migasfree/client/views/safe.py:507
 msgid "Sending repositories..."
 msgstr "Enviando repositorios..."
 
-#: migasfree/client/views/safe.py:535
+#: migasfree/client/views/safe.py:531
 msgid "Getting fault definitions..."
 msgstr "Obteniendo definiciones de fallas..."
 
-#: migasfree/client/views/safe.py:542
+#: migasfree/client/views/safe.py:538
 msgid "Sending fault definitions..."
 msgstr "Enviando definiciones de fallas..."
 
-#: migasfree/client/views/safe.py:564
+#: migasfree/client/views/safe.py:560
 msgid "Getting faults..."
 msgstr "Obteniendo fallas..."
 
-#: migasfree/client/views/safe.py:578
+#: migasfree/client/views/safe.py:574
 msgid "Sending faults..."
 msgstr "Enviando fallas..."
 
-#: migasfree/client/views/safe.py:599
+#: migasfree/client/views/safe.py:595
 msgid "Getting errors..."
 msgstr "Obteniendo errores..."
 
-#: migasfree/client/views/safe.py:603
+#: migasfree/client/views/safe.py:599
 msgid "Sending errors..."
 msgstr "Enviando errores..."
 
-#: migasfree/client/views/safe.py:631
+#: migasfree/client/views/safe.py:627
 msgid "Getting mandatory packages..."
 msgstr "Obteniendo paquetes obligatorios..."
 
-#: migasfree/client/views/safe.py:637
+#: migasfree/client/views/safe.py:633
 msgid "Sending mandatory packages..."
 msgstr "Enviando paquetes obligatorios..."
 
-#: migasfree/client/views/safe.py:685
+#: migasfree/client/views/safe.py:681
 msgid "Getting assigned tags..."
 msgstr "Obteniendo etiquetas asignadas..."
 
-#: migasfree/client/views/safe.py:690
+#: migasfree/client/views/safe.py:685
 msgid "Sending assigned tags..."
 msgstr "Enviando etiquetas asignadas..."
 
-#: migasfree/client/views/safe.py:712
+#: migasfree/client/views/safe.py:707
 msgid "Getting available tags..."
 msgstr "Obteniendo etiquetas disponibles..."
 
-#: migasfree/client/views/safe.py:760
+#: migasfree/client/views/safe.py:739
 msgid "Sending available tags..."
 msgstr "Enviando etiquetas disponibles..."
 
-#: migasfree/client/views/safe.py:785
+#: migasfree/client/views/safe.py:764
 msgid "Getting tags..."
 msgstr "Obteniendo etiquetas..."
 
-#: migasfree/client/views/safe.py:792
+#: migasfree/client/views/safe.py:771
 msgid "Invalid tags"
 msgstr "Etiquetas no válidas"
 
-#: migasfree/client/views/safe.py:891
+#: migasfree/client/views/safe.py:835
 msgid "Sending tags..."
 msgstr "Enviando etiquetas..."
 
-#: migasfree/client/views/safe.py:916
+#: migasfree/client/views/safe.py:860
 msgid "Getting label..."
 msgstr "Obteniendo identificación..."
 
-#: migasfree/client/views/safe.py:925
+#: migasfree/client/views/safe.py:869
 msgid "Sending label..."
 msgstr "Enviando identificación..."
 
-#: migasfree/client/views/safe.py:946
+#: migasfree/client/views/safe.py:890
 msgid "Getting hardware capture is required..."
 msgstr "Obteniendo captura de hardware requerida..."
 
-#: migasfree/client/views/safe.py:952
+#: migasfree/client/views/safe.py:896
 msgid "Sending hardware capture..."
 msgstr "Enviando captura de hardware..."
 
-#: migasfree/client/views/safe.py:976
+#: migasfree/client/views/safe.py:920
 msgid "Getting software..."
 msgstr "Obteniendo software..."
 
-#: migasfree/client/views/safe.py:980
+#: migasfree/client/views/safe.py:924
 msgid "Bad request"
 msgstr "Solicitud incorrecta"
 
-#: migasfree/client/views/safe.py:989
+#: migasfree/client/views/safe.py:933
 msgid "Sending software..."
 msgstr "Enviando software..."
 
-#: migasfree/client/views/safe.py:992 migasfree/core/views/safe.py:110
-#: migasfree/core/views/safe.py:182 migasfree/core/views/safe.py:219
+#: migasfree/client/views/safe.py:936 migasfree/core/views/safe.py:120
+#: migasfree/core/views/safe.py:194 migasfree/core/views/safe.py:224
 #: migasfree/hardware/views.py:146
 msgid "Data received"
 msgstr "Datos recibidos"
 
-#: migasfree/client/views/safe.py:1072
+#: migasfree/client/views/safe.py:1016
 msgid "Getting traits..."
 msgstr "Obteniendo características..."
 
-#: migasfree/client/views/safe.py:1089
+#: migasfree/client/views/safe.py:1030
 msgid "Sending traits..."
 msgstr "Enviando características..."
 
@@ -1015,7 +1015,7 @@ msgstr "La versión es obligatoria"
 msgid "Architecture is required"
 msgstr "La arquitectura es obligatoria"
 
-#: migasfree/core/forms.py:202 migasfree/core/serializers.py:631
+#: migasfree/core/forms.py:202 migasfree/core/serializers.py:633
 #, python-format
 msgid "It is not possible to assign an inactive computer (%s) as an attribute"
 msgstr "No es posible asignar un ordenador inactivo (%s) como atributo"
@@ -1527,19 +1527,35 @@ msgstr "Perfil de usuario"
 msgid "User Profiles"
 msgstr "Perfiles de usuarios"
 
-#: migasfree/core/serializers.py:639
+#: migasfree/core/serializers.py:641
 #, python-format
 msgid "Package %(pkg)s must belong to the project %(project)s"
 msgstr "El paquete %(pkg)s debe pertenecer al proyecto %(project)s"
 
-#: migasfree/core/serializers.py:974
+#: migasfree/core/serializers.py:976
 #, python-format
 msgid "Minimum length is %d characters"
 msgstr "La longitud mínima es %d caracteres"
 
-#: migasfree/core/serializers.py:979
+#: migasfree/core/serializers.py:981
 msgid "Password fields didn't match."
 msgstr "Los campos de contraseña no coinciden."
+
+#: migasfree/core/tasks.py:91
+#, python-format
+msgid ""
+"Repository metadata creation for deployment ID [%d] could not be performed. "
+"Review configuration."
+msgstr ""
+"La creación de metadatos del repositorio para el despliegue con ID [%d] no "
+"puede ser realizada. Revise la configuración."
+
+#: migasfree/core/tasks.py:179
+#, python-format
+msgid "Repository metadata for deployment [%s] in project [%s] created"
+msgstr ""
+"Los metadatos del repositorio para el despliegue [%s] en el proyecto [%s] "
+"han sido creados"
 
 #: migasfree/core/validators.py:62
 #, python-format
@@ -1812,11 +1828,11 @@ msgstr "Nodo hardware"
 msgid "Hardware Nodes"
 msgstr "Nodos hardware"
 
-#: migasfree/secure.py:120
+#: migasfree/secure.py:119
 msgid "Invalid Data"
 msgstr "Datos no válidos"
 
-#: migasfree/secure.py:125
+#: migasfree/secure.py:124
 msgid "Invalid Signature"
 msgstr "Firma no válida"
 
