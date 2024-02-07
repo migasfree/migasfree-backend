@@ -4,12 +4,11 @@ import os
 import json
 import subprocess
 
-from Crypto.PublicKey import RSA
 from django.conf import settings
 
 from . import errmfs
 from ..utils import read_file, write_file
-from ..secure import create_server_keys
+from ..secure import create_server_keys, check_keys_path, generate_rsa_keys
 
 SIGN_LEN = 256
 
@@ -84,27 +83,6 @@ def unwrap(filename, key):
     os.remove(f'{filename}.sign')
 
     return data
-
-
-def check_keys_path():
-    if not os.path.lexists(settings.MIGASFREE_KEYS_DIR):
-        os.makedirs(settings.MIGASFREE_KEYS_DIR)
-
-
-def generate_rsa_keys(name='migasfree-server'):
-    check_keys_path()
-
-    private_pem = os.path.join(settings.MIGASFREE_KEYS_DIR, f'{name}.pri')
-    public_pem = os.path.join(settings.MIGASFREE_KEYS_DIR, f'{name}.pub')
-
-    if not (os.path.exists(private_pem) and os.path.exists(public_pem)):
-        key = RSA.generate(2048)
-        write_file(public_pem, key.publickey().exportKey('PEM'))
-        write_file(private_pem, key.exportKey('PEM'))
-
-        # read only keys
-        os.chmod(private_pem, 0o400)
-        os.chmod(public_pem, 0o400)
 
 
 def get_keys_to_client(project):
