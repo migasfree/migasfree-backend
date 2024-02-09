@@ -187,7 +187,7 @@ Expire-Date: 0
 """
 
         command = [
-            'gpg', '--batch', '--generate-key', 
+            'gpg', '--batch', '--generate-key',
             '--pinentry-mode', 'loopback', '--passphrase', ''
         ]
         subprocess.run(command, input=key_params, text=True, capture_output=True)
