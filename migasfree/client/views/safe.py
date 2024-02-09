@@ -248,6 +248,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 claims.get('uuid')
             )
 
+            # change to default status
+            computer.change_status(settings.MIGASFREE_DEFAULT_COMPUTER_STATUS)
+
             serializer = serializers.ComputerSerializer(
                 computer,
                 context={'request': request}
