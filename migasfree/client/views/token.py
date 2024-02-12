@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -114,7 +114,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
                     return Response(
                         {
                             'error': _('Error in capability %s for assign computer %s.'
-                                      ' There is no driver defined for project %s in model %s.') % (
+                                    ' There is no driver defined for project %s in model %s.') % (
                                 logical_device.capability,
                                 computer,
                                 computer.project,
@@ -601,12 +601,7 @@ class MigrationViewSet(
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
-class NotificationViewSet(
-    DatabaseCheckMixin,
-    mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-    viewsets.GenericViewSet, MigasViewSet, ExportViewSet
-):
+class NotificationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = models.Notification.objects.all()
     serializer_class = serializers.NotificationSerializer
     filterset_class = NotificationFilter
@@ -617,6 +612,9 @@ class NotificationViewSet(
     def get_serializer_class(self):
         if self.action in ['update', 'partial_update', 'destroy']:
             return serializers.NotificationWriteSerializer
+
+        if self.action == 'create':
+            return serializers.NotificationCreateSerializer
 
         return serializers.NotificationSerializer
 
