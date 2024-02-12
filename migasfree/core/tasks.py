@@ -23,12 +23,11 @@ import requests
 
 from celery import Celery
 from celery.exceptions import Reject
-from django.utils.translation import gettext, activate, get_language
+from celery.signals import task_postrun
 
 from .pms import get_pms
 
 from ..utils import get_secret, get_setting
-from ..client.models import Notification
 
 MIGASFREE_FQDN = get_setting('MIGASFREE_FQDN')
 MIGASFREE_PUBLIC_DIR = get_setting('MIGASFREE_PUBLIC_DIR')
@@ -82,16 +81,12 @@ def package_info(pms_name, package):
 
 @app.task
 def create_repository_metadata(deployment_id):
-    activate(get_language())
-
     req = requests.get(
         f'{API_URL}/deployments/{deployment_id}/',
         headers={'Authorization': AUTH_TOKEN}
     )
 
     if req.status_code not in REQUESTS_OK_CODES:
-        msg = gettext("Repository metadata creation for deployment ID [%d] could not be performed. Review configuration." % deployment_id)
-        Notification.objects.create(message=msg)
         raise Reject(reason='Invalid credentials. Review token.')
 
     deployment = req.json()
@@ -166,7 +161,6 @@ def create_repository_metadata(deployment_id):
     ))  # DEBUG
 
     ret, output, error = pms.create_repository(path=tmp_path, arch=project["architecture"])
-    print(output if ret == 0 else error)  # DEBUG
 
     # Move from TMP to REPOSITORY
     shutil.rmtree(repository_path, ignore_errors=True)
@@ -178,12 +172,7 @@ def create_repository_metadata(deployment_id):
     con.srem('migasfree:watch:repos', deployment_id)
     con.close()
 
-    msg = gettext("Repository metadata for deployment [%s] in project [%s] created" % (
-        deployment["name"], project["name"]
-    ))
-    Notification.objects.create(message=msg)
-
-    return ret, output if ret == 0 else error
+    return ret, output if ret == 0 else error, deployment["name"], project["name"]
 
 
 @app.task
@@ -212,3 +201,28 @@ def remove_repository_metadata(deployment_id, old_slug=''):
         slug
     )
     shutil.rmtree(deployment_path, ignore_errors=True)
+
+
+@task_postrun.connect
+def handle_postrun(sender=None, **kwargs):
+    if sender.name == 'migasfree.core.tasks.create_repository_metadata':
+        if kwargs['state'] == 'SUCCESS':
+            ret, output, deployment_name, project_name = kwargs['retval']
+            if ret == 0:
+                msg = "Repository metadata for deployment [%s] in project [%s] created" % (
+                    deployment_name, project_name
+                )
+            else:
+                msg = "An error occurred during repository metadata creation for deployment [%s] in project [%s]: %s" % (
+                    deployment_name, project_name, output
+                )
+        elif kwargs['state'] == 'REJECTED':
+            msg = "Repository metadata creation for deployment ID [%d] could not be performed. Review configuration." % kwargs['kwargs']['deployment_id']
+
+        req = requests.post(
+            f'{API_URL}/notifications/',
+            data={'message': msg},
+            headers={'Authorization': AUTH_TOKEN}
+        )
+        if req.status_code not in REQUESTS_OK_CODES:
+            raise PermissionError(f'Error creating notification by task {sender.name}: [{req.status_code}] {req.text}')
