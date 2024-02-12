@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -101,8 +101,8 @@ function create_deploy {
 
   mv $_F Release
 
-  gpg --no-tty -u migasfree-repository --homedir %(keys_path)s/.gnupg --clearsign -o InRelease Release
-  gpg --no-tty -u migasfree-repository --homedir %(keys_path)s/.gnupg -abs -o Release.gpg Release
+  gpg --no-tty --local-user migasfree-repository --homedir %(keys_path)s/.gnupg --clear-sign --output InRelease Release
+  gpg --no-tty --local-user migasfree-repository --homedir %(keys_path)s/.gnupg -abs --output Release.gpg Release
 }
 
 create_deploy
@@ -216,12 +216,12 @@ echo "~~~"
         elif deploy.source == Deployment.SOURCE_EXTERNAL:
             return 'deb {options} {{protocol}}://{{server}}/src/{project}/{trailing_path}/{name} ' \
                    '{suite} {components}\n'.format(
-                options=deploy.options if deploy.options else '',
-                project=deploy.project.slug,
-                trailing_path=get_setting('MIGASFREE_EXTERNAL_TRAILING_PATH'),
-                name=deploy.slug,
-                suite=deploy.suite,
-                components=deploy.components
-            )
+                        options=deploy.options if deploy.options else '',
+                        project=deploy.project.slug,
+                        trailing_path=get_setting('MIGASFREE_EXTERNAL_TRAILING_PATH'),
+                        name=deploy.slug,
+                        suite=deploy.suite,
+                        components=deploy.components
+                    )
 
         return ''
