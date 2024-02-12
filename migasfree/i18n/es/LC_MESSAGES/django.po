@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-07 12:50+0100\n"
-"PO-Revision-Date: 2024-02-07 12:53+0100\n"
+"POT-Creation-Date: 2024-02-12 13:15+0100\n"
+"PO-Revision-Date: 2024-02-12 10:16+0100\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: \n"
 "Language: es\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: migasfree/api_v4/api.py:46
 #, python-format
@@ -52,7 +52,7 @@ msgstr "Comando no encontrado"
 msgid "Signature is not valid"
 msgstr "La firma no es válida"
 
-#: migasfree/api_v4/errmfs.py:33 migasfree/client/views/safe.py:328
+#: migasfree/api_v4/errmfs.py:33 migasfree/client/views/safe.py:331
 msgid "Computer not found"
 msgstr "Ordenador no encontrado"
 
@@ -68,8 +68,8 @@ msgstr "Proyecto no encontrado"
 msgid "User does not have permission"
 msgstr "El usuario no tiene permiso"
 
-#: migasfree/api_v4/errmfs.py:37 migasfree/client/views/safe.py:339
-#: migasfree/client/views/safe.py:344
+#: migasfree/api_v4/errmfs.py:37 migasfree/client/views/safe.py:342
+#: migasfree/client/views/safe.py:347
 msgid "Unsubscribed computer"
 msgstr "Ordenador de baja"
 
@@ -776,148 +776,148 @@ msgstr "Obteniendo sincronización..."
 msgid "Sending synchronization..."
 msgstr "Enviando sincronización..."
 
-#: migasfree/client/views/safe.py:267
+#: migasfree/client/views/safe.py:270
 msgid "Computer cannot be registered"
 msgstr "El ordenador no puede ser registrado"
 
-#: migasfree/client/views/safe.py:284
+#: migasfree/client/views/safe.py:287
 #, python-format
 msgid "New Computer added id=[%(id)s]: NAME=[%(name)s] UUID=[%(uuid)s]"
 msgstr "Ordenador añadido con id=[%(id)s]: Nombre=[%(name)s] UUID=[%(uuid)s]"
 
-#: migasfree/client/views/safe.py:321 migasfree/core/views/safe.py:210
+#: migasfree/client/views/safe.py:324 migasfree/core/views/safe.py:210
 #: migasfree/hardware/views.py:130
 msgid "Malformed claims"
 msgstr "Solicitud mal formada"
 
-#: migasfree/client/views/safe.py:353
+#: migasfree/client/views/safe.py:356
 #, python-format
 msgid "Unexpected Computer Project (%s). Expected %s"
 msgstr "Proyecto de ordenador inesperado (%s). Se esperaba (%s)"
 
-#: migasfree/client/views/safe.py:383
+#: migasfree/client/views/safe.py:386
 msgid "Getting properties..."
 msgstr "Obteniendo propiedades..."
 
-#: migasfree/client/views/safe.py:389
+#: migasfree/client/views/safe.py:392
 msgid "Sending properties..."
 msgstr "Enviando propiedades..."
 
-#: migasfree/client/views/safe.py:415
+#: migasfree/client/views/safe.py:418
 msgid "Getting attributes..."
 msgstr "Obteniendo atributos..."
 
-#: migasfree/client/views/safe.py:481
+#: migasfree/client/views/safe.py:484
 msgid "Sending attributes..."
 msgstr "Enviando atributos..."
 
-#: migasfree/client/views/safe.py:498
+#: migasfree/client/views/safe.py:501
 msgid "Getting repositories..."
 msgstr "Obteniendo repositorios..."
 
-#: migasfree/client/views/safe.py:507
+#: migasfree/client/views/safe.py:510
 msgid "Sending repositories..."
 msgstr "Enviando repositorios..."
 
-#: migasfree/client/views/safe.py:531
+#: migasfree/client/views/safe.py:534
 msgid "Getting fault definitions..."
 msgstr "Obteniendo definiciones de fallas..."
 
-#: migasfree/client/views/safe.py:538
+#: migasfree/client/views/safe.py:541
 msgid "Sending fault definitions..."
 msgstr "Enviando definiciones de fallas..."
 
-#: migasfree/client/views/safe.py:560
+#: migasfree/client/views/safe.py:563
 msgid "Getting faults..."
 msgstr "Obteniendo fallas..."
 
-#: migasfree/client/views/safe.py:574
+#: migasfree/client/views/safe.py:577
 msgid "Sending faults..."
 msgstr "Enviando fallas..."
 
-#: migasfree/client/views/safe.py:595
+#: migasfree/client/views/safe.py:598
 msgid "Getting errors..."
 msgstr "Obteniendo errores..."
 
-#: migasfree/client/views/safe.py:599
+#: migasfree/client/views/safe.py:602
 msgid "Sending errors..."
 msgstr "Enviando errores..."
 
-#: migasfree/client/views/safe.py:627
+#: migasfree/client/views/safe.py:630
 msgid "Getting mandatory packages..."
 msgstr "Obteniendo paquetes obligatorios..."
 
-#: migasfree/client/views/safe.py:633
+#: migasfree/client/views/safe.py:636
 msgid "Sending mandatory packages..."
 msgstr "Enviando paquetes obligatorios..."
 
-#: migasfree/client/views/safe.py:681
+#: migasfree/client/views/safe.py:684
 msgid "Getting assigned tags..."
 msgstr "Obteniendo etiquetas asignadas..."
 
-#: migasfree/client/views/safe.py:685
+#: migasfree/client/views/safe.py:688
 msgid "Sending assigned tags..."
 msgstr "Enviando etiquetas asignadas..."
 
-#: migasfree/client/views/safe.py:707
+#: migasfree/client/views/safe.py:710
 msgid "Getting available tags..."
 msgstr "Obteniendo etiquetas disponibles..."
 
-#: migasfree/client/views/safe.py:739
+#: migasfree/client/views/safe.py:742
 msgid "Sending available tags..."
 msgstr "Enviando etiquetas disponibles..."
 
-#: migasfree/client/views/safe.py:764
+#: migasfree/client/views/safe.py:767
 msgid "Getting tags..."
 msgstr "Obteniendo etiquetas..."
 
-#: migasfree/client/views/safe.py:771
+#: migasfree/client/views/safe.py:774
 msgid "Invalid tags"
 msgstr "Etiquetas no válidas"
 
-#: migasfree/client/views/safe.py:835
+#: migasfree/client/views/safe.py:838
 msgid "Sending tags..."
 msgstr "Enviando etiquetas..."
 
-#: migasfree/client/views/safe.py:860
+#: migasfree/client/views/safe.py:863
 msgid "Getting label..."
 msgstr "Obteniendo identificación..."
 
-#: migasfree/client/views/safe.py:869
+#: migasfree/client/views/safe.py:872
 msgid "Sending label..."
 msgstr "Enviando identificación..."
 
-#: migasfree/client/views/safe.py:890
+#: migasfree/client/views/safe.py:893
 msgid "Getting hardware capture is required..."
 msgstr "Obteniendo captura de hardware requerida..."
 
-#: migasfree/client/views/safe.py:896
+#: migasfree/client/views/safe.py:899
 msgid "Sending hardware capture..."
 msgstr "Enviando captura de hardware..."
 
-#: migasfree/client/views/safe.py:920
+#: migasfree/client/views/safe.py:923
 msgid "Getting software..."
 msgstr "Obteniendo software..."
 
-#: migasfree/client/views/safe.py:924
+#: migasfree/client/views/safe.py:927
 msgid "Bad request"
 msgstr "Solicitud incorrecta"
 
-#: migasfree/client/views/safe.py:933
+#: migasfree/client/views/safe.py:936
 msgid "Sending software..."
 msgstr "Enviando software..."
 
-#: migasfree/client/views/safe.py:936 migasfree/core/views/safe.py:120
+#: migasfree/client/views/safe.py:939 migasfree/core/views/safe.py:120
 #: migasfree/core/views/safe.py:194 migasfree/core/views/safe.py:224
 #: migasfree/hardware/views.py:146
 msgid "Data received"
 msgstr "Datos recibidos"
 
-#: migasfree/client/views/safe.py:1016
+#: migasfree/client/views/safe.py:1019
 msgid "Getting traits..."
 msgstr "Obteniendo características..."
 
-#: migasfree/client/views/safe.py:1030
+#: migasfree/client/views/safe.py:1033
 msgid "Sending traits..."
 msgstr "Enviando características..."
 
@@ -1541,22 +1541,6 @@ msgstr "La longitud mínima es %d caracteres"
 msgid "Password fields didn't match."
 msgstr "Los campos de contraseña no coinciden."
 
-#: migasfree/core/tasks.py:91
-#, python-format
-msgid ""
-"Repository metadata creation for deployment ID [%d] could not be performed. "
-"Review configuration."
-msgstr ""
-"La creación de metadatos del repositorio para el despliegue con ID [%d] no "
-"puede ser realizada. Revise la configuración."
-
-#: migasfree/core/tasks.py:179
-#, python-format
-msgid "Repository metadata for deployment [%s] in project [%s] created"
-msgstr ""
-"Los metadatos del repositorio para el despliegue [%s] en el proyecto [%s] "
-"han sido creados"
-
 #: migasfree/core/validators.py:62
 #, python-format
 msgid "%s is not an acceptable file type"
@@ -2002,6 +1986,28 @@ msgstr "Almacenes / Proyecto"
 #: migasfree/stats/views/syncs.py:245
 msgid "Synchronizations / Project"
 msgstr "Sincronizaciones / Proyecto"
+
+#, python-format
+#~ msgid "Repository metadata for deployment [%s] in project [%s] created"
+#~ msgstr ""
+#~ "Los metadatos del repositorio para el despliegue [%s] en el proyecto [%s] "
+#~ "han sido creados"
+
+#, python-format
+#~ msgid ""
+#~ "An error occurred during repository metadata creation for deployment [%s] "
+#~ "in project [%s]: %s"
+#~ msgstr ""
+#~ "Ocurrió un error durante la creación de los metadatos del repositorio "
+#~ "para el despliegue [%s] en el proyecto [%s]: %s"
+
+#, python-format
+#~ msgid ""
+#~ "Repository metadata creation for deployment ID [%d] could not be "
+#~ "performed. Review configuration."
+#~ msgstr ""
+#~ "La creación de metadatos del repositorio para el despliegue con ID [%d] "
+#~ "no puede ser realizada. Revise la configuración."
 
 #~ msgid "Sets"
 #~ msgstr "Conjuntos"
