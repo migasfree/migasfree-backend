@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -62,22 +62,19 @@ def configure_user(name, groups=None):
     user.save()
 
 
-def add_perms(group, tables=None, all_perms=True):
+def add_perms(group, tables=None, perms='all'):
     if tables is None:
         tables = []
 
-    perms = ['view_%s']
-    if all_perms:
-        perms.append('add_%s')
-        perms.append('delete_%s')
-        perms.append('change_%s')
+    if perms == 'all':
+        perms = ['add', 'view', 'change', 'delete']
 
     for table in tables:
         app, name = table.split('.')
-        for pattern in perms:
+        for item in perms:
             group.permissions.add(
                 Permission.objects.filter(
-                    codename=pattern % name,
+                    codename=f'{item}_{name}',
                     content_type__app_label=app
                 ).first().id
             )
@@ -113,7 +110,7 @@ def configure_default_users():
         "hardware.configuration", "hardware.logicalname",
     ]
     reader.permissions.clear()
-    add_perms(reader, tables, all_perms=False)
+    add_perms(reader, tables, perms=['view'])
     reader.save()
 
     # liberator group
@@ -128,6 +125,7 @@ def configure_default_users():
     ]
     liberator.permissions.clear()
     add_perms(liberator, tables)
+    add_perms(liberator, ['client.notification'], perms=['add'])
     liberator.save()
 
     # packager group
@@ -135,9 +133,8 @@ def configure_default_users():
     packager.name = 'Packager'
     packager.save()
 
-    tables = ["core.package", "core.packageset", "core.store"]
     packager.permissions.clear()
-    add_perms(packager, tables)
+    add_perms(packager, ['core.package', 'core.packageset', 'core.store'])
     packager.save()
 
     # computer checker group
@@ -145,11 +142,8 @@ def configure_default_users():
     checker.name = 'Computer Checker'
     checker.save()
 
-    tables = [
-        "client.error", "client.fault", "client.synchronization"
-    ]
     checker.permissions.clear()
-    add_perms(checker, tables)
+    add_perms(checker, ['client.error', 'client.fault', 'client.synchronization'])
     checker.save()
 
     # device installer group
@@ -185,12 +179,9 @@ def configure_default_users():
     domain_admin.name = 'Domain Admin'
     domain_admin.save()
 
-    tables = [
-        "core.scope", "core.deployment",
-    ]
     domain_admin.permissions.clear()
-    add_perms(domain_admin, tables)
-    add_perms(domain_admin, ["client.computer", ], all_perms=False)
+    add_perms(domain_admin, ['core.scope', 'core.deployment'])
+    add_perms(domain_admin, ['client.computer'], perms=['view'])
     domain_admin.save()
 
     # default users
