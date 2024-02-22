@@ -99,8 +99,8 @@
             "enabled": true,
             "kind": "N",
             "sort": "client",
-            "language": 0,
-            "code": "_IP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')\nLC_ALL=C ip route | grep $_IP | cut -d' ' -f1"
+            "language": 1,
+            "code": "from __future__ import print_function\n\nfrom migasfree_client.network import get_network_info\n\nprint(get_network_info()['net'])"
         }
     },
     {
