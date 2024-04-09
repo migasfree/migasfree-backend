@@ -16,13 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from datetime import datetime
-
 from django.contrib import auth
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _
 from rest_framework import viewsets, status, views, permissions
 from rest_framework.decorators import action, permission_classes
@@ -78,6 +77,8 @@ def is_computer_changed(computer, name, project, ip_address, uuid):
     # end compatibility with client apiv4
 
     if computer.project != project:
+        models.PackageHistory.uninstall_computer_packages(computer.id)
+
         models.Migration.objects.create(
             computer=computer,
             project=project
@@ -474,7 +475,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             ip_address=claims.get('ip_address'),
             forwarded_ip_address=get_client_ip(request),
             sync_user=user,
-            sync_start_date=datetime.now()
+            sync_start_date=timezone.now()
         )
 
         serializer = serializers.ComputerSerializer(
