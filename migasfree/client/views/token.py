@@ -26,6 +26,7 @@ from django.conf import settings
 from django.http import QueryDict, HttpResponse
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_redis import get_redis_connection
 from rest_framework import viewsets, exceptions, status, mixins, permissions
@@ -279,7 +280,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         con = get_redis_connection()
 
         result = []
-        delayed_time = datetime.now() - timedelta(
+        delayed_time = timezone.now() - timedelta(
             seconds=settings.MIGASFREE_SECONDS_MESSAGE_ALERT
         )
 
@@ -302,7 +303,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         con = get_redis_connection()
 
         result = []
-        delayed_time = datetime.now() - timedelta(
+        delayed_time = timezone.now() - timedelta(
             seconds=settings.MIGASFREE_SECONDS_MESSAGE_ALERT
         )
 
@@ -376,7 +377,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         """
         user = request.user.userprofile
         computer = self.get_object()
-        date = request.GET.get('date', datetime.now())
+        date = request.GET.get('date', timezone.now())
 
         migration = models.Migration.situation(computer.id, date, user)
         status_log = models.StatusLog.situation(computer.id, date, user)
