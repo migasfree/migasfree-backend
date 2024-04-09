@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -234,7 +234,7 @@ class Deployment(models.Model, MigasLink):
     @staticmethod
     def get_percent(begin_date, end_date):
         delta = end_date - begin_date
-        progress = datetime.datetime.now() - datetime.datetime.combine(
+        progress = timezone.now() - datetime.datetime.combine(
             begin_date, datetime.datetime.min.time()
         )
 
@@ -320,7 +320,7 @@ class Deployment(models.Model, MigasLink):
         try:
             from ...stats import tasks
             tasks.assigned_computers_to_deployment(self.id)
-        except:
+        except Exception:
             pass
 
     @staticmethod
@@ -333,7 +333,7 @@ class Deployment(models.Model, MigasLink):
             project__id=computer.project.id,
             enabled=True,
             included_attributes__id__in=attributes,
-            start_date__lte=datetime.datetime.now().date()
+            start_date__lte=timezone.now().date()
         ).filter(
             Q(domain__isnull=True) | (
                 Q(domain__included_attributes__id__in=attributes) &
@@ -364,7 +364,7 @@ class Deployment(models.Model, MigasLink):
                 if computer.id % deploy.duration == duration:
                     if time_horizon(
                         deploy.start_date, deploy.delay + duration
-                    ) <= datetime.datetime.now().date():
+                    ) <= timezone.now().date():
                         lst.append(deploy.id)
                         break
 
@@ -382,7 +382,7 @@ class Deployment(models.Model, MigasLink):
         if model == 'computer':
             from ...client.models import Computer
 
-            if self.enabled and (self.start_date <= datetime.datetime.now().date()):
+            if self.enabled and (self.start_date <= timezone.now().date()):
                 # by assigned attributes
                 computers = Computer.productive.scope(user).filter(
                     project_id=self.project_id
@@ -397,7 +397,7 @@ class Deployment(models.Model, MigasLink):
                         for duration in range(0, delay.duration):
                             if time_horizon(
                                 self.start_date, delay.delay + duration
-                            ) <= datetime.datetime.now().date():
+                            ) <= timezone.now().date():
                                 computers_schedule = Computer.productive.scope(user).filter(
                                     project_id=self.project_id
                                 ).filter(
