@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ def first_day_month(date_):
 
 def datetime_iterator(from_date=None, to_date=None, delta=timedelta(minutes=1)):
     # from https://www.ianlewis.org/en/python-date-range-iterator
-    from_date = from_date or datetime.now()
+    from_date = from_date or timezone.now()
     while to_date is None or from_date <= to_date:
         yield from_date
         from_date += delta
