@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ from django.db.models.signals import pre_save, post_save, pre_delete
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _
 
 from ...utils import (
@@ -369,7 +370,7 @@ class Computer(models.Model, MigasLink):
 
     def update_sync_user(self, user):
         self.sync_user = user
-        self.sync_start_date = datetime.now()
+        self.sync_start_date = timezone.now()
         self.save()
 
     def update_project(self, value):
@@ -402,19 +403,16 @@ class Computer(models.Model, MigasLink):
 
         if history:
             if 'installed' in history:
-                for pkg in PackageHistory.objects.filter(
+                PackageHistory.objects.filter(
                     computer__id=self.id,
                     package__fullname__in=history['installed']
-                ):
-                    pkg.install_date = datetime.now()
-                    pkg.save()
+                ).update(install_date=timezone.now())
+
             if 'uninstalled' in history:
-                for pkg in PackageHistory.objects.filter(
+                PackageHistory.objects.filter(
                     computer__id=self.id,
                     package__fullname__in=history['uninstalled']
-                ):
-                    pkg.uninstall_date = datetime.now()
-                    pkg.save()
+                ).update(uninstall_date=timezone.now())
 
     def has_software_inventory(self):
         from .package_history import PackageHistory
@@ -527,7 +525,7 @@ class Computer(models.Model, MigasLink):
         return capture
 
     def update_last_hardware_capture(self):
-        self.last_hardware_capture = datetime.now()
+        self.last_hardware_capture = timezone.now()
         self.save(update_fields=['last_hardware_capture'])
 
     def update_hardware_resume(self):
