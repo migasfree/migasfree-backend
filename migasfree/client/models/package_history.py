@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from ...core.models import Package, MigasLink
@@ -70,6 +71,16 @@ class PackageHistory(models.Model, MigasLink):
 
     def __str__(self):
         return _('%s at computer %s') % (self.package.fullname, self.computer)
+
+    @staticmethod
+    def uninstall_computer_packages(computer_id):
+        if computer_id is None:
+            raise ValueError("Invalid computer_id")
+
+        PackageHistory.objects.filter(
+            computer__id=computer_id,
+            uninstall_date=None
+        ).update(uninstall_date=timezone.now())
 
     class Meta:
         app_label = 'client'
