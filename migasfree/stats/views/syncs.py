@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ from datetime import timedelta, datetime
 from dateutil.relativedelta import relativedelta
 
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from django_redis import get_redis_connection
 from rest_framework import status, permissions
@@ -95,7 +96,7 @@ class SyncStatsViewSet(EventViewSet):
         try:
             end = datetime.strptime(end, fmt)
         except ValueError:
-            end = datetime.now() + relativedelta(months=1)
+            end = timezone.now() + relativedelta(months=1)
 
         begin = request.query_params.get('begin', '')
         try:
