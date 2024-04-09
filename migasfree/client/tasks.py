@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,10 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from datetime import datetime
-
 from django.db import connection
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 from celery import shared_task
 from celery.exceptions import Reject
 
@@ -49,7 +48,7 @@ def update_software_inventory(computer_id, inventory):
 
 
 def update_software_inventory_raw(pkgs, computer_id, project_id):
-    now = datetime.now()
+    now = timezone.now()
     cursor = connection.cursor()
 
     # UPDATE UNINSTALL M2M
