@@ -34,11 +34,7 @@ MIGASFREE_PUBLIC_DIR = get_setting('MIGASFREE_PUBLIC_DIR')
 MIGASFREE_STORE_TRAILING_PATH = get_setting('MIGASFREE_STORE_TRAILING_PATH')
 MIGASFREE_TMP_TRAILING_PATH = get_setting('MIGASFREE_TMP_TRAILING_PATH')
 
-REDIS_HOST = get_setting('REDIS_HOST')
-REDIS_PORT = get_setting('REDIS_PORT')
-REDIS_DB = get_setting('REDIS_DB')
-
-BROKER_URL = get_setting('CELERY_BROKER_URL')
+CELERY_BROKER_URL = get_setting('CELERY_BROKER_URL')
 
 AUTH_TOKEN = f'Token {get_secret("token_pms")}'
 
@@ -50,7 +46,7 @@ REQUESTS_OK_CODES = [
     requests.codes.temporary_redirect, requests.codes.resume
 ]
 
-app = Celery('migasfree', broker=BROKER_URL, backend=BROKER_URL, fixups=[])
+app = Celery('migasfree', broker=CELERY_BROKER_URL, backend=CELERY_BROKER_URL, fixups=[])
 
 
 def symlink(source_path, target_path, name):
@@ -95,7 +91,7 @@ def create_repository_metadata(deployment_id):
     pms = get_pms(project["pms"])
 
     # ADD INFO IN REDIS
-    con = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
+    con = redis.from_url(CELERY_BROKER_URL)
     con.hmset(
         'migasfree:repos:%d' % deployment_id, {
             'name': deployment["name"],
