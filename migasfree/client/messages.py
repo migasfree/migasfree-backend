@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2022-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2022-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from datetime import datetime
+from django.utils import timezone
 
 from django_redis import get_redis_connection
 
@@ -25,7 +25,7 @@ def add_computer_message(computer, message):
     con = get_redis_connection()
     con.hmset(
         f'migasfree:msg:{computer.id}', {
-            'date': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'),
+            'date': timezone.now().strftime('%Y-%m-%dT%H:%M:%S.%f'),
             'computer_id': computer.id,
             'computer_name': computer.__str__(),
             'computer_status': computer.status,
