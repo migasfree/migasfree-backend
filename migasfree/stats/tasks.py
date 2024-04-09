@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ from asgiref.sync import async_to_sync
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
+from django.utils import timezone
 from django.utils.translation import gettext
 from celery import shared_task
 from channels.layers import get_channel_layer
@@ -161,7 +162,7 @@ def add_synchronizing_computers():
     con = get_redis_connection()
 
     result = 0
-    delayed_time = datetime.now() - timedelta(
+    delayed_time = timezone.now() - timedelta(
         seconds=settings.MIGASFREE_SECONDS_MESSAGE_ALERT
     )
 
@@ -193,7 +194,7 @@ def add_delayed_computers():
     con = get_redis_connection()
 
     result = 0
-    delayed_time = datetime.now() - timedelta(
+    delayed_time = timezone.now() - timedelta(
         seconds=settings.MIGASFREE_SECONDS_MESSAGE_ALERT
     )
 
