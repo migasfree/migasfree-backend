@@ -234,9 +234,11 @@ class Deployment(models.Model, MigasLink):
     @staticmethod
     def get_percent(begin_date, end_date):
         delta = end_date - begin_date
-        progress = timezone.now() - datetime.datetime.combine(
-            begin_date, datetime.datetime.min.time()
+        aware_date = timezone.make_aware(
+            datetime.datetime.combine(begin_date, datetime.datetime.min.time()),
+            timezone.get_default_timezone()
         )
+        progress = timezone.now() - aware_date
 
         if delta.days > 0:
             percent = float(progress.days) / delta.days * 100
