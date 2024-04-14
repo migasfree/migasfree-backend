@@ -170,7 +170,11 @@ def add_synchronizing_computers():
     for computer_id in computers:
         computer_id = int(computer_id)
         date = con.hget(f'migasfree:msg:{computer_id}', 'date')
-        if date and datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f') > delayed_time:
+        aware_date = timezone.make_aware(
+            datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f'),
+            timezone.get_default_timezone()
+        ) if date else None
+        if aware_date and aware_date > delayed_time:
             result += 1
 
     con.hmset(
@@ -202,7 +206,11 @@ def add_delayed_computers():
     for computer_id in computers:
         computer_id = int(computer_id)
         date = con.hget(f'migasfree:msg:{computer_id}', 'date')
-        if date and datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f') <= delayed_time:
+        aware_date = timezone.make_aware(
+            datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f'),
+            timezone.get_default_timezone()
+        ) if date else None
+        if aware_date and aware_date <= delayed_time:
             result += 1
 
     con.hmset(
