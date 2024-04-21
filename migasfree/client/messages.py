@@ -25,7 +25,7 @@ def add_computer_message(computer, message):
     con = get_redis_connection()
     con.hmset(
         f'migasfree:msg:{computer.id}', {
-            'date': timezone.now().strftime('%Y-%m-%dT%H:%M:%S.%f'),
+            'date': timezone.localtime(timezone.now()).strftime('%Y-%m-%dT%H:%M:%S.%f'),
             'computer_id': computer.id,
             'computer_name': computer.__str__(),
             'computer_status': computer.status,
