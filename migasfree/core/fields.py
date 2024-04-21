@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,11 +40,7 @@ class MultiFileField(forms.FileField):
         super().__init__(*args, **kwargs)
 
     def to_python(self, data):
-        ret = []
-        for item in data:
-            ret.append(super().to_python(item))
-
-        return ret
+        return [super().to_python(item) for item in data]
 
     def validate(self, data):
         super().validate(data)
