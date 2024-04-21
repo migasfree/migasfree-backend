@@ -286,8 +286,12 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
 
         computers = con.smembers('migasfree:watch:msg')
         for computer_id in computers:
-            date = con.hget('migasfree:msg:%s' % computer_id, 'date')
-            if datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%f') > delayed_time:
+            date = con.hget(f'migasfree:msg:{computer_id}', 'date')
+            aware_date = timezone.make_aware(
+                datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f'),
+                timezone.get_default_timezone()
+            ) if date else None
+            if aware_date and aware_date > delayed_time:
                 result.append(computer_id)
 
         sync_computers = models.Computer.objects.filter(pk__in=result)
@@ -311,7 +315,11 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         for computer_id in computers:
             computer_id = int(computer_id)
             date = con.hget(f'migasfree:msg:{computer_id}', 'date')
-            if date and datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f') <= delayed_time:
+            aware_date = timezone.make_aware(
+                datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f'),
+                timezone.get_default_timezone()
+            ) if date else None
+            if aware_date and aware_date <= delayed_time:
                 result.append(computer_id)
 
         delayed_computers = models.Computer.objects.filter(pk__in=result)
