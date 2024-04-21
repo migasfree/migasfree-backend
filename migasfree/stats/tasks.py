@@ -18,13 +18,12 @@
 
 import json
 
-from datetime import datetime, timedelta
+from datetime import datetime
+from operator import gt, le
 
 from asgiref.sync import async_to_sync
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
-from django.utils import timezone
 from django.utils.translation import gettext
 from celery import shared_task
 from channels.layers import get_channel_layer
@@ -33,6 +32,7 @@ from django_redis import get_redis_connection
 from ..core.models import Package, PackageSet, Deployment
 from ..client.models import Notification, Fault, Error, Computer
 from ..utils import decode_set, decode_dict
+from .utils import filter_computers_by_date
 
 
 import logging
@@ -140,13 +140,12 @@ def add_unchecked_errors():
 
 def add_generating_repos():
     con = get_redis_connection()
-    result = con.scard('migasfree:watch:repos')
     con.hmset(
         'migasfree:chk:repos', {
             'msg': gettext('Generating Repositories'),
             'target': 'server',
             'level': 'info',
-            'result': result,
+            'result': con.scard('migasfree:watch:repos'),
             'api': json.dumps({
                 'model': 'deployments',
                 'query': {
@@ -159,30 +158,15 @@ def add_generating_repos():
 
 
 def add_synchronizing_computers():
+    result, delayed_time = filter_computers_by_date(gt)
+
     con = get_redis_connection()
-
-    result = 0
-    delayed_time = timezone.now() - timedelta(
-        seconds=settings.MIGASFREE_SECONDS_MESSAGE_ALERT
-    )
-
-    computers = con.smembers('migasfree:watch:msg')
-    for computer_id in computers:
-        computer_id = int(computer_id)
-        date = con.hget(f'migasfree:msg:{computer_id}', 'date')
-        aware_date = timezone.make_aware(
-            datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f'),
-            timezone.get_default_timezone()
-        ) if date else None
-        if aware_date and aware_date > delayed_time:
-            result += 1
-
     con.hmset(
         'migasfree:chk:syncs', {
             'msg': gettext('Synchronizing Computers Now'),
             'target': 'computer',
             'level': 'info',
-            'result': result,
+            'result': len(result),
             'api': json.dumps({
                 'model': 'messages',
                 'query': {
@@ -195,30 +179,15 @@ def add_synchronizing_computers():
 
 
 def add_delayed_computers():
+    result, delayed_time = filter_computers_by_date(le)
+
     con = get_redis_connection()
-
-    result = 0
-    delayed_time = timezone.now() - timedelta(
-        seconds=settings.MIGASFREE_SECONDS_MESSAGE_ALERT
-    )
-
-    computers = con.smembers('migasfree:watch:msg')
-    for computer_id in computers:
-        computer_id = int(computer_id)
-        date = con.hget(f'migasfree:msg:{computer_id}', 'date')
-        aware_date = timezone.make_aware(
-            datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f'),
-            timezone.get_default_timezone()
-        ) if date else None
-        if aware_date and aware_date <= delayed_time:
-            result += 1
-
     con.hmset(
         'migasfree:chk:delayed', {
             'msg': gettext('Delayed Computers'),
             'target': 'computer',
             'level': 'warning',
-            'result': result,
+            'result': len(result),
             'api': json.dumps({
                 'model': 'messages',
                 'query': {
