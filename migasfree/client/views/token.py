@@ -19,7 +19,8 @@
 import csv
 import json
 
-from datetime import datetime, timedelta
+from datetime import datetime
+from operator import gt, le
 
 from django.core.paginator import Paginator
 from django.conf import settings
@@ -42,6 +43,7 @@ from ...hardware.serializers import NodeOnlySerializer
 from ...app_catalog.models import Policy
 from ...core.serializers import PlatformSerializer
 from ...core.views import MigasViewSet, ExportViewSet
+from ...stats.utils import filter_computers_by_date
 from ...mixins import DatabaseCheckMixin
 from ...paginations import DefaultPagination
 from ...utils import replace_keys, decode_dict
@@ -277,23 +279,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
 
     @action(methods=['get'], detail=False)
     def synchronizing(self, request):
-        con = get_redis_connection()
-
-        result = []
-        delayed_time = timezone.now() - timedelta(
-            seconds=settings.MIGASFREE_SECONDS_MESSAGE_ALERT
-        )
-
-        computers = con.smembers('migasfree:watch:msg')
-        for computer_id in computers:
-            date = con.hget(f'migasfree:msg:{computer_id}', 'date')
-            aware_date = timezone.make_aware(
-                datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f'),
-                timezone.get_default_timezone()
-            ) if date else None
-            if aware_date and aware_date > delayed_time:
-                result.append(computer_id)
-
+        result, _ = filter_computers_by_date(gt)
         sync_computers = models.Computer.objects.filter(pk__in=result)
 
         serializer = serializers.ComputerSerializer(sync_computers, many=True)
@@ -304,24 +290,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
 
     @action(methods=['get'], detail=False)
     def delayed(self, request):
-        con = get_redis_connection()
-
-        result = []
-        delayed_time = timezone.now() - timedelta(
-            seconds=settings.MIGASFREE_SECONDS_MESSAGE_ALERT
-        )
-
-        computers = con.smembers('migasfree:watch:msg')
-        for computer_id in computers:
-            computer_id = int(computer_id)
-            date = con.hget(f'migasfree:msg:{computer_id}', 'date')
-            aware_date = timezone.make_aware(
-                datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f'),
-                timezone.get_default_timezone()
-            ) if date else None
-            if aware_date and aware_date <= delayed_time:
-                result.append(computer_id)
-
+        result, _ = filter_computers_by_date(le)
         delayed_computers = models.Computer.objects.filter(pk__in=result)
 
         serializer = serializers.ComputerSerializer(
