@@ -59,10 +59,7 @@ def symlink(source_path, target_path, name):
 
     target = os.path.join(source_path, name)
     if not os.path.lexists(target):
-        os.symlink(
-            os.path.join(target_path, name),
-            target
-        )
+        os.symlink(os.path.join(target_path, name), target)
 
 
 @app.task
@@ -93,7 +90,7 @@ def create_repository_metadata(deployment_id):
     # ADD INFO IN REDIS
     con = redis.from_url(CELERY_BROKER_URL)
     con.hmset(
-        'migasfree:repos:%d' % deployment_id, {
+        f'migasfree:repos:{deployment_id}', {
             'name': deployment["name"],
             'project': project["name"]
         }
@@ -164,7 +161,7 @@ def create_repository_metadata(deployment_id):
     shutil.rmtree(tmp_path)
 
     # REMOVE INFO IN REDIS
-    con.hdel('migasfree:repos:%d' % deployment_id, '*')
+    con.hdel(f'migasfree:repos:{deployment_id}', '*')
     con.srem('migasfree:watch:repos', deployment_id)
     con.close()
 
