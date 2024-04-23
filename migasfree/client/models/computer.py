@@ -670,12 +670,7 @@ class Computer(models.Model, MigasLink):
         return str(self.__getattribute__(desc[0]))
 
     def get_summary(self):
-        return '{}, {}, {}, {}'.format(
-            self.status,
-            self.project,
-            self.ip_address,
-            self.sync_user
-        )
+        return f'{self.status}, {self.project}, {self.ip_address}, {self.sync_user}'
 
     def get_replacement_info(self):
         cid = self.get_cid_attribute()
@@ -757,20 +752,19 @@ class Computer(models.Model, MigasLink):
         ]
 
 
-from .status_log import StatusLog
-
-
 @receiver(pre_save, sender=Computer)
 def pre_save_computer(sender, instance, **kwargs):
     if instance.id:
         old_obj = Computer.objects.get(pk=instance.id)
         if old_obj.status != instance.status:
+            from .status_log import StatusLog
             StatusLog.objects.create(instance)
 
 
 @receiver(post_save, sender=Computer)
 def post_save_computer(sender, instance, created, **kwargs):
     if created:
+        from .status_log import StatusLog
         StatusLog.objects.create(instance)
 
     if instance.status in ['available', 'unsubscribed']:
