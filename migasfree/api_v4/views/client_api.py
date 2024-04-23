@@ -100,7 +100,7 @@ def api_v4(request):
 
     msg = request.FILES.get('message')
     filename = os.path.join(settings.MIGASFREE_TMP_DIR, msg.name)
-    filename_return = "{}.return".format(filename)
+    filename_return = f'{filename}.return'
 
     command, uuid, name = get_msg_info(msg.name)
     computer = get_computer(name, uuid)
@@ -109,11 +109,7 @@ def api_v4(request):
         Error.objects.create(
             computer,
             computer.project,
-            "{} - {} - {}".format(
-                get_client_ip(request),
-                command,
-                errmfs.error_info(errmfs.UNSUBSCRIBED_COMPUTER)
-            )
+            f"{get_client_ip(request)} - {command} - {errmfs.error_info(errmfs.UNSUBSCRIBED_COMPUTER)}"
         )
         ret = return_message(
             command,
@@ -124,8 +120,7 @@ def api_v4(request):
             content_type='text/plain'
         )
 
-    if computer and computer.status == 'available' \
-            and command == 'upload_computer_info':
+    if computer and computer.status == 'available' and command == 'upload_computer_info':
         Notification.objects.create(
             _('Computer [%s] with available status, has been synchronized')
             % computer
@@ -145,21 +140,14 @@ def api_v4(request):
                     Error.objects.create(
                         computer,
                         computer.project,
-                        "{} - {} - {}".format(
-                            get_client_ip(request),
-                            command,
-                            errmfs.error_info(errmfs.INVALID_SIGNATURE)
-                        )
+                        f"{get_client_ip(request)} - {command} - {errmfs.error_info(errmfs.INVALID_SIGNATURE)}"
                     )
             else:
                 ret = eval(command)(request, name, uuid, computer, data)
 
             os.remove(filename)
         else:
-            ret = return_message(
-                command,
-                errmfs.error(errmfs.COMPUTER_NOT_FOUND)
-            )
+            ret = return_message(command, errmfs.error(errmfs.COMPUTER_NOT_FOUND))
 
         return HttpResponse(
             wrap_command_result(filename_return, ret),
@@ -176,7 +164,7 @@ def api_v4(request):
 
         try:
             ret = eval(command)(request, name, uuid, computer, data)
-        except:
+        except Exception:
             ret = return_message(command, errmfs.error(errmfs.GENERIC))
 
         os.remove(filename)
