@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,9 +40,7 @@ class DomainSynchronizationManager(models.Manager):
     def scope(self, user):
         qs = self.get_queryset()
         if not user.is_view_all():
-            qs = qs.filter(
-                computer_id__in=user.get_computers()
-            )
+            qs = qs.filter(computer_id__in=user.get_computers())
 
         return qs
 
@@ -217,11 +215,11 @@ class Synchronization(Event):
         con = get_redis_connection()
         for deploy_id in deployments:
             con.srem(
-                'migasfree:deployments:{}:ok'.format(deploy_id),
+                f'migasfree:deployments:{deploy_id}:ok',
                 self.computer.id
             )
             con.srem(
-                'migasfree:deployments:{}:error'.format(deploy_id),
+                f'migasfree:deployments:{deploy_id}:error',
                 self.computer.id
             )
             con.sadd(
