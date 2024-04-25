@@ -22,6 +22,8 @@ import fcntl
 import select
 import copy
 import tempfile
+import hashlib
+import json
 
 from datetime import timedelta
 
@@ -337,3 +339,7 @@ def to_heatmap(results, range_name='day'):
         ]
         for item in results
     ]
+
+
+def hash_args(args, kwargs):
+    return hashlib.md5(json.dumps((args, kwargs)).encode()).hexdigest()
