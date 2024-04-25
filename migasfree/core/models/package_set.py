@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -133,7 +133,7 @@ class PackageSet(models.Model, MigasLink):
 
 
 def _update_repository_metadata(instance):
-    from .. import tasks
+    from ..pms import tasks
     from .deployment import Deployment
 
     queryset = Deployment.objects.filter(available_package_sets__in=[instance])
