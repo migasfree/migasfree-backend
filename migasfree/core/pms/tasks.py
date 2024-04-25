@@ -200,7 +200,7 @@ def remove_repository_metadata(deployment_id, old_slug=''):
 
 @task_postrun.connect
 def handle_postrun(sender=None, **kwargs):
-    if sender.name == 'migasfree.core.tasks.create_repository_metadata':
+    if sender.name == 'migasfree.core.pms.tasks.create_repository_metadata':
         if kwargs['state'] == 'SUCCESS':
             ret, output, deployment_name, project_name = kwargs['retval']
             if ret == 0:
