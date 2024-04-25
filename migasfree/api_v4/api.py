@@ -29,7 +29,7 @@ from ..client.views.safe import (
 from .secure import get_keys_to_client, get_keys_to_packager
 from ..client.tasks import update_software_inventory
 from ..hardware.tasks import save_computer_hardware
-from ..core.tasks import create_repository_metadata, package_metadata
+from ..core.pms.tasks import create_repository_metadata, package_metadata
 from ..utils import (
     uuid_change_format, get_client_ip,
     list_difference, list_common, to_list,
