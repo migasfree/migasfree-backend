@@ -76,30 +76,21 @@ def error(number):
         etype = sys.exc_info()[0]
         evalue = sys.exc_info()[1]
 
-        dir_errors = os.path.join(settings.MIGASFREE_PUBLIC_DIR, 'errors')
+        dir_errors = os.path.join(settings.MIGASFREE_PUBLIC_DIR, '.errors')
         if not os.path.exists(dir_errors):
             os.makedirs(dir_errors)
 
-        fp = tempfile.NamedTemporaryFile(
+        with tempfile.NamedTemporaryFile(
             mode='w+b',
             suffix='.html',
             prefix=str(evalue).replace(" ", "_").replace("\n", "_"),
             dir=dir_errors,
             delete=False
-        )
+        ) as fp:
+            fp.write(print_exc_plus(etype, evalue))
+            fp_name = os.path.join(dir_errors, os.path.basename(fp.name))
 
-        fp.write(print_exc_plus(etype, evalue))
-        fp.close()
-
-        ret = '%s %s %s: %s' % (
-            str(etype),
-            str(evalue),
-            _("Traceback"),
-            os.path.join(
-                dir_errors,
-                os.path.basename(fp.name)
-            )
-        )
+        ret = f'{etype} {evalue} {_("Traceback")}: {fp_name}'
 
     return {"errmfs": {"code": number, "info": ret}}
 
@@ -140,7 +131,7 @@ def print_exc_plus(etype, evalue):
         for key, value in frame.f_locals.items():
             try:
                 variables.append({"key": key, "value": str(value)})
-            except:
+            except Exception:
                 pass
 
         fr["locals"] = variables
