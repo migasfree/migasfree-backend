@@ -354,7 +354,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         """
         user = request.user.userprofile
         computer = self.get_object()
-        date = request.GET.get('date', timezone.now())
+        date = request.GET.get('date', timezone.localtime(timezone.now()))
 
         migration = models.Migration.situation(computer.id, date, user)
         status_log = models.StatusLog.situation(computer.id, date, user)
