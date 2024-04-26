@@ -61,7 +61,7 @@ def first_day_month(date_):
 
 def datetime_iterator(from_date=None, to_date=None, delta=timedelta(minutes=1)):
     # from https://www.ianlewis.org/en/python-date-range-iterator
-    from_date = from_date or timezone.now()
+    from_date = from_date or timezone.localtime(timezone.now())
     while to_date is None or from_date <= to_date:
         yield from_date
         from_date += delta
@@ -234,7 +234,7 @@ class EventViewSet(viewsets.ViewSet):
             end string (Y-m-dTH)
         """
         user = request.user.userprofile
-        now = timezone.now()
+        now = timezone.localtime(timezone.now())
         fmt = '%Y-%m-%dT%H'
         human_fmt = '%Y-%m-%d %H:%M:%S'
         value_fmt = '%Y-%m-%dT%H:%M:%S'
