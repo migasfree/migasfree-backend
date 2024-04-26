@@ -80,7 +80,7 @@ class PackageHistory(models.Model, MigasLink):
         PackageHistory.objects.filter(
             computer__id=computer_id,
             uninstall_date=None
-        ).update(uninstall_date=timezone.now())
+        ).update(uninstall_date=timezone.localtime(timezone.now()))
 
     class Meta:
         app_label = 'client'
