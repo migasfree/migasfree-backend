@@ -475,7 +475,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             ip_address=claims.get('ip_address'),
             forwarded_ip_address=get_client_ip(request),
             sync_user=user,
-            sync_start_date=timezone.now()
+            sync_start_date=timezone.localtime(timezone.now())
         )
 
         serializer = serializers.ComputerSerializer(
