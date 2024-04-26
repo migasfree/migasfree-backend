@@ -48,7 +48,7 @@ def update_software_inventory(computer_id, inventory):
 
 
 def update_software_inventory_raw(pkgs, computer_id, project_id):
-    now = timezone.now()
+    now = timezone.localtime(timezone.now())
     cursor = connection.cursor()
 
     # UPDATE UNINSTALL M2M
