@@ -96,7 +96,7 @@ class SyncStatsViewSet(EventViewSet):
         try:
             end = datetime.strptime(end, fmt)
         except ValueError:
-            end = timezone.now() + relativedelta(months=1)
+            end = timezone.localtime(timezone.now()) + relativedelta(months=1)
 
         begin = request.query_params.get('begin', '')
         try:
