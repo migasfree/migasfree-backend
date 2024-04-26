@@ -370,7 +370,7 @@ class Computer(models.Model, MigasLink):
 
     def update_sync_user(self, user):
         self.sync_user = user
-        self.sync_start_date = timezone.now()
+        self.sync_start_date = timezone.localtime(timezone.now())
         self.save()
 
     def update_project(self, value):
@@ -406,13 +406,13 @@ class Computer(models.Model, MigasLink):
                 PackageHistory.objects.filter(
                     computer__id=self.id,
                     package__fullname__in=history['installed']
-                ).update(install_date=timezone.now())
+                ).update(install_date=timezone.localtime(timezone.now()))
 
             if 'uninstalled' in history:
                 PackageHistory.objects.filter(
                     computer__id=self.id,
                     package__fullname__in=history['uninstalled']
-                ).update(uninstall_date=timezone.now())
+                ).update(uninstall_date=timezone.localtime(timezone.now()))
 
     def has_software_inventory(self):
         from .package_history import PackageHistory
