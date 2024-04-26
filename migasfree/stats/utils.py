@@ -28,7 +28,7 @@ def filter_computers_by_date(comparison_operator=gt):
     con = get_redis_connection()
 
     result = []
-    delayed_time = timezone.now() - timedelta(seconds=settings.MIGASFREE_SECONDS_MESSAGE_ALERT)
+    delayed_time = timezone.localtime(timezone.now()) - timedelta(seconds=settings.MIGASFREE_SECONDS_MESSAGE_ALERT)
 
     computers = con.smembers('migasfree:watch:msg')
     for computer_id in computers:
