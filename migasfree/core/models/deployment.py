@@ -238,7 +238,7 @@ class Deployment(models.Model, MigasLink):
             datetime.datetime.combine(begin_date, datetime.datetime.min.time()),
             timezone.get_default_timezone()
         )
-        progress = timezone.now() - aware_date
+        progress = timezone.localtime(timezone.now()) - aware_date
 
         if delta.days > 0:
             percent = float(progress.days) / delta.days * 100
@@ -335,7 +335,7 @@ class Deployment(models.Model, MigasLink):
             project__id=computer.project.id,
             enabled=True,
             included_attributes__id__in=attributes,
-            start_date__lte=timezone.now().date()
+            start_date__lte=timezone.localtime(timezone.now()).date()
         ).filter(
             Q(domain__isnull=True) | (
                 Q(domain__included_attributes__id__in=attributes) &
@@ -366,7 +366,7 @@ class Deployment(models.Model, MigasLink):
                 if computer.id % deploy.duration == duration:
                     if time_horizon(
                         deploy.start_date, deploy.delay + duration
-                    ) <= timezone.now().date():
+                    ) <= timezone.localtime(timezone.now()).date():
                         lst.append(deploy.id)
                         break
 
@@ -384,7 +384,7 @@ class Deployment(models.Model, MigasLink):
         if model == 'computer':
             from ...client.models import Computer
 
-            if self.enabled and (self.start_date <= timezone.now().date()):
+            if self.enabled and (self.start_date <= timezone.localtime(timezone.now()).date()):
                 # by assigned attributes
                 computers = Computer.productive.scope(user).filter(
                     project_id=self.project_id
@@ -399,7 +399,7 @@ class Deployment(models.Model, MigasLink):
                         for duration in range(0, delay.duration):
                             if time_horizon(
                                 self.start_date, delay.delay + duration
-                            ) <= timezone.now().date():
+                            ) <= timezone.localtime(timezone.now()).date():
                                 computers_schedule = Computer.productive.scope(user).filter(
                                     project_id=self.project_id
                                 ).filter(
