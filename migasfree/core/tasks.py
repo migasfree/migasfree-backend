@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from celery import Celery, shared_task
+from celery import Celery
 
 from .decorators import unique_task
 from ..utils import get_setting
@@ -27,7 +27,7 @@ CELERY_BROKER_URL = get_setting('CELERY_BROKER_URL')
 app = Celery('migasfree', broker=CELERY_BROKER_URL, backend=CELERY_BROKER_URL, fixups=[])
 
 
-@shared_task(queue='default', bind=True)
+@app.task(bind=True)
 @unique_task(app)
 def migrate_db():
     # Please, don't move this import from here
