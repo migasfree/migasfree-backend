@@ -21,7 +21,7 @@ import shutil
 import redis
 import requests
 
-from celery import Celery, shared_task
+from celery import Celery
 from celery.exceptions import Reject
 from celery.signals import task_postrun
 
@@ -72,8 +72,7 @@ def package_info(pms_name, package):
     return get_pms(pms_name).package_info(package)
 
 
-@app.task
-@shared_task(queue='default', bind=True)
+@app.task(bind=True)
 @unique_task(app)
 def create_repository_metadata(deployment_id):
     req = requests.get(
