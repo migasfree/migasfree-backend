@@ -159,12 +159,18 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
             status=status.HTTP_200_OK
         )
 
-    @action(methods=['get'], detail=True, url_path='software/inventory', url_name='software_inventory')
+    @action(methods=['get', 'delete'], detail=True, url_path='software/inventory', url_name='software_inventory')
     def software_inventory(self, request, pk=None):
         """
         Returns installed packages in a computer
         """
         computer = self.get_object()
+
+        if request.method == 'DELETE' and request.user.is_superuser:
+            computer.packagehistory_set.filter(
+                uninstall_date__isnull=True,
+                package__project=computer.project
+            ).delete()
 
         data = list(
             computer.packagehistory_set.filter(
@@ -186,12 +192,15 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
             status=status.HTTP_200_OK
         )
 
-    @action(methods=['get'], detail=True, url_path='software/history', url_name='software_history')
+    @action(methods=['get', 'delete'], detail=True, url_path='software/history', url_name='software_history')
     def software_history(self, request, pk=None):
         """
         Returns software history of a computer
         """
         computer = self.get_object()
+
+        if request.method == 'DELETE' and request.user.is_superuser:
+            computer.delete_software_history(request.GET.get('key', None))
 
         return Response(
             computer.get_software_history(),
