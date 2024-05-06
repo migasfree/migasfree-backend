@@ -32,7 +32,7 @@ def filter_computers_by_date(comparison_operator=gt):
 
     computers = con.smembers('migasfree:watch:msg')
     for computer_id in computers:
-        date = con.hget(f'migasfree:msg:{computer_id}', 'date')
+        date = con.hget(f'migasfree:msg:{int(computer_id)}', 'date')
         aware_date = timezone.make_aware(
             datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f'),
             timezone.get_default_timezone()
