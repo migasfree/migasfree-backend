@@ -463,6 +463,15 @@ class Computer(models.Model, MigasLink):
 
         return dict(OrderedDict(sorted(merged.items(), reverse=True)))
 
+    def delete_software_history(self, key=None):
+        if key and key != 'null':
+            date = datetime.strptime(key, '%Y-%m-%dT%H:%M:%S')
+            self.packagehistory_set.filter(
+                models.Q(install_date__date=date) | models.Q(uninstall_date__date=date)
+            ).delete()
+        else:
+            self.packagehistory_set.filter().delete()
+
     @staticmethod
     def group_by_project(user):
         return Computer.productive.scope(user).values(
