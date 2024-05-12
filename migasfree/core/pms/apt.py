@@ -48,7 +48,7 @@ class Apt(Pms):
         )
         """
 
-        _cmd = r'''
+        cmd = r'''
 _NAME=%(name)s
 _ARCHS=("%(arch)s")
 for _ARCH in ${_ARCHS[@]}
@@ -56,13 +56,16 @@ do
   mkdir -p "%(path)s/%(components)s/binary-$_ARCH/"
   cd %(path)s/../..
 
-  ionice -c 3 apt-ftparchive --arch $_ARCH packages dists/$_NAME/%(components)s > dists/$_NAME/%(components)s/binary-$_ARCH/Packages 2> /tmp/$_NAME
+  ionice -c 3 apt-ftparchive --arch $_ARCH packages dists/$_NAME/%(components)s \
+    > dists/$_NAME/%(components)s/binary-$_ARCH/Packages 2> /tmp/$_NAME
   if [ $? -ne 0 ]
   then
     (>&2 cat /tmp/$_NAME)
   fi
-  sed -i "s/Filename: .*\/%(components)s\//Filename: dists\/$_NAME\/%(components)s\//" dists/$_NAME/%(components)s/binary-$_ARCH/Packages
-  sed -i "s/Filename: .*\/%(store_trailing_path)s\/[^/]*\//Filename: dists\/$_NAME\/%(components)s\//" dists/$_NAME/%(components)s/binary-$_ARCH/Packages
+  sed -i "s/Filename: .*\/%(components)s\//Filename: dists\/$_NAME\/%(components)s\//" \
+    dists/$_NAME/%(components)s/binary-$_ARCH/Packages
+  sed -i "s/Filename: .*\/%(store_trailing_path)s\/[^/]*\//Filename: \
+    dists\/$_NAME\/%(components)s\//" dists/$_NAME/%(components)s/binary-$_ARCH/Packages
   gzip -9c dists/$_NAME/%(components)s/binary-$_ARCH/Packages > dists/$_NAME/%(components)s/binary-$_ARCH/Packages.gz
 done
 
@@ -115,14 +118,14 @@ create_deploy
             'store_trailing_path': get_setting('MIGASFREE_STORE_TRAILING_PATH')
         }
 
-        return execute(_cmd)
+        return execute(cmd)
 
     def package_info(self, package):
         """
         string package_info(string package)
         """
 
-        _cmd = '''
+        cmd = '''
 echo "## Info"
 echo "~~~"
 dpkg-deb --info %(pkg)s
@@ -176,21 +179,22 @@ dpkg-deb -c %(pkg)s | awk '{print $6}'
 echo "~~~"
         ''' % {'pkg': package}
 
-        _ret, _output, _error = execute(_cmd)
+        ret, output, error = execute(cmd)
 
-        return _output if _ret == 0 else _error
+        return output if ret == 0 else error
 
     def package_metadata(self, package):
         """
         dict package_metadata(string package)
         """
 
-        _cmd = "dpkg-deb --showformat='${Package}_${Version}_${Architecture}' --show %s" % package
-        _ret, _output, _error = execute(_cmd)
-        if _ret == 0:
-            name, version, architecture = _output.split('_')
+        cmd = f"dpkg-deb --showformat='${{Package}}_${{Version}}_${{Architecture}}' --show {package}"
+        ret, output, error = execute(cmd)
+
+        if ret == 0:
+            name, version, architecture = output.split('_')
         else:
-            name, version, architecture = [None, None, None]
+            name, version, architecture = None, None, None
 
         return {
             'name': name,
