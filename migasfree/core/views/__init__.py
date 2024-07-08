@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,3 +32,16 @@ from .safe import SafePackageViewSet
 from .public import (
     GetSourceFileView, ServerInfoView, PmsView, ProgrammingLanguagesView,
 )
+
+__all__ = [
+    'PlatformViewSet', 'ProjectViewSet', 'StoreViewSet', 'SingularityViewSet',
+    'PropertyViewSet', 'ServerPropertyViewSet', 'ClientPropertyViewSet',
+    'AttributeViewSet', 'ServerAttributeViewSet', 'ClientAttributeViewSet',
+    'AttributeSetViewSet', 'ScheduleViewSet', 'ScheduleDelayViewSet',
+    'InternalSourceViewSet', 'ExternalSourceViewSet', 'DeploymentViewSet',
+    'DomainViewSet', 'ScopeViewSet', 'UserProfileViewSet', 'GroupViewSet',
+    'PermissionViewSet', 'PackageViewSet', 'PackageSetViewSet',
+    'MigasViewSet', 'ExportViewSet',
+    'SafePackageViewSet',
+    'GetSourceFileView', 'ServerInfoView', 'PmsView', 'ProgrammingLanguagesView',
+]
