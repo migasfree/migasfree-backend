@@ -1,5 +1,5 @@
 asgiref==3.7.2
-celery==5.3.6
+celery==5.4.0
 channels==4.0.0
 channels-redis==4.2.0
 coreapi==2.3.3
