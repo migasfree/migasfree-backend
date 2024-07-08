@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,3 +39,20 @@ from .deployment import Deployment, InternalSource, ExternalSource
 from .domain import Domain
 from .scope import Scope
 from .user_profile import UserProfile
+
+__all__ = [
+    'MigasLink',
+    'Platform', 'Project', 'Store',
+    'Property', 'ServerProperty', 'ClientProperty', 'BasicProperty',
+    'Singularity',
+    'Attribute', 'ServerAttribute', 'ClientAttribute', 'BasicAttribute',
+    'AttributeSet', 'prevent_circular_dependencies',
+    'Schedule',
+    'ScheduleDelay',
+    'Package', 'PackageManager',
+    'PackageSet',
+    'Deployment', 'InternalSource', 'ExternalSource',
+    'Domain',
+    'Scope',
+    'UserProfile',
+]
