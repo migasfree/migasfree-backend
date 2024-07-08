@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,3 +20,10 @@ from .capability import Capability
 from .configuration import Configuration
 from .logical_name import LogicalName
 from .node import Node
+
+__all__ = [
+    'Capability',
+    'Configuration',
+    'LogicalName',
+    'Node',
+]
