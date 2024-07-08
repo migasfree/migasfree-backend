@@ -22,6 +22,7 @@ import locale
 from datetime import timedelta, datetime
 from dateutil.relativedelta import relativedelta
 
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -39,8 +40,6 @@ from .events import (
     event_by_month, month_interval,
     month_year_iter, EventViewSet,
 )
-
-from . import DAILY_RANGE, MONTHLY_RANGE
 
 
 def daterange(start_date, end_date):
@@ -102,7 +101,7 @@ class SyncStatsViewSet(EventViewSet):
         try:
             begin = datetime.strptime(begin, fmt)
         except ValueError:
-            begin = end - relativedelta(months=+MONTHLY_RANGE)
+            begin = end - relativedelta(months=+settings.MONTHLY_RANGE)
 
         begin += relativedelta(day=1, hour=0, minute=0, second=0, microsecond=0)
 
@@ -164,7 +163,7 @@ class SyncStatsViewSet(EventViewSet):
         try:
             begin = datetime.strptime(begin, fmt)
         except ValueError:
-            begin = end - timedelta(days=DAILY_RANGE)
+            begin = end - timedelta(days=settings.DAILY_RANGE)
 
         project_id = request.query_params.get('project_id', 0)
 
