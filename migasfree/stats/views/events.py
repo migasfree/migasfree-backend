@@ -21,6 +21,7 @@ import time
 from datetime import timedelta, datetime, date
 from dateutil.relativedelta import relativedelta
 
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -37,9 +38,6 @@ from ...client.models import (
 )
 from ...core.models import Project
 from ...utils import to_heatmap
-
-from . import MONTHLY_RANGE, HOURLY_RANGE
-
 
 computer_id = openapi.Parameter(
     'computer_id', openapi.IN_QUERY,
@@ -88,16 +86,16 @@ def month_interval(begin_month='', end_month=''):
         try:
             begin_date = datetime.strptime(f'{begin_month}-01', '%Y-%m-%d')
             if not end_month:
-                end_date = begin_date + relativedelta(months=+MONTHLY_RANGE)
+                end_date = begin_date + relativedelta(months=+settings.MONTHLY_RANGE)
         except ValueError:
             if not end_month:
                 end_date = date.today() + relativedelta(months=+1)
 
-            begin_date = end_date - relativedelta(months=+MONTHLY_RANGE)
+            begin_date = end_date - relativedelta(months=+settings.MONTHLY_RANGE)
 
     if not end_month and not begin_month:
         end_date = date.today() + relativedelta(months=+1)
-        begin_date = end_date - relativedelta(months=+MONTHLY_RANGE)
+        begin_date = end_date - relativedelta(months=+settings.MONTHLY_RANGE)
 
     if begin_date > end_date:
         begin_date, end_date = end_date, begin_date
@@ -249,7 +247,7 @@ class EventViewSet(viewsets.ViewSet):
         try:
             begin = datetime.strptime(begin, fmt)
         except ValueError:
-            begin = end - timedelta(days=HOURLY_RANGE)
+            begin = end - timedelta(days=settings.HOURLY_RANGE)
 
         event_class = self.get_event_class()
         events = {
