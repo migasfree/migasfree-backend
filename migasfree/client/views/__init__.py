@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@ from .safe import (
     SafeComputerViewSet, SafeSynchronizationView, SafeEndOfTransmissionView,
 )
 from .public import (
-    PackagerKeysView, ProjectKeysView,
-    RepositoriesKeysView,
+    PackagerKeysView, ProjectKeysView, RepositoriesKeysView,
 )
 from .token import (
     ComputerViewSet, ErrorViewSet,
@@ -30,3 +29,13 @@ from .token import (
     StatusLogViewSet, SynchronizationViewSet, UserViewSet,
     MessageViewSet,
 )
+
+__all__ = [
+    'SafeComputerViewSet', 'SafeSynchronizationView', 'SafeEndOfTransmissionView',
+    'PackagerKeysView', 'ProjectKeysView', 'RepositoriesKeysView',
+    'ComputerViewSet', 'ErrorViewSet',
+    'FaultDefinitionViewSet', 'FaultViewSet',
+    'PackageHistoryViewSet', 'NotificationViewSet', 'MigrationViewSet',
+    'StatusLogViewSet', 'SynchronizationViewSet', 'UserViewSet',
+    'MessageViewSet',
+]
