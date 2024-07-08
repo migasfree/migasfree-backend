@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,3 +29,16 @@ from .user import User
 from .notification import Notification
 from .migration import Migration
 from .synchronization import Synchronization
+
+__all__ = [
+    'Computer',
+    'StatusLog',
+    'PackageHistory',
+    'Error',
+    'FaultDefinition',
+    'Fault',
+    'User',
+    'Notification',
+    'Migration',
+    'Synchronization',
+]
