@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2021-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -73,19 +73,22 @@ create_deploy
         _cmd = '''
 echo "## Info"
 echo "~~~"
-pacman --query --info --file %(pkg)s
+%(pms)s --query --info --file %(pkg)s
 echo "~~~"
 echo
 echo "## Changelog"
 echo "~~~"
-pacman --query --changelog --file %(pkg)s
+%(pms)s --query --changelog --file %(pkg)s
 echo "~~~"
 echo
 echo "## Files"
 echo "~~~"
-pacman --query --list --quiet --file %(pkg)s
+%(pms)s --query --list --quiet --file %(pkg)s
 echo "~~~"
-        ''' % {'pkg': package}
+        ''' % {
+            'pms': self.name,
+            'pkg': package
+        }
 
         _ret, _output, _error = execute(_cmd)
 
@@ -96,7 +99,7 @@ echo "~~~"
         dict package_metadata(string package)
         """
 
-        _cmd = 'pacman --query --info --file {}'.format(package)
+        _cmd = f'{self.name} --query --info --file {package}'
         _ret, _output, _error = execute(_cmd)
         if _ret == 0:
             _output = _output.splitlines()
@@ -127,8 +130,11 @@ echo "~~~"
         from ..models import Deployment
 
         if deploy.source == Deployment.SOURCE_INTERNAL:
-            return '[{name}]\nSigLevel = Optional TrustAll PackageTrustAll\n' \
-                    'Server = {{protocol}}://{{server}}{media_url}{project}/{trailing_path}/{name}/{components}\n\n'.format(
+            return '''[{name}]
+SigLevel = Optional TrustAll PackageTrustAll
+Server = {{protocol}}://{{server}}{media_url}{project}/{trailing_path}/{name}/{components}
+
+'''.format(
                 media_url=self.media_url,
                 trailing_path=get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH'),
                 project=deploy.project.slug,
