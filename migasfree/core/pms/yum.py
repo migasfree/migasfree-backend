@@ -177,3 +177,9 @@ baseurl={{protocol}}://{{server}}/src/{project}/{trailing_path}/{name}/{suite}/{
                 )
 
         return ''
+
+    def is_package_in_repo(self, filename, path):
+        cmd = f'zgrep {filename} {path}/*primary.xml.gz'
+        ret, _, _ = execute(cmd)
+
+        return ret == 0
