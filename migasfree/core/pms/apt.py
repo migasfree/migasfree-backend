@@ -229,3 +229,9 @@ echo "~~~"
                     )
 
         return ''
+
+    def is_package_in_repo(self, filename, path):
+        cmd = f'grep -r {filename} {path}/*'
+        ret, _, _ = execute(cmd)
+
+        return ret == 0
