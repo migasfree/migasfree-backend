@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -146,17 +146,17 @@ class RangeFileWrapper:
                 return data
 
             raise StopIteration()
-        else:
-            if self.remaining <= 0:
-                raise StopIteration()
 
-            data = self.file_object.read(min(self.remaining, self.blk_size))
-            if not data:
-                raise StopIteration()
+        if self.remaining <= 0:
+            raise StopIteration()
 
-            self.remaining -= len(data)
+        data = self.file_object.read(min(self.remaining, self.blk_size))
+        if not data:
+            raise StopIteration()
 
-            return data
+        self.remaining -= len(data)
+
+        return data
 
 
 @permission_classes((permissions.AllowAny,))
