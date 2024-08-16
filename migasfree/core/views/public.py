@@ -47,11 +47,12 @@ logger = logging.getLogger('migasfree')
 
 def add_notification_get_source_file(error, deployment, resource, remote, from_):
     Notification.objects.create(
-        _("Deployment (external source) [%s]: [%s] resource: [%s], remote file: [%s], from [%s].") % (
+        _("Deployment (external source) [%s]: [%s] resource: [%s], remote file: [%s], from [%s]. Error: %s") % (
             f'{deployment.name}@{deployment.project.name}',
             resource,
             remote,
-            from_
+            from_,
+            error
         )
     )
 
