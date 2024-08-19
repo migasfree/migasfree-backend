@@ -162,7 +162,7 @@ class RangeFileWrapper:
 
 @permission_classes((permissions.AllowAny,))
 class GetSourceFileView(views.APIView):
-    def read_remote_chunks(self, local_file, remote, chunk_size=8192):
+    async def read_remote_chunks(self, local_file, remote, chunk_size=8192):
         _, tmp = tempfile.mkstemp()
         with open(tmp, 'wb') as tmp_file:
             while True:
