@@ -659,7 +659,7 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
         return deploy
 
     def update(self, instance, validated_data):
-        if instance.source == Deployment.SOURCE_INTERNAL:
+        if instance.source == Deployment.SOURCE_INTERNAL and 'name' in validated_data:
             old_obj = self.Meta.model.objects.get(id=instance.id)
             old_pkgs = sorted(
                 old_obj.available_packages.values_list('id', flat=True)
@@ -668,7 +668,7 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
 
         # https://github.com/tomchristie/django-rest-framework/issues/2442
         instance = super().update(instance, validated_data)
-        if instance.source == Deployment.SOURCE_INTERNAL:
+        if instance.source == Deployment.SOURCE_INTERNAL and 'name' in validated_data:
             new_pkgs = sorted(
                 instance.available_packages.values_list('id', flat=True)
             )
