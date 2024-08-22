@@ -79,8 +79,7 @@ class PmsView(views.APIView):
         """
         ret = {}
 
-        pms = dict(get_available_pms())
-        for key, value in pms.items():
+        for key, value in dict(get_available_pms()).items():
             item = get_pms(key)
             ret[key] = {
                 'module': value,
