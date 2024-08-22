@@ -183,10 +183,7 @@ def remove_repository_metadata(deployment_id, old_slug=''):
     project = deployment["project"]
     pms = get_pms(project["pms"])
 
-    if old_slug:
-        slug = old_slug
-    else:
-        slug = deployment["slug"]
+    slug = old_slug or deployment["slug"]
 
     deployment_path = os.path.join(
         MIGASFREE_PUBLIC_DIR,
@@ -194,7 +191,8 @@ def remove_repository_metadata(deployment_id, old_slug=''):
         pms.relative_path,
         slug
     )
-    shutil.rmtree(deployment_path, ignore_errors=True)
+    if os.path.exists(deployment_path):
+        shutil.rmtree(deployment_path, ignore_errors=True)
 
 
 @task_postrun.connect
