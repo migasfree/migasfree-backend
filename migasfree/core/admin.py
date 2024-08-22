@@ -206,8 +206,8 @@ class ServerAttributeFilter(SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value():
             return queryset.filter(property_att__id__exact=self.value())
-        else:
-            return queryset
+
+        return queryset
 
 
 @admin.register(ServerAttribute)
@@ -274,10 +274,7 @@ class ScheduleDelayLine(admin.TabularInline):
 
     def computers(self, obj):
         related_objects = obj.related_objects('computer', self.request.user.userprofile)
-        if related_objects:
-            return related_objects.count()
-
-        return 0
+        return related_objects.count() if related_objects else 0
 
     computers.short_description = _('Computers')
 
@@ -420,15 +417,12 @@ class DeploymentAdmin(admin.ModelAdmin):
 
     def computers(self, obj):
         related_objects = obj.related_objects('computer', self.user.userprofile)
-        if related_objects:
-            return related_objects.count()
-
-        return 0
+        return related_objects.count() if related_objects else 0
 
     computers.short_description = _('Computers')
 
     def save_model(self, request, obj, form, change):
-        is_new = (obj.pk is None)
+        is_new = obj.pk is None
         has_slug_changed = form.initial.get('slug') != obj.slug
         packages_after = form.cleaned_data['available_packages']
 
