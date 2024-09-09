@@ -7,6 +7,7 @@
         {
             "name": "Python: Django",
             "type": "python",
+            "pythonArgs": ["-Wd"],
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
@@ -26,7 +27,7 @@
             "args": [
                 "--app=migasfree.celery.app",
                 "beat",
-                "--loglevel=INFO",
+                "--loglevel=DEBUG",
             ],
             "env": {
                 "DJANGO_SETTINGS_MODULE": "migasfree.settings.development"
@@ -43,8 +44,8 @@
                 "worker",
                 "--without-gossip",
                 "--concurrency=10",
-                "--queues=default,pms-apt,pms-pacman,pms-winget,pms-yum,pms-zypper",
-                "--loglevel=INFO",
+                "--queues=default,pms-apt,pms-dnf,pms-pacman,pms-winget,pms-wpt,pms-yum,pms-zypper",
+                "--loglevel=DEBUG",
             ],
             "env": {
                 "DJANGO_SETTINGS_MODULE": "migasfree.settings.development"
