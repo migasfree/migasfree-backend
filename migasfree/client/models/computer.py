@@ -147,12 +147,13 @@ class Computer(models.Model, MigasLink):
     MAC_MAX_LEN = 60  # size for 5
 
     uuid = models.CharField(
-        verbose_name=_("uuid"),
+        verbose_name=_('uuid'),
         max_length=36,
         null=True,
         blank=True,
         unique=True,
-        default=""
+        default='',
+        db_comment='Universally Unique IDentifier based on the computer\'s motherboard',
     )
 
     status = models.CharField(
@@ -160,15 +161,17 @@ class Computer(models.Model, MigasLink):
         max_length=20,
         null=False,
         choices=STATUS_CHOICES,
-        default=settings.MIGASFREE_DEFAULT_COMPUTER_STATUS
+        default=settings.MIGASFREE_DEFAULT_COMPUTER_STATUS,
+        db_comment='computer status',
     )
 
     name = models.CharField(
-        verbose_name=_("name"),
+        verbose_name=_('name'),
         max_length=50,
         null=True,
         blank=True,
-        unique=False
+        unique=False,
+        db_comment='computer name or label',
     )
 
     fqdn = models.CharField(
@@ -176,32 +179,40 @@ class Computer(models.Model, MigasLink):
         max_length=255,
         null=True,
         blank=True,
-        unique=False
+        unique=False,
+        db_comment='domain name that specifies its exact location in the tree hierarchy of the Domain Name System',
     )
 
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        verbose_name=_("project")
+        verbose_name=_('project'),
+        db_comment='project to which the computer belongs',
     )
 
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name=_('entry date'),
-        help_text=_('Date of entry into the migasfree system')
+        help_text=_('Date of entry into the migasfree system'),
+        db_comment='date of entry of the computer into the migasfree system',
     )
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        db_comment='computer update date on migasfree system',
+    )
 
     ip_address = models.GenericIPAddressField(
-        verbose_name=_("ip address"),
+        verbose_name=_('ip address'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='computer IP address',
     )
 
     forwarded_ip_address = models.GenericIPAddressField(
-        verbose_name=_("forwarded ip address"),
+        verbose_name=_('forwarded ip address'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='forwarded IP address'
     )
 
     default_logical_device = models.ForeignKey(
@@ -209,100 +220,114 @@ class Computer(models.Model, MigasLink):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name=_("default logical device")
+        verbose_name=_('default logical device')
     )
 
     last_hardware_capture = models.DateTimeField(
-        verbose_name=_("last hardware capture"),
+        verbose_name=_('last hardware capture'),
         null=True,
         blank=True,
+        db_comment='last hardware capture date',
     )
 
     tags = models.ManyToManyField(
         ServerAttribute,
         blank=True,
-        verbose_name=_("tags"),
-        related_name='tags'
+        verbose_name=_('tags'),
+        related_name='tags',
+        db_comment='tags associated with the computer',
     )
 
     sync_start_date = models.DateTimeField(
         verbose_name=_('sync start date'),
         null=True,
+        db_comment='synchronization start date',
     )
 
     sync_end_date = models.DateTimeField(
-        verbose_name=_("sync end date"),
+        verbose_name=_('sync end date'),
         null=True,
+        db_comment='synchronization end date',
     )
 
     sync_user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name=_("sync user"),
+        verbose_name=_('sync user'),
         null=True,
+        db_comment='user who performed the synchronization',
     )
 
     sync_attributes = models.ManyToManyField(
         Attribute,
         blank=True,
-        verbose_name=_("sync attributes"),
-        help_text=_("attributes sent")
+        verbose_name=_('sync attributes'),
+        help_text=_('attributes sent'),
+        db_comment='attributes collected in synchronization',
     )
 
     product = models.CharField(
-        verbose_name=_("product"),
+        verbose_name=_('product'),
         max_length=80,
         null=True,
         blank=True,
-        unique=False
+        unique=False,
+        db_comment='product description of the computer',
     )
 
     machine = models.CharField(
-        verbose_name=_("machine"),
+        verbose_name=_('machine'),
         max_length=1,
         null=False,
         choices=MACHINE_CHOICES,
-        default='P'
+        default='P',
+        db_comment='type of computer (physical or virtual)',
     )
 
     cpu = models.CharField(
-        verbose_name=_("CPU"),
+        verbose_name=_('CPU'),
         max_length=50,
         null=True,
         blank=True,
-        unique=False
+        unique=False,
+        db_comment='processor description',
     )
 
     ram = models.BigIntegerField(
-        verbose_name=_("RAM"),
+        verbose_name=_('RAM'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='amount of installed RAM in bytes',
     )
 
     storage = models.BigIntegerField(
-        verbose_name=_("storage"),
+        verbose_name=_('storage'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='total storage amount (bytes)',
     )
 
     disks = models.SmallIntegerField(
-        verbose_name=_("disks"),
+        verbose_name=_('disks'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='number of disk drives',
     )
 
     mac_address = models.CharField(
-        verbose_name=_("MAC address"),
+        verbose_name=_('MAC address'),
         max_length=MAC_MAX_LEN,
         null=True,
         blank=True,
-        unique=False
+        unique=False,
+        db_comment='MAC addresses of network interfaces',
     )
 
     comment = models.TextField(
-        verbose_name=_("comment"),
+        verbose_name=_('comment'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='additional computer comment or description',
     )
 
     objects = ComputerManager()
@@ -491,10 +516,10 @@ class Computer(models.Model, MigasLink):
                 sync_attributes__id__in=attributes_id,
                 project__id=project_id
             ).count()
-        else:
-            return Computer.objects.filter(
-                sync_attributes__id__in=attributes_id
-            ).count()
+
+        return Computer.objects.filter(
+            sync_attributes__id__in=attributes_id
+        ).count()
 
     @staticmethod
     def productive_computers_by_platform(user):
@@ -749,8 +774,8 @@ class Computer(models.Model, MigasLink):
     def __str__(self):
         if settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] == 'id':
             return f'CID-{self.id}'
-        else:
-            return f'{self.get_cid_description()} (CID-{self.id})'
+
+        return f'{self.get_cid_description()} (CID-{self.id})'
 
     class Meta:
         app_label = 'client'
