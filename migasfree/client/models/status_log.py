@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -56,7 +56,8 @@ class StatusLog(Event):
         max_length=20,
         null=False,
         choices=Computer.STATUS_CHOICES,
-        default='intended'
+        default='intended',
+        db_comment='status in which the computer is found at a certain date',
     )
 
     objects = StatusLogManager()
