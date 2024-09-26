@@ -47,24 +47,28 @@ class PackageHistory(models.Model, MigasLink):
     computer = models.ForeignKey(
         Computer,
         on_delete=models.CASCADE,
-        verbose_name=_('computer')
+        verbose_name=_('computer'),
+        db_comment='related computer',
     )
 
     package = models.ForeignKey(
         Package,
         on_delete=models.CASCADE,
-        verbose_name=_('package')
+        verbose_name=_('package'),
+        db_comment='related package',
     )
 
     install_date = models.DateTimeField(
         auto_now_add=True,
         verbose_name=_('install date'),
         null=True,
+        db_comment='date the package was installed on the computer',
     )
 
     uninstall_date = models.DateTimeField(
         verbose_name=_('uninstall date'),
         null=True,
+        db_comment='date of uninstallation of the package on the computer',
     )
 
     objects = PackageHistoryManager()
