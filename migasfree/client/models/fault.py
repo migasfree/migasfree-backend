@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -88,24 +88,28 @@ class Fault(Event):
     fault_definition = models.ForeignKey(
         FaultDefinition,
         on_delete=models.CASCADE,
-        verbose_name=_("fault definition")
+        verbose_name=_('fault definition'),
+        db_comment='related fault definition',
     )
 
     result = models.TextField(
-        verbose_name=_("result"),
+        verbose_name=_('result'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='fault result (if not empty indicates that fault has occurred)',
     )
 
     checked = models.BooleanField(
-        verbose_name=_("checked"),
+        verbose_name=_('checked'),
         default=False,
+        db_comment='indicates whether or not the fault has been verified by any user of the application',
     )
 
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        verbose_name=_("project")
+        verbose_name=_('project'),
+        db_comment='project to which the computer belongs',
     )
 
     objects = FaultManager()
