@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,52 +36,60 @@ class DomainFaultDefinitionManager(models.Manager):
 
 class FaultDefinition(models.Model, MigasLink):
     name = models.CharField(
-        verbose_name=_("name"),
+        verbose_name=_('name'),
         max_length=50,
-        unique=True
+        unique=True,
+        db_comment='fault definition name',
     )
 
     description = models.TextField(
-        verbose_name=_("description"),
+        verbose_name=_('description'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='fault definition description',
     )
 
     enabled = models.BooleanField(
-        verbose_name=_("enabled"),
-        default=True
+        verbose_name=_('enabled'),
+        default=True,
+        db_comment='indicates whether or not the fault definition is enabled',
     )
 
     language = models.IntegerField(
-        verbose_name=_("programming language"),
+        verbose_name=_('programming language'),
         default=settings.MIGASFREE_PROGRAMMING_LANGUAGES[0][0],
-        choices=settings.MIGASFREE_PROGRAMMING_LANGUAGES
+        choices=settings.MIGASFREE_PROGRAMMING_LANGUAGES,
+        db_comment='programming language in which the fault is programmed',
     )
 
     code = models.TextField(
-        verbose_name=_("code"),
-        blank=True
+        verbose_name=_('code'),
+        blank=True,
+        db_comment='fault programming code',
     )
 
     included_attributes = models.ManyToManyField(
         Attribute,
         related_name='faultdefinition_included',
         blank=True,
-        verbose_name=_("included attributes")
+        verbose_name=_('included attributes'),
+        db_comment='list of included attributes (to which the fault will be applied)',
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
         related_name='faultdefinition_excluded',
         blank=True,
-        verbose_name=_("excluded attributes")
+        verbose_name=_('excluded attributes'),
+        db_comment='list of excluded attributes (to which the failure will not apply)',
     )
 
     users = models.ManyToManyField(
         UserProfile,
         related_name='faultdefinition_users',
         blank=True,
-        verbose_name=_("users")
+        verbose_name=_('users'),
+        db_comment='application users to whom the fault is assigned for verification',
     )
 
     objects = DomainFaultDefinitionManager()
