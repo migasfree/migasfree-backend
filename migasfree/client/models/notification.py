@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -47,16 +47,19 @@ class NotificationManager(models.Manager):
 class Notification(models.Model, MigasLink):
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_("date"),
+        verbose_name=_('date'),
+        db_comment='date on which the notification occurs',
     )
 
     message = models.TextField(
-        verbose_name=_("message"),
+        verbose_name=_('message'),
+        db_comment='notification message',
     )
 
     checked = models.BooleanField(
-        verbose_name=_("checked"),
+        verbose_name=_('checked'),
         default=False,
+        db_comment='indicates whether the notification has been verified or not'
     )
 
     objects = NotificationManager()
@@ -70,7 +73,7 @@ class Notification(models.Model, MigasLink):
         super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
-        return '{} ({:%Y-%m-%d %H:%M:%S})'.format(self.id, self.created_at)
+        return f'{self.id} ({self.created_at:%Y-%m-%d %H:%M:%S})'
 
     @classmethod
     def stacked_by_month(cls, start_date):
