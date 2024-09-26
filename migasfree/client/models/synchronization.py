@@ -63,32 +63,37 @@ class Synchronization(Event):
     start_date = models.DateTimeField(
         verbose_name=_('start date connection'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='start date connection',
     )
 
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name=_("user")
+        verbose_name=_('user'),
+        db_comment='computer user who performed the synchronization',
     )
 
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        verbose_name=_("project"),
-        null=True
+        verbose_name=_('project'),
+        null=True,
+        db_comment='project to which the computer belongs',
     )
 
     consumer = models.CharField(
         verbose_name=_('consumer'),
         max_length=50,
-        null=True
+        null=True,
+        db_comment='application that has done the synchronization',
     )
 
     pms_status_ok = models.BooleanField(
         verbose_name=_('PMS status OK'),
         default=False,
-        help_text=_('indicates the status of transactions with PMS')
+        help_text=_('indicates the status of transactions with PMS'),
+        db_comment='indicates the status of transactions with PMS',
     )
 
     objects = SynchronizationManager()
@@ -105,21 +110,17 @@ class Synchronization(Event):
         con = get_redis_connection()
 
         if not con.sismember(
-            'migasfree:watch:stats:years:%04d' % self.created_at.year,
+            f'migasfree:watch:stats:years:{self.created_at.year:04}',
             self.computer.id
         ):
-            con.incr('migasfree:stats:years:%04d' % self.created_at.year)
+            con.incr(f'migasfree:stats:years:{self.created_at.year:04}')
             con.sadd(
-                'migasfree:watch:stats:years:%04d' % self.created_at.year,
+                f'migasfree:watch:stats:years:{self.created_at.year:04}',
                 self.computer.id
             )
-            con.incr('migasfree:stats:%d:years:%04d' % (
-                self.project.id, self.created_at.year
-            ))
+            con.incr(f'migasfree:stats:{self.project.id}:years:{self.created_at.year:04}')
             con.sadd(
-                'migasfree:watch:stats:%d:years:%04d' % (
-                    self.project.id, self.created_at.year
-                ),
+                f'migasfree:watch:stats:{self.project.id}:years:{self.created_at.year:04}',
                 self.computer.id
             )
 
@@ -223,10 +224,7 @@ class Synchronization(Event):
                 self.computer.id
             )
             con.sadd(
-                'migasfree:deployments:{}:{}'.format(
-                    deploy_id,
-                    'ok' if self.pms_status_ok else 'error'
-                ),
+                f'migasfree:deployments:{deploy_id}:{"ok" if self.pms_status_ok else "error"}',
                 self.computer.id,
             )
 
