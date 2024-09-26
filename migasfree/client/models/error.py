@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -69,20 +69,23 @@ class Error(Event):
     TRUNCATED_DESC_LEN = 250
 
     description = models.TextField(
-        verbose_name=_("description"),
+        verbose_name=_('description'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='computer error description',
     )
 
     checked = models.BooleanField(
-        verbose_name=_("checked"),
+        verbose_name=_('checked'),
         default=False,
+        db_comment='indicates whether the error has been verified or not',
     )
 
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        verbose_name=_("project")
+        verbose_name=_('project'),
+        db_comment='project to which the computer belongs',
     )
 
     objects = ErrorManager()
