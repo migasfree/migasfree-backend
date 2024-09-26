@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,13 +28,15 @@ from .computer import Computer
 class Event(models.Model, MigasLink):
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('date')
+        verbose_name=_('date'),
+        db_comment='date on which the event is created',
     )
 
     computer = models.ForeignKey(
         Computer,
         on_delete=models.CASCADE,
-        verbose_name=_("computer")
+        verbose_name=_('computer'),
+        db_comment='computer to which the event corresponds',
     )
 
     @classmethod
@@ -107,7 +109,7 @@ class Event(models.Model, MigasLink):
         return items
 
     def __str__(self):
-        return '{} ({:%Y-%m-%d %H:%M:%S})'.format(self.computer, self.created_at)
+        return f'{self.computer} ({self.created_at:%Y-%m-%d %H:%M:%S})'
 
     class Meta:
         abstract = True
