@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,13 +45,15 @@ class User(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_('name'),
         max_length=50,
-        null=False
+        null=False,
+        db_comment='name of the user who is logged in to a computer',
     )
 
     fullname = models.CharField(
         verbose_name=_('fullname'),
         max_length=100,
-        blank=True
+        blank=True,
+        db_comment='fullname of the user who is logged in to a computer',
     )
 
     objects = UserManager()
