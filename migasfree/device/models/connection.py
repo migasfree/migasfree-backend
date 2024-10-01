@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,22 +25,25 @@ from .type import Type
 
 class Connection(models.Model, MigasLink):
     name = models.CharField(
-        verbose_name=_("name"),
-        max_length=50
+        verbose_name=_('name'),
+        max_length=50,
+        db_comment='how to physically connect the device',
     )
 
     fields = models.CharField(
-        verbose_name=_("fields"),
+        verbose_name=_('fields'),
         max_length=100,
         null=True,
         blank=True,
-        help_text=_("Fields separated by comma")
+        help_text=_('Fields separated by comma'),
+        db_comment='required fields to configure the connection',
     )
 
     device_type = models.ForeignKey(
         Type,
         on_delete=models.CASCADE,
-        verbose_name=_("device type")
+        verbose_name=_('device type'),
+        db_comment='related device type',
     )
 
     def __str__(self):
