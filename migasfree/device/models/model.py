@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,28 +27,32 @@ from .connection import Connection
 
 class Model(models.Model, MigasLink):
     name = models.CharField(
-        verbose_name=_("name"),
+        verbose_name=_('name'),
         max_length=50,
         null=True,
-        blank=True
+        blank=True,
+        db_comment='device model name',
     )
 
     manufacturer = models.ForeignKey(
         Manufacturer,
         on_delete=models.CASCADE,
-        verbose_name=_("manufacturer")
+        verbose_name=_('manufacturer'),
+        db_comment='related device manufacturer',
     )
 
     device_type = models.ForeignKey(
         Type,
         on_delete=models.CASCADE,
-        verbose_name=_("type")
+        verbose_name=_('type'),
+        db_comment='related device type',
     )
 
     connections = models.ManyToManyField(
         Connection,
         blank=True,
-        verbose_name=_("connections")
+        verbose_name=_('connections'),
+        db_comment='possible device connections',
     )
 
     @staticmethod
