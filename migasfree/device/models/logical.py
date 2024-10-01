@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -57,13 +57,15 @@ class Logical(models.Model, MigasLink):
     device = models.ForeignKey(
         Device,
         on_delete=models.CASCADE,
-        verbose_name=_('device')
+        verbose_name=_('device'),
+        db_comment='related device',
     )
 
     capability = models.ForeignKey(
         Capability,
         on_delete=models.CASCADE,
-        verbose_name=_('capability')
+        verbose_name=_('capability'),
+        db_comment='related device capability',
     )
 
     alternative_capability_name = models.CharField(
@@ -71,14 +73,16 @@ class Logical(models.Model, MigasLink):
         max_length=50,
         null=True,
         blank=True,
-        unique=False
+        unique=False,
+        db_comment='alternative capability name',
     )
 
     attributes = models.ManyToManyField(
         Attribute,
         blank=True,
         verbose_name=_('attributes'),
-        help_text=_('Assigned Attributes')
+        help_text=_('Assigned Attributes'),
+        db_comment='attributes of the computers to which the logical device is assigned',
     )
 
     objects = LogicalManager()
