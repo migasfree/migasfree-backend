@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -79,7 +79,8 @@ class Category(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_('name'),
         max_length=50,
-        unique=True
+        unique=True,
+        db_comment='category name',
     )
 
     def __str__(self):
@@ -100,48 +101,59 @@ class Application(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_('name'),
         max_length=50,
-        unique=True
+        unique=True,
+        db_comment='application name',
     )
 
     description = MarkdownxField(
         verbose_name=_('description'),
         blank=True,
-        help_text=_('markdown syntax allowed')
+        help_text=_('markdown syntax allowed'),
+        db_comment='application description',
     )
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('date'))
+    created_at = models.DateTimeField(
+        auto_now_add=True, 
+        verbose_name=_('date'),
+        db_comment='date of entry of the application into the migasfree system',
+    )
 
     score = models.IntegerField(
         verbose_name=_('score'),
         default=1,
         choices=((1, 1), (2, 2), (3, 3), (4, 4), (5, 5)),
-        help_text=_('Relevance to the organization')
+        help_text=_('Relevance to the organization'),
+        db_comment='relevance of the application to the organization (1 minimum, 5 maximum)',
     )
 
     icon = models.ImageField(
         verbose_name=_('icon'),
         upload_to=upload_path_handler,
         storage=MediaFileSystemStorage(),
-        null=True
+        null=True,
+        db_comment='application icon',
     )
 
     level = models.CharField(
         verbose_name=_('level'),
         max_length=1,
         default='U',
-        choices=LEVELS
+        choices=LEVELS,
+        db_comment='user level can install without privileges; administrator level requires administrator privileges',
     )
 
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
-        verbose_name=_('category')
+        verbose_name=_('category'),
+        db_comment='allows you to classify the application',
     )
 
     available_for_attributes = models.ManyToManyField(
         Attribute,
         blank=True,
-        verbose_name=_('available for attributes')
+        verbose_name=_('available for attributes'),
+        db_comment='the application will appear published on computers that have any of the specified attributes',
     )
 
     @staticmethod
@@ -183,18 +195,21 @@ class PackagesByProject(models.Model, MigasLink):
         Application,
         on_delete=models.CASCADE,
         verbose_name=_('application'),
-        related_name='packages_by_project'
+        related_name='packages_by_project',
+        db_comment='related application',
     )
 
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        verbose_name=_('project')
+        verbose_name=_('project'),
+        db_comment='project in which the application will be available',
     )
 
     packages_to_install = models.TextField(
         verbose_name=_('packages to install'),
         blank=True,
+        db_comment='list of packages for the application to be installed',
     )
 
     objects = PackagesByProjectManager()
@@ -213,25 +228,29 @@ class PackagesByProject(models.Model, MigasLink):
 class Policy(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_('name'),
-        max_length=50
+        max_length=50,
+        db_comment='policy name',
     )
 
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
         default=True,
         help_text=_("if you uncheck this field, the policy is disabled for"
-                    " all computers.")
+                    " all computers."),
+        db_comment='indicates whether or not the policy is enabled',
     )
 
     exclusive = models.BooleanField(
         verbose_name=_('exclusive'),
         default=True,
+        db_comment='it is ordered to uninstall the applications assigned in the priorities that have not been met',
     )
 
     comment = models.TextField(
         verbose_name=_('comment'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='policy description',
     )
 
     included_attributes = models.ManyToManyField(
@@ -239,6 +258,7 @@ class Policy(models.Model, MigasLink):
         related_name='policy_included',
         blank=True,
         verbose_name=_('included attributes'),
+        db_comment='attributes to which the policy will apply',
     )
 
     excluded_attributes = models.ManyToManyField(
@@ -246,6 +266,7 @@ class Policy(models.Model, MigasLink):
         related_name='policy_excluded',
         blank=True,
         verbose_name=_('excluded attributes'),
+        db_comment='attributes excluded from policy',
     )
 
     def __str__(self):
@@ -337,13 +358,15 @@ class Policy(models.Model, MigasLink):
 
 class PolicyGroup(models.Model, MigasLink):
     priority = models.IntegerField(
-        verbose_name=_('priority')
+        verbose_name=_('priority'),
+        db_comment='it is used to sort the list of priorities',
     )
 
     policy = models.ForeignKey(
         Policy,
         on_delete=models.CASCADE,
-        verbose_name=_('policy')
+        verbose_name=_('policy'),
+        db_comment='related policy',
     )
 
     included_attributes = models.ManyToManyField(
@@ -351,6 +374,7 @@ class PolicyGroup(models.Model, MigasLink):
         related_name='policygroup_included',
         blank=True,
         verbose_name=_('included attributes'),
+        db_comment='attributes to which the application indicated in the priority is going to be installed',
     )
 
     excluded_attributes = models.ManyToManyField(
@@ -358,12 +382,14 @@ class PolicyGroup(models.Model, MigasLink):
         related_name='policygroup_excluded',
         blank=True,
         verbose_name=_('excluded attributes'),
+        db_comment='exclude attributes from priority',
     )
 
     applications = models.ManyToManyField(
         Application,
         blank=True,
         verbose_name=_('application'),
+        db_comment='related application',
     )
 
     def __str__(self):
