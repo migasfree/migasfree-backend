@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,31 +31,36 @@ class Driver(models.Model, MigasLink):
         max_length=100,
         null=True,
         blank=True,
+        db_comment='driver name or driver file path',
     )
 
     model = models.ForeignKey(
         Model,
         on_delete=models.CASCADE,
         verbose_name=_('model'),
-        related_name='drivers'
+        related_name='drivers',
+        db_comment='related device model',
     )
 
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        verbose_name=_('project')
+        verbose_name=_('project'),
+        db_comment='related project',
     )
 
     capability = models.ForeignKey(
         Capability,
         on_delete=models.CASCADE,
-        verbose_name=_("capability")
+        verbose_name=_('capability'),
+        db_comment='related device capability',
     )
 
     packages_to_install = models.TextField(
-        verbose_name=_("packages to install"),
+        verbose_name=_('packages to install'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='required packages for the device driver to work',
     )
 
     def as_dict(self):
