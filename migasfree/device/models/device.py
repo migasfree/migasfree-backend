@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,33 +46,38 @@ class DeviceManager(models.Manager):
 
 class Device(models.Model, MigasLink):
     name = models.CharField(
-        verbose_name=_("name"),
+        verbose_name=_('name'),
         max_length=50,
-        unique=True
+        unique=True,
+        db_comment='device name (it may be an organization code)',
     )
 
     model = models.ForeignKey(
         Model,
         on_delete=models.CASCADE,
-        verbose_name=_("model")
+        verbose_name=_('model'),
+        db_comment='related device model',
     )
 
     connection = models.ForeignKey(
         Connection,
         on_delete=models.CASCADE,
-        verbose_name=_("connection")
+        verbose_name=_('connection'),
+        db_comment='related device connection',
     )
 
     available_for_attributes = models.ManyToManyField(
         Attribute,
         blank=True,
-        verbose_name=_("available for attributes")
+        verbose_name=_('available for attributes'),
+        db_comment='indicates which attributes the device is to publish',
     )
 
     data = models.TextField(
-        verbose_name=_("data"),
+        verbose_name=_('data'),
         null=True,
-        default="{}"
+        default='{}',
+        db_comment='list of fields and values for device connection',
     )
 
     objects = DeviceManager()
