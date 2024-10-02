@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -65,40 +65,46 @@ class Project(models.Model, MigasLink):
     """
 
     name = models.CharField(
-        verbose_name=_("name"),
+        verbose_name=_('name'),
         max_length=50,
-        unique=True
+        unique=True,
+        db_comment='project name',
     )
 
     slug = models.SlugField(
-        verbose_name=_("slug"),
+        verbose_name=_('slug'),
         max_length=50,
-        unique=True
+        unique=True,
+        db_comment='project name slug',
     )
 
     pms = models.CharField(
         choices=get_available_pms(),
         max_length=50,
-        verbose_name=_("package management system"),
-        validators=[validate_project_pms]
+        verbose_name=_('package management system'),
+        validators=[validate_project_pms],
+        db_comment='package management system used in the project operating system',
     )
 
     architecture = models.CharField(
-        verbose_name=_("architecture"),
-        max_length=20
+        verbose_name=_('architecture'),
+        max_length=20,
+        db_comment='project architecture (amd64, i386, x86, x64, ...)',
     )
 
     auto_register_computers = models.BooleanField(
-        verbose_name=_("auto register computers"),
+        verbose_name=_('auto register computers'),
         default=False,
-        help_text=_("Is not needed a user for register computers in "
-                    "database and get the keys.")
+        help_text=_('Is not needed a user for register computers in '
+                    'database and get the keys.'),
+        db_comment='if true, it allows you to register the computer from a client automatically',
     )
 
     platform = models.ForeignKey(
         Platform,
         on_delete=models.CASCADE,
-        verbose_name=_("platform")
+        verbose_name=_('platform'),
+        db_comment='related platform',
     )
 
     objects = ProjectManager()
