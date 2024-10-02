@@ -132,7 +132,6 @@ class Deployment(models.Model, MigasLink):
         related_name='deployment_included',
         blank=True,
         verbose_name=_('included attributes'),
-        db_comment='attributes that will have visible deployment',
     )
 
     excluded_attributes = models.ManyToManyField(
@@ -140,7 +139,6 @@ class Deployment(models.Model, MigasLink):
         related_name='deployment_excluded',
         blank=True,
         verbose_name=_('excluded attributes'),
-        db_comment='attributes that will not have visible deployment',
     )
 
     schedule = models.ForeignKey(
@@ -193,7 +191,6 @@ class Deployment(models.Model, MigasLink):
         blank=True,
         verbose_name=_('available packages'),
         help_text=_('If a computer has installed one of these packages it will be updated'),
-        db_comment='packages that are included in the physical repository',
     )
 
     available_package_sets = models.ManyToManyField(
@@ -201,7 +198,6 @@ class Deployment(models.Model, MigasLink):
         blank=True,
         verbose_name=_('available package sets'),
         help_text=_('If a computer has installed one of these packages it will be updated'),
-        db_comment='package sets that are included in the physical repository',
     )
 
     base_url = models.CharField(
