@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2018-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -62,11 +62,13 @@ class Scope(models.Model, MigasLink):
         verbose_name=_('user'),
         null=False,
         on_delete=models.CASCADE,
+        db_comment='related user profile',
     )
 
     name = models.CharField(
         max_length=50,
-        verbose_name=_('name')
+        verbose_name=_('name'),
+        db_comment='scope name',
     )
 
     domain = models.ForeignKey(
@@ -74,21 +76,24 @@ class Scope(models.Model, MigasLink):
         verbose_name=_('domain'),
         null=True,
         blank=True,
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        db_comment='related domain',
     )
 
     included_attributes = models.ManyToManyField(
         Attribute,
         related_name='scope_included',
         blank=True,
-        verbose_name=_('included attributes')
+        verbose_name=_('included attributes'),
+        db_comment='attributes that determine which computers in the selected domain will belong to the scope',
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
         related_name='scope_excluded',
         blank=True,
-        verbose_name=_('excluded attributes')
+        verbose_name=_('excluded attributes'),
+        db_comment='attributes that determine which computers in the selected domain will not belong to the scope',
     )
 
     objects = ScopeManager()
