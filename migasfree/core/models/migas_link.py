@@ -584,8 +584,8 @@ class MigasLink:
             data = computer_data + cid_data
 
             return data
-        else:
-            return self.get_relations(request)
+
+        return self.get_relations(request)
 
     def badge(self):
         if self._meta.model_name == 'clientattribute' \
@@ -614,31 +614,39 @@ class MigasLink:
             'text': escape_format_string(self.__str__()),
         }
         if self._meta.model_name == 'computer':
+            lnk.update({
+                'status': self.status,
+                'summary': f'{self.status}, {self.project}, {self.ip_address}, {self.sync_user}'
+            })
             lnk['status'] = self.status
-            lnk['summary'] = '{}, {}, {}, {}'.format(
-                self.status,
-                self.project,
-                self.ip_address,
-                self.sync_user
-            )
         elif self._meta.model_name == 'domain':
-            lnk['status'] = 'domain'
-            lnk['summary'] = gettext(self._meta.verbose_name)
+            lnk.update({
+                'status': 'domain',
+                'summary': gettext(self._meta.verbose_name)
+            })
         elif self._meta.model_name == 'serverattribute' \
                 or (self._meta.model_name == 'attribute' and self.property_att.sort == 'server'):
-            lnk['status'] = 'tag'
-            lnk['summary'] = gettext(self._meta.verbose_name)
+            lnk.update({
+                'status': 'tag',
+                'summary': gettext(self._meta.verbose_name)
+            })
         elif self._meta.model_name == 'attributeset' \
                 or (self._meta.model_name in ['clientattribute', 'attribute'] and self.id == 1):
-            lnk['status'] = 'set'
-            lnk['summary'] = f'({gettext(self._meta.verbose_name)}) {self.description}'
+            lnk.update({
+                'status': 'set',
+                'summary': f'({gettext(self._meta.verbose_name)}) {self.description}'
+            })
         elif self._meta.model_name == 'clientattribute' \
                 or (self._meta.model_name == 'attribute' and self.property_att.sort == 'client'):
-            lnk['status'] = 'attribute'
-            lnk['summary'] = self.description
+            lnk.update({
+                'status': 'attribute',
+                'summary': self.description
+            })
         elif self._meta.model_name == 'policy':
-            lnk['status'] = 'policy'
-            lnk['summary'] = gettext(self._meta.verbose_name)
+            lnk.update({
+                'status': 'policy',
+                'summary': gettext(self._meta.verbose_name)
+            })
 
         return lnk
 
@@ -646,33 +654,37 @@ class MigasLink:
         from ...client.models import Computer
         from . import ClientAttribute, ServerAttribute
 
-        if obj.related_model._meta.label_lower == 'client.computer' and \
+        related_model_lower = obj.related_model._meta.label_lower
+
+        excluded_models = [
+            'admin.logentry',
+            'core.scheduledelay',
+            'hardware.node'
+        ]
+
+        if related_model_lower in excluded_models:
+            return '', ''
+
+        if related_model_lower == 'client.computer' and \
                 self.__class__.__name__ in ['ClientAttribute', 'Attribute'] and \
                 self.property_att.prefix == 'CID':
             return Computer, 'sync_attributes__id'
 
-        if obj.related_model._meta.label_lower == 'core.attribute':
+        if related_model_lower == 'core.attribute':
             if self.sort == 'server':
                 return ServerAttribute, 'property__id'
-            else:
-                return ClientAttribute, 'property__id'
-        elif obj.related_model._meta.label_lower == 'client.computer':
+
+            return ClientAttribute, 'property__id'
+
+        if related_model_lower == 'client.computer':
             if self.__class__.__name__ == ['ClientAttribute', 'Attribute', 'ServerAttribute']:
                 if obj.field.related_model._meta.model_name == 'serverattribute':
                     return Computer, 'tags__id'
-                elif obj.field.related_model._meta.model_name == 'attribute':
+
+                if obj.field.related_model._meta.model_name == 'attribute':
                     return Computer, 'sync_attributes__id'
-        elif obj.related_model._meta.label_lower in [
-            'admin.logentry',
-            'core.scheduledelay',
-            'hardware.node'
-        ]:
-            return '', ''  # Excluded
 
         if obj.field.__class__.__name__ in ['ManyRelatedManager', 'OneToOneField', 'ForeignKey']:
             return obj.related_model, f'{obj.field.name}__id'
-        else:
-            return obj.related_model, '{}__{}'.format(
-                obj.field.name,
-                obj.field.m2m_reverse_target_field_name()
-            )
+
+        return obj.related_model, f'{obj.field.name}__{obj.field.m2m_reverse_target_field_name()}'
