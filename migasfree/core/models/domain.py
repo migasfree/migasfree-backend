@@ -53,7 +53,6 @@ class Domain(models.Model, MigasLink):
         related_name='domain_included',
         blank=True,
         verbose_name=_('included attributes'),
-        db_comment='attributes that will be part of the domain',
     )
 
     excluded_attributes = models.ManyToManyField(
@@ -61,7 +60,6 @@ class Domain(models.Model, MigasLink):
         related_name='domain_excluded',
         blank=True,
         verbose_name=_('excluded attributes'),
-        db_comment='attributes that will not be part of the domain',
     )
 
     tags = models.ManyToManyField(
@@ -69,7 +67,6 @@ class Domain(models.Model, MigasLink):
         related_name='domain_tags',
         blank=True,
         verbose_name=_('tags'),
-        db_comment='related tags',
     )
 
     def __str__(self):
