@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2023-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2023-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ class Singularity(models.Model, MigasLink):
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
         default=True,
+        db_comment='indicates whether or not singularity is enabled',
     )
 
     name = models.CharField(
@@ -45,16 +46,19 @@ class Singularity(models.Model, MigasLink):
         unique=True,
         default=None,
         verbose_name=_('name'),
+        db_comment='singularity name',
     )
 
     property_att = models.ForeignKey(
         Property,
         on_delete=models.CASCADE,
-        verbose_name=_('Property')
+        verbose_name=_('Property'),
+        db_comment='related property (formula)',
     )
 
     priority = models.IntegerField(
-        verbose_name=_('priority')
+        verbose_name=_('priority'),
+        db_comment='singularity priority',
     )
 
     included_attributes = models.ManyToManyField(
@@ -62,6 +66,7 @@ class Singularity(models.Model, MigasLink):
         related_name='singularity_included',
         blank=True,
         verbose_name=_('included attributes'),
+        db_comment='attributes to which the singularity will apply',
     )
 
     excluded_attributes = models.ManyToManyField(
@@ -69,16 +74,18 @@ class Singularity(models.Model, MigasLink):
         related_name='singularity_excluded',
         blank=True,
         verbose_name=_('excluded attributes'),
+        db_comment='attributes to which the singularity will not apply',
     )
 
     language = models.IntegerField(
-        verbose_name=_("programming language"),
+        verbose_name=_('programming language'),
         default=settings.MIGASFREE_PROGRAMMING_LANGUAGES[0][0],
-        choices=settings.MIGASFREE_PROGRAMMING_LANGUAGES
+        choices=settings.MIGASFREE_PROGRAMMING_LANGUAGES,
+        db_comment='programming language in which the singularity code is written',
     )
 
     code = models.TextField(
-        verbose_name=_("code"),
+        verbose_name=_('code'),
         null=True,
         blank=True,
         help_text=_("This code will execute in the client computer, and it must"
@@ -86,7 +93,8 @@ class Singularity(models.Model, MigasLink):
                     " to this property.<br>The format of this value is 'name~description',"
                     " where 'description' is optional.<br><b>Example of code:</b>"
                     "<br>#Create an attribute with the name of computer from bash<br>"
-                    " echo $HOSTNAME")
+                    " echo $HOSTNAME"),
+        db_comment='instructions to execute on clients to obtain attributes',
     )
 
     objects = SingularityManager()
