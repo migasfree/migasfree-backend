@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -91,110 +91,132 @@ class Node(models.Model, MigasLink):
         on_delete=models.CASCADE,
         blank=True,
         null=True,
-        verbose_name=_("parent"),
-        related_name="child"
+        verbose_name=_('parent'),
+        related_name='child',
+        db_comment='hardware node parent',
     )
 
     computer = models.ForeignKey(
         Computer,
         on_delete=models.CASCADE,
-        verbose_name=_("computer")
+        verbose_name=_('computer'),
+        db_comment='related computer'
     )
 
-    level = models.IntegerField(verbose_name=_("level"))
+    level = models.IntegerField(
+        verbose_name=_('level'),
+        db_comment='level of hierarchy between hardware nodes',
+    )
 
     width = models.BigIntegerField(
-        verbose_name=_("width"),
-        null=True
+        verbose_name=_('width'),
+        null=True,
+        db_comment='hardware node width',
     )
 
     name = models.TextField(
-        verbose_name=_("id"),
-        blank=True
-    )  # This is the field "id" in lshw
+        verbose_name=_('id'),
+        blank=True,
+        db_comment='id field in lshw'
+    )
 
     class_name = models.TextField(
-        verbose_name=_("class"),
-        blank=True
-    )  # This is the field "class" in lshw
+        verbose_name=_('class'),
+        blank=True,
+        db_comment='class field in lshw'
+    )
 
     enabled = models.BooleanField(
-        verbose_name=_("enabled"),
+        verbose_name=_('enabled'),
         default=False,
+        db_comment='indicates whether the hardware node is enabled or not',
     )
 
     claimed = models.BooleanField(
-        verbose_name=_("claimed"),
+        verbose_name=_('claimed'),
         default=False,
+        db_comment='indicates whether the hardware node is claimed or not',
     )
 
     description = models.TextField(
-        verbose_name=_("description"),
+        verbose_name=_('description'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='hardware node description',
     )
 
     vendor = models.TextField(
-        verbose_name=_("vendor"),
+        verbose_name=_('vendor'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='hardware node vendor',
     )
 
     product = models.TextField(
-        verbose_name=_("product"),
+        verbose_name=_('product'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='hardware node product name',
     )
 
     version = models.TextField(
-        verbose_name=_("version"),
+        verbose_name=_('version'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='hardware node version',
     )
 
     serial = models.TextField(
-        verbose_name=_("serial"),
+        verbose_name=_('serial'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='hardware node serial code',
     )
 
     bus_info = models.TextField(
-        verbose_name=_("bus info"),
+        verbose_name=_('bus info'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='bus info',
     )
 
     physid = models.TextField(
-        verbose_name=_("physid"),
+        verbose_name=_('physid'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='hardware node physical identifier',
     )
 
     slot = models.TextField(
-        verbose_name=_("slot"),
+        verbose_name=_('slot'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='hardware node slot',
     )
 
     size = models.BigIntegerField(
-        verbose_name=_("size"),
-        null=True
+        verbose_name=_('size'),
+        null=True,
+        db_comment='hardware node size',
     )
 
     capacity = models.BigIntegerField(
-        verbose_name=_("capacity"),
-        null=True
+        verbose_name=_('capacity'),
+        null=True,
+        db_comment='hardware node capacity',
     )
 
     clock = models.BigIntegerField(
-        verbose_name=_("clock"),
-        null=True
+        verbose_name=_('clock'),
+        null=True,
+        db_comment='hardware node clock speed',
     )
 
     dev = models.TextField(
-        verbose_name=_("dev"),
+        verbose_name=_('dev'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='hardware node device',
     )
 
     objects = NodeManager()
@@ -219,7 +241,8 @@ class Node(models.Model, MigasLink):
         if query.count() == 1:
             if query[0].vendor in list(Node.VIRTUAL_MACHINES.keys()):
                 return True
-            elif Node.get_is_docker(computer_id):
+
+            if Node.get_is_docker(computer_id):
                 return True
 
         return False
@@ -308,9 +331,10 @@ class Node(models.Model, MigasLink):
             if product:
                 for item in ['(R)', '(TM)', '@', 'CPU']:
                     product = product.replace(item, '')
+
                 return product.strip()
-            else:
-                return ''
+
+            return ''
         elif not query.exists():
             return ''
         else:
