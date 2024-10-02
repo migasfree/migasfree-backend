@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2018-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,34 +37,39 @@ class Domain(models.Model, MigasLink):
     name = models.CharField(
         max_length=50,
         verbose_name=_('name'),
-        unique=True
+        unique=True,
+        db_comment='domain name',
     )
 
     comment = models.TextField(
         null=True,
         blank=True,
-        verbose_name=_('comment')
+        verbose_name=_('comment'),
+        db_comment='domain comments',
     )
 
     included_attributes = models.ManyToManyField(
         Attribute,
         related_name='domain_included',
         blank=True,
-        verbose_name=_('included attributes')
+        verbose_name=_('included attributes'),
+        db_comment='attributes that will be part of the domain',
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
         related_name='domain_excluded',
         blank=True,
-        verbose_name=_('excluded attributes')
+        verbose_name=_('excluded attributes'),
+        db_comment='attributes that will not be part of the domain',
     )
 
     tags = models.ManyToManyField(
         ServerAttribute,
         related_name='domain_tags',
         blank=True,
-        verbose_name=_('tags')
+        verbose_name=_('tags'),
+        db_comment='related tags',
     )
 
     def __str__(self):
@@ -135,16 +140,16 @@ class Domain(models.Model, MigasLink):
         """
         Returns Queryset with the related computers based in attributes
         """
-        if model == 'computer':
-            from ...client.models import Computer
+        if model != 'computer':
+            return None
 
-            return Computer.productive.scope(user).filter(
-                sync_attributes__in=self.included_attributes.all()
-            ).exclude(
-                sync_attributes__in=self.excluded_attributes.all()
-            ).distinct()
+        from ...client.models import Computer
 
-        return None
+        return Computer.productive.scope(user).filter(
+            sync_attributes__in=self.included_attributes.all()
+        ).exclude(
+            sync_attributes__in=self.excluded_attributes.all()
+        ).distinct()
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.name = slugify(self.name).upper()
