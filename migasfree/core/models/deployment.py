@@ -381,44 +381,44 @@ class Deployment(models.Model, MigasLink):
         """
         Returns Queryset with the related computers based in attributes and schedule
         """
-        if model == 'computer':
-            from ...client.models import Computer
+        if model != 'computer' or not self.enabled \
+                or self.start_date > timezone.localtime(timezone.now()).date():
+            return None
 
-            if self.enabled and (self.start_date <= timezone.localtime(timezone.now()).date()):
-                # by assigned attributes
-                computers = Computer.productive.scope(user).filter(
-                    project_id=self.project_id
-                ).filter(
-                    Q(sync_attributes__in=self.included_attributes.all())
-                )
+        from ...client.models import Computer
 
-                # by schedule
-                if self.schedule:
-                    for delay in self.schedule.delays.all():
-                        delay_attributes = list(delay.attributes.values_list('id', flat=True))
-                        for duration in range(0, delay.duration):
-                            if time_horizon(
-                                self.start_date, delay.delay + duration
-                            ) <= timezone.localtime(timezone.now()).date():
-                                computers_schedule = Computer.productive.scope(user).filter(
-                                    project_id=self.project_id
-                                ).filter(
-                                    Q(sync_attributes__id__in=delay_attributes)
-                                ).extra(
-                                    where=[f'MOD(client_computer.id, {delay.duration}) = {duration}']
-                                )
-                                computers = (computers | computers_schedule)
-                            else:
-                                break
+        # by assigned attributes
+        computers = Computer.productive.scope(user).filter(
+            project_id=self.project_id
+        ).filter(
+            Q(sync_attributes__in=self.included_attributes.all())
+        )
 
-                # excluded attributes
-                computers = computers.exclude(
-                    Q(sync_attributes__in=self.excluded_attributes.all())
-                )
+        # by schedule
+        if self.schedule:
+            for delay in self.schedule.delays.all():
+                delay_attributes = list(delay.attributes.values_list('id', flat=True))
+                for duration in range(0, delay.duration):
+                    if time_horizon(
+                        self.start_date, delay.delay + duration
+                    ) <= timezone.localtime(timezone.now()).date():
+                        computers_schedule = Computer.productive.scope(user).filter(
+                            project_id=self.project_id
+                        ).filter(
+                            Q(sync_attributes__id__in=delay_attributes)
+                        ).extra(
+                            where=[f'MOD(client_computer.id, {delay.duration}) = {duration}']
+                        )
+                        computers |= computers_schedule
+                    else:
+                        break
 
-                return computers.distinct()
+        # excluded attributes
+        computers = computers.exclude(
+            Q(sync_attributes__in=self.excluded_attributes.all())
+        )
 
-        return None
+        return computers.distinct()
 
     def pms(self):
         return get_pms(self.project.pms)
@@ -434,11 +434,9 @@ class Deployment(models.Model, MigasLink):
         return self.pms().source_template(self)
 
     def can_delete(self, user):
-        if user.has_perm("core.delete_deployment"):
-            if user.userprofile.domains.count() == 0 or self.domain == user.userprofile.domain_preference:
-                return True
-
-        return False
+        return user.has_perm('core.delete_deployment') and \
+           (not user.userprofile.domains.count() or \
+                self.domain == user.userprofile.domain_preference)
 
     class Meta:
         app_label = 'core'
