@@ -70,7 +70,6 @@ class Device(models.Model, MigasLink):
         Attribute,
         blank=True,
         verbose_name=_('available for attributes'),
-        db_comment='indicates which attributes the device is to publish',
     )
 
     data = models.TextField(
