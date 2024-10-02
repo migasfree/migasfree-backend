@@ -82,7 +82,6 @@ class Logical(models.Model, MigasLink):
         blank=True,
         verbose_name=_('attributes'),
         help_text=_('Assigned Attributes'),
-        db_comment='attributes of the computers to which the logical device is assigned',
     )
 
     objects = LogicalManager()
