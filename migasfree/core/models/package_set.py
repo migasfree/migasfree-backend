@@ -76,7 +76,6 @@ class PackageSet(models.Model, MigasLink):
         Package,
         blank=True,
         verbose_name=_('packages'),
-        db_comment='related packages',
     )
 
     objects = DomainPackageSetManager()
