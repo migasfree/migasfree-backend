@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,18 +38,21 @@ class Capability(models.Model):
     node = models.ForeignKey(
         Node,
         on_delete=models.CASCADE,
-        verbose_name=_("hardware node")
+        verbose_name=_('hardware node'),
+        db_comment='related hardware node'
     )
 
     name = models.TextField(
-        verbose_name=_("name"),
-        blank=True
-    )  # This is the field "capability" in lshw
+        verbose_name=_('name'),
+        blank=True,
+        db_comment='hardware capability name (lshw field)',
+    )
 
     description = models.TextField(
-        verbose_name=_("description"),
+        verbose_name=_('description'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='hardware capability description',
     )
 
     objects = CapabilityManager()
