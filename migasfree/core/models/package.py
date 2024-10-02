@@ -82,7 +82,8 @@ class Package(models.Model, MigasLink):
         verbose_name=_('fullname'),
         max_length=170,
         null=False,
-        unique=False
+        unique=False,
+        db_comment='package fullname (name + version + architecture + extension)',
     )
 
     name = models.CharField(
@@ -90,33 +91,38 @@ class Package(models.Model, MigasLink):
         max_length=100,
         null=False,
         blank=True,
-        unique=False
+        unique=False,
+        db_comment='package name',
     )
 
     version = models.CharField(
         verbose_name=_('version'),
         max_length=60,
         null=False,
-        unique=False
+        unique=False,
+        db_comment='package version',
     )
 
     architecture = models.CharField(
         verbose_name=_('architecture'),
         max_length=10,
         null=False,
+        db_comment='package architecture',
     )
 
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        verbose_name=_('project')
+        verbose_name=_('project'),
+        db_comment='related project',
     )
 
     store = models.ForeignKey(
         Store,
         on_delete=models.CASCADE,
         null=True,
-        verbose_name=_('store')
+        verbose_name=_('store'),
+        db_comment='related store',
     )
 
     objects = PackageManager()
