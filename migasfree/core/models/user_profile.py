@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2018-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,7 +37,8 @@ class UserProfile(UserSystem, MigasLink):
         'Domain',
         blank=True,
         verbose_name=_('domains'),
-        related_name='domains'
+        related_name='domains',
+        db_comment='domains that the user can manage',
     )
 
     domain_preference = models.ForeignKey(
@@ -45,7 +46,8 @@ class UserProfile(UserSystem, MigasLink):
         blank=True,
         verbose_name=_('domain'),
         null=True,
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        db_comment='domain that the user currently has selected in the application',
     )
 
     scope_preference = models.ForeignKey(
@@ -53,7 +55,8 @@ class UserProfile(UserSystem, MigasLink):
         blank=True,
         verbose_name=_('scope'),
         null=True,
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        db_comment='scope that the user currently has selected in the application',
     )
 
     objects = UserManager()
