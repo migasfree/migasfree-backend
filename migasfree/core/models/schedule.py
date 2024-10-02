@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,13 +28,15 @@ class Schedule(models.Model, MigasLink):
         max_length=50,
         null=False,
         blank=False,
-        unique=True
+        unique=True,
+        db_comment='schedule name',
     )
 
     description = models.TextField(
         verbose_name=_('description'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='schedule description',
     )
 
     def delays_count(self):
