@@ -66,7 +66,6 @@ class Singularity(models.Model, MigasLink):
         related_name='singularity_included',
         blank=True,
         verbose_name=_('included attributes'),
-        db_comment='attributes to which the singularity will apply',
     )
 
     excluded_attributes = models.ManyToManyField(
@@ -74,7 +73,6 @@ class Singularity(models.Model, MigasLink):
         related_name='singularity_excluded',
         blank=True,
         verbose_name=_('excluded attributes'),
-        db_comment='attributes to which the singularity will not apply',
     )
 
     language = models.IntegerField(
