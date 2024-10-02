@@ -153,7 +153,6 @@ class Application(models.Model, MigasLink):
         Attribute,
         blank=True,
         verbose_name=_('available for attributes'),
-        db_comment='the application will appear published on computers that have any of the specified attributes',
     )
 
     @staticmethod
@@ -258,7 +257,6 @@ class Policy(models.Model, MigasLink):
         related_name='policy_included',
         blank=True,
         verbose_name=_('included attributes'),
-        db_comment='attributes to which the policy will apply',
     )
 
     excluded_attributes = models.ManyToManyField(
@@ -266,7 +264,6 @@ class Policy(models.Model, MigasLink):
         related_name='policy_excluded',
         blank=True,
         verbose_name=_('excluded attributes'),
-        db_comment='attributes excluded from policy',
     )
 
     def __str__(self):
@@ -374,7 +371,6 @@ class PolicyGroup(models.Model, MigasLink):
         related_name='policygroup_included',
         blank=True,
         verbose_name=_('included attributes'),
-        db_comment='attributes to which the application indicated in the priority is going to be installed',
     )
 
     excluded_attributes = models.ManyToManyField(
@@ -382,14 +378,12 @@ class PolicyGroup(models.Model, MigasLink):
         related_name='policygroup_excluded',
         blank=True,
         verbose_name=_('excluded attributes'),
-        db_comment='exclude attributes from priority',
     )
 
     applications = models.ManyToManyField(
         Application,
         blank=True,
         verbose_name=_('application'),
-        db_comment='related application',
     )
 
     def __str__(self):
