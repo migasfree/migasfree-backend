@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -129,30 +129,35 @@ class Attribute(models.Model, MigasLink):
     property_att = models.ForeignKey(
         Property,
         on_delete=models.CASCADE,
-        verbose_name=_("Property")
+        verbose_name=_('Property'),
+        db_comment='related property (formula)',
     )
 
     value = models.CharField(
-        verbose_name=_("value"),
-        max_length=VALUE_LEN
+        verbose_name=_('value'),
+        max_length=VALUE_LEN,
+        db_comment='attribute value',
     )
 
     description = models.TextField(
-        verbose_name=_("description"),
+        verbose_name=_('description'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='attribute description',
     )
 
     longitude = models.FloatField(
-        verbose_name=_("longitude"),
+        verbose_name=_('longitude'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='geoposition of attribute (longitude)',
     )
 
     latitude = models.FloatField(
-        verbose_name=_("latitude"),
+        verbose_name=_('latitude'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='geoposition of attribute (latitude)',
     )
 
     objects = AttributeManager()
