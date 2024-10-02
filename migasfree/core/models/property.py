@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,49 +51,56 @@ class Property(models.Model, MigasLink):
     PREFIX_LEN = 3
 
     prefix = models.CharField(
-        verbose_name=_("prefix"),
+        verbose_name=_('prefix'),
         max_length=PREFIX_LEN,
-        unique=True
+        unique=True,
+        db_comment='it is a combination of three numbers or letters (used to group and identify attributes)',
     )
 
     name = models.CharField(
-        verbose_name=_("name"),
-        max_length=50
+        verbose_name=_('name'),
+        max_length=50,
+        db_comment='property (formula) name',
     )
 
     enabled = models.BooleanField(
-        verbose_name=_("enabled"),
+        verbose_name=_('enabled'),
         default=True,
+        db_comment='indicates whether the property (formula) is enabled (if false, it will not be executed on the clients)',
     )
 
     kind = models.CharField(
-        verbose_name=_("kind"),
+        verbose_name=_('kind'),
         max_length=1,
         default='N',
-        choices=KIND_CHOICES
+        choices=KIND_CHOICES,
+        db_comment='property (formula) kind: normal, list, added to the left, added to the right',
     )
 
     sort = models.CharField(
-        verbose_name=_("sort"),
+        verbose_name=_('sort'),
         max_length=10,
         default='client',
-        choices=SORT_CHOICES
+        choices=SORT_CHOICES,
+        db_comment='property (formula) sort: basic (attribute), client (attribute), server (tag)',
     )
 
     auto_add = models.BooleanField(
-        verbose_name=_("automatically add"),
+        verbose_name=_('automatically add'),
         default=True,
-        help_text=_("automatically add the attribute to database")
+        help_text=_('automatically add the attribute to database'),
+        db_comment='automatically add the attribute to database',
     )
 
     language = models.IntegerField(
-        verbose_name=_("programming language"),
+        verbose_name=_('programming language'),
         default=settings.MIGASFREE_PROGRAMMING_LANGUAGES[0][0],
-        choices=settings.MIGASFREE_PROGRAMMING_LANGUAGES
+        choices=settings.MIGASFREE_PROGRAMMING_LANGUAGES,
+        db_comment='programming language in which the property (formula) code is written',
     )
 
     code = models.TextField(
-        verbose_name=_("code"),
+        verbose_name=_('code'),
         null=True,
         blank=True,
         help_text=_("This code will execute in the client computer, and it must"
@@ -101,7 +108,8 @@ class Property(models.Model, MigasLink):
                     " to this property.<br>The format of this value is 'name~description',"
                     " where 'description' is optional.<br><b>Example of code:</b>"
                     "<br>#Create an attribute with the name of computer from bash<br>"
-                    " echo $HOSTNAME")
+                    " echo $HOSTNAME"),
+        db_comment='instructions to execute on clients to obtain attributes',
     )
 
     def __str__(self):
