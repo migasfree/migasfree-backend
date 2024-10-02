@@ -73,7 +73,6 @@ class FaultDefinition(models.Model, MigasLink):
         related_name='faultdefinition_included',
         blank=True,
         verbose_name=_('included attributes'),
-        db_comment='list of included attributes (to which the fault will be applied)',
     )
 
     excluded_attributes = models.ManyToManyField(
@@ -81,7 +80,6 @@ class FaultDefinition(models.Model, MigasLink):
         related_name='faultdefinition_excluded',
         blank=True,
         verbose_name=_('excluded attributes'),
-        db_comment='list of excluded attributes (to which the failure will not apply)',
     )
 
     users = models.ManyToManyField(
@@ -89,7 +87,6 @@ class FaultDefinition(models.Model, MigasLink):
         related_name='faultdefinition_users',
         blank=True,
         verbose_name=_('users'),
-        db_comment='application users to whom the fault is assigned for verification',
     )
 
     objects = DomainFaultDefinitionManager()
