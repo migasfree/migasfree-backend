@@ -52,7 +52,6 @@ class Model(models.Model, MigasLink):
         Connection,
         blank=True,
         verbose_name=_('connections'),
-        db_comment='possible device connections',
     )
 
     @staticmethod
