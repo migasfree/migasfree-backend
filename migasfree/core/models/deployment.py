@@ -72,23 +72,27 @@ class Deployment(models.Model, MigasLink):
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
         default=True,
-        help_text=_('if you uncheck this field, deployment is disabled for all computers.')
+        help_text=_('if you uncheck this field, deployment is disabled for all computers.'),
+        db_comment='indicates whether or not deployment is enabled',
     )
 
     name = models.CharField(
         max_length=50,
-        verbose_name=_('name')
+        verbose_name=_('name'),
+        db_comment='deployment name',
     )
 
     slug = models.SlugField(
         max_length=50,
-        verbose_name=_('slug')
+        verbose_name=_('slug'),
+        db_comment='name slug',
     )
 
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        verbose_name=_('project')
+        verbose_name=_('project'),
+        db_comment='related project',
     )
 
     domain = models.ForeignKey(
@@ -96,41 +100,47 @@ class Deployment(models.Model, MigasLink):
         verbose_name=_('domain'),
         null=True,
         blank=True,
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        db_comment='related domain',
     )
 
     comment = models.TextField(
         verbose_name=_('comment'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='deployment comments',
     )
 
     packages_to_install = models.TextField(
         verbose_name=_('packages to install'),
         null=True,
         blank=True,
-        help_text=_('Mandatory packages to install each time')
+        help_text=_('Mandatory packages to install each time'),
+        db_comment='mandatory packages to install each time',
     )
 
     packages_to_remove = models.TextField(
         verbose_name=_('packages to remove'),
         null=True,
         blank=True,
-        help_text=_('Mandatory packages to remove each time')
+        help_text=_('Mandatory packages to remove each time'),
+        db_comment='mandatory packages to remove each time',
     )
 
     included_attributes = models.ManyToManyField(
         Attribute,
         related_name='deployment_included',
         blank=True,
-        verbose_name=_('included attributes')
+        verbose_name=_('included attributes'),
+        db_comment='attributes that will have visible deployment',
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
         related_name='deployment_excluded',
         blank=True,
-        verbose_name=_('excluded attributes')
+        verbose_name=_('excluded attributes'),
+        db_comment='attributes that will not have visible deployment',
     )
 
     schedule = models.ForeignKey(
@@ -138,30 +148,35 @@ class Deployment(models.Model, MigasLink):
         on_delete=models.CASCADE,
         verbose_name=_('schedule'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='related schedule',
     )
 
     start_date = models.DateField(
         default=timezone.now,
-        verbose_name=_('start date')
+        verbose_name=_('start date'),
+        db_comment='initial date from which the deployment will be available',
     )
 
     default_preincluded_packages = models.TextField(
         verbose_name=_('default pre-included packages'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='can be used to install packages that configure repositories external to migasfree',
     )
 
     default_included_packages = models.TextField(
         verbose_name=_('default included packages'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='packages to be installed when tags are set on the computer',
     )
 
     default_excluded_packages = models.TextField(
         verbose_name=_('default excluded packages'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='packages to be uninstalled when tags are set on the computer',
     )
 
     source = models.CharField(
@@ -169,28 +184,32 @@ class Deployment(models.Model, MigasLink):
         max_length=1,
         null=False,
         choices=SOURCE_CHOICES,
-        default=SOURCE_INTERNAL
+        default=SOURCE_INTERNAL,
+        db_comment='indicates whether the source of the deployment is internal or external',
     )
 
     available_packages = models.ManyToManyField(
         Package,
         blank=True,
         verbose_name=_('available packages'),
-        help_text=_('If a computer has installed one of these packages it will be updated')
+        help_text=_('If a computer has installed one of these packages it will be updated'),
+        db_comment='packages that are included in the physical repository',
     )
 
     available_package_sets = models.ManyToManyField(
         PackageSet,
         blank=True,
         verbose_name=_('available package sets'),
-        help_text=_('If a computer has installed one of these packages it will be updated')
+        help_text=_('If a computer has installed one of these packages it will be updated'),
+        db_comment='package sets that are included in the physical repository',
     )
 
     base_url = models.CharField(
         max_length=100,
         verbose_name=_('base url'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='external source base url',
     )
 
     # https://manpages.debian.org/stretch/apt/sources.list.5.en.html
@@ -199,31 +218,36 @@ class Deployment(models.Model, MigasLink):
         max_length=250,
         verbose_name=_('options'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='allows you to specify the different options that we need for the external repository',
     )
 
     suite = models.CharField(
         max_length=50,
         verbose_name=_('suite'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='usually indicates the specific name of the distro (external source)',
     )
 
     components = models.CharField(
         max_length=100,
         verbose_name=_('components'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='the various components of the source are listed (external)',
     )
 
     frozen = models.BooleanField(
         verbose_name=_('frozen'),
-        default=True
+        default=True,
+        db_comment='indicates whether the public repository metadata is updated or not',
     )
 
     expire = models.IntegerField(
         verbose_name=_('metadata cache minutes. Default 1440 minutes = 1 day'),
-        default=1440  # 60m * 24h = 1 day
+        default=1440,  # 60m * 24h = 1 day
+        db_comment='minutes that the public repository\'s metadata will remain cached (only taken into account in the case where the frozen is false)',
     )
 
     objects = DeploymentManager()
