@@ -38,7 +38,6 @@ class UserProfile(UserSystem, MigasLink):
         blank=True,
         verbose_name=_('domains'),
         related_name='domains',
-        db_comment='domains that the user can manage',
     )
 
     domain_preference = models.ForeignKey(
