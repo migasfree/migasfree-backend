@@ -57,7 +57,6 @@ class ScheduleDelay(models.Model, MigasLink):
         Attribute,
         blank=True,
         verbose_name=_('attributes'),
-        db_comment='attributes for a delay',
     )
 
     duration = models.IntegerField(
