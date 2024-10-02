@@ -85,7 +85,6 @@ class Scope(models.Model, MigasLink):
         related_name='scope_included',
         blank=True,
         verbose_name=_('included attributes'),
-        db_comment='attributes that determine which computers in the selected domain will belong to the scope',
     )
 
     excluded_attributes = models.ManyToManyField(
@@ -93,7 +92,6 @@ class Scope(models.Model, MigasLink):
         related_name='scope_excluded',
         blank=True,
         verbose_name=_('excluded attributes'),
-        db_comment='attributes that determine which computers in the selected domain will not belong to the scope',
     )
 
     objects = ScopeManager()
