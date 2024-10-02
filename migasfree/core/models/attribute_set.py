@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,46 +39,53 @@ class AttributeSetManager(models.Manager):
 # FIXME https://docs.djangoproject.com/en/1.8/ref/contrib/gis/
 class AttributeSet(models.Model, MigasLink):
     name = models.CharField(
-        verbose_name=_("name"),
+        verbose_name=_('name'),
         max_length=50,
-        unique=True
+        unique=True,
+        db_comment='attribute set name',
     )
 
     description = models.TextField(
-        verbose_name=_("description"),
+        verbose_name=_('description'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='attribute set description',
     )
 
     enabled = models.BooleanField(
-        verbose_name=_("enabled"),
+        verbose_name=_('enabled'),
         default=True,
+        db_comment='indicates whether or not the attribute set is enabled',
     )
 
     included_attributes = models.ManyToManyField(
         Attribute,
         related_name='attributeset_included',
         blank=True,
-        verbose_name=_("included attributes"),
+        verbose_name=_('included attributes'),
+        db_comment='attributes that belong to the attribute set',
     )
 
     excluded_attributes = models.ManyToManyField(
         Attribute,
         related_name='attributeset_excluded',
         blank=True,
-        verbose_name=_("excluded attributes"),
+        verbose_name=_('excluded attributes'),
+        db_comment='attributes that do not belong to the attribute set',
     )
 
     longitude = models.FloatField(
-        verbose_name=_("longitude"),
+        verbose_name=_('longitude'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='geoposition of attribute set (longitude)',
     )
 
     latitude = models.FloatField(
-        verbose_name=_("latitude"),
+        verbose_name=_('latitude'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='geoposition of attribute set (latitude)',
     )
 
     objects = AttributeSetManager()
