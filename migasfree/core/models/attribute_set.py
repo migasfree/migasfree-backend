@@ -63,7 +63,6 @@ class AttributeSet(models.Model, MigasLink):
         related_name='attributeset_included',
         blank=True,
         verbose_name=_('included attributes'),
-        db_comment='attributes that belong to the attribute set',
     )
 
     excluded_attributes = models.ManyToManyField(
@@ -71,7 +70,6 @@ class AttributeSet(models.Model, MigasLink):
         related_name='attributeset_excluded',
         blank=True,
         verbose_name=_('excluded attributes'),
-        db_comment='attributes that do not belong to the attribute set',
     )
 
     longitude = models.FloatField(
