@@ -235,7 +235,6 @@ class Computer(models.Model, MigasLink):
         blank=True,
         verbose_name=_('tags'),
         related_name='tags',
-        db_comment='tags associated with the computer',
     )
 
     sync_start_date = models.DateTimeField(
@@ -263,7 +262,6 @@ class Computer(models.Model, MigasLink):
         blank=True,
         verbose_name=_('sync attributes'),
         help_text=_('attributes sent'),
-        db_comment='attributes collected in synchronization',
     )
 
     product = models.CharField(
