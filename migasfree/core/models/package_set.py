@@ -45,33 +45,38 @@ class DomainPackageSetManager(models.Manager):
 
 class PackageSet(models.Model, MigasLink):
     name = models.CharField(
-        verbose_name=_("name"),
-        max_length=50
+        verbose_name=_('name'),
+        max_length=50,
+        db_comment='package set name',
     )
 
     description = models.TextField(
-        verbose_name=_("description"),
+        verbose_name=_('description'),
         null=True,
-        blank=True
+        blank=True,
+        db_comment='package set description',
     )
 
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        verbose_name=_("project")
+        verbose_name=_('project'),
+        db_comment='related project',
     )
 
     store = models.ForeignKey(
         Store,
         on_delete=models.CASCADE,
         null=True,
-        verbose_name=_("store")
+        verbose_name=_('store'),
+        db_comment='related store',
     )
 
     packages = models.ManyToManyField(
         Package,
         blank=True,
-        verbose_name=_("packages"),
+        verbose_name=_('packages'),
+        db_comment='related packages',
     )
 
     objects = DomainPackageSetManager()
