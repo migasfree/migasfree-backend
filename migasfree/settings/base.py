@@ -28,7 +28,7 @@ from .migasfree import BASE_DIR, MIGASFREE_TMP_DIR
 
 if django.VERSION < (4, 2, 0, 'final'):
     print('Migasfree requires Django 4.2.0 at least. Please, update it.')
-    exit(1)
+    sys.exit(1)
 
 ADMINS = (
     ('Your name', 'your_name@example.com'),
@@ -148,7 +148,7 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
     ),
     'DEFAULT_PAGINATION_CLASS': 'migasfree.paginations.DefaultPagination',
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.openapi.AutoSchema',
     # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
