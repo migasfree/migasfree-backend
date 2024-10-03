@@ -17,7 +17,8 @@ djangorestframework-filters==1.0.0.dev2
 djangorestframework-simplejwt==5.3.1
 djoser==2.2.2
 docutils==0.20.1
-drf-yasg==1.21.7
+drf-spectacular==0.27.2
+drf-spectacular-sidecar==2024.7.1
 graphene-django==3.2.0
 jwcrypto==1.5.6
 MarkupPy==1.14
