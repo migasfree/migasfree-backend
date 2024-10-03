@@ -115,8 +115,8 @@ INSTALLED_APPS = (
     'graphene_django',
     'rest_framework',
     'rest_framework.authtoken',
-    'drf_yasg',
-    # 'drf_spectacular',
+    'drf_spectacular',
+    'drf_spectacular_sidecar',
     'rest_framework_filters',
     'dj_rest_auth',
     'django_filters',
@@ -148,18 +148,21 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
     ),
     'DEFAULT_PAGINATION_CLASS': 'migasfree.paginations.DefaultPagination',
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.openapi.AutoSchema',
-    # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-"""
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Migasfree REST API',
-    'VERSION': '1.0.0',
+    'VERSION': 'v1',
     'SERVE_INCLUDE_SCHEMA': False,
-    # OTHER SETTINGS
+    'SERVE_PUBLIC': True,
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
+    'SWAGGER_UI_DIST': 'SIDECAR',
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
+    'CONTACT': {'email': 'fun.with@migasfree.org'},
+    'LICENSE': {'name': 'GPLv3'},
 }
-"""
 
 REST_AUTH = {
     'USER_DETAILS_SERIALIZER': 'migasfree.core.serializers.UserProfileSerializer',
