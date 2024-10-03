@@ -25,12 +25,11 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
-
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 
 from ...client.models import (
     Computer, Error, Fault,
@@ -39,17 +38,17 @@ from ...client.models import (
 from ...core.models import Project
 from ...utils import to_heatmap
 
-computer_id = openapi.Parameter(
-    'computer_id', openapi.IN_QUERY,
-    default=0, description='Computer ID', type=openapi.TYPE_INTEGER
+computer_id = OpenApiParameter(
+    name='computer_id', location=OpenApiParameter.QUERY,
+    default=0, description='Computer ID', type=OpenApiTypes.INT
 )
-start_date = openapi.Parameter(
-    'start_date', openapi.IN_QUERY,
-    required=False, default='', description='String in YYYY-MM-DD format', type=openapi.TYPE_STRING
+start_date = OpenApiParameter(
+    name='start_date', location=OpenApiParameter.QUERY,
+    required=False, default='', description='String in YYYY-MM-DD format', type=OpenApiTypes.STR
 )
-end_date = openapi.Parameter(
-    'end_date', openapi.IN_QUERY,
-    required=False, default='', description='String in YYYY-MM-DD format', type=openapi.TYPE_STRING
+end_date = OpenApiParameter(
+    name='end_date', location=OpenApiParameter.QUERY,
+    required=False, default='', description='String in YYYY-MM-DD format', type=OpenApiTypes.STR
 )
 
 
@@ -203,7 +202,7 @@ class EventViewSet(viewsets.ViewSet):
 
         return globals()[event_class]
 
-    @swagger_auto_schema(manual_parameters=[computer_id, start_date, end_date])
+    @extend_schema(parameters=[computer_id, start_date, end_date])
     @action(methods=['get'], detail=False, url_path='by-day')
     def by_day(self, request):
         user = request.user.userprofile
