@@ -24,17 +24,18 @@ import shutil
 import hashlib
 import tempfile
 
+from mimetypes import guess_type
+from urllib.error import URLError, HTTPError
+from urllib.request import urlopen, urlretrieve, urlcleanup
+from wsgiref.util import FileWrapper
+
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, StreamingHttpResponse
 from django.utils.translation import gettext as _
-from mimetypes import guess_type
 from rest_framework import status, views, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
-from urllib.error import URLError, HTTPError
-from urllib.request import urlopen, urlretrieve, urlcleanup
-from wsgiref.util import FileWrapper
 
 from ..pms import get_available_pms, get_pms
 from ..models import Project, ExternalSource
@@ -118,7 +119,9 @@ class ServerInfoView(views.APIView):
         return Response(info)
 
     def post(self, request):
-        # compatibility with older clients
+        """
+        Returns server info (compatibility with older clients)
+        """
         return self.get(request)
 
 
