@@ -187,6 +187,7 @@ class AttributeSet(models.Model, MigasLink):
         app_label = 'core'
         verbose_name = _('Attribute Set')
         verbose_name_plural = _('Attribute Sets')
+        db_table_comment = 'attribute groupings'
 
 
 @receiver(pre_save, sender=AttributeSet)
