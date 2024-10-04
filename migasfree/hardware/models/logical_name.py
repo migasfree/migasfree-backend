@@ -56,3 +56,4 @@ class LogicalName(models.Model):
         app_label = 'hardware'
         verbose_name = _('Hardware Logical Name')
         verbose_name_plural = _('Hardware Logical Names')
+        db_table_comment = 'hardware node logical names'
