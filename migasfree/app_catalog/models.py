@@ -80,7 +80,7 @@ class Category(models.Model, MigasLink):
         verbose_name=_('name'),
         max_length=50,
         unique=True,
-        db_comment='category name',
+        db_comment='application category name',
     )
 
     def __str__(self):
@@ -90,6 +90,7 @@ class Category(models.Model, MigasLink):
         app_label = 'app_catalog'
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
+        db_table_comment = 'application categories'
 
 
 class Application(models.Model, MigasLink):
@@ -113,7 +114,7 @@ class Application(models.Model, MigasLink):
     )
 
     created_at = models.DateTimeField(
-        auto_now_add=True, 
+        auto_now_add=True,
         verbose_name=_('date'),
         db_comment='date of entry of the application into the migasfree system',
     )
@@ -123,7 +124,7 @@ class Application(models.Model, MigasLink):
         default=1,
         choices=((1, 1), (2, 2), (3, 3), (4, 4), (5, 5)),
         help_text=_('Relevance to the organization'),
-        db_comment='relevance of the application to the organization (1 minimum, 5 maximum)',
+        db_comment='relevance of the application to the organization (1 = lowest, 5 = highest)',
     )
 
     icon = models.ImageField(
@@ -139,14 +140,15 @@ class Application(models.Model, MigasLink):
         max_length=1,
         default='U',
         choices=LEVELS,
-        db_comment='user level can install without privileges; administrator level requires administrator privileges',
+        db_comment='single-character string: Use "U" for User level (no privileges required)'
+                   ' and "A" for Administrator level (requires elevated privileges)',
     )
 
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
         verbose_name=_('category'),
-        db_comment='allows you to classify the application',
+        db_comment='application category (used to classify the application)',
     )
 
     available_for_attributes = models.ManyToManyField(
@@ -187,6 +189,7 @@ class Application(models.Model, MigasLink):
         app_label = 'app_catalog'
         verbose_name = _('Application')
         verbose_name_plural = _('Applications')
+        db_table_comment = 'application catalog of the organization'
 
 
 class PackagesByProject(models.Model, MigasLink):
@@ -222,6 +225,7 @@ class PackagesByProject(models.Model, MigasLink):
         verbose_name_plural = _('Packages by Projects')
         unique_together = (('application', 'project'),)
         ordering = ['application__id', 'project__name']
+        db_table_comment = 'packages to install applications per project'
 
 
 class Policy(models.Model, MigasLink):
@@ -351,12 +355,13 @@ class Policy(models.Model, MigasLink):
         verbose_name_plural = _('Policies')
         unique_together = ('name',)
         ordering = ['name']
+        db_table_comment = 'they allow complex orders to be given for installing and uninstalling applications'
 
 
 class PolicyGroup(models.Model, MigasLink):
     priority = models.IntegerField(
         verbose_name=_('priority'),
-        db_comment='it is used to sort the list of priorities',
+        db_comment='integer used to indicate the order in which different policy groups will be processed',
     )
 
     policy = models.ForeignKey(
@@ -395,6 +400,7 @@ class PolicyGroup(models.Model, MigasLink):
         verbose_name_plural = _('Policy Groups')
         unique_together = (('policy', 'priority'),)
         ordering = ['policy__name', 'priority']
+        db_table_comment = 'app installation policy priority list'
 
 
 @receiver(pre_save, sender=Application)
