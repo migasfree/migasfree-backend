@@ -90,3 +90,4 @@ class Notification(models.Model, MigasLink):
         app_label = 'client'
         verbose_name = _('Notification')
         verbose_name_plural = _('Notifications')
+        db_table_comment = 'relevant facts in the migasfree system'
