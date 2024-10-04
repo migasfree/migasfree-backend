@@ -239,6 +239,7 @@ class Synchronization(Event):
         indexes = [
             models.Index(fields=['created_at']),
         ]
+        db_table_comment = 'synchronization processes that have been occurring on computers'
 
 
 @receiver(post_save, sender=Synchronization)
