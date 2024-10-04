@@ -90,3 +90,4 @@ class PackageHistory(models.Model, MigasLink):
         app_label = 'client'
         verbose_name = _('Package History')
         verbose_name_plural = _('Packages History')
+        db_table_comment = 'history of computer package changes'
