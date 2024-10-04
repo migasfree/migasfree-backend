@@ -42,7 +42,7 @@ class ScheduleDelay(models.Model, MigasLink):
     delay = models.IntegerField(
         verbose_name=_('delay'),
         db_comment='number of days from the deployment start date that the assigned attributes '
-            'will be effective (Saturdays and Sundays are not taken into account)',
+                   'will be effective (Saturdays and Sundays are not taken into account)',
     )
 
     schedule = models.ForeignKey(
@@ -96,3 +96,4 @@ class ScheduleDelay(models.Model, MigasLink):
         verbose_name = _('Schedule Delay')
         verbose_name_plural = _('Schedule Delays')
         unique_together = (('schedule', 'delay'),)
+        db_table_comment = 'stores delays for schedules, specifying when assigned attributes will be effective'
