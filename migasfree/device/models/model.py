@@ -76,7 +76,7 @@ class Model(models.Model, MigasLink):
         return self.name
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.name = self.name.replace(" ", "_")
+        self.name = self.name.replace(' ', '_')
         super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
@@ -85,3 +85,4 @@ class Model(models.Model, MigasLink):
         verbose_name_plural = _('Models')
         unique_together = (('device_type', 'manufacturer', 'name'),)
         ordering = ['manufacturer', 'name']
+        db_table_comment = 'device models'
