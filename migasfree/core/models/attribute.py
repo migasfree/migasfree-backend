@@ -212,46 +212,30 @@ class Attribute(models.Model, MigasLink):
 
     @staticmethod
     def _kind_normal(property_att, value):
-        obj = Attribute.objects.create(property_att, value)
-        return [obj.id]
+        return [Attribute.objects.create(property_att, value).id]
 
     @staticmethod
     def _kind_list(property_att, value):
-        attributes = []
-
-        lst = value.split(',')
-        for item in lst:
-            item = item.replace('\n', '')
-            if item:
-                obj = Attribute.objects.create(property_att, item)
-                attributes.append(obj.id)
-
-        return attributes
+        return [
+            Attribute.objects.create(property_att, item.strip()).id
+            for item in value.split(',') if item.strip()
+        ]
 
     @staticmethod
     def _kind_by_side(property_att, value):
         attributes = []
+        lst = value.split('.')
 
         if property_att.sort == 'server':
-            obj = Attribute.objects.create(property_att, '')
+            attributes.append(Attribute.objects.create(property_att, '').id)
+
+        for i, item in enumerate(lst):
+            if property_att.kind == 'R':  # Adds right
+                obj = Attribute.objects.create(property_att, '.'.join(lst[i:]))
+            elif property_att.kind == 'L':  # Adds left
+                obj = Attribute.objects.create(property_att, '.'.join(lst[:i+1]))
+
             attributes.append(obj.id)
-
-        lst = value.split('.')
-        pos = 0
-
-        if property_att.kind == 'R':  # Adds right
-            for item in lst:
-                obj = Attribute.objects.create(property_att, value[pos:])
-                attributes.append(obj.id)
-                pos += len(item) + 1
-
-        if property_att.kind == 'L':  # Adds left
-            for item in lst:
-                pos += len(item) + 1
-                obj = Attribute.objects.create(
-                    property_att, value[0:pos - 1]
-                )
-                attributes.append(obj.id)
 
         return attributes
 
@@ -302,6 +286,7 @@ class Attribute(models.Model, MigasLink):
         verbose_name_plural = _('Attributes')
         unique_together = (('property_att', 'value'),)
         ordering = ['property_att__prefix', 'value']
+        db_table_comment = 'result of the execution of a property (formula) on computers'
 
 
 class ServerAttributeManager(DomainAttributeManager):
