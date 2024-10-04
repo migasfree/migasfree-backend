@@ -54,3 +54,4 @@ class Connection(models.Model, MigasLink):
         verbose_name = _('Connection')
         verbose_name_plural = _('Connections')
         unique_together = (('device_type', 'name'),)
+        db_table_comment = 'different ways you can physically connect the device'
