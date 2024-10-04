@@ -147,3 +147,4 @@ class Logical(models.Model, MigasLink):
             'alternative_capability_name', 'capability__name', 'device__name'
         ]
         unique_together = (('device', 'capability'),)
+        db_table_comment = 'logical device features'
