@@ -66,7 +66,8 @@ class Property(models.Model, MigasLink):
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
         default=True,
-        db_comment='indicates whether the property (formula) is enabled (if false, it will not be executed on the clients)',
+        db_comment='indicates whether the property (formula) is enabled'
+                   ' (if false, it will not be executed on the clients)',
     )
 
     kind = models.CharField(
@@ -153,6 +154,7 @@ class Property(models.Model, MigasLink):
         verbose_name = _('Property')
         verbose_name_plural = _('Properties')
         ordering = ['name']
+        db_table_comment = _('stores properties (formulas) used to collect attributes from computers')
 
 
 class ServerProperty(Property):
