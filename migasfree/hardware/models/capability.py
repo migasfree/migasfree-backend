@@ -69,3 +69,4 @@ class Capability(models.Model):
         verbose_name = _('Hardware Capability')
         verbose_name_plural = _('Hardware Capabilities')
         unique_together = (('name', 'node'),)
+        db_table_comment = 'hardware node capabilities'
