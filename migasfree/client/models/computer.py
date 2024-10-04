@@ -782,6 +782,7 @@ class Computer(models.Model, MigasLink):
         indexes = [
             models.Index(fields=['name']),
         ]
+        db_table_comment = 'computers that have registered in the migasfree system'
 
 
 @receiver(pre_save, sender=Computer)
