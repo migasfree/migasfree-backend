@@ -142,3 +142,4 @@ class FaultDefinition(models.Model, MigasLink):
         verbose_name = _('Fault Definition')
         verbose_name_plural = _('Fault Definitions')
         ordering = ['name']
+        db_table_comment = 'negative event that occurs on a computer'
