@@ -37,3 +37,4 @@ class Type(models.Model, MigasLink):
         app_label = 'device'
         verbose_name = _('Type')
         verbose_name_plural = _('Types')
+        db_table_comment = 'device types (printer, scanner, ...)'
