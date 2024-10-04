@@ -170,3 +170,4 @@ class Fault(Event):
         app_label = 'client'
         verbose_name = _('Fault')
         verbose_name_plural = _('Faults')
+        db_table_comment = 'faults detected in computers'
