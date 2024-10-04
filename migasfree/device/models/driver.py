@@ -82,3 +82,4 @@ class Driver(models.Model, MigasLink):
         verbose_name_plural = _('Drivers')
         unique_together = (('model', 'project', 'capability'),)
         ordering = ['model', 'name']
+        db_table_comment = 'device drivers'
