@@ -145,3 +145,4 @@ class Scope(models.Model, MigasLink):
         verbose_name = _('Scope')
         verbose_name_plural = _('Scopes')
         unique_together = (('name', 'domain', 'user'),)
+        db_table_comment = 'filter computers by user (and domain optionally)'
