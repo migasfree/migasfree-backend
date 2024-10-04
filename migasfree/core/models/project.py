@@ -157,6 +157,7 @@ class Project(models.Model, MigasLink):
         verbose_name = _('Project')
         verbose_name_plural = _('Projects')
         ordering = ['name']
+        db_table_comment = 'defines a project: a customized set of computers with a specific distribution'
 
 
 @receiver(pre_delete, sender=Project)
