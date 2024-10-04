@@ -119,6 +119,7 @@ class Store(models.Model, MigasLink):
         verbose_name_plural = _('Stores')
         unique_together = (('name', 'project'), ('project', 'slug'))
         ordering = ['name', 'project']
+        db_table_comment = 'locations where packages will be stored'
 
 
 @receiver(pre_delete, sender=Store)
