@@ -42,7 +42,7 @@ class Schedule(models.Model, MigasLink):
     def delays_count(self):
         return self.delays.count()
 
-    delays_count.short_description = _("Delays count")
+    delays_count.short_description = _('Delays count')
 
     def update_delays(self, delays):
         self.delays.clear()
@@ -58,3 +58,4 @@ class Schedule(models.Model, MigasLink):
         app_label = 'core'
         verbose_name = _('Schedule')
         verbose_name_plural = _('Schedules')
+        db_table_comment = 'allows you to systematically schedule releases over time for certain attributes'
