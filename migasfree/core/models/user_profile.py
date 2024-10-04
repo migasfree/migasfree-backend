@@ -247,6 +247,7 @@ SELECT ARRAY(
         app_label = 'core'
         verbose_name = _('User Profile')
         verbose_name_plural = _('User Profiles')
+        db_table_comment = 'stores user-specific settings and preferences'
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
