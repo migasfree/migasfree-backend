@@ -37,3 +37,4 @@ class Capability(models.Model, MigasLink):
         app_label = 'device'
         verbose_name = _('Capability')
         verbose_name_plural = _('Capabilities')
+        db_table_comment = 'device driver default settings'
