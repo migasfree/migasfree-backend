@@ -369,3 +369,4 @@ class Node(models.Model, MigasLink):
         app_label = 'hardware'
         verbose_name = _('Hardware Node')
         verbose_name_plural = _('Hardware Nodes')
+        db_table_comment = 'hardware nodes'
