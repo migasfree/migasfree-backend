@@ -38,3 +38,4 @@ class Manufacturer(models.Model, MigasLink):
         verbose_name = _('Manufacturer')
         verbose_name_plural = _('Manufacturers')
         ordering = ['name']
+        db_table_comment = 'device manufacturers'
