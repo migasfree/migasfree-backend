@@ -134,6 +134,7 @@ class PackageSet(models.Model, MigasLink):
         app_label = 'core'
         verbose_name = _('Package Set')
         verbose_name_plural = _('Package Sets')
+        db_table_comment = 'sets of software packages associated with projects and stored in stores'
 
 
 def _update_repository_metadata(instance):
