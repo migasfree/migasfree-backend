@@ -164,3 +164,4 @@ class Error(Event):
         app_label = 'client'
         verbose_name = _('Error')
         verbose_name_plural = _('Errors')
+        db_table_comment = 'errors that occur on computers when synchronizing'
