@@ -243,7 +243,8 @@ class Deployment(models.Model, MigasLink):
     expire = models.IntegerField(
         verbose_name=_('metadata cache minutes. Default 1440 minutes = 1 day'),
         default=1440,  # 60m * 24h = 1 day
-        db_comment='minutes that the public repository\'s metadata will remain cached (only taken into account in the case where the frozen is false)',
+        db_comment='minutes that the public repository\'s metadata will remain cached'
+                   ' (only taken into account in the case where the frozen is false)',
     )
 
     objects = DeploymentManager()
@@ -455,8 +456,8 @@ class Deployment(models.Model, MigasLink):
 
     def can_delete(self, user):
         return user.has_perm('core.delete_deployment') and \
-           (not user.userprofile.domains.count() or \
-                self.domain == user.userprofile.domain_preference)
+           (not user.userprofile.domains.count() or
+               self.domain == user.userprofile.domain_preference)
 
     class Meta:
         app_label = 'core'
@@ -464,6 +465,7 @@ class Deployment(models.Model, MigasLink):
         verbose_name_plural = _('Deployments')
         unique_together = (('name', 'project'), ('project', 'slug'))
         ordering = ['project__name', 'name']
+        db_table_comment = 'repository of packages and actions to be executed on computers'
 
 
 @receiver(pre_save, sender=Deployment)
