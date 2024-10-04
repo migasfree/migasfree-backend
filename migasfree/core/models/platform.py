@@ -75,3 +75,4 @@ class Platform(models.Model, MigasLink):
         verbose_name = _('Platform')
         verbose_name_plural = _('Platforms')
         ordering = ['name']
+        db_table_comment = 'collection of computer platforms (e.g. Linux, Windows, macOS)'
