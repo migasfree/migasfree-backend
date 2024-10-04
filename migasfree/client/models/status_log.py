@@ -113,3 +113,4 @@ class StatusLog(Event):
         app_label = 'client'
         verbose_name = _('Status Log')
         verbose_name_plural = _('Status Logs')
+        db_table_comment = 'computer status changes'
