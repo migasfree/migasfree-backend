@@ -145,10 +145,9 @@ class Device(models.Model, MigasLink):
                     sync_attributes__in=Attribute.objects.filter(logical__device__id=self.id)
                 ).distinct()
 
-            else:
-                return Computer.productive.filter(
-                    sync_attributes__in=Attribute.objects.filter(logical__device__id=self.id)
-                ).distinct()
+            return Computer.productive.filter(
+                sync_attributes__in=Attribute.objects.filter(logical__device__id=self.id)
+            ).distinct()
 
         return None
 
@@ -203,3 +202,4 @@ class Device(models.Model, MigasLink):
         verbose_name = _('Device')
         verbose_name_plural = _('Devices')
         unique_together = (('connection', 'name'),)
+        db_table_comment = 'device inventory'
