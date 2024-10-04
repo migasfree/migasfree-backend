@@ -64,7 +64,7 @@ class User(models.Model, MigasLink):
 
     def __str__(self):
         if self.fullname.strip():
-            return '{} ({})'.format(self.name, self.fullname.strip())
+            return f'{self.name} ({self.fullname.strip()})'
 
         return self.name
 
@@ -73,3 +73,4 @@ class User(models.Model, MigasLink):
         verbose_name = _('User')
         verbose_name_plural = _('Users')
         unique_together = (('name', 'fullname'),)
+        db_table_comment = 'users of the computers that have performed the synchronizations'
