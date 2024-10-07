@@ -156,7 +156,7 @@ class Domain(models.Model, MigasLink):
         app_label = 'core'
         verbose_name = _('Domain')
         verbose_name_plural = _('Domains')
-        db_table_comment = 'group of computers that are jointly administered'
+        db_table_comment = 'groups of computers managed by different administrators'
 
 
 @receiver(post_save, sender=Domain)
