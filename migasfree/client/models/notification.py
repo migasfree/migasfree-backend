@@ -59,7 +59,7 @@ class Notification(models.Model, MigasLink):
     checked = models.BooleanField(
         verbose_name=_('checked'),
         default=False,
-        db_comment='indicates whether the notification has been verified or not'
+        db_comment='indicates whether the notification has been verified'
     )
 
     objects = NotificationManager()
