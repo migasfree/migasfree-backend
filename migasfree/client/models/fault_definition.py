@@ -52,14 +52,14 @@ class FaultDefinition(models.Model, MigasLink):
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
         default=True,
-        db_comment='indicates whether or not the fault definition is enabled',
+        db_comment='indicates if the fault definition will execute',
     )
 
     language = models.IntegerField(
         verbose_name=_('programming language'),
         default=settings.MIGASFREE_PROGRAMMING_LANGUAGES[0][0],
         choices=settings.MIGASFREE_PROGRAMMING_LANGUAGES,
-        db_comment='programming language in which the fault is programmed',
+        db_comment='programming language used to implement the fault',
     )
 
     code = models.TextField(
@@ -142,4 +142,4 @@ class FaultDefinition(models.Model, MigasLink):
         verbose_name = _('Fault Definition')
         verbose_name_plural = _('Fault Definitions')
         ordering = ['name']
-        db_table_comment = 'negative event that occurs on a computer'
+        db_table_comment = 'code implementation for detecting faults or adverse events on computers'
