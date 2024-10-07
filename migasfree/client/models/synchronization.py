@@ -71,7 +71,7 @@ class Synchronization(Event):
         User,
         on_delete=models.CASCADE,
         verbose_name=_('user'),
-        db_comment='computer user who performed the synchronization',
+        db_comment='user logged into the graphical session at the time of computer sync',
     )
 
     project = models.ForeignKey(
@@ -93,7 +93,7 @@ class Synchronization(Event):
         verbose_name=_('PMS status OK'),
         default=False,
         help_text=_('indicates the status of transactions with PMS'),
-        db_comment='indicates the status of transactions with PMS',
+        db_comment='indicates whether the packaging system completed successfully (true for no error, false for error)',
     )
 
     objects = SynchronizationManager()
@@ -239,7 +239,7 @@ class Synchronization(Event):
         indexes = [
             models.Index(fields=['created_at']),
         ]
-        db_table_comment = 'synchronization processes that have been occurring on computers'
+        db_table_comment = 'synchronization processes that have occurred on computers'
 
 
 @receiver(post_save, sender=Synchronization)
