@@ -162,7 +162,7 @@ class Computer(models.Model, MigasLink):
         null=False,
         choices=STATUS_CHOICES,
         default=settings.MIGASFREE_DEFAULT_COMPUTER_STATUS,
-        db_comment='computer status',
+        db_comment='computer status: intended, reserved, unknown, in repair, available or unsubscribed',
     )
 
     name = models.CharField(
@@ -171,7 +171,7 @@ class Computer(models.Model, MigasLink):
         null=True,
         blank=True,
         unique=False,
-        db_comment='computer name or label',
+        db_comment='computer name',
     )
 
     fqdn = models.CharField(
@@ -254,14 +254,14 @@ class Computer(models.Model, MigasLink):
         on_delete=models.CASCADE,
         verbose_name=_('sync user'),
         null=True,
-        db_comment='user who performed the synchronization',
+        db_comment='user logged into the graphical session at the time of computer sync',
     )
 
     sync_attributes = models.ManyToManyField(
         Attribute,
         blank=True,
         verbose_name=_('sync attributes'),
-        help_text=_('attributes sent'),
+        help_text=_('computer attributes at the time of sync'),
     )
 
     product = models.CharField(
@@ -270,7 +270,7 @@ class Computer(models.Model, MigasLink):
         null=True,
         blank=True,
         unique=False,
-        db_comment='product description of the computer',
+        db_comment='description of the computer product',
     )
 
     machine = models.CharField(
@@ -279,7 +279,7 @@ class Computer(models.Model, MigasLink):
         null=False,
         choices=MACHINE_CHOICES,
         default='P',
-        db_comment='type of computer (physical or virtual)',
+        db_comment='computer type (single-character string: use "P" for physical and "V" for virtual)',
     )
 
     cpu = models.CharField(
