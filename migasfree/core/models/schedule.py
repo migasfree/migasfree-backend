@@ -58,4 +58,4 @@ class Schedule(models.Model, MigasLink):
         app_label = 'core'
         verbose_name = _('Schedule')
         verbose_name_plural = _('Schedules')
-        db_table_comment = 'allows you to systematically schedule releases over time for certain attributes'
+        db_table_comment = 'enables the systematic planning of releases over time for specific attributes'
