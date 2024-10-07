@@ -69,4 +69,6 @@ class Capability(models.Model):
         verbose_name = _('Hardware Capability')
         verbose_name_plural = _('Hardware Capabilities')
         unique_together = (('name', 'node'),)
-        db_table_comment = 'hardware node capabilities'
+        db_table_comment = 'features and functionalities supported by the hardware components of the system'
+        ' (each entry describes a specific capability, such as support for certain protocols, standards,'
+        ' or performance metrics)'
