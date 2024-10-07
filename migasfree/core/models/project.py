@@ -83,7 +83,7 @@ class Project(models.Model, MigasLink):
         max_length=50,
         verbose_name=_('package management system'),
         validators=[validate_project_pms],
-        db_comment='package management system used in the project operating system',
+        db_comment='package management system utilized in the project\'s operating system',
     )
 
     architecture = models.CharField(
@@ -157,7 +157,7 @@ class Project(models.Model, MigasLink):
         verbose_name = _('Project')
         verbose_name_plural = _('Projects')
         ordering = ['name']
-        db_table_comment = 'defines a project: a customized set of computers with a specific distribution'
+        db_table_comment = 'defines a customized set of computers with a specific distribution'
 
 
 @receiver(pre_delete, sender=Project)
