@@ -129,13 +129,13 @@ class Node(models.Model, MigasLink):
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
         default=False,
-        db_comment='indicates whether the hardware node is enabled or not',
+        db_comment='indicates whether the hardware node is enabled',
     )
 
     claimed = models.BooleanField(
         verbose_name=_('claimed'),
         default=False,
-        db_comment='indicates whether the hardware node is claimed or not',
+        db_comment='indicates whether the hardware node is claimed',
     )
 
     description = models.TextField(
@@ -369,4 +369,6 @@ class Node(models.Model, MigasLink):
         app_label = 'hardware'
         verbose_name = _('Hardware Node')
         verbose_name_plural = _('Hardware Nodes')
-        db_table_comment = 'hardware nodes'
+        db_table_comment = 'hierarchical structure of the hardware in the system (it details the individual components'
+        ' and their relationships, indicating how they are organized and connected within the overall architecture'
+        ' of the system)'
