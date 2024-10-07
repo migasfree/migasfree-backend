@@ -150,14 +150,14 @@ class Attribute(models.Model, MigasLink):
         verbose_name=_('longitude'),
         null=True,
         blank=True,
-        db_comment='geoposition of attribute (longitude)',
+        db_comment='longitude of the attribute set\'s geoposition',
     )
 
     latitude = models.FloatField(
         verbose_name=_('latitude'),
         null=True,
         blank=True,
-        db_comment='geoposition of attribute (latitude)',
+        db_comment='latitude of the attribute set\'s geoposition',
     )
 
     objects = AttributeManager()
@@ -286,7 +286,10 @@ class Attribute(models.Model, MigasLink):
         verbose_name_plural = _('Attributes')
         unique_together = (('property_att', 'value'),)
         ordering = ['property_att__prefix', 'value']
-        db_table_comment = 'result of the execution of a property (formula) on computers'
+        db_table_comment = 'stores system attributes collected from computers via small scripts,'
+        ' referred to as "formulas" (each attribute represents a specific characteristic'
+        ' of the computer, such as the number of hard drives, RAM size,'
+        ' or any other detail that can be retrieved through these automated formulas)'
 
 
 class ServerAttributeManager(DomainAttributeManager):
