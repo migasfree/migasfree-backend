@@ -57,7 +57,7 @@ class StatusLog(Event):
         null=False,
         choices=Computer.STATUS_CHOICES,
         default='intended',
-        db_comment='status in which the computer is found at a certain date',
+        db_comment='computer status on a specific date',
     )
 
     objects = StatusLogManager()
