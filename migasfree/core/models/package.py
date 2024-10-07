@@ -293,7 +293,8 @@ class Package(models.Model, MigasLink):
         verbose_name = _('Package')
         verbose_name_plural = _('Packages')
         unique_together = (('fullname', 'project'),)
-        db_table_comment = 'package information: including name, version, architecture and related project and store'
+        db_table_comment = 'software package details: contains the name, version,'
+        ' architecture, related project and store'
 
 
 @receiver(pre_delete, sender=Package)
