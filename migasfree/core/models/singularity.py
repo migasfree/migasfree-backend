@@ -38,7 +38,7 @@ class Singularity(models.Model, MigasLink):
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
         default=True,
-        db_comment='indicates whether or not singularity is enabled',
+        db_comment='indicates whether singularity is enabled',
     )
 
     name = models.CharField(
@@ -116,3 +116,5 @@ class Singularity(models.Model, MigasLink):
         verbose_name_plural = _('Singularities')
         unique_together = (('name', 'property_att', 'priority'),)
         ordering = ['property_att__name', '-priority']
+        db_table_comment = 'exceptions to standard formulas used for gathering attributes from computers,'
+        ' allowing different formulas to be specified based on unique computer attributes'
