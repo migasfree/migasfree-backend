@@ -55,7 +55,7 @@ class AttributeSet(models.Model, MigasLink):
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
         default=True,
-        db_comment='indicates whether or not the attribute set is enabled',
+        db_comment='indicates whether the attribute set is enabled',
     )
 
     included_attributes = models.ManyToManyField(
@@ -76,14 +76,14 @@ class AttributeSet(models.Model, MigasLink):
         verbose_name=_('longitude'),
         null=True,
         blank=True,
-        db_comment='geoposition of attribute set (longitude)',
+        db_comment='longitude of the attribute set\'s geoposition',
     )
 
     latitude = models.FloatField(
         verbose_name=_('latitude'),
         null=True,
         blank=True,
-        db_comment='geoposition of attribute set (latitude)',
+        db_comment='latitude of the attribute set\'s geoposition',
     )
 
     objects = AttributeSetManager()
@@ -187,7 +187,7 @@ class AttributeSet(models.Model, MigasLink):
         app_label = 'core'
         verbose_name = _('Attribute Set')
         verbose_name_plural = _('Attribute Sets')
-        db_table_comment = 'attribute groupings'
+        db_table_comment = 'attribute sets'
 
 
 @receiver(pre_save, sender=AttributeSet)
