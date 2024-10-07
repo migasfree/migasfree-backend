@@ -71,4 +71,4 @@ class Migration(Event):
         app_label = 'client'
         verbose_name = _('Migration')
         verbose_name_plural = _('Migrations')
-        db_table_comment = 'computer project changes'
+        db_table_comment = 'switching computer projects'
