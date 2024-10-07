@@ -73,7 +73,7 @@ class Deployment(models.Model, MigasLink):
         verbose_name=_('enabled'),
         default=True,
         help_text=_('if you uncheck this field, deployment is disabled for all computers.'),
-        db_comment='indicates whether or not deployment is enabled',
+        db_comment='indicates whether deployment is enabled',
     )
 
     name = models.CharField(
@@ -85,7 +85,7 @@ class Deployment(models.Model, MigasLink):
     slug = models.SlugField(
         max_length=50,
         verbose_name=_('slug'),
-        db_comment='name slug',
+        db_comment='slug name',
     )
 
     project = models.ForeignKey(
@@ -116,7 +116,8 @@ class Deployment(models.Model, MigasLink):
         null=True,
         blank=True,
         help_text=_('Mandatory packages to install each time'),
-        db_comment='mandatory packages to install each time',
+        db_comment='lists the packages that will be automatically installed when a computer\'s attributes'
+                   ' match the deployment',
     )
 
     packages_to_remove = models.TextField(
@@ -124,7 +125,8 @@ class Deployment(models.Model, MigasLink):
         null=True,
         blank=True,
         help_text=_('Mandatory packages to remove each time'),
-        db_comment='mandatory packages to remove each time',
+        db_comment='lists the packages that will be automatically removed when a computer\'s attributes'
+                   ' match the deployment',
     )
 
     included_attributes = models.ManyToManyField(
@@ -153,7 +155,7 @@ class Deployment(models.Model, MigasLink):
     start_date = models.DateField(
         default=timezone.now,
         verbose_name=_('start date'),
-        db_comment='initial date from which the deployment will be available',
+        db_comment='initial date from which the deployment will be accessible',
     )
 
     default_preincluded_packages = models.TextField(
@@ -183,7 +185,7 @@ class Deployment(models.Model, MigasLink):
         null=False,
         choices=SOURCE_CHOICES,
         default=SOURCE_INTERNAL,
-        db_comment='indicates whether the source of the deployment is internal or external',
+        db_comment='indicates if the deployment originates from an internal (I) or external (E) source',
     )
 
     available_packages = models.ManyToManyField(
@@ -351,7 +353,7 @@ class Deployment(models.Model, MigasLink):
         """
         Return available deployments for a computer and attributes list
         """
-        # 1.- all deployments by attribute
+        # first: all deployments by attribute
         attributed = Deployment.objects.filter(
             project__id=computer.project.id,
             enabled=True,
@@ -365,7 +367,7 @@ class Deployment(models.Model, MigasLink):
         ).values_list('id', flat=True)
         lst = list(attributed)
 
-        # 2.- all deployments by schedule
+        # second: all deployments by schedule
         scheduled = Deployment.objects.filter(
             project__id=computer.project.id,
             enabled=True,
@@ -465,7 +467,8 @@ class Deployment(models.Model, MigasLink):
         verbose_name_plural = _('Deployments')
         unique_together = (('name', 'project'), ('project', 'slug'))
         ordering = ['project__name', 'name']
-        db_table_comment = 'repository of packages and actions to be executed on computers'
+        db_table_comment = 'repositories of packages and associated actions to be executed on computers'
+        ' that meet the required attributes'
 
 
 @receiver(pre_save, sender=Deployment)
