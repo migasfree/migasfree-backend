@@ -65,4 +65,6 @@ class Configuration(models.Model):
         verbose_name = _('Hardware Configuration')
         verbose_name_plural = _('Hardware Configurations')
         unique_together = (('name', 'node'),)
-        db_table_comment = 'hardware node configurations'
+        db_table_comment = 'settings and parameters of the hardware components (it outlines how each component'
+        ' is configured, including resource allocation, operational modes, and any specific options'
+        ' that affect performance)'
