@@ -102,7 +102,7 @@ class Fault(Event):
     checked = models.BooleanField(
         verbose_name=_('checked'),
         default=False,
-        db_comment='indicates whether or not the fault has been verified by any user of the application',
+        db_comment='indicates whether the fault has been verified by any user of the application',
     )
 
     project = models.ForeignKey(
