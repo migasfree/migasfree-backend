@@ -69,7 +69,7 @@ class Store(models.Model, MigasLink):
     slug = models.SlugField(
         verbose_name=_('slug'),
         max_length=50,
-        db_comment='store name slug',
+        db_comment='store slug name',
     )
 
     project = models.ForeignKey(
@@ -119,7 +119,7 @@ class Store(models.Model, MigasLink):
         verbose_name_plural = _('Stores')
         unique_together = (('name', 'project'), ('project', 'slug'))
         ordering = ['name', 'project']
-        db_table_comment = 'locations where packages will be stored'
+        db_table_comment = 'locations for package storage'
 
 
 @receiver(pre_delete, sender=Store)
