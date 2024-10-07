@@ -46,14 +46,14 @@ class User(models.Model, MigasLink):
         verbose_name=_('name'),
         max_length=50,
         null=False,
-        db_comment='name of the user who is logged in to a computer',
+        db_comment='user\'s name',
     )
 
     fullname = models.CharField(
         verbose_name=_('fullname'),
         max_length=100,
         blank=True,
-        db_comment='fullname of the user who is logged in to a computer',
+        db_comment='user\'s fullname',
     )
 
     objects = UserManager()
@@ -73,4 +73,4 @@ class User(models.Model, MigasLink):
         verbose_name = _('User')
         verbose_name_plural = _('Users')
         unique_together = (('name', 'fullname'),)
-        db_table_comment = 'users of the computers that have performed the synchronizations'
+        db_table_comment = 'users logged into the graphical session at the time of computer synchronization'
