@@ -23,7 +23,8 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _
-from rest_framework import viewsets, status, views, permissions
+from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiExample, inline_serializer
+from rest_framework import viewsets, status, views, permissions, serializers as drf_serializers
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
@@ -156,11 +157,27 @@ def get_computer(uuid, name):
 
 @permission_classes((permissions.AllowAny,))
 class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
+
+    @extend_schema(
+        description='Returns 200 if ok, 404 if computer not found (requires JWT auth)',
+        request={
+            'id': OpenApiTypes.INT
+        },
+        responses={
+            200: gettext('EOT OK'),
+            404: '',
+        },
+        examples=[
+            OpenApiExample(
+                name='successfully response',
+                value=gettext('EOT OK'),
+                response_only=True,
+            ),
+        ],
+    )
     def post(self, request):
         """
         claims = {"id": id}
-
-        Returns 200 if ok, 404 if computer not found
         """
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
@@ -181,6 +198,25 @@ class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
 
 @permission_classes((permissions.AllowAny,))
 class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
+
+    @extend_schema(
+        description='Returns 201 if ok, 404 if computer not found, 400 otherwise'
+                    ' (requires JWT auth)',
+        request=inline_serializer(
+            name='SafeSyncRequest',
+            fields={
+                'id': drf_serializers.IntegerField(),
+                'start_date': drf_serializers.DateTimeField(),
+                'consumer': drf_serializers.CharField(),
+                'pms_status_ok': drf_serializers.BooleanField(),
+            },
+        ),
+        responses={
+            201: '',
+            400: '',
+            404: '',
+        },
+    )
     def post(self, request):
         """
         claims = {
@@ -365,21 +401,27 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns 200 if ok, 404 if computer not found (requires JWT auth)',
+        request={
+            'id': OpenApiTypes.INT
+        },
+        responses={
+            200: {
+                'type': 'object',
+                'properties': {
+                    'prefix': {'type': 'string'},
+                    'language': {'type': 'string'},
+                    'code': {'type': 'string'},
+                }
+            },
+            404: '',
+        },
+    )
     @action(methods=['post'], detail=False)
     def properties(self, request):
         """
         claims = {'id': 1}
-
-        Returns: {
-            [
-                {
-                    'prefix': 'xxx',
-                    'language': 'bash' | 'php' | 'python' | 'ruby' | 'perl',
-                    'code': 'xxxx'
-                },
-                ...
-            ]
-        }
         """
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
@@ -397,6 +439,36 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns 201 if ok, 404 if computer not found (requires JWT auth)',
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': 'integer'},
+                    'uuid': {'type': 'string', 'format': 'uuid'},
+                    'name': {'type': 'string'},
+                    'ip_address': {'type': 'string', 'format': 'ipv4'},
+                    'sync_user': {'type': 'string'},
+                    'sync_fullname': {'type': 'string'},
+                    'sync_attributes': {
+                        'type': 'object',
+                        'additionalProperties': {
+                            'type': 'string'
+                        }
+                    }
+                },
+                'required': [
+                    'id', 'uuid', 'name', 'ip_address', 
+                    'sync_user', 'sync_fullname', 'sync_attributes',
+                ]
+            }
+        },
+        responses={
+            201: '',
+            404: '',
+        },
+    )
     @action(methods=['post'], detail=False)
     def attributes(self, request):
         """
