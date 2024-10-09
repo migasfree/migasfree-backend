@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,8 @@ from django.conf import settings
 from django.contrib import auth
 from django.utils.translation import gettext, gettext_lazy as _
 from django.http import HttpResponseForbidden
-from rest_framework import views, status
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiTypes
+from rest_framework import views, status, serializers
 from rest_framework.response import Response
 
 from ...core.models import Platform, Project
@@ -66,18 +67,27 @@ def add_project(project_name, pms, platform, architecture, ip_address=None):
 class PackagerKeysView(views.APIView):
     permission_classes = (permissions.IsPackager,)
 
+    @extend_schema(
+        description='Returns the public and private keys needed to configure the Migasfree Client'
+                    ' so it can upload packages.',
+        request=inline_serializer(
+            name='PackagerKeysRequest',
+            fields={
+                'username': serializers.CharField(),
+                'password': serializers.CharField(),
+            },
+        ),
+        responses={
+            200: inline_serializer(
+               name='PackagerKeysResponse',
+               fields={
+                   settings.MIGASFREE_PUBLIC_KEY: serializers.CharField(),
+                   settings.MIGASFREE_PACKAGER_PRI_KEY: serializers.CharField(),
+                }
+            )
+        }
+    )
     def post(self, request):
-        """
-        Input: {
-            "username": "admin",
-            "password": "admin"
-        }
-
-        Returns: {
-            "migasfree-server.pub": pub_server_key,
-            "migasfree-packager.pri": priv_packager_key
-        }
-        """
         pub_server_key_file = os.path.join(
             settings.MIGASFREE_KEYS_DIR, settings.MIGASFREE_PUBLIC_KEY
         )
@@ -118,22 +128,30 @@ class ProjectKeysView(views.APIView):
 
             return project
 
+    @extend_schema(
+        description='Returns the public and private keys needed to configure the Migasfree Client',
+        request=inline_serializer(
+            name='ProjectKeysRequest',
+            fields={
+                'username': serializers.CharField(),
+                'password': serializers.CharField(),
+                'project': serializers.CharField(),
+                'pms': serializers.CharField(),
+                'platform': serializers.CharField(),
+                'architecture': serializers.CharField(),
+            },
+        ),
+        responses={
+            200: inline_serializer(
+               name='ProjectKeysResponse',
+               fields={
+                   settings.MIGASFREE_PUBLIC_KEY: serializers.CharField(),
+                   'migasfree-client.pri': serializers.CharField(),
+                }
+            )
+        }
+    )
     def post(self, request):
-        """
-        Input: {
-            "user": "admin",
-            "password": "admin",
-            "project": "Vitalinux",
-            "pms": "apt",
-            "platform": "Linux",
-            "architecture": "amd64 i386"
-        }
-
-        Returns: {
-            "migasfree-server.pub": pub_server_key,
-            "migasfree-client.pri": priv_project_key
-        }
-        """
         self.user = auth.authenticate(
             username=request.data.get('username'),
             password=request.data.get('password')
@@ -184,10 +202,15 @@ class ProjectKeysView(views.APIView):
 
 
 class RepositoriesKeysView(views.APIView):
+
+    @extend_schema(
+        description='Returns the repositories public key',
+        request=None,
+        responses={
+            '200': OpenApiTypes.STR
+        }
+    )
     def post(self, request):
-        """
-        Returns the repositories public key
-        """
         return Response(
             gpg_get_key('migasfree-repository'),
             content_type='text/plain'
