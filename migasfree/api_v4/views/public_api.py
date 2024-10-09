@@ -3,6 +3,7 @@ import json
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse, Http404
 from django.template import Context, Template
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes
 from rest_framework.decorators import permission_classes
 from rest_framework import permissions, views
 from rest_framework.response import Response
@@ -99,11 +100,22 @@ def get_key_repositories(request):
 
 @permission_classes((permissions.AllowAny,))
 class RepositoriesUrlTemplateView(views.APIView):
+
+    @extend_schema(
+        description='Returns the repositories URL template'
+                    ' (compatibility for migasfree-client <= 4.16)',
+        responses={
+            '200': OpenApiTypes.STR
+        },
+        examples=[
+            OpenApiExample(
+                name='successfully response',
+                value=f'http://<server>{settings.MEDIA_URL}<project>/{settings.MIGASFREE_REPOSITORY_TRAILING_PATH}',
+                response_only=True,
+            ),
+        ],
+    )
     def post(self, request):
-        """
-        Returns the repositories URL template
-        (compatibility for migasfree-client <= 4.16)
-        """
         protocol = 'https' if request.is_secure() else 'http'
 
         return Response(
