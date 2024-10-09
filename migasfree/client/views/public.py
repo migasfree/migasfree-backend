@@ -143,8 +143,8 @@ class ProjectKeysView(views.APIView):
         ),
         responses={
             200: inline_serializer(
-               name='ProjectKeysResponse',
-               fields={
+                name='ProjectKeysResponse',
+                fields={
                    settings.MIGASFREE_PUBLIC_KEY: serializers.CharField(),
                    'migasfree-client.pri': serializers.CharField(),
                 }
@@ -205,7 +205,6 @@ class RepositoriesKeysView(views.APIView):
 
     @extend_schema(
         description='Returns the repositories public key',
-        request=None,
         responses={
             '200': OpenApiTypes.STR
         }
