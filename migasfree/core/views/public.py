@@ -33,6 +33,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, StreamingHttpResponse
 from django.utils.translation import gettext as _
+from drf_spectacular.utils import extend_schema, OpenApiExample
 from rest_framework import status, views, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -74,10 +75,26 @@ def external_downloads(url, local_file):
 
 @permission_classes((permissions.AllowAny,))
 class PmsView(views.APIView):
+
+    @extend_schema(
+        description='Returns available PMS',
+        responses={
+            200: {
+                'type': 'object',
+                'properties': {
+                    'pms': {
+                        'type': 'object',
+                        'properties': {
+                            'module': {'type': 'string'},
+                            'mimetype': {'type': 'array', 'items': {'type': 'string'}},
+                            'extensions': {'type': 'array', 'items': {'type': 'string'}}
+                        }
+                    }
+                }
+            }
+        }
+    )
     def get(self, request):
-        """
-        Returns available PMS
-        """
         ret = {}
 
         for key, value in dict(get_available_pms()).items():
@@ -93,19 +110,43 @@ class PmsView(views.APIView):
 
 @permission_classes((permissions.AllowAny,))
 class ProgrammingLanguagesView(views.APIView):
+
+    @extend_schema(
+        description='Returns available programming languages (to formulas and faults definitions)',
+        responses={
+            200: dict(settings.MIGASFREE_PROGRAMMING_LANGUAGES)
+        },
+        examples=[
+            OpenApiExample(
+                name='successfully response',
+                value=dict(settings.MIGASFREE_PROGRAMMING_LANGUAGES),
+                response_only=True,
+            ),
+        ],
+    )
     def get(self, request):
-        """
-        Returns available programming languages (to formulas and faults definitions)
-        """
         return Response(dict(settings.MIGASFREE_PROGRAMMING_LANGUAGES))
 
 
+@extend_schema(
+    methods=['GET', 'POST'],
+    description='Returns server info',
+    responses={
+        200: {
+            'type': 'object',
+            'properties': {
+                'version': {'type': 'string'},
+                'author': {'type': 'array', 'items': {'type': 'string'}},
+                'contact': {'type': 'string'},
+                'homepage': {'type': 'string'},
+                'organization': {'type': 'string'},
+            }
+        }
+    },
+)
 @permission_classes((permissions.AllowAny,))
 class ServerInfoView(views.APIView):
     def get(self, request):
-        """
-        Returns server info
-        """
         from ... import __version__, __author__, __contact__, __homepage__
 
         info = {
@@ -120,7 +161,7 @@ class ServerInfoView(views.APIView):
 
     def post(self, request):
         """
-        Returns server info (compatibility with older clients)
+        Compatibility with older clients
         """
         return self.get(request)
 
