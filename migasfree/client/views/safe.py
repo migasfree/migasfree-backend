@@ -164,8 +164,8 @@ class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
             'id': OpenApiTypes.INT
         },
         responses={
-            200: gettext('EOT OK'),
-            404: '',
+            status.HTTP_200_OK: gettext('EOT OK'),
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
         examples=[
             OpenApiExample(
@@ -212,9 +212,9 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
             },
         ),
         responses={
-            201: '',
-            400: '',
-            404: '',
+            status.HTTP_201_CREATED: {'description': 'Object created successfully'},
+            status.HTTP_400_BAD_REQUEST: {'description': 'Error in request'},
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
     )
     def post(self, request):
@@ -260,6 +260,29 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
 
 @permission_classes((permissions.AllowAny,))
 class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
+
+    @extend_schema(
+        description='Creates or updates a computer',
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'uuid': {'type': 'string', 'format': 'uuid'},
+                    'name': {'type': 'string'},
+                    'ip_address': {'type': 'string', 'format': 'ipv4'},
+                    'username': {'type': 'string'},
+                    'password': {'type': 'string', 'format': 'password'}
+                },
+                'required': ['uuid', 'name', 'ip_address', 'username', 'password']
+            }
+        },
+        responses={
+            status.HTTP_200_OK: {'description': 'Computer data updated'},
+            status.HTTP_201_CREATED: {'description': 'Object created successfully'},
+            status.HTTP_400_BAD_REQUEST: {'description': 'Error in request'},
+            status.HTTP_401_UNAUTHORIZED: {'description': 'Computer cannot be registered'},
+        }
+    )
     def create(self, request):
         """
         claims = {
@@ -407,7 +430,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             'id': OpenApiTypes.INT
         },
         responses={
-            200: {
+            status.HTTP_200_OK: {
                 'type': 'object',
                 'properties': {
                     'prefix': {'type': 'string'},
@@ -415,7 +438,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     'code': {'type': 'string'},
                 }
             },
-            404: '',
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
     )
     @action(methods=['post'], detail=False)
@@ -465,8 +488,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             }
         },
         responses={
-            201: '',
-            404: '',
+            status.HTTP_201_CREATED: {'description': 'Object created successfully'},
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
     )
     @action(methods=['post'], detail=False)
