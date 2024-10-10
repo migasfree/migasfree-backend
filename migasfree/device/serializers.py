@@ -18,6 +18,7 @@
 
 import json
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from ..core.serializers import AttributeInfoSerializer, ProjectInfoSerializer
@@ -116,14 +117,17 @@ class DeviceSerializer(serializers.ModelSerializer):
     location = serializers.SerializerMethodField()
     total_computers = serializers.SerializerMethodField()
 
+    @extend_schema_field(serializers.IntegerField)
     def get_total_computers(self, obj):
         return obj.total_computers(
             user=self.context['request'].user if self.context.get('request') else None
         )
 
+    @extend_schema_field(serializers.JSONField)
     def get_data(self, obj):
         return json.loads(obj.data)
 
+    @extend_schema_field(serializers.CharField)
     def get_location(self, obj):
         return obj.location()
 
@@ -156,6 +160,7 @@ class DriverSerializer(serializers.ModelSerializer):
     capability = CapabilityInfoSerializer(many=False, read_only=True)
     packages_to_install = serializers.SerializerMethodField()
 
+    @extend_schema_field(serializers.ListField)
     def get_packages_to_install(self, obj):
         return to_list(obj.packages_to_install)
 
