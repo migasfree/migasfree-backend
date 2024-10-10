@@ -28,6 +28,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _
+from drf_spectacular.utils import extend_schema_field
+from rest_framework import serializers
 
 from ...utils import (
     swap_m2m, remove_empty_elements_from_dict,
@@ -437,6 +439,7 @@ class Computer(models.Model, MigasLink):
                     package__fullname__in=history['uninstalled']
                 ).update(uninstall_date=timezone.localtime(timezone.now()))
 
+    @extend_schema_field(serializers.BooleanField)
     def has_software_inventory(self):
         from .package_history import PackageHistory
 
@@ -769,6 +772,7 @@ class Computer(models.Model, MigasLink):
         except ObjectDoesNotExist:
             pass
 
+    @extend_schema_field(serializers.CharField)
     def __str__(self):
         if settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] == 'id':
             return f'CID-{self.id}'
