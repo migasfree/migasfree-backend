@@ -19,6 +19,7 @@
 from django.contrib.auth.models import Group, Permission
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from dj_rest_auth.serializers import UserDetailsSerializer
 
@@ -58,6 +59,7 @@ class PropertyWriteSerializer(serializers.ModelSerializer):
 class PropertySerializer(serializers.ModelSerializer):
     language = serializers.SerializerMethodField()
 
+    @extend_schema_field(serializers.CharField)
     def get_language(self, obj):
         return obj.get_language_display()
 
@@ -237,6 +239,7 @@ class SingularitySerializer(serializers.ModelSerializer):
     included_attributes = AttributeInfoSerializer(many=True, read_only=True)
     excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
 
+    @extend_schema_field(serializers.CharField)
     def get_language(self, obj):
         return obj.get_language_display()
 
@@ -505,18 +508,23 @@ class DeploymentSerializer(serializers.ModelSerializer):
     available_packages = PackageInfoSerializer(many=True, read_only=True)
     available_package_sets = PackageSetInfoSerializer(many=True, read_only=True)
 
+    @extend_schema_field(serializers.ListField)
     def get_packages_to_install(self, obj):
         return to_list(obj.packages_to_install)
 
+    @extend_schema_field(serializers.ListField)
     def get_packages_to_remove(self, obj):
         return to_list(obj.packages_to_remove)
 
+    @extend_schema_field(serializers.ListField)
     def get_default_preincluded_packages(self, obj):
         return to_list(obj.default_preincluded_packages)
 
+    @extend_schema_field(serializers.ListField)
     def get_default_included_packages(self, obj):
         return to_list(obj.default_included_packages)
 
+    @extend_schema_field(serializers.ListField)
     def get_default_excluded_packages(self, obj):
         return to_list(obj.default_excluded_packages)
 
@@ -734,6 +742,7 @@ class DomainSerializer(serializers.ModelSerializer):
     tags = AttributeInfoSerializer(many=True, read_only=True)
     domain_admins = serializers.SerializerMethodField()
 
+    @extend_schema_field(serializers.ListField)
     def get_domain_admins(self, obj):
         return obj.get_domain_admins()
 
@@ -952,6 +961,7 @@ class UserProfileSerializer(UserDetailsSerializer):
     )
     token = serializers.SerializerMethodField()
 
+    @extend_schema_field(serializers.CharField)
     def get_token(self, obj):
         try:
             return obj.get_token()
