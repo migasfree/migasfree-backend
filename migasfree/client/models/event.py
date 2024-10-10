@@ -20,6 +20,8 @@ from django.db import models
 from django.db.models.aggregates import Count
 from django.db.models.functions import TruncDay, TruncHour, ExtractMonth, ExtractYear
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import extend_schema_field
+from rest_framework import serializers
 
 from ...core.models import MigasLink
 from .computer import Computer
@@ -108,6 +110,7 @@ class Event(models.Model, MigasLink):
 
         return items
 
+    @extend_schema_field(serializers.CharField)
     def __str__(self):
         return f'{self.computer} ({self.created_at:%Y-%m-%d %H:%M:%S})'
 
