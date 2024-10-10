@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from ..core.serializers import (
@@ -36,6 +37,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 class ComputerInfoSerializer(serializers.ModelSerializer):
     summary = serializers.SerializerMethodField()
 
+    @extend_schema_field(serializers.CharField)
     def get_summary(self, obj):
         return obj.get_summary()
 
@@ -77,9 +79,11 @@ class ComputerListSerializer(serializers.ModelSerializer):
     product_system = serializers.SerializerMethodField()
     summary = serializers.SerializerMethodField()
 
+    @extend_schema_field(serializers.CharField)
     def get_product_system(self, obj):
         return obj.product_system()
 
+    @extend_schema_field(serializers.CharField)
     def get_summary(self, obj):
         return obj.get_summary()
 
@@ -104,6 +108,7 @@ class ComputerSerializer(ComputerListSerializer):
     tags = AttributeInfoSerializer(many=True, read_only=True)
     architecture = serializers.SerializerMethodField()
 
+    @extend_schema_field(serializers.CharField)
     def get_architecture(self, obj):
         return obj.get_architecture()
 
