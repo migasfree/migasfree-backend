@@ -164,7 +164,7 @@ class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
             'id': OpenApiTypes.INT
         },
         responses={
-            status.HTTP_200_OK: gettext('EOT OK'),
+            status.HTTP_200_OK: {'description': gettext('EOT OK')},
             status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
         examples=[
