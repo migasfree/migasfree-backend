@@ -18,6 +18,8 @@
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import extend_schema_field
+from rest_framework import serializers
 
 from .migas_link import MigasLink
 
@@ -39,6 +41,7 @@ class Schedule(models.Model, MigasLink):
         db_comment='schedule description',
     )
 
+    @extend_schema_field(serializers.IntegerField)
     def delays_count(self):
         return self.delays.count()
 
