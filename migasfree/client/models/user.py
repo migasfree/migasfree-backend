@@ -18,6 +18,8 @@
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import extend_schema_field
+from rest_framework import serializers
 
 from ...core.models import MigasLink
 
@@ -62,6 +64,7 @@ class User(models.Model, MigasLink):
         self.fullname = fullname
         self.save()
 
+    @extend_schema_field(serializers.CharField)
     def __str__(self):
         if self.fullname.strip():
             return f'{self.name} ({self.fullname.strip()})'
