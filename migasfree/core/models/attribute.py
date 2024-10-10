@@ -23,6 +23,8 @@ from django.db.models import Q
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import extend_schema_field
+from rest_framework import serializers
 
 from .migas_link import MigasLink
 from .property import Property
@@ -170,11 +172,12 @@ class Attribute(models.Model, MigasLink):
     def __str__(self):
         if self.id == 1:  # special case (SET-All Systems)
             return self.value
-        elif self.property_att.prefix == 'CID' and \
+        
+        if self.property_att.prefix == 'CID' and \
                 settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] != 'id':
             return f'{self.description} (CID-{self.value})'
-        else:
-            return f'{self.property_att.prefix}-{self.value}'
+
+        return f'{self.property_att.prefix}-{self.value}'
 
     def prefix_value(self):
         return self.__str__()
@@ -182,6 +185,7 @@ class Attribute(models.Model, MigasLink):
     def has_location(self):
         return self.longitude is not None and self.latitude is not None
 
+    @extend_schema_field(serializers.IntegerField)
     def total_computers(self, user=None):
         from ...client.models import Computer
 
