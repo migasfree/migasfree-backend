@@ -20,6 +20,8 @@ import json
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import extend_schema_field
+from rest_framework import serializers
 
 from ...core.models import Attribute, MigasLink
 from .device import Device
@@ -120,6 +122,7 @@ class Logical(models.Model, MigasLink):
 
         return ret
 
+    @extend_schema_field(serializers.CharField)
     def __str__(self):
         data = json.loads(self.device.data)
         if 'NAME' in data and not (data['NAME'] == 'undefined' or data['NAME'] == ''):
