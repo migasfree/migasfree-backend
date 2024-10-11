@@ -172,7 +172,7 @@ class Attribute(models.Model, MigasLink):
     def __str__(self):
         if self.id == 1:  # special case (SET-All Systems)
             return self.value
-        
+
         if self.property_att.prefix == 'CID' and \
                 settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] != 'id':
             return f'{self.description} (CID-{self.value})'
