@@ -231,7 +231,7 @@ def prevent_circular_dependencies(sender, instance, action, reverse, model, pk_s
         except ValueError as e:
             from ast import literal_eval
 
-            depends = literal_eval(str(e))
+            depends = literal_eval(str(e))[1]
             if instance.id in depends:
                 del depends[instance.id]
 
