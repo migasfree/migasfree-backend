@@ -22,6 +22,7 @@ from django.db.models.functions import ExtractMonth, ExtractYear
 from django.utils.translation import gettext_lazy as _
 
 from ...core.models import MigasLink
+from ...utils import normalize_line_breaks
 
 
 class NotificationQueryset(models.query.QuerySet):
@@ -69,7 +70,8 @@ class Notification(models.Model, MigasLink):
         self.save()
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.message = self.message.replace("\r\n", "\n")
+        self.message = normalize_line_breaks(self.message)
+
         super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
