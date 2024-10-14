@@ -343,3 +343,7 @@ def to_heatmap(results, range_name='day'):
 
 def hash_args(args, kwargs):
     return hashlib.md5(json.dumps((args, kwargs)).encode()).hexdigest()
+
+
+def normalize_line_breaks(text):
+    return text.replace("\r\n", "\n") if text else text
