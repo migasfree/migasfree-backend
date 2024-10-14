@@ -35,3 +35,7 @@ Systems Management System (backend). Provides a REST API.
 `migasfree:watch:stats:<project_id>:hours:YYYYMMDDHH`<br>
 `migasfree:stats:hours:YYYYMMDDHH`<br>
 `migasfree:stats:<project_id>:hours:YYYYMMDDHH`
+
+## Code coverage (in development mode)
+
+`$ python3 -m pytest --cov=migasfree`
