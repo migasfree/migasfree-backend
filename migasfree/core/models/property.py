@@ -21,6 +21,7 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 from .migas_link import MigasLink
+from ...utils import normalize_line_breaks
 
 
 class ClientPropertyManager(models.Manager):
@@ -176,7 +177,8 @@ class ClientProperty(Property):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.sort = 'client'
-        self.code = self.code.replace("\r\n", "\n")
+        self.code = normalize_line_breaks(self.code)
+
         super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
@@ -188,7 +190,8 @@ class ClientProperty(Property):
 class BasicProperty(Property):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.sort = 'basic'
-        self.code = self.code.replace("\r\n", "\n")
+        self.code = normalize_line_breaks(self.code)
+
         super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
