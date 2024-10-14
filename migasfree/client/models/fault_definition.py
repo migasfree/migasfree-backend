@@ -22,6 +22,7 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 from ...core.models import Attribute, UserProfile, MigasLink
+from ...utils import normalize_line_breaks
 
 
 class DomainFaultDefinitionManager(models.Manager):
@@ -130,7 +131,7 @@ class FaultDefinition(models.Model, MigasLink):
         return None
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.code = self.code.replace("\r\n", "\n")
+        self.code = normalize_line_breaks(self.code)
 
         super().save(force_insert, force_update, using, update_fields)
 
