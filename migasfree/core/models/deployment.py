@@ -31,7 +31,7 @@ from django.utils.translation import gettext_lazy as _
 from django_redis import get_redis_connection
 
 from ..pms import get_pms
-from ...utils import time_horizon
+from ...utils import time_horizon, normalize_line_breaks
 
 from .migas_link import MigasLink
 from .project import Project
@@ -116,8 +116,8 @@ class Deployment(models.Model, MigasLink):
         null=True,
         blank=True,
         help_text=_('Mandatory packages to install each time'),
-        db_comment='lists the packages that will be automatically installed when a computer\'s attributes'
-                   ' match the deployment',
+        db_comment='lists the packages that will be automatically installed'
+                   ' when a computer\'s attributes match the deployment',
     )
 
     packages_to_remove = models.TextField(
@@ -125,8 +125,8 @@ class Deployment(models.Model, MigasLink):
         null=True,
         blank=True,
         help_text=_('Mandatory packages to remove each time'),
-        db_comment='lists the packages that will be automatically removed when a computer\'s attributes'
-                   ' match the deployment',
+        db_comment='lists the packages that will be automatically removed when'
+                   ' a computer\'s attributes match the deployment',
     )
 
     included_attributes = models.ManyToManyField(
@@ -267,6 +267,8 @@ class Deployment(models.Model, MigasLink):
             percent = float(progress.days) / delta.days * 100
             if percent > 100:
                 percent = 100
+            elif percent < 0:
+                percent = 0
         else:
             percent = 100
 
@@ -328,17 +330,16 @@ class Deployment(models.Model, MigasLink):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.name)
 
-        if self.packages_to_install:
-            self.packages_to_install = self.packages_to_install.replace("\r\n", "\n")
-        if self.packages_to_remove:
-            self.packages_to_remove = self.packages_to_remove.replace("\r\n", "\n")
+        properties_to_normalize = [
+            'packages_to_install',
+            'packages_to_remove',
+            'default_preincluded_packages',
+            'default_included_packages',
+            'default_excluded_packages',
+        ]
 
-        if self.default_preincluded_packages:
-            self.default_preincluded_packages = self.default_preincluded_packages.replace("\r\n", "\n")
-        if self.default_included_packages:
-            self.default_included_packages = self.default_included_packages.replace("\r\n", "\n")
-        if self.default_excluded_packages:
-            self.default_excluded_packages = self.default_excluded_packages.replace("\r\n", "\n")
+        for property_name in properties_to_normalize:
+            setattr(self, property_name, normalize_line_breaks(getattr(self, property_name)))
 
         super().save(force_insert, force_update, using, update_fields)
 
