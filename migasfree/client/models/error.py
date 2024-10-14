@@ -21,6 +21,7 @@ from django.db.models.aggregates import Count
 from django.utils.translation import gettext_lazy as _
 
 from ...core.models import Project
+from ...utils import normalize_line_breaks
 
 from .computer import Computer
 from .event import Event
@@ -156,7 +157,7 @@ class Error(Event):
         self.save()
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.description = self.description.replace("\r\n", "\n")
+        self.description = normalize_line_breaks(self.description)
 
         super().save(force_insert, force_update, using, update_fields)
 
