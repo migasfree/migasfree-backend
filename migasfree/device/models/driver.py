@@ -20,7 +20,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from ...core.models import Project, MigasLink
-from ...utils import to_list
+from ...utils import to_list, normalize_line_breaks
 from .model import Model
 from .capability import Capability
 
@@ -70,7 +70,8 @@ class Driver(models.Model, MigasLink):
         }
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.packages_to_install = self.packages_to_install.replace("\r\n", "\n")
+        self.packages_to_install = normalize_line_breaks(self.packages_to_install)
+
         super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
