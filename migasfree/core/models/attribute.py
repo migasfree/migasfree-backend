@@ -36,7 +36,7 @@ class DomainAttributeManager(models.Manager):
 
     def scope(self, user):
         qs = self.get_queryset()
-        if not user.is_view_all():
+        if user and not user.is_view_all():
             qs = qs.filter(
                 Q(id__in=user.get_attributes()) |
                 Q(id__in=user.get_domain_tags())
@@ -275,14 +275,15 @@ class Attribute(models.Model, MigasLink):
         if property_att.kind not in list(zip(*Property.KIND_CHOICES))[0]:
             return []
 
-        if property_att.kind == 'N':  # Normal
-            return Attribute._kind_normal(property_att, value)
-        elif property_att.kind == '-':  # List
-            return Attribute._kind_list(property_att, value)
-        elif property_att.kind == 'R' or property_att.kind == 'L':
-            return Attribute._kind_by_side(property_att, value)
-        elif property_att.kind == 'J':  # JSON
-            return Attribute._kind_json(property_att, value)
+        methods = {
+            'N': Attribute._kind_normal,
+            '-': Attribute._kind_list,
+            'R': Attribute._kind_by_side,
+            'L': Attribute._kind_by_side,
+            'J': Attribute._kind_json
+        }
+
+        return methods.get(property_att.kind, lambda x: [])(property_att, value)
 
     class Meta:
         app_label = 'core'
