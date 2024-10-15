@@ -27,7 +27,7 @@ from ...core.models import MigasLink
 class DomainUserManager(models.Manager):
     def scope(self, user):
         qs = super().get_queryset()
-        if not user.is_view_all():
+        if user and not user.is_view_all():
             qs = qs.filter(computer__in=user.get_computers())
 
         return qs.distinct()
