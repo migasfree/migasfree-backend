@@ -47,7 +47,7 @@ class LogicalManager(models.Manager):
 
     def scope(self, user):
         qs = self.get_queryset()
-        if not user.is_view_all():
+        if user and not user.is_view_all():
             qs = qs.filter(
                 attributes__in=user.get_attributes()
             ).distinct()
