@@ -47,10 +47,10 @@ class ScopeManager(models.Manager):
         qs = self.get_queryset()
         if filter_by_user:
             qs = qs.filter(user=user)
-        if user.domain_preference:
+        if user and user.domain_preference:
             qs = qs.filter(domain=user.domain_preference)
 
-        if not user.is_view_all():
+        if user and not user.is_view_all():
             qs = qs.filter(included_attributes__in=user.get_attributes()).distinct()
 
         return qs
@@ -103,28 +103,26 @@ class Scope(models.Model, MigasLink):
         """
         Returns Queryset with the related computers based in attributes
         """
-        if model == 'computer':
-            from ...client.models import Computer
+        if model != 'computer':
+            return None
 
-            qs = Computer.productive.scope(user)
-            if self.domain:
-                qs = qs.filter(
-                    sync_attributes__in=Attribute.objects.filter(
-                        id__in=self.domain.included_attributes.all()
-                    ).exclude(
-                        id__in=self.domain.excluded_attributes.all()
-                    )
-                )
+        from ...client.models import Computer
 
+        qs = Computer.productive.scope(user)
+        if self.domain:
             qs = qs.filter(
-                sync_attributes__in=self.included_attributes.all()
-            ).exclude(
-                sync_attributes__in=self.excluded_attributes.all()
-            ).distinct()
+                sync_attributes__in=Attribute.objects.filter(
+                    id__in=self.domain.included_attributes.all()
+                ).exclude(
+                    id__in=self.domain.excluded_attributes.all()
+                )
+            )
 
-            return qs
-
-        return None
+        return qs.filter(
+            sync_attributes__in=self.included_attributes.all()
+        ).exclude(
+            sync_attributes__in=self.excluded_attributes.all()
+        ).distinct()
 
     def validate_unique(self, exclude=None):
         if Scope.objects.exclude(id=self.id).filter(
