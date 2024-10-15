@@ -1,5 +1,7 @@
 import pytest
 
+from django.test import TestCase
+
 from migasfree.core.models import Attribute, Property
 
 
@@ -85,3 +87,50 @@ def test_kind_by_side_left():
     assert Attribute.objects.filter(property_att=property_att, value='hello.world').exists()
     assert Attribute.objects.filter(property_att=property_att, value='hello.world.foo').exists()
     assert Attribute.objects.filter(property_att=property_att, value='hello.world.foo.bar').exists()
+
+
+class TestAttribute(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.property_att = Property.objects.create(name='test', sort='client', kind='N')
+        cls.value = 'proof value'
+
+    def test_process_kind_property_normal(self):
+        self.property_att.kind = 'N'
+        result = Attribute.process_kind_property(self.property_att, self.value)
+
+        assert result == Attribute._kind_normal(self.property_att, self.value)
+
+    def test_process_kind_property_list(self):
+        self.property_att.kind = '-'
+        result = Attribute.process_kind_property(self.property_att, self.value)
+        assert result == Attribute._kind_list(self.property_att, self.value)
+
+    def test_process_kind_property_by_side(self):
+        self.property_att.kind = 'R'
+        result = Attribute.process_kind_property(self.property_att, self.value)
+        assert result == Attribute._kind_by_side(self.property_att, self.value)
+
+        self.property_att.kind = 'L'
+        result = Attribute.process_kind_property(self.property_att, self.value)
+        assert result == Attribute._kind_by_side(self.property_att, self.value)
+
+    def test_process_kind_property_json(self):
+        self.property_att.kind = 'J'
+        result = Attribute.process_kind_property(self.property_att, self.value)
+        assert result == Attribute._kind_json(self.property_att, self.value)
+
+    def test_process_kind_property_invalid_kind(self):
+        self.property_att.kind = 'X'
+        result = Attribute.process_kind_property(self.property_att, self.value)
+        assert result == []
+
+    def test_process_kind_property_none_kind(self):
+        self.property_att.kind = None
+        result = Attribute.process_kind_property(self.property_att, self.value)
+        assert result == []
+
+    def test_process_kind_property_empty_kind(self):
+        self.property_att.kind = ''
+        result = Attribute.process_kind_property(self.property_att, self.value)
+        assert result == []
