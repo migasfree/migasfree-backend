@@ -118,8 +118,8 @@ class ServerPropertyFilter(SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value():
             return queryset.filter(id__exact=self.value())
-        else:
-            return queryset.filter(sort='server')
+
+        return queryset.filter(sort='server')
 
 
 @admin.register(ServerProperty)
@@ -168,8 +168,8 @@ class ClientAttributeFilter(SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value():
             return queryset.filter(property_att__id__exact=self.value())
-        else:
-            return queryset
+
+        return queryset
 
 
 @admin.register(ClientAttribute)
@@ -185,7 +185,7 @@ class ClientAttributeAdmin(ImportExportActionModelAdmin):
     def get_queryset(self, request):
         sql = Attribute.TOTAL_COMPUTER_QUERY
         user = request.user.userprofile
-        if not user.is_view_all():
+        if user and not user.is_view_all():
             computers = user.get_computers()
             if computers:
                 sql += " AND client_computer_sync_attributes.computer_id IN " \
@@ -223,7 +223,7 @@ class ServerAttributeAdmin(ImportExportActionModelAdmin):
     def get_queryset(self, request):
         sql = Attribute.TOTAL_COMPUTER_QUERY
         user = request.user.userprofile
-        if not user.is_view_all():
+        if user and not user.is_view_all():
             computers = user.get_computers()
             if computers:
                 sql += " AND client_computer_sync_attributes.computer_id IN " \
