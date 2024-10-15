@@ -713,7 +713,7 @@ class MessageViewSet(viewsets.ViewSet):
         projects = []
         computers = []
         user = self.request.user.userprofile
-        if not user.is_view_all():
+        if user and not user.is_view_all():
             projects = user.get_projects()
             computers = user.get_computers()
 
