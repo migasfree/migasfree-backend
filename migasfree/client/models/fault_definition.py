@@ -28,7 +28,7 @@ from ...utils import normalize_line_breaks
 class DomainFaultDefinitionManager(models.Manager):
     def scope(self, user):
         qs = super().get_queryset()
-        if not user.is_view_all():
+        if user and not user.is_view_all():
             user_attributes = user.get_attributes()
             qs = qs.filter(included_attributes__id__in=user_attributes)
 
@@ -119,16 +119,16 @@ class FaultDefinition(models.Model, MigasLink):
         """
         Returns Queryset with the related computers based in attributes
         """
-        if model == 'computer':
-            from .computer import Computer
+        if model != 'computer':
+            return None
 
-            return Computer.productive.scope(user).filter(
-                sync_attributes__in=self.included_attributes.all()
-            ).exclude(
-                sync_attributes__in=self.excluded_attributes.all()
-            ).distinct()
+        from .computer import Computer
 
-        return None
+        return Computer.productive.scope(user).filter(
+            sync_attributes__in=self.included_attributes.all()
+        ).exclude(
+            sync_attributes__in=self.excluded_attributes.all()
+        ).distinct()
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.code = normalize_line_breaks(self.code)
