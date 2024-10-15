@@ -28,7 +28,7 @@ from .property import Property
 class SingularityManager(models.Manager):
     def scope(self, user):
         qs = super().get_queryset()
-        if not user.is_view_all():
+        if user and not user.is_view_all():
             qs = qs.filter(id__in=user.get_attributes()).distinct()
 
         return qs
