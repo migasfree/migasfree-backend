@@ -20,6 +20,7 @@ import os
 
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
@@ -39,7 +40,7 @@ class DomainPackagesByProjectManager(models.Manager):
 
     def scope(self, user):
         qs = self.get_queryset()
-        if not user.is_view_all():
+        if user and not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects())
 
         return qs
@@ -59,7 +60,7 @@ class PackagesByProjectManager(DomainPackagesByProjectManager):
 class MediaFileSystemStorage(FileSystemStorage):
     def get_available_name(self, name, max_length=None):
         if max_length and len(name) > max_length:
-            raise Exception(_("name's length is greater than max length"))
+            raise ValidationError(_("name's length is greater than max length"))
 
         return name
 
