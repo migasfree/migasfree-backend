@@ -25,7 +25,7 @@ from .migas_link import MigasLink
 class DomainPlatformManager(models.Manager):
     def scope(self, user):
         qs = super().get_queryset()
-        if not user.is_view_all():
+        if user and not user.is_view_all():
             qs = qs.filter(project__in=user.get_projects()).distinct()
 
         return qs
@@ -61,14 +61,14 @@ class Platform(models.Model, MigasLink):
         """
         Returns Queryset with the related computers based in project
         """
-        if model == 'computer':
-            from migasfree.client.models import Computer
+        if model != 'computer':
+            return None
 
-            return Computer.productive.scope(user).filter(
-                project__platform__id=self.id
-            ).distinct()
+        from migasfree.client.models import Computer
 
-        return None
+        return Computer.productive.scope(user).filter(
+            project__platform__id=self.id
+        ).distinct()
 
     class Meta:
         app_label = 'core'
