@@ -29,7 +29,7 @@ from .attribute import Attribute
 class ScheduleDelayManager(models.Manager):
     def scope(self, user):
         qs = super().get_queryset()
-        if not user.is_view_all():
+        if user and not user.is_view_all():
             qs = qs.filter(
                 Q(attributes__in=user.get_attributes()) |
                 Q(attributes__in=user.get_domain_tags())
@@ -82,14 +82,14 @@ class ScheduleDelay(models.Model, MigasLink):
         """
         Returns Queryset with the related computers based in attributes
         """
-        if model == 'computer':
-            from ...client.models import Computer
+        if model != 'computer':
+            return None
 
-            return Computer.productive.scope(user).filter(
-                sync_attributes__in=self.attributes.all()
-            ).distinct()
+        from ...client.models import Computer
 
-        return None
+        return Computer.productive.scope(user).filter(
+            sync_attributes__in=self.attributes.all()
+        ).distinct()
 
     class Meta:
         app_label = 'core'
