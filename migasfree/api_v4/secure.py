@@ -16,7 +16,16 @@ SIGN_LEN = 256
 
 def is_safe_filename(filename):
     # Allow only alphanumeric characters, dashes, and underscores in filenames
-    return re.match(r'^[\w\-. ]+$', filename) is not None
+    if re.match(r'^[\w\-. ]+$', filename) is None:
+        return False
+
+    # Check for any dangerous patterns or reserved filenames
+    dangerous_patterns = ['..', '/', '\\', '|', ';', '&', '$', '>', '<']
+    for pattern in dangerous_patterns:
+        if pattern in filename:
+            return False
+
+    return True
 
 
 def sign(filename):
