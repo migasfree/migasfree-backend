@@ -99,7 +99,7 @@ def api_v4(request):
         )
 
     msg = request.FILES.get('message')
-    filename = os.path.join(settings.MIGASFREE_TMP_DIR, msg.name)
+    filename = os.path.normpath(os.path.join(settings.MIGASFREE_TMP_DIR, msg.name))
     filename_return = f'{filename}.return'
 
     command, uuid, name = get_msg_info(msg.name)
