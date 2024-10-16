@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import json
 import subprocess
 
@@ -8,26 +9,39 @@ from django.conf import settings
 
 from . import errmfs
 from ..utils import read_file, write_file
-from ..secure import create_server_keys, check_keys_path, generate_rsa_keys
+from ..secure import create_server_keys, generate_rsa_keys
 
 SIGN_LEN = 256
 
 
+def is_safe_filename(filename):
+    # Allow only alphanumeric characters, dashes, and underscores in filenames
+    return re.match(r'^[\w\-. ]+$', filename) is not None
+
+
 def sign(filename):
+    if not is_safe_filename(filename):
+        print(f"Invalid filename: {filename}")
+        return False
+
     command = [
-        'openssl', 'dgst', '-sha1', '-sign', 
+        'openssl', 'dgst', '-sha1', '-sign',
         os.path.join(settings.MIGASFREE_KEYS_DIR, 'migasfree-server.pri'),
         '-out', f'{filename}.sign', filename
     ]
 
     try:
-        result = subprocess.run(command, check=True)
+        subprocess.run(command, check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error signing file: {e}")
 
 
 def verify(filename, key):
     # returns True if OK, False otherwise
+
+    if not is_safe_filename(filename):
+        print(f"Invalid filename: {filename}")
+        return False
 
     command = [
         'openssl', 'dgst', '-sha1', '-verify',
@@ -37,7 +51,7 @@ def verify(filename, key):
     ]
 
     try:
-        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        subprocess.run(command, capture_output=True, text=True, check=True)
         return True
     except subprocess.CalledProcessError as e:
         print(f"Error during verification: {e.stderr}")
@@ -48,6 +62,11 @@ def wrap(filename, data):
     """
     Creates a signed wrapper file around data
     """
+
+    if not is_safe_filename(filename):
+        print(f"Invalid filename: {filename}")
+        return False
+
     data = json.dumps(data)
     data = data.encode()
     with open(filename, 'wb') as fp:
@@ -66,6 +85,11 @@ def unwrap(filename, key):
     """
     Returns data inside signed wrapper file
     """
+
+    if not is_safe_filename(filename):
+        print(f"Invalid filename: {filename}")
+        return False
+
     with open(filename, 'rb') as fp:
         content = fp.read()
 
