@@ -32,6 +32,7 @@ from wsgiref.util import FileWrapper
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, StreamingHttpResponse
+from django.utils.html import escape
 from django.utils.translation import gettext as _
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from rest_framework import status, views, permissions
@@ -247,7 +248,7 @@ class GetSourceFileView(views.APIView):
             project = Project.objects.get(slug=project_slug)
         except ObjectDoesNotExist:
             return HttpResponse(
-                f'Project not exists: {project_slug}',
+                f'Project not exists: {escape(project_slug)}',
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -256,7 +257,7 @@ class GetSourceFileView(views.APIView):
                 source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
             except ObjectDoesNotExist:
                 return HttpResponse(
-                    f'URL not exists: {_path}',
+                    f'URL not exists: {escape(_path)}',
                     status=status.HTTP_404_NOT_FOUND
                 )
 
@@ -277,7 +278,7 @@ class GetSourceFileView(views.APIView):
                     source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
                 except ObjectDoesNotExist:
                     return HttpResponse(
-                        f'URL not exists: {_path}',
+                        f'URL not exists: {escape(_path)}',
                         status=status.HTTP_404_NOT_FOUND
                     )
 
@@ -300,7 +301,7 @@ class GetSourceFileView(views.APIView):
                     get_client_ip(request)
                 )
                 return HttpResponse(
-                    f'HTTP Error: {e.code} {url}',
+                    f'HTTP Error: {e.code} {escape(url)}',
                     status=e.code
                 )
             except URLError as e:
@@ -312,7 +313,7 @@ class GetSourceFileView(views.APIView):
                     get_client_ip(request)
                 )
                 return HttpResponse(
-                    f'URL Error: {e.reason} {url}',
+                    f'URL Error: {escape(e.reason)} {escape(url)}',
                     status=status.HTTP_404_NOT_FOUND
                 )
         else:
