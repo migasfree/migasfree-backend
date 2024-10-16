@@ -9,9 +9,9 @@ pip3 install -r requirements/development.txt
 
 python3 manage.py runserver 0.0.0.0:2345 --settings=migasfree.settings.development
 
-DJANGO_SETTINGS_MODULE='migasfree.settings.development' celery --app=migasfree.celery.app worker --without-gossip --concurrency=10 -Q default -B
+DJANGO_SETTINGS_MODULE='migasfree.settings.development' celery --app=migasfree.celery.app beat --loglevel=DEBUG
 
-DJANGO_SETTINGS_MODULE='migasfree.settings.development' celery --app=migasfree.celery.app worker --without-gossip --concurrency=10 -Q repository
+DJANGO_SETTINGS_MODULE='migasfree.settings.development' celery --app=migasfree.celery.app worker --without-gossip --concurrency=10 --queues=default,pms-apt,pms-dnf,pms-pacman,pms-winget,pms-wpt,pms-yum,pms-zypper --loglevel=DEBUG
 ```
 
 ## Update redis syncs stats (example)
