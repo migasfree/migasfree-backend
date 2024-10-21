@@ -1095,7 +1095,10 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                                             },
                                             "connection": {"type": "object"}
                                         },
-                                        "required": ["id", "name", "model", "driver", "capability", "manufacturer", "packages", "connection"]
+                                        "required": [
+                                            "id", "name", "model", "driver", "capability",
+                                            "manufacturer", "packages", "connection"
+                                        ]
                                     }
                                 },
                                 "required": ["printer"]
