@@ -361,6 +361,35 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    @extend_schema(
+        description='Creates or updates a computer',
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'uuid': {'type': 'string', 'format': 'uuid'},
+                    'name': {'type': 'string'},
+                },
+                'required': ['uuid', 'name']
+            }
+        },
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'object',
+                'id': {'type': 'integer'},
+            },
+            status.HTTP_400_BAD_REQUEST: {'description': 'Error in request'},
+            status.HTTP_403_FORBIDDEN: {'description': 'Unsubscribed computer'},
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
+        examples=[
+            OpenApiExample(
+                name='successfully response',
+                value={'id': 23},
+                response_only=True,
+            ),
+        ],
+    )
     @action(methods=['post'], detail=False, url_path='id')
     def id_(self, request):
         """
@@ -482,7 +511,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     }
                 },
                 'required': [
-                    'id', 'uuid', 'name', 'ip_address', 
+                    'id', 'uuid', 'name', 'ip_address',
                     'sync_user', 'sync_fullname', 'sync_attributes',
                 ]
             }
@@ -1036,6 +1065,50 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns 200 if ok, 404 if computer not found (requires JWT auth)',
+        request={
+            'id': OpenApiTypes.INT
+        },
+        responses={
+            status.HTTP_200_OK: {
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "logical": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "printer": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {"type": "integer"},
+                                            "name": {"type": "string"},
+                                            "model": {"type": "string"},
+                                            "driver": {"type": "string"},
+                                            "capability": {"type": "string"},
+                                            "manufacturer": {"type": "string"},
+                                            "packages": {
+                                                "type": "array",
+                                                "items": {"type": "string"}
+                                            },
+                                            "connection": {"type": "object"}
+                                        },
+                                        "required": ["id", "name", "model", "driver", "capability", "manufacturer", "packages", "connection"]
+                                    }
+                                },
+                                "required": ["printer"]
+                            }
+                        },
+                        "default": {"type": "integer"}
+                    },
+                    "required": ["logical", "default"]
+                },
+            },
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
+    )
     @action(methods=['post'], detail=False)
     def devices(self, request):
         """
