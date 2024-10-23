@@ -27,11 +27,11 @@ class TestComputerModel(TestCase):
         assert result == []
 
     def test_stacked_by_month_no_filter(self):
-        computer = Computer._base_manager.create(uuid=uuid.uuid4(), project=self.project)
+        computer = Computer._base_manager.create(uuid=str(uuid.uuid4()), project=self.project)
         Computer.objects.filter(pk=computer.pk).update(created_at=make_aware(datetime(2022, 1, 15)))
-        computer = Computer._base_manager.create(uuid=uuid.uuid4(), project=self.project)
+        computer = Computer._base_manager.create(uuid=str(uuid.uuid4()), project=self.project)
         Computer.objects.filter(pk=computer.pk).update(created_at=make_aware(datetime(2022, 1, 20)))
-        computer = Computer._base_manager.create(uuid=uuid.uuid4(), project=self.project_other)
+        computer = Computer._base_manager.create(uuid=str(uuid.uuid4()), project=self.project_other)
         Computer.objects.filter(pk=computer.pk).update(created_at=make_aware(datetime(2022, 2, 10)))
 
         result = Computer.stacked_by_month(None, make_aware(datetime(2022, 1, 1)))
@@ -41,11 +41,11 @@ class TestComputerModel(TestCase):
         ]
 
     def test_stacked_by_month_filter(self):
-        computer = Computer._base_manager.create(uuid=uuid.uuid4(), project=self.project)
+        computer = Computer._base_manager.create(uuid=str(uuid.uuid4()), project=self.project)
         Computer.objects.filter(pk=computer.pk).update(created_at=make_aware(datetime(2022, 1, 15)))
-        computer = Computer._base_manager.create(uuid=uuid.uuid4(), project=self.project)
+        computer = Computer._base_manager.create(uuid=str(uuid.uuid4()), project=self.project)
         Computer.objects.filter(pk=computer.pk).update(created_at=make_aware(datetime(2022, 1, 20)))
-        computer = Computer._base_manager.create(uuid=uuid.uuid4(), project=self.project_other)
+        computer = Computer._base_manager.create(uuid=str(uuid.uuid4()), project=self.project_other)
         Computer.objects.filter(pk=computer.pk).update(created_at=make_aware(datetime(2022, 2, 10)))
 
         result = Computer.stacked_by_month(None, make_aware(datetime(2022, 1, 1)), 'project_id')
@@ -55,11 +55,11 @@ class TestComputerModel(TestCase):
         ]
 
     def test_stacked_by_month_order(self):
-        computer = Computer._base_manager.create(uuid=uuid.uuid4(), project=self.project)
+        computer = Computer._base_manager.create(uuid=str(uuid.uuid4()), project=self.project)
         Computer.objects.filter(pk=computer.pk).update(created_at=make_aware(datetime(2022, 1, 15)))
-        computer = Computer._base_manager.create(uuid=uuid.uuid4(), project=self.project)
+        computer = Computer._base_manager.create(uuid=str(uuid.uuid4()), project=self.project)
         Computer.objects.filter(pk=computer.pk).update(created_at=make_aware(datetime(2022, 1, 20)))
-        computer = Computer._base_manager.create(uuid=uuid.uuid4(), project=self.project_other)
+        computer = Computer._base_manager.create(uuid=str(uuid.uuid4()), project=self.project_other)
         Computer.objects.filter(pk=computer.pk).update(created_at=make_aware(datetime(2022, 2, 10)))
 
         result = Computer.stacked_by_month(None, make_aware(datetime(2022, 1, 1)))
@@ -69,9 +69,9 @@ class TestComputerModel(TestCase):
         ]
 
     def test_stacked_by_month_year(self):
-        computer = Computer._base_manager.create(uuid=uuid.uuid4(), project=self.project)
+        computer = Computer._base_manager.create(uuid=str(uuid.uuid4()), project=self.project)
         Computer.objects.filter(pk=computer.pk).update(created_at=make_aware(datetime(2022, 1, 15)))
-        computer = Computer._base_manager.create(uuid=uuid.uuid4(), project=self.project)
+        computer = Computer._base_manager.create(uuid=str(uuid.uuid4()), project=self.project)
         Computer.objects.filter(pk=computer.pk).update(created_at=make_aware(datetime(2023, 1, 20)))
 
         result = Computer.stacked_by_month(None, make_aware(datetime(2022, 1, 1)))
