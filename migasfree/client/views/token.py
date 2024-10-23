@@ -460,9 +460,10 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
 
     @action(methods=['get'], detail=True)
     def hardware(self, request, pk=None):
+        computer = self.get_object()
         request.user.userprofile.check_scope(pk)
 
-        results = Node.objects.filter(computer__id=pk).order_by(
+        results = Node.objects.filter(computer=computer).order_by(
             'id', 'parent_id', 'level'
         )
 
