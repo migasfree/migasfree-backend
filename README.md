@@ -14,6 +14,12 @@ DJANGO_SETTINGS_MODULE='migasfree.settings.development' celery --app=migasfree.c
 DJANGO_SETTINGS_MODULE='migasfree.settings.development' celery --app=migasfree.celery.app worker --without-gossip --concurrency=10 --queues=default,pms-apt,pms-dnf,pms-pacman,pms-winget,pms-wpt,pms-yum,pms-zypper --loglevel=DEBUG
 ```
 
+## View API endpoints (in development mode)
+
+```bash
+python3 manage.py show_urls --settings=migasfree.settings.development
+```
+
 ## Update redis syncs stats (example)
 
 ```bash
