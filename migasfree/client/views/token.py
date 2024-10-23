@@ -226,7 +226,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
                 )
             )
 
-        serializer = serializers.ComputerSerializer(computer)
+        serializer = serializers.ComputerSerializer(computer, context={'request': request})
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
