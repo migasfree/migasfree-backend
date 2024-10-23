@@ -6,6 +6,7 @@ from migasfree.utils import (
     time_horizon, replace_keys, merge_dicts, sort_depends,
     get_client_ip, uuid_change_format, remove_empty_elements_from_dict,
     remove_duplicates_preserving_order, to_list, cmp,
+    list_common, list_difference
 )
 
 
@@ -446,3 +447,54 @@ class TestCmp:
 
     def test_cmp_zero(self):
         assert cmp([0, 0, 0], [0, 0, 0]) == 0
+
+
+class TestSets:
+    def test_list_difference(self):
+        l1 = [1, 2, 3, 4]
+        l2 = [3, 4, 5, 6]
+        result = list_difference(l1, l2)
+
+        assert result == [1, 2]
+
+    def test_list_difference_empty(self):
+        l1 = []
+        l2 = [1, 2, 3]
+        result = list_difference(l1, l2)
+
+        assert result == []
+
+    def test_list_common(self):
+        l1 = [1, 2, 3, 4]
+        l2 = [3, 4, 5, 6]
+        result = list_common(l1, l2)
+
+        assert result == [3, 4]
+
+    def test_list_common_empty(self):
+        l1 = []
+        l2 = [1, 2, 3]
+        result = list_common(l1, l2)
+
+        assert result == []
+
+    def test_list_common_all(self):
+        l1 = [1, 2, 3]
+        l2 = [1, 2, 3]
+        result = list_common(l1, l2)
+
+        assert result == [1, 2, 3]
+
+    def test_list_difference_set_operations(self):
+        l1 = [1, 2, 3]
+        l2 = {1, 2, 3}
+        result = list_difference(l1, l2)
+
+        assert result == []
+
+    def test_list_common_set_operations(self):
+        l1 = [1, 2, 3]
+        l2 = {1, 2, 3}
+        result = list_common(l1, l2)
+
+        assert result == [1, 2, 3]
