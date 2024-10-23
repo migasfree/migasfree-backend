@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,27 +31,6 @@ from ..mixins import DatabaseCheckMixin
 from .models import Node, Capability, LogicalName, Configuration
 from .filters import NodeFilter
 from . import tasks, serializers
-
-
-@permission_classes((permissions.DjangoModelPermissions,))
-class HardwareComputerViewSet(DatabaseCheckMixin, viewsets.ViewSet):
-    # FIXME It's in use?
-    queryset = Node.objects.all()
-
-    @action(methods=['get'], detail=True)
-    def hardware(self, request, pk=None):
-        computer = get_object_or_404(Computer, pk=pk)
-        request.user.userprofile.check_scope(pk)
-
-        nodes = Node.objects.filter(computer=computer).order_by(
-            'id', 'parent_id', 'level'
-        )
-
-        serializer = serializers.NodeSerializer(nodes, many=True)
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
 
 
 @permission_classes((permissions.DjangoModelPermissions,))
