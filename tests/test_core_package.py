@@ -79,7 +79,7 @@ def test_by_store_with_packages():
     store = Store.objects.create(name='Store 1', project=project)
 
     Package.objects.create(
-        project=project, store=store, 
+        project=project, store=store,
         fullname='migasfree-package_1.0_amd64.deb',
         name='migasfree-package', version='1.0', architecture='amd64'
     )
