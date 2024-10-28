@@ -21,10 +21,10 @@ import os
 from django.conf import settings
 from django.contrib import auth
 from django.utils.translation import gettext, gettext_lazy as _
-from django.http import HttpResponseForbidden
 from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiTypes
 from rest_framework import views, status, serializers
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 
 from ...core.models import Platform, Project
 from ...core.pms import get_available_pms
@@ -78,7 +78,7 @@ class PackagerKeysView(views.APIView):
             },
         ),
         responses={
-            200: inline_serializer(
+            status.HTTP_200_OK: inline_serializer(
                name='PackagerKeysResponse',
                fields={
                    settings.MIGASFREE_PUBLIC_KEY: serializers.CharField(),
@@ -116,15 +116,15 @@ class ProjectKeysView(views.APIView):
                 if not self.user or not self.user.is_superuser \
                         or not self.user.has_perm('core.add_project') \
                         or not self.user.has_perm('core.add_platform'):
-                    raise HttpResponseForbidden
+                    raise PermissionDenied()
 
             platform = get_platform_or_create(platform_name, ip_address)
             if not platform:
-                raise HttpResponseForbidden
+                raise PermissionDenied()
 
             project = add_project(name, pms, platform, architecture, ip_address)
             if not project:
-                raise HttpResponseForbidden
+                raise PermissionDenied()
 
             return project
 
@@ -142,7 +142,7 @@ class ProjectKeysView(views.APIView):
             },
         ),
         responses={
-            200: inline_serializer(
+            status.HTTP_200_OK: inline_serializer(
                 name='ProjectKeysResponse',
                 fields={
                    settings.MIGASFREE_PUBLIC_KEY: serializers.CharField(),
@@ -156,6 +156,8 @@ class ProjectKeysView(views.APIView):
             username=request.data.get('username'),
             password=request.data.get('password')
         )
+        if not self.user or not self.user.is_authenticated:
+            raise PermissionDenied()
 
         ip_address = get_client_ip(request)  # notifications purpose only
         project_name = request.data.get('project')
@@ -178,7 +180,7 @@ class ProjectKeysView(views.APIView):
         if not settings.MIGASFREE_AUTOREGISTER and not project.auto_register_computers \
                 and not self.user and not self.user.is_superuser \
                 and not self.user.has_perm('client.add_computer'):
-            raise HttpResponseForbidden
+            raise PermissionDenied()
 
         priv_project_key_file = os.path.join(
             settings.MIGASFREE_KEYS_DIR, f'{project.slug}.pri'
@@ -206,7 +208,7 @@ class RepositoriesKeysView(views.APIView):
     @extend_schema(
         description='Returns the repositories public key',
         responses={
-            '200': OpenApiTypes.STR
+            status.HTTP_200_OK: OpenApiTypes.STR
         }
     )
     def post(self, request):
