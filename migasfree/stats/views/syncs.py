@@ -23,6 +23,7 @@ from datetime import timedelta, datetime
 from dateutil.relativedelta import relativedelta
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -61,10 +62,13 @@ class SyncStatsViewSet(EventViewSet):
         """
         begin = int(request.query_params.get('begin', time.localtime()[0]))
         end = int(request.query_params.get('end', time.localtime()[0] + 1))
-        project_id = request.query_params.get('project_id', 0)
+        project_id = int(request.query_params.get('project_id', 0))
 
-        validators.validate_year(begin)
-        validators.validate_year(end)
+        try:
+            validators.validate_year(begin)
+            validators.validate_year(end)
+        except ValidationError as e:
+            return Response(e, status=status.HTTP_404_NOT_FOUND)
 
         key = 'migasfree:stats:years'
         if project_id:
