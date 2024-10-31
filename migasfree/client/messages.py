@@ -23,8 +23,8 @@ from django_redis import get_redis_connection
 
 def add_computer_message(computer, message):
     con = get_redis_connection()
-    con.hmset(
-        f'migasfree:msg:{computer.id}', {
+    con.hset(
+        f'migasfree:msg:{computer.id}', mapping={
             'date': timezone.localtime(timezone.now()).strftime('%Y-%m-%dT%H:%M:%S.%f'),
             'computer_id': computer.id,
             'computer_name': computer.__str__(),
