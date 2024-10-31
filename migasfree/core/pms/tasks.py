@@ -90,8 +90,8 @@ def create_repository_metadata(deployment_id):
 
     # ADD INFO IN REDIS
     con = redis.from_url(CELERY_BROKER_URL)
-    con.hmset(
-        f'migasfree:repos:{deployment_id}', {
+    con.hset(
+        f'migasfree:repos:{deployment_id}', mapping={
             'name': deployment["name"],
             'project': project["name"]
         }
