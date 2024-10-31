@@ -41,8 +41,8 @@ logger = logging.getLogger('celery')
 
 def add_orphan_packages():
     con = get_redis_connection()
-    con.hmset(
-        'migasfree:chk:orphan_packages', {
+    con.hset(
+        'migasfree:chk:orphan_packages', mapping={
             'msg': gettext('Orphan Packages'),
             'target': 'server',
             'level': 'warning',
@@ -62,8 +62,8 @@ def add_orphan_packages():
 
 def add_orphan_package_sets():
     con = get_redis_connection()
-    con.hmset(
-        'migasfree:chk:orphan_package_sets', {
+    con.hset(
+        'migasfree:chk:orphan_package_sets', mapping={
             'msg': gettext('Orphan Package Sets'),
             'target': 'server',
             'level': 'warning',
@@ -82,8 +82,8 @@ def add_orphan_package_sets():
 
 def add_unchecked_notifications():
     con = get_redis_connection()
-    con.hmset(
-        'migasfree:chk:notifications', {
+    con.hset(
+        'migasfree:chk:notifications', mapping={
             'msg': gettext('Unchecked Notifications'),
             'target': 'server',
             'level': 'warning',
@@ -101,8 +101,8 @@ def add_unchecked_notifications():
 
 def add_unchecked_faults():
     con = get_redis_connection()
-    con.hmset(
-        'migasfree:chk:faults', {
+    con.hset(
+        'migasfree:chk:faults', mapping={
             'msg': gettext('Unchecked Faults'),
             'target': 'computer',
             'level': 'critical',
@@ -121,8 +121,8 @@ def add_unchecked_faults():
 
 def add_unchecked_errors():
     con = get_redis_connection()
-    con.hmset(
-        'migasfree:chk:errors', {
+    con.hset(
+        'migasfree:chk:errors', mapping={
             'msg': gettext('Unchecked Errors'),
             'target': 'computer',
             'level': 'critical',
@@ -140,8 +140,8 @@ def add_unchecked_errors():
 
 def add_generating_repos():
     con = get_redis_connection()
-    con.hmset(
-        'migasfree:chk:repos', {
+    con.hset(
+        'migasfree:chk:repos', mapping={
             'msg': gettext('Generating Repositories'),
             'target': 'server',
             'level': 'info',
@@ -161,8 +161,8 @@ def add_synchronizing_computers():
     result, delayed_time = filter_computers_by_date(gt)
 
     con = get_redis_connection()
-    con.hmset(
-        'migasfree:chk:syncs', {
+    con.hset(
+        'migasfree:chk:syncs', mapping={
             'msg': gettext('Synchronizing Computers Now'),
             'target': 'computer',
             'level': 'info',
@@ -182,8 +182,8 @@ def add_delayed_computers():
     result, delayed_time = filter_computers_by_date(le)
 
     con = get_redis_connection()
-    con.hmset(
-        'migasfree:chk:delayed', {
+    con.hset(
+        'migasfree:chk:delayed', mapping={
             'msg': gettext('Delayed Computers'),
             'target': 'computer',
             'level': 'warning',
@@ -210,8 +210,8 @@ def add_active_schedule_deployments():
         if int(item.schedule_timeline()['percent']) < 100:
             result += 1
 
-    con.hmset(
-        'migasfree:chk:active_deploys', {
+    con.hset(
+        'migasfree:chk:active_deploys', mapping={
             'msg': gettext('Active schedule deployments'),
             'target': 'server',
             'level': 'info',
@@ -240,8 +240,8 @@ def add_finished_schedule_deployments():
         if int(item.schedule_timeline()['percent']) == 100:
             result += 1
 
-    con.hmset(
-        'migasfree:chk:finished_deploys', {
+    con.hset(
+        'migasfree:chk:finished_deploys', mapping={
             'msg': gettext('Finished schedule deployments'),
             'target': 'server',
             'level': 'warning',
