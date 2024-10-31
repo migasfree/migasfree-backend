@@ -295,6 +295,12 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         """
 
         claims = self.get_claims(request.data)
+        if not claims or 'project' not in claims:
+            return Response(
+                self.create_response(gettext('Invalid Data')),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         claims['project'] = self.project.id
         claims['forwarded_ip_address'] = get_client_ip(request)
 
