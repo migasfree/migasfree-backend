@@ -23,7 +23,7 @@ jwcrypto==1.5.6
 MarkupPy==1.14
 odfpy==1.4.1
 openpyxl==3.1.2
-psutil==5.9.8
+psutil==6.1.0
 psycopg2-binary==2.9.9
 python-dateutil==2.9.0.post0
 python-magic==0.4.27
