@@ -30,8 +30,8 @@ class TestYearlySync(APITestCase):
         self.con.flushdb()
 
     def test_yearly_sync_ok(self):
-        self.con.set(f'migasfree:stats:{self.project.pk}:years:2022', '1')
-        self.con.set('migasfree:stats:years:2022', '1')
+        self.con.set(f'migasfree:stats:{self.project.pk}:years:2022', 1)
+        self.con.set('migasfree:stats:years:2022', 1)
 
         url = reverse('stats-syncs-yearly')
         params = {'begin': 2022, 'end': 2023, 'project_id': self.project.pk}
@@ -41,7 +41,7 @@ class TestYearlySync(APITestCase):
         self.assertEqual(len(response.data), 1)
 
     def test_yearly_sync_no_project_id(self):
-        self.con.set('migasfree:stats:years:2022', '1')
+        self.con.set('migasfree:stats:years:2022', 1)
 
         url = reverse('stats-syncs-yearly')
         params = {'begin': 2022, 'end': 2023}
@@ -51,7 +51,7 @@ class TestYearlySync(APITestCase):
         self.assertEqual(len(response.data), 1)
 
     def test_yearly_sync_invalid_project_id(self):
-        self.con.set('migasfree:stats:years:2022', '1')
+        self.con.set('migasfree:stats:years:2022', 1)
 
         url = reverse('stats-syncs-yearly')
         params = {'begin': 2022, 'end': 2023, 'project_id': 9999}
@@ -60,7 +60,7 @@ class TestYearlySync(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_yearly_sync_invalid_begin_end(self):
-        self.con.set('migasfree:stats:years:2022', '1')
+        self.con.set('migasfree:stats:years:2022', 1)
 
         url = reverse('stats-syncs-yearly')
         params = {'begin': 0, 'end': 2023}
@@ -68,3 +68,36 @@ class TestYearlySync(APITestCase):
         print(response.data)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class TestMonthlySync(APITestCase):
+    def setUp(self):
+        self.user = UserProfile.objects.create(
+            username='test', email='test@test.com', password='test', is_superuser=True
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        self.platform = Platform.objects.create(name='Linux')
+        self.project = Project.objects.create(
+            name='Vitalinux', platform=self.platform, pms='apt', architecture='amd64'
+        )
+
+        self.con = redis.Redis(
+            host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB + 1
+        )
+        self.con.flushdb()
+
+    def tearDown(self):
+        self.con.flushdb()
+
+    def test_monthly_sync_ok(self):
+        self.con.set(f'migasfree:stats:{self.project.pk}:months:202201', 1)
+        self.con.set('migasfree:stats:months:202201', 1)
+
+        url = reverse('stats-syncs-monthly')
+        params = {'begin': '2022-01', 'end': '2022-02', 'project_id': self.project.pk}
+        response = self.client.get(url, data=params)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['x_labels'], ['2022-01'])
