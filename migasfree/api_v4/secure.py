@@ -15,14 +15,19 @@ SIGN_LEN = 256
 
 
 def is_safe_filename(filename):
-    # Allow only alphanumeric characters, dashes, and underscores in filenames
-    if re.match(r'^[\w\-. ]+$', filename) is None:
-        return False
-
     # Check for any dangerous patterns or reserved filenames
-    dangerous_patterns = ['..', '/', '\\', '|', ';', '&', '$', '>', '<']
+    dangerous_patterns = ['..', '\\', '|', ';', '&', '$', '>', '<']
+    reserved_filenames = [
+        r'^/dev/', r'^/proc/', r'^/sys/',
+        r'^lost\+found.*$', r'^\.trash-.*', r'^\.Trash-.*$'
+    ]
+
     for pattern in dangerous_patterns:
         if pattern in filename:
+            return False
+
+    for reserved_filename in reserved_filenames:
+        if re.match(reserved_filename, filename):
             return False
 
     return True
