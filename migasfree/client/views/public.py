@@ -156,7 +156,7 @@ class ProjectKeysView(views.APIView):
             username=request.data.get('username'),
             password=request.data.get('password')
         )
-        if not self.user or not self.user.is_authenticated:
+        if self.user and not self.user.is_authenticated:
             raise PermissionDenied()
 
         ip_address = get_client_ip(request)  # notifications purpose only
