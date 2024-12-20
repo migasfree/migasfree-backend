@@ -28,17 +28,29 @@ from django.utils.translation import gettext
 from .utils import read_file, write_file
 
 
+def load_jwk(filename):
+    """
+    Loads a JWK from a PEM file
+
+    Args:
+        filename (str)
+
+    Returns:
+        jwk.JWK: loaded JWK object
+    """
+    return jwk.JWK.from_pem(
+        read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, filename))
+    )
+
+
 def sign(claims, priv_key):
     """
     string sign(dict claims, string priv_key)
     """
-    priv_jwk = jwk.JWK.from_pem(
-        read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, priv_key))
-    )
-
     if isinstance(claims, dict):
         claims = json.dumps(claims)
 
+    priv_jwk = load_jwk(priv_key)
     jws_token = jws.JWS(str(claims))
     jws_token.add_signature(
         priv_jwk,
@@ -55,13 +67,9 @@ def verify(jwt, pub_key):
     """
     dict verify(string jwt, string pub_key)
     """
-    pub_jwk = jwk.JWK.from_pem(
-        read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, pub_key))
-    )
-
     jws_token = jws.JWS()
     jws_token.deserialize(jwt)
-    jws_token.verify(pub_jwk)
+    jws_token.verify(load_jwk(pub_key))
 
     return jws_token.payload
 
@@ -70,9 +78,7 @@ def encrypt(claims, pub_key):
     """
     string encrypt(dict claims, string pub_key)
     """
-    pub_jwk = jwk.JWK.from_pem(
-        read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, pub_key))
-    )
+    pub_jwk = load_jwk(pub_key)
 
     protected_header = {
         'alg': 'RSA-OAEP-256',
@@ -93,12 +99,8 @@ def decrypt(jwt, priv_key):
     """
     string decrypt(string jwt, string priv_key)
     """
-    priv_jwk = jwk.JWK.from_pem(
-        read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, priv_key))
-    )
-
     jwe_token = jwe.JWE()
-    jwe_token.deserialize(jwt, key=priv_jwk)
+    jwe_token.deserialize(jwt, key=load_jwk(priv_key))
 
     return jwe_token.payload
 
