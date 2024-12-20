@@ -232,17 +232,156 @@ class GetSourceFileView(views.APIView):
 
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+    def _parse_path(self, path):
+        project_slug = path.split('/')[2]
+        source_slug = path.split('/')[4]
+        resource = path.split(f'/src/{project_slug}/{settings.MIGASFREE_EXTERNAL_TRAILING_PATH}/{source_slug}/')[1]
+
+        return project_slug, source_slug, resource
+
+    def _handle_file_not_exists(self, source, project_slug, source_slug, resource, file_local, path, client_ip):
+        if not os.path.exists(os.path.dirname(file_local)):
+            os.makedirs(os.path.dirname(file_local))
+
+        if not source:
+            try:
+                source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
+            except ObjectDoesNotExist:
+                return HttpResponse(
+                    f'URL not exists: {escape(path)}',
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+        url = f'{source.base_url}/{resource}'
+        logger.debug('get url %s', url)
+
+        try:
+            with urlopen(url, context=ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)) as remote_file:
+                remote_file_status = remote_file.getcode()
+                if remote_file_status != status.HTTP_200_OK:
+                    add_notification_get_source_file(
+                        f'HTTP Error: {remote_file_status}',
+                        source,
+                        path,
+                        url,
+                        client_ip
+                    )
+                    return HttpResponse(
+                        f'HTTP Error: {remote_file_status} {escape(url)}',
+                        status=remote_file_status
+                    )
+
+                remote_file_size = remote_file.info().get('Content-Length')
+                if remote_file_size is None:
+                    add_notification_get_source_file(
+                        'Error: Failed to get file size',
+                        source,
+                        path,
+                        url,
+                        client_ip
+                    )
+                    return HttpResponse(
+                        f'Error: Failed to get file size {escape(url)}',
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+
+                remote_file_type = remote_file.info().get('Content-Type')
+
+                response = StreamingHttpResponse(self.read_remote_chunks(file_local, remote_file))
+                response['Content-Type'] = remote_file_type if remote_file_type else 'application/octet-stream'
+
+                return response
+        except HTTPError as e:
+            add_notification_get_source_file(
+                f'HTTP Error: {e.code}',
+                source,
+                path,
+                url,
+                client_ip
+            )
+            return HttpResponse(
+                f'HTTP Error: {e.code} {escape(url)}',
+                status=e.code
+            )
+        except URLError as e:
+            add_notification_get_source_file(
+                f'URL Error: {e.reason}',
+                source,
+                path,
+                url,
+                client_ip
+            )
+            return HttpResponse(
+                f'URL Error: {escape(e.reason)} {escape(url)}',
+                status=status.HTTP_502_BAD_GATEWAY
+            )
+        except Exception as e:
+            add_notification_get_source_file(
+                f'Error: {str(e)}',
+                source,
+                path,
+                url,
+                client_ip
+            )
+            return HttpResponse(
+                f'Error: {str(e)} {escape(url)}',
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def _handle_file_exists(self, file_local, source, request):
+        if not os.path.isfile(file_local):
+            return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+
+        size = os.path.getsize(file_local)
+
+        range_header = request.META.get('HTTP_RANGE', '').strip()
+        range_re = re.compile(r'bytes\s*=\s*(\d+)\s*-\s*(\d*)', re.I)
+
+        range_match = range_re.match(range_header)
+        if range_match and os.path.exists(os.path.dirname(file_local)):
+            content_type, encoding = guess_type(file_local)
+            content_type = content_type or 'application/octet-stream'
+
+            first_byte, last_byte = range_match.groups()
+            first_byte = int(first_byte) if first_byte else 0
+
+            if first_byte >= size:
+                return HttpResponse(status=status.HTTP_416_RANGE_NOT_SATISFIABLE)
+
+            last_byte = int(last_byte) if last_byte else size - 1
+            if last_byte >= size:
+                last_byte = size - 1
+
+            length = last_byte - first_byte + 1
+
+            with open(file_local, 'rb') as f:
+                response = StreamingHttpResponse(
+                    RangeFileWrapper(f, offset=first_byte, length=length),
+                    status=status.HTTP_206_PARTIAL_CONTENT,
+                    content_type=content_type
+                )
+                response['Content-Disposition'] = f'attachment; filename={os.path.basename(file_local)}'
+                response['Content-Length'] = str(length)
+                response['Content-Range'] = f'bytes {first_byte}-{last_byte}/{size}'
+                response['Accept-Ranges'] = 'bytes'
+
+                return response
+
+        with open(file_local, 'rb') as f:
+            response = HttpResponse(
+                FileWrapper(f),
+                content_type='application/octet-stream'
+            )
+            response['Content-Disposition'] = f'attachment; filename={os.path.basename(file_local)}'
+            response['Content-Length'] = size
+            response['Accept-Ranges'] = 'bytes'
+
+            return response
+
     def get(self, request):
         source = None
-
-        _path = request.get_full_path()
-        project_slug = _path.split('/')[2]
-        source_slug = _path.split('/')[4]
-        resource = _path.split(
-            f'/src/{project_slug}/{settings.MIGASFREE_EXTERNAL_TRAILING_PATH}/{source_slug}/'
-        )[1]
-
-        _file_local = os.path.join(settings.MIGASFREE_PUBLIC_DIR, _path.split('/src/')[1])
+        path = request.get_full_path()
+        project_slug, source_slug, resource = self._parse_path(path)
 
         try:
             project = Project.objects.get(slug=project_slug)
@@ -252,110 +391,28 @@ class GetSourceFileView(views.APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if not _file_local.endswith(tuple(project.get_pms().extensions)):  # is a metadata file
+        file_local = os.path.join(settings.MIGASFREE_PUBLIC_DIR, path.split('/src/')[1])
+        if not file_local.endswith(tuple(project.get_pms().extensions)):  # is a metadata file
             try:
                 source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
             except ObjectDoesNotExist:
                 return HttpResponse(
-                    f'URL not exists: {escape(_path)}',
+                    f'URL not exists: {escape(path)}',
                     status=status.HTTP_404_NOT_FOUND
                 )
 
             if not source.frozen:
                 # expired metadata
-                if os.path.exists(_file_local) and (
+                if os.path.exists(file_local) and (
                     source.expire <= 0 or
-                    (time.time() - os.stat(_file_local).st_mtime) / (60 * source.expire) > 1
+                    (time.time() - os.stat(file_local).st_mtime) / (60 * source.expire) > 1
                 ):
-                    os.remove(_file_local)
+                    os.remove(file_local)
 
-        if not os.path.exists(_file_local):
-            if not os.path.exists(os.path.dirname(_file_local)):
-                os.makedirs(os.path.dirname(_file_local))
+        if not os.path.exists(file_local):
+            return self._handle_file_not_exists(
+                source, project_slug, source_slug, resource,
+                file_local, path, get_client_ip(request)
+            )
 
-            if not source:
-                try:
-                    source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
-                except ObjectDoesNotExist:
-                    return HttpResponse(
-                        f'URL not exists: {escape(_path)}',
-                        status=status.HTTP_404_NOT_FOUND
-                    )
-
-            url = f'{source.base_url}/{resource}'
-            logger.debug('get url %s', url)
-
-            try:
-                with urlopen(url, context=ssl.SSLContext(ssl.PROTOCOL_SSLv23)) as remote_file:
-                    response = StreamingHttpResponse(self.read_remote_chunks(_file_local, remote_file))
-                    response['Content-Type'] = 'application/octet-stream'
-
-                    return response
-            except HTTPError as e:
-                add_notification_get_source_file(
-                    f'HTTP Error: {e.code}',
-                    source,
-                    _path,
-                    url,
-                    get_client_ip(request)
-                )
-                return HttpResponse(
-                    f'HTTP Error: {e.code} {escape(url)}',
-                    status=e.code
-                )
-            except URLError as e:
-                add_notification_get_source_file(
-                    f'URL Error: {e.reason}',
-                    source,
-                    _path,
-                    url,
-                    get_client_ip(request)
-                )
-                return HttpResponse(
-                    f'URL Error: {escape(e.reason)} {escape(url)}',
-                    status=status.HTTP_404_NOT_FOUND
-                )
-        else:
-            if not os.path.isfile(_file_local):
-                return HttpResponse(status=status.HTTP_204_NO_CONTENT)
-
-            range_header = request.META.get('HTTP_RANGE', '').strip()
-            range_re = re.compile(r'bytes\s*=\s*(\d+)\s*-\s*(\d*)', re.I)
-
-            range_match = range_re.match(range_header)
-            if range_match and os.path.exists(os.path.dirname(_file_local)):
-                size = os.path.getsize(_file_local)
-
-                content_type, encoding = guess_type(_file_local)
-                content_type = content_type or 'application/octet-stream'
-
-                first_byte, last_byte = range_match.groups()
-                first_byte = int(first_byte) if first_byte else 0
-
-                last_byte = int(last_byte) if last_byte else size - 1
-                if last_byte >= size:
-                    last_byte = size - 1
-
-                length = last_byte - first_byte + 1
-
-                with open(_file_local, 'rb') as f:
-                    response = StreamingHttpResponse(
-                        RangeFileWrapper(f, offset=first_byte, length=length),
-                        status=status.HTTP_206_PARTIAL_CONTENT,
-                        content_type=content_type
-                    )
-                response['Content-Length'] = str(length)
-                response['Content-Range'] = f'bytes {first_byte}-{last_byte}/{size}'
-                response['Accept-Ranges'] = 'bytes'
-
-                return response
-
-            with open(_file_local, 'rb') as f:
-                response = HttpResponse(
-                    FileWrapper(f),
-                    content_type='application/octet-stream'
-                )
-            response['Content-Disposition'] = f'attachment; filename={os.path.basename(_file_local)}'
-            response['Content-Length'] = os.path.getsize(_file_local)
-
-            return response
+        return self._handle_file_exists(file_local, source, request)
