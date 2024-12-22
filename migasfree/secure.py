@@ -102,10 +102,17 @@ def decrypt(jwt, priv_key):
     jwe_token = jwe.JWE()
     jwe_token.deserialize(jwt, key=load_jwk(priv_key))
 
+    if isinstance(jwe_token.payload, bytes) \
+            and not isinstance(jwe_token.payload, str):
+        return str(jwe_token.payload, encoding='utf8')
+
     return jwe_token.payload
 
 
 def wrap(data, sign_key, encrypt_key):
+    """
+    string wrap(dict data, string sign_key, string encrypt_key)
+    """
     claims = {
         'data': data,
         'sign': sign(data, sign_key)
@@ -115,6 +122,9 @@ def wrap(data, sign_key, encrypt_key):
 
 
 def unwrap(data, decrypt_key, verify_key):
+    """
+    dict unwrap(string data, string decrypt_key, string verify_key)
+    """
     try:
         jwt = json.loads(decrypt(data, decrypt_key))
     except jwe.InvalidJWEData:
@@ -152,9 +162,9 @@ def generate_rsa_keys(name='migasfree-server'):
 
 
 def create_server_keys():
-    generate_rsa_keys("migasfree-server")
-    generate_rsa_keys("migasfree-packager")
-    gpg_get_key("migasfree-repository")
+    generate_rsa_keys('migasfree-server')
+    generate_rsa_keys('migasfree-packager')
+    gpg_get_key('migasfree-repository')
 
 
 def gpg_get_key(name):
