@@ -206,21 +206,33 @@ class RangeFileWrapper:
 
 @permission_classes((permissions.AllowAny,))
 class GetSourceFileView(views.APIView):
-    async def read_remote_chunks(self, local_file, remote, chunk_size=8192):
-        _, tmp = tempfile.mkstemp()
-        with open(tmp, 'wb') as tmp_file:
-            while True:
-                data = remote.read(chunk_size)
-                if not data:
-                    break
+    def read_remote_chunks(self, local_file, remote, chunk_size=8192):
+        if not remote:
+            raise ValueError('Invalid remote file')
 
-                yield data
-                tmp_file.write(data)
-                tmp_file.flush()
+        if chunk_size <= 0:
+            raise ValueError('Chunk size must be greater than zero')
 
-            os.fsync(tmp_file.fileno())
+        try:
+            with tempfile.NamedTemporaryFile(mode='wb', delete=False) as tmp_file:
+                while True:
+                    data = remote.read(chunk_size)
+                    if not data:
+                        break
 
-        shutil.move(tmp, local_file)
+                    yield data
+                    tmp_file.write(data)
+                    tmp_file.flush()
+
+            try:
+                os.replace(tmp_file.name, local_file)
+            except OSError as e:
+                logger.error(f'Error moving file: {e}')
+                os.unlink(tmp_file.name)
+                raise
+        except Exception as e:
+            logger.error(f'Error reading remote file: {e}')
+            raise
 
     @action(methods=['head'], detail=False)
     def exists(self, request, *args, **kwargs):
@@ -256,41 +268,47 @@ class GetSourceFileView(views.APIView):
         logger.debug('get url %s', url)
 
         try:
-            with urlopen(url, context=ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)) as remote_file:
-                remote_file_status = remote_file.getcode()
-                if remote_file_status != status.HTTP_200_OK:
-                    add_notification_get_source_file(
-                        f'HTTP Error: {remote_file_status}',
-                        source,
-                        path,
-                        url,
-                        client_ip
-                    )
-                    return HttpResponse(
-                        f'HTTP Error: {remote_file_status} {escape(url)}',
-                        status=remote_file_status
-                    )
+            # with urlopen(url, context=ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)) as remote_file:
+            remote_file = urlopen(url, context=ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT))
 
-                remote_file_size = remote_file.info().get('Content-Length')
-                if remote_file_size is None:
-                    add_notification_get_source_file(
-                        'Error: Failed to get file size',
-                        source,
-                        path,
-                        url,
-                        client_ip
-                    )
-                    return HttpResponse(
-                        f'Error: Failed to get file size {escape(url)}',
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                    )
+            remote_file_status = remote_file.getcode()
+            # print('remote_file', remote_file, remote_file_status)
+            if remote_file_status != status.HTTP_200_OK:
+                add_notification_get_source_file(
+                    f'HTTP Error: {remote_file_status}',
+                    source,
+                    path,
+                    url,
+                    client_ip
+                )
+                return HttpResponse(
+                    f'HTTP Error: {remote_file_status} {escape(url)}',
+                    status=remote_file_status
+                )
 
-                remote_file_type = remote_file.info().get('Content-Type')
+            remote_file_size = remote_file.info().get('Content-Length')
+            # print('remote_file_size', remote_file_size)
+            if remote_file_size is None:
+                add_notification_get_source_file(
+                    'Error: Failed to get file size',
+                    source,
+                    path,
+                    url,
+                    client_ip
+                )
+                return HttpResponse(
+                    f'Error: Failed to get file size {escape(url)}',
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
 
-                response = StreamingHttpResponse(self.read_remote_chunks(file_local, remote_file))
-                response['Content-Type'] = remote_file_type if remote_file_type else 'application/octet-stream'
+            remote_file_type = remote_file.info().get('Content-Type')
+            # print('remote_file_type', remote_file_type)
 
-                return response
+            response = StreamingHttpResponse(self.read_remote_chunks(file_local, remote_file))
+            response['Content-Type'] = remote_file_type if remote_file_type else 'application/octet-stream'
+
+            # print('response', response, vars(response))
+            return response
         except HTTPError as e:
             add_notification_get_source_file(
                 f'HTTP Error: {e.code}',
