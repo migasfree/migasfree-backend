@@ -226,6 +226,7 @@ class GetSourceFileView(views.APIView):
 
             try:
                 os.replace(tmp_file.name, local_file)
+                tmp_file.close()
             except OSError as e:
                 logger.error(f'Error moving file: {e}')
                 os.unlink(tmp_file.name)
@@ -251,28 +252,17 @@ class GetSourceFileView(views.APIView):
 
         return project_slug, source_slug, resource
 
-    def _handle_file_not_exists(self, source, project_slug, source_slug, resource, file_local, path, client_ip):
+    def _handle_file_not_exists(self, source, resource, file_local, path, client_ip):
         if not os.path.exists(os.path.dirname(file_local)):
             os.makedirs(os.path.dirname(file_local))
-
-        if not source:
-            try:
-                source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
-            except ObjectDoesNotExist:
-                return HttpResponse(
-                    f'URL not exists: {escape(path)}',
-                    status=status.HTTP_404_NOT_FOUND
-                )
 
         url = f'{source.base_url}/{resource}'
         logger.debug('get url %s', url)
 
         try:
-            # with urlopen(url, context=ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)) as remote_file:
             remote_file = urlopen(url, context=ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT))
 
             remote_file_status = remote_file.getcode()
-            # print('remote_file', remote_file, remote_file_status)
             if remote_file_status != status.HTTP_200_OK:
                 add_notification_get_source_file(
                     f'HTTP Error: {remote_file_status}',
@@ -287,7 +277,6 @@ class GetSourceFileView(views.APIView):
                 )
 
             remote_file_size = remote_file.info().get('Content-Length')
-            # print('remote_file_size', remote_file_size)
             if remote_file_size is None:
                 add_notification_get_source_file(
                     'Error: Failed to get file size',
@@ -302,12 +291,10 @@ class GetSourceFileView(views.APIView):
                 )
 
             remote_file_type = remote_file.info().get('Content-Type')
-            # print('remote_file_type', remote_file_type)
 
             response = StreamingHttpResponse(self.read_remote_chunks(file_local, remote_file))
             response['Content-Type'] = remote_file_type if remote_file_type else 'application/octet-stream'
 
-            # print('response', response, vars(response))
             return response
         except HTTPError as e:
             add_notification_get_source_file(
@@ -346,7 +333,7 @@ class GetSourceFileView(views.APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    def _handle_file_exists(self, file_local, source, request):
+    def _handle_file_exists(self, file_local, request):
         if not os.path.isfile(file_local):
             return HttpResponse(status=status.HTTP_204_NO_CONTENT)
 
@@ -357,14 +344,14 @@ class GetSourceFileView(views.APIView):
 
         range_match = range_re.match(range_header)
         if range_match and os.path.exists(os.path.dirname(file_local)):
-            content_type, encoding = guess_type(file_local)
+            content_type, _ = guess_type(file_local)
             content_type = content_type or 'application/octet-stream'
 
             first_byte, last_byte = range_match.groups()
             first_byte = int(first_byte) if first_byte else 0
 
             if first_byte >= size:
-                return HttpResponse(status=status.HTTP_416_RANGE_NOT_SATISFIABLE)
+                return HttpResponse(status=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE)
 
             last_byte = int(last_byte) if last_byte else size - 1
             if last_byte >= size:
@@ -409,16 +396,16 @@ class GetSourceFileView(views.APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+        try:
+            source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
+        except ObjectDoesNotExist:
+            return HttpResponse(
+                f'URL not exists: {escape(path)}',
+                status=status.HTTP_404_NOT_FOUND
+            )
+
         file_local = os.path.join(settings.MIGASFREE_PUBLIC_DIR, path.split('/src/')[1])
         if not file_local.endswith(tuple(project.get_pms().extensions)):  # is a metadata file
-            try:
-                source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
-            except ObjectDoesNotExist:
-                return HttpResponse(
-                    f'URL not exists: {escape(path)}',
-                    status=status.HTTP_404_NOT_FOUND
-                )
-
             if not source.frozen:
                 # expired metadata
                 if os.path.exists(file_local) and (
@@ -429,8 +416,8 @@ class GetSourceFileView(views.APIView):
 
         if not os.path.exists(file_local):
             return self._handle_file_not_exists(
-                source, project_slug, source_slug, resource,
+                source, resource,
                 file_local, path, get_client_ip(request)
             )
 
-        return self._handle_file_exists(file_local, source, request)
+        return self._handle_file_exists(file_local, request)
