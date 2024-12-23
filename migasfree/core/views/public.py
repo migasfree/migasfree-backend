@@ -360,6 +360,8 @@ class GetSourceFileView(views.APIView):
 
             length = last_byte - first_byte + 1
 
+            logger.debug('get local file streaming %s', file_local)
+
             with open(file_local, 'rb') as f:
                 response = StreamingHttpResponse(
                     RangeFileWrapper(f, offset=first_byte, length=length),
@@ -373,7 +375,7 @@ class GetSourceFileView(views.APIView):
 
                 return response
 
-        logger.debug('get local file %s', file_local)
+        logger.debug('get local file wrapper %s', file_local)
 
         with open(file_local, 'rb') as f:
             response = HttpResponse(
