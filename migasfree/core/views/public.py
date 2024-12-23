@@ -27,6 +27,7 @@ import tempfile
 from mimetypes import guess_type
 from urllib.error import URLError, HTTPError
 from urllib.request import urlopen, urlretrieve, urlcleanup
+from urllib.parse import urljoin
 from wsgiref.util import FileWrapper
 
 from django.conf import settings
@@ -256,7 +257,7 @@ class GetSourceFileView(views.APIView):
         if not os.path.exists(os.path.dirname(file_local)):
             os.makedirs(os.path.dirname(file_local))
 
-        url = f'{source.base_url}/{resource}'
+        url = urljoin(source.base_url, resource)
         logger.debug('get url %s', url)
 
         try:
@@ -371,6 +372,8 @@ class GetSourceFileView(views.APIView):
                 response['Accept-Ranges'] = 'bytes'
 
                 return response
+
+        logger.debug('get local file %s', file_local)
 
         with open(file_local, 'rb') as f:
             response = HttpResponse(
