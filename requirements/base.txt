@@ -3,7 +3,7 @@ celery==5.4.0
 channels==4.0.0
 channels-redis==4.2.0
 daphne==4.1.0
-Django==4.2.16
+Django==4.2.17
 dj-rest-auth==5.0.2
 django-cors-headers==4.3.1
 django-filter==24.1
@@ -14,7 +14,7 @@ django-redis==5.4.0
 djangorestframework==3.15.2
 djangorestframework-filters==1.0.0.dev2
 djangorestframework-simplejwt==5.3.1
-djoser==2.2.2
+djoser==2.3.0
 docutils==0.20.1
 drf-spectacular==0.27.2
 drf-spectacular-sidecar==2024.7.1
