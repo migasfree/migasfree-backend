@@ -29,15 +29,31 @@ TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 LOGGING['loggers']['migasfree']['level'] = 'DEBUG'
 LOGGING['handlers']['console']['level'] = 'DEBUG'
 LOGGING['handlers']['file']['level'] = 'DEBUG'
+"""
+LOGGING['loggers']['django.db.backends'] = {
+    'level': 'DEBUG',
+    'handlers': ['console'],
+}
+"""
+LOGGING['loggers']['celery'] = {
+    'level': 'DEBUG',
+    'handlers': ['console'],
+    # 'propagate': False,
+}
 
 MIGASFREE_PUBLIC_DIR = os.path.join(MIGASFREE_PROJECT_DIR, 'pub')
 MIGASFREE_KEYS_DIR = os.path.join(MIGASFREE_APP_DIR, 'keys')
+
+MIGASFREE_FQDN = 'localhost:2345'
+
+MIGASFREE_COMPUTER_SEARCH_FIELDS = ('name', 'ip_address')
 
 SECRET_KEY = secret_key(MIGASFREE_KEYS_DIR)
 
 STATIC_ROOT = os.path.join(MIGASFREE_APP_DIR, 'static')
 MEDIA_ROOT = MIGASFREE_PUBLIC_DIR
 
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -45,6 +61,18 @@ DATABASES = {
         'USER': 'migasfree_backend',
         'PASSWORD': 'migasfree_backend',
         'HOST': 'localhost',
+        'PORT': '',
+    }
+}
+"""
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'migasfree',
+        'USER': 'migasfree',
+        'PASSWORD': 'migasfree',
+        'HOST': '172.16.69.134',
         'PORT': '',
     }
 }
@@ -62,12 +90,16 @@ if os.environ.get('GITHUB_WORKFLOW'):
     }
 
 # python manage.py graph_models -a -o myapp_models.png
-INSTALLED_APPS += ('debug_toolbar', 'django_extensions', 'silk')
-INTERNAL_IPS = ('127.0.0.1',)
+INSTALLED_APPS += (
+    'debug_toolbar',
+    'django_extensions',
+    # 'silk',
+)
+INTERNAL_IPS = ('127.0.0.1', '172.16.69.215')
 
 MIDDLEWARE += [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'silk.middleware.SilkyMiddleware',
+    # 'silk.middleware.SilkyMiddleware',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True

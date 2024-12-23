@@ -44,7 +44,7 @@
                 "worker",
                 "--without-gossip",
                 "--concurrency=10",
-                "--queues=default,pms-apt,pms-dnf,pms-pacman,pms-winget,pms-wpt,pms-yum,pms-zypper",
+                "--queues=default,pms-apt,pms-dnf,pms-pacman,pms-winget,pms-wpt,pms-yum,pms-zypper,pms-giman",
                 "--loglevel=DEBUG",
             ],
             "env": {

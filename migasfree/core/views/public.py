@@ -225,7 +225,7 @@ class GetSourceFileView(views.APIView):
                     tmp_file.flush()
 
             try:
-                os.replace(tmp_file.name, local_file)
+                shutil.move(tmp_file.name, local_file)
                 tmp_file.close()
             except OSError as e:
                 logger.error(f'Error moving file: {e}')
@@ -260,7 +260,7 @@ class GetSourceFileView(views.APIView):
         logger.debug('get url %s', url)
 
         try:
-            remote_file = urlopen(url, context=ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT))
+            remote_file = urlopen(url, context=ssl.SSLContext(ssl.PROTOCOL_SSLv23))
 
             remote_file_status = remote_file.getcode()
             if remote_file_status != status.HTTP_200_OK:
@@ -414,7 +414,7 @@ class GetSourceFileView(views.APIView):
                 ):
                     os.remove(file_local)
 
-        if not os.path.exists(file_local):
+        if not os.path.exists(file_local) or os.path.getsize(file_local) == 0:
             return self._handle_file_not_exists(
                 source, resource,
                 file_local, path, get_client_ip(request)
