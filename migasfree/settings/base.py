@@ -182,8 +182,8 @@ LOGGING = {
     'version': 1,
     'formatters': {
         'verbose': {
-            'format': '%(asctime)s - %(levelname)s - %(module)s - %(lineno)d '
-                      '- %(funcName)s - %(message)s',
+            'format': '%(asctime)s - %(levelname)s - %(process)d - %(module)s '
+                      '- %(lineno)d - %(funcName)s - %(message)s',
         },
         'simple': {
             'format': '%(asctime)s - %(levelname)s - %(filename)s - %(message)s'
