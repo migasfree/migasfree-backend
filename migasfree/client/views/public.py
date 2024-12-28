@@ -178,8 +178,8 @@ class ProjectKeysView(views.APIView):
         )
 
         if not settings.MIGASFREE_AUTOREGISTER and not project.auto_register_computers \
-                and (self.user is None or (not self.user.is_superuser \
-                    and not self.user.has_perm('client.add_computer'))):
+                and (self.user is None or
+                     (not self.user.is_superuser and not self.user.has_perm('client.add_computer'))):
             raise PermissionDenied()
 
         priv_project_key_file = os.path.join(
