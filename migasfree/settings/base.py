@@ -25,6 +25,7 @@ import django.conf.global_settings as DEFAULT_SETTINGS
 from corsheaders.defaults import default_headers
 
 from .migasfree import BASE_DIR, MIGASFREE_TMP_DIR
+from .. import __contact__
 
 if django.VERSION < (4, 2, 0, 'final'):
     print('Migasfree requires Django 4.2.0 at least. Please, update it.')
@@ -160,7 +161,7 @@ SPECTACULAR_SETTINGS = {
     'SWAGGER_UI_DIST': 'SIDECAR',
     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
     'REDOC_DIST': 'SIDECAR',
-    'CONTACT': {'email': 'fun.with@migasfree.org'},
+    'CONTACT': {'email': __contact__},
     'LICENSE': {'name': 'GPLv3'},
 }
 
