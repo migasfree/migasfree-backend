@@ -26,6 +26,7 @@ from django.conf import settings
 from django.utils.translation import gettext
 
 from .utils import read_file, write_file
+from .. import __contact__
 
 
 def load_jwk(filename):
@@ -175,26 +176,28 @@ def gpg_get_key(name):
     gpg_home = os.path.join(settings.MIGASFREE_KEYS_DIR, '.gnupg')
     gpg_conf = os.path.join(gpg_home, 'gpg.conf')
     gpg_agent_conf = os.path.join(gpg_home, 'gpg-agent.conf')
-    _file = os.path.join(gpg_home, f'{name}.gpg')
+    public_key = os.path.join(gpg_home, f'{name}.gpg')
+    private_key = os.path.join(gpg_home, f'{name}.sec')
 
-    if not os.path.exists(_file):
+    if not os.path.exists(gpg_home):
+        os.makedirs(gpg_home, 0o700)
+        # creates configuration file
+        write_file(
+            gpg_conf,
+            'cert-digest-algo SHA256\ndigest-algo SHA256\nuse-agent\npinentry-mode loopback'
+        )
+        os.chmod(gpg_conf, 0o600)
+        write_file(gpg_agent_conf, 'allow-loopback-pinentry')
+        os.chmod(gpg_agent_conf, 0o600)
+
+    if not os.path.exists(public_key):
         os.environ['GNUPGHOME'] = gpg_home
-        if not os.path.exists(gpg_home):
-            os.makedirs(gpg_home, 0o700)
-            # creates configuration file
-            write_file(
-                gpg_conf,
-                'cert-digest-algo SHA256\ndigest-algo SHA256\nuse-agent\npinentry-mode loopback'
-            )
-            os.chmod(gpg_conf, 0o600)
-            write_file(gpg_agent_conf, 'allow-loopback-pinentry')
-            os.chmod(gpg_agent_conf, 0o600)
 
         key_params = f"""
 Key-Type: RSA
 Key-Length: 4096
 Name-Real: {name}
-Name-Email: fun.with@migasfree.org
+Name-Email: {__contact__}
 Expire-Date: 0
 """
 
@@ -204,13 +207,18 @@ Expire-Date: 0
         ]
         subprocess.run(command, input=key_params, text=True, capture_output=True)
 
-        # export and save
-        command = ['gpg', '--list-secret-keys', f'{name}']
+        # export and save public key
+        command = ['gpg', '--list-keys', f'{name}']
         output = subprocess.check_output(command, text=True)
         fingerprint = output.split('\n')[1].split('/')[-1].strip()
 
-        command = ['gpg', '--armor', '--export-secret-keys', fingerprint, '>', _file]
+        command = ['gpg', '--armor', '--export', fingerprint, '>', public_key]
         subprocess.check_call(' '.join(command), shell=True)
-        os.chmod(_file, 0o600)
+        os.chmod(public_key, 0o600)
 
-    return read_file(_file)
+        # export and save private key
+        command = ['gpg', '--armor', '--export-secret-key', fingerprint, '>', private_key]
+        subprocess.check_call(' '.join(command), shell=True)
+        os.chmod(private_key, 0o600)
+
+    return read_file(public_key)
