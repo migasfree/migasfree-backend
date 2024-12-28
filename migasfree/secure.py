@@ -25,8 +25,8 @@ from jwcrypto.common import json_encode
 from django.conf import settings
 from django.utils.translation import gettext
 
+from migasfree import __contact__
 from .utils import read_file, write_file
-from .. import __contact__
 
 
 def load_jwk(filename):
