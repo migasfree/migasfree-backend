@@ -30,6 +30,7 @@ from ..utils import cmp
 
 from .resources import AttributeResource, ProjectResource
 from .pms import tasks
+from .validators import validate_no_spaces
 
 from .models import (
     Platform, Project, Store,
@@ -66,6 +67,12 @@ class ProjectAdmin(ImportExportActionModelAdmin):
 
     def get_queryset(self, request):
         return Project.objects.scope(request.user.userprofile)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change, **kwargs)
+        form.base_fields['name'].validators.append(validate_no_spaces)
+
+        return form
 
 
 @admin.register(Store)
