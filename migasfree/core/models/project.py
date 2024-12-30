@@ -23,6 +23,7 @@ from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 
@@ -108,6 +109,12 @@ class Project(models.Model, MigasLink):
     )
 
     objects = ProjectManager()
+
+    def clean(self):
+        super().clean()
+
+        if ' ' in self.name:
+            raise ValidationError(_('Name cannot contain spaces'))
 
     def __str__(self):
         return self.name
