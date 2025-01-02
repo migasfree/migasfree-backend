@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ function create_deploy {
   echo "Architectures: ${_ARCHS[@]}" > $_F
   echo "Codename: $_NAME" >> $_F
   echo "Components: %(components)s" >> $_F
-  echo "Date: $(date -u '+%%a, %%d %%b %%Y %%H:%%M:%%S UTC')" >> $_F
+  echo "Date: $(LC_ALL=C date -u '+%%a, %%d %%b %%Y %%H:%%M:%%S UTC')" >> $_F
   echo "Label: migasfree $_NAME repository" >> $_F
   echo "Origin: migasfree" >> $_F
   echo "Suite: $_NAME" >> $_F
