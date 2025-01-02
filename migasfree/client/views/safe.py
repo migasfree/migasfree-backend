@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -295,7 +295,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         """
 
         claims = self.get_claims(request.data)
-        if not claims or 'project' not in claims:
+        if not claims or not all(k in claims for k in ('uuid', 'name', 'ip_address', 'username', 'password')):
             return Response(
                 self.create_response(gettext('Invalid Data')),
                 status=status.HTTP_400_BAD_REQUEST
