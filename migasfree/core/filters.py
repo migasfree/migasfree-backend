@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -335,7 +335,10 @@ class ScheduleFilter(filters.FilterSet):
 class ScheduleDelayFilter(filters.FilterSet):
     class Meta:
         model = ScheduleDelay
-        fields = ['schedule__id', 'schedule__name']
+        fields = {
+            'schedule__id': ['exact', 'in'],
+            'schedule__name': ['exact', 'icontains']
+        }
 
 
 class StoreFilter(filters.FilterSet):
@@ -343,7 +346,7 @@ class StoreFilter(filters.FilterSet):
         model = Store
         fields = {
             'id': ['exact', 'in'],
-            'name': ['icontains'],
+            'name': ['exact', 'icontains'],
             'project__id': ['exact'],
             'packageset__id': ['exact'],
         }
@@ -370,7 +373,7 @@ class PermissionFilter(filters.FilterSet):
         model = Permission
         fields = {
             'id': ['exact', 'in'],
-            'name': ['icontains'],
+            'name': ['exact', 'icontains'],
         }
 
 
@@ -379,7 +382,7 @@ class GroupFilter(filters.FilterSet):
         model = Group
         fields = {
             'id': ['exact', 'in'],
-            'name': ['icontains'],
+            'name': ['exact', 'icontains'],
             'user__id': ['exact'],
         }
 
