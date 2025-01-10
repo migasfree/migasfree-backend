@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save, post_save, post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
@@ -417,3 +417,9 @@ def post_save_application(sender, instance, created, **kwargs):
         instance.icon = getattr(instance, _UNSAVED_IMAGEFIELD)
         instance.save()
         instance.__dict__.pop(_UNSAVED_IMAGEFIELD)
+
+
+@receiver(post_delete, sender=Application)
+def post_delete_application(sender, instance, **kwargs):
+    if instance.icon:
+        instance.icon.delete(save=False)
