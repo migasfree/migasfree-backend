@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -127,7 +127,7 @@ class ComputerFilter(filters.FilterSet):
             'name': ['exact', 'icontains'],
             'uuid': ['exact', 'icontains'],
             'sync_attributes__id': ['exact', 'in'],
-            'tags__id': ['exact'],
+            'tags__id': ['exact', 'in'],
             'machine': ['exact'],
             'sync_user__id': ['exact'],
             'sync_user__name': ['exact', 'icontains'],
@@ -149,7 +149,7 @@ class ErrorFilter(filters.FilterSet):
             'project__platform__id': ['exact'],
             'checked': ['exact'],
             'computer__id': ['exact'],
-            'computer__name': ['icontains'],
+            'computer__name': ['exact', 'icontains'],
             'computer__status': ['exact', 'in'],
             'description': ['icontains'],
         }
@@ -160,7 +160,7 @@ class FaultDefinitionFilter(filters.FilterSet):
         model = FaultDefinition
         fields = {
             'id': ['exact', 'in'],
-            'name': ['icontains'],
+            'name': ['exact', 'icontains'],
             'enabled': ['exact'],
             'language': ['exact'],
             'included_attributes__id': ['exact'],
@@ -203,7 +203,7 @@ class FaultFilter(filters.FilterSet):
             'project__platform__id': ['exact'],
             'checked': ['exact'],
             'computer__id': ['exact'],
-            'computer__name': ['icontains'],
+            'computer__name': ['exact', 'icontains'],
             'fault_definition_id': ['exact'],
             'result': ['icontains'],
         }
@@ -220,7 +220,7 @@ class MigrationFilter(filters.FilterSet):
             'project__id': ['exact'],
             'project__platform__id': ['exact'],
             'computer__id': ['exact'],
-            'computer__name': ['icontains'],
+            'computer__name': ['exact', 'icontains'],
         }
 
 
@@ -233,7 +233,7 @@ class NotificationFilter(filters.FilterSet):
         fields = {
             'id': ['exact', 'in'],
             'checked': ['exact'],
-            'message': ['icontains'],
+            'message': ['exact', 'icontains'],
         }
 
 
@@ -245,7 +245,7 @@ class PackageHistoryFilter(filters.FilterSet):
             'computer__id': ['exact'],
             'computer__name': ['exact', 'icontains'],
             'package__id': ['exact'],
-            'package__fullname': ['icontains'],
+            'package__fullname': ['exact', 'icontains'],
             'package__project__id': ['exact'],
             'install_date': ['gte', 'lt'],
             'uninstall_date': ['gte', 'lt', 'isnull'],
@@ -261,7 +261,7 @@ class StatusLogFilter(filters.FilterSet):
         fields = {
             'id': ['exact', 'in'],
             'computer__id': ['exact'],
-            'computer__name': ['icontains'],
+            'computer__name': ['exact', 'icontains'],
             'status': ['exact', 'in'],
         }
 
@@ -280,11 +280,11 @@ class SynchronizationFilter(filters.FilterSet):
             'project__id': ['exact'],
             'project__platform__id': ['exact'],
             'computer__id': ['exact'],
-            'computer__name': ['icontains'],
+            'computer__name': ['exact', 'icontains'],
             'user__id': ['exact'],
-            'user__name': ['icontains'],
+            'user__name': ['exact', 'icontains'],
             'pms_status_ok': ['exact'],
-            'consumer': ['icontains']
+            'consumer': ['exact', 'icontains']
         }
 
 
