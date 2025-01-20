@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,12 +29,10 @@ TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 LOGGING['loggers']['migasfree']['level'] = 'DEBUG'
 LOGGING['handlers']['console']['level'] = 'DEBUG'
 LOGGING['handlers']['file']['level'] = 'DEBUG'
-"""
 LOGGING['loggers']['django.db.backends'] = {
     'level': 'DEBUG',
     'handlers': ['console'],
 }
-"""
 LOGGING['loggers']['celery'] = {
     'level': 'DEBUG',
     'handlers': ['console'],
@@ -53,7 +51,6 @@ SECRET_KEY = secret_key(MIGASFREE_KEYS_DIR)
 STATIC_ROOT = os.path.join(MIGASFREE_APP_DIR, 'static')
 MEDIA_ROOT = MIGASFREE_PUBLIC_DIR
 
-"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -61,18 +58,6 @@ DATABASES = {
         'USER': 'migasfree_backend',
         'PASSWORD': 'migasfree_backend',
         'HOST': 'localhost',
-        'PORT': '',
-    }
-}
-"""
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'migasfree',
-        'USER': 'migasfree',
-        'PASSWORD': 'migasfree',
-        'HOST': '172.16.69.134',
         'PORT': '',
     }
 }
@@ -93,13 +78,13 @@ if os.environ.get('GITHUB_WORKFLOW'):
 INSTALLED_APPS += (
     'debug_toolbar',
     'django_extensions',
-    # 'silk',
+    'silk',
 )
-INTERNAL_IPS = ('127.0.0.1', '172.16.69.215')
+INTERNAL_IPS = ('127.0.0.1',)
 
 MIDDLEWARE += [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-    # 'silk.middleware.SilkyMiddleware',
+    'silk.middleware.SilkyMiddleware',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
