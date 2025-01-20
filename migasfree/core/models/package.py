@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ from importlib import import_module
 
 from django.db import models
 from django.db.models.aggregates import Count
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, post_save
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
@@ -297,11 +297,28 @@ class Package(models.Model, MigasLink):
         ' architecture, related project and store'
 
 
-@receiver(pre_delete, sender=Package)
-def delete_package(sender, instance, **kwargs):
+def _update_deployments(instance, delete=False):
     from ..pms import tasks
     from .deployment import Deployment
 
+    queryset = Deployment.objects.filter(available_packages__in=[instance])
+    for deploy in queryset:
+        if delete:
+            deploy.available_packages.remove(instance)
+        tasks.create_repository_metadata.apply_async(
+            queue=f'pms-{deploy.pms().name}',
+            kwargs={'deployment_id': deploy.id}
+        )
+
+
+@receiver(post_save, sender=Package)
+def save_package(sender, instance, **kwargs):
+    if instance.store:
+        _update_deployments(instance)
+
+
+@receiver(pre_delete, sender=Package)
+def delete_package(sender, instance, **kwargs):
     if not instance.store:
         return
 
@@ -311,11 +328,4 @@ def delete_package(sender, instance, **kwargs):
         instance.fullname
     )
     Package.delete_from_store(path)
-
-    queryset = Deployment.objects.filter(available_packages__in=[instance])
-    for deploy in queryset:
-        deploy.available_packages.remove(instance)
-        tasks.create_repository_metadata.apply_async(
-            queue=f'pms-{deploy.pms().name}',
-            kwargs={'deployment_id': deploy.id}
-        )
+    _update_deployments(instance, delete=True)
