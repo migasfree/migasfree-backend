@@ -188,19 +188,12 @@ class PropertyFilter(filters.FilterSet):
         }
 
 
-class ClientPropertyFilter(filters.FilterSet):
-    class Meta:
+class ClientPropertyFilter(PropertyFilter):
+    class Meta(PropertyFilter.Meta):
         model = ClientProperty
         fields = {
-            'id': ['exact', 'in'],
-            'prefix': ['exact', 'icontains', 'in'],
-            'name': ['exact', 'icontains'],
-            'enabled': ['exact'],
-            'sort': ['exact'],
-            'kind': ['exact'],
+            **PropertyFilter.Meta.fields,
             'language': ['exact'],
-            'singularity__id': ['exact'],
-            'attribute__id': ['exact'],
         }
 
 
