@@ -178,6 +178,7 @@ class PropertyFilter(filters.FilterSet):
         model = Property
         fields = {
             'id': ['exact', 'in'],
+            'prefix': ['exact', 'icontains', 'in'],
             'name': ['exact', 'icontains'],
             'enabled': ['exact'],
             'sort': ['exact'],
@@ -192,6 +193,7 @@ class ClientPropertyFilter(filters.FilterSet):
         model = ClientProperty
         fields = {
             'id': ['exact', 'in'],
+            'prefix': ['exact', 'icontains', 'in'],
             'name': ['exact', 'icontains'],
             'enabled': ['exact'],
             'sort': ['exact'],
