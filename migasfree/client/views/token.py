@@ -116,8 +116,10 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
                 ).exists():
                     return Response(
                         {
-                            'error': _('Error in capability %s for assign computer %s.'
-                                    ' There is no driver defined for project %s in model %s.') % (
+                            'error': _(
+                                'Error in capability %s for assign computer %s.'
+                                ' There is no driver defined for project %s in model %s.'
+                            ) % (
                                 logical_device.capability,
                                 computer,
                                 computer.project,
