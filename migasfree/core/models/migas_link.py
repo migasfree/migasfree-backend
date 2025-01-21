@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2020-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2020-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2020-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2020-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -468,6 +468,66 @@ class MigasLink:
 
         return data
 
+    def _get_domain_and_att(self):
+        if self._meta.model_name == 'domain':
+            from . import ServerAttribute
+            domain = self
+            try:
+                att = ServerAttribute.objects.get(
+                    value=str(self.name),
+                    property_att__prefix='DMN'
+                )
+            except ObjectDoesNotExist:
+                att = None
+        else:
+            from . import Domain
+            att = self
+            try:
+                domain = Domain.objects.get(name=self.value)
+            except ObjectDoesNotExist:
+                domain = None
+
+        return domain, att
+
+    def _get_attribute_set_and_att(self):
+        if self._meta.model_name == 'attributeset':
+            from . import Attribute
+            attribute_set = self
+            try:
+                att = Attribute.objects.get(
+                    value=str(self.name),
+                    property_att__prefix='SET'
+                )
+            except ObjectDoesNotExist:
+                att = None
+        else:
+            from . import AttributeSet
+            att = self
+            try:
+                attribute_set = AttributeSet.objects.get(name=self.value)
+            except ObjectDoesNotExist:
+                attribute_set = None
+
+        return attribute_set, att
+
+    def _get_computer_and_cid(self):
+        if self._meta.model_name == 'computer':
+            from . import Attribute
+            computer = self
+            try:
+                cid = Attribute.objects.get(
+                    value=str(self.id),
+                    property_att__prefix='CID'
+                )
+            except ObjectDoesNotExist:
+                cid = None
+        else:
+            from ...client.models import Computer
+            cid = self
+            computer = Computer.objects.get(pk=int(self.value))
+
+        return computer, cid
+
     def relations(self, request):
         data = []
 
@@ -491,31 +551,10 @@ class MigasLink:
         if self._meta.model_name == 'domain' or (
                 self._meta.model_name == 'serverattribute' and self.property_att.prefix == 'DMN'
         ):
-            if self._meta.model_name == 'domain':
-                from . import ServerAttribute
-                domain = self
-                try:
-                    att = ServerAttribute.objects.get(
-                        value=str(self.name),
-                        property_att__prefix='DMN'
-                    )
-                except ObjectDoesNotExist:
-                    att = None
-            else:
-                from . import Domain
-                att = self
-                try:
-                    domain = Domain.objects.get(name=self.value)
-                except ObjectDoesNotExist:
-                    domain = None
-            if att:
-                att_data = att.get_relations(request)
-            else:
-                att_data = []
-
-            if domain:
-                set_data = domain.get_relations(request)
-                data = set_data + att_data
+            domain, att = self._get_domain_and_att()
+            att_data = att.get_relations(request) if att else []
+            set_data = domain.get_relations(request) if domain else []
+            data = set_data + att_data
 
             return data
 
@@ -523,132 +562,94 @@ class MigasLink:
         if self._meta.model_name == 'attributeset' \
                 or (self._meta.model_name == 'attribute' and self.pk > 1) \
                 and self.property_att.prefix == 'SET':
-            if self._meta.model_name == 'attributeset':
-                from . import Attribute
-                attribute_set = self
-                try:
-                    att = Attribute.objects.get(
-                        value=str(self.name),
-                        property_att__prefix='SET'
-                    )
-                except ObjectDoesNotExist:
-                    att = None
-            else:
-                from . import AttributeSet
-                att = self
-                try:
-                    attribute_set = AttributeSet.objects.get(name=self.value)
-                except ObjectDoesNotExist:
-                    attribute_set = None
-
-            if att:
-                att_data = att.get_relations(request)
-            else:
-                att_data = []
-
-            if attribute_set:
-                set_data = attribute_set.get_relations(request)
-                data = set_data + att_data
+            attribute_set, att = self._get_attribute_set_and_att()
+            set_data = attribute_set.get_relations(request) if attribute_set else []
+            att_data = att.get_relations(request) if att else []
+            data = set_data + att_data
 
             return data
 
         # COMPUTER === CID ATTRIBUTE
         if self._meta.model_name == 'computer' or (
                 (
-                    self._meta.model_name == 'attribute' or
-                    self._meta.model_name == 'clientattribute'
+                    self._meta.model_name in ['attribute', 'clientattribute']
                 ) and self.property_att.prefix == 'CID'
         ):
-            if self._meta.model_name == 'computer':
-                from . import Attribute
-                computer = self
-                try:
-                    cid = Attribute.objects.get(
-                        value=str(self.id),
-                        property_att__prefix='CID'
-                    )
-                except ObjectDoesNotExist:
-                    cid = None
-            else:
-                from ...client.models import Computer
-                cid = self
-                computer = Computer.objects.get(pk=int(self.value))
-
-            computer_data = computer.get_relations(request)
-
-            if cid:
-                cid_data = cid.get_relations(request)
-            else:
-                cid_data = []
-
+            computer, cid = self._get_computer_and_cid()
+            computer_data = computer.get_relations(request) if computer else []
+            cid_data = cid.get_relations(request) if cid else []
             data = computer_data + cid_data
 
             return data
 
         return self.get_relations(request)
 
-    def badge(self):
-        if self._meta.model_name == 'clientattribute' \
-                or self._meta.model_name == 'attribute':
-            if self.property_att.prefix == 'CID':
-                from ...client.models import Computer
-                try:
-                    self = Computer.objects.get(id=self.value)
-                except ObjectDoesNotExist:
-                    pass
-            elif self.property_att.prefix == 'SET':
-                from . import AttributeSet
-                try:
-                    self = AttributeSet.objects.get(name=self.value)
-                except ObjectDoesNotExist:
-                    pass
-            elif self.property_att.prefix == 'DMN':
-                from . import Domain
-                try:
-                    self = Domain.objects.get(name=self.value)
-                except ObjectDoesNotExist:
-                    pass
+    def _get_related_object(self):
+        if self.property_att.prefix == 'CID':
+            from ...client.models import Computer
+            try:
+                return Computer.objects.get(id=self.value)
+            except ObjectDoesNotExist:
+                pass
+        elif self.property_att.prefix == 'SET':
+            from . import AttributeSet
+            try:
+                return AttributeSet.objects.get(name=self.value)
+            except ObjectDoesNotExist:
+                pass
+        elif self.property_att.prefix == 'DMN':
+            from . import Domain
+            try:
+                return Domain.objects.get(name=self.value)
+            except ObjectDoesNotExist:
+                pass
 
-        lnk = {
+    def badge(self):
+        if self._meta.model_name in ['clientattribute', 'attribute']:
+            related_object = self._get_related_object()
+            if related_object:
+                self = related_object
+
+        badge_data = {
             'pk': self.id,
             'text': escape_format_string(self.__str__()),
         }
+
         if self._meta.model_name == 'computer':
-            lnk.update({
+            badge_data.update({
                 'status': self.status,
                 'summary': f'{self.status}, {self.project}, {self.ip_address}, {self.sync_user}'
             })
-            lnk['status'] = self.status
         elif self._meta.model_name == 'domain':
-            lnk.update({
+            badge_data.update({
                 'status': 'domain',
                 'summary': gettext(self._meta.verbose_name)
             })
         elif self._meta.model_name == 'serverattribute' \
                 or (self._meta.model_name == 'attribute' and self.property_att.sort == 'server'):
-            lnk.update({
+            badge_data.update({
                 'status': 'tag',
                 'summary': gettext(self._meta.verbose_name)
             })
         elif self._meta.model_name == 'attributeset' \
                 or (self._meta.model_name in ['clientattribute', 'attribute'] and self.id == 1):
-            lnk.update({
+            badge_data.update({
                 'status': 'set',
                 'summary': f'({gettext(self._meta.verbose_name)}) {self.description}'
             })
         elif self._meta.model_name == 'clientattribute' \
                 or (self._meta.model_name == 'attribute' and self.property_att.sort == 'client'):
-            lnk.update({
+            badge_data.update({
                 'status': 'attribute',
                 'summary': self.description
             })
         elif self._meta.model_name == 'policy':
-            lnk.update({
+            badge_data.update({
                 'status': 'policy',
                 'summary': gettext(self._meta.verbose_name)
             })
 
-        return lnk
+        return badge_data
 
     def transmodel(self, obj):
         from ...client.models import Computer
@@ -677,7 +678,7 @@ class MigasLink:
             return ClientAttribute, 'property__id'
 
         if related_model_lower == 'client.computer':
-            if self.__class__.__name__ == ['ClientAttribute', 'Attribute', 'ServerAttribute']:
+            if self.__class__.__name__ in ['ClientAttribute', 'Attribute', 'ServerAttribute']:
                 if obj.field.related_model._meta.model_name == 'serverattribute':
                     return Computer, 'tags__id'
 
