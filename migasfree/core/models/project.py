@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,13 +46,14 @@ class DomainProjectManager(models.Manager):
 
 
 class ProjectManager(DomainProjectManager):
-    def create(self, name, pms, architecture, platform, auto_register_computers=False):
+    def create(self, name, pms, architecture, platform, auto_register_computers=False, base_os=None):
         obj = Project()
         obj.name = name
         obj.pms = pms
         obj.architecture = architecture
         obj.platform = platform
         obj.auto_register_computers = auto_register_computers
+        obj.base_os = base_os
         obj.save()
 
         return obj
@@ -60,7 +61,7 @@ class ProjectManager(DomainProjectManager):
 
 class Project(models.Model, MigasLink):
     """
-    OS Version: 'Ubuntu natty 32bit' or 'openSUSE 12.1' or 'Vitalinux'
+    Custom Distribution: 'AZLinux-XX' or 'Vitalinux-X' or 'MyCustomProject-X'
     This is 'your personal distribution', a set of computers with a determinate
     Distribution for customize.
     """
@@ -99,6 +100,14 @@ class Project(models.Model, MigasLink):
         help_text=_('Is not needed a user for register computers in '
                     'database and get the keys.'),
         db_comment='if true, it allows you to register the computer from a client automatically',
+    )
+
+    base_os = models.CharField(
+        verbose_name=_('base operating system'),
+        max_length=50,
+        null=True,
+        blank=True,
+        db_comment='specifies the base operating system your project is based on'
     )
 
     platform = models.ForeignKey(
