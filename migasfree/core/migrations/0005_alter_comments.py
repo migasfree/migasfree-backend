@@ -310,7 +310,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='project',
             name='pms',
-            field=models.CharField(choices=[('apt', 'apt'), ('dnf', 'dnf'), ('giman', 'plugins.giman'), ('gpkgmgr', 'plugins.gpkgmgr'), ('pacman', 'pacman'), ('winget', 'winget'), ('wpt', 'wpt'), ('yum', 'yum'), ('zypper', 'zypper')], db_comment="package management system utilized in the project's operating system", max_length=50, validators=[migasfree.core.validators.validate_project_pms], verbose_name='package management system'),
+            field=models.CharField(choices=[('apt', 'apt'), ('dnf', 'dnf'), ('pacman', 'pacman'), ('winget', 'winget'), ('wpt', 'wpt'), ('yum', 'yum'), ('zypper', 'zypper')], db_comment="package management system utilized in the project's operating system", max_length=50, validators=[migasfree.core.validators.validate_project_pms], verbose_name='package management system'),
         ),
         migrations.AlterField(
             model_name='project',
