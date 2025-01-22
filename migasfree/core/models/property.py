@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -115,12 +115,12 @@ class Property(models.Model, MigasLink):
     )
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def delete(self, using=None, keep_parents=False):
         # Not allowed delete basic properties
         if self.sort != 'basic':
-            return super().delete(using, keep_parents)
+            super().delete(using, keep_parents)
 
     @staticmethod
     def enabled_client_properties(attributes):
