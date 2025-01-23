@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -149,7 +149,8 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = (
             'id', 'name', 'slug', 'pms',
-            'architecture', 'auto_register_computers', 'platform'
+            'architecture', 'auto_register_computers',
+            'base_os', 'platform'
         )
 
 
@@ -169,7 +170,8 @@ class ProjectWriteSerializer(serializers.ModelSerializer):
         model = Project
         fields = (
             'id', 'name', 'pms',
-            'architecture', 'auto_register_computers', 'platform'
+            'architecture', 'auto_register_computers',
+            'base_os', 'platform'
         )
 
 
@@ -488,7 +490,7 @@ class DeploymentListSerializer(serializers.ModelSerializer):
             'id', 'project', 'domain',
             'schedule', 'source',
             'name', 'slug', 'comment',
-            'start_date', 'enabled',
+            'start_date', 'enabled', 'auto_restart',
         )
 
 
@@ -544,7 +546,7 @@ class InternalSourceSerializer(DeploymentSerializer):
             'included_attributes', 'excluded_attributes',
             'packages_to_install', 'packages_to_remove',
             'default_preincluded_packages', 'default_included_packages', 'default_excluded_packages',
-            'schedule', 'start_date'
+            'schedule', 'start_date', 'auto_restart',
         )
 
 
@@ -556,7 +558,7 @@ class ExternalSourceSerializer(DeploymentSerializer):
             'included_attributes', 'excluded_attributes',
             'packages_to_install', 'packages_to_remove',
             'default_preincluded_packages', 'default_included_packages', 'default_excluded_packages',
-            'schedule', 'start_date',
+            'schedule', 'start_date', 'auto_restart',
             'base_url', 'options', 'suite', 'components', 'frozen', 'expire'
         )
 
@@ -575,6 +577,7 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
             "available_packages": [id1, id2, ...],
             "available_package_sets": [id1, id2, ...],
             "start_date": "string",
+            "auto_restart": false,
             "packages_to_install": [],
             "packages_to_remove": [],
             "default_preincluded_packages": [],
@@ -708,7 +711,7 @@ class InternalSourceWriteSerializer(DeploymentWriteSerializer):
             'included_attributes', 'excluded_attributes',
             'packages_to_install', 'packages_to_remove',
             'default_preincluded_packages', 'default_included_packages', 'default_excluded_packages',
-            'schedule', 'start_date'
+            'schedule', 'start_date', 'auto_restart',
         )
 
 
@@ -720,7 +723,7 @@ class ExternalSourceWriteSerializer(DeploymentWriteSerializer):
             'included_attributes', 'excluded_attributes',
             'packages_to_install', 'packages_to_remove',
             'default_preincluded_packages', 'default_included_packages', 'default_excluded_packages',
-            'schedule', 'start_date',
+            'schedule', 'start_date', 'auto_restart',
             'base_url', 'options', 'suite', 'components', 'frozen', 'expire'
         )
 
