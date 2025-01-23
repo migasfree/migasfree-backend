@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,8 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from celery import Celery
+from datetime import datetime, timedelta
+from celery import Celery, shared_task
 
+from .models import Deployment, ScheduleDelay
 from .decorators import unique_task
 from ..utils import get_setting
 
@@ -34,3 +36,27 @@ def migrate_db():
     from django.core.management import call_command
 
     call_command('migrate', interactive=False)
+
+
+@shared_task
+def update_deployment_start_date():
+    """
+    Daily task that updates the start date of deployments
+    that have auto_restart=True and have completed deployment.
+    """
+    deployments = Deployment.objects.filter(auto_restart=True, schedule__isnull=False)
+
+    for deployment in deployments:
+        schedule_delays = ScheduleDelay.objects.filter(schedule=deployment.schedule)
+        if schedule_delays.exists():
+            last_delay = schedule_delays.order_by('delay').last()
+            if last_delay:
+                start_date = deployment.start_date
+                last_delay_date = start_date + timedelta(days=last_delay.delay)
+                last_duration_date = last_delay_date + timedelta(days=last_delay.duration)
+
+                if datetime.today() >= last_duration_date:
+                    new_start_date = last_duration_date + timedelta(days=1)
+                    deployment.start_date = new_start_date
+                    deployment.save()
+                    print(f"Updated the start date of deployment {deployment.name} to {new_start_date}")
