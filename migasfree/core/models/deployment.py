@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -158,6 +158,13 @@ class Deployment(models.Model, MigasLink):
         db_comment='initial date from which the deployment will be accessible',
     )
 
+    auto_restart = models.BooleanField(
+        verbose_name=_('auto restart'),
+        default=False,
+        db_comment='indicates that start date is updated once the deployment is complete,'
+                   ' ensuring an automatic restart of the process',
+    )
+
     default_preincluded_packages = models.TextField(
         verbose_name=_('default pre-included packages'),
         null=True,
@@ -252,7 +259,7 @@ class Deployment(models.Model, MigasLink):
     objects = DeploymentManager()
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     @staticmethod
     def get_percent(begin_date, end_date):
