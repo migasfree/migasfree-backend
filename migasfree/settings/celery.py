@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,19 +46,23 @@ CELERY_BEAT_SCHEDULE = {
     'alerts': {
         'task': 'migasfree.stats.tasks.alerts',
         'schedule': timedelta(seconds=10),
-        'options': {'expires': 8}
+        'options': {'expires': 8},
     },
     'computers_deployments': {
         'task': 'migasfree.stats.tasks.computers_deployments',
-        'schedule': crontab(hour=0, minute=1)
-    }
+        'schedule': crontab(hour=0, minute=1),
+    },
+    'update_deployment_start_date': {
+        'task': 'migasfree.core.tasks.update_deployment_start_date',
+        'schedule': crontab(hour=0, minute=0),
+    },
 }
 
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [(REDIS_HOST, REDIS_PORT)]
+            'hosts': [(REDIS_HOST, REDIS_PORT)],
         }
     }
 }
