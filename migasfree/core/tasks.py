@@ -55,8 +55,8 @@ def update_deployment_start_date():
                 last_delay_date = start_date + timedelta(days=last_delay.delay)
                 last_duration_date = last_delay_date + timedelta(days=last_delay.duration)
 
-                if datetime.today() >= last_duration_date:
+                if datetime.today().date() >= last_duration_date:
                     new_start_date = last_duration_date + timedelta(days=1)
                     deployment.start_date = new_start_date
                     deployment.save()
-                    print(f"Updated the start date of deployment {deployment.name} to {new_start_date}")
+                    print(f"Updated the start date of deployment {deployment.name} to {new_start_date}")  # DEBUG
