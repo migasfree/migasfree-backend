@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,13 +35,14 @@ from .core.models import UserProfile
 
 
 def run(cmd):
-    out, err = subprocess.Popen(
+    with subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
         shell=True
-    ).communicate()
+    ) as process:
+        out, err = process.communicate()
 
-    return out, err
+        return out, err
 
 
 def configure_user(name, groups=None):
@@ -50,7 +51,7 @@ def configure_user(name, groups=None):
     user.username = name
     user.is_staff = True
     user.is_active = True
-    user.is_superuser = (name == 'admin')
+    user.is_superuser = name == 'admin'
     user.set_password(name)
     user.save()
 
