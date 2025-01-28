@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -186,21 +186,117 @@ def event_by_month(data, begin_date, end_date, model, field='project_id'):
     return {'x_labels': x_axe, 'data': chart_data}
 
 
+def event_by_day(data, begin_date, end_date, model, field='project_id'):
+    labels = {}
+    new_data = {}
+    chart_data = {}
+
+    if field == 'project_id':
+        projects = Project.objects.only('id', 'name', 'platform')
+        for project in projects:
+            new_data[project.id] = []
+            labels[project.id] = project.name
+    elif field == 'status':
+        for item in Computer.STATUS_CHOICES:
+            new_data[item[0]] = []
+            labels[item[0]] = _(item[1])
+    elif field == 'checked':
+        new_data[True] = []
+        new_data[False] = []
+        labels[True] = _('Checked')
+        labels[False] = _('Unchecked')
+
+    date_range = []
+    current_date = begin_date
+    while current_date <= end_date:
+        date_range.append(current_date)
+        current_date += timedelta(days=1)
+
+    x_axe = [date.strftime('%Y-%m-%d') for date in date_range]
+
+    for date in date_range:
+        start_date = date
+        end_of_day = date + timedelta(days=1)  # range [start, end)
+
+        key = start_date.strftime('%Y-%m-%d')
+
+        if field == 'project_id':
+            for project in projects:
+                value = list(filter(
+                    lambda item:
+                        item['year'] == start_date.year and
+                        item['month'] == start_date.month and
+                        item['day'] == start_date.day,
+                    data
+                ))
+
+                count = list(filter(lambda item: item['project_id'] == project.id, value))
+                new_data[project.id].append({
+                    'value': count[0]['count'] if count else 0,
+                    'model': model,
+                    'project__id__exact': project.id,
+                    'created_at__gte': start_date.strftime('%Y-%m-%d'),
+                    'created_at__lt': end_of_day.strftime('%Y-%m-%d'),
+                })
+        elif field == 'status':
+            for item in Computer.STATUS_CHOICES:
+                value = list(filter(
+                    lambda item:
+                        item['year'] == start_date.year and
+                        item['month'] == start_date.month and
+                        item['day'] == start_date.day,
+                    data
+                ))
+
+                count = list(filter(lambda row: row['status'] == item[0], value))
+                new_data[item[0]].append({
+                    'value': count[0]['count'] if count else 0,
+                    'model': model,
+                    'status__in': item[0],
+                    'created_at__gte': start_date.strftime('%Y-%m-%d'),
+                    'created_at__lt': end_of_day.strftime('%Y-%m-%d'),
+                })
+        elif field == 'checked':
+            for val in [True, False]:
+                value = list(filter(
+                    lambda item:
+                        item['year'] == start_date.year and
+                        item['month'] == start_date.month and
+                        item['day'] == start_date.day,
+                    data
+                ))
+
+                count = list(filter(lambda item: item['checked'] == val, value))
+                new_data[val].append({
+                    'value': count[0]['count'] if count else 0,
+                    'model': model,
+                    'checked__exact': 1 if val else 0,
+                    'created_at__gte': start_date.strftime('%Y-%m-%d'),
+                    'created_at__lt': end_of_day.strftime('%Y-%m-%d'),
+                })
+
+    for item in new_data:
+        chart_data[labels[item]] = new_data[item]
+
+    return {'x_labels': x_axe, 'data': chart_data}
+
+
 @permission_classes((permissions.IsAuthenticated,))
 class EventViewSet(viewsets.ViewSet):
     def get_event_class(self):
-        if 'error' in self.basename:
-            event_class = 'Error'
-        elif 'fault' in self.basename:
-            event_class = 'Fault'
-        elif 'sync' in self.basename:
-            event_class = 'Synchronization'
-        elif 'migration' in self.basename:
-            event_class = 'Migration'
-        elif 'status' in self.basename:
-            event_class = 'StatusLog'
+        patterns = {
+            'error': 'Error',
+            'fault': 'Fault',
+            'sync': 'Synchronization',
+            'migration': 'Migration',
+            'status': 'StatusLog',
+        }
 
-        return globals()[event_class]
+        for pattern, event_class in patterns.items():
+            if pattern in self.basename:
+                return globals()[event_class]
+
+        raise ValueError('No matching event class found')
 
     @extend_schema(parameters=[computer_id, start_date, end_date])
     @action(methods=['get'], detail=False, url_path='by-day')
