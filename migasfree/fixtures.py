@@ -202,7 +202,7 @@ def configure_default_users():
     user.is_staff = False
     user.save()
     permissions = Permission.objects.filter(
-        codename__in=['change_device.logical'],
+        codename__in=['change_logical'],
         content_type__app_label='device'
     )
     user.user_permissions.add(*permissions)
