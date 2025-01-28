@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 from django.db import models
 from django.db.models.aggregates import Count
-from django.db.models.functions import TruncDay, TruncHour, ExtractMonth, ExtractYear
+from django.db.models.functions import TruncDay, TruncHour, ExtractMonth, ExtractYear, ExtractDay
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -81,6 +81,20 @@ class Event(models.Model, MigasLink):
             year=ExtractYear('created_at'),
             month=ExtractMonth('created_at')
         ).order_by('year', 'month', field).values('year', 'month', field).annotate(
+            count=Count('id')
+        ))
+
+    @classmethod
+    def stacked_by_day(cls, user, start_date, field='project_id'):
+        return list(cls.objects.scope(user).filter(
+            created_at__gte=start_date
+        ).annotate(
+            year=ExtractYear('created_at'),
+            month=ExtractMonth('created_at'),
+            day=ExtractDay('created_at')
+        ).order_by('year', 'month', 'day', field).values(
+            'year', 'month', 'day', field
+        ).annotate(
             count=Count('id')
         ))
 
