@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,15 +26,11 @@ from rest_framework.response import Response
 
 from ...core.models import Platform
 from ...client.models import Migration
-
-from .events import (
-    event_by_month, month_interval,
-    EventViewSet,
-)
+from .events_project import EventProjectViewSet
 
 
 @permission_classes((permissions.IsAuthenticated,))
-class MigrationStatsViewSet(EventViewSet):
+class MigrationStatsViewSet(EventProjectViewSet):
     @action(methods=['get'], detail=False, url_path='project')
     def by_project(self, request):
         user = request.user.userprofile
@@ -76,23 +72,5 @@ class MigrationStatsViewSet(EventViewSet):
                 'total': total,
                 'data': data,
             },
-            status=status.HTTP_200_OK
-        )
-
-    @action(methods=['get'], detail=False, url_path='project/month')
-    def project_by_month(self, request):
-        begin_date, end_date = month_interval(
-            begin_month=request.query_params.get('begin', ''),
-            end_month=request.query_params.get('end', '')
-        )
-
-        data = event_by_month(
-            Migration.stacked_by_month(request.user.userprofile, begin_date),
-            begin_date,
-            end_date,
-            'migration'
-        )
-        return Response(
-            data,
             status=status.HTTP_200_OK
         )
