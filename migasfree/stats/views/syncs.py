@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,11 +36,8 @@ from ...core.models import Project
 from ...client.models import Synchronization
 from ...utils import replace_keys
 from .. import validators
-
-from .events import (
-    event_by_month, month_interval,
-    month_year_iter, EventViewSet,
-)
+from .events import month_year_iter
+from .events_project import EventProjectViewSet
 
 
 def daterange(start_date, end_date):
@@ -50,7 +47,7 @@ def daterange(start_date, end_date):
 
 
 @permission_classes((permissions.IsAuthenticated,))
-class SyncStatsViewSet(EventViewSet):
+class SyncStatsViewSet(EventProjectViewSet):
     @action(methods=['get'], detail=False)
     def yearly(self, request):
         """
@@ -257,23 +254,5 @@ class SyncStatsViewSet(EventViewSet):
                     }
                 ),
             },
-            status=status.HTTP_200_OK
-        )
-
-    @action(methods=['get'], detail=False, url_path='project/month')
-    def project_by_month(self, request):
-        begin_date, end_date = month_interval(
-            begin_month=request.query_params.get('begin', ''),
-            end_month=request.query_params.get('end', '')
-        )
-
-        data = event_by_month(
-            Synchronization.stacked_by_month(request.user.userprofile, begin_date),
-            begin_date,
-            end_date,
-            'synchronization'
-        )
-        return Response(
-            data,
             status=status.HTTP_200_OK
         )
