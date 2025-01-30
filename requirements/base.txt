@@ -7,7 +7,7 @@ Django==4.2.18
 dj-rest-auth==7.0.1
 django-cors-headers==4.4.0
 django-filter==24.3
-django-import-export==4.3.4
+django-import-export==4.1.1
 django-markdownx==4.0.7
 django-partial-content==0.9.4
 django-redis==5.4.0
