@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@
 
 import sys
 
-if not hasattr(sys, 'version_info') or sys.version_info < (3, 8, 0, 'final'):
-    raise SystemExit('migasfree-backend requires Python 3.8 or later.')
+if not hasattr(sys, 'version_info') or sys.version_info < (3, 9, 0, 'final'):
+    raise SystemExit('migasfree-backend requires Python 3.9 or later.')
 
 import os
 
