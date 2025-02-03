@@ -95,6 +95,7 @@ class TestHardwareComputerViewSet(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('status', response.data)
         self.assertEqual(response.data['status'], 'reserved')
+
     def test_status_invalid(self):
         url = reverse('computer-status', kwargs={'pk': self.computer.pk})
         data = {'status': 'invalid'}
