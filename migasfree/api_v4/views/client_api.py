@@ -8,41 +8,51 @@ from django.http import HttpResponse
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 
-from ..api import *
+from ..api import (
+    get_computer, return_message, save_request_file,
+    register_computer, get_key_packager,
+    upload_server_package, upload_server_set, create_repositories_of_packageset,
+    upload_computer_message, get_properties, upload_computer_info,
+    upload_computer_faults, upload_computer_hardware,
+    upload_computer_software_base, upload_computer_software_base_diff,
+    upload_computer_software_history, get_computer_software,
+    upload_computer_errors, upload_devices_changes,
+    set_computer_tags, get_computer_tags,
+)
 from ...client.models import Error, Notification
 from ..secure import wrap, unwrap
 from ...utils import get_client_ip, uuid_validate, read_file
 from .. import errmfs
 
 # USING USERNAME AND PASSWORD ONLY (WITHOUT KEYS PAIR)
-API_REGISTER = (
-    "register_computer",
-    "get_key_packager",
-)
+API_REGISTER = {
+    'register_computer': register_computer,
+    'get_key_packager': get_key_packager,
+}
 
 # USING "PACKAGER" KEYS PAIR
-API_PACKAGER = (
-    "upload_server_package",
-    "upload_server_set",
-    "create_repositories_of_packageset",
-)
+API_PACKAGER = {
+    'upload_server_package': upload_server_package,
+    'upload_server_set': upload_server_set,
+    'create_repositories_of_packageset': create_repositories_of_packageset,
+}
 
-# USING "VERSION" KEYS
-API_VERSION = (
-    "upload_computer_message",
-    "get_properties",
-    "upload_computer_info",
-    "upload_computer_faults",
-    "upload_computer_hardware",
-    "upload_computer_software_base_diff",
-    "upload_computer_software_base",
-    "upload_computer_software_history",
-    "get_computer_software",
-    "upload_computer_errors",
-    "upload_devices_changes",
-    "set_computer_tags",
-    "get_computer_tags",
-)
+# USING "PROJECT" KEYS
+API_PROJECT = {
+    'upload_computer_message': upload_computer_message,
+    'get_properties': get_properties,
+    'upload_computer_info': upload_computer_info,
+    'upload_computer_faults': upload_computer_faults,
+    'upload_computer_hardware': upload_computer_hardware,
+    'upload_computer_software_base_diff': upload_computer_software_base_diff,
+    'upload_computer_software_base': upload_computer_software_base,
+    'upload_computer_software_history': upload_computer_software_history,
+    'get_computer_software': get_computer_software,
+    'upload_computer_errors': upload_computer_errors,
+    'upload_devices_changes': upload_devices_changes,
+    'set_computer_tags': set_computer_tags,
+    'get_computer_tags': get_computer_tags,
+}
 
 
 def check_tmp_path():
@@ -70,9 +80,7 @@ def get_msg_info(text):
         uuid = name
     else:  # WITH UUID
         name = '.'.join(slices[:-2])
-        uuid = uuid_validate(slices[-2])
-        if not uuid:
-            uuid = name
+        uuid = uuid_validate(slices[-2]) or name
         command = slices[-1]
 
     return command, uuid, name
@@ -82,23 +90,23 @@ def get_msg_info(text):
 def api_v4(request):
     if not check_tmp_path():
         return HttpResponse(
-            return_message(
-                'temporal_path_not_created',
-                errmfs.error(errmfs.GENERIC)
-            ),
+            return_message('temporal_path_not_created', errmfs.error(errmfs.GENERIC)),
             content_type='text/plain'
         )
 
     if request.method != 'POST':
         return HttpResponse(
-            return_message(
-                'unexpected_get_method',
-                errmfs.error(errmfs.GET_METHOD_NOT_ALLOWED)
-            ),
+            return_message('unexpected_get_method', errmfs.error(errmfs.GET_METHOD_NOT_ALLOWED)),
             content_type='text/plain'
         )
 
     msg = request.FILES.get('message')
+    if not msg:
+        return HttpResponse(
+            return_message('no_message_file', errmfs.error(errmfs.GENERIC)),
+            content_type='text/plain'
+        )
+
     filename = os.path.normpath(os.path.join(settings.MIGASFREE_TMP_DIR, msg.name))
     filename_return = f'{filename}.return'
 
@@ -127,23 +135,26 @@ def api_v4(request):
         )
 
     # COMPUTERS
-    if command in API_VERSION:  # IF COMMAND IS BY PROJECT
+    if command in API_PROJECT:  # IF COMMAND IS BY PROJECT
         if computer:
             save_request_file(msg, filename)
 
-            # UNWRAP AND EXECUTE COMMAND
             data = unwrap(filename, computer.project.name)
             if 'errmfs' in data:
                 ret = return_message(command, data)
 
-                if data["errmfs"]["code"] == errmfs.INVALID_SIGNATURE:
+                if data['errmfs']['code'] == errmfs.INVALID_SIGNATURE:
                     Error.objects.create(
                         computer,
                         computer.project,
                         f"{get_client_ip(request)} - {command} - {errmfs.error_info(errmfs.INVALID_SIGNATURE)}"
                     )
             else:
-                ret = eval(command)(request, name, uuid, computer, data)
+                handler = API_PROJECT.get(command)
+                if handler:
+                    ret = handler(request, name, uuid, computer, data)
+                else:
+                    ret = return_message(command, errmfs.error(errmfs.COMMAND_NOT_FOUND))
 
             os.remove(filename)
         else:
@@ -163,7 +174,11 @@ def api_v4(request):
             data = json.load(f)[command]
 
         try:
-            ret = eval(command)(request, name, uuid, computer, data)
+            handler = API_REGISTER.get(command)
+            if handler:
+                ret = handler(request, name, uuid, computer, data)
+            else:
+                ret = return_message(command, errmfs.error(errmfs.COMMAND_NOT_FOUND))
         except Exception:
             ret = return_message(command, errmfs.error(errmfs.GENERIC))
 
@@ -175,12 +190,15 @@ def api_v4(request):
     elif command in API_PACKAGER:
         save_request_file(msg, filename)
 
-        # UNWRAP AND EXECUTE COMMAND
-        data = unwrap(filename, "migasfree-packager")
+        data = unwrap(filename, 'migasfree-packager')
         if 'errmfs' in data:
             ret = data
         else:
-            ret = eval(command)(request, name, uuid, computer, data[command])
+            handler = API_PACKAGER.get(command)
+            if handler:
+                ret = handler(request, name, uuid, computer, data[command])
+            else:
+                ret = return_message(command, errmfs.error(errmfs.COMMAND_NOT_FOUND))
 
         os.remove(filename)
 
