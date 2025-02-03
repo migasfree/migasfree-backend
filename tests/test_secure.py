@@ -1,5 +1,3 @@
-import pytest
-
 from migasfree.api_v4.secure import is_safe_filename
 
 
