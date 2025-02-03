@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ from rest_framework import (
 )
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
 
 from ...app_catalog.resources import (
     ApplicationResource, CategoryResource, PolicyResource,
@@ -109,28 +110,59 @@ from ..filters import (
 class ExportViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False)
     def export(self, request):
-        exceptions = {
-            'attributeset': 'AttributeSet',
-            'clientattribute': 'ClientAttribute',
-            'serverattribute': 'ServerAttribute',
-            'clientproperty': 'ClientProperty',
-            'serverproperty': 'ServerProperty',
-            'faultdefinition': 'FaultDefinition',
-            'packagehistory': 'PackageHistory',
-            'packageset': 'PackageSet',
-            'statuslog': 'StatusLog',
-            'userprofile': 'UserProfile',
+        resources = {
+            # app_catalog
+            'application': ApplicationResource,
+            'category': CategoryResource,
+            'policy': PolicyResource,
+
+            # client
+            'computer': ComputerResource,
+            'error': ErrorResource,
+            'fault': FaultResource,
+            'faultdefinition': FaultDefinitionResource,
+            'migration': MigrationResource,
+            'notification': NotificationResource,
+            'packagehistory': PackageHistoryResource,
+            'statuslog': StatusLogResource,
+            'synchronization': SynchronizationResource,
+            'user': UserResource,
+
+            # core
+            'attributeset': AttributeSetResource,
+            'clientattribute': ClientAttributeResource,
+            'clientproperty': ClientPropertyResource,
+            'deployment': DeploymentResource,
+            'domain': DomainResource,
+            'group': GroupResource,
+            'package': PackageResource,
+            'packageset': PackageSetResource,
+            'platform': PlatformResource,
+            'project': ProjectResource,
+            'schedule': ScheduleResource,
+            'scope': ScopeResource,
+            'serverattribute': ServerAttributeResource,
+            'serverproperty': ServerPropertyResource,
+            'store': StoreResource,
+            'userprofile': UserProfileResource,
+
+            # device
+            'capability': CapabilityResource,
+            'connection': ConnectionResource,
+            'device': DeviceResource,
+            'driver': DriverResource,
+            'manufacturer': ManufacturerResource,
+            'model': ModelResource,
+            'logical': LogicalResource,
+            'type': TypeResource,
         }
 
-        class_name = self.basename.capitalize()
-        if class_name.lower() in exceptions:
-            class_name = exceptions[class_name.lower()]
+        class_name = self.basename
+        if class_name not in resources:
+            raise NotFound(f'Export not supported for {class_name}')
 
-        resource = globals()[f'{class_name}Resource']
-        obj = resource()
-        data = obj.export(
-            self.filter_queryset(self.get_queryset())
-        )
+        resource = resources[class_name]()
+        data = resource.export(self.filter_queryset(self.get_queryset()))
 
         response = HttpResponse(
             data.csv,
