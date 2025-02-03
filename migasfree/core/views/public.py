@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -257,7 +257,7 @@ class GetSourceFileView(views.APIView):
         if not os.path.exists(os.path.dirname(file_local)):
             os.makedirs(os.path.dirname(file_local))
 
-        url = urljoin(source.base_url, resource)
+        url = urljoin(f'{source.base_url}/', resource)
         logger.debug('get url %s', url)
 
         try:
