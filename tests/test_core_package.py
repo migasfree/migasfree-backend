@@ -68,7 +68,6 @@ def test_by_store_without_packages():
     assert result['outer'] == []
 
 
-
 @pytest.mark.django_db
 def test_by_store_with_packages():
     user = UserProfile.objects.create_user('test', 'test@example.com', 'test')
