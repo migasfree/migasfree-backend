@@ -35,15 +35,15 @@ from .events import EventViewSet, month_interval, event_by_month, event_by_day
 class EventProjectViewSet(EventViewSet):
     def get_event_class(self):
         patterns = {
-            'error': 'Error',
-            'fault': 'Fault',
-            'sync': 'Synchronization',
-            'migration': 'Migration',
+            'error': Error,
+            'fault': Fault,
+            'sync': Synchronization,
+            'migration': Migration,
         }
 
         for pattern, event_class in patterns.items():
             if pattern in self.basename:
-                return globals()[event_class]
+                return event_class
 
         raise ValueError('No matching event class found')
 
