@@ -214,11 +214,9 @@ def event_by_day(data, begin_date, end_date, model, field='project_id'):
 
     x_axe = [date.strftime('%Y-%m-%d') for date in date_range]
 
-    for date in date_range:
-        start_date = date
-        end_of_day = date + timedelta(days=1)  # range [start, end)
-
-        key = start_date.strftime('%Y-%m-%d')
+    for date_item in date_range:
+        start_date = date_item
+        end_of_day = date_item + timedelta(days=1)  # range [start, end)
 
         if field == 'project_id':
             for project in projects:
@@ -285,16 +283,16 @@ def event_by_day(data, begin_date, end_date, model, field='project_id'):
 class EventViewSet(viewsets.ViewSet):
     def get_event_class(self):
         patterns = {
-            'error': 'Error',
-            'fault': 'Fault',
-            'sync': 'Synchronization',
-            'migration': 'Migration',
-            'status': 'StatusLog',
+            'error': Error,
+            'fault': Fault,
+            'sync': Synchronization,
+            'migration': Migration,
+            'status': StatusLog,
         }
 
         for pattern, event_class in patterns.items():
             if pattern in self.basename:
-                return globals()[event_class]
+                return event_class
 
         raise ValueError('No matching event class found')
 
@@ -304,11 +302,11 @@ class EventViewSet(viewsets.ViewSet):
         user = request.user.userprofile
         computer_id = request.GET.get('computer_id', 0)
         start_date = request.GET.get('start_date', '')
-        end_date = request.GET.get('end_date', date.today().strftime('%Y-%m-%d'))
+        end_date = request.GET.get('end_date', timezone.localtime().strftime('%Y-%m-%d'))
 
         computer = get_object_or_404(Computer, pk=computer_id)
         if not start_date:
-            start_date = computer.created_at.strftime('%Y-%m-%d')
+            start_date = timezone.localtime(computer.created_at).strftime('%Y-%m-%d')
 
         event_class = self.get_event_class()
         data = event_class.by_day(computer_id, start_date, end_date, user)
