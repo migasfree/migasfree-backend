@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -120,15 +120,15 @@ class PackageSet(models.Model, MigasLink):
             return PackageSet.objects.filter(
                 deployment__isnull=True,
                 packages__isnull=False
-            ).count()
+            ).distinct().count()
 
         return PackageSet.objects.scope(user).filter(
             deployment__isnull=True,
             packageset__isnull=False
-        ).count()
+        ).distinct().count()
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     class Meta:
         app_label = 'core'
