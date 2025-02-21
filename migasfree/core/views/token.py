@@ -729,7 +729,7 @@ class PackageSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
         if self.request is None:
             return PackageSet.objects.none()
 
-        return PackageSet.objects.scope(self.request.user.userprofile)
+        return PackageSet.objects.scope(self.request.user.userprofile).distinct()
 
     def _upload_packages(self, project, store, files):
         new_pkgs = []
