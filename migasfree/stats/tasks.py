@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -279,7 +279,7 @@ def get_alerts():
         item['api'] = json.loads(item.get('api', '{}'))
         item['msg'] = gettext(item.get('msg', ''))
 
-    return [item for item in response if not (int(item['result']) == 0)]
+    return [item for item in response if int(item['result']) != 0]
 
 
 @shared_task(queue='default')
