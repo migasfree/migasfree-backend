@@ -813,7 +813,11 @@ class DeploymentViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
     queryset = Deployment.objects.all()
     serializer_class = DeploymentSerializer
     filterset_class = DeploymentFilter
-    search_fields = ['name']
+    search_fields = [
+        'name',
+        'packages_to_install', 'packages_to_remove',
+        'default_preincluded_packages', 'default_included_packages', 'default_excluded_packages',
+    ]
     ordering_fields = '__all__'
     ordering = ('name', 'project__name')
 
