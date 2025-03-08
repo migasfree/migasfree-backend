@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,6 +30,8 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_redis import get_redis_connection
+from drf_spectacular.openapi import OpenApiParameter
+from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets, exceptions, status, mixins, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -58,6 +60,17 @@ from ..filters import (
 from .safe import remove_computer_messages
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: settings.MIGASFREE_COMPUTER_SEARCH_FIELDS, sync_user__name, sync_user__fullname',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = models.Computer.objects.all()
@@ -475,6 +488,17 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         )
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: created_at, description',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class ErrorViewSet(
     DatabaseCheckMixin,
@@ -502,6 +526,17 @@ class ErrorViewSet(
         return models.Error.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class FaultDefinitionViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = models.FaultDefinition.objects.all()
@@ -534,6 +569,17 @@ class FaultDefinitionViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
         )
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: created_at, result',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class FaultViewSet(
     DatabaseCheckMixin,
@@ -569,6 +615,17 @@ class FaultViewSet(
         return Response(response, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: computer__name, computer__id',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class MigrationViewSet(
     DatabaseCheckMixin,
@@ -590,6 +647,17 @@ class MigrationViewSet(
         return models.Migration.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: message',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class NotificationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = models.Notification.objects.all()
@@ -609,6 +677,17 @@ class NotificationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSe
         return serializers.NotificationSerializer
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: computer__name, package__fullname',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class PackageHistoryViewSet(
     DatabaseCheckMixin,
@@ -629,6 +708,17 @@ class PackageHistoryViewSet(
         return models.PackageHistory.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: status, computer__name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class StatusLogViewSet(
     DatabaseCheckMixin,
@@ -650,6 +740,17 @@ class StatusLogViewSet(
         return models.StatusLog.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: user__name, user__fullname',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class SynchronizationViewSet(
     DatabaseCheckMixin,
@@ -677,6 +778,17 @@ class SynchronizationViewSet(
         return models.Synchronization.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name, fullname',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class UserViewSet(
     DatabaseCheckMixin,
