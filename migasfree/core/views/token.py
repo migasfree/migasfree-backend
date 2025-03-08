@@ -382,7 +382,7 @@ class AttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, 
     queryset = Attribute.objects.all()
     serializer_class = AttributeSerializer
     filterset_class = AttributeFilter
-    search_fields = ['value', 'description']
+    search_fields = ['value', 'description', 'property_att__prefix']
 
     def get_queryset(self):
         if self.request is None:
@@ -396,7 +396,7 @@ class ServerAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
     queryset = ServerAttribute.objects.filter(property_att__sort='server')
     serializer_class = ServerAttributeSerializer
     filterset_class = ServerAttributeFilter
-    search_fields = ['value', 'description']
+    search_fields = ['value', 'description', 'property_att__prefix']
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -453,7 +453,7 @@ class ClientAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
     queryset = ClientAttribute.objects.filter(property_att__sort__in=['client', 'basic'])
     serializer_class = ClientAttributeSerializer
     filterset_class = ClientAttributeFilter
-    search_fields = ['value', 'description']
+    search_fields = ['value', 'description', 'property_att__prefix']
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
