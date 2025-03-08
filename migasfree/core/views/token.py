@@ -28,6 +28,8 @@ from django.shortcuts import get_object_or_404
 from django.utils.text import slugify
 from django.utils.translation import gettext
 from django_redis import get_redis_connection
+from drf_spectacular.openapi import OpenApiParameter
+from drf_spectacular.utils import extend_schema
 from rest_framework import (
     viewsets, parsers, status,
     mixins, permissions,
@@ -200,6 +202,17 @@ class MigasViewSet(viewsets.ViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name, property_att__name, property_att__prefix',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class SingularityViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Singularity.objects.all()
@@ -231,6 +244,17 @@ class SingularityViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
         )
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name, description',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class AttributeSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = AttributeSet.objects.all()
@@ -262,6 +286,17 @@ class AttributeSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSe
         )
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class PlatformViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Platform.objects.all()
@@ -278,6 +313,17 @@ class PlatformViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         return Platform.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Project.objects.all()
@@ -312,6 +358,17 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         return super().create(request, *args, **kwargs)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class StoreViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Store.objects.all()
@@ -334,6 +391,17 @@ class StoreViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Expo
         return Store.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name, language, code',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class PropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Property.objects.all()
@@ -361,6 +429,17 @@ class PropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         )
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name, prefix',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class ServerPropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = ServerProperty.objects.filter(sort='server')
@@ -369,6 +448,17 @@ class ServerPropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
     search_fields = ['name', 'prefix']
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name, prefix',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class ClientPropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = ClientProperty.objects.filter(sort__in=['client', 'basic'])
@@ -377,6 +467,17 @@ class ClientPropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
     search_fields = ['name', 'prefix']
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: value, description, property_att__prefix',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class AttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Attribute.objects.all()
@@ -391,6 +492,17 @@ class AttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, 
         return Attribute.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: value, description, property_att__prefix',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class ServerAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = ServerAttribute.objects.filter(property_att__sort='server')
@@ -448,6 +560,17 @@ class ServerAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: value, description, property_att__prefix',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class ClientAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = ClientAttribute.objects.filter(property_att__sort__in=['client', 'basic'])
@@ -563,6 +686,17 @@ class ScheduleDelayViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewS
         )
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class ScheduleViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Schedule.objects.all()
@@ -585,6 +719,17 @@ class ScheduleViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         return self.queryset.prefetch_related('delays')
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: fullname',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class PackageViewSet(
         DatabaseCheckMixin,
@@ -709,6 +854,17 @@ class PackageViewSet(
         return Response({'data': response}, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class PackageSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = PackageSet.objects.all()
@@ -808,6 +964,18 @@ class PackageSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
         return super().partial_update(request, *args, **kwargs)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name, packages_to_install, packages_to_remove,'
+            ' default_preincluded_packages, default_included_packages, default_excluded_packages',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class DeploymentViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Deployment.objects.all()
@@ -908,6 +1076,17 @@ class ExternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
         return ExternalSourceSerializer
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: username, first_name, last_name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class UserProfileViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = UserProfile.objects.all()
@@ -989,6 +1168,17 @@ class UserProfileViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
         )
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class GroupViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, ExportViewSet):
     queryset = Group.objects.all()
@@ -1004,6 +1194,17 @@ class GroupViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, ExportViewSet):
         return GroupSerializer
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class PermissionViewSet(DatabaseCheckMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Permission.objects.all()
@@ -1012,6 +1213,17 @@ class PermissionViewSet(DatabaseCheckMixin, mixins.ListModelMixin, viewsets.Gene
     search_fields = ['name']
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class DomainViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Domain.objects.all()
@@ -1046,6 +1258,17 @@ class DomainViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
         )
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class ScopeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = Scope.objects.all()
