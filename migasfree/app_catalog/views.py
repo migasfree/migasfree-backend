@@ -18,6 +18,8 @@
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from drf_spectacular.openapi import OpenApiParameter
+from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets, status, permissions, parsers
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -34,6 +36,17 @@ from .filters import (
 )
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class CategoryViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = models.Category.objects.all()
@@ -45,6 +58,17 @@ class CategoryViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
     ordering = ('name',)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class ApplicationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = models.Application.objects.all()
@@ -120,6 +144,17 @@ class PackagesByProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasV
         return serializers.PackagesByProjectSerializer
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='search',
+            location=OpenApiParameter.QUERY,
+            description='Fields: name',
+            type=str
+        )
+    ],
+    methods=['GET'],
+)
 @permission_classes((permissions.DjangoModelPermissions,))
 class PolicyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = models.Policy.objects.all()
