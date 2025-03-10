@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
+from drf_spectacular.openapi import OpenApiParameter, OpenApiTypes, OpenApiResponse
+from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets, status, mixins, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -53,6 +55,26 @@ class HardwareViewSet(
 
         return Node.objects.scope(self.request.user.userprofile)
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='id',
+                location=OpenApiParameter.PATH,
+                type=OpenApiTypes.INT,
+                description='Identifier of the node',
+                required=True,
+            )
+        ],
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(description='Successfully retrieved node information'),
+            status.HTTP_401_UNAUTHORIZED: OpenApiResponse(description='Authentication credentials were not provided'),
+            status.HTTP_403_FORBIDDEN: OpenApiResponse(description='Permission denied for this operation'),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description='Node not found'),
+        },
+        summary='Retrieve detailed information about a specific node',
+        description='This endpoint provides comprehensive details about a node, including its capabilities, '
+        'logical names, and configurations.',
+    )
     @action(methods=['get'], detail=True)
     def info(self, request, pk=None):
         node = self.get_object()
