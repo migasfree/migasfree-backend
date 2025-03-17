@@ -108,6 +108,12 @@ def api_v4(request):
         )
 
     filename = os.path.normpath(os.path.join(settings.MIGASFREE_TMP_DIR, msg.name))
+    if not filename.startswith(settings.MIGASFREE_TMP_DIR):
+        return HttpResponse(
+            return_message('invalid_file_path', errmfs.error(errmfs.GENERIC)),
+            content_type='text/plain'
+        )
+
     filename_return = f'{filename}.return'
 
     command, uuid, name = get_msg_info(msg.name)
