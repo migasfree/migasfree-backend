@@ -416,7 +416,13 @@ class GetSourceFileView(views.APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        file_local = os.path.join(settings.MIGASFREE_PUBLIC_DIR, path.split('/src/')[1])
+        file_local = os.path.normpath(os.path.join(settings.MIGASFREE_PUBLIC_DIR, path.split('/src/')[1]))
+        if not file_local.startswith(settings.MIGASFREE_PUBLIC_DIR):
+            return HttpResponse(
+                'Invalid file path',
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         if not file_local.endswith(tuple(project.get_pms().extensions)):  # is a metadata file
             if not source.frozen:
                 # expired metadata
