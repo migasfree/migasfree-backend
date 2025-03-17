@@ -329,6 +329,8 @@ class GetSourceFileView(views.APIView):
                 status=status.HTTP_502_BAD_GATEWAY
             )
         except Exception as e:
+            error_message = f'Error: {str(e)} {escape(url)}'
+            logger.error(error_message)
             add_notification_get_source_file(
                 f'Error: {str(e)}',
                 source,
@@ -337,7 +339,7 @@ class GetSourceFileView(views.APIView):
                 client_ip
             )
             return HttpResponse(
-                f'Error: {str(e)} {escape(url)}',
+                'An internal error has occurred',
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
