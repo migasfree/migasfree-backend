@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2021-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@ except ImportError:
 
 
 def get_id(con, cursor, table, field, value):
-    cursor.execute('SELECT rowid FROM {} WHERE {} = "{}";'.format(table, field, value))
+    cursor.execute(f'SELECT rowid FROM {table} WHERE {field} = "{value}";')
     con.commit()
 
     row = cursor.fetchall()
     if len(row) == 0:
-        cursor.execute('SELECT MAX(rowid) + 1 FROM {}'.format(table))
+        cursor.execute(f'SELECT MAX(rowid) + 1 FROM {table}')
         con.commit()
 
         id_ = cursor.fetchall()[0][0]
@@ -44,7 +44,7 @@ def get_id(con, cursor, table, field, value):
             id_ = 1
 
         cursor.execute(
-            'INSERT INTO {} (rowid, {}) VALUES (?,?)'.format(table, field),
+            f'INSERT INTO {table} (rowid, {field}) VALUES (?,?)',
             (id_, value)
         )
         con.commit()
@@ -129,7 +129,7 @@ class Winget(Pms):
         manifest = 1
 
         cursor.execute(
-            'INSERT INTO pathparts (rowid,pathpart) VALUES (?,?)',
+            'INSERT INTO pathparts (rowid, pathpart) VALUES (?,?)',
             (1, self.components)
         )
         con.commit()
@@ -164,7 +164,7 @@ class Winget(Pms):
 
                     # PATHPARTS
                     pathpart = get_id(con, cursor, 'pathparts', 'pathpart', package)
-                    cursor.execute('UPDATE pathparts SET parent=1 WHERE rowid={};'.format(pathpart))
+                    cursor.execute(f'UPDATE pathparts SET parent=1 WHERE rowid={pathpart};')
                     con.commit()
 
                     # MANIFEST
