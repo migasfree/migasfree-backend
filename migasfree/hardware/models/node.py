@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 import re
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -255,6 +256,14 @@ class Node(models.Model, MigasLink):
             class_name='network',
             description='Ethernet interface'
         )
+
+        if not query.exists():
+            # not privileged docker does not have a network card, but has an special UUID pattern
+            try:
+                computer = Computer.objects.get(id=computer_id)
+                return computer.uuid.upper().startswith('00000000-0000-0000-0000-0242AC')
+            except ObjectDoesNotExist:
+                return False
 
         return query.count() == 1 and \
             query[0].serial.upper().startswith('02:42:AC')
