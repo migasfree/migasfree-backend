@@ -205,11 +205,11 @@ def handle_postrun(sender=None, **kwargs):
                     deployment_name, project_name
                 )
             else:
-                msg = "An error occurred during repository metadata creation for deployment [%s] in project [%s]: %s" % (
-                    deployment_name, project_name, output
-                )
+                msg = 'An error occurred during repository metadata creation for deployment [%s] in project [%s]: %s' \
+                    % (deployment_name, project_name, output)
         elif kwargs['state'] == 'REJECTED':
-            msg = "Repository metadata creation for deployment ID [%d] could not be performed. Review configuration." % kwargs['kwargs']['deployment_id']
+            msg = 'Repository metadata creation for deployment ID [%d] could not be performed.'
+            ' Review configuration.' % kwargs['kwargs']['deployment_id']
         elif kwargs['state'] is None:  # REVOKED & TERMINATED
             return
 
