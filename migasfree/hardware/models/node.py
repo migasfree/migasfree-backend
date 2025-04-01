@@ -84,7 +84,8 @@ class Node(models.Model, MigasLink):
         'Supermicro': 'kvm host',
         'Xen': 'xen',
         'Bochs': 'kvm',
-        'VMware, Inc.': 'vmware'
+        'VMware, Inc.': 'vmware',
+        'QEMU': 'qemu',
     }
 
     parent = models.ForeignKey(
