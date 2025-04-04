@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
 from datetime import datetime, timedelta
 from celery import Celery, shared_task
 
@@ -60,3 +62,31 @@ def update_deployment_start_date():
                     deployment.start_date = new_start_date
                     deployment.save()
                     print(f"Updated the start date of deployment {deployment.name} to {new_start_date}")  # DEBUG
+
+
+@shared_task
+def remove_orphan_packages_from_deployments():
+    deployments = Deployment.objects.all()
+    for deploy in deployments:
+        path = deploy.path()
+        if os.path.isdir(path):
+            pms = deploy.pms()
+            packages_directory = os.path.join(path, pms.components)
+            for root, _, files in os.walk(packages_directory):
+                for _file in files:
+                    if any(_file.lower().endswith(ext) for ext in pms.extensions):
+                        try:
+                            if not pms.is_package_in_repo(_file, path):
+                                package_path = os.path.join(root, _file)
+                                real_package = os.path.realpath(package_path)
+
+                                os.unlink(package_path)
+                                print(f'{package_path} removed')
+
+                                if os.path.exists(real_package) and not os.path.isdir(real_package):
+                                    os.remove(real_package)
+                                    print(f'{real_package} removed')
+                        except NotImplementedError:
+                            pass
+                        except OSError as e:
+                            print(f'Error removing {package_path} or {real_package}: {e}')
