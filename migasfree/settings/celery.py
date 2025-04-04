@@ -56,6 +56,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'migasfree.core.tasks.update_deployment_start_date',
         'schedule': crontab(hour=0, minute=0),
     },
+    'remove_orphan_packages_from_deployments': {
+        'task': 'migasfree.core.tasks.remove_orphan_packages_from_deployments',
+        'schedule': crontab(hour=1, minute=0, day_of_week=6),  # at Sunday
+    },
 }
 
 CHANNEL_LAYERS = {
