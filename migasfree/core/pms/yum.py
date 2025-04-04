@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+import gzip
+import re
+import xml.etree.ElementTree as ET
 
 from ...utils import execute, get_setting
 
@@ -179,7 +183,28 @@ baseurl={{protocol}}://{{server}}/src/{project}/{trailing_path}/{name}/{suite}/{
         return ''
 
     def is_package_in_repo(self, filename, path):
-        cmd = f'zgrep {filename} {path}/*primary.xml.gz'
-        ret, _, _ = execute(cmd)
+        match = re.match(r'^(.+)-([^-]+)-([^-]+)\.([^.]+)\.rpm$', filename)
+        if not match:
+            raise ValueError(f'Incorrect file format: {filename}')
 
-        return ret == 0
+        package_name = match.group(1)
+        version = match.group(2)
+        release = match.group(3)
+        arch = match.group(4)
+
+        with gzip.open(f'{path}/*primary.xml.gz', 'rt') as f:
+            tree = ET.parse(f)
+            root = tree.getroot()
+            namespaces = {'rpm': 'http://linux.duke.edu/metadata/rpm'}
+            for package in root.findall('.//rpm:package', namespaces):
+                package_name_elem = package.find('rpm:name', namespaces)
+                version_elem = package.find('rpm:version', namespaces)
+                arch_elem = package.find('rpm:arch', namespaces)
+
+                if (package_name_elem is not None and package_name_elem.text == package_name and
+                        version_elem is not None and version_elem.attrib.get('ver') == version and
+                        version_elem.attrib.get('rel') == release and
+                        arch_elem is not None and arch_elem.text == arch):
+                    return True
+
+        return False
