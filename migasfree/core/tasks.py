@@ -65,8 +65,8 @@ def update_deployment_start_date():
 
 
 @shared_task
-def remove_orphan_packages_from_deployments():
-    deployments = Deployment.objects.all()
+def remove_orphan_packages_from_external_deployments():
+    deployments = Deployment.objects.filter(source=Deployment.SOURCE_EXTERNAL)
     for deploy in deployments:
         path = deploy.path()
         if os.path.isdir(path):
@@ -78,15 +78,10 @@ def remove_orphan_packages_from_deployments():
                         try:
                             if not pms.is_package_in_repo(_file, path):
                                 package_path = os.path.join(root, _file)
-                                real_package = os.path.realpath(package_path)
-
-                                os.unlink(package_path)
-                                print(f'{package_path} removed')
-
-                                if os.path.exists(real_package) and not os.path.isdir(real_package):
-                                    os.remove(real_package)
-                                    print(f'{real_package} removed')
+                                if os.path.exists(package_path) and not os.path.isdir(package_path):
+                                    os.remove(package_path)
+                                    print(f'{package_path} removed')
                         except NotImplementedError:
                             pass
                         except OSError as e:
-                            print(f'Error removing {package_path} or {real_package}: {e}')
+                            print(f'Error removing {package_path}: {e}')
