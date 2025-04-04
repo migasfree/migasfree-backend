@@ -81,7 +81,7 @@ def remove_orphan_packages_from_external_deployments():
                                 if os.path.exists(package_path) and not os.path.isdir(package_path):
                                     os.remove(package_path)
                                     print(f'{package_path} removed')
-                        except NotImplementedError:
+                        except (NotImplementedError, ValueError):
                             pass
                         except OSError as e:
                             print(f'Error removing {package_path}: {e}')
