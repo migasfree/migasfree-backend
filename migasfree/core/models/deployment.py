@@ -20,6 +20,7 @@ import os
 import shutil
 import datetime
 
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import pre_save, pre_delete
@@ -457,7 +458,9 @@ class Deployment(models.Model, MigasLink):
     def path(self, name=None):
         return os.path.join(
             Project.path(self.project.slug),
-            self.pms().relative_path,
+            self.pms().relative_path
+            if self.source == Deployment.SOURCE_INTERNAL
+            else settings.MIGASFREE_EXTERNAL_TRAILING_PATH,
             name if name else self.slug
         )
 
