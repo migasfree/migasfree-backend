@@ -71,8 +71,7 @@ def remove_orphan_packages_from_external_deployments():
         path = deploy.path()
         if os.path.isdir(path):
             pms = deploy.pms()
-            packages_directory = os.path.join(path, pms.components)
-            for root, _, files in os.walk(packages_directory):
+            for root, dirs, files in os.walk(path):
                 for _file in files:
                     if any(_file.lower().endswith(ext) for ext in pms.extensions):
                         try:
