@@ -25,8 +25,9 @@ from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _
 from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiExample, inline_serializer
 from rest_framework import viewsets, status, views, permissions, serializers as drf_serializers
-from rest_framework.decorators import action, permission_classes
+from rest_framework.decorators import action, permission_classes, throttle_classes
 from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle
 
 from ...utils import (
     uuid_change_format, get_client_ip,
@@ -156,6 +157,7 @@ def get_computer(uuid, name):
 
 
 @permission_classes((permissions.AllowAny,))
+@throttle_classes([UserRateThrottle])
 class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
 
     @extend_schema(
@@ -197,6 +199,7 @@ class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
 
 
 @permission_classes((permissions.AllowAny,))
+@throttle_classes([UserRateThrottle])
 class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
 
     @extend_schema(
@@ -259,6 +262,7 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
 
 
 @permission_classes((permissions.AllowAny,))
+@throttle_classes([UserRateThrottle])
 class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
     @extend_schema(
