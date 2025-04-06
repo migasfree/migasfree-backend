@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,8 +22,9 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
 from rest_framework import viewsets, status, permissions
-from rest_framework.decorators import action, permission_classes
+from rest_framework.decorators import action, permission_classes, throttle_classes
 from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle
 
 from ...utils import save_tempfile
 
@@ -49,6 +50,7 @@ def check_repository_metadata(package_id):
 
 
 @permission_classes((permissions.AllowAny,))
+@throttle_classes([UserRateThrottle])
 class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
     def get_package_data(self, _file, project):
         name, version, architecture = Package.normalized_name(_file.name)
