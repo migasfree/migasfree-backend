@@ -21,8 +21,9 @@ from django.utils.translation import gettext
 from drf_spectacular.openapi import OpenApiParameter, OpenApiTypes, OpenApiResponse
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets, status, mixins, permissions
-from rest_framework.decorators import action, permission_classes
+from rest_framework.decorators import action, permission_classes, throttle_classes
 from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle
 
 from ..core.mixins import SafeConnectionMixin
 from ..core.views import MigasViewSet
@@ -115,6 +116,7 @@ class HardwareViewSet(
 
 
 @permission_classes((permissions.AllowAny,))
+@throttle_classes([UserRateThrottle])
 class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
     @action(methods=['post'], detail=False)
     def hardware(self, request):
