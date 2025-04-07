@@ -372,7 +372,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @extend_schema(
-        description='Creates or updates a computer',
+        description='Creates or updates a computer (requires JWT auth)',
         request={
             'application/json': {
                 'type': 'object',
@@ -623,6 +623,31 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_201_CREATED
         )
 
+    @extend_schema(
+        description='Returns computer available repositories list (requires JWT auth)',
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'id': {
+                        'type': 'integer',
+                        'description': 'Computer ID'
+                    },
+                },
+                'required': ['id']
+            }
+        },
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'object',
+                'properties': {
+                    'name': {'type': 'string'},
+                    'source_template': {'type': 'string'}
+                }
+            },
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'}
+        }
+    )
     @action(methods=['post'], detail=False)
     def repositories(self, request):
         """
@@ -649,6 +674,45 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns computer fault definitions list (requires JWT auth)',
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'id': {
+                        'type': 'integer',
+                        'description': 'Computer ID'
+                    },
+                },
+                'required': ['id']
+            }
+        },
+        responses={
+            status.HTTP_200_OK: serializers.FaultDefinitionForAttributesSerializer(many=True),
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'}
+        },
+        examples=[
+            OpenApiExample(
+                'Example request',
+                value={
+                    'id': 1
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                'Example response',
+                value=[
+                    {
+                        'name': 'SampleFaultDefinition',
+                        'language': 'python',
+                        'code': 'print("This is a sample code.")'
+                    }
+                ],
+                response_only=True,
+            ),
+        ]
+    )
     @action(methods=['post'], detail=False, url_path='faults/definitions')
     def fault_definitions(self, request):
         """
@@ -657,7 +721,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         Returns: [
             {
                 'name': 'xxx',
-                'language': 'bash' | 'php' | 'python' | 'ruby' | 'perl',
+                'language': 'bash' | 'php' | 'python' | 'ruby' | 'perl' | 'cmd' | 'powershell',
                 'code': 'xxxx'
             },
             ...
@@ -680,6 +744,39 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Process and record faults for a given computer (requires JWT auth)',
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': 'integer', 'description': 'Computer ID'},
+                    'faults': {
+                        'type': 'object',
+                        'description': 'A dictionary of fault names and their results.',
+                        'additionalProperties': {'type': 'string'}
+                    }
+                }
+            }
+        },
+        responses={
+            status.HTTP_200_OK: serializers.FaultSerializer(many=True),
+            status.HTTP_404_NOT_FOUND: 'Computer not found'
+        },
+        examples=[
+            OpenApiExample(
+                'Example request',
+                value={
+                    'id': 1,
+                    'faults': {
+                        'Low Available Space On Home Partition': '',
+                        'Low Available Space On System Partition': '95%',
+                    }
+                },
+                request_only=True,
+            ),
+        ]
+    )
     @action(methods=['post'], detail=False)
     def faults(self, request):
         """
@@ -716,6 +813,48 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Process and record errors for a given computer (requires JWT auth)',
+        request=serializers.ErrorSafeWriteSerializer,
+        responses={
+            status.HTTP_201_CREATED: serializers.ErrorSafeWriteSerializer,
+            status.HTTP_400_BAD_REQUEST: OpenApiTypes.OBJECT,
+            status.HTTP_404_NOT_FOUND: 'Computer not found'
+        },
+        examples=[
+            OpenApiExample(
+                'Claim example',
+                summary='Example claim object',
+                description='A sample claim object that will be processed.',
+                value={
+                    'id': 1,
+                    'description': 'could not connect to host'
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                'Success response',
+                summary='Claim processed successfully',
+                description='The response when a claim is processed successfully.',
+                value={
+                    'id': 1,
+                    'description': 'could not connect to host',
+                    'computer': 123,
+                    'project': 456
+                },
+                response_only=True,
+            ),
+            OpenApiExample(
+                'Error response',
+                summary='Claim validation failed',
+                description='The response when the claim data is invalid.',
+                value={
+                    'description': ['This field may not be null.']
+                },
+                response_only=True,
+            ),
+        ]
+    )
     @action(methods=['post'], detail=False)
     def errors(self, request):
         """
