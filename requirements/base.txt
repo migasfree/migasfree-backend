@@ -1,6 +1,6 @@
 asgiref==3.8.1
-celery==5.4.0
-channels==4.2.0
+celery==5.5.0
+channels==4.2.2
 channels-redis==4.2.1
 daphne==4.1.2
 Django==4.2.20
@@ -11,14 +11,13 @@ django-import-export==4.3.7
 django-markdownx==4.0.7
 django-partial-content==0.9.4
 django-redis==5.4.0
-djangorestframework==3.15.2
-djangorestframework-filters==1.0.0.dev2
+djangorestframework==3.16.0
 djangorestframework-simplejwt==5.5.0
 djoser==2.3.1
 docutils==0.21.2
 drf-spectacular==0.28.0
-drf-spectacular-sidecar==2025.3.1
-graphene-django==3.2.2
+drf-spectacular-sidecar==2025.4.1
+graphene-django==3.2.3
 jwcrypto==1.5.6
 MarkupPy==1.14
 odfpy==1.4.1
