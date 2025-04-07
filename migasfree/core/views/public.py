@@ -37,8 +37,9 @@ from django.utils.html import escape
 from django.utils.translation import gettext as _
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from rest_framework import status, views, permissions
-from rest_framework.decorators import action, permission_classes
+from rest_framework.decorators import action, permission_classes, throttle_classes
 from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle
 
 from ..pms import get_available_pms, get_pms
 from ..models import Project, ExternalSource
@@ -76,6 +77,7 @@ def external_downloads(url, local_file):
 
 
 @permission_classes((permissions.AllowAny,))
+@throttle_classes([UserRateThrottle])
 class PmsView(views.APIView):
 
     @extend_schema(
@@ -111,6 +113,7 @@ class PmsView(views.APIView):
 
 
 @permission_classes((permissions.AllowAny,))
+@throttle_classes([UserRateThrottle])
 class ProgrammingLanguagesView(views.APIView):
 
     @extend_schema(
@@ -147,6 +150,7 @@ class ProgrammingLanguagesView(views.APIView):
     },
 )
 @permission_classes((permissions.AllowAny,))
+@throttle_classes([UserRateThrottle])
 class ServerInfoView(views.APIView):
     def get(self, request):
         from ... import __version__, __author__, __contact__, __homepage__
@@ -206,6 +210,7 @@ class RangeFileWrapper:
 
 
 @permission_classes((permissions.AllowAny,))
+@throttle_classes([UserRateThrottle])
 class GetSourceFileView(views.APIView):
     def read_remote_chunks(self, local_file, remote, chunk_size=8192):
         if not remote:
