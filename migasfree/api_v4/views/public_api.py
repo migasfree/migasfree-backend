@@ -4,9 +4,10 @@ from django.conf import settings
 from django.http import HttpResponse, JsonResponse, Http404
 from django.template import Context, Template
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes
-from rest_framework.decorators import permission_classes
+from rest_framework.decorators import permission_classes, throttle_classes
 from rest_framework import permissions, views
 from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle
 
 from ...utils import uuid_validate
 from ...secure import gpg_get_key
@@ -52,7 +53,7 @@ def get_computer_info(request, uuid=None):
     else:
         _uuid = uuid_validate(request.GET.get('uuid', ''))
     _name = request.GET.get('name', '')
-    if _uuid == "":
+    if _uuid == '':
         _uuid = _name
 
     computer = get_computer(_name, _uuid)
@@ -65,7 +66,7 @@ def get_computer_info(request, uuid=None):
         'name': computer.__str__(),
         'helpdesk': settings.MIGASFREE_HELP_DESK,
         'server': request.META.get('HTTP_HOST'),
-        'tags': ["{}-{}".format(tag.property_att.prefix, tag.value) for tag in computer.tags.all()],
+        'tags': [f'{tag.property_att.prefix}-{tag.value}' for tag in computer.tags.all()],
         'available_tags': {},
     }
     result['search'] = result[settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0]]
@@ -129,6 +130,7 @@ class RepositoriesUrlTemplateView(views.APIView):
 
 
 @permission_classes((permissions.AllowAny,))
+@throttle_classes([UserRateThrottle])
 class ServerInfoView(views.APIView):
     def post(self, request):
         """
