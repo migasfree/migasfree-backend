@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 from django.db.models import Count
 from django.utils.translation import gettext as _
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -25,6 +26,9 @@ from rest_framework.response import Response
 from ...core.models import ClientAttribute, ServerAttribute
 
 
+@extend_schema_view(
+    by_property=extend_schema(tags=['stats']),
+)
 @permission_classes((permissions.IsAuthenticated,))
 class ClientAttributeStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False, url_path='property')
@@ -54,6 +58,9 @@ class ClientAttributeStatsViewSet(viewsets.ViewSet):
         )
 
 
+@extend_schema_view(
+    by_category=extend_schema(tags=['stats']),
+)
 @permission_classes((permissions.IsAuthenticated,))
 class ServerAttributeStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False, url_path='category')
