@@ -19,7 +19,7 @@
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
 from drf_spectacular.openapi import OpenApiParameter, OpenApiTypes, OpenApiResponse
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets, status, mixins, permissions
 from rest_framework.decorators import action, permission_classes, throttle_classes
 from rest_framework.response import Response
@@ -115,6 +115,9 @@ class HardwareViewSet(
         )
 
 
+@extend_schema_view(
+    hardware=extend_schema(tags=['safe']),
+)
 @permission_classes((permissions.AllowAny,))
 @throttle_classes([UserRateThrottle])
 class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
