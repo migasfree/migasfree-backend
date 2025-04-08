@@ -5,7 +5,7 @@ from django.http import HttpResponse, JsonResponse, Http404
 from django.template import Context, Template
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes
 from rest_framework.decorators import permission_classes, throttle_classes
-from rest_framework import permissions, views
+from rest_framework import permissions, views, status
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
@@ -106,7 +106,7 @@ class RepositoriesUrlTemplateView(views.APIView):
         description='Returns the repositories URL template'
                     ' (compatibility for migasfree-client <= 4.16)',
         responses={
-            '200': OpenApiTypes.STR
+            status.HTTP_200_OK: OpenApiTypes.STR
         },
         examples=[
             OpenApiExample(
@@ -115,6 +115,7 @@ class RepositoriesUrlTemplateView(views.APIView):
                 response_only=True,
             ),
         ],
+        tags=['public'],
     )
     def post(self, request):
         protocol = 'https' if request.is_secure() else 'http'
