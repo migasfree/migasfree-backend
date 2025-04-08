@@ -83,7 +83,7 @@ class PmsView(views.APIView):
     @extend_schema(
         description='Returns available PMS',
         responses={
-            200: {
+            status.HTTP_200_OK: {
                 'type': 'object',
                 'properties': {
                     'pms': {
@@ -96,7 +96,8 @@ class PmsView(views.APIView):
                     }
                 }
             }
-        }
+        },
+        tags=['public'],
     )
     def get(self, request):
         ret = {}
@@ -119,7 +120,7 @@ class ProgrammingLanguagesView(views.APIView):
     @extend_schema(
         description='Returns available programming languages (to formulas and faults definitions)',
         responses={
-            200: dict(settings.MIGASFREE_PROGRAMMING_LANGUAGES)
+            status.HTTP_200_OK: dict(settings.MIGASFREE_PROGRAMMING_LANGUAGES)
         },
         examples=[
             OpenApiExample(
@@ -128,6 +129,7 @@ class ProgrammingLanguagesView(views.APIView):
                 response_only=True,
             ),
         ],
+        tags=['public'],
     )
     def get(self, request):
         return Response(dict(settings.MIGASFREE_PROGRAMMING_LANGUAGES))
@@ -137,7 +139,7 @@ class ProgrammingLanguagesView(views.APIView):
     methods=['GET', 'POST'],
     description='Returns server info',
     responses={
-        200: {
+        status.HTTP_200_OK: {
             'type': 'object',
             'properties': {
                 'version': {'type': 'string'},
@@ -148,6 +150,7 @@ class ProgrammingLanguagesView(views.APIView):
             }
         }
     },
+    tags=['public'],
 )
 @permission_classes((permissions.AllowAny,))
 @throttle_classes([UserRateThrottle])
