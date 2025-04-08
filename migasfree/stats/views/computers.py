@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 from django.db.models.aggregates import Count
 from django.utils.translation import gettext as _
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -28,6 +29,15 @@ from ...utils import replace_keys
 from .events import event_by_month, month_interval
 
 
+@extend_schema_view(
+    projects=extend_schema(tags=['stats']),
+    platforms=extend_schema(tags=['stats']),
+    by_machine=extend_schema(tags=['stats']),
+    attributes_count=extend_schema(tags=['stats']),
+    new_by_month=extend_schema(tags=['stats']),
+    productive_by_platform=extend_schema(tags=['stats']),
+    entry_year=extend_schema(tags=['stats']),
+)
 @permission_classes((permissions.IsAuthenticated,))
 class ComputerStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False)
