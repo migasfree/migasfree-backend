@@ -23,7 +23,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _
-from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiExample, inline_serializer
+from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiExample, inline_serializer, extend_schema_view
 from rest_framework import viewsets, status, views, permissions, serializers as drf_serializers
 from rest_framework.decorators import action, permission_classes, throttle_classes
 from rest_framework.response import Response
@@ -156,6 +156,9 @@ def get_computer(uuid, name):
         return None
 
 
+@extend_schema_view(
+    post=extend_schema(tags=['safe']),
+)
 @permission_classes((permissions.AllowAny,))
 @throttle_classes([UserRateThrottle])
 class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
@@ -198,6 +201,9 @@ class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
         )
 
 
+@extend_schema_view(
+    post=extend_schema(tags=['safe']),
+)
 @permission_classes((permissions.AllowAny,))
 @throttle_classes([UserRateThrottle])
 class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
@@ -261,12 +267,31 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
         )
 
 
+@extend_schema_view(
+    create=extend_schema(tags=['safe']),
+    id_=extend_schema(tags=['safe']),
+    properties=extend_schema(tags=['safe']),
+    attributes=extend_schema(tags=['safe']),
+    repositories=extend_schema(tags=['safe']),
+    fault_definitions=extend_schema(tags=['safe']),
+    faults=extend_schema(tags=['safe']),
+    errors=extend_schema(tags=['safe']),
+    mandatory_pkgs=extend_schema(tags=['safe']),
+    assigned_tags=extend_schema(tags=['safe']),
+    available_tags=extend_schema(tags=['safe']),
+    tags=extend_schema(tags=['safe']),
+    label=extend_schema(tags=['safe']),
+    hardware_capture_is_required=extend_schema(tags=['safe']),
+    software=extend_schema(tags=['safe']),
+    devices=extend_schema(tags=['safe']),
+    traits=extend_schema(tags=['safe']),
+)
 @permission_classes((permissions.AllowAny,))
 @throttle_classes([UserRateThrottle])
 class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
     @extend_schema(
-        description='Creates or updates a computer',
+        description='Creates or updates a computer (requires JWT auth)',
         request={
             'application/json': {
                 'type': 'object',
