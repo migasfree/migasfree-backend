@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -85,7 +85,8 @@ class PackagerKeysView(views.APIView):
                    settings.MIGASFREE_PACKAGER_PRI_KEY: serializers.CharField(),
                 }
             )
-        }
+        },
+        tags=['public'],
     )
     def post(self, request):
         pub_server_key_file = os.path.join(
@@ -149,7 +150,8 @@ class ProjectKeysView(views.APIView):
                    'migasfree-client.pri': serializers.CharField(),
                 }
             )
-        }
+        },
+        tags=['public'],
     )
     def post(self, request):
         self.user = auth.authenticate(
@@ -209,7 +211,8 @@ class RepositoriesKeysView(views.APIView):
         description='Returns the repositories public key',
         responses={
             status.HTTP_200_OK: OpenApiTypes.STR
-        }
+        },
+        tags=['public'],
     )
     def post(self, request):
         return Response(
