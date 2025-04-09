@@ -28,6 +28,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django_redis import get_redis_connection
+from drf_spectacular.utils import extend_schema
 from rest_framework import status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -46,6 +47,7 @@ def daterange(start_date, end_date):
         yield start_date + timedelta(item)
 
 
+@extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class SyncStatsViewSet(EventProjectViewSet):
     @action(methods=['get'], detail=False)
