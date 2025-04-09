@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import permission_classes
@@ -25,9 +25,7 @@ from ..tasks import get_alerts
 from ...mixins import DatabaseCheckMixin
 
 
-@extend_schema_view(
-    list=extend_schema(tags=['stats']),
-)
+@extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class AlertsViewSet(DatabaseCheckMixin, viewsets.ViewSet):
     def list(self, request):
