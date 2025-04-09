@@ -265,7 +265,7 @@ class GetSourceFileView(views.APIView):
         if not os.path.exists(os.path.dirname(file_local)):
             os.makedirs(os.path.dirname(file_local))
 
-        if not re.match(r'^[a-zA-Z0-9_\-/.]+$', resource):
+        if not re.match(r'^[a-zA-Z0-9_\-\+~/.]+$', resource):
             logger.error('Invalid resource path: %s', resource)
             return HttpResponse(
                 f'Invalid resource path: {escape(resource)}',
