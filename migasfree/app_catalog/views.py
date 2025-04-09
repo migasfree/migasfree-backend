@@ -36,6 +36,7 @@ from .filters import (
 )
 
 
+@extend_schema(tags=['catalog'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -58,6 +59,7 @@ class CategoryViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
     ordering = ('name',)
 
 
+@extend_schema(tags=['catalog'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -129,6 +131,7 @@ class ApplicationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@extend_schema(tags=['catalog'])
 @permission_classes((permissions.DjangoModelPermissions,))
 class PackagesByProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
     queryset = models.PackagesByProject.objects.all()
@@ -144,6 +147,7 @@ class PackagesByProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasV
         return serializers.PackagesByProjectSerializer
 
 
+@extend_schema(tags=['catalog'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -171,6 +175,7 @@ class PolicyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
         return serializers.PolicySerializer
 
 
+@extend_schema(tags=['catalog'])
 @permission_classes((permissions.DjangoModelPermissions,))
 class PolicyGroupViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
     queryset = models.PolicyGroup.objects.all()
