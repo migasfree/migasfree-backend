@@ -36,6 +36,7 @@ from .filters import NodeFilter
 from . import tasks, serializers
 
 
+@extend_schema(tags=['hardware'])
 @permission_classes((permissions.DjangoModelPermissions,))
 class HardwareViewSet(
     DatabaseCheckMixin,
