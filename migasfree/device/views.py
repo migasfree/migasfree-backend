@@ -43,6 +43,7 @@ from .filters import (
 from . import serializers
 
 
+@extend_schema(tags=['devices'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -73,6 +74,7 @@ class ConnectionViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
         return serializers.ConnectionSerializer
 
 
+@extend_schema(tags=['devices'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -155,6 +157,7 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
         return Response(status=status.HTTP_200_OK)
 
 
+@extend_schema(tags=['devices'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -182,6 +185,7 @@ class DriverViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
         return serializers.DriverSerializer
 
 
+@extend_schema(tags=['devices'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -203,6 +207,7 @@ class CapabilityViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
     ordering = ('name',)
 
 
+@extend_schema(tags=['devices'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -277,6 +282,7 @@ class LogicalViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@extend_schema(tags=['devices'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -298,6 +304,7 @@ class ManufacturerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSe
     ordering = ('name',)
 
 
+@extend_schema(tags=['devices'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -335,6 +342,7 @@ class ModelViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Expo
         ).distinct()
 
 
+@extend_schema(tags=['devices'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
