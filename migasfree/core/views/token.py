@@ -202,6 +202,7 @@ class MigasViewSet(viewsets.ViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
+@extend_schema(tags=['singularities'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -244,6 +245,7 @@ class SingularityViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
         )
 
 
+@extend_schema(tags=['attribute-sets'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -286,6 +288,7 @@ class AttributeSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSe
         )
 
 
+@extend_schema(tags=['platforms'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -313,6 +316,7 @@ class PlatformViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         return Platform.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(tags=['projects'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -358,6 +362,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         return super().create(request, *args, **kwargs)
 
 
+@extend_schema(tags=['stores'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -391,6 +396,7 @@ class StoreViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Expo
         return Store.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(tags=['properties'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -429,6 +435,7 @@ class PropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         )
 
 
+@extend_schema(tags=['stamps'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -448,6 +455,7 @@ class ServerPropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
     search_fields = ['name', 'prefix']
 
 
+@extend_schema(tags=['formulas'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -467,6 +475,7 @@ class ClientPropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
     search_fields = ['name', 'prefix']
 
 
+@extend_schema(tags=['attributes'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -492,6 +501,7 @@ class AttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, 
         return Attribute.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(tags=['tags'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -560,6 +570,7 @@ class ServerAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@extend_schema(tags=['features'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -658,6 +669,7 @@ class ClientAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
             return Response(status=status.HTTP_201_CREATED)
 
 
+@extend_schema(tags=['schedule-delays'])
 @permission_classes((permissions.DjangoModelPermissions,))
 class ScheduleDelayViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
     queryset = ScheduleDelay.objects.all()
@@ -686,6 +698,7 @@ class ScheduleDelayViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewS
         )
 
 
+@extend_schema(tags=['schedules'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -719,6 +732,7 @@ class ScheduleViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         return self.queryset.prefetch_related('delays')
 
 
+@extend_schema(tags=['packages'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -854,6 +868,7 @@ class PackageViewSet(
         return Response({'data': response}, status=status.HTTP_200_OK)
 
 
+@extend_schema(tags=['package-sets'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -964,6 +979,7 @@ class PackageSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
         return super().partial_update(request, *args, **kwargs)
 
 
+@extend_schema(tags=['deployments'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -1005,6 +1021,7 @@ class DeploymentViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
         return Deployment.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(tags=['deployments'])
 @permission_classes((permissions.DjangoModelPermissions,))
 class InternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
     queryset = InternalSource.objects.all()
@@ -1054,6 +1071,7 @@ class InternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
         )
 
 
+@extend_schema(tags=['deployments'])
 @permission_classes((permissions.DjangoModelPermissions,))
 class ExternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
     queryset = ExternalSource.objects.all()
@@ -1076,6 +1094,7 @@ class ExternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
         return ExternalSourceSerializer
 
 
+@extend_schema(tags=['user-profiles'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -1215,6 +1234,7 @@ class PermissionViewSet(DatabaseCheckMixin, mixins.ListModelMixin, viewsets.Gene
     search_fields = ['name']
 
 
+@extend_schema(tags=['domains'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -1260,6 +1280,7 @@ class DomainViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
         )
 
 
+@extend_schema(tags=['scopes'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
