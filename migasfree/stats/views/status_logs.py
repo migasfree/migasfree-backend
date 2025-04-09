@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.utils.translation import gettext as _
+from drf_spectacular.utils import extend_schema
 from rest_framework import status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -26,6 +27,7 @@ from ...client.models import StatusLog
 from .events import event_by_month, month_interval, EventViewSet
 
 
+@extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class StatusLogStatsViewSet(EventViewSet):
     @action(methods=['get'], detail=False, url_path='status')
