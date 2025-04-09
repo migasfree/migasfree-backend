@@ -60,6 +60,7 @@ from ..filters import (
 from .safe import remove_computer_messages
 
 
+@extend_schema(tags=['computers'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -488,6 +489,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         )
 
 
+@extend_schema(tags=['errors'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -526,6 +528,7 @@ class ErrorViewSet(
         return models.Error.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(tags=['fault-definitions'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -569,6 +572,7 @@ class FaultDefinitionViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
         )
 
 
+@extend_schema(tags=['faults'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -615,6 +619,7 @@ class FaultViewSet(
         return Response(response, status=status.HTTP_200_OK)
 
 
+@extend_schema(tags=['migrations'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -647,6 +652,7 @@ class MigrationViewSet(
         return models.Migration.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(tags=['notifications'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -677,6 +683,7 @@ class NotificationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSe
         return serializers.NotificationSerializer
 
 
+@extend_schema(tags=['packages-history'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -708,6 +715,7 @@ class PackageHistoryViewSet(
         return models.PackageHistory.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(tags=['status-logs'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -740,6 +748,7 @@ class StatusLogViewSet(
         return models.StatusLog.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(tags=['syncs'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -778,6 +787,7 @@ class SynchronizationViewSet(
         return models.Synchronization.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(tags=['users'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -810,6 +820,7 @@ class UserViewSet(
         return models.User.objects.scope(self.request.user.userprofile)
 
 
+@extend_schema(tags=['messages'])
 @permission_classes((permissions.IsAuthenticated,))
 class MessageViewSet(viewsets.ViewSet):
     def get_queryset(self):
