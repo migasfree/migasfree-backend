@@ -17,7 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.utils.translation import gettext as _
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -25,11 +25,7 @@ from rest_framework.response import Response
 from ...app_catalog.models import Application
 
 
-@extend_schema_view(
-    by_category=extend_schema(tags=['stats']),
-    by_level=extend_schema(tags=['stats']),
-    by_project=extend_schema(tags=['stats']),
-)
+@extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class ApplicationStatsViewSet(viewsets.ViewSet):
     @action(methods=['get'], detail=False, url_path='category')
