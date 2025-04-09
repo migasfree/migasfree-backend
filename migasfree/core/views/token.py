@@ -1168,6 +1168,7 @@ class UserProfileViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
         )
 
 
+@extend_schema(tags=['accounts'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
@@ -1204,6 +1205,7 @@ class GroupViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, ExportViewSet):
         )
     ],
     methods=['GET'],
+    tags=['accounts'],
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class PermissionViewSet(DatabaseCheckMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
