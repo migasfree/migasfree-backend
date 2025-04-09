@@ -279,6 +279,7 @@ def event_by_day(data, begin_date, end_date, model, field='project_id'):
     return {'x_labels': x_axe, 'data': chart_data}
 
 
+@extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class EventViewSet(viewsets.ViewSet):
     def get_event_class(self):
