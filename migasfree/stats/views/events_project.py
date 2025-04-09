@@ -22,6 +22,7 @@ import time
 from datetime import timedelta, datetime
 
 from django.conf import settings
+from drf_spectacular.utils import extend_schema
 from rest_framework import status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -31,6 +32,7 @@ from ...client.models import Error, Fault, Synchronization, Migration
 from .events import EventViewSet, month_interval, event_by_month, event_by_day
 
 
+@extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class EventProjectViewSet(EventViewSet):
     def get_event_class(self):
