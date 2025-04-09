@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.utils.translation import gettext as _
+from drf_spectacular.utils import extend_schema
 from rest_framework import status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -26,6 +27,7 @@ from ...utils import replace_keys
 from .events_project import EventProjectViewSet
 
 
+@extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class FaultStatsViewSet(EventProjectViewSet):
     @action(methods=['get'], detail=False)
