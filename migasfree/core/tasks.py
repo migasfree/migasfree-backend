@@ -69,7 +69,7 @@ def update_deployment_start_date():
 
 
 @shared_task
-def remove_orphan_packages_from_external_deployments():
+def remove_orphan_files_from_external_deployments():
     deployments = Deployment.objects.filter(source=Deployment.SOURCE_EXTERNAL, frozen=False)
     for deploy in deployments:
         path = deploy.path()
@@ -104,11 +104,11 @@ def remove_orphan_packages_from_external_deployments():
 
                         if content_length is not None and file_size != content_length:
                             print(f'File size {file_path} ({file_size}) does not match '
-                                'the size on the server ({content_length}). Removed.')
+                                f'the size on the server ({content_length}). Removed.')
                             os.remove(file_path)
 
                 except urllib.error.HTTPError as e:
-                    print(f'Error HTTP al acceder a {url}: {e.code} {e.reason}')
+                    print(f'HTTP error accessing {url}: {e.code} {e.reason}')
                     if e.code == requests.codes.not_found:
                         print(f'File {file_path} not found at server. Removed.')
                         os.remove(file_path)
