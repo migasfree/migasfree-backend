@@ -229,22 +229,3 @@ echo "~~~"
                     )
 
         return ''
-
-    def is_package_in_repo(self, filename, path):
-        cmd = f"""
-_FOUND=1
-
-for _FILE in $(find {path}/dists -type f)
-do
-  if xzcat "$_FILE" 2>/dev/null | grep -q "{filename}"
-  then
-    _FOUND=0
-    break
-  fi
-done
-
-exit $_FOUND
-"""
-        ret, _, _ = execute(cmd)
-
-        return ret == 0
