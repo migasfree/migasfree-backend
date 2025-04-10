@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -69,13 +69,6 @@ class Pms:
     def source_template(self, deploy):
         """
         string source_template(Deployment deploy)
-        """
-
-        raise NotImplementedError
-
-    def is_package_in_repo(self, filename, path):
-        """
-        bool is_package_in_repo(string filename, string path)
         """
 
         raise NotImplementedError
