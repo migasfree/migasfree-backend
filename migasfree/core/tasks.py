@@ -17,8 +17,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import requests
+import ssl
+import urllib.request
 
 from datetime import datetime, timedelta
+from urllib.parse import urljoin
 from celery import Celery, shared_task
 
 from .models import Deployment, ScheduleDelay
@@ -66,21 +70,53 @@ def update_deployment_start_date():
 
 @shared_task
 def remove_orphan_packages_from_external_deployments():
-    deployments = Deployment.objects.filter(source=Deployment.SOURCE_EXTERNAL)
+    deployments = Deployment.objects.filter(source=Deployment.SOURCE_EXTERNAL, frozen=False)
     for deploy in deployments:
         path = deploy.path()
-        if os.path.isdir(path):
-            pms = deploy.pms()
-            for root, dirs, files in os.walk(path):
-                for _file in files:
-                    if any(_file.lower().endswith(ext) for ext in pms.extensions):
-                        try:
-                            if not pms.is_package_in_repo(_file, path):
-                                package_path = os.path.join(root, _file)
-                                if os.path.exists(package_path) and not os.path.isdir(package_path):
-                                    os.remove(package_path)
-                                    print(f'{package_path} removed')
-                        except (NotImplementedError, ValueError):
-                            pass
-                        except OSError as e:
-                            print(f'Error removing {package_path}: {e}')
+        if not os.path.isdir(path):
+            continue
+
+        for root, _, files in os.walk(path):
+            for _file in files:
+                file_path = os.path.join(root, _file)
+                relative_path = file_path.split(f'{deploy.name}/', 1)[1]
+                url = urljoin(f'{deploy.base_url}/', relative_path)
+
+                try:
+                    with urllib.request.urlopen(
+                        urllib.request.Request(url, method='HEAD'),
+                        context=ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+                    ) as response:
+                        headers = response.getheaders()
+
+                        if response.status == requests.codes.not_found:
+                            print(f'File {file_path} not found at server. Removed. (No catch)')
+                            os.remove(file_path)
+                            continue
+
+                        file_size = os.path.getsize(file_path)
+
+                        content_length = None
+                        for header in headers:
+                            if header[0].lower() == 'content-length':
+                                content_length = int(header[1])
+                                break
+
+                        if content_length is not None and file_size != content_length:
+                            print(f'File size {file_path} ({file_size}) does not match '
+                                'the size on the server ({content_length}). Removed.')
+                            os.remove(file_path)
+
+                except urllib.error.HTTPError as e:
+                    print(f'Error HTTP al acceder a {url}: {e.code} {e.reason}')
+                    if e.code == requests.codes.not_found:
+                        print(f'File {file_path} not found at server. Removed.')
+                        os.remove(file_path)
+                except ConnectionResetError as e:
+                    print(f'Connection reset accessing {url}: {e}')
+                except urllib.error.URLError as e:
+                    if requests.codes.not_found in str(e.reason):
+                        print(f'File {file_path} not found at server. Removed.')
+                        os.remove(file_path)
+                    else:
+                        print(f'Error accessing {url}: {e}')
