@@ -79,7 +79,7 @@ def remove_orphan_files_from_external_deployments():
         for root, _, files in os.walk(path):
             for _file in files:
                 file_path = os.path.join(root, _file)
-                relative_path = file_path.split(f'{deploy.name}/', 1)[1]
+                relative_path = file_path.split(f'{deploy.slug}/', 1)[1]
                 url = urljoin(f'{deploy.base_url}/', relative_path)
 
                 try:
@@ -103,8 +103,10 @@ def remove_orphan_files_from_external_deployments():
                                 break
 
                         if content_length is not None and file_size != content_length:
-                            print(f'File size {file_path} ({file_size}) does not match '
-                                f'the size on the server ({content_length}). Removed.')
+                            print(
+                                f'File size {file_path} ({file_size}) does not match '
+                                f'the size on the server ({content_length}). Removed.'
+                            )
                             os.remove(file_path)
 
                 except urllib.error.HTTPError as e:
