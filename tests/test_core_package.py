@@ -3,60 +3,6 @@ import pytest
 from migasfree.core.models import Package, Project, Platform, Store, UserProfile
 
 
-def test_normalized_name_convention():
-    package_name = "migasfree-package"
-    name, version, architecture = Package.normalized_name(package_name)
-
-    assert name is None
-    assert version is None
-    assert architecture == ''
-
-
-def test_normalized_name_with_version():
-    package_name = "migasfree-package_1.2.3"
-    name, version, architecture = Package.normalized_name(package_name)
-
-    assert name is None
-    assert version is None
-    assert architecture == ''
-
-
-def test_normalized_name_with_architecture():
-    package_name = "migasfree-package_1.2.3_amd64"
-    name, version, architecture = Package.normalized_name(package_name)
-
-    assert name == "migasfree-package"
-    assert version == "1.2.3"
-    assert architecture == "amd64"
-
-
-def test_normalized_name_with_version_and_architecture():
-    package_name = "migasfree-package_1.2.3_amd64.deb"
-    name, version, architecture = Package.normalized_name(package_name)
-
-    assert name == "migasfree-package"
-    assert version == "1.2.3"
-    assert architecture == "amd64"
-
-
-def test_normalized_name_with_extra_slices():
-    package_name = "migasfree-package_1.2.3_amd64.deb.tar.gz"
-    name, version, architecture = Package.normalized_name(package_name)
-
-    assert name == "migasfree-package"
-    assert version == "1.2.3"
-    assert architecture == "amd64"
-
-
-def test_normalized_name_with_empty_architecture():
-    package_name = "migasfree-package_1.2.3_"
-    name, version, architecture = Package.normalized_name(package_name)
-
-    assert name == "migasfree-package"
-    assert version == "1.2.3"
-    assert architecture == ''
-
-
 @pytest.mark.django_db
 def test_by_store_without_packages():
     user = UserProfile.objects.create_user('test', 'test@example.com', 'test')
@@ -95,3 +41,31 @@ def test_by_store_with_packages():
     assert result['outer'][0]['store__id'] == store.id
     assert result['outer'][0]['store__name'] == store.name
     assert result['outer'][0]['count'] == 1
+
+
+@pytest.mark.parametrize(
+    'filename, expected',
+    [
+        ('migasfree-play_5.9-0_amd64.deb', ('migasfree-play', '5.9-0', 'amd64')),
+        ('migasfree-play_5.9-0_x86_64.rpm', ('migasfree-play', '5.9-0', 'x86_64')),
+        ('migasfree-play-5.9-0.x86_64.rpm', ('migasfree-play', '5.9-0', 'x86_64')),
+        ('migasfree-client_5.0-1_any.pkg.tar.zst', ('migasfree-client', '5.0-1', 'any')),
+        (
+            'ca-certificates_2024.2.69_v8.0.401-1.0.fc40_noarch.rpm',
+            ('ca-certificates', '2024.2.69_v8.0.401-1.0.fc40', 'noarch')
+        ),
+        ('a52dec_0.7.4-11_x86_64.pkg.tar.zst', ('a52dec', '0.7.4-11', 'x86_64')),
+        ('migasfree-package', ('migasfree-package', '', '')),
+        ('migasfree-package_1.2.3_amd64', ('migasfree-package', '1.2.3', 'amd64')),
+    ],
+)
+def test_normalized_name(filename, expected):
+    package = Package()
+    result = package.normalized_name(filename)
+    assert result == expected
+
+
+def test_normalized_name_no_match():
+    package = Package()
+    result = package.normalized_name('no-match')
+    assert result == ('no-match', '', '')
