@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -76,6 +76,19 @@ def get_available_mimetypes():
                 ret += class_[1]().mimetype
 
     return ';'.join(ret)
+
+
+def get_available_extensions():
+    ret = Apt().extensions + Dnf().extensions + Pacman().extensions \
+        + Winget().extensions + Wpt().extensions + Yum().extensions + Zypper().extensions
+
+    discovered_plugins = get_discovered_plugins()
+    for item in discovered_plugins.keys():
+        for class_ in inspect.getmembers(sys.modules[item], inspect.isclass):
+            if class_[0] != 'Pms':
+                ret += class_[1]().extensions
+
+    return list(set(ret))
 
 
 def get_pms(name):
