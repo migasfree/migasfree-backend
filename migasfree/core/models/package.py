@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import re
 import shutil
 
 from importlib import import_module
@@ -29,7 +30,7 @@ from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
-from ..pms import get_available_pms
+from ..pms import get_available_pms, get_available_extensions
 
 from .migas_link import MigasLink
 from .project import Project
@@ -128,23 +129,21 @@ class Package(models.Model, MigasLink):
     objects = PackageManager()
 
     @staticmethod
-    def normalized_name(package_name):
-        name = None
-        version = None
-        architecture = None
+    def normalized_name(filename):
+        extensions = get_available_extensions()
+        for ext in extensions:
+            if filename.endswith(ext):
+                base = filename[:-len(ext)].rstrip('_.-')  # remove possible separators after extension
+                break
+            else:
+                base = filename
 
-        # name_version_architecture.ext convention
-        try:
-            name, version, architecture = package_name.split('_')
-        except ValueError:
-            if package_name.count('_') > 2:
-                slices = package_name.split('_', 1)
-                name = slices[0]
-                version, architecture = slices[1].rsplit('_', 1)
-
-        architecture = architecture.split('.')[0] if architecture else ''
-
-        return name, version, architecture
+        match = re.match(r'^(.*?)[-_\.](?=\d|v\d)(.*)[-_.]([a-zA-Z][a-zA-Z0-9_]*)$', base)
+        if match:
+            name, version, arch = match.groups()
+            return (name, version, arch or '')
+        else:
+            return (base, '', '')
 
     @staticmethod
     def handle_uploaded_file(f, target):
