@@ -1,7 +1,7 @@
 # -*- coding: utf-8 *-*
 
-# Copyright (c) 2022-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2022-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2022-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2022-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ def add_computer_message(computer, message):
         f'migasfree:msg:{computer.id}', mapping={
             'date': timezone.localtime(timezone.now()).strftime('%Y-%m-%dT%H:%M:%S.%f'),
             'computer_id': computer.id,
-            'computer_name': computer.__str__(),
+            'computer_name': str(computer),
             'computer_status': computer.status,
             'computer_summary': computer.get_summary(),
             'project_id': computer.project.id,
