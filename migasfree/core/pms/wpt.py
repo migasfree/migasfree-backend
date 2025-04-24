@@ -21,7 +21,7 @@ import json
 import tarfile
 import hashlib
 
-from ...utils import execute, get_setting
+from ...utils import get_setting
 
 from .pms import Pms
 
