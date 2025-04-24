@@ -111,10 +111,10 @@ class Event(models.Model, MigasLink):
         items = cls.objects.scope(user).filter(
             created_at__range=(start_date, end_date)
         ).extra(
-            {range_name: "date_trunc('" + range_name + "', created_at)"}
+            {range_name: f"date_trunc('{range_name}', created_at)"}
         ).values(range_name).annotate(
             count=Count('computer_id', distinct=True)
-        ).order_by('-' + range_name)
+        ).order_by(f'-{range_name}')
 
         if platform:
             items = items.filter(project__platform=platform)
