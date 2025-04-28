@@ -30,7 +30,7 @@ from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
-from ..pms import get_available_pms, get_available_extensions
+from ..pms import get_available_pms, get_available_extensions, get_available_architectures
 
 from .migas_link import MigasLink
 from .project import Project
@@ -128,22 +128,47 @@ class Package(models.Model, MigasLink):
 
     objects = PackageManager()
 
+
     @staticmethod
     def normalized_name(filename):
-        extensions = get_available_extensions()
-        for ext in extensions:
-            if filename.endswith(ext):
-                base = filename[:-len(ext)].rstrip('_.-')  # remove possible separators after extension
-                break
-            else:
-                base = filename
+        def remove_extensions(filename):
+            extensions = get_available_extensions()
+            for ext in extensions:
+                if filename.endswith(f'.{ext}'):
+                    return filename[:-len(ext)-1]
 
-        match = re.match(r'^(.*?)[-_\.](?=\d|v\d)(.*)[-_.]([a-zA-Z][a-zA-Z0-9_]*)$', base)
-        if match:
-            name, version, arch = match.groups()
-            return (name, version, arch or '')
-        else:
-            return (base, '', '')
+            return filename
+
+        def extract_arch(base):
+            architectures = get_available_architectures()
+            for arch in architectures:
+                if base.endswith(arch):
+                    return arch, base[:len(base) - len(arch) - 1]
+
+            return '', base
+
+        def split_name_version(pkg):
+            if '_' in pkg and pkg.count('_') == 1:
+                name_part, version_candidate = pkg.split('_', 1)
+                version_re = re.compile(r'^[\d:.+~a-zA-Z-]+$')  # based in Debian standards
+                if version_re.match(version_candidate):
+                    return name_part, version_candidate
+
+            version_re = re.compile(r'([_.-])(?=[\d:])(.*)$', re.IGNORECASE)  # other cases
+            match = version_re.search(pkg)
+            if match:
+                version = match.group(2)
+                version_start = match.start(1)
+                name = pkg[:version_start].rstrip('_.-')
+
+                return name, version
+
+            return pkg, ''
+
+        base = remove_extensions(filename)
+        arch, name_version = extract_arch(base)
+        name, version = split_name_version(name_version)
+        return (name, version, arch)
 
     @staticmethod
     def handle_uploaded_file(f, target):
