@@ -31,6 +31,7 @@ class Pms:
     mimetype = []
     components = 'PKGS'
     extensions = []
+    architectures = []
 
     def __init__(self):
         self.keys_path = get_setting('MIGASFREE_KEYS_DIR')
