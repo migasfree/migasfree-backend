@@ -57,6 +57,13 @@ def test_by_store_with_packages():
         ('a52dec_0.7.4-11_x86_64.pkg.tar.zst', ('a52dec', '0.7.4-11', 'x86_64')),
         ('migasfree-package', ('migasfree-package', '', '')),
         ('migasfree-package_1.2.3_amd64', ('migasfree-package', '1.2.3', 'amd64')),
+        (
+            'binutils-gold-x86-64-linux-gnu_2.44-2_amd64.deb',
+            ('binutils-gold-x86-64-linux-gnu', '2.44-2', 'amd64')
+        ),
+        ('7zip_24.09+dfsg-7_amd64.deb', ('7zip', '24.09+dfsg-7', 'amd64')),
+        ('automake_1:1.17-4_all.deb', ('automake', '1:1.17-4', 'all')),
+        ('bind9-libs:amd64_1:9.20.7-1_amd64.deb', ('bind9-libs:amd64', '1:9.20.7-1', 'amd64')),
     ],
 )
 def test_normalized_name(filename, expected):
