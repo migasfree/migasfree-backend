@@ -40,6 +40,18 @@ class Apt(Pms):
             'application/vnd.debian.binary-package',
         ]
         self.extensions = ['deb']
+        self.architectures = [
+            'alpha', 'all', 'amd64', 'arm', 'arm64', 'armel', 'armhf', 'avr32',
+            'hppa', 'hurd-i386',
+            'i386', 'ia64',
+            'kfreebsd-amd64', 'kfreebsd-i386',
+            'loong64',
+            'm68k', 'mips', 'mips64el', 'mipsel',
+            'powerpc', 'powerpcspe', 'ppc64', 'ppc64el',
+            'riscv64',
+            's390', 's390x', 'sh4', 'sparc', 'sparc64',
+            'x32',
+        ]
 
     def create_repository(self, path, arch):
         """
