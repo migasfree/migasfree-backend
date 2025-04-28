@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2021-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2021-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2021-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ class Pacman(Pms):
             'application/x-gtar',
         ]
         self.extensions = ['pkg', 'pkg.tar.zst', 'pkg.tar.gz', 'pkg.tar.xz']
+        self.architectures = ['any', 'x86_64']
 
     def create_repository(self, path, arch):
         """
