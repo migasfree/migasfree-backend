@@ -88,8 +88,20 @@ def get_available_extensions():
             if class_[0] != 'Pms':
                 ret += class_[1]().extensions
 
-    return list(set(ret))
+    return sorted(list(set(ret)), key=lambda x: -len(x))
 
+
+def get_available_architectures():
+    ret = Apt().architectures + Dnf().architectures + Pacman().architectures \
+        + Winget().architectures + Wpt().architectures + Yum().architectures + Zypper().architectures
+
+    discovered_plugins = get_discovered_plugins()
+    for item in discovered_plugins.keys():
+        for class_ in inspect.getmembers(sys.modules[item], inspect.isclass):
+            if class_[0] != 'Pms':
+                ret += class_[1]().architectures
+
+    return sorted(list(set(ret)), key=lambda x: -len(x))
 
 def get_pms(name):
     available_pms = dict(get_available_pms())
