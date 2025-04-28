@@ -64,6 +64,7 @@ def test_by_store_with_packages():
         ('7zip_24.09+dfsg-7_amd64.deb', ('7zip', '24.09+dfsg-7', 'amd64')),
         ('automake_1:1.17-4_all.deb', ('automake', '1:1.17-4', 'all')),
         ('bind9-libs:amd64_1:9.20.7-1_amd64.deb', ('bind9-libs:amd64', '1:9.20.7-1', 'amd64')),
+        ('acme-app-0.1', ('acme-app', '0.1', '')),
     ],
 )
 def test_normalized_name(filename, expected):
