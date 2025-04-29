@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 import os
 import json
 import subprocess
+import logging
 
 from jwcrypto import jwk, jwe, jws
 from jwcrypto.common import json_encode
@@ -27,6 +28,8 @@ from django.utils.translation import gettext
 
 from migasfree import __contact__
 from .utils import read_file, write_file
+
+logger = logging.getLogger('migasfree')
 
 
 def load_jwk(filename):
@@ -128,12 +131,18 @@ def unwrap(data, decrypt_key, verify_key):
     """
     try:
         jwt = json.loads(decrypt(data, decrypt_key))
-    except jwe.InvalidJWEData:
+    except jwe.InvalidJWEData as e:
+        logger.debug('exception: %s', str(e))
+        logger.debug('data: %s', data)
+        logger.debug('decrypt key: %s', decrypt_key)
         return gettext('Invalid Data')
 
     try:
         jws_payload = verify(jwt['sign'], verify_key)
-    except jws.InvalidJWSSignature:
+    except jws.InvalidJWSSignature as e:
+        logger.debug('exception: %s', str(e))
+        logger.debug('sign: %s', jwt['sign'])
+        logger.debug('verify key: %s', verify_key)
         return gettext('Invalid Signature')
 
     if jws_payload:
