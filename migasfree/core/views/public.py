@@ -44,7 +44,7 @@ from rest_framework.throttling import UserRateThrottle
 from ..pms import get_available_pms, get_pms
 from ..models import Project, ExternalSource
 from ...client.models import Notification
-from ...utils import get_client_ip
+from ...utils import get_proxied_ip_address
 
 import logging
 logger = logging.getLogger('migasfree')
@@ -445,7 +445,7 @@ class GetSourceFileView(views.APIView):
         if not os.path.exists(file_local) or os.path.getsize(file_local) == 0:
             return self._handle_file_not_exists(
                 source, resource,
-                file_local, path, get_client_ip(request)
+                file_local, path, get_proxied_ip_address(request)
             )
 
         return self._handle_file_exists(file_local, request)
