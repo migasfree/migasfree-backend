@@ -70,6 +70,7 @@ class Winget(Pms):
         self.relative_path = get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH')
         self.mimetype = ['application/yaml']
         self.extensions = ['yaml']
+        self.architectures = ['x64']
 
     def create_repository(self, path, arch):
         """
