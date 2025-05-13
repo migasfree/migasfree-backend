@@ -91,7 +91,8 @@ class PmsView(views.APIView):
                         'properties': {
                             'module': {'type': 'string'},
                             'mimetype': {'type': 'array', 'items': {'type': 'string'}},
-                            'extensions': {'type': 'array', 'items': {'type': 'string'}}
+                            'extensions': {'type': 'array', 'items': {'type': 'string'}},
+                            'architectures': {'type': 'array', 'items': {'type': 'string'}},
                         }
                     }
                 }
@@ -107,7 +108,8 @@ class PmsView(views.APIView):
             ret[key] = {
                 'module': value,
                 'mimetype': item.mimetype,
-                'extensions': item.extensions
+                'extensions': item.extensions,
+                'architectures': item.architectures,
             }
 
         return Response(ret)
