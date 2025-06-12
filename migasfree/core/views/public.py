@@ -217,7 +217,7 @@ class RangeFileWrapper:
 @permission_classes((permissions.AllowAny,))
 @throttle_classes([UserRateThrottle])
 class GetSourceFileView(views.APIView):
-    def read_remote_chunks(self, local_file, remote, chunk_size=8192):
+    async def read_remote_chunks(self, local_file, remote, chunk_size=8192):
         if not remote:
             raise ValueError('Invalid remote file')
 
@@ -239,11 +239,11 @@ class GetSourceFileView(views.APIView):
                 shutil.move(tmp_file.name, local_file)
                 tmp_file.close()
             except OSError as e:
-                logger.error(f'Error moving file: {e}')
+                logger.error('Error moving file: %s', str(e))
                 os.unlink(tmp_file.name)
                 raise
         except Exception as e:
-            logger.error(f'Error reading remote file: {e}')
+            logger.error('Error reading remote file: %s', str(e))
             raise
 
     @action(methods=['head'], detail=False)
