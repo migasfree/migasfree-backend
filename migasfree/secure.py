@@ -29,6 +29,11 @@ from django.utils.translation import gettext
 from migasfree import __contact__
 from .utils import read_file, write_file
 
+ALG_SIGN = 'RS256'
+ALG_ENC = 'RSA-OAEP-256'
+ENC_CONTENT = 'A256CBC-HS512'
+TYPE_JWE = 'JWE'
+
 logger = logging.getLogger('migasfree')
 
 
@@ -51,15 +56,17 @@ def sign(claims, priv_key):
     """
     string sign(dict claims, string priv_key)
     """
-    if isinstance(claims, dict):
-        claims = json.dumps(claims)
-
     priv_jwk = load_jwk(priv_key)
-    jws_token = jws.JWS(str(claims))
+
+    # Normalize to JSON string
+    payload = json.dumps(claims) if isinstance(claims, dict) else claims
+    payload_bytes = str(payload).encode('utf-8')
+
+    jws_token = jws.JWS(payload_bytes)
     jws_token.add_signature(
         priv_jwk,
         header=json_encode({
-            'alg': 'RS256',
+            'alg': ALG_SIGN,
             'kid': priv_jwk.thumbprint()
         })
     )
@@ -71,9 +78,11 @@ def verify(jwt, pub_key):
     """
     dict verify(string jwt, string pub_key)
     """
+    pub_jwk = load_jwk(pub_key)
+
     jws_token = jws.JWS()
     jws_token.deserialize(jwt)
-    jws_token.verify(load_jwk(pub_key))
+    jws_token.verify(pub_jwk)
 
     return jws_token.payload
 
@@ -85,13 +94,13 @@ def encrypt(claims, pub_key):
     pub_jwk = load_jwk(pub_key)
 
     protected_header = {
-        'alg': 'RSA-OAEP-256',
-        'enc': 'A256CBC-HS512',
-        'typ': 'JWE',
+        'alg': ALG_ENC,
+        'enc': ENC_CONTENT,
+        'typ': TYPE_JWE,
         'kid': pub_jwk.thumbprint(),
     }
     jwe_token = jwe.JWE(
-        json.dumps(claims),
+        json.dumps(claims).encode('utf-8'),
         recipient=pub_jwk,
         protected=protected_header
     )
@@ -103,14 +112,13 @@ def decrypt(jwt, priv_key):
     """
     string decrypt(string jwt, string priv_key)
     """
+    priv_jwk = load_jwk(priv_key)
+
     jwe_token = jwe.JWE()
-    jwe_token.deserialize(jwt, key=load_jwk(priv_key))
+    jwe_token.deserialize(jwt, key=priv_jwk)
+    payload = jwe_token.payload
 
-    if isinstance(jwe_token.payload, bytes) \
-            and not isinstance(jwe_token.payload, str):
-        return str(jwe_token.payload, encoding='utf8')
-
-    return jwe_token.payload
+    return payload.decode('utf-8') if isinstance(payload, bytes) else str(payload)
 
 
 def wrap(data, sign_key, encrypt_key):
@@ -138,17 +146,14 @@ def unwrap(data, decrypt_key, verify_key):
         return gettext('Invalid Data')
 
     try:
-        jws_payload = verify(jwt['sign'], verify_key)
+        jws_token = verify(jwt['sign'], verify_key)
     except jws.InvalidJWSSignature as e:
         logger.debug('exception: %s', str(e))
         logger.debug('sign: %s', jwt['sign'])
         logger.debug('verify key: %s', verify_key)
         return gettext('Invalid Signature')
 
-    if jws_payload:
-        return jwt['data']
-
-    return None
+    return jwt['data'] if jws_token else None
 
 
 def check_keys_path():
