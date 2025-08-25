@@ -29,13 +29,17 @@
 
 import sys
 
-if not hasattr(sys, 'version_info') or sys.version_info < (3, 9, 0, 'final'):
-    raise SystemExit('migasfree-backend requires Python 3.9 or later.')
+if not hasattr(sys, 'version_info') or sys.version_info < (3, 10, 0, 'final'):
+    raise SystemExit('migasfree-backend requires Python 3.10 or later.')
 
 import os
 
 from setuptools import setup, find_packages
-from distutils.command.install_data import install_data
+
+try:
+    from setuptools.command.install_data import install_data
+except ImportError:
+    from distutils.command.install_data import install_data
 
 PATH = os.path.dirname(__file__)
 with open(os.path.join(PATH, 'README.md'), encoding='utf_8') as f:
