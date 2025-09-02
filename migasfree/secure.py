@@ -219,13 +219,24 @@ Expire-Date: 0
             'gpg', '--batch', '--generate-key',
             '--pinentry-mode', 'loopback', '--passphrase', ''
         ]
-        subprocess.run(command, input=key_params, text=True, capture_output=True)
+        subprocess.run(command, input=key_params, text=True, capture_output=True, check=True)
 
         # export and save public key
         command = ['gpg', '--list-keys', f'{name}']
         output = subprocess.check_output(command, text=True)
         fingerprint = output.split('\n')[1].split('/')[-1].strip()
 
+        # sign the key's UserID with SHA256
+        subprocess.run([
+            'gpg',
+            '--batch',
+            '--cert-digest-algo', 'SHA256',
+            '--pinentry-mode', 'loopback',
+            '--passphrase', '',
+            '--sign-key', fingerprint
+        ], check=True)
+
+        # export and save public key
         command = ['gpg', '--armor', '--export', fingerprint, '>', public_key]
         subprocess.check_call(' '.join(command), shell=True)
         os.chmod(public_key, 0o600)
