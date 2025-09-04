@@ -221,7 +221,7 @@ Expire-Date: 0
         ]
         subprocess.run(command, input=key_params, text=True, capture_output=True, check=True)
 
-        command = ['gpg', '--list-keys', f'{name}']
+        command = ['gpg', '--list-keys', name]
         output = subprocess.check_output(command, text=True)
         fingerprint = output.split('\n')[1].split('/')[-1].strip()
 
