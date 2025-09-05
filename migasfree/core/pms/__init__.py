@@ -28,7 +28,6 @@ from importlib import import_module
 from .apt import Apt
 from .dnf import Dnf
 from .pacman import Pacman
-from .winget import Winget
 from .wpt import Wpt
 from .yum import Yum
 from .zypper import Zypper
@@ -51,7 +50,6 @@ def get_available_pms():
         ('apt', 'apt'),
         ('dnf', 'dnf'),
         ('pacman', 'pacman'),
-        ('winget', 'winget'),
         ('wpt', 'wpt'),
         ('yum', 'yum'),
         ('zypper', 'zypper'),
@@ -67,7 +65,7 @@ def get_available_pms():
 
 def get_available_mimetypes():
     ret = Apt().mimetype + Dnf().mimetype + Pacman().mimetype \
-        + Winget().mimetype + Wpt().mimetype + Yum().mimetype + Zypper().mimetype
+        + Wpt().mimetype + Yum().mimetype + Zypper().mimetype
 
     discovered_plugins = get_discovered_plugins()
     for item in discovered_plugins.keys():
@@ -80,7 +78,7 @@ def get_available_mimetypes():
 
 def get_available_extensions():
     ret = Apt().extensions + Dnf().extensions + Pacman().extensions \
-        + Winget().extensions + Wpt().extensions + Yum().extensions + Zypper().extensions
+        + Wpt().extensions + Yum().extensions + Zypper().extensions
 
     discovered_plugins = get_discovered_plugins()
     for item in discovered_plugins.keys():
@@ -93,7 +91,7 @@ def get_available_extensions():
 
 def get_available_architectures():
     ret = Apt().architectures + Dnf().architectures + Pacman().architectures \
-        + Winget().architectures + Wpt().architectures + Yum().architectures + Zypper().architectures
+        + Wpt().architectures + Yum().architectures + Zypper().architectures
 
     discovered_plugins = get_discovered_plugins()
     for item in discovered_plugins.keys():
@@ -102,6 +100,7 @@ def get_available_architectures():
                 ret += class_[1]().architectures
 
     return sorted(list(set(ret)), key=lambda x: -len(x))
+
 
 def get_pms(name):
     available_pms = dict(get_available_pms())
