@@ -11,7 +11,7 @@ python3 manage.py runserver 0.0.0.0:2345 --settings=migasfree.settings.developme
 
 DJANGO_SETTINGS_MODULE='migasfree.settings.development' celery --app=migasfree.celery.app beat --loglevel=DEBUG
 
-DJANGO_SETTINGS_MODULE='migasfree.settings.development' celery --app=migasfree.celery.app worker --without-gossip --concurrency=10 --queues=default,pms-apt,pms-dnf,pms-pacman,pms-winget,pms-wpt,pms-yum,pms-zypper --loglevel=DEBUG
+DJANGO_SETTINGS_MODULE='migasfree.settings.development' celery --app=migasfree.celery.app worker --without-gossip --concurrency=10 --queues=default,pms-apt,pms-dnf,pms-pacman,pms-wpt,pms-yum,pms-zypper --loglevel=DEBUG
 ```
 
 ## View API endpoints (in development mode)
