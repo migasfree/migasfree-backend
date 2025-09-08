@@ -38,6 +38,8 @@ from ...utils import time_horizon
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class DeploymentStatsViewSet(viewsets.ViewSet):
+    serializer_class = None
+
     @action(methods=['get'], detail=True, url_path='computers/assigned')
     def assigned_computers(self, request, pk=None):
         deploy = get_object_or_404(Deployment, pk=pk)
