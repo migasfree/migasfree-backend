@@ -205,8 +205,7 @@ class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
 class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
 
     @extend_schema(
-        description='Returns 201 if ok, 404 if computer not found, 400 otherwise'
-                    ' (requires JWT auth)',
+        description='Creates a computer synchronization (requires JWT auth)',
         request=inline_serializer(
             name='SafeSyncRequest',
             fields={
@@ -217,7 +216,7 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
             },
         ),
         responses={
-            status.HTTP_201_CREATED: {'description': 'Object created successfully'},
+            status.HTTP_201_CREATED: serializers.SynchronizationWriteSerializer,
             status.HTTP_400_BAD_REQUEST: {'description': 'Error in request'},
             status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
@@ -285,7 +284,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         },
         responses={
             status.HTTP_200_OK: {'description': 'Computer data updated'},
-            status.HTTP_201_CREATED: {'description': 'Object created successfully'},
+            status.HTTP_201_CREATED: serializers.ComputerCreateSerializer,
             status.HTTP_400_BAD_REQUEST: {'description': 'Error in request'},
             status.HTTP_401_UNAUTHORIZED: {'description': 'Computer cannot be registered'},
         }
@@ -467,7 +466,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @extend_schema(
-        description='Returns 200 if ok, 404 if computer not found (requires JWT auth)',
+        description='Returns enabled properties for a given computer (requires JWT auth)',
         request={
             'id': OpenApiTypes.INT
         },
@@ -505,7 +504,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @extend_schema(
-        description='Returns 201 if ok, 404 if computer not found (requires JWT auth)',
+        description='Process and record sync attributes for a given computer (requires JWT auth)',
         request={
             'application/json': {
                 'type': 'object',
@@ -530,7 +529,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             }
         },
         responses={
-            status.HTTP_201_CREATED: {'description': 'Object created successfully'},
+            status.HTTP_201_CREATED: serializers.ComputerSerializer,
             status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
     )
@@ -757,14 +756,22 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     'faults': {
                         'type': 'object',
                         'description': 'A dictionary of fault names and their results.',
-                        'additionalProperties': {'type': 'string'}
+                        'propertyNames': {
+                            'type': 'string',
+                            'description': 'Name of the fault'
+                        },
+                        'additionalProperties': {
+                            'type': 'string',
+                            'description': 'Result of the fault (empty string = no error)'
+                        }
                     }
-                }
+                },
+                'required': ['id', 'faults']
             }
         },
         responses={
             status.HTTP_200_OK: serializers.FaultSerializer(many=True),
-            status.HTTP_404_NOT_FOUND: 'Computer not found'
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'}
         },
         examples=[
             OpenApiExample(
@@ -822,7 +829,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         responses={
             status.HTTP_201_CREATED: serializers.ErrorSafeWriteSerializer,
             status.HTTP_400_BAD_REQUEST: OpenApiTypes.OBJECT,
-            status.HTTP_404_NOT_FOUND: 'Computer not found'
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'}
         },
         examples=[
             OpenApiExample(
@@ -890,6 +897,35 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    @extend_schema(
+        description='Returns mandatory packages for a computer (requires JWT auth). '
+                    'If no packages are defined an empty list is returned.',
+        request={
+            'id': OpenApiTypes.INT,
+        },
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'object',
+                'properties': {
+                    'install': {
+                        'type': 'array',
+                        'items': {'type': 'string'},
+                        'description': 'Packages to install.',
+                    },
+                    'remove': {
+                        'type': 'array',
+                        'items': {'type': 'string'},
+                        'description': 'Packages to remove.',
+                    },
+                },
+                'example': {
+                    'install': ['one', 'two'],
+                    'remove': ['three']
+                },
+            },
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
+    )
     @action(methods=['post'], detail=False, url_path='packages/mandatory')
     def mandatory_pkgs(self, request):
         """
@@ -945,6 +981,28 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns the list of tags assigned to a computer (requires JWT auth).',
+        request={
+            'id': OpenApiTypes.INT,
+        },
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'object',
+                'properties': {
+                    'tags': {
+                        'type': 'array',
+                        'items': {'type': 'string'},
+                        'description': 'List of tags assigned to the computer.',
+                    },
+                },
+                'example': {
+                    'tags': ['PR1-value1', 'PR2-value2']
+                },
+            },
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
+    )
     @action(methods=['post'], detail=False, url_path='tags/assigned')
     def assigned_tags(self, request):
         """
@@ -969,6 +1027,30 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns all tags that are available for a computer (requires JWT auth). '
+                    'The response is a dictionary where each key is a tag name '
+                    'and the value is a list of possible tag values.',
+        request={
+            'id': OpenApiTypes.INT,
+        },
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'object',
+                'additionalProperties': {
+                    'type': 'array',
+                    'items': {'type': 'string'},
+                    'description': 'Possible values for the tag name (key).',
+                },
+                'example': {
+                    'name': ['PR1-value1', 'PR2-value2'],
+                    'name2': ['PR3-value3'],
+                    # …
+                },
+            },
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
+    )
     @action(methods=['post'], detail=False, url_path='tags/available')
     def available_tags(self, request):
         """
@@ -1023,6 +1105,47 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Assigns a list of tags to a computer and returns the packages that must be '
+                    'pre-installed, installed or removed as a result (requires JWT auth).',
+        request={
+            'id': OpenApiTypes.INT,                     # computer identifier
+            'tags': {
+                'type': 'array',
+                'items': {'type': 'string'},
+                'description': 'List of tag strings in the form "<prefix>-<value>".',
+            },
+        },
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'object',
+                'properties': {
+                    'preinstall': {
+                        'type': 'array',
+                        'items': {'type': 'string'},
+                        'description': 'Packages that must be pre‑installed.',
+                    },
+                    'install': {
+                        'type': 'array',
+                        'items': {'type': 'string'},
+                        'description': 'Packages to install.',
+                    },
+                    'remove': {
+                        'type': 'array',
+                        'items': {'type': 'string'},
+                        'description': 'Packages to remove.',
+                    },
+                },
+                'example': {
+                    'preinstall': ['four', 'five'],
+                    'install': ['one', 'two'],
+                    'remove': ['three'],
+                },
+            },
+            status.HTTP_400_BAD_REQUEST: {'description': 'Invalid tags supplied'},
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
+    )
     @action(methods=['post'], detail=False)
     def tags(self, request):
         """
@@ -1119,6 +1242,43 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns basic label information for a computer (requires JWT auth).',
+        request={
+            'id': OpenApiTypes.INT,
+        },
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'object',
+                'properties': {
+                    'uuid': {
+                        'type': 'string',
+                        'format': 'uuid',
+                        'description': 'Unique identifier of the computer.',
+                    },
+                    'name': {
+                        'type': 'string',
+                        'description': 'Human-readable name of the computer.',
+                    },
+                    'search': {
+                        'type': 'string',
+                        'description': 'String representation of the computer (used for searches).',
+                    },
+                    'helpdesk': {
+                        'type': 'string',
+                        'description': 'Helpdesk URL or identifier defined in settings.',
+                    },
+                },
+                'example': {
+                    'uuid': '123e4567-e89b-12d3-a456-426614174000',
+                    'name': 'my-computer',
+                    'search': 'my-computer (001)',
+                    'helpdesk': 'https://helpdesk.example.com',
+                },
+            },
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
+    )
     @action(methods=['post'], detail=False)
     def label(self, request):
         """
@@ -1153,6 +1313,26 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Indicates whether a hardware capture is required for the given computer '
+                    '(requires JWT auth).',
+        request={
+            'id': OpenApiTypes.INT,
+        },
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'object',
+                'properties': {
+                    'capture': {
+                        'type': 'boolean',
+                        'description': 'True if a hardware capture is required, otherwise False.',
+                    },
+                },
+                'example': {'capture': True},
+            },
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
+    )
     @action(methods=['post'], detail=False, url_path='hardware/required')
     def hardware_capture_is_required(self, request):
         """
@@ -1181,6 +1361,48 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Receives software inventory and history for a computer (requires JWT auth). '
+                    'The endpoint updates the computer’s software records and returns a '
+                    'confirmation message.',
+        request={
+            'id': OpenApiTypes.INT,
+            'inventory': {
+                'type': 'array',
+                'items': {'type': 'string'},
+                'description': 'List of currently installed packages (optional).',
+            },
+            'history': {
+                'type': 'object',
+                'properties': {
+                    'installed': {
+                        'type': 'array',
+                        'items': {'type': 'string'},
+                        'description': 'Packages that were installed since the last report.',
+                    },
+                    'uninstalled': {
+                        'type': 'array',
+                        'items': {'type': 'string'},
+                        'description': 'Packages that were removed since the last report.',
+                    },
+                },
+                'description': 'Software change history (optional).',
+            },
+        },
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'string',
+                'description': 'Acknowledgement that the data was received.',
+                'example': 'Data received',
+            },
+            status.HTTP_400_BAD_REQUEST: {
+                'type': 'string',
+                'description': 'Bad request: neither *inventory* nor *history* provided.',
+                'example': 'Bad request',
+            },
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
+    )
     @action(methods=['post'], detail=False)
     def software(self, request):
         """
@@ -1218,7 +1440,8 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         )
 
     @extend_schema(
-        description='Returns 200 if ok, 404 if computer not found (requires JWT auth)',
+        description='Returns a list of logical devices for a given computer along with the default logical device ID '
+        '(requires JWT auth)',
         request={
             'id': OpenApiTypes.INT
         },
@@ -1260,6 +1483,35 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     },
                     "required": ["logical", "default"]
                 },
+                "example": {
+                    "logical": [
+                        {
+                            "printer": {
+                                "id": 99,
+                                "name": "OfficePrinter-01",
+                                "model": "LaserJet 5000",
+                                "driver": "hp-laserjet",
+                                "capability": "color",
+                                "manufacturer": "HP",
+                                "packages": ["hp-driver", "printer-utils"],
+                                "connection": {}
+                            }
+                        },
+                        {
+                            "printer": {
+                                "id": 100,
+                                "name": "OfficePrinter-02",
+                                "model": "LaserJet 5000",
+                                "driver": "hp-laserjet",
+                                "capability": "color",
+                                "manufacturer": "HP",
+                                "packages": ["hp-driver", "printer-utils"],
+                                "connection": {}
+                            }
+                        }
+                    ],
+                    "default": 99
+                }
             },
             status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
@@ -1318,6 +1570,39 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns the list of traits (attributes) associated with a computer '
+                    '(requires JWT auth).',
+        request={
+            'id': OpenApiTypes.INT,
+        },
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {'type': 'integer', 'description': 'Trait identifier.'},
+                        'description': {'type': 'string', 'description': 'Human readable description.'},
+                        'value': {'type': 'string', 'description': 'Current value of the trait.'},
+                        'name': {'type': 'string', 'description': 'Trait name (property_att.name).'},
+                        'prefix': {'type': 'string', 'description': 'Trait prefix (property_att.prefix).'},
+                        'sort': {'type': 'string', 'description': 'Trait sort order (property_att.sort).'},
+                    },
+                    'example': {
+                        'id': 1,
+                        'description': 'lorem ipsum',
+                        'value': 'x',
+                        'name': 'xxxx',
+                        'prefix': 'xxx',
+                        'sort': 'xxxxxx',
+                    },
+                },
+                'description': 'List of trait objects.',
+            },
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
+    )
     @action(methods=['post'], detail=False)
     def traits(self, request):
         """
