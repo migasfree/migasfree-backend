@@ -30,6 +30,8 @@ from .events import event_by_month, month_interval, EventViewSet
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class StatusLogStatsViewSet(EventViewSet):
+    serializer_class = None
+
     @action(methods=['get'], detail=False, url_path='status')
     def by_status(self, request):
         data = StatusLog.by_status(request.user.userprofile)
