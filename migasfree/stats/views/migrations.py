@@ -33,6 +33,8 @@ from .events_project import EventProjectViewSet
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class MigrationStatsViewSet(EventProjectViewSet):
+    serializer_class = None
+
     @action(methods=['get'], detail=False, url_path='project')
     def by_project(self, request):
         user = request.user.userprofile
