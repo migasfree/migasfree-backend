@@ -17,7 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.utils.translation import gettext as _
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiResponse, OpenApiExample
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -29,6 +29,46 @@ from ...utils import replace_keys
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class StoreStatsViewSet(viewsets.ViewSet):
+    serializer_class = None
+
+    @extend_schema(
+        description=(
+            "Returns the number of stores per project for the current user's "
+            "profile. Keys are renamed (`project__name` → `name`, "
+            "`project__id` → `project_id`, `count` → `value`) for a cleaner API."
+        ),
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                description=(
+                    "Stores grouped by project for the authenticated user profile. "
+                    "The payload contains a title, the total number of stores, "
+                    "and a list of projects with the amount of stores per project."
+                ),
+                examples=[
+                    OpenApiExample(
+                        "successfully response",
+                        value={
+                            "title": "Stores / Project",
+                            "total": 42,
+                            "data": [
+                                {
+                                    "name": "Project Alpha",
+                                    "project_id": 10,
+                                    "value": 18
+                                },
+                                {
+                                    "name": "Project Beta",
+                                    "project_id": 12,
+                                    "value": 24
+                                }
+                            ]
+                        }
+                    )
+                ],
+            )
+        },
+    )
     @action(methods=['get'], detail=False, url_path='project')
     def by_project(self, request):
         user = request.user.userprofile
