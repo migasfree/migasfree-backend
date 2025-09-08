@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiExample
 from rest_framework.response import Response
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import permission_classes
@@ -28,5 +28,37 @@ from ...mixins import DatabaseCheckMixin
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class AlertsViewSet(DatabaseCheckMixin, viewsets.ViewSet):
+    serializer_class = None
+
+    @extend_schema(
+        summary='Retrieves the list of alerts',
+        description=(
+            'Returns all current alerts for the authenticated user. '
+            'The response is a JSON arrays list.'
+        ),
+        responses={
+            status.HTTP_200_OK: {'description': 'Successful retrieval of alerts'},
+        },
+        examples=[
+            OpenApiExample(
+                name='successfully response',
+                value={
+                    "result": "3",
+                    "api": {
+                        "model": "packages",
+                        "query": {
+                            "deployment": True,
+                            "store": False,
+                            "packageset": True,
+                        },
+                    },
+                    "level": "warning",
+                    "target": "server",
+                    "msg": "Orphan packages",
+                },
+                response_only=True,
+            )
+        ],
+    )
     def list(self, request):
         return Response(get_alerts(), status=status.HTTP_200_OK)
