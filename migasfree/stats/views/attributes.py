@@ -29,6 +29,30 @@ from ...core.models import ClientAttribute, ServerAttribute
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class ClientAttributeStatsViewSet(viewsets.ViewSet):
+
+    @extend_schema(
+        description='Returns client attribute statistics grouped by property',
+        responses={
+            status.HTTP_200_OK: {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "total": {"type": "integer"},
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "value": {"type": "integer"},
+                                "property_att_id": {"type": "integer"},
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    )
     @action(methods=['get'], detail=False, url_path='property')
     def by_property(self, request):
         total = ClientAttribute.objects.scope(request.user.userprofile).count()
@@ -59,6 +83,30 @@ class ClientAttributeStatsViewSet(viewsets.ViewSet):
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class ServerAttributeStatsViewSet(viewsets.ViewSet):
+
+    @extend_schema(
+        description='Returns tags stats grouped by category',
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'object',
+                'properties': {
+                    'title': {'type': 'string'},
+                    'total': {'type': 'integer'},
+                    'data': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'name': {'type': 'string'},
+                                'value': {'type': 'integer'},
+                                'property_att_id': {'type': 'integer'},
+                            },
+                        },
+                    },
+                },
+            }
+        },
+    )
     @action(methods=['get'], detail=False, url_path='category')
     def by_category(self, request):
         total = ServerAttribute.objects.scope(request.user.userprofile).count()
