@@ -79,10 +79,10 @@ class PackagerKeysView(views.APIView):
         ),
         responses={
             status.HTTP_200_OK: inline_serializer(
-               name='PackagerKeysResponse',
-               fields={
-                   settings.MIGASFREE_PUBLIC_KEY: serializers.CharField(),
-                   settings.MIGASFREE_PACKAGER_PRI_KEY: serializers.CharField(),
+                name='PackagerKeysResponse',
+                fields={
+                    settings.MIGASFREE_PUBLIC_KEY: serializers.CharField(),
+                    settings.MIGASFREE_PACKAGER_PRI_KEY: serializers.CharField(),
                 }
             )
         },
@@ -146,8 +146,8 @@ class ProjectKeysView(views.APIView):
             status.HTTP_200_OK: inline_serializer(
                 name='ProjectKeysResponse',
                 fields={
-                   settings.MIGASFREE_PUBLIC_KEY: serializers.CharField(),
-                   'migasfree-client.pri': serializers.CharField(),
+                    settings.MIGASFREE_PUBLIC_KEY: serializers.CharField(),
+                    'migasfree-client.pri': serializers.CharField(),
                 }
             )
         },
@@ -206,6 +206,7 @@ class ProjectKeysView(views.APIView):
 
 
 class RepositoriesKeysView(views.APIView):
+    serializer_class = None
 
     @extend_schema(
         description='Returns the repositories public key',
