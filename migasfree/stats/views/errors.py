@@ -29,6 +29,8 @@ from .events_project import EventProjectViewSet
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class ErrorStatsViewSet(EventProjectViewSet):
+    serializer_class = None
+
     @action(methods=['get'], detail=False)
     def unchecked(self, request):
         data = Error.unchecked_by_project(request.user.userprofile)
