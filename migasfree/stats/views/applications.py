@@ -17,7 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.utils.translation import gettext as _
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -28,6 +28,48 @@ from ...app_catalog.models import Application
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class ApplicationStatsViewSet(viewsets.ViewSet):
+    serializer_class = None
+
+    @extend_schema(
+        description='Returns the total number of applications grouped by category.',
+        responses=OpenApiResponse(
+            description="Response containing a title, total count, and a list of categories.",
+            response={
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "total": {"type": "integer"},
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "value": {"type": "integer"},
+                                "category": {"type": "integer"},
+                            },
+                        },
+                    },
+                },
+                "required": ["title", "total", "data"],
+            },
+            examples=[
+                OpenApiExample(
+                    "successfully response",
+                    value={
+                        "title": "Applications / Category",
+                        "total": 15,
+                        "data": [
+                            {"name": "Category A", "value": 10, "category": 1},
+                            {"name": "Category B", "value": 5, "category": 2},
+                        ],
+                    },
+                    response_only=True,
+                    status_codes=[status.HTTP_200_OK],
+                )
+            ],
+        ),
+    )
     @action(methods=['get'], detail=False, url_path='category')
     def by_category(self, request):
         total = Application.objects.count()
@@ -50,6 +92,46 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns the total number of applications grouped by level.',
+        responses=OpenApiResponse(
+            description="Response containing a title, total count, and a list of levels.",
+            response={
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "total": {"type": "integer"},
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "value": {"type": "integer"},
+                                "level": {"type": "integer"},
+                            },
+                        },
+                    },
+                },
+                "required": ["title", "total", "data"],
+            },
+            examples=[
+                OpenApiExample(
+                    "Response example",
+                    value={
+                        "title": "Applications / Level",
+                        "total": 17,
+                        "data": [
+                            {"name": "User", "value": 5, "level": 1},
+                            {"name": "Admin", "value": 12, "level": 2},
+                        ],
+                    },
+                    response_only=True,
+                    status_codes=[status.HTTP_200_OK],
+                )
+            ],
+        ),
+    )
     @action(methods=['get'], detail=False, url_path='level')
     def by_level(self, request):
         total = Application.objects.count()
@@ -72,6 +154,51 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns the total number of applications grouped by project.',
+        responses=OpenApiResponse(
+            description="Response containing x-axis labels, data points and total count.",
+            response={
+                "type": "object",
+                "properties": {
+                    "x_labels": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Project names (x-axis labels).",
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "value": {"type": "integer"},
+                                "packages_by_project__project__id": {"type": "integer"},
+                            },
+                            "required": ["value", "packages_by_project__project__id"],
+                        },
+                    },
+                    "total": {"type": "integer"},
+                },
+                "required": ["x_labels", "data", "total"],
+            },
+            examples=[
+                OpenApiExample(
+                    "successfully response",
+                    value={
+                        "x_labels": ["Project A", "Project B", "Project C"],
+                        "data": [
+                            {"value": 12, "packages_by_project__project__id": 1},
+                            {"value": 7,  "packages_by_project__project__id": 2},
+                            {"value": 3,  "packages_by_project__project__id": 3},
+                        ],
+                        "total": 22,
+                    },
+                    response_only=True,
+                    status_codes=[status.HTTP_200_OK],
+                )
+            ],
+        ),
+    )
     @action(methods=['get'], detail=False, url_path='project')
     def by_project(self, request):
         total = Application.objects.count()
