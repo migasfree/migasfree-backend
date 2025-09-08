@@ -18,7 +18,7 @@
 
 from django.db.models import Count
 from django.utils.translation import gettext as _
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiResponse, OpenApiExample
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -29,6 +29,47 @@ from ...client.models import PackageHistory
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class PackageHistoryStatsViewSet(viewsets.ViewSet):
+    serializer_class = None
+
+    @extend_schema(
+        description=(
+            "Returns the amount of packages per project for the authenticated "
+            "user profile. The response contains a title, the overall total, "
+            "and a list of objects with the project name, the package count "
+            "(value), and the project’s internal ID."
+        ),
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                description=(
+                    "Number of packages grouped by project for the current user "
+                    "profile. Includes a total count and a list of project-wise "
+                    "aggregations."
+                ),
+                examples=[
+                    OpenApiExample(
+                        "successfully response",
+                        value={
+                            "title": "Packages / Project",
+                            "total": 123,
+                            "data": [
+                                {
+                                    "name": "Project Alpha",
+                                    "value": 78,
+                                    "package_project_id": 10
+                                },
+                                {
+                                    "name": "Project Beta",
+                                    "value": 45,
+                                    "package_project_id": 12
+                                }
+                            ]
+                        }
+                    )
+                ],
+            )
+        },
+    )
     @action(methods=['get'], detail=False, url_path='project')
     def by_project(self, request):
         total = PackageHistory.objects.scope(request.user.userprofile).count()
