@@ -823,6 +823,8 @@ class UserViewSet(
 @extend_schema(tags=['messages'])
 @permission_classes((permissions.IsAuthenticated,))
 class MessageViewSet(viewsets.ViewSet):
+    serializer_class = None
+
     def get_queryset(self):
         id_filter = self.request.query_params.get('id__in', None)
         if id_filter:
