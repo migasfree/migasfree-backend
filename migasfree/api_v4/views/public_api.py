@@ -101,6 +101,7 @@ def get_key_repositories(request):
 
 @permission_classes((permissions.AllowAny,))
 class RepositoriesUrlTemplateView(views.APIView):
+    serializer_class = None
 
     @extend_schema(
         description='Returns the repositories URL template'
