@@ -17,7 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.utils.translation import gettext as _
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiResponse, OpenApiExample
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -29,6 +29,64 @@ from ...utils import replace_keys
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class PackageStatsViewSet(viewsets.ViewSet):
+    serializer_class = None
+
+    @extend_schema(
+        description=(
+            "Returns package statistics per store for the authenticated user's "
+            "profile. The payload includes a total count, an 'inner' aggregation "
+            "(by project) and an 'outer' aggregation (by store and project)."
+        ),
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                description=(
+                    "Packages grouped by store. The response contains a title, a total "
+                    "count, an 'inner' list (packages per project) and an 'outer' list "
+                    "(packages per store + project) with keys renamed for a clean API."
+                ),
+                examples=[
+                    OpenApiExample(
+                        "successfully response",
+                        value={
+                            "title": "Packages / Store",
+                            "total": 250,
+                            "inner": [
+                                {"project_id": 5, "name": "Project X", "value": 120},
+                                {"project_id": 7, "name": "Project Y", "value": 80}
+                            ],
+                            "outer": [
+                                {
+                                    "project_id": 5,
+                                    "store_id": 2,
+                                    "name": "Main Store",
+                                    "value": 70
+                                },
+                                {
+                                    "project_id": 5,
+                                    "store_id": 3,
+                                    "name": "Secondary Store",
+                                    "value": 50
+                                },
+                                {
+                                    "project_id": 7,
+                                    "store_id": 2,
+                                    "name": "Main Store",
+                                    "value": 45
+                                },
+                                {
+                                    "project_id": 7,
+                                    "store_id": 4,
+                                    "name": "Remote Store",
+                                    "value": 35
+                                }
+                            ]
+                        }
+                    )
+                ],
+            )
+        },
+    )
     @action(methods=['get'], detail=False, url_path='store')
     def by_store(self, request):
         data = Package.by_store(request.user.userprofile)
