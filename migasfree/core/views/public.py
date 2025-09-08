@@ -157,6 +157,8 @@ class ProgrammingLanguagesView(views.APIView):
 @permission_classes((permissions.AllowAny,))
 @throttle_classes([UserRateThrottle])
 class ServerInfoView(views.APIView):
+    serializer_class = None
+
     def get(self, request):
         from ... import __version__, __author__, __contact__, __homepage__
 
@@ -217,6 +219,8 @@ class RangeFileWrapper:
 @permission_classes((permissions.AllowAny,))
 @throttle_classes([UserRateThrottle])
 class GetSourceFileView(views.APIView):
+    serializer_class = None
+
     async def read_remote_chunks(self, local_file, remote, chunk_size=8192):
         if not remote:
             raise ValueError('Invalid remote file')
