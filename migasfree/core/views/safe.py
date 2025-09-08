@@ -73,6 +73,30 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
 
         return name, version, architecture
 
+    @extend_schema(
+        description=(
+            "Accepts an uploaded file together with claim information (project, store, "
+            "and a flag indicating if the file represents a package). The endpoint "
+            "stores the file, creates or updates the related ``Package`` record and "
+            "updates repository metadata when necessary (requires JWT auth)."
+        ),
+        request={
+            "multipart/form-data": {
+                "type": "object",
+                "properties": {
+                    "file": {"type": "string", "format": "binary", "description": "The package file to upload"},
+                    "project": {"type": "string", "description": "Name of the project"},
+                    "store": {"type": "string", "description": "Name of the store"},
+                    "is_package": {"type": "boolean", "description": "Indicates if file is a package or regular file"},
+                },
+                "required": ["file", "project", "store"]
+            }
+        },
+        responses={
+            status.HTTP_200_OK: {'description': gettext('Data received')},
+            status.HTTP_404_NOT_FOUND: {'description': 'Project not found'},
+        },
+    )
     def create(self, request):
         """
         claims = {
@@ -125,6 +149,28 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description="Creates or updates a package set and store an uploaded package file (requires JWT auth).",
+        request={
+            "multipart/form-data": {
+                "type": "object",
+                "properties": {
+                    "file": {"type": "string", "format": "binary", "description": "The package file to upload"},
+                    "project": {"type": "string", "description": "Name of the project"},
+                    "store": {"type": "string", "description": "Name of the store"},
+                    "packageset": {"type": "string", "description": "Name of the package set"},
+                    "path": {
+                        "type": "string",
+                        "description": "Optional relative path inside the store where the file should be moved"
+                    }
+                },
+                "required": ["file", "project", "store", "packageset"]
+            }
+        },
+        responses={
+            status.HTTP_200_OK: {'description': gettext('Data received')},
+        }
+    )
     @action(methods=['post'], detail=False, url_path='set')
     def packageset(self, request):
         """
@@ -199,6 +245,24 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description="Creates a repository entry for an existing package set (requires JWT auth).",
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "project": {"type": "string", "description": "Name of the project"},
+                    "packageset": {"type": "string", "description": "Fullname of the package set"}
+                },
+                "required": ["project", "packageset"]
+            }
+        },
+        responses={
+            status.HTTP_200_OK: {'description': gettext('Data received')},
+            status.HTTP_400_BAD_REQUEST: {'description': gettext('Malformed claims')},
+            status.HTTP_404_NOT_FOUND: {'description': 'Project or PackageSet not found'}
+        }
+    )
     @action(methods=['post'], detail=False, url_path='repos')
     def create_repository(self, request):
         """
