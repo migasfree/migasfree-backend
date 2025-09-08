@@ -120,6 +120,47 @@ class HardwareViewSet(
 @permission_classes((permissions.AllowAny,))
 @throttle_classes([UserRateThrottle])
 class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
+    serializer_class = None
+
+    @extend_schema(
+        summary='Receives hardware capture for a computer',
+        description=(
+            'Accepts a JSON payload containing a computer ID and a hardware '
+            'structure. The payload is validated, the existing hardware nodes are '
+            'removed, and a background task stores the new data (requires JWT auth).'
+        ),
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'id': {
+                        'type': 'integer',
+                        'description': 'Computer primary key',
+                        'example': 42,
+                    },
+                    'hardware': {
+                        'type': 'object',
+                        'description': 'Hardware description (JSON serializable structure)',
+                        'example': {
+                            'cpu': 'Intel i7',
+                            'ram': '16GB',
+                            # …
+                        },
+                    },
+                },
+                'required': ['id', 'hardware'],
+                'example': {
+                    'id': 42,
+                    'hardware': {'cpu': 'Intel i7', 'ram': '16GB'},
+                },
+            }
+        },
+        responses={
+            status.HTTP_200_OK: {'description': gettext('Data received')},
+            status.HTTP_400_BAD_REQUEST: {'description': gettext('Malformed claims')},
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        }
+    )
     @action(methods=['post'], detail=False)
     def hardware(self, request):
         """
