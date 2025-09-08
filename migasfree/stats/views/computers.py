@@ -18,7 +18,7 @@
 
 from django.db.models.aggregates import Count
 from django.utils.translation import gettext as _
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample, OpenApiParameter, OpenApiTypes
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -32,6 +32,47 @@ from .events import event_by_month, month_interval
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class ComputerStatsViewSet(viewsets.ViewSet):
+    serializer_class = None
+
+    @extend_schema(
+        description='Returns the number of computers grouped by project for the requesting user.',
+        responses=OpenApiResponse(
+            description="Response containing a list of projects with their IDs, names and counts, plus a total.",
+            response={
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "project_id": {"type": "integer"},
+                                "value": {"type": "integer"},
+                            },
+                            "required": ["name", "project_id", "value"],
+                        },
+                    },
+                    "total": {"type": "integer"},
+                },
+                "required": ["data", "total"],
+            },
+            examples=[
+                OpenApiExample(
+                    "successfully response",
+                    value={
+                        "data": [
+                            {"name": "Project Alpha", "project_id": 1, "value": 42},
+                            {"name": "Project Beta",  "project_id": 2, "value": 17},
+                        ],
+                        "total": 69,
+                    },
+                    response_only=True,
+                    status_codes=[status.HTTP_200_OK],
+                )
+            ],
+        ),
+    )
     @action(methods=['get'], detail=False)
     def projects(self, request):
         data = Computer.group_by_project(request.user.userprofile)
@@ -52,6 +93,46 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns the number of computers grouped by platform for the requesting user.',
+        responses=OpenApiResponse(
+            description="Response containing a list of platforms with their IDs, names and counts, plus a total.",
+            response={
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "platform_id": {"type": "integer"},
+                                "value": {"type": "integer"},
+                            },
+                            "required": ["name", "platform_id", "value"],
+                        },
+                    },
+                    "total": {"type": "integer"},
+                },
+                "required": ["data", "total"],
+            },
+            examples=[
+                OpenApiExample(
+                    "successfully response",
+                    value={
+                        "data": [
+                            {"name": "Linux", "platform_id": 1, "value": 120},
+                            {"name": "Windows", "platform_id": 2, "value": 85},
+                            {"name": "macOS", "platform_id": 3, "value": 30},
+                        ],
+                        "total": 235,
+                    },
+                    response_only=True,
+                    status_codes=[status.HTTP_200_OK],
+                )
+            ],
+        ),
+    )
     @action(methods=['get'], detail=False)
     def platforms(self, request):
         data = Computer.group_by_platform(request.user.userprofile)
@@ -72,6 +153,95 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns the total number of computers grouped by machine type '
+        '(virtual/physical) and subscription status.',
+        responses=OpenApiResponse(
+            description="Response with title, total count and two arrays (inner & outer) describing the groups.",
+            response={
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "total": {"type": "integer"},
+                    "inner": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "value": {"type": "integer"},
+                                "status_in": {"type": "string"},
+                            },
+                            "required": ["name", "value", "status_in"],
+                        },
+                    },
+                    "outer": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "value": {"type": "integer"},
+                                "status_in": {"type": "string"},
+                                "machine": {"type": "string"},
+                            },
+                            "required": ["name", "value", "status_in", "machine"],
+                        },
+                    },
+                },
+                "required": ["title", "total", "inner", "outer"],
+            },
+            examples=[
+                OpenApiExample(
+                    "Response example",
+                    value={
+                        "title": "Computers / Machine",
+                        "total": 250,
+                        "inner": [
+                            {
+                                "name": "Subscribed",
+                                "value": 180,
+                                "status_in": "intended,reserved,unknown,in repair,available"
+                            },
+                            {
+                                "name": "Unsubscribed",
+                                "value": 70,
+                                "status_in": "unsubscribed"
+                            },
+                        ],
+                        "outer": [
+                            {
+                                "name": "Virtual",
+                                "value": 100,
+                                "status_in": "intended,reserved,unknown,in repair,available",
+                                "machine": "V"
+                            },
+                            {
+                                "name": "Physical",
+                                "value": 80,
+                                "status_in": "intended,reserved,unknown,in repair,available",
+                                "machine": "P"
+                            },
+                            {
+                                "name": "Virtual",
+                                "value": 20,
+                                "status_in": "unsubscribed",
+                                "machine": "V"
+                            },
+                            {
+                                "name": "Physical",
+                                "value": 50,
+                                "status_in": "unsubscribed",
+                                "machine": "P"
+                            },
+                        ],
+                    },
+                    response_only=True,
+                    status_codes=[status.HTTP_200_OK],
+                )
+            ],
+        ),
+    )
     @action(methods=['get'], detail=False, url_path='machine')
     def by_machine(self, request):
         total = Computer.objects.scope(request.user.userprofile).count()
@@ -156,6 +326,67 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns the total number of subscribed computers grouped by status and by productivity '
+        '(productive / unproductive).',
+        responses=OpenApiResponse(
+            description="Response containing title, total count and two arrays (inner & outer) describing the groups.",
+            response={
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "total": {"type": "integer"},
+                    "inner": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "value": {"type": "integer"},
+                                "status_in": {"type": "string"},
+                            },
+                            "required": ["name", "value", "status_in"],
+                        },
+                    },
+                    "outer": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "value": {"type": "integer"},
+                                "status_in": {"type": "string"},
+                            },
+                            "required": ["name", "value", "status_in"],
+                        },
+                    },
+                },
+                "required": ["title", "total", "inner", "outer"],
+            },
+            examples=[
+                OpenApiExample(
+                    "successfully response",
+                    value={
+                        "title": "Subscribed Computers / Status",
+                        "total": 300,
+                        "inner": [
+                            {"name": "Productive", "value": 210, "status_in": "intended,reserved,unknown"},
+                            {"name": "Unproductive", "value": 90, "status_in": "in repair,available"},
+                        ],
+                        "outer": [
+                            {"name": "Intended", "value": 120, "status_in": "intended"},
+                            {"name": "Reserved", "value": 60, "status_in": "reserved"},
+                            {"name": "Unknown", "value": 30, "status_in": "unknown"},
+                            {"name": "Available", "value": 70, "status_in": "available"},
+                            {"name": "In repair", "value": 20, "status_in": "in repair"},
+                        ],
+                    },
+                    response_only=True,
+                    status_codes=[status.HTTP_200_OK],
+                )
+            ],
+        ),
+    )
     @action(methods=['get'], detail=False, url_path='status')
     def by_status(self, request):
         total = Computer.objects.scope(request.user.userprofile).exclude(
@@ -224,6 +455,27 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns the number of computers that match the specified attributes.',
+        parameters=[
+            OpenApiParameter(
+                name='attributes',
+                description='List of attributes to count (can be repeated)',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=True,
+                many=True,
+            ),
+            OpenApiParameter(
+                name='project_id',
+                description='Proyect ID (optional)',
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                required=False,
+            ),
+        ],
+        responses={status.HTTP_200_OK: OpenApiTypes.INT},
+    )
     @action(methods=['get'], detail=False, url_path='attributes/count')
     def attributes_count(self, request):
         attributes = request.query_params.getlist('attributes')
@@ -234,6 +486,26 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description='Returns the number of new computers created per month within the given interval.',
+        parameters=[
+            OpenApiParameter(
+                name='begin',
+                description='Start month in YYYY-MM format (optional)',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+            ),
+            OpenApiParameter(
+                name='end',
+                description='End month in YYYY-MM format (optional)',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+            ),
+        ],
+        responses={status.HTTP_200_OK: OpenApiTypes.OBJECT},
+    )
     @action(methods=['get'], detail=False, url_path='new/month')
     def new_by_month(self, request):
         begin_date, end_date = month_interval(
@@ -252,6 +524,53 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description=(
+            "Returns productive computers grouped by platform (inner) and by "
+            "project + platform (outer). Keys are renamed for a cleaner API output."
+        ),
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                description=(
+                    "Dictionary with the total number of productive computers and "
+                    "breakdowns by platform (inner) and by project/platform (outer)."
+                ),
+                examples=[
+                    OpenApiExample(
+                        "successfully response",
+                        value={
+                            "total": 123,
+                            "inner": [
+                                {"platform_id": 1, "name": "Linux", "value": 80},
+                                {"platform_id": 2, "name": "Windows", "value": 43}
+                            ],
+                            "outer": [
+                                {
+                                    "name": "Project A",
+                                    "project_id": 10,
+                                    "platform_id": 1,
+                                    "value": 50
+                                },
+                                {
+                                    "name": "Project B",
+                                    "project_id": 11,
+                                    "platform_id": 1,
+                                    "value": 30
+                                },
+                                {
+                                    "name": "Project C",
+                                    "project_id": 11,
+                                    "platform_id": 2,
+                                    "value": 43
+                                }
+                            ]
+                        }
+                    )
+                ],
+            )
+        },
+    )
     @action(methods=['get'], detail=False, url_path='productive/platform')
     def productive_by_platform(self, request):
         data = Computer.productive_computers_by_platform(request.user.userprofile)
@@ -276,6 +595,53 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        description=(
+            "Returns the number of computers entered each year for the current "
+            "user profile, together with helper fields useful for front‑end "
+            "filtering."
+        ),
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                description=(
+                    "Statistics of computer entries per year. Returns a list of "
+                    "labels (years) and a data dict where each entry contains the "
+                    "count for that year plus auxiliary filter information."
+                ),
+                examples=[
+                    OpenApiExample(
+                        "successfully response",
+                        value={
+                            "x_labels": [2022, 2023, 2024],
+                            "data": {
+                                "Computers": [
+                                    {
+                                        "value": 150,
+                                        "machine": "P",
+                                        "created_at__gte": "2022-01-01",
+                                        "created_at__lt": "2023-01-01"
+                                    },
+                                    {
+                                        "value": 180,
+                                        "machine": "P",
+                                        "created_at__gte": "2023-01-01",
+                                        "created_at__lt": "2024-01-01"
+                                    },
+                                    {
+                                        "value": 200,
+                                        "machine": "P",
+                                        "created_at__gte": "2024-01-01",
+                                        "created_at__lt": "2025-01-01"
+                                    }
+                                ]
+                            }
+                        }
+                    )
+                ],
+            )
+        },
+    )
     @action(methods=['get'], detail=False, url_path='entry/year')
     def entry_year(self, request):
         results = Computer.entry_year(request.user.userprofile)
