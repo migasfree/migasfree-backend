@@ -29,6 +29,8 @@ from ...device.models import Device, Model
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class DeviceStatsViewSet(viewsets.ViewSet):
+    serializer_class = None
+
     @action(methods=['get'], detail=False, url_path='connection')
     def by_connection(self, request):
         return Response(
