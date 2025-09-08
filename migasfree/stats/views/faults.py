@@ -30,6 +30,8 @@ from .events_project import EventProjectViewSet
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class FaultStatsViewSet(EventProjectViewSet):
+    serializer_class = None
+
     @action(methods=['get'], detail=False)
     def unchecked(self, request):
         data = Fault.unchecked_by_project(request.user.userprofile)
