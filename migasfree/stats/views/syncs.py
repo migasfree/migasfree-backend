@@ -50,6 +50,8 @@ def daterange(start_date, end_date):
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class SyncStatsViewSet(EventProjectViewSet):
+    serializer_class = None
+
     @action(methods=['get'], detail=False)
     def yearly(self, request):
         """
