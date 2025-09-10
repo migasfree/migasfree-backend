@@ -52,22 +52,14 @@ class DomainPackageManager(models.Manager):
 class PackageManager(DomainPackageManager):
     def create(self, fullname, name, version, architecture, project, store, file_=None):
         if store and file_:
-            Package.handle_uploaded_file(
-                file_,
-                os.path.join(Store.path(project.slug, store.slug), fullname)
-            )
+            Package.handle_uploaded_file(file_, os.path.join(Store.path(project.slug, store.slug), fullname))
 
         if Package.objects.filter(fullname=fullname, project=project).exists() and store and file_:
             package = Package.objects.get(fullname=fullname, project=project)
             package.store = store
         else:
             package = Package(
-                fullname=fullname,
-                name=name,
-                version=version,
-                architecture=architecture,
-                project=project,
-                store=store
+                fullname=fullname, name=name, version=version, architecture=architecture, project=project, store=store
             )
 
         package.save()
@@ -81,7 +73,7 @@ class PackageManager(DomainPackageManager):
 class Package(models.Model, MigasLink):
     fullname = models.CharField(
         verbose_name=_('fullname'),
-        max_length=170,
+        max_length=270,
         null=False,
         unique=False,
         db_comment='package fullname (name + version + architecture + extension)',
@@ -89,7 +81,7 @@ class Package(models.Model, MigasLink):
 
     name = models.CharField(
         verbose_name=_('name'),
-        max_length=100,
+        max_length=200,
         null=False,
         blank=True,
         unique=False,
@@ -128,14 +120,13 @@ class Package(models.Model, MigasLink):
 
     objects = PackageManager()
 
-
     @staticmethod
     def normalized_name(filename):
         def remove_extensions(filename):
             extensions = get_available_extensions()
             for ext in extensions:
                 if filename.endswith(f'.{ext}'):
-                    return filename[:-len(ext)-1]
+                    return filename[: -len(ext) - 1]
 
             return filename
 
@@ -143,7 +134,7 @@ class Package(models.Model, MigasLink):
             architectures = get_available_architectures()
             for arch in architectures:
                 if base.endswith(arch):
-                    return arch, base[:len(base) - len(arch) - 1]
+                    return arch, base[: len(base) - len(arch) - 1]
 
             return '', base
 
@@ -183,23 +174,17 @@ class Package(models.Model, MigasLink):
     @staticmethod
     def orphan_count(user=None):
         if not user:
-            return Package.objects.filter(
-                deployment__isnull=True,
-                store__isnull=False,
-                packageset__isnull=True
-            ).count()
+            return Package.objects.filter(deployment__isnull=True, store__isnull=False, packageset__isnull=True).count()
 
-        return Package.objects.scope(user).filter(
-            deployment__isnull=True,
-            store__isnull=False,
-            packageset__isnull=True
-        ).count()
+        return (
+            Package.objects.scope(user)
+            .filter(deployment__isnull=True, store__isnull=False, packageset__isnull=True)
+            .count()
+        )
 
     def pms(self):
         available_pms = dict(get_available_pms())
-        mod = import_module(
-            f'migasfree.core.pms.{available_pms.get(self.project.pms)}'
-        )
+        mod = import_module(f'migasfree.core.pms.{available_pms.get(self.project.pms)}')
         return getattr(mod, self.project.pms.capitalize())()
 
     def url(self):
@@ -211,7 +196,7 @@ class Package(models.Model, MigasLink):
             self.project.slug,
             settings.MIGASFREE_STORE_TRAILING_PATH,
             self.store.slug,
-            self.fullname
+            self.fullname,
         )
 
     @staticmethod
@@ -233,17 +218,19 @@ class Package(models.Model, MigasLink):
     def by_store(user):
         total = Package.objects.scope(user).count()
 
-        stores = list(Package.objects.scope(user).values(
-            'project__id', 'store__id', 'store__name'
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__id', 'store__name', '-count'))
+        stores = list(
+            Package.objects.scope(user)
+            .values('project__id', 'store__id', 'store__name')
+            .annotate(count=Count('id'))
+            .order_by('project__id', 'store__name', '-count')
+        )
 
-        projects = list(Package.objects.scope(user).values(
-            'project__id', 'project__name'
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__id', '-count'))
+        projects = list(
+            Package.objects.scope(user)
+            .values('project__id', 'project__name')
+            .annotate(count=Count('id'))
+            .order_by('project__id', '-count')
+        )
 
         return {
             'total': total,
@@ -269,7 +256,7 @@ class Package(models.Model, MigasLink):
             if previous_store:
                 shutil.move(
                     self.path(self.project.slug, previous_store, self.name),
-                    self.path(self.project.slug, self.store, self.name)
+                    self.path(self.project.slug, self.store, self.name),
                 )
 
     def update_package_data(self, name, version, architecture):
@@ -287,10 +274,9 @@ class Package(models.Model, MigasLink):
         if self.store and self.store.project.id != self.project_id:
             raise ValidationError(_('Store must belong to the project'))
 
-        queryset = Package.objects.filter(
-            fullname=self.fullname,
-            project__id=self.project_id
-        ).filter(~models.Q(id=self.id))
+        queryset = Package.objects.filter(fullname=self.fullname, project__id=self.project_id).filter(
+            ~models.Q(id=self.id)
+        )
         if queryset.exists():
             raise ValidationError(_('Duplicated fullname at project'))
 
@@ -310,7 +296,7 @@ class Package(models.Model, MigasLink):
 
     def __str__(self):
         # return _('%s at project %s') % (self.fullname, self.project.name)
-        return self.fullname
+        return str(self.fullname)
 
     class Meta:
         app_label = 'core'
@@ -329,9 +315,9 @@ def _update_deployments(instance, delete=False):
     for deploy in queryset:
         if delete:
             deploy.available_packages.remove(instance)
+
         tasks.create_repository_metadata.apply_async(
-            queue=f'pms-{deploy.pms().name}',
-            kwargs={'deployment_id': deploy.id}
+            queue=f'pms-{deploy.pms().name}', kwargs={'deployment_id': deploy.id}
         )
 
 
@@ -346,10 +332,6 @@ def delete_package(sender, instance, **kwargs):
     if not instance.store:
         return
 
-    path = Package.path(
-        instance.project.slug,
-        instance.store.slug,
-        instance.fullname
-    )
+    path = Package.path(instance.project.slug, instance.store.slug, instance.fullname)
     Package.delete_from_store(path)
     _update_deployments(instance, delete=True)
