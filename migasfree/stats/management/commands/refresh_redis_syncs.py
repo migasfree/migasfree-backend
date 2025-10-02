@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2021-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2021-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+import time
 
 from datetime import datetime
 
@@ -31,21 +33,28 @@ class Command(BaseCommand):
     CURRENT_YEAR = datetime.today().year
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            '-s', '--since',
-            type=int, action='store', default=self.INITIAL_YEAR,
-            help='Format: YYYY'
-        )
-        parser.add_argument(
-            '-u', '--until',
-            type=int, action='store', default=self.CURRENT_YEAR,
-            help='Format: YYYY'
-        )
-        parser.add_argument(
-            '-r', '--remove',
-            action='store_true',
-            help='Remove Redis stats'
-        )
+        parser.add_argument('-s', '--since', type=int, action='store', default=self.INITIAL_YEAR, help='Format: YYYY')
+        parser.add_argument('-u', '--until', type=int, action='store', default=self.CURRENT_YEAR, help='Format: YYYY')
+        parser.add_argument('-r', '--remove', action='store_true', help='Remove Redis stats')
+
+    def _batch_delete_keys(self, con, year):
+        intervals = ['years', 'months', 'days', 'hours']
+        all_keys = []
+
+        for interval in intervals:
+            patterns = [
+                f'migasfree:stats:{interval}:{year}*',
+                f'migasfree:watch:stats:{interval}:{year}*',
+                f'migasfree:stats:*:{interval}:{year}*',
+                f'migasfree:watch:stats:*:{interval}:{year}*',
+            ]
+
+            for pattern in patterns:
+                for key in con.scan_iter(match=pattern):
+                    all_keys.append(key)
+
+        if all_keys:
+            con.delete(*all_keys)
 
     def handle(self, *args, **options):
         since = options['since']
@@ -64,26 +73,22 @@ class Command(BaseCommand):
         con = get_redis_connection()
 
         # first, reset redis stats
+        start_reset = time.perf_counter()
         for year in range(since, until + 1):
-            for interval in ['years', 'months', 'days', 'hours']:
-                for x in con.keys(f'migasfree:stats:{interval}:{year}*'):
-                    con.delete(x)
+            self._batch_delete_keys(con, year)
 
-                for x in con.keys(f'migasfree:watch:stats:{interval}:{year}*'):
-                    con.delete(x)
-
-                for x in con.keys(f'migasfree:stats:*:{interval}:{year}*'):
-                    con.delete(x)
-
-                for x in con.keys(f'migasfree:watch:stats:*:{interval}:{year}*'):
-                    con.delete(x)
+        elapsed_reset = time.perf_counter() - start_reset
+        self.stdout.write(self.style.NOTICE(f'Reset Redis stats: {elapsed_reset:.2f} s'))
 
         if not remove:
             # then, update db syncs
+            start_update = time.perf_counter()
             for sync in Synchronization.objects.filter(
-                    created_at__year__gte=since,
-                    created_at__year__lte=until
+                created_at__year__gte=since, created_at__year__lte=until
             ).iterator():
                 sync.add_to_redis()
+
+            elapsed_update = time.perf_counter() - start_update
+            self.stdout.write(self.style.NOTICE(f'Update DB syncs: {elapsed_update:.2f} s'))
 
         self.stdout.write(self.style.SUCCESS('Redis stats refreshed!'))
