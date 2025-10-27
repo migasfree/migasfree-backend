@@ -226,4 +226,7 @@ def handle_postrun(sender=None, **kwargs):
             headers={'Authorization': AUTH_TOKEN}
         )
         if req.status_code not in REQUESTS_OK_CODES:
-            raise PermissionError(f'Error creating notification by task {sender.name}: [{req.status_code}] {req.text}')
+            raise PermissionError(
+                f'Error creating notification by task {sender.name}: [{req.status_code}] {req.text}'
+                f' Message: {msg}'
+            )
