@@ -770,7 +770,7 @@ class SynchronizationViewSet(
     queryset = models.Synchronization.objects.all()
     serializer_class = serializers.SynchronizationSerializer
     filterset_class = SynchronizationFilter
-    search_fields = ['user__name', 'user__fullname']
+    search_fields = ['user__name', 'user__fullname', 'computer__name', 'consumer']
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
