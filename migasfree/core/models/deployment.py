@@ -154,7 +154,7 @@ class Deployment(models.Model, MigasLink):
     )
 
     start_date = models.DateField(
-        default=timezone.now,
+        default=timezone.localdate,
         verbose_name=_('start date'),
         db_comment='initial date from which the deployment will be accessible',
     )
