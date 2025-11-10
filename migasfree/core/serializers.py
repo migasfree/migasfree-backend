@@ -483,6 +483,10 @@ class DeploymentListSerializer(serializers.ModelSerializer):
     project = ProjectInfoSerializer(many=False, read_only=True)
     domain = DomainInfoSerializer(many=False, read_only=True)
     schedule = ScheduleInfoSerializer(many=False, read_only=True)
+    schedule_timeline = serializers.SerializerMethodField()
+
+    def get_schedule_timeline(self, obj):
+        return obj.schedule_timeline()
 
     class Meta:
         model = Deployment
@@ -491,6 +495,7 @@ class DeploymentListSerializer(serializers.ModelSerializer):
             'schedule', 'source',
             'name', 'slug', 'comment',
             'start_date', 'enabled', 'auto_restart',
+            'schedule_timeline',
         )
 
 
