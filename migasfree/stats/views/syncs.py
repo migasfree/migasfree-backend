@@ -120,28 +120,22 @@ class SyncStatsViewSet(EventProjectViewSet):
         con = get_redis_connection()
         labels = []
         stats = []
-        for i in month_year_iter(
-            begin.month, begin.year,
-            end.month, end.year
-        ):
+        for i in month_year_iter(begin.month, begin.year, end.month, end.year):
             item_date = datetime(i[0], i[1], 1)
             next_item_date = item_date + relativedelta(months=+1)
             value = con.get(f'{key}:{i[0]:04}{i[1]:02}')
             labels.append(f'{i[0]:04}-{i[1]:02}')
-            stats.append({
-                'model': Synchronization._meta.model_name,
-                'created_at__gte': time.strftime(value_fmt, item_date.timetuple()),
-                'created_at__lt': time.strftime(value_fmt, next_item_date.timetuple()),
-                'value': int(value) if value else 0
-            })
+            stats.append(
+                {
+                    'model': Synchronization._meta.model_name,
+                    'created_at__gte': time.strftime(value_fmt, item_date.timetuple()),
+                    'created_at__lt': time.strftime(value_fmt, next_item_date.timetuple()),
+                    'value': int(value) if value else 0,
+                    **({'project_id': project_id} if project_id else {}),
+                }
+            )
 
-        return Response(
-            {
-                'x_labels': labels,
-                'data': {_('Computers'): stats}
-            },
-            status=status.HTTP_200_OK
-        )
+        return Response({'x_labels': labels, 'data': {_('Computers'): stats}}, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False)
     def daily(self, request):
@@ -184,20 +178,17 @@ class SyncStatsViewSet(EventProjectViewSet):
             next_item_date = single_date + timedelta(days=1)
             value = con.get(f'{key}:{time.strftime("%Y%m%d", single_date.timetuple())}')
             labels.append(time.strftime(human_fmt, single_date.timetuple()))
-            stats.append({
-                'model': Synchronization._meta.model_name,
-                'created_at__gte': time.strftime(value_fmt, single_date.timetuple()),
-                'created_at__lt': time.strftime(value_fmt, next_item_date.timetuple()),
-                'value': int(value) if value else 0
-            })
+            stats.append(
+                {
+                    'model': Synchronization._meta.model_name,
+                    'created_at__gte': time.strftime(value_fmt, single_date.timetuple()),
+                    'created_at__lt': time.strftime(value_fmt, next_item_date.timetuple()),
+                    'value': int(value) if value else 0,
+                    **({'project_id': project_id} if project_id else {}),
+                }
+            )
 
-        return Response(
-            {
-                'x_labels': labels,
-                'data': {_('Computers'): stats}
-            },
-            status=status.HTTP_200_OK
-        )
+        return Response({'x_labels': labels, 'data': {_('Computers'): stats}}, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False)
     def hourly(self, request):
@@ -208,9 +199,12 @@ class SyncStatsViewSet(EventProjectViewSet):
             end string (Y-m-dTH)
             project_id int
         """
+        locale.setlocale(locale.LC_ALL, '')  # strftime not using locale settings (python3)
         now = time.localtime()
         hour = timedelta(hours=1)
         fmt = '%Y-%m-%dT%H'
+        human_fmt = '%Y-%m-%d %H:%M'
+        value_fmt = '%Y-%m-%dT%H:%M:%S'
 
         begin = request.query_params.get('begin', '')
         try:
@@ -232,16 +226,24 @@ class SyncStatsViewSet(EventProjectViewSet):
             key = f'migasfree:stats:{project_id}:hours'
 
         con = get_redis_connection()
+        labels = []
         stats = []
         while begin <= end:
+            next_item_date = begin + hour
             value = con.get(f'{key}:{begin.strftime("%Y%m%d%H")}')
-            stats.append([
-                begin.strftime(fmt),
-                int(value) if value else 0
-            ])
+            labels.append(time.strftime(human_fmt, begin.timetuple()))
+            stats.append(
+                {
+                    'model': Synchronization._meta.model_name,
+                    'created_at__gte': time.strftime(value_fmt, begin.timetuple()),
+                    'created_at__lt': time.strftime(value_fmt, next_item_date.timetuple()),
+                    'value': int(value) if value else 0,
+                    **({'project_id': project_id} if project_id else {}),
+                }
+            )
             begin += hour
 
-        return Response(stats, status=status.HTTP_200_OK)
+        return Response({'x_labels': labels, 'data': {_('Computers'): stats}}, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False, url_path='project')
     def by_project(self, request):
@@ -251,12 +253,8 @@ class SyncStatsViewSet(EventProjectViewSet):
                 'total': Synchronization.objects.scope(request.user.userprofile).count(),
                 'data': replace_keys(
                     list(Synchronization.group_by_project(request.user.userprofile)),
-                    {
-                        'project__name': 'name',
-                        'project__id': 'project_id',
-                        'count': 'value'
-                    }
+                    {'project__name': 'name', 'project__id': 'project_id', 'count': 'value'},
                 ),
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
