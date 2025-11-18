@@ -31,15 +31,27 @@ from .pms import tasks
 from .validators import MimetypeValidator, validate_project_pms
 from .pms import get_available_mimetypes
 from .models import (
-    Platform, Project, Store,
-    ServerProperty, ClientProperty,
-    Property, Singularity,
-    Attribute, AttributeSet,
-    ServerAttribute, ClientAttribute,
-    Schedule, ScheduleDelay,
-    Package, PackageSet, Deployment,
-    Domain, Scope, UserProfile,
-    InternalSource, ExternalSource,
+    Platform,
+    Project,
+    Store,
+    ServerProperty,
+    ClientProperty,
+    Property,
+    Singularity,
+    Attribute,
+    AttributeSet,
+    ServerAttribute,
+    ClientAttribute,
+    Schedule,
+    ScheduleDelay,
+    Package,
+    PackageSet,
+    Deployment,
+    Domain,
+    Scope,
+    UserProfile,
+    InternalSource,
+    ExternalSource,
 )
 from ..utils import to_list
 
@@ -87,11 +99,7 @@ class AttributeInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Attribute
-        fields = (
-            'id', 'property_att',
-            'value', 'description',
-            'latitude', 'longitude'
-        )
+        fields = ('id', 'property_att', 'value', 'description', 'latitude', 'longitude')
 
 
 class AttributeSetSerializer(serializers.ModelSerializer):
@@ -147,11 +155,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = (
-            'id', 'name', 'slug', 'pms',
-            'architecture', 'auto_register_computers',
-            'base_os', 'platform'
-        )
+        fields = ('id', 'name', 'slug', 'pms', 'architecture', 'auto_register_computers', 'base_os', 'platform')
 
 
 class ProjectWriteSerializer(serializers.ModelSerializer):
@@ -168,11 +172,7 @@ class ProjectWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = (
-            'id', 'name', 'pms',
-            'architecture', 'auto_register_computers',
-            'base_os', 'platform'
-        )
+        fields = ('id', 'name', 'pms', 'architecture', 'auto_register_computers', 'base_os', 'platform')
 
 
 class StoreInfoSerializer(serializers.ModelSerializer):
@@ -228,11 +228,7 @@ class ClientPropertySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClientProperty
-        fields = (
-            'id', 'prefix', 'name',
-            'kind', 'sort', 'enabled',
-            'language', 'code'
-        )
+        fields = ('id', 'prefix', 'name', 'kind', 'sort', 'enabled', 'language', 'code')
 
 
 class SingularitySerializer(serializers.ModelSerializer):
@@ -248,9 +244,15 @@ class SingularitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Singularity
         fields = (
-            'id', 'name', 'enabled', 'priority',
-            'property_att', 'language', 'code',
-            'included_attributes', 'excluded_attributes',
+            'id',
+            'name',
+            'enabled',
+            'priority',
+            'property_att',
+            'language',
+            'code',
+            'included_attributes',
+            'excluded_attributes',
         )
 
 
@@ -279,9 +281,12 @@ class ServerAttributeSerializer(AttributeSerializer):
     class Meta:
         model = ServerAttribute
         fields = (
-            'id', 'property_att',
-            'value', 'description',
-            'latitude', 'longitude',
+            'id',
+            'property_att',
+            'value',
+            'description',
+            'latitude',
+            'longitude',
             'total_computers',
         )
 
@@ -296,11 +301,7 @@ class ServerAttributeWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServerAttribute
-        fields = (
-            'id', 'property_att',
-            'value', 'description',
-            'latitude', 'longitude'
-        )
+        fields = ('id', 'property_att', 'value', 'description', 'latitude', 'longitude')
 
 
 class ClientAttributeSerializer(AttributeSerializer):
@@ -309,9 +310,12 @@ class ClientAttributeSerializer(AttributeSerializer):
     class Meta:
         model = ClientAttribute
         fields = (
-            'id', 'property_att',
-            'value', 'description',
-            'latitude', 'longitude',
+            'id',
+            'property_att',
+            'value',
+            'description',
+            'latitude',
+            'longitude',
             'total_computers',
         )
 
@@ -326,11 +330,7 @@ class ClientAttributeWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClientAttribute
-        fields = (
-            'id', 'property_att',
-            'value', 'description',
-            'latitude', 'longitude'
-        )
+        fields = ('id', 'property_att', 'value', 'description', 'latitude', 'longitude')
 
 
 class ScheduleInfoSerializer(serializers.ModelSerializer):
@@ -373,21 +373,10 @@ class PackageInfoSerializer(serializers.ModelSerializer):
 
 
 class PackageSerializer(serializers.ModelSerializer):
-    project = serializers.PrimaryKeyRelatedField(
-        queryset=Project.objects.all()
-    )
-    store = serializers.PrimaryKeyRelatedField(
-        queryset=Store.objects.all()
-    )
-    files = serializers.FileField(
-        allow_empty_file=False,
-        validators=[MimetypeValidator(get_available_mimetypes())]
-    )
-    fullname = serializers.CharField(
-        max_length=170,
-        required=False,
-        allow_blank=True
-    )
+    project = serializers.PrimaryKeyRelatedField(queryset=Project.objects.all())
+    store = serializers.PrimaryKeyRelatedField(queryset=Store.objects.all())
+    files = serializers.FileField(allow_empty_file=False, validators=[MimetypeValidator(get_available_mimetypes())])
+    fullname = serializers.CharField(max_length=170, required=False, allow_blank=True)
 
     def to_representation(self, obj):
         return {
@@ -400,11 +389,8 @@ class PackageSerializer(serializers.ModelSerializer):
                 'id': obj.project.id,
                 'name': obj.project.name,
             },
-            'store': {
-                'id': obj.store.id if obj.store else 0,
-                'name': obj.store.name if obj.store else ''
-            },
-            'url': obj.url()
+            'store': {'id': obj.store.id if obj.store else 0, 'name': obj.store.name if obj.store else ''},
+            'url': obj.url(),
         }
 
     def create(self, validated_data):
@@ -428,7 +414,7 @@ class PackageSerializer(serializers.ModelSerializer):
             architecture=validated_data['architecture'],
             project=validated_data['project'],
             store=validated_data['store'],
-            file_=file_
+            file_=file_,
         )
 
     class Meta:
@@ -491,10 +477,18 @@ class DeploymentListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deployment
         fields = (
-            'id', 'project', 'domain',
-            'schedule', 'source',
-            'name', 'slug', 'comment',
-            'start_date', 'enabled', 'auto_restart',
+            'id',
+            'project',
+            'domain',
+            'schedule',
+            'source',
+            'frozen',
+            'name',
+            'slug',
+            'comment',
+            'start_date',
+            'enabled',
+            'auto_restart',
             'schedule_timeline',
         )
 
@@ -546,12 +540,24 @@ class InternalSourceSerializer(DeploymentSerializer):
     class Meta:
         model = InternalSource
         fields = (
-            'id', 'enabled', 'project', 'domain', 'name', 'slug', 'comment',
+            'id',
+            'enabled',
+            'project',
+            'domain',
+            'name',
+            'slug',
+            'comment',
             'available_packages',
-            'included_attributes', 'excluded_attributes',
-            'packages_to_install', 'packages_to_remove',
-            'default_preincluded_packages', 'default_included_packages', 'default_excluded_packages',
-            'schedule', 'start_date', 'auto_restart',
+            'included_attributes',
+            'excluded_attributes',
+            'packages_to_install',
+            'packages_to_remove',
+            'default_preincluded_packages',
+            'default_included_packages',
+            'default_excluded_packages',
+            'schedule',
+            'start_date',
+            'auto_restart',
         )
 
 
@@ -559,12 +565,29 @@ class ExternalSourceSerializer(DeploymentSerializer):
     class Meta:
         model = ExternalSource
         fields = (
-            'id', 'enabled', 'project', 'domain', 'name', 'slug', 'comment',
-            'included_attributes', 'excluded_attributes',
-            'packages_to_install', 'packages_to_remove',
-            'default_preincluded_packages', 'default_included_packages', 'default_excluded_packages',
-            'schedule', 'start_date', 'auto_restart',
-            'base_url', 'options', 'suite', 'components', 'frozen', 'expire'
+            'id',
+            'enabled',
+            'project',
+            'domain',
+            'name',
+            'slug',
+            'comment',
+            'included_attributes',
+            'excluded_attributes',
+            'packages_to_install',
+            'packages_to_remove',
+            'default_preincluded_packages',
+            'default_included_packages',
+            'default_excluded_packages',
+            'schedule',
+            'start_date',
+            'auto_restart',
+            'base_url',
+            'options',
+            'suite',
+            'components',
+            'frozen',
+            'expire',
         )
 
 
@@ -646,17 +669,15 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
                 computer = Computer.objects.get(pk=int(attribute.value))
                 if computer.status not in Computer.ACTIVE_STATUS:
                     raise serializers.ValidationError(
-                        _('It is not possible to assign an inactive computer (%s) as an attribute')
-                        % computer.__str__()
+                        _('It is not possible to assign an inactive computer (%s) as an attribute') % computer.__str__()
                     )
 
     def validate(self, data):
         for item in data.get('available_packages', []):
             if item.project.id != data['project'].id:
                 raise serializers.ValidationError(
-                    _('Package %(pkg)s must belong to the project %(project)s') % {
-                        'pkg': item, 'project': data['project']
-                    }
+                    _('Package %(pkg)s must belong to the project %(project)s')
+                    % {'pkg': item, 'project': data['project']}
                 )
 
         self._validate_active_computers(data.get('included_attributes', []))
@@ -668,8 +689,7 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
         deploy = super().create(validated_data)
         if deploy.source == Deployment.SOURCE_INTERNAL:
             tasks.create_repository_metadata.apply_async(
-                queue=f'pms-{deploy.pms().name}',
-                kwargs={'deployment_id': deploy.id}
+                queue=f'pms-{deploy.pms().name}', kwargs={'deployment_id': deploy.id}
             )
 
         return deploy
@@ -677,28 +697,21 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if instance.source == Deployment.SOURCE_INTERNAL and 'name' in validated_data:
             old_obj = self.Meta.model.objects.get(id=instance.id)
-            old_pkgs = sorted(
-                old_obj.available_packages.values_list('id', flat=True)
-            )
+            old_pkgs = sorted(old_obj.available_packages.values_list('id', flat=True))
             old_name = old_obj.name
 
         # https://github.com/tomchristie/django-rest-framework/issues/2442
         instance = super().update(instance, validated_data)
         if instance.source == Deployment.SOURCE_INTERNAL and 'name' in validated_data:
-            new_pkgs = sorted(
-                instance.available_packages.values_list('id', flat=True)
-            )
+            new_pkgs = sorted(instance.available_packages.values_list('id', flat=True))
 
             if cmp(old_pkgs, new_pkgs) != 0 or old_name != validated_data['name']:
                 tasks.create_repository_metadata.apply_async(
-                    queue=f'pms-{instance.pms().name}',
-                    kwargs={'deployment_id': instance.id}
+                    queue=f'pms-{instance.pms().name}', kwargs={'deployment_id': instance.id}
                 )
 
                 if old_name != validated_data['name']:
-                    tasks.remove_repository_metadata.delay(
-                        instance.id, old_obj.slug
-                    )
+                    tasks.remove_repository_metadata.delay(instance.id, old_obj.slug)
 
         return instance
 
@@ -711,12 +724,24 @@ class InternalSourceWriteSerializer(DeploymentWriteSerializer):
     class Meta:
         model = InternalSource
         fields = (
-            'id', 'enabled', 'project', 'domain', 'name', 'comment',
-            'available_packages', 'available_package_sets',
-            'included_attributes', 'excluded_attributes',
-            'packages_to_install', 'packages_to_remove',
-            'default_preincluded_packages', 'default_included_packages', 'default_excluded_packages',
-            'schedule', 'start_date', 'auto_restart',
+            'id',
+            'enabled',
+            'project',
+            'domain',
+            'name',
+            'comment',
+            'available_packages',
+            'available_package_sets',
+            'included_attributes',
+            'excluded_attributes',
+            'packages_to_install',
+            'packages_to_remove',
+            'default_preincluded_packages',
+            'default_included_packages',
+            'default_excluded_packages',
+            'schedule',
+            'start_date',
+            'auto_restart',
         )
 
 
@@ -724,12 +749,28 @@ class ExternalSourceWriteSerializer(DeploymentWriteSerializer):
     class Meta:
         model = ExternalSource
         fields = (
-            'id', 'enabled', 'project', 'domain', 'name', 'comment',
-            'included_attributes', 'excluded_attributes',
-            'packages_to_install', 'packages_to_remove',
-            'default_preincluded_packages', 'default_included_packages', 'default_excluded_packages',
-            'schedule', 'start_date', 'auto_restart',
-            'base_url', 'options', 'suite', 'components', 'frozen', 'expire'
+            'id',
+            'enabled',
+            'project',
+            'domain',
+            'name',
+            'comment',
+            'included_attributes',
+            'excluded_attributes',
+            'packages_to_install',
+            'packages_to_remove',
+            'default_preincluded_packages',
+            'default_included_packages',
+            'default_excluded_packages',
+            'schedule',
+            'start_date',
+            'auto_restart',
+            'base_url',
+            'options',
+            'suite',
+            'components',
+            'frozen',
+            'expire',
         )
 
 
@@ -760,11 +801,7 @@ class DomainSerializer(serializers.ModelSerializer):
 
 
 class DomainWriteSerializer(serializers.ModelSerializer):
-    domain_admins = serializers.ListField(
-        child=serializers.IntegerField(),
-        allow_empty=True,
-        write_only=True
-    )
+    domain_admins = serializers.ListField(child=serializers.IntegerField(), allow_empty=True, write_only=True)
 
     def to_representation(self, obj):
         representation = super().to_representation(obj)
@@ -777,13 +814,9 @@ class DomainWriteSerializer(serializers.ModelSerializer):
             AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
         ]
 
-        representation['tags'] = [
-            AttributeInfoSerializer(item).data for item in obj.tags.all()
-        ]
+        representation['tags'] = [AttributeInfoSerializer(item).data for item in obj.tags.all()]
 
-        representation['domain_admins'] = [
-            UserProfileInfoSerializer(item).data for item in obj.domains.all()
-        ]
+        representation['domain_admins'] = [UserProfileInfoSerializer(item).data for item in obj.domains.all()]
 
         return representation
 
@@ -803,11 +836,7 @@ class DomainWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Domain
-        fields = (
-            'id', 'name', 'comment',
-            'included_attributes', 'excluded_attributes',
-            'tags', 'domain_admins'
-        )
+        fields = ('id', 'name', 'comment', 'included_attributes', 'excluded_attributes', 'tags', 'domain_admins')
 
 
 class ScopeInfoSerializer(serializers.ModelSerializer):
@@ -891,9 +920,7 @@ class GroupWriteSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
 
-        representation['permissions'] = [
-            PermissionInfoSerializer(item).data for item in obj.permissions.all()
-        ]
+        representation['permissions'] = [PermissionInfoSerializer(item).data for item in obj.permissions.all()]
 
         return representation
 
@@ -906,67 +933,62 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
 
-        representation['groups'] = [
-            GroupInfoSerializer(item).data for item in obj.groups.all()
-        ]
+        representation['groups'] = [GroupInfoSerializer(item).data for item in obj.groups.all()]
 
         representation['user_permissions'] = [
             PermissionInfoSerializer(item).data for item in obj.user_permissions.all()
         ]
 
-        representation['domains'] = [
-            DomainInfoSerializer(item).data for item in obj.domains.all()
-        ]
+        representation['domains'] = [DomainInfoSerializer(item).data for item in obj.domains.all()]
 
         if obj.domain_preference:
-            representation['domain_preference'] = DomainInfoSerializer(
-                obj.domain_preference
-            ).data
+            representation['domain_preference'] = DomainInfoSerializer(obj.domain_preference).data
 
         if obj.scope_preference:
-            representation['scope_preference'] = ScopeInfoSerializer(
-                obj.scope_preference
-            ).data
+            representation['scope_preference'] = ScopeInfoSerializer(obj.scope_preference).data
 
         return representation
 
     class Meta:
         model = UserProfile
         fields = UserDetailsSerializer.Meta.fields + (
-            'domains', 'domain_preference', 'scope_preference',
-            'groups', 'user_permissions', 'is_superuser', 'is_staff',
-            'is_active', 'last_login', 'date_joined', 'id',
+            'domains',
+            'domain_preference',
+            'scope_preference',
+            'groups',
+            'user_permissions',
+            'is_superuser',
+            'is_staff',
+            'is_active',
+            'last_login',
+            'date_joined',
+            'id',
         )
 
 
 class UserProfileListSerializer(UserDetailsSerializer):
-    domain_preference = DomainInfoSerializer(
-        many=False, read_only=True, source='userprofile.domain_preference'
-    )
-    scope_preference = ScopeInfoSerializer(
-        many=False, read_only=True, source='userprofile.scope_preference'
-    )
+    domain_preference = DomainInfoSerializer(many=False, read_only=True, source='userprofile.domain_preference')
+    scope_preference = ScopeInfoSerializer(many=False, read_only=True, source='userprofile.scope_preference')
 
     class Meta(UserDetailsSerializer.Meta):
         fields = UserDetailsSerializer.Meta.fields + (
-            'domain_preference', 'scope_preference',
-            'is_superuser', 'is_staff',
-            'is_active', 'last_login', 'date_joined', 'id',
+            'domain_preference',
+            'scope_preference',
+            'is_superuser',
+            'is_staff',
+            'is_active',
+            'last_login',
+            'date_joined',
+            'id',
         )
 
 
 class UserProfileSerializer(UserDetailsSerializer):
     groups = GroupInfoSerializer(many=True, read_only=True)
     user_permissions = PermissionInfoSerializer(many=True, read_only=True)
-    domains = DomainInfoSerializer(
-        many=True, read_only=True, source='userprofile.domains'
-    )
-    domain_preference = DomainInfoSerializer(
-        many=False, read_only=True, source='userprofile.domain_preference'
-    )
-    scope_preference = ScopeInfoSerializer(
-        many=False, read_only=True, source='userprofile.scope_preference'
-    )
+    domains = DomainInfoSerializer(many=True, read_only=True, source='userprofile.domains')
+    domain_preference = DomainInfoSerializer(many=False, read_only=True, source='userprofile.domain_preference')
+    scope_preference = ScopeInfoSerializer(many=False, read_only=True, source='userprofile.scope_preference')
     token = serializers.SerializerMethodField()
 
     @extend_schema_field(serializers.CharField)
@@ -978,9 +1000,18 @@ class UserProfileSerializer(UserDetailsSerializer):
 
     class Meta(UserDetailsSerializer.Meta):
         fields = UserDetailsSerializer.Meta.fields + (
-            'domains', 'domain_preference', 'scope_preference',
-            'groups', 'user_permissions', 'is_superuser', 'is_staff',
-            'is_active', 'last_login', 'date_joined', 'id', 'token',
+            'domains',
+            'domain_preference',
+            'scope_preference',
+            'groups',
+            'user_permissions',
+            'is_superuser',
+            'is_staff',
+            'is_active',
+            'last_login',
+            'date_joined',
+            'id',
+            'token',
         )
 
 
@@ -990,13 +1021,9 @@ class ChangePasswordSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         if len(attrs['password']) < 8:
-            raise serializers.ValidationError(
-                {'password': _('Minimum length is %d characters') % 8}
-            )
+            raise serializers.ValidationError({'password': _('Minimum length is %d characters') % 8})
 
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError(
-                {'password': _("Password fields didn't match.")}
-            )
+            raise serializers.ValidationError({'password': _("Password fields didn't match.")})
 
         return attrs
