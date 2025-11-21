@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-12-30 14:11+0100\n"
-"PO-Revision-Date: 2024-12-30 14:12+0100\n"
+"PO-Revision-Date: 2025-11-21 11:03+0100\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: \n"
 "Language: es\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.6\n"
 
 #: migasfree/api_v4/api.py:46
 #, python-format
@@ -26,7 +26,7 @@ msgstr "Plataforma [%s] registrada por el ordenador [%s]."
 #: migasfree/api_v4/api.py:52
 #, python-format
 msgid "Project [%s] with P.M.S. [%s] registered by computer [%s]."
-msgstr "Projecto [%s] con PMS [%s] registrado por el ordenador [%s]."
+msgstr "Proyecto [%s] con PMS [%s] registrado por el ordenador [%s]."
 
 #: migasfree/api_v4/errmfs.py:27
 msgid "No errors"
