@@ -25,7 +25,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
+from django.utils import timezone, translation, formats
 from django.utils.translation import gettext as _
 from django_redis import get_redis_connection
 from drf_spectacular.utils import extend_schema
@@ -146,10 +146,17 @@ class SyncStatsViewSet(EventProjectViewSet):
             end string (Y-m-d)
             project_id int
         """
+
+        def day_label(dt):
+            date_part = dt.strftime('%Y-%m-%d')
+            weekday_part = formats.date_format(dt, 'D')
+
+            return f'{date_part} ({weekday_part})'
+
         locale.setlocale(locale.LC_ALL, '')  # strftime not using locale settings (python3)
+        translation.activate(request.LANGUAGE_CODE or 'en')
         now = time.localtime()
         fmt = '%Y-%m-%d'
-        human_fmt = '%Y-%m-%d (%a)'
         value_fmt = '%Y-%m-%dT%H:%M:%S'
 
         end = request.query_params.get('end', '')
@@ -177,7 +184,7 @@ class SyncStatsViewSet(EventProjectViewSet):
         for single_date in daterange(begin, end):
             next_item_date = single_date + timedelta(days=1)
             value = con.get(f'{key}:{time.strftime("%Y%m%d", single_date.timetuple())}')
-            labels.append(time.strftime(human_fmt, single_date.timetuple()))
+            labels.append(day_label(single_date))
             stats.append(
                 {
                     'model': Synchronization._meta.model_name,
