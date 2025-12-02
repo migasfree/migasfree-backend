@@ -1,5 +1,3 @@
-# -*- coding: utf-8 *-*
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -31,93 +29,170 @@ from django_redis import get_redis_connection
 from drf_spectacular.openapi import OpenApiParameter
 from drf_spectacular.utils import extend_schema
 from rest_framework import (
-    viewsets, parsers, status,
-    mixins, permissions,
+    mixins,
+    parsers,
+    permissions,
+    status,
+    viewsets,
 )
 from rest_framework.decorators import action, permission_classes
-from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
+from rest_framework.response import Response
 
 from ...app_catalog.resources import (
-    ApplicationResource, CategoryResource, PolicyResource,
+    ApplicationResource,
+    CategoryResource,
+    PolicyResource,
 )
 from ...client.models import Computer
 from ...client.resources import (
-    ComputerResource, UserResource, FaultDefinitionResource,
-    ErrorResource, FaultResource, MigrationResource,
-    StatusLogResource, SynchronizationResource, NotificationResource,
+    ComputerResource,
+    ErrorResource,
+    FaultDefinitionResource,
+    FaultResource,
+    MigrationResource,
+    NotificationResource,
     PackageHistoryResource,
+    StatusLogResource,
+    SynchronizationResource,
+    UserResource,
 )
 from ...client.serializers import ComputerInfoSerializer
 from ...device.models import Logical
-from ...device.serializers import LogicalSerializer
 from ...device.resources import (
-    CapabilityResource, ConnectionResource, DeviceResource, DriverResource,
-    ManufacturerResource, ModelResource, LogicalResource, TypeResource,
+    CapabilityResource,
+    ConnectionResource,
+    DeviceResource,
+    DriverResource,
+    LogicalResource,
+    ManufacturerResource,
+    ModelResource,
+    TypeResource,
 )
+from ...device.serializers import LogicalSerializer
 from ...mixins import DatabaseCheckMixin
 from ...utils import save_tempfile
-
-from ..pms import tasks
-from ..resources import (
-    ClientAttributeResource, ServerAttributeResource,
-    ClientPropertyResource, ServerPropertyResource,
-    ProjectResource, PlatformResource, AttributeSetResource,
-    UserProfileResource, GroupResource, DomainResource, ScopeResource,
-    DeploymentResource, ScheduleResource, StoreResource, PackageResource,
-    PackageSetResource,
+from ..filters import (
+    AttributeFilter,
+    AttributeSetFilter,
+    ClientAttributeFilter,
+    ClientPropertyFilter,
+    DeploymentFilter,
+    DomainFilter,
+    GroupFilter,
+    PackageFilter,
+    PackageSetFilter,
+    PermissionFilter,
+    PlatformFilter,
+    ProjectFilter,
+    PropertyFilter,
+    ScheduleDelayFilter,
+    ScheduleFilter,
+    ScopeFilter,
+    ServerAttributeFilter,
+    SingularityFilter,
+    StoreFilter,
+    UserProfileFilter,
 )
 from ..models import (
-    Platform, Project, Store,
-    ServerProperty, ClientProperty, Singularity,
-    ServerAttribute, ClientAttribute, Attribute,
-    Schedule, ScheduleDelay,
-    Package, PackageSet, Deployment,
-    ExternalSource, InternalSource,
-    Domain, Scope, UserProfile,
-    AttributeSet, Property,
+    Attribute,
+    AttributeSet,
+    ClientAttribute,
+    ClientProperty,
+    Deployment,
+    Domain,
+    ExternalSource,
+    InternalSource,
+    Package,
+    PackageSet,
+    Platform,
+    Project,
+    Property,
+    Schedule,
+    ScheduleDelay,
+    Scope,
+    ServerAttribute,
+    ServerProperty,
+    Singularity,
+    Store,
+    UserProfile,
+)
+from ..pms import tasks
+from ..resources import (
+    AttributeSetResource,
+    ClientAttributeResource,
+    ClientPropertyResource,
+    DeploymentResource,
+    DomainResource,
+    GroupResource,
+    PackageResource,
+    PackageSetResource,
+    PlatformResource,
+    ProjectResource,
+    ScheduleResource,
+    ScopeResource,
+    ServerAttributeResource,
+    ServerPropertyResource,
+    StoreResource,
+    UserProfileResource,
 )
 from ..serializers import (
-    PlatformSerializer, ProjectSerializer, ProjectWriteSerializer,
-    StoreSerializer, StoreWriteSerializer,
-    ServerPropertySerializer, ClientPropertySerializer,
-    SingularitySerializer, SingularityWriteSerializer,
-    ServerAttributeSerializer, ServerAttributeWriteSerializer,
-    ClientAttributeSerializer, ClientAttributeWriteSerializer,
     AttributeSerializer,
-    ScheduleSerializer, ScheduleWriteSerializer,
-    ScheduleDelaySerializer, ScheduleDelayWriteSerializer,
-    PackageSerializer, PackageSetSerializer, PackageSetWriteSerializer,
-    DeploymentSerializer, DeploymentWriteSerializer, DeploymentListSerializer,
-    DomainWriteSerializer, DomainSerializer, DomainListSerializer,
-    ScopeSerializer, ScopeWriteSerializer, ScopeListSerializer,
-    UserProfileSerializer, UserProfileWriteSerializer,
-    ChangePasswordSerializer, UserProfileListSerializer,
-    GroupSerializer, GroupWriteSerializer, PermissionSerializer,
-    AttributeSetSerializer, AttributeSetWriteSerializer,
-    PropertySerializer, PropertyWriteSerializer,
-    ExternalSourceSerializer, ExternalSourceWriteSerializer,
-    InternalSourceSerializer, InternalSourceWriteSerializer,
-)
-from ..filters import (
-    DeploymentFilter, PackageFilter, ProjectFilter, StoreFilter,
-    ClientAttributeFilter, ServerAttributeFilter, ScheduleDelayFilter,
-    AttributeSetFilter, PropertyFilter, AttributeFilter, PlatformFilter,
-    UserProfileFilter, PermissionFilter, GroupFilter, DomainFilter,
-    ScopeFilter, ScheduleFilter, PackageSetFilter, ClientPropertyFilter,
-    SingularityFilter,
+    AttributeSetSerializer,
+    AttributeSetWriteSerializer,
+    ChangePasswordSerializer,
+    ClientAttributeSerializer,
+    ClientAttributeWriteSerializer,
+    ClientPropertySerializer,
+    DeploymentListSerializer,
+    DeploymentSerializer,
+    DeploymentWriteSerializer,
+    DomainListSerializer,
+    DomainSerializer,
+    DomainWriteSerializer,
+    ExternalSourceSerializer,
+    ExternalSourceWriteSerializer,
+    GroupSerializer,
+    GroupWriteSerializer,
+    InternalSourceSerializer,
+    InternalSourceWriteSerializer,
+    PackageSerializer,
+    PackageSetSerializer,
+    PackageSetWriteSerializer,
+    PermissionSerializer,
+    PlatformSerializer,
+    ProjectSerializer,
+    ProjectWriteSerializer,
+    PropertySerializer,
+    PropertyWriteSerializer,
+    ScheduleDelaySerializer,
+    ScheduleDelayWriteSerializer,
+    ScheduleSerializer,
+    ScheduleWriteSerializer,
+    ScopeListSerializer,
+    ScopeSerializer,
+    ScopeWriteSerializer,
+    ServerAttributeSerializer,
+    ServerAttributeWriteSerializer,
+    ServerPropertySerializer,
+    SingularitySerializer,
+    SingularityWriteSerializer,
+    StoreSerializer,
+    StoreWriteSerializer,
+    UserProfileListSerializer,
+    UserProfileSerializer,
+    UserProfileWriteSerializer,
 )
 
 
 class ExportViewSet(viewsets.ViewSet):
-    @action(methods=['get'], detail=False)
+    @action(methods=['get', 'post'], detail=False)
     def export(self, request):
         resources = {
             # app_catalog
             'application': ApplicationResource,
             'category': CategoryResource,
             'policy': PolicyResource,
-
             # client
             'computer': ComputerResource,
             'error': ErrorResource,
@@ -129,7 +204,6 @@ class ExportViewSet(viewsets.ViewSet):
             'statuslog': StatusLogResource,
             'synchronization': SynchronizationResource,
             'user': UserResource,
-
             # core
             'attributeset': AttributeSetResource,
             'clientattribute': ClientAttributeResource,
@@ -147,7 +221,6 @@ class ExportViewSet(viewsets.ViewSet):
             'serverproperty': ServerPropertyResource,
             'store': StoreResource,
             'userprofile': UserProfileResource,
-
             # device
             'capability': CapabilityResource,
             'connection': ConnectionResource,
@@ -162,6 +235,11 @@ class ExportViewSet(viewsets.ViewSet):
         class_name = self.basename
         if class_name not in resources:
             raise NotFound(f'Export not supported for {class_name}')
+
+        if request.method == 'POST':
+            new_params = request.GET.copy()
+            new_params.update(request.data)
+            request._request.GET = new_params
 
         resource = resources[class_name]()
         data = resource.export(self.filter_queryset(self.get_queryset()))
@@ -201,6 +279,26 @@ class MigasViewSet(viewsets.ViewSet):
         except ObjectDoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+    @action(methods=['post'], detail=False, url_path='filter')
+    def filter_list(self, request, *args, **kwargs):
+        """
+        Generic endpoint to list with filters via POST.
+        Allows to bypass the URL length limit for large filters (e.g: id__in).
+        """
+        new_params = request.GET.copy()
+        new_params.update(request.data)
+        request._request.GET = new_params
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 @extend_schema(tags=['singularities'])
 @extend_schema(
@@ -209,7 +307,7 @@ class MigasViewSet(viewsets.ViewSet):
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name, property_att__name, property_att__prefix',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -219,7 +317,7 @@ class SingularityViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
     queryset = Singularity.objects.all()
     serializer_class = SingularitySerializer
     filterset_class = SingularityFilter
-    search_fields = ['name', 'property_att__name', 'property_att__prefix']
+    search_fields = ('name', 'property_att__name', 'property_att__prefix')
     ordering_fields = '__all__'
     ordering = ('property_att__name', '-priority')
 
@@ -235,9 +333,7 @@ class SingularityViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
 
         qs = Attribute.objects.scope(self.request.user.userprofile)
 
-        return Singularity.objects.scope(
-            self.request.user.userprofile
-        ).prefetch_related(
+        return Singularity.objects.scope(self.request.user.userprofile).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
             Prefetch('excluded_attributes', queryset=qs),
             'included_attributes__property_att',
@@ -252,7 +348,7 @@ class SingularityViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name, description',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -262,7 +358,7 @@ class AttributeSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSe
     queryset = AttributeSet.objects.all()
     serializer_class = AttributeSetSerializer
     filterset_class = AttributeSetFilter
-    search_fields = ['name', 'description']
+    search_fields = ('name', 'description')
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -278,9 +374,7 @@ class AttributeSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSe
 
         qs = Attribute.objects.scope(self.request.user.userprofile)
 
-        return AttributeSet.objects.scope(
-            self.request.user.userprofile
-        ).prefetch_related(
+        return AttributeSet.objects.scope(self.request.user.userprofile).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
             Prefetch('excluded_attributes', queryset=qs),
             'included_attributes__property_att',
@@ -295,7 +389,7 @@ class AttributeSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSe
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -307,7 +401,7 @@ class PlatformViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
     filterset_class = PlatformFilter
     ordering_fields = '__all__'
     ordering = ('name',)
-    search_fields = ['name']
+    search_fields = ('name',)
 
     def get_queryset(self):
         if self.request is None:
@@ -323,7 +417,7 @@ class PlatformViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -335,7 +429,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
     filterset_class = ProjectFilter
     ordering_fields = '__all__'
     ordering = ('name',)
-    search_fields = ['name']
+    search_fields = ('name',)
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -356,7 +450,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         if Project.objects.filter(slug=slug).exists():
             return Response(
                 {'detail': gettext('Project slug already exists')},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         return super().create(request, *args, **kwargs)
@@ -369,7 +463,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -381,7 +475,7 @@ class StoreViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Expo
     filterset_class = StoreFilter
     ordering_fields = '__all__'
     ordering = ('name', 'project__name')
-    search_fields = ['name']
+    search_fields = ('name',)
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -403,7 +497,7 @@ class StoreViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Expo
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name, language, code',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -415,7 +509,7 @@ class PropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
     filterset_class = PropertyFilter
     ordering_fields = '__all__'
     ordering = ('prefix', 'name')
-    search_fields = ['name', 'language', 'code']
+    search_fields = ('name', 'language', 'code')
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -429,10 +523,7 @@ class PropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         Returns kind definition
         """
 
-        return Response(
-            dict(Property.KIND_CHOICES),
-            status=status.HTTP_200_OK
-        )
+        return Response(dict(Property.KIND_CHOICES), status=status.HTTP_200_OK)
 
 
 @extend_schema(tags=['stamps'])
@@ -442,7 +533,7 @@ class PropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name, prefix',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -452,7 +543,7 @@ class ServerPropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
     queryset = ServerProperty.objects.filter(sort='server')
     serializer_class = ServerPropertySerializer
     filterset_class = PropertyFilter
-    search_fields = ['name', 'prefix']
+    search_fields = ('name', 'prefix')
 
 
 @extend_schema(tags=['formulas'])
@@ -462,7 +553,7 @@ class ServerPropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name, prefix',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -472,7 +563,7 @@ class ClientPropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
     queryset = ClientProperty.objects.filter(sort__in=['client', 'basic'])
     serializer_class = ClientPropertySerializer
     filterset_class = ClientPropertyFilter
-    search_fields = ['name', 'prefix']
+    search_fields = ('name', 'prefix')
 
 
 @extend_schema(tags=['attributes'])
@@ -482,7 +573,7 @@ class ClientPropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: value, description, property_att__prefix',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -492,7 +583,7 @@ class AttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, 
     queryset = Attribute.objects.all()
     serializer_class = AttributeSerializer
     filterset_class = AttributeFilter
-    search_fields = ['value', 'description', 'property_att__prefix']
+    search_fields = ('value', 'description', 'property_att__prefix')
 
     def get_queryset(self):
         if self.request is None:
@@ -508,7 +599,7 @@ class AttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, 
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: value, description, property_att__prefix',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -518,7 +609,7 @@ class ServerAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
     queryset = ServerAttribute.objects.filter(property_att__sort='server')
     serializer_class = ServerAttributeSerializer
     filterset_class = ServerAttributeFilter
-    search_fields = ['value', 'description', 'property_att__prefix']
+    search_fields = ('value', 'description', 'property_att__prefix')
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -537,30 +628,22 @@ class ServerAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
         tag = self.get_object()
 
         if request.method == 'GET':
-            computers = Computer.productive.scope(
-                request.user.userprofile
-            ).filter(tags__in=[tag])
+            computers = Computer.productive.scope(request.user.userprofile).filter(tags__in=[tag])
             serializer_computers = ComputerInfoSerializer(
-                computers,
-                context={'request': request},
-                many=True, read_only=True
+                computers, context={'request': request}, many=True, read_only=True
             )
 
-            inflicted = Computer.productive.filter(
-                sync_attributes__in=[tag]
-            ).exclude(tags__in=[tag])
+            inflicted = Computer.productive.filter(sync_attributes__in=[tag]).exclude(tags__in=[tag])
             serializer_inflicted = ComputerInfoSerializer(
-                inflicted,
-                context={'request': request},
-                many=True, read_only=True
+                inflicted, context={'request': request}, many=True, read_only=True
             )
 
             return Response(
                 {
                     'computers': serializer_computers.data,
-                    'inflicted': serializer_inflicted.data
+                    'inflicted': serializer_inflicted.data,
                 },
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
 
         if request.method == 'PATCH':
@@ -577,7 +660,7 @@ class ServerAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: value, description, property_att__prefix',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -587,7 +670,7 @@ class ClientAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
     queryset = ClientAttribute.objects.filter(property_att__sort__in=['client', 'basic'])
     serializer_class = ClientAttributeSerializer
     filterset_class = ClientAttributeFilter
-    search_fields = ['value', 'description', 'property_att__prefix']
+    search_fields = ('value', 'description', 'property_att__prefix')
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -642,10 +725,7 @@ class ClientAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
         logical_devices = attribute.logical_set.all()
 
         if request.method == 'GET':
-            serializer = LogicalSerializer(
-                logical_devices,
-                many=True
-            )
+            serializer = LogicalSerializer(logical_devices, many=True)
 
             return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -690,11 +770,8 @@ class ScheduleDelayViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewS
 
         qs = Attribute.objects.scope(self.request.user.userprofile)
 
-        return ScheduleDelay.objects.scope(
-            self.request.user.userprofile
-        ).prefetch_related(
-            Prefetch('attributes', queryset=qs),
-            'attributes__property_att', 'schedule'
+        return ScheduleDelay.objects.scope(self.request.user.userprofile).prefetch_related(
+            Prefetch('attributes', queryset=qs), 'attributes__property_att', 'schedule'
         )
 
 
@@ -705,7 +782,7 @@ class ScheduleDelayViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewS
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -715,7 +792,7 @@ class ScheduleViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
     queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
     filterset_class = ScheduleFilter
-    search_fields = ['name']
+    search_fields = ('name',)
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -739,21 +816,21 @@ class ScheduleViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: fullname',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class PackageViewSet(
-        DatabaseCheckMixin,
-        mixins.CreateModelMixin,
-        mixins.RetrieveModelMixin,
-        mixins.DestroyModelMixin,
-        mixins.ListModelMixin,
-        viewsets.GenericViewSet,
-        MigasViewSet,
-        ExportViewSet
+    DatabaseCheckMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+    MigasViewSet,
+    ExportViewSet,
 ):
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
@@ -761,7 +838,7 @@ class PackageViewSet(
     parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
     ordering_fields = '__all__'
     ordering = ('fullname', 'version', 'project__name')
-    search_fields = ['fullname']
+    search_fields = ('fullname',)
 
     def get_queryset(self):
         if self.request is None:
@@ -783,11 +860,8 @@ class PackageViewSet(
         if not data['name']:
             package_path = save_tempfile(data['files'][0])
             response = tasks.package_metadata.apply_async(
-                kwargs={
-                    'pms_name': store.project.pms,
-                    'package': package_path
-                },
-                queue=f'pms-{store.project.pms}'
+                kwargs={'pms_name': store.project.pms, 'package': package_path},
+                queue=f'pms-{store.project.pms}',
             ).get()
             os.remove(package_path)
             if response['name']:
@@ -803,7 +877,7 @@ class PackageViewSet(
                 architecture=data['architecture'],
                 project=store.project,
                 store=store,
-                file_=data['files'][0]
+                file_=data['files'][0],
             )
 
             serializer = PackageSerializer(package)
@@ -811,7 +885,7 @@ class PackageViewSet(
         except IntegrityError:
             return Response(
                 {'detail': gettext('Package already exists')},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
     def destroy(self, request, pk=None):
@@ -822,7 +896,7 @@ class PackageViewSet(
         if queryset.filter(pk=instance.pk).exists():
             return Response(
                 {'detail': gettext('The element has relations and cannot be removed')},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -832,18 +906,9 @@ class PackageViewSet(
         """
         Returns packages that are not in any deployment
         """
-        serializer = PackageSerializer(
-            Package.objects.filter(
-                deployment__id=None,
-                store__isnull=False
-            ),
-            many=True
-        )
+        serializer = PackageSerializer(Package.objects.filter(deployment__id=None, store__isnull=False), many=True)
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=True)
     def info(self, request, pk=None):
@@ -851,18 +916,16 @@ class PackageViewSet(
 
         if obj.store is None:
             return Response(
-                {
-                    'detail': gettext('The package has no store on the server')
-                },
-                status=status.HTTP_400_BAD_REQUEST
+                {'detail': gettext('The package has no store on the server')},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         response = tasks.package_info.apply_async(
             kwargs={
                 'pms_name': obj.project.pms,
-                'package': Package.path(obj.project.slug, obj.store.slug, obj.fullname)
+                'package': Package.path(obj.project.slug, obj.store.slug, obj.fullname),
             },
-            queue=f'pms-{obj.project.pms}'
+            queue=f'pms-{obj.project.pms}',
         ).get()
 
         return Response({'data': response}, status=status.HTTP_200_OK)
@@ -875,7 +938,7 @@ class PackageViewSet(
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -886,7 +949,7 @@ class PackageSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
     serializer_class = PackageSetSerializer
     filterset_class = PackageSetFilter
     parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
-    search_fields = ['name']
+    search_fields = ('name',)
     ordering_fields = '__all__'
     ordering = ('project__name', 'name')
 
@@ -909,11 +972,8 @@ class PackageSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
             if not name:
                 package_path = save_tempfile(file_)
                 response = tasks.package_metadata.apply_async(
-                    kwargs={
-                        'pms_name': project.pms,
-                        'package': package_path
-                    },
-                    queue=f'pms-{project.pms}'
+                    kwargs={'pms_name': project.pms, 'package': package_path},
+                    queue=f'pms-{project.pms}',
                 ).get()
                 os.remove(package_path)
                 if response['name']:
@@ -922,22 +982,20 @@ class PackageSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
                     architecture = response['architecture']
 
             if not name or not version or not architecture:
-                return {
-                    'error': gettext('Package %s has an incorrect name format') % file_.name
-                }
+                return {'error': gettext('Package %s has an incorrect name format') % file_.name}
 
             try:
                 pkg = Package.objects.create(
                     fullname=file_.name,
-                    name=name, version=version, architecture=architecture,
+                    name=name,
+                    version=version,
+                    architecture=architecture,
                     project=project,
                     store=store,
-                    file_=file_
+                    file_=file_,
                 )
             except IntegrityError:
-                return {
-                    'error': gettext('Package %s is duplicated in store %s') % (file_.name, store.name)
-                }
+                return {'error': gettext('Package %s is duplicated in store %s') % (file_.name, store.name)}
 
             new_pkgs.append(str(pkg.id))
 
@@ -987,7 +1045,7 @@ class PackageSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
             location=OpenApiParameter.QUERY,
             description='Fields: name, packages_to_install, packages_to_remove,'
             ' default_preincluded_packages, default_included_packages, default_excluded_packages',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -997,11 +1055,14 @@ class DeploymentViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
     queryset = Deployment.objects.all()
     serializer_class = DeploymentSerializer
     filterset_class = DeploymentFilter
-    search_fields = [
+    search_fields = (
         'name',
-        'packages_to_install', 'packages_to_remove',
-        'default_preincluded_packages', 'default_included_packages', 'default_excluded_packages',
-    ]
+        'packages_to_install',
+        'packages_to_remove',
+        'default_preincluded_packages',
+        'default_included_packages',
+        'default_excluded_packages',
+    )
     ordering_fields = '__all__'
     ordering = ('name', 'project__name')
 
@@ -1046,29 +1107,19 @@ class InternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
     def metadata(self, request, pk=None):
         deploy = self.get_object()
         tasks.create_repository_metadata.apply_async(
-            queue=f'pms-{deploy.pms().name}',
-            kwargs={'deployment_id': deploy.id}
+            queue=f'pms-{deploy.pms().name}', kwargs={'deployment_id': deploy.id}
         )
 
-        return Response(
-            {'detail': gettext('Operation received')},
-            status=status.HTTP_200_OK
-        )
+        return Response({'detail': gettext('Operation received')}, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False)
     def generating(self, request):
         con = get_redis_connection()
         result = con.smembers('migasfree:watch:repos')
 
-        serializer = DeploymentSerializer(
-            Deployment.objects.filter(pk__in=result),
-            many=True
-        )
+        serializer = DeploymentSerializer(Deployment.objects.filter(pk__in=result), many=True)
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @extend_schema(tags=['deployments'])
@@ -1087,8 +1138,7 @@ class ExternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
         return ExternalSource.objects.scope(self.request.user.userprofile)
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update' \
-                or self.action == 'partial_update':
+        if self.action == 'create' or self.action == 'update' or self.action == 'partial_update':
             return ExternalSourceWriteSerializer
 
         return ExternalSourceSerializer
@@ -1101,7 +1151,7 @@ class ExternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: username, first_name, last_name',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -1111,7 +1161,7 @@ class UserProfileViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     filterset_class = UserProfileFilter
-    search_fields = ['username', 'first_name', 'last_name']
+    search_fields = ('username', 'first_name', 'last_name')
     ordering_fields = '__all__'
     ordering = ('username',)
 
@@ -1128,9 +1178,7 @@ class UserProfileViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
         if self.request is None:
             return UserProfile.objects.none()
 
-        return self.queryset.select_related(
-            'domain_preference', 'scope_preference'
-        ).prefetch_related(
+        return self.queryset.select_related('domain_preference', 'scope_preference').prefetch_related(
             'domains',
             'groups',
             'user_permissions',
@@ -1139,16 +1187,11 @@ class UserProfileViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
     @action(methods=['get'], detail=False, url_path='domain-admins')
     def domain_admins(self, request):
         serializer = UserProfileSerializer(
-            UserProfile.objects.filter(
-                groups__in=[Group.objects.get(name="Domain Admin")]
-            ).order_by('username'),
-            many=True
+            UserProfile.objects.filter(groups__in=[Group.objects.get(name='Domain Admin')]).order_by('username'),
+            many=True,
         )
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['post'], detail=True, url_path='update-token')
     def set_token(self, request, pk=None):
@@ -1156,18 +1199,15 @@ class UserProfileViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
         token = user.update_token()
 
         return Response(
-            {
-                'detail': gettext('Token updated!'),
-                'info': token
-            },
-            status=status.HTTP_200_OK
+            {'detail': gettext('Token updated!'), 'info': token},
+            status=status.HTTP_200_OK,
         )
 
     @action(
         methods=['put'],
         detail=True,
         serializer_class=ChangePasswordSerializer,
-        url_path='change-password'
+        url_path='change-password',
     )
     def set_password(self, request, pk=None):
         user = self.get_object()
@@ -1176,15 +1216,9 @@ class UserProfileViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
         if serializer.is_valid():
             user.update_password(serializer.validated_data.get('password'))
 
-            return Response(
-                {'detail': gettext('Password changed!')},
-                status=status.HTTP_200_OK
-            )
+            return Response({'detail': gettext('Password changed!')}, status=status.HTTP_200_OK)
 
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema(tags=['accounts'])
@@ -1194,7 +1228,7 @@ class UserProfileViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -1204,7 +1238,7 @@ class GroupViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, ExportViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     filterset_class = GroupFilter
-    search_fields = ['name']
+    search_fields = ('name',)
     ordering = ('name',)
 
     def get_serializer_class(self):
@@ -1220,7 +1254,7 @@ class GroupViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, ExportViewSet):
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -1231,7 +1265,7 @@ class PermissionViewSet(DatabaseCheckMixin, mixins.ListModelMixin, viewsets.Gene
     queryset = Permission.objects.all()
     serializer_class = PermissionSerializer
     filterset_class = PermissionFilter
-    search_fields = ['name']
+    search_fields = ('name',)
 
 
 @extend_schema(tags=['domains'])
@@ -1241,7 +1275,7 @@ class PermissionViewSet(DatabaseCheckMixin, mixins.ListModelMixin, viewsets.Gene
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -1251,7 +1285,7 @@ class DomainViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
     queryset = Domain.objects.all()
     serializer_class = DomainSerializer
     filterset_class = DomainFilter
-    search_fields = ['name']
+    search_fields = ('name',)
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -1287,7 +1321,7 @@ class DomainViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -1297,7 +1331,7 @@ class ScopeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Expo
     queryset = Scope.objects.all()
     serializer_class = ScopeSerializer
     filterset_class = ScopeFilter
-    search_fields = ['name']
+    search_fields = ('name',)
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -1330,5 +1364,5 @@ class ScopeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Expo
             Prefetch('included_attributes', queryset=qs_att),
             'included_attributes__property_att',
             Prefetch('excluded_attributes', queryset=qs_att),
-            'excluded_attributes__property_att'
+            'excluded_attributes__property_att',
         )
