@@ -1,7 +1,5 @@
-# -*- coding: UTF-8 -*-
-
-# Copyright (c) 2022-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2022-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2022-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2022-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +18,6 @@ import logging
 
 from django.db import connections
 from django.db.utils import OperationalError
-
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
@@ -34,10 +31,7 @@ class DatabaseCheckMixin(viewsets.ViewSet):
             return super().dispatch(request, *args, **kwargs)
         except OperationalError as e:
             logger.error('Operational error in database: %s', e)
-            response = Response(
-                'Operational error in database',
-                status=status.HTTP_503_SERVICE_UNAVAILABLE
-            )
+            response = Response('Operational error in database', status=status.HTTP_503_SERVICE_UNAVAILABLE)
             if not getattr(request, 'accepted_renderer', None):
                 neg = self.perform_content_negotiation(request, force=True)
                 request.accepted_renderer, request.accepted_media_type = neg
