@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -18,43 +16,47 @@
 
 import csv
 import json
-
 from datetime import datetime
 from operator import gt, le
 
-from django.core.paginator import Paginator
 from django.conf import settings
-from django.http import QueryDict, HttpResponse
+from django.core.paginator import Paginator
 from django.db.models import Prefetch
+from django.http import HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_redis import get_redis_connection
 from drf_spectacular.openapi import OpenApiParameter
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets, exceptions, status, mixins, permissions
+from rest_framework import exceptions, mixins, permissions, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 from rest_framework.utils.urls import remove_query_param, replace_query_param
 
-from ...core.models import Deployment, Attribute
-from ...device.models import Logical, Driver, Model
+from ...app_catalog.models import Policy
+from ...core.models import Attribute, Deployment
+from ...core.serializers import PlatformSerializer
+from ...core.views import ExportViewSet, MigasViewSet
+from ...device.models import Driver, Logical, Model
 from ...device.serializers import LogicalInfoSerializer
 from ...hardware.models import Node
 from ...hardware.serializers import NodeOnlySerializer
-from ...app_catalog.models import Policy
-from ...core.serializers import PlatformSerializer
-from ...core.views import MigasViewSet, ExportViewSet
-from ...stats.utils import filter_computers_by_date
 from ...mixins import DatabaseCheckMixin
 from ...paginations import DefaultPagination
-from ...utils import replace_keys, decode_dict
-
+from ...stats.utils import filter_computers_by_date
+from ...utils import decode_dict, replace_keys
 from .. import models, serializers
 from ..filters import (
-    PackageHistoryFilter, ErrorFilter, NotificationFilter,
-    FaultDefinitionFilter, FaultFilter, ComputerFilter,
-    MigrationFilter, StatusLogFilter, SynchronizationFilter,
+    ComputerFilter,
+    ErrorFilter,
+    FaultDefinitionFilter,
+    FaultFilter,
+    MigrationFilter,
+    NotificationFilter,
+    PackageHistoryFilter,
+    StatusLogFilter,
+    SynchronizationFilter,
     UserFilter,
 )
 from .safe import remove_computer_messages
@@ -67,7 +69,7 @@ from .safe import remove_computer_messages
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: settings.MIGASFREE_COMPUTER_SEARCH_FIELDS, sync_user__name, sync_user__fullname',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -77,9 +79,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
     queryset = models.Computer.objects.all()
     serializer_class = serializers.ComputerSerializer
     filterset_class = ComputerFilter
-    search_fields = settings.MIGASFREE_COMPUTER_SEARCH_FIELDS + (
-        'sync_user__name', 'sync_user__fullname',
-    )
+    search_fields = (*settings.MIGASFREE_COMPUTER_SEARCH_FIELDS, 'sync_user__name', 'sync_user__fullname')
     ordering = (settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0],)
 
     def get_serializer_class(self):
@@ -95,23 +95,15 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         if self.request is None:
             return models.Computer.objects.none()
 
-        return models.Computer.objects.scope(
-            self.request.user.userprofile
-        ).prefetch_related(
+        return models.Computer.objects.scope(self.request.user.userprofile).prefetch_related(
             'tags',
             Prefetch('node_set', queryset=Node.objects.filter(parent=None)),
         )
 
     def partial_update(self, request, *args, **kwargs):
-        if isinstance(request.data, QueryDict):
-            data = dict(request.data.lists())
-        else:
-            data = request.data
+        data = dict(request.data.lists()) if isinstance(request.data, QueryDict) else request.data
 
-        devices = data.get(
-            'assigned_logical_devices_to_cid[]',
-            data.get('assigned_logical_devices_to_cid', None)
-        )
+        devices = data.get('assigned_logical_devices_to_cid[]', data.get('assigned_logical_devices_to_cid', None))
         if devices or isinstance(devices, list):
             computer = get_object_or_404(models.Computer, pk=kwargs['pk'])
 
@@ -124,21 +116,15 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
                 logical_device = Logical.objects.get(pk=item)
                 model = Model.objects.get(device=logical_device.device)
                 if not Driver.objects.filter(
-                    capability=logical_device.capability,
-                    model=model,
-                    project=computer.project
+                    capability=logical_device.capability, model=model, project=computer.project
                 ).exists():
                     return Response(
                         {
                             'error': _(
                                 'Error in capability %s for assign computer %s.'
                                 ' There is no driver defined for project %s in model %s.'
-                            ) % (
-                                logical_device.capability,
-                                computer,
-                                computer.project,
-                                model
-                            ),
+                            )
+                            % (logical_device.capability, computer, computer.project, model),
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
@@ -150,14 +136,9 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
     @action(methods=['get'], detail=True, url_name='devices')
     def devices(self, request, pk=None):
         computer = self.get_object()
-        serializer = serializers.ComputerDevicesSerializer(
-            computer, context={'request': request}
-        )
+        serializer = serializers.ComputerDevicesSerializer(computer, context={'request': request})
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=True)
     def label(self, request, pk=None):
@@ -170,10 +151,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
             'helpdesk': settings.MIGASFREE_HELP_DESK,
         }
 
-        return Response(
-            response,
-            status=status.HTTP_200_OK
-        )
+        return Response(response, status=status.HTTP_200_OK)
 
     @action(methods=['get', 'delete'], detail=True, url_path='software/inventory', url_name='software_inventory')
     def software_inventory(self, request, pk=None):
@@ -183,18 +161,16 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         computer = self.get_object()
 
         if request.method == 'DELETE' and request.user.is_superuser:
-            computer.packagehistory_set.filter(
-                uninstall_date__isnull=True,
-                package__project=computer.project
-            ).delete()
+            computer.packagehistory_set.filter(uninstall_date__isnull=True, package__project=computer.project).delete()
 
         data = list(
-            computer.packagehistory_set.filter(
-                uninstall_date__isnull=True,
-                package__project=computer.project
-            ).values(
-                'package__id', 'package__fullname',
-            ).distinct().order_by('package__fullname')
+            computer.packagehistory_set.filter(uninstall_date__isnull=True, package__project=computer.project)
+            .values(
+                'package__id',
+                'package__fullname',
+            )
+            .distinct()
+            .order_by('package__fullname')
         )
 
         return Response(
@@ -203,9 +179,9 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
                 {
                     'package__id': 'id',
                     'package__fullname': 'name',
-                }
+                },
             ),
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
     @action(methods=['get', 'delete'], detail=True, url_path='software/history', url_name='software_history')
@@ -218,10 +194,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         if request.method == 'DELETE' and request.user.is_superuser:
             computer.delete_software_history(request.GET.get('key', None))
 
-        return Response(
-            computer.get_software_history(),
-            status=status.HTTP_200_OK
-        )
+        return Response(computer.get_software_history(), status=status.HTTP_200_OK)
 
     @action(methods=['post'], detail=True)
     def status(self, request, pk=None):
@@ -237,16 +210,11 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         ret = computer.change_status(request.data.get('status'))
         if not ret:
             raise exceptions.ParseError(
-                _('Status must have one of the values: %s') % (
-                    dict(models.Computer.STATUS_CHOICES).keys()
-                )
+                _('Status must have one of the values: %s') % (dict(models.Computer.STATUS_CHOICES).keys())
             )
 
         serializer = serializers.ComputerSerializer(computer, context={'request': request})
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False, url_path='status')
     def status_choices(self, request):
@@ -256,7 +224,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
             'unproductive': models.Computer.UNPRODUCTIVE_STATUS,
             'active': models.Computer.ACTIVE_STATUS,
             'subscribed': models.Computer.SUBSCRIBED_STATUS,
-            'unsubscribed': models.Computer.UNSUBSCRIBED_STATUS
+            'unsubscribed': models.Computer.UNSUBSCRIBED_STATUS,
         }
 
         return Response(response, status=status.HTTP_200_OK)
@@ -268,9 +236,9 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         return Response(
             {
                 'unchecked': models.Error.unchecked.filter(computer__pk=pk).count(),
-                'total': models.Error.objects.filter(computer__pk=pk).count()
+                'total': models.Error.objects.filter(computer__pk=pk).count(),
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
     @action(methods=['get'], detail=True)
@@ -280,9 +248,9 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         return Response(
             {
                 'unchecked': models.Fault.unchecked.filter(computer__pk=pk).count(),
-                'total': models.Fault.objects.filter(computer__pk=pk).count()
+                'total': models.Fault.objects.filter(computer__pk=pk).count(),
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
     @action(methods=['post'], detail=True)
@@ -294,9 +262,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         Exchanges tags, status and devices
         """
         source = self.get_object()
-        target = get_object_or_404(
-            models.Computer, id=request.data.get('target')
-        )
+        target = get_object_or_404(models.Computer, id=request.data.get('target'))
 
         models.Computer.replacement(source, target)
 
@@ -308,24 +274,15 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         sync_computers = models.Computer.objects.filter(pk__in=result)
 
         serializer = serializers.ComputerSerializer(sync_computers, many=True)
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False)
     def delayed(self, request):
         result, _ = filter_computers_by_date(le)
         delayed_computers = models.Computer.objects.filter(pk__in=result)
 
-        serializer = serializers.ComputerSerializer(
-            delayed_computers, many=True,
-            context={'request': request}
-        )
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+        serializer = serializers.ComputerSerializer(delayed_computers, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=True)
     def sync(self, request, pk=None):
@@ -408,16 +365,12 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         user = request.user
         user.userprofile.check_scope(pk)
 
-        repos = Deployment.available_deployments(
-            computer, computer.get_all_attributes()
-        ).values('id', 'name', 'source')
-        definitions = models.FaultDefinition.enabled_for_attributes(
-            computer.get_all_attributes()
-        ).values('id', 'name')
+        repos = Deployment.available_deployments(computer, computer.get_all_attributes()).values('id', 'name', 'source')
+        definitions = models.FaultDefinition.enabled_for_attributes(computer.get_all_attributes()).values('id', 'name')
 
-        pkgs = Deployment.available_deployments(
-            computer, computer.get_all_attributes()
-        ).values_list('packages_to_install', 'packages_to_remove', 'name', 'id')
+        pkgs = Deployment.available_deployments(computer, computer.get_all_attributes()).values_list(
+            'packages_to_install', 'packages_to_remove', 'name', 'id'
+        )
 
         install = set()
         remove = set()
@@ -425,31 +378,17 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
             if install_item:
                 for pkg in install_item.split('\n'):
                     if pkg:
-                        install.add(json.dumps({
-                            'package': pkg,
-                            'name': deploy_name,
-                            'id': deploy_id
-                        }, sort_keys=True))
+                        install.add(json.dumps({'package': pkg, 'name': deploy_name, 'id': deploy_id}, sort_keys=True))
 
             if remove_item:
                 for pkg in remove_item.split('\n'):
                     if pkg:
-                        remove.add(json.dumps({
-                            'package': pkg,
-                            'name': deploy_name,
-                            'id': deploy_id
-                        }, sort_keys=True))
+                        remove.add(json.dumps({'package': pkg, 'name': deploy_name, 'id': deploy_id}, sort_keys=True))
 
-        packages = {
-            'install': [json.loads(x) for x in install],
-            'remove': [json.loads(x) for x in remove]
-        }
+        packages = {'install': [json.loads(x) for x in install], 'remove': [json.loads(x) for x in remove]}
 
         policy_pkg_to_install, policy_pkg_to_remove = Policy.get_packages(computer)
-        policies = {
-            'install': policy_pkg_to_install,
-            'remove': policy_pkg_to_remove
-        }
+        policies = {'install': policy_pkg_to_install, 'remove': policy_pkg_to_remove}
 
         capture = computer.hardware_capture_is_required()
 
@@ -457,10 +396,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         for device in computer.logical_devices():
             logical_devices.append(LogicalInfoSerializer(device).data)
 
-        if computer.default_logical_device:
-            default_logical_device = computer.default_logical_device.id
-        else:
-            default_logical_device = 0
+        default_logical_device = computer.default_logical_device.id if computer.default_logical_device else 0
 
         response = {
             'deployments': repos,
@@ -469,7 +405,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
             'policies': policies,
             'capture_hardware': capture,
             'logical_devices': logical_devices,
-            'default_logical_device': default_logical_device
+            'default_logical_device': default_logical_device,
         }
 
         return Response(response, status=status.HTTP_200_OK)
@@ -479,24 +415,16 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         computer = self.get_object()
         request.user.userprofile.check_scope(pk)
 
-        results = Node.objects.filter(computer=computer).order_by(
-            'id', 'parent_id', 'level'
-        )
+        results = Node.objects.filter(computer=computer).order_by('id', 'parent_id', 'level')
 
-        return Response(
-            NodeOnlySerializer(results, many=True).data,
-            status=status.HTTP_200_OK
-        )
+        return Response(NodeOnlySerializer(results, many=True).data, status=status.HTTP_200_OK)
 
 
 @extend_schema(tags=['errors'])
 @extend_schema(
     parameters=[
         OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: created_at, description',
-            type=str
+            name='search', location=OpenApiParameter.QUERY, description='Fields: created_at, description', type=str
         )
     ],
     methods=['GET'],
@@ -504,14 +432,18 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
 @permission_classes((permissions.DjangoModelPermissions,))
 class ErrorViewSet(
     DatabaseCheckMixin,
-    mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-    viewsets.GenericViewSet, MigasViewSet, ExportViewSet
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+    MigasViewSet,
+    ExportViewSet,
 ):
     queryset = models.Error.objects.all()
     serializer_class = serializers.ErrorSerializer
     filterset_class = ErrorFilter
-    search_fields = ['created_at', 'description']
+    search_fields = ('created_at', 'description')
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
@@ -530,14 +462,7 @@ class ErrorViewSet(
 
 @extend_schema(tags=['fault-definitions'])
 @extend_schema(
-    parameters=[
-        OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: name',
-            type=str
-        )
-    ],
+    parameters=[OpenApiParameter(name='search', location=OpenApiParameter.QUERY, description='Fields: name', type=str)],
     methods=['GET'],
 )
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -545,7 +470,7 @@ class FaultDefinitionViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
     queryset = models.FaultDefinition.objects.all()
     serializer_class = serializers.FaultDefinitionSerializer
     filterset_class = FaultDefinitionFilter
-    search_fields = ['name']
+    search_fields = ('name',)
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -561,9 +486,7 @@ class FaultDefinitionViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
 
         qs = Attribute.objects.scope(self.request.user.userprofile)
 
-        return models.FaultDefinition.objects.scope(
-            self.request.user.userprofile
-        ).prefetch_related(
+        return models.FaultDefinition.objects.scope(self.request.user.userprofile).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
             Prefetch('excluded_attributes', queryset=qs),
             'included_attributes__property_att',
@@ -576,10 +499,7 @@ class FaultDefinitionViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
 @extend_schema(
     parameters=[
         OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: created_at, result',
-            type=str
+            name='search', location=OpenApiParameter.QUERY, description='Fields: created_at, result', type=str
         )
     ],
     methods=['GET'],
@@ -587,14 +507,18 @@ class FaultDefinitionViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
 @permission_classes((permissions.DjangoModelPermissions,))
 class FaultViewSet(
     DatabaseCheckMixin,
-    mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-    viewsets.GenericViewSet, MigasViewSet, ExportViewSet
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+    MigasViewSet,
+    ExportViewSet,
 ):
     queryset = models.Fault.objects.all()
     serializer_class = serializers.FaultSerializer
     filterset_class = FaultFilter
-    search_fields = ['created_at', 'result']
+    search_fields = ('created_at', 'result')
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
@@ -623,10 +547,7 @@ class FaultViewSet(
 @extend_schema(
     parameters=[
         OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: computer__name, computer__id',
-            type=str
+            name='search', location=OpenApiParameter.QUERY, description='Fields: computer__name, computer__id', type=str
         )
     ],
     methods=['GET'],
@@ -634,14 +555,17 @@ class FaultViewSet(
 @permission_classes((permissions.DjangoModelPermissions,))
 class MigrationViewSet(
     DatabaseCheckMixin,
-    mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet,
-    MigasViewSet, ExportViewSet
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+    MigasViewSet,
+    ExportViewSet,
 ):
     queryset = models.Migration.objects.all()
     serializer_class = serializers.MigrationSerializer
     filterset_class = MigrationFilter
-    search_fields = ['computer__name', 'computer__id']
+    search_fields = ('computer__name', 'computer__id')
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
@@ -655,12 +579,7 @@ class MigrationViewSet(
 @extend_schema(tags=['notifications'])
 @extend_schema(
     parameters=[
-        OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: message',
-            type=str
-        )
+        OpenApiParameter(name='search', location=OpenApiParameter.QUERY, description='Fields: message', type=str)
     ],
     methods=['GET'],
 )
@@ -669,7 +588,7 @@ class NotificationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSe
     queryset = models.Notification.objects.all()
     serializer_class = serializers.NotificationSerializer
     filterset_class = NotificationFilter
-    search_fields = ['message']
+    search_fields = ('message',)
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
@@ -690,7 +609,7 @@ class NotificationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSe
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: computer__name, package__fullname',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -698,15 +617,21 @@ class NotificationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSe
 @permission_classes((permissions.DjangoModelPermissions,))
 class PackageHistoryViewSet(
     DatabaseCheckMixin,
-    mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet, MigasViewSet, ExportViewSet
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+    MigasViewSet,
+    ExportViewSet,
 ):
     queryset = models.PackageHistory.objects.all()
     serializer_class = serializers.PackageHistorySerializer
     filterset_class = PackageHistoryFilter
-    search_fields = ['computer__name', 'package__fullname']
+    search_fields = ('computer__name', 'package__fullname')
     ordering_fields = '__all__'
-    ordering = ('computer__name', 'package__fullname',)
+    ordering = (
+        'computer__name',
+        'package__fullname',
+    )
 
     def get_queryset(self):
         if self.request is None:
@@ -719,10 +644,7 @@ class PackageHistoryViewSet(
 @extend_schema(
     parameters=[
         OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: status, computer__name',
-            type=str
+            name='search', location=OpenApiParameter.QUERY, description='Fields: status, computer__name', type=str
         )
     ],
     methods=['GET'],
@@ -730,14 +652,17 @@ class PackageHistoryViewSet(
 @permission_classes((permissions.DjangoModelPermissions,))
 class StatusLogViewSet(
     DatabaseCheckMixin,
-    mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet,
-    MigasViewSet, ExportViewSet
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+    MigasViewSet,
+    ExportViewSet,
 ):
     queryset = models.StatusLog.objects.all()
     serializer_class = serializers.StatusLogSerializer
     filterset_class = StatusLogFilter
-    search_fields = ['status', 'computer__name']
+    search_fields = ('status', 'computer__name')
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
@@ -752,10 +677,7 @@ class StatusLogViewSet(
 @extend_schema(
     parameters=[
         OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: user__name, user__fullname',
-            type=str
+            name='search', location=OpenApiParameter.QUERY, description='Fields: user__name, user__fullname', type=str
         )
     ],
     methods=['GET'],
@@ -763,14 +685,17 @@ class StatusLogViewSet(
 @permission_classes((permissions.DjangoModelPermissions,))
 class SynchronizationViewSet(
     DatabaseCheckMixin,
-    mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet,
-    MigasViewSet, ExportViewSet
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+    MigasViewSet,
+    ExportViewSet,
 ):
     queryset = models.Synchronization.objects.all()
     serializer_class = serializers.SynchronizationSerializer
     filterset_class = SynchronizationFilter
-    search_fields = ['user__name', 'user__fullname', 'computer__name', 'consumer']
+    search_fields = ('user__name', 'user__fullname', 'computer__name', 'consumer')
     ordering_fields = '__all__'
     ordering = ('-created_at',)
 
@@ -790,26 +715,24 @@ class SynchronizationViewSet(
 @extend_schema(tags=['users'])
 @extend_schema(
     parameters=[
-        OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: name, fullname',
-            type=str
-        )
+        OpenApiParameter(name='search', location=OpenApiParameter.QUERY, description='Fields: name, fullname', type=str)
     ],
     methods=['GET'],
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class UserViewSet(
     DatabaseCheckMixin,
-    mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet,
-    MigasViewSet, ExportViewSet
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+    MigasViewSet,
+    ExportViewSet,
 ):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
     filterset_class = UserFilter
-    search_fields = ['name', 'fullname']
+    search_fields = ('name', 'fullname')
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -873,25 +796,21 @@ class MessageViewSet(viewsets.ViewSet):
             if search_filter and search_filter.lower() not in item['msg'].lower():
                 continue
 
-            results.append({
-                'id': int(key),
-                'created_at': item['date'],
-                'computer': {
-                    'id': int(item['computer_id']),
-                    '__str__': item['computer_name'],
-                    'status': item['computer_status'],
-                    'summary': item['computer_summary']
-                },
-                'project': {
-                    'id': int(item['project_id']),
-                    'name': item['project_name']
-                },
-                'user': {
-                    'id': int(item['user_id']),
-                    'name': item['user_name']
-                },
-                'message': item['msg']
-            })
+            results.append(
+                {
+                    'id': int(key),
+                    'created_at': item['date'],
+                    'computer': {
+                        'id': int(item['computer_id']),
+                        '__str__': item['computer_name'],
+                        'status': item['computer_status'],
+                        'summary': item['computer_summary'],
+                    },
+                    'project': {'id': int(item['project_id']), 'name': item['project_name']},
+                    'user': {'id': int(item['user_id']), 'name': item['user_name']},
+                    'message': item['msg'],
+                }
+            )
 
         return sorted(results, key=lambda d: d['created_at'], reverse=True)
 
@@ -918,10 +837,7 @@ class MessageViewSet(viewsets.ViewSet):
     def list(self, request):
         results = self.get_queryset()
 
-        paginator = Paginator(
-            results,
-            request.GET.get('page_size', DefaultPagination.page_size)
-        )
+        paginator = Paginator(results, request.GET.get('page_size', DefaultPagination.page_size))
         page_number = request.GET.get('page', 1)
         page_obj = paginator.get_page(page_number)
 
@@ -930,7 +846,7 @@ class MessageViewSet(viewsets.ViewSet):
                 'results': page_obj.object_list,
                 'count': len(results),
                 'next': self._get_next_link(request, page_obj),
-                'previous': self._get_previous_link(request, page_obj)
+                'previous': self._get_previous_link(request, page_obj),
             }
         )
 
@@ -948,24 +864,33 @@ class MessageViewSet(viewsets.ViewSet):
             response,
             fieldnames=[
                 'created_at',
-                'computer__id', 'computer____str__', 'computer__status', 'computer__summary',
-                'project__id', 'project__name', 'user__id', 'user__name', 'message',
-            ]
+                'computer__id',
+                'computer____str__',
+                'computer__status',
+                'computer__summary',
+                'project__id',
+                'project__name',
+                'user__id',
+                'user__name',
+                'message',
+            ],
         )
         writer.writeheader()
 
         for item in self.get_queryset():
-            writer.writerow({
-                'created_at': item['created_at'],
-                'computer__id': item['computer']['id'],
-                'computer____str__': item['computer']['__str__'],
-                'computer__status': item['computer']['status'],
-                'computer__summary': item['computer']['summary'],
-                'project__id': item['project']['id'],
-                'project__name': item['project']['name'],
-                'user__id': item['user']['id'],
-                'user__name': item['user']['name'],
-                'message': item['message'],
-            })
+            writer.writerow(
+                {
+                    'created_at': item['created_at'],
+                    'computer__id': item['computer']['id'],
+                    'computer____str__': item['computer']['__str__'],
+                    'computer__status': item['computer']['status'],
+                    'computer__summary': item['computer']['summary'],
+                    'project__id': item['project']['id'],
+                    'project__name': item['project']['name'],
+                    'user__id': item['user']['id'],
+                    'user__name': item['user']['name'],
+                    'message': item['message'],
+                }
+            )
 
         return response
