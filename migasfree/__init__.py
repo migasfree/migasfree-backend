@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,13 +15,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from .celery import app as celery_app
+from .version import __version__
 
-__version__ = "5.0"
-__author__ = [
-    'Alberto Gacías <alberto@migasfree.org>',
-    'Jose Antonio Chavarría <jachavar@gmail.com>'
-]
-__contact__ = "fun.with@migasfree.org"
-__homepage__ = "https://github.com/migasfree/migasfree-backend/"
+__author__ = ['Alberto Gacías <alberto@migasfree.org>', 'Jose Antonio Chavarría <jachavar@gmail.com>']
+__contact__ = 'fun.with@migasfree.org'
+__homepage__ = 'https://github.com/migasfree/migasfree-backend/'
 
-__all__ = ['celery_app']
+__all__ = ['__version__', 'celery_app']
