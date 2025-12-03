@@ -84,7 +84,7 @@ Repository = "https://github.com/migasfree/migasfree-backend/"
 packages = {find = {where = ["."], include = ["migasfree*"]}}
 
 [tool.setuptools.dynamic]
-version = {attr = "migasfree.__version__"}
+version = {attr = "migasfree.version.__version__"}
 
 [tool.setuptools.package-data]
 migasfree = [
