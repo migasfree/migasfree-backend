@@ -1,6 +1,91 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "migasfree-backend"
+version = "5.0"
+description = "migasfree-backend is a Django app to manage systems management"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "GPLv3"}
+authors = [
+    {name = "Alberto Gacías", email = "alberto@migasfree.org"},
+    {name = "Jose Antonio Chavarría", email = "jachavar@gmail.com"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "License :: OSI Approved :: GNU General Public License (GPL)",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "asgiref==3.9.1",
+    "celery==5.5.3",
+    "channels==4.3.1",
+    "channels-redis==4.3.0",
+    "daphne==4.2.1",
+    "Django==5.2.8",
+    "dj-rest-auth==7.0.1",
+    "django-cors-headers==4.7.0",
+    "django-filter==25.1",
+    "django-import-export==4.3.9",
+    "django-markdownx==4.0.9",
+    "django-partial-content==0.9.4",
+    "django-redis==6.0.0",
+    "djangorestframework==3.16.1",
+    "djangorestframework-simplejwt==5.5.1",
+    "djoser==2.3.3",
+    "docutils==0.22",
+    "drf-spectacular==0.28.0",
+    "drf-spectacular-sidecar==2025.8.1",
+    "graphene-django==3.2.3",
+    "jwcrypto==1.5.6",
+    "MarkupPy==1.18",
+    "odfpy==1.4.1",
+    "openpyxl==3.1.5",
+    "packaging==25.0",
+    "psutil==7.0.0",
+    "psycopg2-binary==2.9.10",
+    "python-dateutil==2.9.0.post0",
+    "python-magic==0.4.27",
+    "PyYAML==6.0.2",
+    "redis==6.4.0",
+    "requests==2.32.5",
+    "xlrd==2.0.2",
+    "xlwt==1.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "django-debug-toolbar==6.0.0",
+    "django-extensions==4.1",
+    "django-silk==5.4.1",
+    "pydot==4.0.1",
+    "pyparsing==3.2.3",
+    "pytest==8.4.1",
+    "pytest-celery==1.2.1",
+    "pytest-cov==6.2.1",
+    "pytest-django==4.11.1",
+    "sqlparse==0.5.3",
+]
+
+[project.urls]
+Homepage = "https://migasfree.org/"
+Repository = "https://github.com/migasfree/migasfree-backend/"
+
+[tool.setuptools]
+packages = ["migasfree"]
+
 [tool.ruff]
 line-length = 120
-target-version = "py38"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = [
