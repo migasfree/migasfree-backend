@@ -1,5 +1,3 @@
-# -*- coding: utf-8 *-*
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -16,36 +14,43 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+
+from django.conf import settings
 from django.contrib import auth
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.utils.translation import gettext, gettext_lazy as _
-from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiExample, inline_serializer
-from rest_framework import viewsets, status, views, permissions, serializers as drf_serializers
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import OpenApiExample, OpenApiTypes, extend_schema, inline_serializer
+from rest_framework import permissions, status, views, viewsets
+from rest_framework import serializers as drf_serializers
 from rest_framework.decorators import action, permission_classes, throttle_classes
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
-from ...utils import (
-    uuid_change_format, get_client_ip,
-    remove_duplicates_preserving_order,
-    replace_keys,
-)
-from ...model_update import update
+from ...app_catalog.models import Policy
 from ...core.mixins import SafeConnectionMixin
 from ...core.models import (
-    Deployment, Property, Domain,
-    Attribute, BasicAttribute, AttributeSet,
+    Attribute,
+    AttributeSet,
+    BasicAttribute,
+    Deployment,
+    Domain,
+    Property,
 )
-from ...app_catalog.models import Policy
-
+from ...model_update import update
+from ...utils import (
+    get_client_ip,
+    remove_duplicates_preserving_order,
+    replace_keys,
+    uuid_change_format,
+)
 from .. import models, serializers, tasks
 from ..messages import add_computer_message, remove_computer_messages
 
-import logging
 logger = logging.getLogger('migasfree')
 
 
@@ -53,9 +58,7 @@ def get_user_or_create(name, fullname, ip_address=None):
     user, created = models.User.objects.get_or_create(name=name, fullname=fullname)
 
     if created and ip_address:
-        msg = _('User [%s] registered by IP [%s].') % (
-            name, ip_address
-        )
+        msg = _('User [%s] registered by IP [%s].') % (name, ip_address)
         models.Notification.objects.create(message=msg)
 
     return user
@@ -70,47 +73,28 @@ def is_computer_changed(computer, name, project, ip_address, uuid):
 
         if settings.MIGASFREE_NOTIFY_NEW_COMPUTER:
             models.Notification.objects.create(
-                _("New Computer added id=[%s]: NAME=[%s] UUID=[%s]") % (
-                    computer.id,
-                    computer,
-                    computer.uuid
-                )
+                _('New Computer added id=[%s]: NAME=[%s] UUID=[%s]') % (computer.id, computer, computer.uuid)
             )
     # end compatibility with client apiv4
 
     if computer.project != project:
         models.PackageHistory.uninstall_computer_packages(computer.id)
 
-        models.Migration.objects.create(
-            computer=computer,
-            project=project
-        )
+        models.Migration.objects.create(computer=computer, project=project)
         computer.update_project(project)
 
     if settings.MIGASFREE_NOTIFY_CHANGE_NAME and (computer.name != name):
-        msg = _("Computer id=[%s]: NAME [%s] changed by [%s]") % (
-            computer.id,
-            computer,
-            name
-        )
+        msg = _('Computer id=[%s]: NAME [%s] changed by [%s]') % (computer.id, computer, name)
         models.Notification.objects.create(message=msg)
         computer.update_name(name)
 
     if settings.MIGASFREE_NOTIFY_CHANGE_IP and (computer.ip_address != ip_address):
-        msg = _("Computer id=[%s]: IP [%s] changed by [%s]") % (
-            computer.id,
-            computer.ip_address,
-            ip_address
-        )
+        msg = _('Computer id=[%s]: IP [%s] changed by [%s]') % (computer.id, computer.ip_address, ip_address)
         models.Notification.objects.create(message=msg)
         computer.update_ip_address(ip_address)
 
     if settings.MIGASFREE_NOTIFY_CHANGE_UUID and (computer.uuid != uuid):
-        msg = _("Computer id=[%s]: UUID [%s] changed by [%s]") % (
-            computer.id,
-            computer.uuid,
-            uuid
-        )
+        msg = _('Computer id=[%s]: UUID [%s] changed by [%s]') % (computer.id, computer.uuid, uuid)
         models.Notification.objects.create(message=msg)
         computer.update_uuid(uuid)
 
@@ -129,9 +113,7 @@ def get_computer(uuid, name):
         pass
 
     try:
-        computer = models.Computer.objects.get(
-            uuid=uuid_change_format(uuid)
-        )
+        computer = models.Computer.objects.get(uuid=uuid_change_format(uuid))
         logger.debug('computer found by uuid (endian format changed)')
 
         return computer
@@ -139,7 +121,7 @@ def get_computer(uuid, name):
         pass
 
     computer = models.Computer.objects.filter(mac_address__icontains=uuid[-12:])
-    if computer.count() == 1 and uuid[0:8] == '0'*8:
+    if computer.count() == 1 and uuid[0:8] == '0' * 8:
         logger.debug('computer found by mac_address (in uuid format)')
 
         return computer.first()
@@ -149,10 +131,7 @@ def get_computer(uuid, name):
         logger.debug('computer found by name')
 
         return computer
-    except (
-        models.Computer.DoesNotExist,
-        models.Computer.MultipleObjectsReturned
-    ):
+    except (models.Computer.DoesNotExist, models.Computer.MultipleObjectsReturned):
         return None
 
 
@@ -160,12 +139,9 @@ def get_computer(uuid, name):
 @permission_classes((permissions.AllowAny,))
 @throttle_classes([UserRateThrottle])
 class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
-
     @extend_schema(
         description='Returns 200 if ok, 404 if computer not found (requires JWT auth)',
-        request={
-            'id': OpenApiTypes.INT
-        },
+        request={'id': OpenApiTypes.INT},
         responses={
             status.HTTP_200_OK: {'description': gettext('EOT OK')},
             status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
@@ -189,21 +165,16 @@ class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
 
         if computer.status == 'available':
             models.Notification.objects.create(
-                _('Computer [%s] with available status, has been synchronized')
-                % computer
+                _('Computer [%s] with available status, has been synchronized') % computer
             )
 
-        return Response(
-            self.create_response(gettext('EOT OK')),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(gettext('EOT OK')), status=status.HTTP_200_OK)
 
 
 @extend_schema(tags=['safe'])
 @permission_classes((permissions.AllowAny,))
 @throttle_classes([UserRateThrottle])
 class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
-
     @extend_schema(
         description='Creates a computer synchronization (requires JWT auth)',
         request=inline_serializer(
@@ -251,22 +222,15 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
         if serializer.is_valid():
             serializer.save()
 
-            return Response(
-                self.create_response(serializer.data),
-                status=status.HTTP_201_CREATED
-            )
+            return Response(self.create_response(serializer.data), status=status.HTTP_201_CREATED)
 
-        return Response(
-            self.create_response(serializer.errors),
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(self.create_response(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema(tags=['safe'])
 @permission_classes((permissions.AllowAny,))
 @throttle_classes([UserRateThrottle])
 class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
-
     @extend_schema(
         description='Creates or updates a computer (requires JWT auth)',
         request={
@@ -277,9 +241,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     'name': {'type': 'string'},
                     'ip_address': {'type': 'string', 'format': 'ipv4'},
                     'username': {'type': 'string'},
-                    'password': {'type': 'string', 'format': 'password'}
+                    'password': {'type': 'string', 'format': 'password'},
                 },
-                'required': ['uuid', 'name', 'ip_address', 'username', 'password']
+                'required': ['uuid', 'name', 'ip_address', 'username', 'password'],
             }
         },
         responses={
@@ -287,7 +251,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status.HTTP_201_CREATED: serializers.ComputerCreateSerializer,
             status.HTTP_400_BAD_REQUEST: {'description': 'Error in request'},
             status.HTTP_401_UNAUTHORIZED: {'description': 'Computer cannot be registered'},
-        }
+        },
     )
     def create(self, request):
         """
@@ -302,10 +266,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
         if not claims or not all(k in claims for k in ('uuid', 'name', 'ip_address', 'username', 'password')):
-            return Response(
-                self.create_response(gettext('Invalid Data')),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(self.create_response(gettext('Invalid Data')), status=status.HTTP_400_BAD_REQUEST)
 
         claims['project'] = self.project.id
         claims['forwarded_ip_address'] = get_client_ip(request)
@@ -313,65 +274,40 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         computer = get_computer(claims.get('uuid'), claims.get('name'))
         if computer:
             computer = is_computer_changed(
-                computer,
-                claims.get('name'),
-                self.project,
-                claims.get('ip_address'),
-                claims.get('uuid')
+                computer, claims.get('name'), self.project, claims.get('ip_address'), claims.get('uuid')
             )
 
             # change to default status
             computer.change_status(settings.MIGASFREE_DEFAULT_COMPUTER_STATUS)
 
-            serializer = serializers.ComputerSerializer(
-                computer,
-                context={'request': request}
-            )
+            serializer = serializers.ComputerSerializer(computer, context={'request': request})
+            return Response(self.create_response(serializer.data), status=status.HTTP_200_OK)
+
+        user = auth.authenticate(username=claims.get('username'), password=claims.get('password'))
+        if not self.project.auto_register_computers and (
+            not user or not user.is_superuser or not user.has_perm('client.add_computer')
+        ):
             return Response(
-                self.create_response(serializer.data),
-                status=status.HTTP_200_OK
+                self.create_response(gettext('Computer cannot be registered')), status=status.HTTP_401_UNAUTHORIZED
             )
 
-        user = auth.authenticate(
-            username=claims.get('username'),
-            password=claims.get('password')
-        )
-        if not self.project.auto_register_computers and \
-                (not user or not user.is_superuser or not user.has_perm('client.add_computer')):
-            return Response(
-                self.create_response(gettext('Computer cannot be registered')),
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-
-        serializer = serializers.ComputerCreateSerializer(
-            data=claims,
-            context={'request': request}
-        )
+        serializer = serializers.ComputerCreateSerializer(data=claims, context={'request': request})
         if serializer.is_valid():
             computer = serializer.save()
 
-            models.Migration.objects.create(
-                computer=computer,
-                project=self.project
-            )
+            models.Migration.objects.create(computer=computer, project=self.project)
 
             if settings.MIGASFREE_NOTIFY_NEW_COMPUTER:
-                msg = _("New Computer added id=[%(id)s]: NAME=[%(name)s] UUID=[%(uuid)s]") % {
+                msg = _('New Computer added id=[%(id)s]: NAME=[%(name)s] UUID=[%(uuid)s]') % {
                     'id': serializer.data.get('id'),
                     'name': serializer.data.get('name'),
-                    'uuid': serializer.data.get('uuid')
+                    'uuid': serializer.data.get('uuid'),
                 }
                 models.Notification.objects.create(message=msg)
 
-            return Response(
-                self.create_response(serializer.data),
-                status=status.HTTP_201_CREATED
-            )
+            return Response(self.create_response(serializer.data), status=status.HTTP_201_CREATED)
 
-        return Response(
-            self.create_response(serializer.errors),
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(self.create_response(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
         description='Creates or updates a computer (requires JWT auth)',
@@ -382,7 +318,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     'uuid': {'type': 'string', 'format': 'uuid'},
                     'name': {'type': 'string'},
                 },
-                'required': ['uuid', 'name']
+                'required': ['uuid', 'name'],
             }
         },
         responses={
@@ -415,61 +351,37 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
 
         if isinstance(claims, str):
-            return Response(
-                self.create_response(claims),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(self.create_response(claims), status=status.HTTP_400_BAD_REQUEST)
 
-        if not claims or 'uuid' not in claims.keys() or 'name' not in claims.keys():
-            return Response(
-                self.create_response(gettext('Malformed claims')),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        if not claims or 'uuid' not in claims or 'name' not in claims:
+            return Response(self.create_response(gettext('Malformed claims')), status=status.HTTP_400_BAD_REQUEST)
 
         computer = get_computer(claims['uuid'], claims['name'])
         if not computer:
-            return Response(
-                self.create_response(gettext('Computer not found')),
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response(self.create_response(gettext('Computer not found')), status=status.HTTP_404_NOT_FOUND)
 
         if computer.status == 'unsubscribed':
             models.Error.objects.create(
                 computer,
                 computer.project,
-                '{} - {} - {}'.format(
-                    get_client_ip(request),
-                    'id',
-                    gettext('Unsubscribed computer')
-                )
+                '{} - {} - {}'.format(get_client_ip(request), 'id', gettext('Unsubscribed computer')),
             )
-            return Response(
-                self.create_response(
-                    gettext('Unsubscribed computer')
-                ),
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response(self.create_response(gettext('Unsubscribed computer')), status=status.HTTP_403_FORBIDDEN)
 
         if computer.project.id != self.project.id:
             return Response(
                 self.create_response(
-                    gettext(
-                        'Unexpected Computer Project (%s). Expected %s'
-                    ) % (self.project.name, computer.project.name)
+                    gettext('Unexpected Computer Project (%s). Expected %s')
+                    % (self.project.name, computer.project.name)
                 ),
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_403_FORBIDDEN,
             )
 
-        return Response(
-            self.create_response(computer.id),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(computer.id), status=status.HTTP_200_OK)
 
     @extend_schema(
         description='Returns enabled properties for a given computer (requires JWT auth)',
-        request={
-            'id': OpenApiTypes.INT
-        },
+        request={'id': OpenApiTypes.INT},
         responses={
             status.HTTP_200_OK: {
                 'type': 'object',
@@ -477,7 +389,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     'prefix': {'type': 'string'},
                     'language': {'type': 'string'},
                     'code': {'type': 'string'},
-                }
+                },
             },
             status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
@@ -492,16 +404,11 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Getting properties...'))
 
-        properties = Property.enabled_client_properties(
-            computer.get_all_attributes()
-        )
+        properties = Property.enabled_client_properties(computer.get_all_attributes())
 
         add_computer_message(computer, gettext('Sending properties...'))
 
-        return Response(
-            self.create_response(properties),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(properties), status=status.HTTP_200_OK)
 
     @extend_schema(
         description='Process and record sync attributes for a given computer (requires JWT auth)',
@@ -515,17 +422,17 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     'ip_address': {'type': 'string', 'format': 'ipv4'},
                     'sync_user': {'type': 'string'},
                     'sync_fullname': {'type': 'string'},
-                    'sync_attributes': {
-                        'type': 'object',
-                        'additionalProperties': {
-                            'type': 'string'
-                        }
-                    }
+                    'sync_attributes': {'type': 'object', 'additionalProperties': {'type': 'string'}},
                 },
                 'required': [
-                    'id', 'uuid', 'name', 'ip_address',
-                    'sync_user', 'sync_fullname', 'sync_attributes',
-                ]
+                    'id',
+                    'uuid',
+                    'name',
+                    'ip_address',
+                    'sync_user',
+                    'sync_fullname',
+                    'sync_attributes',
+                ],
             }
         },
         responses={
@@ -554,19 +461,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Getting attributes...'))
 
-        is_computer_changed(
-            computer,
-            claims.get('name'),
-            self.project,
-            claims.get('ip_address'),
-            claims.get('uuid')
-        )
+        is_computer_changed(computer, claims.get('name'), self.project, claims.get('ip_address'), claims.get('uuid'))
 
-        user = get_user_or_create(
-            claims.get('sync_user'),
-            claims.get('sync_fullname'),
-            claims.get('ip_address')
-        )
+        user = get_user_or_create(claims.get('sync_user'), claims.get('sync_fullname'), claims.get('ip_address'))
         user.update_fullname(claims.get('sync_fullname'))
 
         computer.sync_attributes.clear()
@@ -575,18 +472,14 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         for prefix, value in claims.get('sync_attributes').items():
             client_property = Property.objects.get(prefix=prefix)
             if client_property.sort == 'client':
-                computer.sync_attributes.add(
-                    *Attribute.process_kind_property(client_property, value)
-                )
+                computer.sync_attributes.add(*Attribute.process_kind_property(client_property, value))
 
         # Domain attribute
         computer.sync_attributes.add(*Domain.process(computer.get_all_attributes()))
 
         # tags
         for tag in computer.tags.filter(property_att__enabled=True):
-            computer.sync_attributes.add(
-                *Attribute.process_kind_property(tag.property_att, tag.value)
-            )
+            computer.sync_attributes.add(*Attribute.process_kind_property(tag.property_att, tag.value))
 
         # basic attributes
         computer.sync_attributes.add(
@@ -596,7 +489,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                 project=computer.project.name,
                 platform=computer.project.platform.name,
                 user=user.name,
-                description=computer.get_cid_description()
+                description=computer.get_cid_description(),
             )
         )
 
@@ -611,19 +504,14 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             ip_address=claims.get('ip_address'),
             forwarded_ip_address=get_client_ip(request),
             sync_user=user,
-            sync_start_date=timezone.localtime(timezone.now())
+            sync_start_date=timezone.localtime(timezone.now()),
         )
 
-        serializer = serializers.ComputerSerializer(
-            computer, context={'request': request}
-        )
+        serializer = serializers.ComputerSerializer(computer, context={'request': request})
 
         add_computer_message(computer, gettext('Sending attributes...'))
 
-        return Response(
-            self.create_response(serializer.data),
-            status=status.HTTP_201_CREATED
-        )
+        return Response(self.create_response(serializer.data), status=status.HTTP_201_CREATED)
 
     @extend_schema(
         description='Returns computer available repositories list (requires JWT auth)',
@@ -631,24 +519,18 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             'application/json': {
                 'type': 'object',
                 'properties': {
-                    'id': {
-                        'type': 'integer',
-                        'description': 'Computer ID'
-                    },
+                    'id': {'type': 'integer', 'description': 'Computer ID'},
                 },
-                'required': ['id']
+                'required': ['id'],
             }
         },
         responses={
             status.HTTP_200_OK: {
                 'type': 'object',
-                'properties': {
-                    'name': {'type': 'string'},
-                    'source_template': {'type': 'string'}
-                }
+                'properties': {'name': {'type': 'string'}, 'source_template': {'type': 'string'}},
             },
-            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'}
-        }
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
     )
     @action(methods=['post'], detail=False)
     def repositories(self, request):
@@ -664,17 +546,12 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         ret = [
             {'name': repo.slug, 'source_template': repo.source_template()}
-            for repo in Deployment.available_deployments(
-                computer, computer.get_all_attributes()
-            )
+            for repo in Deployment.available_deployments(computer, computer.get_all_attributes())
         ]
 
         add_computer_message(computer, gettext('Sending repositories...'))
 
-        return Response(
-            self.create_response(ret),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(ret), status=status.HTTP_200_OK)
 
     @extend_schema(
         description='Returns computer fault definitions list (requires JWT auth)',
@@ -682,38 +559,29 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             'application/json': {
                 'type': 'object',
                 'properties': {
-                    'id': {
-                        'type': 'integer',
-                        'description': 'Computer ID'
-                    },
+                    'id': {'type': 'integer', 'description': 'Computer ID'},
                 },
-                'required': ['id']
+                'required': ['id'],
             }
         },
         responses={
             status.HTTP_200_OK: serializers.FaultDefinitionForAttributesSerializer(many=True),
-            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'}
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
         examples=[
             OpenApiExample(
                 'Example request',
-                value={
-                    'id': 1
-                },
+                value={'id': 1},
                 request_only=True,
             ),
             OpenApiExample(
                 'Example response',
                 value=[
-                    {
-                        'name': 'SampleFaultDefinition',
-                        'language': 'python',
-                        'code': 'print("This is a sample code.")'
-                    }
+                    {'name': 'SampleFaultDefinition', 'language': 'python', 'code': 'print("This is a sample code.")'}
                 ],
                 response_only=True,
             ),
-        ]
+        ],
     )
     @action(methods=['post'], detail=False, url_path='faults/definitions')
     def fault_definitions(self, request):
@@ -734,17 +602,12 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Getting fault definitions...'))
 
-        results = models.FaultDefinition.enabled_for_attributes(
-            computer.get_all_attributes()
-        )
+        results = models.FaultDefinition.enabled_for_attributes(computer.get_all_attributes())
         ret = [serializers.FaultDefinitionForAttributesSerializer(item).data for item in results]
 
         add_computer_message(computer, gettext('Sending fault definitions...'))
 
-        return Response(
-            self.create_response(list(ret)),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(list(ret)), status=status.HTTP_200_OK)
 
     @extend_schema(
         description='Process and record faults for a given computer (requires JWT auth)',
@@ -756,22 +619,19 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     'faults': {
                         'type': 'object',
                         'description': 'A dictionary of fault names and their results.',
-                        'propertyNames': {
-                            'type': 'string',
-                            'description': 'Name of the fault'
-                        },
+                        'propertyNames': {'type': 'string', 'description': 'Name of the fault'},
                         'additionalProperties': {
                             'type': 'string',
-                            'description': 'Result of the fault (empty string = no error)'
-                        }
-                    }
+                            'description': 'Result of the fault (empty string = no error)',
+                        },
+                    },
                 },
-                'required': ['id', 'faults']
+                'required': ['id', 'faults'],
             }
         },
         responses={
             status.HTTP_200_OK: serializers.FaultSerializer(many=True),
-            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'}
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
         examples=[
             OpenApiExample(
@@ -781,11 +641,11 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     'faults': {
                         'Low Available Space On Home Partition': '',
                         'Low Available Space On System Partition': '95%',
-                    }
+                    },
                 },
                 request_only=True,
             ),
-        ]
+        ],
     )
     @action(methods=['post'], detail=False)
     def faults(self, request):
@@ -818,10 +678,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Sending faults...'))
 
-        return Response(
-            self.create_response(list(ret)),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(list(ret)), status=status.HTTP_200_OK)
 
     @extend_schema(
         description='Process and record errors for a given computer (requires JWT auth)',
@@ -829,41 +686,31 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         responses={
             status.HTTP_201_CREATED: serializers.ErrorSafeWriteSerializer,
             status.HTTP_400_BAD_REQUEST: OpenApiTypes.OBJECT,
-            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'}
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
         examples=[
             OpenApiExample(
                 'Claim example',
                 summary='Example claim object',
                 description='A sample claim object that will be processed.',
-                value={
-                    'id': 1,
-                    'description': 'could not connect to host'
-                },
+                value={'id': 1, 'description': 'could not connect to host'},
                 request_only=True,
             ),
             OpenApiExample(
                 'Success response',
                 summary='Claim processed successfully',
                 description='The response when a claim is processed successfully.',
-                value={
-                    'id': 1,
-                    'description': 'could not connect to host',
-                    'computer': 123,
-                    'project': 456
-                },
+                value={'id': 1, 'description': 'could not connect to host', 'computer': 123, 'project': 456},
                 response_only=True,
             ),
             OpenApiExample(
                 'Error response',
                 summary='Claim validation failed',
                 description='The response when the claim data is invalid.',
-                value={
-                    'description': ['This field may not be null.']
-                },
+                value={'description': ['This field may not be null.']},
                 response_only=True,
             ),
-        ]
+        ],
     )
     @action(methods=['post'], detail=False)
     def errors(self, request):
@@ -887,19 +734,13 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                self.create_response(serializer.data),
-                status=status.HTTP_201_CREATED
-            )
+            return Response(self.create_response(serializer.data), status=status.HTTP_201_CREATED)
 
-        return Response(
-            self.create_response(serializer.errors),
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(self.create_response(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
         description='Returns mandatory packages for a computer (requires JWT auth). '
-                    'If no packages are defined an empty list is returned.',
+        'If no packages are defined an empty list is returned.',
         request={
             'id': OpenApiTypes.INT,
         },
@@ -918,10 +759,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                         'description': 'Packages to remove.',
                     },
                 },
-                'example': {
-                    'install': ['one', 'two'],
-                    'remove': ['three']
-                },
+                'example': {'install': ['one', 'two'], 'remove': ['three']},
             },
             status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
@@ -942,9 +780,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Getting mandatory packages...'))
 
-        pkgs = Deployment.available_deployments(
-            computer, computer.get_all_attributes()
-        ).values_list('packages_to_install', 'packages_to_remove')
+        pkgs = Deployment.available_deployments(computer, computer.get_all_attributes()).values_list(
+            'packages_to_install', 'packages_to_remove'
+        )
 
         add_computer_message(computer, gettext('Sending mandatory packages...'))
 
@@ -965,21 +803,12 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
             response = {
                 'install': remove_duplicates_preserving_order(install),
-                'remove': remove_duplicates_preserving_order(remove)
+                'remove': remove_duplicates_preserving_order(remove),
             }
 
-            return Response(
-                self.create_response(response),
-                status=status.HTTP_200_OK
-            )
+            return Response(self.create_response(response), status=status.HTTP_200_OK)
 
-        return Response(
-            self.create_response({
-                'install': [],
-                'remove': []
-            }),
-            status.HTTP_200_OK
-        )
+        return Response(self.create_response({'install': [], 'remove': []}), status.HTTP_200_OK)
 
     @extend_schema(
         description='Returns the list of tags assigned to a computer (requires JWT auth).',
@@ -996,9 +825,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                         'description': 'List of tags assigned to the computer.',
                     },
                 },
-                'example': {
-                    'tags': ['PR1-value1', 'PR2-value2']
-                },
+                'example': {'tags': ['PR1-value1', 'PR2-value2']},
             },
             status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
@@ -1022,15 +849,12 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Sending assigned tags...'))
 
-        return Response(
-            self.create_response(response),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(response), status=status.HTTP_200_OK)
 
     @extend_schema(
         description='Returns all tags that are available for a computer (requires JWT auth). '
-                    'The response is a dictionary where each key is a tag name '
-                    'and the value is a list of possible tag values.',
+        'The response is a dictionary where each key is a tag name '
+        'and the value is a list of possible tag values.',
         request={
             'id': OpenApiTypes.INT,
         },
@@ -1082,34 +906,29 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     available.setdefault(tag_dmn.property_att.name, []).append(str(tag_dmn))
 
         # Deployment tags
-        for deploy in Deployment.objects.filter(
-            project__id=computer.project.id
-        ).filter(enabled=True):
-            for tag in deploy.included_attributes.filter(
-                property_att__sort='server'
-            ).filter(property_att__enabled=True):
+        for deploy in Deployment.objects.filter(project__id=computer.project.id).filter(enabled=True):
+            for tag in deploy.included_attributes.filter(property_att__sort='server').filter(
+                property_att__enabled=True
+            ):
                 available.setdefault(tag.property_att.name, []).append(str(tag))
 
         # Domain Tags
         for domain in Domain.objects.filter(
-            Q(included_attributes__in=computer.sync_attributes.all()) &
-            ~Q(excluded_attributes__in=computer.sync_attributes.all())
+            Q(included_attributes__in=computer.sync_attributes.all())
+            & ~Q(excluded_attributes__in=computer.sync_attributes.all())
         ):
             for tag in domain.tags.all():
                 available.setdefault(tag.property_att.name, []).append(str(tag))
 
         add_computer_message(computer, gettext('Sending available tags...'))
 
-        return Response(
-            self.create_response(available),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(available), status=status.HTTP_200_OK)
 
     @extend_schema(
         description='Assigns a list of tags to a computer and returns the packages that must be '
-                    'pre-installed, installed or removed as a result (requires JWT auth).',
+        'pre-installed, installed or removed as a result (requires JWT auth).',
         request={
-            'id': OpenApiTypes.INT,                     # computer identifier
+            'id': OpenApiTypes.INT,  # computer identifier
             'tags': {
                 'type': 'array',
                 'items': {'type': 'string'},
@@ -1123,7 +942,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
                     'preinstall': {
                         'type': 'array',
                         'items': {'type': 'string'},
-                        'description': 'Packages that must be pre‑installed.',
+                        'description': 'Packages that must be pre-installed.',
                     },
                     'install': {
                         'type': 'array',
@@ -1170,10 +989,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         tags = claims.get('tags')
         tag_objs = Attribute.objects.filter_by_prefix_value(tags)
         if not tag_objs:
-            return Response(
-                self.create_response(gettext('Invalid tags')),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(self.create_response(gettext('Invalid tags')), status=status.HTTP_400_BAD_REQUEST)
 
         computer.tags.set(tag_objs)
         tag_ids = tag_objs.values_list('id', flat=True)
@@ -1189,38 +1005,26 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         # Old deploys
         old_deploys = Deployment.available_deployments(computer, old_tags)
         pkgs = old_deploys.values_list(
-            'packages_to_install',
-            'default_preincluded_packages',
-            'default_included_packages'
+            'packages_to_install', 'default_preincluded_packages', 'default_included_packages'
         )
-        for packages_to_install, default_preincluded_packages, \
-                default_included_packages in pkgs:
+        for packages_to_install, default_preincluded_packages, default_included_packages in pkgs:
             remove.extend(pkg for pkg in packages_to_install.split('\n') if pkg)
             remove.extend(pkg for pkg in default_preincluded_packages.split('\n') if pkg)
             remove.extend(pkg for pkg in default_included_packages.split('\n') if pkg)
 
-        pkgs = old_deploys.values_list(
-            'packages_to_remove', 'default_excluded_packages'
-        )
+        pkgs = old_deploys.values_list('packages_to_remove', 'default_excluded_packages')
         for packages_to_remove, default_excluded_packages in pkgs:
             install.extend(pkg for pkg in packages_to_remove.split('\n') if pkg)
             install.extend(pkg for pkg in default_excluded_packages.split('\n') if pkg)
 
         # New deploys
-        new_deploys = Deployment.available_deployments(
-            computer,
-            new_tags + intersection_tags
-        )
-        pkgs = new_deploys.values_list(
-            'packages_to_remove', 'default_excluded_packages'
-        )
+        new_deploys = Deployment.available_deployments(computer, new_tags + intersection_tags)
+        pkgs = new_deploys.values_list('packages_to_remove', 'default_excluded_packages')
         for packages_to_remove, default_excluded_packages in pkgs:
             remove.extend(pkg for pkg in packages_to_remove.split('\n') if pkg)
             remove.extend(pkg for pkg in default_excluded_packages.split('\n') if pkg)
 
-        pkgs = new_deploys.values_list(
-            'packages_to_install', 'default_included_packages'
-        )
+        pkgs = new_deploys.values_list('packages_to_install', 'default_included_packages')
         for packages_to_install, default_included_packages in pkgs:
             install.extend(pkg for pkg in packages_to_install.split('\n') if pkg)
             install.extend(pkg for pkg in default_included_packages.split('\n') if pkg)
@@ -1237,10 +1041,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Sending tags...'))
 
-        return Response(
-            self.create_response(ret),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(ret), status=status.HTTP_200_OK)
 
     @extend_schema(
         description='Returns basic label information for a computer (requires JWT auth).',
@@ -1308,14 +1109,10 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         add_computer_message(computer, gettext('Sending label...'))
 
-        return Response(
-            self.create_response(ret),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(ret), status=status.HTTP_200_OK)
 
     @extend_schema(
-        description='Indicates whether a hardware capture is required for the given computer '
-                    '(requires JWT auth).',
+        description='Indicates whether a hardware capture is required for the given computer (requires JWT auth).',
         request={
             'id': OpenApiTypes.INT,
         },
@@ -1346,25 +1143,17 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        add_computer_message(
-            computer, gettext('Getting hardware capture is required...')
-        )
+        add_computer_message(computer, gettext('Getting hardware capture is required...'))
 
         capture = computer.hardware_capture_is_required()
 
-        add_computer_message(
-            computer, gettext('Sending hardware capture...')
-        )
+        add_computer_message(computer, gettext('Sending hardware capture...'))
 
-        return Response(
-            self.create_response({'capture': capture}),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response({'capture': capture}), status=status.HTTP_200_OK)
 
     @extend_schema(
         description='Receives software inventory and history for a computer (requires JWT auth). '
-                    'The endpoint updates the computer’s software records and returns a '
-                    'confirmation message.',
+        "The endpoint updates the computer's software records and returns a confirmation message.",
         request={
             'id': OpenApiTypes.INT,
             'inventory': {
@@ -1422,96 +1211,89 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         add_computer_message(computer, gettext('Getting software...'))
 
         if 'inventory' not in claims and 'history' not in claims:
-            return Response(
-                self.create_response(gettext('Bad request')),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(self.create_response(gettext('Bad request')), status=status.HTTP_400_BAD_REQUEST)
 
         computer.update_software_history(claims.get('history'))
-        tasks.update_software_inventory.delay(
-            computer.id, claims.get('inventory')
-        )
+        tasks.update_software_inventory.delay(computer.id, claims.get('inventory'))
 
         add_computer_message(computer, gettext('Sending software...'))
 
-        return Response(
-            self.create_response(gettext('Data received')),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(gettext('Data received')), status=status.HTTP_200_OK)
 
     @extend_schema(
         description='Returns a list of logical devices for a given computer along with the default logical device ID '
         '(requires JWT auth)',
-        request={
-            'id': OpenApiTypes.INT
-        },
+        request={'id': OpenApiTypes.INT},
         responses={
             status.HTTP_200_OK: {
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "logical": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "printer": {
-                                        "type": "object",
-                                        "properties": {
-                                            "id": {"type": "integer"},
-                                            "name": {"type": "string"},
-                                            "model": {"type": "string"},
-                                            "driver": {"type": "string"},
-                                            "capability": {"type": "string"},
-                                            "manufacturer": {"type": "string"},
-                                            "packages": {
-                                                "type": "array",
-                                                "items": {"type": "string"}
-                                            },
-                                            "connection": {"type": "object"}
+                'schema': {
+                    'type': 'object',
+                    'properties': {
+                        'logical': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'object',
+                                'properties': {
+                                    'printer': {
+                                        'type': 'object',
+                                        'properties': {
+                                            'id': {'type': 'integer'},
+                                            'name': {'type': 'string'},
+                                            'model': {'type': 'string'},
+                                            'driver': {'type': 'string'},
+                                            'capability': {'type': 'string'},
+                                            'manufacturer': {'type': 'string'},
+                                            'packages': {'type': 'array', 'items': {'type': 'string'}},
+                                            'connection': {'type': 'object'},
                                         },
-                                        "required": [
-                                            "id", "name", "model", "driver", "capability",
-                                            "manufacturer", "packages", "connection"
-                                        ]
+                                        'required': [
+                                            'id',
+                                            'name',
+                                            'model',
+                                            'driver',
+                                            'capability',
+                                            'manufacturer',
+                                            'packages',
+                                            'connection',
+                                        ],
                                     }
                                 },
-                                "required": ["printer"]
-                            }
+                                'required': ['printer'],
+                            },
                         },
-                        "default": {"type": "integer"}
+                        'default': {'type': 'integer'},
                     },
-                    "required": ["logical", "default"]
+                    'required': ['logical', 'default'],
                 },
-                "example": {
-                    "logical": [
+                'example': {
+                    'logical': [
                         {
-                            "printer": {
-                                "id": 99,
-                                "name": "OfficePrinter-01",
-                                "model": "LaserJet 5000",
-                                "driver": "hp-laserjet",
-                                "capability": "color",
-                                "manufacturer": "HP",
-                                "packages": ["hp-driver", "printer-utils"],
-                                "connection": {}
+                            'printer': {
+                                'id': 99,
+                                'name': 'OfficePrinter-01',
+                                'model': 'LaserJet 5000',
+                                'driver': 'hp-laserjet',
+                                'capability': 'color',
+                                'manufacturer': 'HP',
+                                'packages': ['hp-driver', 'printer-utils'],
+                                'connection': {},
                             }
                         },
                         {
-                            "printer": {
-                                "id": 100,
-                                "name": "OfficePrinter-02",
-                                "model": "LaserJet 5000",
-                                "driver": "hp-laserjet",
-                                "capability": "color",
-                                "manufacturer": "HP",
-                                "packages": ["hp-driver", "printer-utils"],
-                                "connection": {}
+                            'printer': {
+                                'id': 100,
+                                'name': 'OfficePrinter-02',
+                                'model': 'LaserJet 5000',
+                                'driver': 'hp-laserjet',
+                                'capability': 'color',
+                                'manufacturer': 'HP',
+                                'packages': ['hp-driver', 'printer-utils'],
+                                'connection': {},
                             }
-                        }
+                        },
                     ],
-                    "default": 99
-                }
+                    'default': 99,
+                },
             },
             status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
@@ -1549,9 +1331,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
 
-        logical_devices = [
-            device.as_dict(computer.project) for device in computer.logical_devices()
-        ]
+        logical_devices = [device.as_dict(computer.project) for device in computer.logical_devices()]
 
         default_logical_device = 0
         if computer.default_logical_device:
@@ -1565,14 +1345,10 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             'default': default_logical_device,
         }
 
-        return Response(
-            self.create_response(response),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(response), status=status.HTTP_200_OK)
 
     @extend_schema(
-        description='Returns the list of traits (attributes) associated with a computer '
-                    '(requires JWT auth).',
+        description='Returns the list of traits (attributes) associated with a computer (requires JWT auth).',
         request={
             'id': OpenApiTypes.INT,
         },
@@ -1628,20 +1404,14 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         add_computer_message(computer, gettext('Getting traits...'))
 
         attributes = replace_keys(
-            list(Attribute.objects.filter(computer__id=computer.id).values(
-                'id', 'description', 'value',
-                'property_att__name', 'property_att__prefix', 'property_att__sort'
-            )),
-            {
-                'property_att__name': 'name',
-                'property_att__prefix': 'prefix',
-                'property_att__sort': 'sort'
-            }
+            list(
+                Attribute.objects.filter(computer__id=computer.id).values(
+                    'id', 'description', 'value', 'property_att__name', 'property_att__prefix', 'property_att__sort'
+                )
+            ),
+            {'property_att__name': 'name', 'property_att__prefix': 'prefix', 'property_att__sort': 'sort'},
         )
 
         add_computer_message(computer, gettext('Sending traits...'))
 
-        return Response(
-            self.create_response(attributes),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(attributes), status=status.HTTP_200_OK)
