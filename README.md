@@ -5,7 +5,7 @@ Systems Management System (backend). Provides a REST API.
 ## Run in development mode (example)
 
 ```bash
-pip3 install -r requirements/development.txt
+pip3 install -e .[dev]
 
 python3 manage.py runserver 0.0.0.0:2345 --settings=migasfree.settings.development
 
