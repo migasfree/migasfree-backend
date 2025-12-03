@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2017-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2017-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -20,32 +18,27 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.openapi import OpenApiParameter
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets, status, permissions, parsers
+from rest_framework import parsers, permissions, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
-from ..core.permissions import PublicPermission
-from ..core.views import MigasViewSet, ExportViewSet
 from ..client.models import Computer
+from ..core.permissions import PublicPermission
+from ..core.views import ExportViewSet, MigasViewSet
 from ..mixins import DatabaseCheckMixin
-
 from . import models, serializers
 from .filters import (
-    ApplicationFilter, PackagesByProjectFilter,
-    PolicyFilter, PolicyGroupFilter, CategoryFilter,
+    ApplicationFilter,
+    CategoryFilter,
+    PackagesByProjectFilter,
+    PolicyFilter,
+    PolicyGroupFilter,
 )
 
 
 @extend_schema(tags=['catalog'])
 @extend_schema(
-    parameters=[
-        OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: name',
-            type=str
-        )
-    ],
+    parameters=[OpenApiParameter(name='search', location=OpenApiParameter.QUERY, description='Fields: name', type=str)],
     methods=['GET'],
 )
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -54,21 +47,14 @@ class CategoryViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
     serializer_class = serializers.CategorySerializer
     filterset_class = CategoryFilter
     permission_classes = (PublicPermission,)
-    search_fields = ['name']
+    search_fields = ('name',)
     ordering_fields = '__all__'
     ordering = ('name',)
 
 
 @extend_schema(tags=['catalog'])
 @extend_schema(
-    parameters=[
-        OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: name',
-            type=str
-        )
-    ],
+    parameters=[OpenApiParameter(name='search', location=OpenApiParameter.QUERY, description='Fields: name', type=str)],
     methods=['GET'],
 )
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -78,7 +64,7 @@ class ApplicationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
     filterset_class = ApplicationFilter
     parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
     permission_classes = (PublicPermission,)
-    search_fields = ['name']
+    search_fields = ('name',)
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -90,10 +76,7 @@ class ApplicationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
 
     @action(methods=['get'], detail=False)
     def levels(self, request):
-        return Response(
-            dict(models.Application.LEVELS),
-            status=status.HTTP_200_OK
-        )
+        return Response(dict(models.Application.LEVELS), status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False)
     def available(self, request):
@@ -111,10 +94,14 @@ class ApplicationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
         level = request.GET.get('level', '')
         query = request.GET.get('q', '')
 
-        results = models.Application.objects.filter(
-            available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True),
-            packages_by_project__project=computer.project
-        ).order_by('-score', 'name').distinct()
+        results = (
+            models.Application.objects.filter(
+                available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True),
+                packages_by_project__project=computer.project,
+            )
+            .order_by('-score', 'name')
+            .distinct()
+        )
         if category:
             results = results.filter(category=category)
         if level:
@@ -138,7 +125,7 @@ class PackagesByProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasV
     serializer_class = serializers.PackagesByProjectSerializer
     filterset_class = PackagesByProjectFilter
     permission_classes = (PublicPermission,)
-    ordering = ['application__id', 'project__name']
+    ordering = ('application__id', 'project__name')
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -149,14 +136,7 @@ class PackagesByProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasV
 
 @extend_schema(tags=['catalog'])
 @extend_schema(
-    parameters=[
-        OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: name',
-            type=str
-        )
-    ],
+    parameters=[OpenApiParameter(name='search', location=OpenApiParameter.QUERY, description='Fields: name', type=str)],
     methods=['GET'],
 )
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -164,7 +144,7 @@ class PolicyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
     queryset = models.Policy.objects.all()
     serializer_class = serializers.PolicySerializer
     filterset_class = PolicyFilter
-    search_fields = ['name']
+    search_fields = ('name',)
     ordering_fields = '__all__'
     ordering = ('name',)
 
