@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,28 +19,28 @@ from django.db.models.aggregates import Count
 from django.utils.translation import gettext_lazy as _
 
 from ...core.models import Project
-
 from .event import Event
 from .fault_definition import FaultDefinition
 
 
 class DomainFaultManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().select_related(
-            'project',
-            'fault_definition',
-            'computer',
-            'computer__project',
-            'computer__sync_user',
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                'project',
+                'fault_definition',
+                'computer',
+                'computer__project',
+                'computer__sync_user',
+            )
         )
 
     def scope(self, user):
         qs = self.get_queryset()
         if user and not user.is_view_all():
-            qs = qs.filter(
-                project_id__in=user.get_projects(),
-                computer_id__in=user.get_computers()
-            )
+            qs = qs.filter(project_id__in=user.get_projects(), computer_id__in=user.get_computers())
 
         return qs
 
@@ -56,7 +54,11 @@ class UncheckedManager(DomainFaultManager):
 
         if user:
             qs = qs.filter(
-                models.Q(fault_definition__users__id__in=[user.id, ])
+                models.Q(
+                    fault_definition__users__id__in=[
+                        user.id,
+                    ]
+                )
                 | models.Q(fault_definition__users=None)
             )
         else:
@@ -66,12 +68,13 @@ class UncheckedManager(DomainFaultManager):
 
 
 class FaultManager(DomainFaultManager):
-    def create(self, computer, definition, result):
+    def create(self, computer, definition, result, synchronization=None):
         obj = Fault()
         obj.computer = computer
         obj.project = computer.project
         obj.fault_definition = definition
         obj.result = result
+        obj.synchronization = synchronization
         obj.save()
 
         return obj
@@ -112,6 +115,16 @@ class Fault(Event):
         db_comment='project to which the computer belongs',
     )
 
+    synchronization = models.ForeignKey(
+        'Synchronization',
+        on_delete=models.SET_NULL,
+        verbose_name=_('synchronization'),
+        null=True,
+        blank=True,
+        related_name='faults',
+        db_comment='synchronization that generated this fault',
+    )
+
     objects = FaultManager()
     unchecked = UncheckedManager()
 
@@ -120,7 +133,11 @@ class Fault(Event):
         queryset = Fault.unchecked.scope(user)
         if user:
             queryset = queryset.filter(
-                models.Q(fault_definition__users__id__in=[user.id, ])
+                models.Q(
+                    fault_definition__users__id__in=[
+                        user.id,
+                    ]
+                )
                 | models.Q(fault_definition__users=None)
             )
 
@@ -130,20 +147,23 @@ class Fault(Event):
     def unchecked_by_project(user):
         total = Fault.unchecked_count(user)
 
-        projects = list(Fault.unchecked.scope(user).values(
-            'project__name',
-            'project__id',
-            'project__platform__id',
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__platform__id', '-count'))
+        projects = list(
+            Fault.unchecked.scope(user)
+            .values(
+                'project__name',
+                'project__id',
+                'project__platform__id',
+            )
+            .annotate(count=Count('id'))
+            .order_by('project__platform__id', '-count')
+        )
 
-        platforms = list(Fault.unchecked.scope(user).values(
-            'project__platform__id',
-            'project__platform__name'
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__platform__id', '-count'))
+        platforms = list(
+            Fault.unchecked.scope(user)
+            .values('project__platform__id', 'project__platform__name')
+            .annotate(count=Count('id'))
+            .order_by('project__platform__id', '-count')
+        )
 
         return {
             'total': total,
@@ -153,11 +173,12 @@ class Fault(Event):
 
     @staticmethod
     def group_by_definition(user=None):
-        return Fault.objects.scope(user).values(
-            'fault_definition__id', 'fault_definition__name'
-        ).annotate(
-            count=models.aggregates.Count('fault_definition__id')
-        ).order_by('-count')
+        return (
+            Fault.objects.scope(user)
+            .values('fault_definition__id', 'fault_definition__name')
+            .annotate(count=models.aggregates.Count('fault_definition__id'))
+            .order_by('-count')
+        )
 
     def checked_ok(self):
         self.checked = True
