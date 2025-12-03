@@ -29,20 +29,21 @@ from .event import Event
 
 class DomainErrorManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().select_related(
-            'project',
-            'computer',
-            'computer__project',
-            'computer__sync_user',
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                'project',
+                'computer',
+                'computer__project',
+                'computer__sync_user',
+            )
         )
 
     def scope(self, user):
         qs = self.get_queryset()
         if user and not user.is_view_all():
-            qs = qs.filter(
-                project_id__in=user.get_projects(),
-                computer_id__in=user.get_computers()
-            )
+            qs = qs.filter(project_id__in=user.get_projects(), computer_id__in=user.get_computers())
 
         return qs
 
@@ -56,11 +57,12 @@ class UncheckedManager(DomainErrorManager):
 
 
 class ErrorManager(DomainErrorManager):
-    def create(self, computer, project, description):
+    def create(self, computer, project, description, synchronization=None):
         obj = Error()
         obj.computer = computer
         obj.project = project
         obj.description = description
+        obj.synchronization = synchronization
         obj.save()
 
         return obj
@@ -89,6 +91,16 @@ class Error(Event):
         db_comment='project to which the computer belongs',
     )
 
+    synchronization = models.ForeignKey(
+        'Synchronization',
+        on_delete=models.SET_NULL,
+        verbose_name=_('synchronization'),
+        null=True,
+        blank=True,
+        related_name='errors',
+        db_comment='synchronization that generated this error',
+    )
+
     objects = ErrorManager()
     unchecked = UncheckedManager()
 
@@ -103,20 +115,23 @@ class Error(Event):
     def unchecked_by_project(user):
         total = Error.unchecked_count(user)
 
-        projects = list(Error.unchecked.scope(user).values(
-            'project__name',
-            'project__id',
-            'project__platform__id',
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__platform__id', '-count'))
+        projects = list(
+            Error.unchecked.scope(user)
+            .values(
+                'project__name',
+                'project__id',
+                'project__platform__id',
+            )
+            .annotate(count=Count('id'))
+            .order_by('project__platform__id', '-count')
+        )
 
-        platforms = list(Error.unchecked.scope(user).values(
-            'project__platform__id',
-            'project__platform__name'
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__platform__id', '-count'))
+        platforms = list(
+            Error.unchecked.scope(user)
+            .values('project__platform__id', 'project__platform__name')
+            .annotate(count=Count('id'))
+            .order_by('project__platform__id', '-count')
+        )
 
         return {
             'total': total,
@@ -128,19 +143,25 @@ class Error(Event):
     def status_by_project(user):
         total = Error.objects.scope(user).count()
 
-        projects = list(Error.objects.scope(user).values(
-            'computer__status',
-            'project__id',
-            'project__name',
-        ).annotate(
-            count=Count('id')
-        ).order_by('computer__status', '-count'))
+        projects = list(
+            Error.objects.scope(user)
+            .values(
+                'computer__status',
+                'project__id',
+                'project__name',
+            )
+            .annotate(count=Count('id'))
+            .order_by('computer__status', '-count')
+        )
 
-        status = list(Error.objects.scope(user).values(
-            'computer__status',
-        ).annotate(
-            count=Count('id')
-        ).order_by('computer__status', '-count'))
+        status = list(
+            Error.objects.scope(user)
+            .values(
+                'computer__status',
+            )
+            .annotate(count=Count('id'))
+            .order_by('computer__status', '-count')
+        )
 
         for item in status:
             item['status'] = item.get('computer__status')
