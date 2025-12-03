@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
@@ -20,9 +18,11 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from ..core.serializers import (
-    ClientAttributeSerializer, ProjectInfoSerializer,
     AttributeInfoSerializer,
-    ProjectNestedInfoSerializer, UserProfileInfoSerializer,
+    ClientAttributeSerializer,
+    ProjectInfoSerializer,
+    ProjectNestedInfoSerializer,
+    UserProfileInfoSerializer,
 )
 from ..device.serializers import LogicalInfoSerializer
 from . import models
@@ -50,8 +50,12 @@ class ComputerCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Computer
         fields = (
-            'id', 'uuid', 'name', 'project',
-            'ip_address', 'forwarded_ip_address',
+            'id',
+            'uuid',
+            'name',
+            'project',
+            'ip_address',
+            'forwarded_ip_address',
         )
 
 
@@ -67,9 +71,13 @@ class ComputerWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Computer
         fields = (
-            'name', 'last_hardware_capture',
-            'status', 'comment', 'tags',
-            'default_logical_device', 'project',
+            'name',
+            'last_hardware_capture',
+            'status',
+            'comment',
+            'tags',
+            'default_logical_device',
+            'project',
         )
 
 
@@ -90,21 +98,25 @@ class ComputerListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Computer
         fields = (
-            'id', 'uuid', 'name', 'project',
-            'status', 'product', 'product_system',
-            'created_at', 'last_hardware_capture',
-            'sync_user', 'sync_end_date',
-            '__str__', 'summary'
+            'id',
+            'uuid',
+            'name',
+            'project',
+            'status',
+            'product',
+            'product_system',
+            'created_at',
+            'last_hardware_capture',
+            'sync_user',
+            'sync_end_date',
+            '__str__',
+            'summary',
         )
 
 
 class ComputerSerializer(ComputerListSerializer):
-    software_inventory = serializers.HyperlinkedIdentityField(
-        view_name='computer-software_inventory'
-    )
-    software_history = serializers.HyperlinkedIdentityField(
-        view_name='computer-software_history'
-    )
+    software_inventory = serializers.HyperlinkedIdentityField(view_name='computer-software_inventory')
+    software_history = serializers.HyperlinkedIdentityField(view_name='computer-software_history')
     tags = AttributeInfoSerializer(many=True, read_only=True)
     architecture = serializers.SerializerMethodField()
 
@@ -114,11 +126,23 @@ class ComputerSerializer(ComputerListSerializer):
 
     class Meta:
         model = models.Computer
-        fields = ComputerListSerializer.Meta.fields + (
-            'fqdn', 'ip_address', 'forwarded_ip_address', 'tags',
-            'software_inventory', 'software_history', 'has_software_inventory',
-            'machine', 'cpu', 'architecture', 'ram',
-            'storage', 'disks', 'mac_address', 'comment',
+        fields = (
+            *ComputerListSerializer.Meta.fields,
+            'fqdn',
+            'ip_address',
+            'forwarded_ip_address',
+            'tags',
+            'software_inventory',
+            'software_history',
+            'has_software_inventory',
+            'machine',
+            'cpu',
+            'architecture',
+            'ram',
+            'storage',
+            'disks',
+            'mac_address',
+            'comment',
         )
 
 
@@ -128,11 +152,7 @@ class ComputerDevicesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Computer
-        fields = (
-            'default_logical_device',
-            'assigned_logical_devices_to_cid',
-            'inflicted_logical_devices'
-        )
+        fields = ('default_logical_device', 'assigned_logical_devices_to_cid', 'inflicted_logical_devices')
 
 
 class ErrorSerializer(serializers.ModelSerializer):
@@ -141,11 +161,7 @@ class ErrorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Error
-        fields = (
-            'id', '__str__',
-            'project', 'computer',
-            'created_at', 'checked', 'description'
-        )
+        fields = ('id', '__str__', 'project', 'computer', 'synchronization', 'created_at', 'checked', 'description')
 
 
 class ErrorWriteSerializer(serializers.ModelSerializer):
@@ -199,9 +215,7 @@ class FaultDefinitionWriteSerializer(serializers.ModelSerializer):
             AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
         ]
 
-        representation['users'] = [
-            UserProfileInfoSerializer(item).data for item in obj.users.all()
-        ]
+        representation['users'] = [UserProfileInfoSerializer(item).data for item in obj.users.all()]
 
         return representation
 
@@ -218,9 +232,15 @@ class FaultSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Fault
         fields = (
-            'id', '__str__',
-            'project', 'computer', 'fault_definition',
-            'created_at', 'checked', 'result'
+            'id',
+            '__str__',
+            'project',
+            'computer',
+            'fault_definition',
+            'synchronization',
+            'created_at',
+            'checked',
+            'result',
         )
 
 
@@ -264,7 +284,7 @@ class PackageHistorySerializer(serializers.ModelSerializer):
         representation['package'] = {
             'id': obj.package.id,
             'fullname': obj.package.fullname,
-            'project': ProjectInfoSerializer(obj.package.project).data
+            'project': ProjectInfoSerializer(obj.package.project).data,
         }
 
         representation['computer'] = ComputerInfoSerializer(obj.computer).data
@@ -313,12 +333,10 @@ class ComputerSyncSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        context = kwargs.get('context', None)
+        context = kwargs.get('context')
         if context:
             request = kwargs['context']['request']
-            self.sync_attributes = ClientAttributeSerializer(
-                many=True, read_only=True, context={'request': request}
-            )
+            self.sync_attributes = ClientAttributeSerializer(many=True, read_only=True, context={'request': request})
 
     class Meta:
         model = models.Computer
