@@ -84,7 +84,7 @@ Repository = "https://github.com/migasfree/migasfree-backend/"
 packages = {find = {where = ["."], include = ["migasfree*"]}}
 
 [tool.setuptools.dynamic]
-version = {attr = "migasfree.version.__version__"}
+version = {file = "migasfree/VERSION"}
 
 [tool.setuptools.package-data]
 migasfree = [
@@ -93,7 +93,13 @@ migasfree = [
     "core/fixtures/*",
     "client/fixtures/*",
     "device/fixtures/*",
-    "stats/management/commands/*"
+    "i18n/*/LC_MESSAGES/*.mo",
+    "app_catalog/fixtures/*",
+    "core/fixtures/*",
+    "client/fixtures/*",
+    "device/fixtures/*",
+    "stats/management/commands/*",
+    "VERSION"
 ]
 
 [tool.ruff]
