@@ -155,27 +155,6 @@ class ComputerDevicesSerializer(serializers.ModelSerializer):
         fields = ('default_logical_device', 'assigned_logical_devices_to_cid', 'inflicted_logical_devices')
 
 
-class ErrorSerializer(serializers.ModelSerializer):
-    project = ProjectInfoSerializer(many=False, read_only=True)
-    computer = ComputerInfoSerializer(many=False, read_only=True)
-
-    class Meta:
-        model = models.Error
-        fields = ('id', '__str__', 'project', 'computer', 'synchronization', 'created_at', 'checked', 'description')
-
-
-class ErrorWriteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Error
-        fields = ('checked',)
-
-
-class ErrorSafeWriteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Error
-        fields = '__all__'
-
-
 class FaultDefinitionForAttributesSerializer(serializers.ModelSerializer):
     language = serializers.SerializerMethodField()
 
@@ -222,32 +201,6 @@ class FaultDefinitionWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FaultDefinition
         fields = '__all__'
-
-
-class FaultSerializer(serializers.ModelSerializer):
-    project = ProjectInfoSerializer(many=False, read_only=True)
-    computer = ComputerInfoSerializer(many=False, read_only=True)
-    fault_definition = FaultDefinitionInfoSerializer(many=False, read_only=True)
-
-    class Meta:
-        model = models.Fault
-        fields = (
-            'id',
-            '__str__',
-            'project',
-            'computer',
-            'fault_definition',
-            'synchronization',
-            'created_at',
-            'checked',
-            'result',
-        )
-
-
-class FaultWriteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Fault
-        fields = ('checked',)
 
 
 class MigrationSerializer(serializers.ModelSerializer):
@@ -310,6 +263,12 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'fullname', '__str__')
 
 
+class SynchronizationInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Synchronization
+        fields = ('id', 'start_date', 'created_at')
+
+
 class SynchronizationSerializer(serializers.ModelSerializer):
     project = ProjectInfoSerializer(many=False, read_only=True)
     user = UserInfoSerializer(many=False, read_only=True)
@@ -324,6 +283,55 @@ class SynchronizationWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Synchronization
         fields = ('computer', 'start_date', 'consumer', 'pms_status_ok')
+
+
+class ErrorSerializer(serializers.ModelSerializer):
+    project = ProjectInfoSerializer(many=False, read_only=True)
+    computer = ComputerInfoSerializer(many=False, read_only=True)
+    synchronization = SynchronizationInfoSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = models.Error
+        fields = ('id', '__str__', 'project', 'computer', 'synchronization', 'created_at', 'checked', 'description')
+
+
+class ErrorWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Error
+        fields = ('checked',)
+
+
+class ErrorSafeWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Error
+        fields = '__all__'
+
+
+class FaultSerializer(serializers.ModelSerializer):
+    project = ProjectInfoSerializer(many=False, read_only=True)
+    computer = ComputerInfoSerializer(many=False, read_only=True)
+    fault_definition = FaultDefinitionInfoSerializer(many=False, read_only=True)
+    synchronization = SynchronizationInfoSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = models.Fault
+        fields = (
+            'id',
+            '__str__',
+            'project',
+            'computer',
+            'fault_definition',
+            'synchronization',
+            'created_at',
+            'checked',
+            'result',
+        )
+
+
+class FaultWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Fault
+        fields = ('checked',)
 
 
 class ComputerSyncSerializer(serializers.ModelSerializer):
