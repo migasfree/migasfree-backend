@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "migasfree-backend"
-version = "5.0"
+dynamic = ["version"]
 description = "migasfree-backend is a Django app to manage systems management"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -81,7 +81,20 @@ Homepage = "https://migasfree.org/"
 Repository = "https://github.com/migasfree/migasfree-backend/"
 
 [tool.setuptools]
-packages = ["migasfree"]
+packages = {find = {where = ["."], include = ["migasfree*"]}}
+
+[tool.setuptools.dynamic]
+version = {attr = "migasfree.__version__"}
+
+[tool.setuptools.package-data]
+migasfree = [
+    "i18n/*/LC_MESSAGES/*.mo",
+    "app_catalog/fixtures/*",
+    "core/fixtures/*",
+    "client/fixtures/*",
+    "device/fixtures/*",
+    "stats/management/commands/*"
+]
 
 [tool.ruff]
 line-length = 120
