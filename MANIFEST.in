@@ -8,4 +8,4 @@ include migasfree/core/fixtures/*
 include migasfree/client/fixtures/*
 recursive-include migasfree *.py
 recursive-include migasfree/locale *.mo
-include migasfree/VERSION
+include VERSION
