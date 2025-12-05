@@ -43,7 +43,7 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements/development.txt
+        pip install .[dev]
     - name: Run migrations
       run: python manage.py migrate --settings=migasfree.settings.development
     - name: Run Tests
