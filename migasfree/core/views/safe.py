@@ -1,5 +1,3 @@
-# -*- coding: utf-8 *-*
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -16,22 +14,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import contextlib
 import os
 
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets, status, permissions
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, permission_classes, throttle_classes
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
 from ...utils import save_tempfile
-
-from ..pms import tasks
 from ..mixins import SafeConnectionMixin
-from ..models import Project, Store, Package, PackageSet, Deployment
+from ..models import Deployment, Package, PackageSet, Project, Store
+from ..pms import tasks
 
 
 class SafePackagerConnectionMixin(SafeConnectionMixin):
@@ -45,8 +43,7 @@ class SafePackagerConnectionMixin(SafeConnectionMixin):
 def check_repository_metadata(package_id):
     for deploy in Deployment.objects.filter(available_packages__id=package_id):
         tasks.create_repository_metadata.apply_async(
-            queue=f'pms-{deploy.pms().name}',
-            kwargs={'deployment_id': deploy.id}
+            queue=f'pms-{deploy.pms().name}', kwargs={'deployment_id': deploy.id}
         )
 
 
@@ -59,11 +56,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         if not name:
             package_path = save_tempfile(_file)
             response = tasks.package_metadata.apply_async(
-                kwargs={
-                    'pms_name': project.pms,
-                    'package': package_path
-                },
-                queue=f'pms-{project.pms}'
+                kwargs={'pms_name': project.pms, 'package': package_path}, queue=f'pms-{project.pms}'
             ).get()
             os.remove(package_path)
             if response['name']:
@@ -75,21 +68,21 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
 
     @extend_schema(
         description=(
-            "Accepts an uploaded file together with claim information (project, store, "
-            "and a flag indicating if the file represents a package). The endpoint "
-            "stores the file, creates or updates the related ``Package`` record and "
-            "updates repository metadata when necessary (requires JWT auth)."
+            'Accepts an uploaded file together with claim information (project, store, '
+            'and a flag indicating if the file represents a package). The endpoint '
+            'stores the file, creates or updates the related ``Package`` record and '
+            'updates repository metadata when necessary (requires JWT auth).'
         ),
         request={
-            "multipart/form-data": {
-                "type": "object",
-                "properties": {
-                    "file": {"type": "string", "format": "binary", "description": "The package file to upload"},
-                    "project": {"type": "string", "description": "Name of the project"},
-                    "store": {"type": "string", "description": "Name of the store"},
-                    "is_package": {"type": "boolean", "description": "Indicates if file is a package or regular file"},
+            'multipart/form-data': {
+                'type': 'object',
+                'properties': {
+                    'file': {'type': 'string', 'format': 'binary', 'description': 'The package file to upload'},
+                    'project': {'type': 'string', 'description': 'Name of the project'},
+                    'store': {'type': 'string', 'description': 'Name of the store'},
+                    'is_package': {'type': 'boolean', 'description': 'Indicates if file is a package or regular file'},
                 },
-                "required": ["file", "project", "store"]
+                'required': ['file', 'project', 'store'],
             }
         },
         responses={
@@ -109,23 +102,14 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         claims = self.get_claims(request.data)
         project = get_object_or_404(Project, name=claims.get('project'))
 
-        store, _ = Store.objects.get_or_create(
-            name=claims.get('store'),
-            project=project
-        )
+        store, _ = Store.objects.get_or_create(name=claims.get('store'), project=project)
 
         _file = request.FILES.get('file')
 
-        Package.handle_uploaded_file(
-            _file,
-            Package.path(project.slug, store.slug, _file.name)
-        )
+        Package.handle_uploaded_file(_file, Package.path(project.slug, store.slug, _file.name))
 
         if claims.get('is_package'):
-            package = Package.objects.filter(
-                fullname=_file.name,
-                project=project
-            ).first()
+            package = Package.objects.filter(fullname=_file.name, project=project).first()
             name, version, architecture = self.get_package_data(_file, project)
             if package:
                 package.update_store(store)
@@ -141,35 +125,32 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                     architecture=architecture,
                     project=project,
                     store=store,
-                    file_=_file
+                    file_=_file,
                 )
 
-        return Response(
-            self.create_response(gettext('Data received')),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(gettext('Data received')), status=status.HTTP_200_OK)
 
     @extend_schema(
-        description="Creates or updates a package set and store an uploaded package file (requires JWT auth).",
+        description='Creates or updates a package set and store an uploaded package file (requires JWT auth).',
         request={
-            "multipart/form-data": {
-                "type": "object",
-                "properties": {
-                    "file": {"type": "string", "format": "binary", "description": "The package file to upload"},
-                    "project": {"type": "string", "description": "Name of the project"},
-                    "store": {"type": "string", "description": "Name of the store"},
-                    "packageset": {"type": "string", "description": "Name of the package set"},
-                    "path": {
-                        "type": "string",
-                        "description": "Optional relative path inside the store where the file should be moved"
-                    }
+            'multipart/form-data': {
+                'type': 'object',
+                'properties': {
+                    'file': {'type': 'string', 'format': 'binary', 'description': 'The package file to upload'},
+                    'project': {'type': 'string', 'description': 'Name of the project'},
+                    'store': {'type': 'string', 'description': 'Name of the store'},
+                    'packageset': {'type': 'string', 'description': 'Name of the package set'},
+                    'path': {
+                        'type': 'string',
+                        'description': 'Optional relative path inside the store where the file should be moved',
+                    },
                 },
-                "required": ["file", "project", "store", "packageset"]
+                'required': ['file', 'project', 'store', 'packageset'],
             }
         },
         responses={
             status.HTTP_200_OK: {'description': gettext('Data received')},
-        }
+        },
     )
     @action(methods=['post'], detail=False, url_path='set')
     def packageset(self, request):
@@ -186,10 +167,7 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
         project = get_object_or_404(Project, name=claims.get('project'))
         packageset = os.path.basename(claims.get('packageset'))
 
-        store, _ = Store.objects.get_or_create(
-            name=claims.get('store'),
-            project=project
-        )
+        store, _ = Store.objects.get_or_create(name=claims.get('store'), project=project)
 
         _file = request.FILES.get('file')
 
@@ -222,46 +200,37 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
                 architecture=architecture,
                 project=project,
                 store=store,
-                file_=_file
+                file_=_file,
             )
 
         # if exists path move it
         if claims.get('path'):
-            dst = os.path.join(
-                Store.path(project.slug, store.slug),
-                claims.get('path'),
-                _file.name
-            )
-            try:
+            dst = os.path.join(Store.path(project.slug, store.slug), claims.get('path'), _file.name)
+            with contextlib.suppress(OSError):
                 os.makedirs(os.path.dirname(dst))
-            except OSError:
-                pass
             os.rename(target, dst)
 
         package_set.packages.add(package.id)
 
-        return Response(
-            self.create_response(gettext('Data received')),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(gettext('Data received')), status=status.HTTP_200_OK)
 
     @extend_schema(
-        description="Creates a repository entry for an existing package set (requires JWT auth).",
+        description='Creates a repository entry for an existing package set (requires JWT auth).',
         request={
-            "application/json": {
-                "type": "object",
-                "properties": {
-                    "project": {"type": "string", "description": "Name of the project"},
-                    "packageset": {"type": "string", "description": "Fullname of the package set"}
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'project': {'type': 'string', 'description': 'Name of the project'},
+                    'packageset': {'type': 'string', 'description': 'Fullname of the package set'},
                 },
-                "required": ["project", "packageset"]
+                'required': ['project', 'packageset'],
             }
         },
         responses={
             status.HTTP_200_OK: {'description': gettext('Data received')},
             status.HTTP_400_BAD_REQUEST: {'description': gettext('Malformed claims')},
-            status.HTTP_404_NOT_FOUND: {'description': 'Project or PackageSet not found'}
-        }
+            status.HTTP_404_NOT_FOUND: {'description': 'Project or PackageSet not found'},
+        },
     )
     @action(methods=['post'], detail=False, url_path='repos')
     def create_repository(self, request):
@@ -274,21 +243,11 @@ class SafePackageViewSet(SafePackagerConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
         if not claims or 'project' not in claims or 'packageset' not in claims:
-            return Response(
-                self.create_response(gettext('Malformed claims')),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(self.create_response(gettext('Malformed claims')), status=status.HTTP_400_BAD_REQUEST)
 
         project = get_object_or_404(Project, name=claims.get('project'))
-        package = get_object_or_404(
-            Package,
-            fullname=os.path.basename(claims.get('packageset')),
-            project=project
-        )
+        package = get_object_or_404(Package, fullname=os.path.basename(claims.get('packageset')), project=project)
 
         check_repository_metadata(package.id)
 
-        return Response(
-            self.create_response(gettext('Data received')),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(gettext('Data received')), status=status.HTTP_200_OK)
