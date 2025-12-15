@@ -204,6 +204,7 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
 
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
+        self.verify_mtls_identity(request, computer.id, computer.uuid)
 
         add_computer_message(computer, gettext('Getting synchronization...'))
 
