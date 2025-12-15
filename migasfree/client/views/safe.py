@@ -364,7 +364,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             models.Error.objects.create(
                 computer,
                 computer.project,
-                '{} - {} - {}'.format(get_client_ip(request), 'id', gettext('Unsubscribed computer')),
+                f'{get_client_ip(request)} - id - {gettext("Unsubscribed computer")}',
             )
             return Response(self.create_response(gettext('Unsubscribed computer')), status=status.HTTP_403_FORBIDDEN)
 
@@ -458,6 +458,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         """
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
+        self.verify_mtls_identity(request, computer.id, computer.uuid)
 
         add_computer_message(computer, gettext('Getting attributes...'))
 
@@ -661,6 +662,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         """
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
+        self.verify_mtls_identity(request, computer.id, computer.uuid)
 
         add_computer_message(computer, gettext('Getting faults...'))
 
@@ -723,6 +725,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
+        self.verify_mtls_identity(request, computer.id, computer.uuid)
         claims['computer'] = computer.id
         claims['project'] = self.project.id
 
@@ -982,6 +985,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
+        self.verify_mtls_identity(request, computer.id, computer.uuid)
 
         add_computer_message(computer, gettext('Getting tags...'))
 
@@ -1207,6 +1211,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
+        self.verify_mtls_identity(request, computer.id, computer.uuid)
 
         add_computer_message(computer, gettext('Getting software...'))
 
