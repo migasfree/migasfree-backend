@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -16,14 +14,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from django.contrib.auth.models import Group, Permission
 from django_filters import rest_framework as filters
-from django.contrib.auth.models import Permission, Group
 
 from .models import (
-    Deployment, Package, ClientAttribute, ServerAttribute, Attribute,
-    Project, ScheduleDelay, Store, AttributeSet, Platform,
-    Property, ClientProperty, Singularity,
-    UserProfile, Domain, Scope, Schedule, PackageSet,
+    Attribute,
+    AttributeSet,
+    ClientAttribute,
+    ClientProperty,
+    Deployment,
+    Domain,
+    Package,
+    PackageSet,
+    Platform,
+    Project,
+    Property,
+    Schedule,
+    ScheduleDelay,
+    Scope,
+    ServerAttribute,
+    Singularity,
+    Store,
+    UserProfile,
 )
 
 
@@ -55,23 +67,14 @@ class AttributeSetFilter(filters.FilterSet):
 
 
 class DeploymentFilter(filters.FilterSet):
-    included_attributes = filters.CharFilter(
-        field_name='included_attributes__value', lookup_expr='icontains'
-    )
-    excluded_attributes = filters.CharFilter(
-        field_name='excluded_attributes__value', lookup_expr='icontains'
-    )
-    available_packages = filters.CharFilter(
-        field_name='available_packages__name', lookup_expr='icontains'
-    )
+    included_attributes = filters.CharFilter(field_name='included_attributes__value', lookup_expr='icontains')
+    excluded_attributes = filters.CharFilter(field_name='excluded_attributes__value', lookup_expr='icontains')
+    available_packages = filters.CharFilter(field_name='available_packages__name', lookup_expr='icontains')
     percent__gte = filters.NumberFilter(
         method='filter_percent_gte',
         label='percent__gte',
     )
-    percent__lt = filters.NumberFilter(
-        method='filter_percent_lt',
-        label='percent__lt'
-    )
+    percent__lt = filters.NumberFilter(method='filter_percent_lt', label='percent__lt')
 
     def filter_percent_gte(self, qs, name, value):
         ret = Deployment.objects.none()
@@ -97,6 +100,7 @@ class DeploymentFilter(filters.FilterSet):
             'id': ['exact', 'in'],
             'name': ['exact', 'icontains'],
             'project__id': ['exact'],
+            'project__platform__id': ['exact'],
             'enabled': ['exact'],
             'source': ['exact'],
             'auto_restart': ['exact'],
@@ -121,6 +125,7 @@ class PackageFilter(filters.FilterSet):
             'architecture': ['exact', 'icontains'],
             'project__id': ['exact'],
             'project__name': ['exact', 'icontains'],
+            'project__platform__id': ['exact'],
             'deployment': ['isnull'],
             'deployment__id': ['exact'],
             'store': ['isnull'],
@@ -139,6 +144,7 @@ class PackageSetFilter(filters.FilterSet):
             'name': ['exact', 'icontains'],
             'project__id': ['exact'],
             'project__name': ['exact', 'icontains'],
+            'project__platform__id': ['exact'],
             'store__id': ['exact'],
             'store__name': ['exact', 'icontains'],
             'packages__id': ['exact'],
@@ -205,10 +211,7 @@ class AttributeFilter(filters.FilterSet):
         label='has_location',
     )
 
-    total_computers = filters.NumberFilter(
-        method='filter_total_computers',
-        label='total_computers'
-    )
+    total_computers = filters.NumberFilter(method='filter_total_computers', label='total_computers')
 
     def filter_has_location(self, qs, name, value):
         ret = Attribute.objects.none()
@@ -332,10 +335,7 @@ class ScheduleFilter(filters.FilterSet):
 class ScheduleDelayFilter(filters.FilterSet):
     class Meta:
         model = ScheduleDelay
-        fields = {
-            'schedule__id': ['exact', 'in'],
-            'schedule__name': ['exact', 'icontains']
-        }
+        fields = {'schedule__id': ['exact', 'in'], 'schedule__name': ['exact', 'icontains']}
 
 
 class StoreFilter(filters.FilterSet):
