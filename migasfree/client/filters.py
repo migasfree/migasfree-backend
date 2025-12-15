@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -21,10 +19,17 @@ from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
 
 from ..hardware.models import Node
-
 from .models import (
-    PackageHistory, Error, Notification, FaultDefinition, Fault,
-    Computer, Migration, StatusLog, Synchronization, User,
+    Computer,
+    Error,
+    Fault,
+    FaultDefinition,
+    Migration,
+    Notification,
+    PackageHistory,
+    StatusLog,
+    Synchronization,
+    User,
 )
 
 
@@ -32,20 +37,12 @@ class ComputerFilter(filters.FilterSet):
     platform = filters.CharFilter(field_name='project__platform__id')
     created_at__gte = filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
     created_at__lt = filters.DateTimeFilter(field_name='created_at', lookup_expr='lt')
-    sync_attributes = filters.CharFilter(
-        field_name='sync_attributes__value', lookup_expr='contains'
-    )
-    mac_address = filters.CharFilter(
-        field_name='mac_address', lookup_expr='icontains'
-    )
+    sync_attributes = filters.CharFilter(field_name='sync_attributes__value', lookup_expr='contains')
+    mac_address = filters.CharFilter(field_name='mac_address', lookup_expr='icontains')
     has_software_inventory = filters.BooleanFilter(
-        method='filter_has_software_inventory',
-        label='has software inventory'
+        method='filter_has_software_inventory', label='has software inventory'
     )
-    architecture = filters.NumberFilter(
-        method='filter_architecture',
-        label='architecture'
-    )
+    architecture = filters.NumberFilter(method='filter_architecture', label='architecture')
     product_system = filters.ChoiceFilter(
         method='filter_product_system',
         label='product system',
@@ -54,16 +51,10 @@ class ComputerFilter(filters.FilterSet):
             ('virtual', 'virtual'),
             ('laptop', 'laptop'),
             ('desktop', 'desktop'),
-        )
+        ),
     )
-    installed_package = filters.NumberFilter(
-        method='filter_installed_package',
-        label='installed_package'
-    )
-    serial = filters.CharFilter(
-        method='filter_serial',
-        label='serial'
-    )
+    installed_package = filters.NumberFilter(method='filter_installed_package', label='installed_package')
+    serial = filters.CharFilter(method='filter_serial', label='serial')
 
     def filter_has_software_inventory(self, qs, name, value):
         if value:
@@ -73,8 +64,7 @@ class ComputerFilter(filters.FilterSet):
 
     def filter_architecture(self, qs, name, value):
         return qs.filter(
-            Q(node__class_name='processor', node__width=value) |
-            Q(node__class_name='system', node__width=value)
+            Q(node__class_name='processor', node__width=value) | Q(node__class_name='system', node__width=value)
         ).distinct()
 
     def filter_product_system(self, qs, name, value):
@@ -83,37 +73,26 @@ class ComputerFilter(filters.FilterSet):
                 node__name='network',
                 node__class_name='network',
                 node__description='Ethernet interface',
-                node__serial__istartswith='02:42:AC'
+                node__serial__istartswith='02:42:AC',
             )
 
         if value == 'virtual':
-            return qs.filter(
-                node__parent_id__isnull=True,
-                node__vendor__in=list(Node.VIRTUAL_MACHINES.keys())
-            )
+            return qs.filter(node__parent_id__isnull=True, node__vendor__in=list(Node.VIRTUAL_MACHINES.keys()))
 
         if value == 'laptop':
             return qs.filter(
-                node__class_name='system',
-                node__configuration__name='chassis',
-                node__configuration__value='notebook'
+                node__class_name='system', node__configuration__name='chassis', node__configuration__value='notebook'
             )
 
         if value == 'desktop':
-            return qs.filter(
-                node__class_name='system',
-                node__configuration__name='chassis'
-            ).exclude(
+            return qs.filter(node__class_name='system', node__configuration__name='chassis').exclude(
                 node__configuration__value='notebook'
             )
 
         return qs
 
     def filter_installed_package(self, qs, name, value):
-        return qs.filter(
-            packagehistory__package__id=value,
-            packagehistory__uninstall_date__isnull=True
-        )
+        return qs.filter(packagehistory__package__id=value, packagehistory__uninstall_date__isnull=True)
 
     def filter_serial(self, qs, name, value):
         return qs.filter(node__serial__icontains=value)
@@ -173,25 +152,16 @@ class FaultFilter(filters.FilterSet):
     created_at__gte = filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
     created_at__lt = filters.DateTimeFilter(field_name='created_at', lookup_expr='lt')
 
-    user = filters.ChoiceFilter(
-        choices=Fault.USER_FILTER_CHOICES,
-        label=_('User'),
-        method='filter_by_user'
-    )
+    user = filters.ChoiceFilter(choices=Fault.USER_FILTER_CHOICES, label=_('User'), method='filter_by_user')
 
     def filter_by_user(self, qs, name, value):
         me = self.request.user.id
         if value == 'me':
-            return qs.filter(
-                Q(fault_definition__users__id=me)
-                | Q(fault_definition__users=None)
-            )
+            return qs.filter(Q(fault_definition__users__id=me) | Q(fault_definition__users=None))
         elif value == 'only_me':
             return qs.filter(fault_definition__users__id=me)
         elif value == 'others':
-            return qs.exclude(
-                fault_definition__users__id=me
-            ).exclude(fault_definition__users=None)
+            return qs.exclude(fault_definition__users__id=me).exclude(fault_definition__users=None)
         elif value == 'unassigned':
             return qs.filter(Q(fault_definition__users=None))
 
@@ -284,7 +254,7 @@ class SynchronizationFilter(filters.FilterSet):
             'user__id': ['exact'],
             'user__name': ['exact', 'icontains'],
             'pms_status_ok': ['exact'],
-            'consumer': ['exact', 'icontains']
+            'consumer': ['exact', 'icontains'],
         }
 
 
