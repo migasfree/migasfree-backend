@@ -170,7 +170,7 @@ def uuid_change_format(uuid):
         return ''
 
     if len(uuid) == 36:
-        return f'{uuid[6:8]}{uuid[4:6]}{uuid[2:4]}{uuid[0:2]}-{uuid[11:13]}{uuid[9:11]}{uuid[16:18]}{uuid[14:16]}{uuid[19:23]}{uuid[24:36]}'
+        return f'{uuid[6:8]}{uuid[4:6]}{uuid[2:4]}{uuid[0:2]}-{uuid[11:13]}{uuid[9:11]}-{uuid[16:18]}{uuid[14:16]}-{uuid[19:23]}-{uuid[24:36]}'
 
     return uuid
 
