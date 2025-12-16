@@ -286,7 +286,7 @@ def save_tempfile(file_):
             for chunk in file_.chunks():
                 temp_file.write(chunk)
     except OSError:
-        raise Exception(f'Problem with the input file {file_.name}')
+        raise Exception(f'Problem with the input file {file_.name}')  # noqa: B904
 
     return tempfn
 
@@ -295,7 +295,7 @@ def decode_dict(value):
     """
     https://www.geeksforgeeks.org/python-convert-bytestring-keyvalue-pair-of-dictionary-to-string/
     """
-    return {y.decode(): value.get(y).decode() for y in value.keys()}
+    return {y.decode(): value.get(y).decode() for y in value}
 
 
 def decode_set(value):
