@@ -36,7 +36,7 @@ class SafeConnectionMixin:
     verify_key = None
     encrypt_key = None
 
-    def verify_mtls_identity(self, request, computer_id, computer_uuid):
+    def verify_mtls_identity(self, request, computer_uuid):
         """
         Verify mTLS client certificate identity if X-SSL-Client-CN header is present.
 
@@ -48,7 +48,6 @@ class SafeConnectionMixin:
 
         Args:
             request: The HTTP request object
-            computer_id: The computer's database ID
             computer_uuid: The computer's UUID
 
         Raises:
@@ -62,7 +61,7 @@ class SafeConnectionMixin:
 
         logger.debug('X-SSL-Client-CN header: %s', client_dn)
 
-        # Parse the DN format: /O=org/OU=unit/CN=UUID_CID
+        # Parse the DN format: /O=org/OU=unit/CN=UUID_CertID
         try:
             cn_match = re.search(r'/CN=([^/]+)', client_dn)
             if not cn_match:
@@ -75,21 +74,16 @@ class SafeConnectionMixin:
             if len(parts) != 2:
                 raise ValueError('Invalid CN format')
 
-            cert_uuid, cert_cid = parts
-            cert_cid = int(cert_cid)
+            cert_uuid, _cert_cid = parts
         except (ValueError, TypeError) as e:
             logger.warning('Invalid X-SSL-Client-CN format: %s (%s)', client_dn, e)
             raise PermissionDenied(_('Invalid mTLS certificate CN format'))  # noqa: B904
-
-        if cert_cid != computer_id:
-            logger.warning('mTLS certificate CID mismatch: cert_cid=%s, computer_id=%s', cert_cid, computer_id)
-            raise PermissionDenied(_('mTLS certificate does not match the requesting computer'))
 
         if cert_uuid.upper() != computer_uuid.upper():
             logger.warning('mTLS certificate UUID mismatch: cert_uuid=%s, computer_uuid=%s', cert_uuid, computer_uuid)
             raise PermissionDenied(_('mTLS certificate does not match the requesting computer'))
 
-        logger.debug('mTLS identity verified: uuid=%s, cid=%s', cert_uuid, cert_cid)
+        logger.debug('mTLS identity verified: uuid=%s', cert_uuid)
 
     def get_claims(self, data):
         """
