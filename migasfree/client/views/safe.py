@@ -204,7 +204,7 @@ class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
 
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
-        self.verify_mtls_identity(request, computer.id, computer.uuid)
+        self.verify_mtls_identity(request, computer.uuid)
 
         add_computer_message(computer, gettext('Getting synchronization...'))
 
@@ -274,6 +274,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         computer = get_computer(claims.get('uuid'), claims.get('name'))
         if computer:
+            self.verify_mtls_identity(request, computer.uuid)
             computer = is_computer_changed(
                 computer, claims.get('name'), self.project, claims.get('ip_address'), claims.get('uuid')
             )
@@ -459,7 +460,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         """
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
-        self.verify_mtls_identity(request, computer.id, computer.uuid)
+        self.verify_mtls_identity(request, computer.uuid)
 
         add_computer_message(computer, gettext('Getting attributes...'))
 
@@ -663,7 +664,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         """
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
-        self.verify_mtls_identity(request, computer.id, computer.uuid)
+        self.verify_mtls_identity(request, computer.uuid)
 
         add_computer_message(computer, gettext('Getting faults...'))
 
@@ -726,7 +727,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
-        self.verify_mtls_identity(request, computer.id, computer.uuid)
+        self.verify_mtls_identity(request, computer.uuid)
         claims['computer'] = computer.id
         claims['project'] = self.project.id
 
@@ -986,7 +987,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
-        self.verify_mtls_identity(request, computer.id, computer.uuid)
+        self.verify_mtls_identity(request, computer.uuid)
 
         add_computer_message(computer, gettext('Getting tags...'))
 
@@ -1212,7 +1213,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
-        self.verify_mtls_identity(request, computer.id, computer.uuid)
+        self.verify_mtls_identity(request, computer.uuid)
 
         add_computer_message(computer, gettext('Getting software...'))
 
