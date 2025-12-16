@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -16,15 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import subprocess
-import fcntl
-import select
 import copy
-import tempfile
+import fcntl
 import hashlib
 import json
-
+import os
+import select
+import subprocess
+import tempfile
 from datetime import timedelta
 
 
@@ -68,28 +65,17 @@ def execute(cmd, verbose=False, interactive=False):
         print(cmd)
 
     if interactive:
-        _process = subprocess.Popen(
-            cmd,
-            shell=True,
-            executable='/bin/bash'
-        )
+        _process = subprocess.Popen(cmd, shell=True, executable='/bin/bash')
     else:
         _process = subprocess.Popen(
-            cmd,
-            shell=True,
-            executable='/bin/bash',
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE
+            cmd, shell=True, executable='/bin/bash', stderr=subprocess.PIPE, stdout=subprocess.PIPE
         )
 
         if verbose:
             fcntl.fcntl(
                 _process.stdout.fileno(),
                 fcntl.F_SETFL,
-                fcntl.fcntl(
-                    _process.stdout.fileno(),
-                    fcntl.F_GETFL
-                ) | os.O_NONBLOCK,
+                fcntl.fcntl(_process.stdout.fileno(), fcntl.F_GETFL) | os.O_NONBLOCK,
             )
 
             while _process.poll() is None:
@@ -129,7 +115,7 @@ def write_file(filename, content):
             os.fsync(file.fileno())
 
         return True
-    except IOError:
+    except OSError:
         return False
 
 
@@ -168,13 +154,7 @@ def get_proxied_ip_address(request):
 
 def uuid_validate(uuid):
     if len(uuid) == 32:
-        uuid = '{}-{}-{}-{}-{}'.format(
-            uuid[0:8],
-            uuid[8:12],
-            uuid[12:16],
-            uuid[16:20],
-            uuid[20:32]
-        )
+        uuid = f'{uuid[0:8]}-{uuid[8:12]}-{uuid[12:16]}-{uuid[16:20]}-{uuid[20:32]}'
 
     if uuid in get_setting('MIGASFREE_INVALID_UUID'):
         return ''
@@ -190,18 +170,7 @@ def uuid_change_format(uuid):
         return ''
 
     if len(uuid) == 36:
-        return '{}{}{}{}-{}{}-{}{}-{}-{}'.format(
-            uuid[6:8],
-            uuid[4:6],
-            uuid[2:4],
-            uuid[0:2],
-            uuid[11:13],
-            uuid[9:11],
-            uuid[16:18],
-            uuid[14:16],
-            uuid[19:23],
-            uuid[24:36]
-        )
+        return f'{uuid[6:8]}{uuid[4:6]}{uuid[2:4]}{uuid[0:2]}-{uuid[11:13]}{uuid[9:11]}{uuid[16:18]}{uuid[14:16]}{uuid[19:23]}{uuid[24:36]}'
 
     return uuid
 
@@ -229,11 +198,7 @@ def remove_empty_elements_from_dict(dic):
 
 
 def replace_keys(data, aliases):
-    return [
-        {
-            aliases.get(key, key): value for key, value in item.items()
-        } for item in data
-    ]
+    return [{aliases.get(key, key): value for key, value in item.items()} for item in data]
 
 
 def remove_duplicates_preserving_order(seq):
@@ -279,12 +244,12 @@ def merge_dicts(*dicts):
 
 
 def list_difference(l1, l2):
-    """ uses l1 as reference, returns list of items not in l2 """
+    """uses l1 as reference, returns list of items not in l2"""
     return list(set(l1).difference(l2))
 
 
 def list_common(l1, l2):
-    """ uses l1 as reference, returns list of items in l2 (api_v4) """
+    """uses l1 as reference, returns list of items in l2 (api_v4)"""
     return list(set(l1).intersection(l2))
 
 
@@ -305,7 +270,7 @@ def sort_depends(data):
                 sort()
 
         if data_copy:
-            raise ValueError("Circular dependencies detected.", data_copy)
+            raise ValueError('Circular dependencies detected.', data_copy)
 
         return ret
 
@@ -321,7 +286,7 @@ def save_tempfile(file_):
             for chunk in file_.chunks():
                 temp_file.write(chunk)
     except OSError:
-        raise Exception(f"Problem with the input file {file_.name}")
+        raise Exception(f'Problem with the input file {file_.name}')
 
     return tempfn
 
@@ -344,13 +309,7 @@ def to_heatmap(results, range_name='day'):
     :return: [["YYYY-MM-DD", int], ...]
     """
 
-    return [
-        [
-            item[range_name].strftime("%Y-%m-%d"),
-            item['count']
-        ]
-        for item in results
-    ]
+    return [[item[range_name].strftime('%Y-%m-%d'), item['count']] for item in results]
 
 
 def hash_args(args, kwargs):
@@ -358,4 +317,4 @@ def hash_args(args, kwargs):
 
 
 def normalize_line_breaks(text):
-    return text.replace("\r\n", "\n") if text else text
+    return text.replace('\r\n', '\n') if text else text
