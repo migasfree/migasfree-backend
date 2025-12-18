@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,44 +14,52 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta
-from collections import defaultdict, OrderedDict
 
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models.aggregates import Count
 from django.db.models.functions import ExtractMonth, ExtractYear
-from django.db.models.signals import pre_save, post_save, pre_delete
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from ...utils import (
-    swap_m2m, remove_empty_elements_from_dict,
-    list_difference, merge_dicts,
-)
 from ...core.models import (
-    Project, MigasLink,
-    ServerAttribute, Attribute,
-    BasicProperty, Property,
+    Attribute,
+    BasicProperty,
+    MigasLink,
+    Project,
+    Property,
+    ServerAttribute,
 )
 from ...device.models import Logical
-
-from .user import User
-
+from ...utils import (
+    list_difference,
+    merge_dicts,
+    remove_empty_elements_from_dict,
+    swap_m2m,
+)
 from ..messages import remove_computer_messages
+from .user import User
 
 
 class DomainComputerManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().select_related(
-            'project',
-            'sync_user',
-            'default_logical_device',
-            'default_logical_device__device',
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                'project',
+                'sync_user',
+                'default_logical_device',
+                'default_logical_device__device',
+            )
         )
 
     def scope(self, user):
@@ -137,9 +143,13 @@ class Computer(models.Model, MigasLink):
 
     PRODUCTIVE_STATUS = ['intended', 'reserved', 'unknown']
     UNPRODUCTIVE_STATUS = ['in repair', 'available']
-    ACTIVE_STATUS = PRODUCTIVE_STATUS + ['in repair']
+    ACTIVE_STATUS = [*PRODUCTIVE_STATUS, 'in repair']
     SUBSCRIBED_STATUS = PRODUCTIVE_STATUS + UNPRODUCTIVE_STATUS
     UNSUBSCRIBED_STATUS = ['unsubscribed']
+
+    # CSV versions for API query parameters
+    PRODUCTIVE_STATUS_CSV = ','.join(PRODUCTIVE_STATUS)
+    SUBSCRIBED_STATUS_CSV = ','.join(SUBSCRIBED_STATUS)
 
     MACHINE_CHOICES = (
         ('P', _('Physical')),
@@ -155,7 +165,7 @@ class Computer(models.Model, MigasLink):
         blank=True,
         unique=True,
         default='',
-        db_comment='Universally Unique IDentifier based on the computer\'s motherboard',
+        db_comment="Universally Unique IDentifier based on the computer's motherboard",
     )
 
     status = models.CharField(
@@ -211,18 +221,11 @@ class Computer(models.Model, MigasLink):
     )
 
     forwarded_ip_address = models.GenericIPAddressField(
-        verbose_name=_('forwarded ip address'),
-        null=True,
-        blank=True,
-        db_comment='forwarded IP address'
+        verbose_name=_('forwarded ip address'), null=True, blank=True, db_comment='forwarded IP address'
     )
 
     default_logical_device = models.ForeignKey(
-        Logical,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name=_('default logical device')
+        Logical, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('default logical device')
     )
 
     last_hardware_capture = models.DateTimeField(
@@ -340,34 +343,28 @@ class Computer(models.Model, MigasLink):
 
     @classmethod
     def stacked_by_month(cls, user, start_date, field='project_id'):
-        return list(cls.objects.scope(user).filter(
-            created_at__gte=start_date
-        ).annotate(
-            year=ExtractYear('created_at'),
-            month=ExtractMonth('created_at')
-        ).order_by('year', 'month', field).values(
-            'year', 'month', field
-        ).annotate(
-            count=Count('id')
-        ))
+        return list(
+            cls.objects.scope(user)
+            .filter(created_at__gte=start_date)
+            .annotate(year=ExtractYear('created_at'), month=ExtractMonth('created_at'))
+            .order_by('year', 'month', field)
+            .values('year', 'month', field)
+            .annotate(count=Count('id'))
+        )
 
     @classmethod
     def entry_year(cls, user):
         return list(
-            cls.objects.scope(user).filter(
-                machine='P'
-            ).annotate(
-                year=ExtractYear('created_at')
-            ).values(
-                'year'
-            ).annotate(
-                count=Count('id')
-            ).order_by('year')
+            cls.objects.scope(user)
+            .filter(machine='P')
+            .annotate(year=ExtractYear('created_at'))
+            .values('year')
+            .annotate(count=Count('id'))
+            .order_by('year')
         )
 
     def get_all_attributes(self):
-        return list(self.tags.values_list('id', flat=True)) \
-            + list(self.sync_attributes.values_list('id', flat=True))
+        return list(self.tags.values_list('id', flat=True)) + list(self.sync_attributes.values_list('id', flat=True))
 
     def get_attribute_sets(self):
         return self.sync_attributes.filter(property_att__prefix='SET')
@@ -428,15 +425,13 @@ class Computer(models.Model, MigasLink):
 
         if history:
             if 'installed' in history:
-                PackageHistory.objects.filter(
-                    computer__id=self.id,
-                    package__fullname__in=history['installed']
-                ).update(install_date=timezone.localtime(timezone.now()))
+                PackageHistory.objects.filter(computer__id=self.id, package__fullname__in=history['installed']).update(
+                    install_date=timezone.localtime(timezone.now())
+                )
 
             if 'uninstalled' in history:
                 PackageHistory.objects.filter(
-                    computer__id=self.id,
-                    package__fullname__in=history['uninstalled']
+                    computer__id=self.id, package__fullname__in=history['uninstalled']
                 ).update(uninstall_date=timezone.localtime(timezone.now()))
 
     @extend_schema_field(serializers.BooleanField)
@@ -447,12 +442,10 @@ class Computer(models.Model, MigasLink):
 
     def get_software_inventory(self):
         return list(
-            self.packagehistory_set.filter(
-                uninstall_date__isnull=True,
-                package__project=self.project
-            ).values_list(
-                'package__fullname', flat=True
-            ).distinct().order_by('package__fullname')
+            self.packagehistory_set.filter(uninstall_date__isnull=True, package__project=self.project)
+            .values_list('package__fullname', flat=True)
+            .distinct()
+            .order_by('package__fullname')
         )
 
     def get_software_history(self):
@@ -460,30 +453,20 @@ class Computer(models.Model, MigasLink):
         uninstalled = defaultdict(list)
 
         for key, pkg, _id in list(
-                self.packagehistory_set.filter(
-                    install_date__isnull=False
-                ).values_list(
-                    'install_date', 'package__fullname', 'package__id'
-                ).distinct().order_by('-install_date', 'package__fullname')
+            self.packagehistory_set.filter(install_date__isnull=False)
+            .values_list('install_date', 'package__fullname', 'package__id')
+            .distinct()
+            .order_by('-install_date', 'package__fullname')
         ):
-            installed[key.strftime('%Y-%m-%dT%H:%M:%S')].append({
-                'id': _id,
-                'name': pkg,
-                'mode': '+'
-            })
+            installed[key.strftime('%Y-%m-%dT%H:%M:%S')].append({'id': _id, 'name': pkg, 'mode': '+'})
 
         for key, pkg, _id in list(
-                self.packagehistory_set.filter(
-                    uninstall_date__isnull=False
-                ).values_list(
-                    'uninstall_date', 'package__fullname', 'package__id'
-                ).distinct().order_by('-uninstall_date', 'package__fullname')
+            self.packagehistory_set.filter(uninstall_date__isnull=False)
+            .values_list('uninstall_date', 'package__fullname', 'package__id')
+            .distinct()
+            .order_by('-uninstall_date', 'package__fullname')
         ):
-            uninstalled[key.strftime('%Y-%m-%dT%H:%M:%S')].append({
-                'id': _id,
-                'name': pkg,
-                'mode': '-'
-            })
+            uninstalled[key.strftime('%Y-%m-%dT%H:%M:%S')].append({'id': _id, 'name': pkg, 'mode': '-'})
 
         merged = merge_dicts(installed, uninstalled)
 
@@ -500,46 +483,44 @@ class Computer(models.Model, MigasLink):
 
     @staticmethod
     def group_by_project(user):
-        return Computer.productive.scope(user).values(
-            'project__name', 'project__id'
-        ).annotate(count=Count('id'))
+        return Computer.productive.scope(user).values('project__name', 'project__id').annotate(count=Count('id'))
 
     @staticmethod
     def group_by_platform(user):
-        return Computer.productive.scope(user).values(
-            'project__platform__name', 'project__platform__id'
-        ).annotate(count=Count('id'))
+        return (
+            Computer.productive.scope(user)
+            .values('project__platform__name', 'project__platform__id')
+            .annotate(count=Count('id'))
+        )
 
     @staticmethod
     def count_by_attributes(attributes_id, project_id=None):
         if project_id:
-            return Computer.objects.filter(
-                sync_attributes__id__in=attributes_id,
-                project__id=project_id
-            ).count()
+            return Computer.objects.filter(sync_attributes__id__in=attributes_id, project__id=project_id).count()
 
-        return Computer.objects.filter(
-            sync_attributes__id__in=attributes_id
-        ).count()
+        return Computer.objects.filter(sync_attributes__id__in=attributes_id).count()
 
     @staticmethod
     def productive_computers_by_platform(user):
         total = Computer.productive.scope(user).count()
 
-        projects = list(Computer.productive.scope(user).values(
-            'project__name',
-            'project__id',
-            'project__platform__id',
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__platform__id', '-count'))
+        projects = list(
+            Computer.productive.scope(user)
+            .values(
+                'project__name',
+                'project__id',
+                'project__platform__id',
+            )
+            .annotate(count=Count('id'))
+            .order_by('project__platform__id', '-count')
+        )
 
-        platforms = list(Computer.productive.scope(user).values(
-            'project__platform__id',
-            'project__platform__name'
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__platform__id', '-count'))
+        platforms = list(
+            Computer.productive.scope(user)
+            .values('project__platform__id', 'project__platform__name')
+            .annotate(count=Count('id'))
+            .order_by('project__platform__id', '-count')
+        )
 
         return {
             'total': total,
@@ -549,10 +530,8 @@ class Computer(models.Model, MigasLink):
 
     def hardware_capture_is_required(self):
         if self.last_hardware_capture:
-            capture = (datetime.now() > (
-                self.last_hardware_capture.replace(tzinfo=None) + timedelta(
-                    days=settings.MIGASFREE_HW_PERIOD
-                ))
+            capture = datetime.now() > (
+                self.last_hardware_capture.replace(tzinfo=None) + timedelta(days=settings.MIGASFREE_HW_PERIOD)
             )
         else:
             capture = True
@@ -567,9 +546,7 @@ class Computer(models.Model, MigasLink):
         from ...hardware.models import Node
 
         try:
-            self.product = Node.objects.get(
-                computer=self.id, parent=None
-            ).get_product()
+            self.product = Node.objects.get(computer=self.id, parent=None).get_product()
         except ObjectDoesNotExist:
             self.product = None
 
@@ -579,12 +556,7 @@ class Computer(models.Model, MigasLink):
         self.disks, self.storage = Node.get_storage(self.id)
         self.mac_address = Node.get_mac_address(self.id)
 
-        self.save(
-            update_fields=[
-                'product', 'machine', 'cpu', 'ram',
-                'disks', 'storage', 'mac_address'
-            ]
-        )
+        self.save(update_fields=['product', 'machine', 'cpu', 'ram', 'disks', 'storage', 'mac_address'])
 
     def update_logical_devices(self, devices):
         """
@@ -592,9 +564,7 @@ class Computer(models.Model, MigasLink):
         :return: void
         """
         cid_attribute = self.get_cid_attribute()
-        initial_logical_devices = list(
-            self.assigned_logical_devices_to_cid().values_list('id', flat=True)
-        )
+        initial_logical_devices = list(self.assigned_logical_devices_to_cid().values_list('id', flat=True))
 
         for pk in list_difference(devices, initial_logical_devices):
             Logical.objects.get(pk=pk).attributes.add(cid_attribute)
@@ -606,16 +576,12 @@ class Computer(models.Model, MigasLink):
         if not attributes:
             attributes = self.sync_attributes.values_list('id', flat=True)
 
-        return Logical.objects.filter(
-            attributes__in=attributes
-        ).distinct()
+        return Logical.objects.filter(attributes__in=attributes).distinct()
 
     logical_devices.short_description = _('Logical Devices')
 
     def inflicted_logical_devices(self):
-        return self.logical_devices().exclude(
-            attributes__in=[self.get_cid_attribute().pk]
-        )
+        return self.logical_devices().exclude(attributes__in=[self.get_cid_attribute().pk])
 
     inflicted_logical_devices.short_description = _('Inflicted Logical Devices')
 
@@ -627,20 +593,12 @@ class Computer(models.Model, MigasLink):
     def get_architecture(self):
         from ...hardware.models.node import Node
 
-        node = Node.objects.filter(
-            computer=self.id,
-            class_name='processor',
-            width__gt=0
-        ).first()
+        node = Node.objects.filter(computer=self.id, class_name='processor', width__gt=0).first()
 
         if node:
             return node.width
 
-        node = Node.objects.filter(
-            computer=self.id,
-            class_name='system',
-            width__gt=0
-        ).first()
+        node = Node.objects.filter(computer=self.id, class_name='system', width__gt=0).first()
 
         return node.width if node else None
 
@@ -658,7 +616,8 @@ class Computer(models.Model, MigasLink):
     def replacement(source, target):
         swap_m2m(source, target, 'tags')
         source.default_logical_device, target.default_logical_device = (
-            target.default_logical_device, source.default_logical_device
+            target.default_logical_device,
+            source.default_logical_device,
         )
 
         # swap CID
@@ -692,7 +651,7 @@ class Computer(models.Model, MigasLink):
         cid_att, _ = Attribute.objects.get_or_create(
             property_att=BasicProperty.objects.get(prefix='CID'),
             value=str(self.id),
-            defaults={'description': self.get_cid_description()}
+            defaults={'description': self.get_cid_description()},
         )
 
         return cid_att
@@ -710,60 +669,30 @@ class Computer(models.Model, MigasLink):
     def get_replacement_info(self):
         cid = self.get_cid_attribute()
 
-        return remove_empty_elements_from_dict({
-            gettext("Computer"): self.__str__(),
-            gettext("Status"): gettext(self.status),
-            gettext("Tags"): ', '.join(str(x) for x in self.tags.all()),
-            gettext("Faults (included)"): ', '.join(
-                str(x) for x in cid.faultdefinition_included.all()
-            ),
-            gettext("Faults (excluded)"): ', '.join(
-                str(x) for x in cid.faultdefinition_excluded.all()
-            ),
-            gettext("Deployments (included)"): ', '.join(
-                str(x) for x in cid.deployment_included.all()
-            ),
-            gettext("Deployments (excluded)"): ', '.join(
-                str(x) for x in cid.deployment_excluded.all()
-            ),
-            gettext("Sets (included)"): ', '.join(
-                str(x) for x in cid.attributeset_included.all()
-            ),
-            gettext("Sets (excluded)"): ', '.join(
-                str(x) for x in cid.attributeset_excluded.all()
-            ),
-            gettext("Delays"): ', '.join(
-                str(x) for x in cid.scheduledelay_set.all()
-            ),
-            gettext("Logical devices"): ', '.join(
-                str(x) for x in self.logical_devices()
-            ),
-            gettext("Default logical device"): self.default_logical_device.__str__(),
-            gettext("Policies (included)"): ', '.join(
-                str(x) for x in cid.policy_included.all()
-            ),
-            gettext("Policies (excluded)"): ', '.join(
-                str(x) for x in cid.policy_excluded.all()
-            ),
-            gettext("Policy Groups (included)"): ', '.join(
-                str(x) for x in cid.policygroup_included.all()
-            ),
-            gettext("Policy Groups (excluded)"): ', '.join(
-                str(x) for x in cid.policygroup_excluded.all()
-            ),
-            gettext("Domain (included)"): ', '.join(
-                str(x) for x in cid.domain_included.all()
-            ),
-            gettext("Domain (excluded)"): ', '.join(
-                str(x) for x in cid.domain_excluded.all()
-            ),
-            gettext("Scope (included)"): ', '.join(
-                str(x) for x in cid.scope_included.all()
-            ),
-            gettext("Scope (excluded)"): ', '.join(
-                str(x) for x in cid.scope_excluded.all()
-            ),
-        })
+        return remove_empty_elements_from_dict(
+            {
+                gettext('Computer'): self.__str__(),
+                gettext('Status'): gettext(self.status),
+                gettext('Tags'): ', '.join(str(x) for x in self.tags.all()),
+                gettext('Faults (included)'): ', '.join(str(x) for x in cid.faultdefinition_included.all()),
+                gettext('Faults (excluded)'): ', '.join(str(x) for x in cid.faultdefinition_excluded.all()),
+                gettext('Deployments (included)'): ', '.join(str(x) for x in cid.deployment_included.all()),
+                gettext('Deployments (excluded)'): ', '.join(str(x) for x in cid.deployment_excluded.all()),
+                gettext('Sets (included)'): ', '.join(str(x) for x in cid.attributeset_included.all()),
+                gettext('Sets (excluded)'): ', '.join(str(x) for x in cid.attributeset_excluded.all()),
+                gettext('Delays'): ', '.join(str(x) for x in cid.scheduledelay_set.all()),
+                gettext('Logical devices'): ', '.join(str(x) for x in self.logical_devices()),
+                gettext('Default logical device'): self.default_logical_device.__str__(),
+                gettext('Policies (included)'): ', '.join(str(x) for x in cid.policy_included.all()),
+                gettext('Policies (excluded)'): ', '.join(str(x) for x in cid.policy_excluded.all()),
+                gettext('Policy Groups (included)'): ', '.join(str(x) for x in cid.policygroup_included.all()),
+                gettext('Policy Groups (excluded)'): ', '.join(str(x) for x in cid.policygroup_excluded.all()),
+                gettext('Domain (included)'): ', '.join(str(x) for x in cid.domain_included.all()),
+                gettext('Domain (excluded)'): ', '.join(str(x) for x in cid.domain_excluded.all()),
+                gettext('Scope (included)'): ', '.join(str(x) for x in cid.scope_included.all()),
+                gettext('Scope (excluded)'): ', '.join(str(x) for x in cid.scope_excluded.all()),
+            }
+        )
 
     def append_devices(self, computer_id):
         try:
@@ -795,6 +724,7 @@ def pre_save_computer(sender, instance, **kwargs):
         old_obj = Computer.objects.get(pk=instance.id)
         if old_obj.status != instance.status:
             from .status_log import StatusLog
+
             StatusLog.objects.create(instance)
 
 
@@ -802,6 +732,7 @@ def pre_save_computer(sender, instance, **kwargs):
 def post_save_computer(sender, instance, created, **kwargs):
     if created:
         from .status_log import StatusLog
+
         StatusLog.objects.create(instance)
 
     if instance.status in ['available', 'unsubscribed']:
@@ -819,9 +750,6 @@ def post_save_computer(sender, instance, created, **kwargs):
 
 @receiver(pre_delete, sender=Computer)
 def pre_delete_computer(sender, instance, **kwargs):
-    Attribute.objects.filter(
-        property_att=Property.objects.get(prefix='CID'),
-        value=instance.id
-    ).delete()
+    Attribute.objects.filter(property_att=Property.objects.get(prefix='CID'), value=instance.id).delete()
 
     remove_computer_messages(instance.id)
