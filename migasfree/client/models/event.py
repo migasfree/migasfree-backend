@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2016-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2016-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -18,7 +16,7 @@
 
 from django.db import models
 from django.db.models.aggregates import Count
-from django.db.models.functions import TruncDay, TruncHour, ExtractMonth, ExtractYear, ExtractDay
+from django.db.models.functions import ExtractDay, ExtractMonth, ExtractYear, TruncDay, TruncHour
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -43,78 +41,80 @@ class Event(models.Model, MigasLink):
 
     @classmethod
     def by_day(cls, computer_id, start_date, end_date, user):
-        return cls.objects.scope(user).filter(
-             computer__id=computer_id,
-             created_at__range=(start_date, end_date)
-        ).annotate(
-            day=TruncDay('created_at', output_field=models.DateTimeField())
-        ).values('day').order_by('-day').annotate(
-            count=Count('id')
+        return (
+            cls.objects.scope(user)
+            .filter(computer__id=computer_id, created_at__range=(start_date, end_date))
+            .annotate(day=TruncDay('created_at', output_field=models.DateTimeField()))
+            .values('day')
+            .order_by('-day')
+            .annotate(count=Count('id'))
         )
 
     @classmethod
     def by_hour(cls, start_date, end_date, user):
-        return cls.objects.scope(user).filter(
-            created_at__range=(start_date, end_date)
-        ).annotate(
-            hour=TruncHour('created_at', output_field=models.DateTimeField())
-        ).order_by('hour').values('hour').annotate(
-            count=Count('computer_id', distinct=True)
+        return (
+            cls.objects.scope(user)
+            .filter(created_at__range=(start_date, end_date))
+            .annotate(hour=TruncHour('created_at', output_field=models.DateTimeField()))
+            .order_by('hour')
+            .values('hour')
+            .annotate(count=Count('computer_id', distinct=True))
         )
 
     @classmethod
     def by_month(cls, user, start_date, field='project_id'):
-        return list(cls.objects.scope(user).filter(
-            created_at__gte=start_date
-        ).annotate(
-            year=ExtractYear('created_at'),
-            month=ExtractMonth('created_at')
-        ).order_by('year', 'month', field).values('year', 'month', field).annotate(
-            count=Count('id')
-        ))
+        return list(
+            cls.objects.scope(user)
+            .filter(created_at__gte=start_date)
+            .annotate(year=ExtractYear('created_at'), month=ExtractMonth('created_at'))
+            .order_by('year', 'month', field)
+            .values('year', 'month', field)
+            .annotate(count=Count('id'))
+        )
 
     @classmethod
     def stacked_by_month(cls, user, start_date, field='project_id'):
-        return list(cls.objects.scope(user).filter(
-            created_at__gte=start_date
-        ).annotate(
-            year=ExtractYear('created_at'),
-            month=ExtractMonth('created_at')
-        ).order_by('year', 'month', field).values('year', 'month', field).annotate(
-            count=Count('id')
-        ))
+        return list(
+            cls.objects.scope(user)
+            .filter(created_at__gte=start_date)
+            .annotate(year=ExtractYear('created_at'), month=ExtractMonth('created_at'))
+            .order_by('year', 'month', field)
+            .values('year', 'month', field)
+            .annotate(count=Count('id'))
+        )
 
     @classmethod
     def stacked_by_day(cls, user, start_date, field='project_id'):
-        return list(cls.objects.scope(user).filter(
-            created_at__gte=start_date
-        ).annotate(
-            year=ExtractYear('created_at'),
-            month=ExtractMonth('created_at'),
-            day=ExtractDay('created_at')
-        ).order_by('year', 'month', 'day', field).values(
-            'year', 'month', 'day', field
-        ).annotate(
-            count=Count('id')
-        ))
+        return list(
+            cls.objects.scope(user)
+            .filter(created_at__gte=start_date)
+            .annotate(year=ExtractYear('created_at'), month=ExtractMonth('created_at'), day=ExtractDay('created_at'))
+            .order_by('year', 'month', 'day', field)
+            .values('year', 'month', 'day', field)
+            .annotate(count=Count('id'))
+        )
 
     @classmethod
     def situation(cls, computer_id, date, user):
-        return cls.objects.scope(user).filter(
-            computer__id=computer_id, created_at__lte=date
-        ).order_by(
-            '-created_at'
-        ).first()
+        return (
+            cls.objects.scope(user)
+            .filter(computer__id=computer_id, created_at__lte=date)
+            .order_by('-created_at')
+            .first()
+        )
 
     @classmethod
     def time_range(cls, start_date, end_date, platform=0, project=0, range_name='month', user=None):
-        items = cls.objects.scope(user).filter(
-            created_at__range=(start_date, end_date)
-        ).extra(
-            {range_name: f"date_trunc('{range_name}', created_at)"}
-        ).values(range_name).annotate(
-            count=Count('computer_id', distinct=True)
-        ).order_by(f'-{range_name}')
+        from django.db.models.functions import Trunc
+
+        items = (
+            cls.objects.scope(user)
+            .filter(created_at__range=(start_date, end_date))
+            .annotate(**{range_name: Trunc('created_at', range_name, output_field=models.DateTimeField())})
+            .values(range_name)
+            .annotate(count=Count('computer_id', distinct=True))
+            .order_by(f'-{range_name}')
+        )
 
         if platform:
             items = items.filter(project__platform=platform)
