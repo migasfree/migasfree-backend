@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -16,44 +14,58 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from dj_rest_auth.serializers import UserDetailsSerializer
 from django.contrib.auth.models import Group, Permission
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from dj_rest_auth.serializers import UserDetailsSerializer
 
 from ..client.models import Computer
-from ..utils import cmp
-
-from .pms import tasks
-
-from .validators import MimetypeValidator, validate_project_pms
-from .pms import get_available_mimetypes
+from ..utils import cmp, to_list
 from .models import (
-    Platform,
-    Project,
-    Store,
-    ServerProperty,
-    ClientProperty,
-    Property,
-    Singularity,
     Attribute,
     AttributeSet,
-    ServerAttribute,
     ClientAttribute,
-    Schedule,
-    ScheduleDelay,
-    Package,
-    PackageSet,
+    ClientProperty,
     Deployment,
     Domain,
-    Scope,
-    UserProfile,
-    InternalSource,
     ExternalSource,
+    InternalSource,
+    Package,
+    PackageSet,
+    Platform,
+    Project,
+    Property,
+    Schedule,
+    ScheduleDelay,
+    Scope,
+    ServerAttribute,
+    ServerProperty,
+    Singularity,
+    Store,
+    UserProfile,
 )
-from ..utils import to_list
+from .pms import get_available_mimetypes, tasks
+from .validators import MimetypeValidator, validate_project_pms
+
+
+class AttributeRepresentationMixin:
+    """
+    Mixin to reduce code duplication in serializers that handle
+    included_attributes and excluded_attributes fields.
+
+    Override attribute_fields to customize which fields are serialized.
+    """
+
+    attribute_fields = ['included_attributes', 'excluded_attributes']
+
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+        for field in self.attribute_fields:
+            if hasattr(obj, field):
+                representation[field] = [AttributeInfoSerializer(item).data for item in getattr(obj, field).all()]
+        return representation
 
 
 class PropertyInfoSerializer(serializers.ModelSerializer):
@@ -111,20 +123,7 @@ class AttributeSetSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class AttributeSetWriteSerializer(serializers.ModelSerializer):
-    def to_representation(self, obj):
-        representation = super().to_representation(obj)
-
-        representation['included_attributes'] = [
-            AttributeInfoSerializer(item).data for item in obj.included_attributes.all()
-        ]
-
-        representation['excluded_attributes'] = [
-            AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
-        ]
-
-        return representation
-
+class AttributeSetWriteSerializer(AttributeRepresentationMixin, serializers.ModelSerializer):
     class Meta:
         model = AttributeSet
         fields = '__all__'
@@ -256,20 +255,7 @@ class SingularitySerializer(serializers.ModelSerializer):
         )
 
 
-class SingularityWriteSerializer(serializers.ModelSerializer):
-    def to_representation(self, obj):
-        representation = super().to_representation(obj)
-
-        representation['included_attributes'] = [
-            AttributeInfoSerializer(item).data for item in obj.included_attributes.all()
-        ]
-
-        representation['excluded_attributes'] = [
-            AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
-        ]
-
-        return representation
-
+class SingularityWriteSerializer(AttributeRepresentationMixin, serializers.ModelSerializer):
     class Meta:
         model = Singularity
         fields = '__all__'
@@ -865,17 +851,9 @@ class ScopeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ScopeWriteSerializer(serializers.ModelSerializer):
+class ScopeWriteSerializer(AttributeRepresentationMixin, serializers.ModelSerializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
-
-        representation['included_attributes'] = [
-            AttributeInfoSerializer(item).data for item in obj.included_attributes.all()
-        ]
-
-        representation['excluded_attributes'] = [
-            AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
-        ]
 
         if obj.user:
             representation['user'] = UserProfileInfoSerializer(obj.user).data
@@ -951,7 +929,8 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = UserDetailsSerializer.Meta.fields + (
+        fields = (
+            *UserDetailsSerializer.Meta.fields,
             'domains',
             'domain_preference',
             'scope_preference',
@@ -971,7 +950,8 @@ class UserProfileListSerializer(UserDetailsSerializer):
     scope_preference = ScopeInfoSerializer(many=False, read_only=True, source='userprofile.scope_preference')
 
     class Meta(UserDetailsSerializer.Meta):
-        fields = UserDetailsSerializer.Meta.fields + (
+        fields = (
+            *UserDetailsSerializer.Meta.fields,
             'domain_preference',
             'scope_preference',
             'is_superuser',
@@ -999,7 +979,8 @@ class UserProfileSerializer(UserDetailsSerializer):
             return ''  # rest-auth/user/
 
     class Meta(UserDetailsSerializer.Meta):
-        fields = UserDetailsSerializer.Meta.fields + (
+        fields = (
+            *UserDetailsSerializer.Meta.fields,
             'domains',
             'domain_preference',
             'scope_preference',
