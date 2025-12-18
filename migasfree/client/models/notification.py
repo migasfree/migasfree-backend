@@ -72,7 +72,7 @@ class Notification(models.Model, MigasLink):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.message = normalize_line_breaks(self.message)
 
-        super().save(force_insert, force_update, using, update_fields)
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
     def __str__(self):
         return f'{self.id} ({self.created_at:%Y-%m-%d %H:%M:%S})'
