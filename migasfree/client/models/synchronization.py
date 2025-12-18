@@ -210,7 +210,7 @@ class Synchronization(Event):
             )
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        super().save(force_insert, force_update, using, update_fields)
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
         deployments = Deployment.available_deployments(self.computer, self.computer.get_all_attributes()).values_list(
             'id', flat=True
