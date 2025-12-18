@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2020-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2020-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -109,10 +107,8 @@ class MigasLink:
                 model = 'computer'
 
             # ATTRIBUTE SET === ATTRIBUTE
-            elif (
-                self._meta.model_name == 'attributeset'
-                or (self._meta.model_name == 'attribute' and self.pk > 1)
-                and self.property_att.prefix == 'SET'
+            elif self._meta.model_name == 'attributeset' or (
+                (self._meta.model_name == 'attribute' and self.pk > 1) and self.property_att.prefix == 'SET'
             ):
                 model = 'attributeset'
 
@@ -193,9 +189,8 @@ class MigasLink:
             else:
                 _name = obj.remote_field.field.remote_field.model.__name__.lower()
 
-            if _name == 'attribute':
-                if self._meta.model_name == 'computer' and obj.attname == 'tags':
-                    _name = 'tag'
+            if _name == 'attribute' and self._meta.model_name == 'computer' and obj.attname == 'tags':
+                _name = 'tag'
 
             if _name == 'permission':
                 break
@@ -255,84 +250,80 @@ class MigasLink:
             related_model, _field = self.transmodel(related_object)
             if related_model:
                 # EXCLUDE CID
-                if related_model.__name__.lower() != 'computer' or not (
-                    self._meta.model_name == 'attribute' and self.property_att.prefix == 'CID'
-                ):
-                    if f'{related_model._meta.model_name} - {_field}' not in self._exclude_links:
-                        if hasattr(related_model.objects, 'scope'):
-                            if related_model.__name__.lower() == 'computer':
-                                rel_objects = related_model.productive.scope(user).filter(
-                                    **{related_object.field.name: self.id}
-                                )
-                            else:
-                                rel_objects = related_model.objects.scope(user).filter(
-                                    **{related_object.field.name: self.id}
-                                )
+                if (
+                    related_model.__name__.lower() != 'computer'
+                    or not (self._meta.model_name == 'attribute' and self.property_att.prefix == 'CID')
+                ) and f'{related_model._meta.model_name} - {_field}' not in self._exclude_links:
+                    if hasattr(related_model.objects, 'scope'):
+                        if related_model.__name__.lower() == 'computer':
+                            rel_objects = related_model.productive.scope(user).filter(
+                                **{related_object.field.name: self.id}
+                            )
                         else:
-                            rel_objects = related_model.objects.filter(**{related_object.field.name: self.id})
+                            rel_objects = related_model.objects.scope(user).filter(
+                                **{related_object.field.name: self.id}
+                            )
+                    else:
+                        rel_objects = related_model.objects.filter(**{related_object.field.name: self.id})
 
-                        count = rel_objects.count()
-                        if count and related_model._meta.app_label != 'authtoken':
-                            actions = []
-                            if related_model.__name__.lower() in settings.MIGASFREE_EXTERNAL_ACTIONS:
-                                element = settings.MIGASFREE_EXTERNAL_ACTIONS[related_model.__name__.lower()]
-                                for action in element:
-                                    if 'many' not in element[action] or element[action]['many'] or count == 1:
-                                        if self.is_related(element[action]):
-                                            info_action = {
-                                                'name': action,
-                                                'model': self._meta.model_name,
-                                                'id': self.id,
-                                                'related_model': related_model.__name__.lower(),
-                                                'related_ids': list(rel_objects.values_list('id', flat=True)),
-                                                'server': server,
+                    # Fetch IDs once and derive count from that
+                    rel_ids = list(rel_objects.values_list('id', flat=True))
+                    count = len(rel_ids)
+                    if count and related_model._meta.app_label != 'authtoken':
+                        actions = []
+                        if related_model.__name__.lower() in settings.MIGASFREE_EXTERNAL_ACTIONS:
+                            element = settings.MIGASFREE_EXTERNAL_ACTIONS[related_model.__name__.lower()]
+                            for action in element:
+                                if 'many' not in element[action] or element[action]['many'] or count == 1:
+                                    if self.is_related(element[action]):
+                                        info_action = {
+                                            'name': action,
+                                            'model': self._meta.model_name,
+                                            'id': self.id,
+                                            'related_model': related_model.__name__.lower(),
+                                            'related_ids': rel_ids,
+                                            'server': server,
+                                        }
+
+                                        actions.append(
+                                            {
+                                                'url': self.custom_protocol(info_action),
+                                                'title': element[action]['title'],
+                                                'description': self.get_description(element[action]),
                                             }
+                                        )
 
-                                            actions.append(
-                                                {
-                                                    'url': self.custom_protocol(info_action),
-                                                    'title': element[action]['title'],
-                                                    'description': self.get_description(element[action]),
-                                                }
-                                            )
-
-                            if related_model.__name__.lower() == 'computer':
-                                data.append(
-                                    {
-                                        'api': {
-                                            'model': self.model_to_route(
-                                                related_model._meta.app_label, related_model._meta.model_name
-                                            ),
-                                            'query': {_field: self.id, 'status__in': 'intended,reserved,unknown'},
-                                        },
-                                        'text': '{} [{}]'.format(
-                                            gettext(related_model._meta.verbose_name_plural),
-                                            gettext(related_object.field.verbose_name),
+                        if related_model.__name__.lower() == 'computer':
+                            data.append(
+                                {
+                                    'api': {
+                                        'model': self.model_to_route(
+                                            related_model._meta.app_label, related_model._meta.model_name
                                         ),
-                                        'count': count,
-                                        'actions': actions,
-                                    }
-                                )
-                            else:
-                                if related_model.__name__.lower() == 'faultdefinition' and _field == 'users__user_ptr':
-                                    _field = 'users__id'
+                                        'query': {_field: self.id, 'status__in': 'intended,reserved,unknown'},
+                                    },
+                                    'text': f'{gettext(related_model._meta.verbose_name_plural)} [{gettext(related_object.field.verbose_name)}]',
+                                    'count': count,
+                                    'actions': actions,
+                                }
+                            )
+                        else:
+                            if related_model.__name__.lower() == 'faultdefinition' and _field == 'users__user_ptr':
+                                _field = 'users__id'
 
-                                data.append(
-                                    {
-                                        'api': {
-                                            'model': self.model_to_route(
-                                                related_model._meta.app_label, related_model._meta.model_name
-                                            ),
-                                            'query': {_field: self.id},
-                                        },
-                                        'text': '{} [{}]'.format(
-                                            gettext(related_model._meta.verbose_name_plural),
-                                            gettext(related_object.field.verbose_name),
+                            data.append(
+                                {
+                                    'api': {
+                                        'model': self.model_to_route(
+                                            related_model._meta.app_label, related_model._meta.model_name
                                         ),
-                                        'count': count,
-                                        'actions': actions,
-                                    }
-                                )
+                                        'query': {_field: self.id},
+                                    },
+                                    'text': f'{gettext(related_model._meta.verbose_name_plural)} [{gettext(related_object.field.verbose_name)}]',
+                                    'count': count,
+                                    'actions': actions,
+                                }
+                            )
 
         # SPECIAL RELATIONS (model must have a method named: 'related_objects').
         actions = []
@@ -346,18 +337,21 @@ class MigasLink:
             'platform',
         ]:
             rel_objects = self.related_objects('computer', user)
-            if rel_objects and rel_objects.exists():
-                if 'computer' in settings.MIGASFREE_EXTERNAL_ACTIONS:
+            if rel_objects is not None:
+                # Fetch IDs once and derive count from that
+                rel_ids = list(rel_objects.values_list('id', flat=True))
+                count = len(rel_ids)
+                if count and 'computer' in settings.MIGASFREE_EXTERNAL_ACTIONS:
                     element = settings.MIGASFREE_EXTERNAL_ACTIONS['computer']
                     for action in element:
-                        if 'many' not in element[action] or element[action]['many'] or rel_objects.count() == 1:
+                        if 'many' not in element[action] or element[action]['many'] or count == 1:
                             if self.is_related(element[action]):
                                 info_action = {
                                     'name': action,
                                     'model': self._meta.model_name,
                                     'id': self.id,
                                     'related_model': 'computer',
-                                    'related_ids': list(rel_objects.values_list('id', flat=True)),
+                                    'related_ids': rel_ids,
                                     'server': server,
                                 }
 
@@ -382,7 +376,7 @@ class MigasLink:
                                     },
                                 },
                                 'text': gettext(self.related_title(rel_objects)),
-                                'count': rel_objects.count(),
+                                'count': count,
                                 'actions': actions,
                             }
                         )
@@ -408,7 +402,7 @@ class MigasLink:
                                     },
                                 },
                                 'text': gettext(self.related_title(rel_objects)),
-                                'count': rel_objects.count(),
+                                'count': count,
                                 'actions': actions,
                             }
                         )
@@ -417,12 +411,10 @@ class MigasLink:
                             {
                                 'api': {
                                     'model': 'computers',
-                                    'query': {
-                                        'id__in': ','.join(map(str, list(rel_objects.values_list('id', flat=True))))
-                                    },
+                                    'query': {'id__in': ','.join(map(str, rel_ids))},
                                 },
                                 'text': gettext(self.related_title(rel_objects)),
-                                'count': rel_objects.count(),
+                                'count': count,
                                 'actions': actions,
                             }
                         )
@@ -459,7 +451,7 @@ class MigasLink:
                             'model': self.model_to_route('client', 'computer'),
                             'query': {'installed_package': self.id},
                         },
-                        'text': '{} [{}]'.format(gettext('Installed package'), gettext('computer')),
+                        'text': f'{gettext("Installed package")} [{gettext("computer")}]',
                         'count': computers_count,
                         'actions': actions,
                     }
@@ -573,10 +565,8 @@ class MigasLink:
             return data
 
         # ATTRIBUTE SET === ATTRIBUTE
-        if (
-            self._meta.model_name == 'attributeset'
-            or (self._meta.model_name == 'attribute' and self.pk > 1)
-            and self.property_att.prefix == 'SET'
+        if self._meta.model_name == 'attributeset' or (
+            (self._meta.model_name == 'attribute' and self.pk > 1) and self.property_att.prefix == 'SET'
         ):
             attribute_set, att = self._get_attribute_set_and_att()
             set_data = attribute_set.get_relations(request) if attribute_set else []
@@ -682,13 +672,16 @@ class MigasLink:
 
             return ClientAttribute, 'property__id'
 
-        if related_model_lower == 'client.computer':
-            if self.__class__.__name__ in ['ClientAttribute', 'Attribute', 'ServerAttribute']:
-                if obj.field.related_model._meta.model_name == 'serverattribute':
-                    return Computer, 'tags__id'
+        if related_model_lower == 'client.computer' and self.__class__.__name__ in [
+            'ClientAttribute',
+            'Attribute',
+            'ServerAttribute',
+        ]:
+            if obj.field.related_model._meta.model_name == 'serverattribute':
+                return Computer, 'tags__id'
 
-                if obj.field.related_model._meta.model_name == 'attribute':
-                    return Computer, 'sync_attributes__id'
+            if obj.field.related_model._meta.model_name == 'attribute':
+                return Computer, 'sync_attributes__id'
 
         if obj.field.__class__.__name__ in ['ManyRelatedManager', 'OneToOneField', 'ForeignKey']:
             return obj.related_model, f'{obj.field.name}__id'
