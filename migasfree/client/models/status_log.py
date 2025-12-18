@@ -1,7 +1,5 @@
-# -*- coding: utf-8 *-*
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,9 +26,7 @@ from .event import Event
 
 class DomainStatusLogManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().select_related(
-            'computer', 'computer__project', 'computer__sync_user'
-        )
+        return super().get_queryset().select_related('computer', 'computer__project', 'computer__sync_user')
 
     def scope(self, user):
         qs = self.get_queryset()
@@ -66,42 +62,49 @@ class StatusLog(Event):
     def by_status(user):
         total = StatusLog.objects.scope(user).count()
 
-        data = list(StatusLog.objects.scope(user).values(
-            'status',
-        ).annotate(
-            count=Count('id')
-        ).order_by('status', '-count'))
+        data = list(
+            StatusLog.objects.scope(user)
+            .values(
+                'status',
+            )
+            .annotate(count=Count('id'))
+            .order_by('status', '-count')
+        )
 
         subscribed_sum = reduce(
-            lambda x, y: x + y['count'],
-            list(filter(lambda s: s['status'] != 'unsubscribed', data)),
-            0
+            lambda x, y: x + y['count'], list(filter(lambda s: s['status'] != 'unsubscribed', data)), 0
         )
         unsubscribed_sum = list(filter(lambda s: s['status'] == 'unsubscribed', data))
         unsubscribed_sum = unsubscribed_sum[0]['count'] if len(unsubscribed_sum) > 0 else 0
 
         inner = []
         if subscribed_sum:
-            inner.append({
-                'name': _('Subscribed'),
-                'value': subscribed_sum,
-                'status_in': 'intended,reserved,unknown,in repair,available',
-            })
+            inner.append(
+                {
+                    'name': _('Subscribed'),
+                    'value': subscribed_sum,
+                    'status_in': Computer.SUBSCRIBED_STATUS_CSV,
+                }
+            )
 
         if unsubscribed_sum:
-            inner.append({
-                'name': _('unsubscribed'),
-                'value': unsubscribed_sum,
-                'status_in': 'unsubscribed',
-            })
+            inner.append(
+                {
+                    'name': _('unsubscribed'),
+                    'value': unsubscribed_sum,
+                    'status_in': 'unsubscribed',
+                }
+            )
 
         outer = []
         for item in data:
-            outer.append({
-                'name': _(dict(Computer.STATUS_CHOICES)[item.get('status')]),
-                'value': item.get('count'),
-                'status_in': item.get('status')
-            })
+            outer.append(
+                {
+                    'name': _(dict(Computer.STATUS_CHOICES)[item.get('status')]),
+                    'value': item.get('count'),
+                    'status_in': item.get('status'),
+                }
+            )
 
         return {
             'total': total,
