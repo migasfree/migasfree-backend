@@ -120,28 +120,11 @@ class MigasLink:
 
         return 'related' not in action or model in action['related']
 
-    def get_relations(self, request):
-        user = request.user.userprofile
-        server = request.META.get('HTTP_HOST')
-
-        related_objects = [
-            (f, f.model if f.model != self else None)
-            for f in self._meta.get_fields()
-            if (f.one_to_many or f.one_to_one) and f.auto_created and not f.concrete
-        ] + [
-            (f, f.model if f.model != self else None)
-            for f in self._meta.get_fields(include_hidden=True)
-            if f.many_to_many and f.auto_created
-        ]
-
-        objs = [
-            (f, f.model if f.model != self else None)
-            for f in self._meta.get_fields()
-            if (f.many_to_many or f.many_to_one) and not f.auto_created
-        ]
-
+    def _get_self_actions(self, server):
+        """Get actions for the current model instance."""
         actions = []
         data = []
+
         if self._actions is not None and any(self._actions):
             for item in self._actions:
                 actions.append(
@@ -182,6 +165,12 @@ class MigasLink:
                 'actions': actions,
             }
         )
+
+        return data
+
+    def _get_m2m_relations(self, user, server, objs):
+        """Get many-to-many forward relations."""
+        data = []
 
         for obj, _ in objs:
             if obj.remote_field.field.remote_field.parent_link:
@@ -245,6 +234,12 @@ class MigasLink:
                         'actions': actions,
                     }
                 )
+
+        return data
+
+    def _get_reverse_relations(self, user, server, related_objects):
+        """Get reverse relations (one-to-many, one-to-one, m2m auto-created)."""
+        data = []
 
         for related_object, _ in related_objects:
             related_model, _field = self.transmodel(related_object)
@@ -325,8 +320,51 @@ class MigasLink:
                                 }
                             )
 
-        # SPECIAL RELATIONS (model must have a method named: 'related_objects').
+        return data
+
+    def _get_related_fields(self):
+        """Get related object and m2m fields for this model."""
+        related_objects = [
+            (f, f.model if f.model != self else None)
+            for f in self._meta.get_fields()
+            if (f.one_to_many or f.one_to_one) and f.auto_created and not f.concrete
+        ] + [
+            (f, f.model if f.model != self else None)
+            for f in self._meta.get_fields(include_hidden=True)
+            if f.many_to_many and f.auto_created
+        ]
+
+        objs = [
+            (f, f.model if f.model != self else None)
+            for f in self._meta.get_fields()
+            if (f.many_to_many or f.many_to_one) and not f.auto_created
+        ]
+
+        return related_objects, objs
+
+    def get_relations(self, request):
+        user = request.user.userprofile
+        server = request.META.get('HTTP_HOST')
+
+        related_objects, objs = self._get_related_fields()
+
+        data = self._get_self_actions(server)
+
+        data.extend(self._get_m2m_relations(user, server, objs))
+
+        data.extend(self._get_reverse_relations(user, server, related_objects))
+
+        data.extend(self._get_special_relations(user, server, request))
+
+        data.extend(self._get_custom_links())
+
+        return data
+
+    def _get_special_relations(self, user, server, request):
+        """Get special relations for models with custom related_objects method."""
+        data = []
         actions = []
+
         if self._meta.model_name.lower() in [
             'device',
             'deployment',
@@ -419,8 +457,8 @@ class MigasLink:
                             }
                         )
 
+        # Special case: installed packages for computer
         if self._meta.model_name.lower() == 'computer':
-            # special case installed packages
             installed_packages_count = self.packagehistory_set.filter(
                 package__project=self.project, uninstall_date__isnull=True
             ).count()
@@ -435,14 +473,14 @@ class MigasLink:
                                 'uninstall_date': True,  # isnull = True
                             },
                         },
-                        'text': '{} [{}]'.format(gettext('Installed Packages'), gettext('computer')),
+                        'text': f'{gettext("Installed Packages")} [{gettext("computer")}]',
                         'count': installed_packages_count,
                         'actions': actions,
                     }
                 )
 
+        # Special case: computers with package installed
         if self._meta.model_name.lower() == 'package':
-            # special case computers with package installed
             computers_count = self.packagehistory_set.filter(package=self, uninstall_date__isnull=True).count()
             if computers_count > 0:
                 data.append(
@@ -456,6 +494,12 @@ class MigasLink:
                         'actions': actions,
                     }
                 )
+
+        return data
+
+    def _get_custom_links(self):
+        """Get custom included links."""
+        data = []
 
         for _include in self._include_links:
             try:
