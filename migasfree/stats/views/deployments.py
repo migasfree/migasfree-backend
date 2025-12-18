@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -17,16 +15,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from collections import defaultdict
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 
 from django.db.models import Q
 from django.db.models.aggregates import Count
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from django_redis import get_redis_connection
-
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets, status, permissions
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
@@ -47,10 +44,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         con = get_redis_connection()
         response = con.smembers(f'migasfree:deployments:{deploy.id}:computers')
 
-        return Response(
-            list(map(int, response)),
-            status=status.HTTP_200_OK
-        )
+        return Response(list(map(int, response)), status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=True, url_path='computers/status/ok')
     def computers_with_ok_status(self, request, pk=None):
@@ -59,10 +53,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         con = get_redis_connection()
         response = con.smembers(f'migasfree:deployments:{deploy.id}:ok')
 
-        return Response(
-            list(map(int, response)),
-            status=status.HTTP_200_OK
-        )
+        return Response(list(map(int, response)), status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=True, url_path='computers/status/error')
     def computers_with_error_status(self, request, pk=None):
@@ -71,10 +62,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         con = get_redis_connection()
         response = con.smembers(f'migasfree:deployments:{deploy.id}:error')
 
-        return Response(
-            list(map(int, response)),
-            status=status.HTTP_200_OK
-        )
+        return Response(list(map(int, response)), status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=True)
     def timeline(self, request, pk=None):
@@ -86,15 +74,12 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
             'computers': {
                 'assigned': con.scard(f'migasfree:deployments:{deploy.id}:computers'),
                 'ok': con.scard(f'migasfree:deployments:{deploy.id}:ok'),
-                'error': con.scard(f'migasfree:deployments:{deploy.id}:error')
+                'error': con.scard(f'migasfree:deployments:{deploy.id}:error'),
             },
-            'schedule': deploy.schedule_timeline()
+            'schedule': deploy.schedule_timeline(),
         }
 
-        return Response(
-            response,
-            status=status.HTTP_200_OK
-        )
+        return Response(response, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=True, url_path='computers/delay')
     def provided_computers_by_delay(self, request, pk=None):
@@ -104,7 +89,7 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                 {
                     'detail': _('This deployment has not schedule'),
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         rolling_date = deploy.start_date
@@ -121,61 +106,56 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
             q_ex_domain = Q()
 
         lst_attributes = list(deploy.included_attributes.values_list('id', flat=True))
-        value = Computer.productive.scope(request.user.userprofile).filter(
-            Q(sync_attributes__id__in=lst_attributes) &
-            Q(project__id=deploy.project.id)
-        ).exclude(
-            Q(sync_attributes__id__in=deploy.excluded_attributes.all())
-        ).exclude(
-            q_in_domain
-        ).exclude(
-            q_ex_domain
-        ).values('id').distinct().count()
+        value = (
+            Computer.productive.scope(request.user.userprofile)
+            .filter(Q(sync_attributes__id__in=lst_attributes) & Q(project__id=deploy.project.id))
+            .exclude(Q(sync_attributes__id__in=deploy.excluded_attributes.all()))
+            .exclude(q_in_domain)
+            .exclude(q_ex_domain)
+            .values('id')
+            .distinct()
+            .count()
+        )
 
         date_format = '%Y-%m-%d'
 
-        delays = ScheduleDelay.objects.filter(
-            schedule__id=deploy.schedule.id
-        ).order_by('delay')
+        delays = ScheduleDelay.objects.filter(schedule__id=deploy.schedule.id).order_by('delay')
         len_delays = delays.count()
 
         for i, item in enumerate(delays):
             lst_att_delay = list(item.attributes.values_list('id', flat=True))
 
-            start_horizon = datetime.strptime(
-                str(time_horizon(rolling_date, 0)),
-                date_format
-            )
+            start_horizon = datetime.strptime(str(time_horizon(rolling_date, 0)), date_format)
             if i < (len_delays - 1):
                 end_horizon = datetime.strptime(
-                    str(time_horizon(rolling_date, delays[i + 1].delay - item.delay)),
-                    date_format
+                    str(time_horizon(rolling_date, delays[i + 1].delay - item.delay)), date_format
                 )
             else:
-                end_horizon = datetime.strptime(
-                    str(time_horizon(rolling_date, item.duration)),
-                    date_format
-                )
+                end_horizon = datetime.strptime(str(time_horizon(rolling_date, item.duration)), date_format)
 
             duration = 0
             for real_days in range(0, (end_horizon - start_horizon).days):
                 loop_date = start_horizon + timedelta(days=real_days)
-                weekday = int(loop_date.strftime("%w"))  # [0(Sunday), 6]
+                weekday = int(loop_date.strftime('%w'))  # [0(Sunday), 6]
                 if weekday not in [0, 6]:
-                    value += Computer.productive.scope(request.user.userprofile).extra(
-                        select={'deployment': 'id'},
-                        where=[f'computer_id %% {item.duration} = {duration}']
-                    ).filter(
-                        ~ Q(sync_attributes__id__in=lst_attributes) &
-                        Q(sync_attributes__id__in=lst_att_delay) &
-                        Q(project__id=deploy.project.id)
-                    ).exclude(
-                        Q(sync_attributes__id__in=deploy.excluded_attributes.all())
-                    ).exclude(
-                        q_in_domain
-                    ).exclude(
-                        q_ex_domain
-                    ).values('id').distinct().count()
+                    from django.db.models.functions import Mod
+
+                    value += (
+                        Computer.productive.scope(request.user.userprofile)
+                        .annotate(mod_duration=Mod('id', item.duration))
+                        .filter(mod_duration=duration)
+                        .filter(
+                            ~Q(sync_attributes__id__in=lst_attributes)
+                            & Q(sync_attributes__id__in=lst_att_delay)
+                            & Q(project__id=deploy.project.id)
+                        )
+                        .exclude(Q(sync_attributes__id__in=deploy.excluded_attributes.all()))
+                        .exclude(q_in_domain)
+                        .exclude(q_ex_domain)
+                        .values('id')
+                        .distinct()
+                        .count()
+                    )
                     duration += 1
 
                 labels.append(loop_date.strftime(date_format))
@@ -191,52 +171,47 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                 'data': chart_data,
                 'x_labels': list(labels),
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
     @action(methods=['get'], detail=False, url_path='enabled/project')
     def enabled_by_project(self, request):
-        total = Deployment.objects.scope(request.user.userprofile).filter(
-            enabled=True
-        ).count()
+        total = Deployment.objects.scope(request.user.userprofile).filter(enabled=True).count()
 
         values_null = defaultdict(list)
-        for item in Deployment.objects.scope(
-            request.user.userprofile
-        ).filter(
-            enabled=True, schedule=None
-        ).values(
-            'project__id', 'project__name'
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__id', '-count'):
+        for item in (
+            Deployment.objects.scope(request.user.userprofile)
+            .filter(enabled=True, schedule=None)
+            .values('project__id', 'project__name')
+            .annotate(count=Count('id'))
+            .order_by('project__id', '-count')
+        ):
             values_null[item.get('project__id')].append(
                 {
-                    'name': '{} ({})'.format(_("Without schedule"), item.get("project__name")),
+                    'name': '{} ({})'.format(_('Without schedule'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
-                    'schedule': True  # isnull = True
+                    'schedule': True,  # isnull = True
                 }
             )
 
         values_not_null = defaultdict(list)
-        for item in Deployment.objects.scope(
-            request.user.userprofile
-        ).filter(
-            enabled=True,
-        ).filter(
-            ~Q(schedule=None)
-        ).values(
-            'project__id', 'project__name'
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__id', '-count'):
+        for item in (
+            Deployment.objects.scope(request.user.userprofile)
+            .filter(
+                enabled=True,
+            )
+            .filter(~Q(schedule=None))
+            .values('project__id', 'project__name')
+            .annotate(count=Count('id'))
+            .order_by('project__id', '-count')
+        ):
             values_not_null[item.get('project__id')].append(
                 {
-                    'name': '{} ({})'.format(_("With schedule"), item.get("project__name")),
+                    'name': '{} ({})'.format(_('With schedule'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
-                    'schedule': False  # isnull = False
+                    'schedule': False,  # isnull = False
                 }
             )
 
@@ -251,20 +226,17 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                 count += values_not_null[project.id][0]['value']
                 outer.append(values_not_null[project.id][0])
             if count:
-                inner.append({
-                    'name': project.name,
-                    'value': count,
-                    'project_id': project.id,
-                })
+                inner.append(
+                    {
+                        'name': project.name,
+                        'value': count,
+                        'project_id': project.id,
+                    }
+                )
 
         return Response(
-            {
-                'title': _('Enabled Deployments'),
-                'total': total,
-                'inner': inner,
-                'outer': outer
-            },
-            status=status.HTTP_200_OK
+            {'title': _('Enabled Deployments'), 'total': total, 'inner': inner, 'outer': outer},
+            status=status.HTTP_200_OK,
         )
 
     @action(methods=['get'], detail=False, url_path='enabled')
@@ -272,16 +244,16 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         total = Deployment.objects.scope(request.user.userprofile).count()
 
         values_null = defaultdict(list)
-        for item in Deployment.objects.scope(request.user.userprofile).filter(
-            enabled=True
-        ).values(
-            'project__id', 'project__name'
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__id', '-count'):
+        for item in (
+            Deployment.objects.scope(request.user.userprofile)
+            .filter(enabled=True)
+            .values('project__id', 'project__name')
+            .annotate(count=Count('id'))
+            .order_by('project__id', '-count')
+        ):
             values_null[item.get('project__id')].append(
                 {
-                    'name': '{} ({})'.format(_("Enabled"), item.get("project__name")),
+                    'name': '{} ({})'.format(_('Enabled'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
                     'enabled': True,
@@ -289,19 +261,21 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
             )
 
         values_not_null = defaultdict(list)
-        for item in Deployment.objects.scope(request.user.userprofile).filter(
-            enabled=False,
-        ).values(
-            'project__id', 'project__name'
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__id', '-count'):
+        for item in (
+            Deployment.objects.scope(request.user.userprofile)
+            .filter(
+                enabled=False,
+            )
+            .values('project__id', 'project__name')
+            .annotate(count=Count('id'))
+            .order_by('project__id', '-count')
+        ):
             values_not_null[item.get('project__id')].append(
                 {
-                    'name': '{} ({})'.format(_("Disabled"), item.get("project__name")),
+                    'name': '{} ({})'.format(_('Disabled'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
-                    'enabled': False
+                    'enabled': False,
                 }
             )
 
@@ -316,20 +290,17 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                 count += values_not_null[project.id][0]['value']
                 outer.append(values_not_null[project.id][0])
             if count:
-                inner.append({
-                    'name': project.name,
-                    'value': count,
-                    'project_id': project.id,
-                })
+                inner.append(
+                    {
+                        'name': project.name,
+                        'value': count,
+                        'project_id': project.id,
+                    }
+                )
 
         return Response(
-            {
-                'title': _('Deployments / Enabled'),
-                'total': total,
-                'inner': inner,
-                'outer': outer
-            },
-            status=status.HTTP_200_OK
+            {'title': _('Deployments / Enabled'), 'total': total, 'inner': inner, 'outer': outer},
+            status=status.HTTP_200_OK,
         )
 
     @action(methods=['get'], detail=False, url_path='schedule')
@@ -337,36 +308,36 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
         total = Deployment.objects.scope(request.user.userprofile).count()
 
         values_null = defaultdict(list)
-        for item in Deployment.objects.scope(request.user.userprofile).filter(
-            schedule=None
-        ).values(
-            'project__id', 'project__name'
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__id', '-count'):
+        for item in (
+            Deployment.objects.scope(request.user.userprofile)
+            .filter(schedule=None)
+            .values('project__id', 'project__name')
+            .annotate(count=Count('id'))
+            .order_by('project__id', '-count')
+        ):
             values_null[item.get('project__id')].append(
                 {
-                    'name': '{} ({})'.format(_("Without schedule"), item.get("project__name")),
+                    'name': '{} ({})'.format(_('Without schedule'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
-                    'schedule': True  # isnull = True
+                    'schedule': True,  # isnull = True
                 }
             )
 
         values_not_null = defaultdict(list)
-        for item in Deployment.objects.scope(request.user.userprofile).filter(
-            ~Q(schedule=None)
-        ).values(
-            'project__id', 'project__name'
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__id', '-count'):
+        for item in (
+            Deployment.objects.scope(request.user.userprofile)
+            .filter(~Q(schedule=None))
+            .values('project__id', 'project__name')
+            .annotate(count=Count('id'))
+            .order_by('project__id', '-count')
+        ):
             values_not_null[item.get('project__id')].append(
                 {
-                    'name': '{} ({})'.format(_("With schedule"), item.get("project__name")),
+                    'name': '{} ({})'.format(_('With schedule'), item.get('project__name')),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
-                    'schedule': False  # isnull = False
+                    'schedule': False,  # isnull = False
                 }
             )
 
@@ -381,18 +352,15 @@ class DeploymentStatsViewSet(viewsets.ViewSet):
                 count += values_not_null[project.id][0]['value']
                 outer.append(values_not_null[project.id][0])
             if count:
-                inner.append({
-                    'name': project.name,
-                    'value': count,
-                    'project_id': project.id,
-                })
+                inner.append(
+                    {
+                        'name': project.name,
+                        'value': count,
+                        'project_id': project.id,
+                    }
+                )
 
         return Response(
-            {
-                'title': _('Deployments / Schedule'),
-                'total': total,
-                'inner': inner,
-                'outer': outer
-            },
-            status=status.HTTP_200_OK
+            {'title': _('Deployments / Schedule'), 'total': total, 'inner': inner, 'outer': outer},
+            status=status.HTTP_200_OK,
         )
