@@ -183,7 +183,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                             {
                                 'name': 'Subscribed',
                                 'value': 180,
-                                'status_in': 'intended,reserved,unknown,in repair,available',
+                                'status_in': Computer.SUBSCRIBED_STATUS_CSV,
                             },
                             {'name': 'Unsubscribed', 'value': 70, 'status_in': 'unsubscribed'},
                         ],
@@ -191,13 +191,13 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                             {
                                 'name': 'Virtual',
                                 'value': 100,
-                                'status_in': 'intended,reserved,unknown,in repair,available',
+                                'status_in': Computer.SUBSCRIBED_STATUS_CSV,
                                 'machine': 'V',
                             },
                             {
                                 'name': 'Physical',
                                 'value': 80,
-                                'status_in': 'intended,reserved,unknown,in repair,available',
+                                'status_in': Computer.SUBSCRIBED_STATUS_CSV,
                                 'machine': 'P',
                             },
                             {'name': 'Virtual', 'value': 20, 'status_in': 'unsubscribed', 'machine': 'V'},
@@ -246,7 +246,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                     {
                         'name': _('Virtual'),
                         'value': counts['subscribed_virtual'],
-                        'status_in': 'intended,reserved,unknown,in repair,available',
+                        'status_in': Computer.SUBSCRIBED_STATUS_CSV,
                         'machine': 'V',
                     }
                 )
@@ -256,7 +256,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                     {
                         'name': _('Physical'),
                         'value': counts['subscribed_physical'],
-                        'status_in': 'intended,reserved,unknown,in repair,available',
+                        'status_in': Computer.SUBSCRIBED_STATUS_CSV,
                         'machine': 'P',
                     }
                 )
@@ -265,7 +265,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                 {
                     'name': _('Subscribed'),
                     'value': counts['subscribed'],
-                    'status_in': 'intended,reserved,unknown,in repair,available',
+                    'status_in': Computer.SUBSCRIBED_STATUS_CSV,
                 },
             )
 
@@ -348,7 +348,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                         'title': 'Subscribed Computers / Status',
                         'total': 300,
                         'inner': [
-                            {'name': 'Productive', 'value': 210, 'status_in': 'intended,reserved,unknown'},
+                            {'name': 'Productive', 'value': 210, 'status_in': Computer.PRODUCTIVE_STATUS_CSV},
                             {'name': 'Unproductive', 'value': 90, 'status_in': 'in repair,available'},
                         ],
                         'outer': [
@@ -411,7 +411,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             {
                 'name': _('Productive'),
                 'value': count_productive,
-                'status_in': 'intended,reserved,unknown',
+                'status_in': Computer.PRODUCTIVE_STATUS_CSV,
             },
             {
                 'name': _('Unproductive'),
