@@ -164,7 +164,7 @@ class ServerProperty(Property):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.sort = 'server'
         self.code = ''
-        super().save(force_insert, force_update, using, update_fields)
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
     class Meta:
         verbose_name = _('Stamp')
@@ -179,7 +179,7 @@ class ClientProperty(Property):
         self.sort = 'client'
         self.code = normalize_line_breaks(self.code)
 
-        super().save(force_insert, force_update, using, update_fields)
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
     class Meta:
         verbose_name = _('Formula')
@@ -192,7 +192,7 @@ class BasicProperty(Property):
         self.sort = 'basic'
         self.code = normalize_line_breaks(self.code)
 
-        super().save(force_insert, force_update, using, update_fields)
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
     class Meta:
         verbose_name = _('Basic Property')
