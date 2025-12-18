@@ -166,7 +166,7 @@ class Project(models.Model, MigasLink):
         self.slug = slugify(self.name)
         self._create_dirs()
 
-        super().save(force_insert, force_update, using, update_fields)
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
     class Meta:
         app_label = 'core'
