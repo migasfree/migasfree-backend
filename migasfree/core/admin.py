@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
@@ -18,33 +16,52 @@
 
 import os
 
-from django.db.models import Q, Prefetch
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
+from django.db.models import Count, Prefetch, Q
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from import_export.admin import ImportExportActionModelAdmin
 
 from ..client.models import Computer
 from ..utils import cmp
-
-from .resources import AttributeResource, ProjectResource
-from .pms import tasks
-from .validators import validate_no_spaces
-
-from .models import (
-    Platform, Project, Store,
-    Attribute, ClientAttribute, ServerAttribute, AttributeSet,
-    Property, ClientProperty, ServerProperty, Singularity,
-    ScheduleDelay, Schedule, Package, PackageSet,
-    Deployment, InternalSource, ExternalSource,
-    UserProfile, Scope, Domain,
-)
 from .forms import (
-    PackageForm, DeploymentForm, ClientPropertyForm,
-    UserProfileForm, ScopeForm, DomainForm, StoreForm,
-    ExternalSourceForm, InternalSourceForm,
+    ClientPropertyForm,
+    DeploymentForm,
+    DomainForm,
+    ExternalSourceForm,
+    InternalSourceForm,
+    PackageForm,
+    ScopeForm,
+    StoreForm,
+    UserProfileForm,
 )
+from .models import (
+    Attribute,
+    AttributeSet,
+    ClientAttribute,
+    ClientProperty,
+    Deployment,
+    Domain,
+    ExternalSource,
+    InternalSource,
+    Package,
+    PackageSet,
+    Platform,
+    Project,
+    Property,
+    Schedule,
+    ScheduleDelay,
+    Scope,
+    ServerAttribute,
+    ServerProperty,
+    Singularity,
+    Store,
+    UserProfile,
+)
+from .pms import tasks
+from .resources import AttributeResource, ProjectResource
+from .validators import validate_no_spaces
 
 admin.site.register(Platform)
 admin.site.register(Attribute)
@@ -54,13 +71,11 @@ admin.site.register(Property)
 @admin.register(Project)
 class ProjectAdmin(ImportExportActionModelAdmin):
     resource_class = ProjectResource
-    list_display = (
-        'name',
+    list_display = ('name', 'platform', 'pms', 'auto_register_computers')
+    list_filter = (
         'platform',
         'pms',
-        'auto_register_computers'
     )
-    list_filter = ('platform', 'pms',)
     list_select_related = ('platform',)
     search_fields = ('name',)
     prepopulated_fields = {'slug': ('name',)}
@@ -108,10 +123,17 @@ class ClientPropertyAdmin(admin.ModelAdmin):
     list_display = ('name', 'prefix', 'enabled', 'kind')
     list_filter = ('enabled', 'kind', ClientPropertyFilter)
     ordering = ('name',)
-    search_fields = ('name', 'prefix',)
+    search_fields = (
+        'name',
+        'prefix',
+    )
     fields = (
-        'prefix', 'name', 'enabled',
-        'language', 'code', 'kind',
+        'prefix',
+        'name',
+        'enabled',
+        'language',
+        'code',
+        'kind',
     )
 
 
@@ -139,9 +161,13 @@ class ServerPropertyAdmin(admin.ModelAdmin):
 @admin.register(Singularity)
 class SingularityAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'enabled', 'language',
-        'property_att', 'priority',
-        'list_included_attributes', 'list_excluded_attributes'
+        'name',
+        'enabled',
+        'language',
+        'property_att',
+        'priority',
+        'list_included_attributes',
+        'list_excluded_attributes',
     )
     list_filter = ('enabled',)
     ordering = ('property_att__name', '-priority')
@@ -151,9 +177,7 @@ class SingularityAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return Singularity.objects.scope(
-            request.user.userprofile
-        ).prefetch_related(
+        return Singularity.objects.scope(request.user.userprofile).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
             Prefetch('excluded_attributes', queryset=qs),
             'included_attributes__property_att',
@@ -166,11 +190,7 @@ class ClientAttributeFilter(SimpleListFilter):
     parameter_name = 'Client Attribute'
 
     def lookups(self, request, model_admin):
-        return [
-            (c.id, c.name) for c in Property.objects.filter(
-                Q(sort='client') | Q(sort='basic')
-            )
-        ]
+        return [(c.id, c.name) for c in Property.objects.filter(Q(sort='client') | Q(sort='basic'))]
 
     def queryset(self, request, queryset):
         if self.value():
@@ -184,23 +204,29 @@ class ClientAttributeAdmin(ImportExportActionModelAdmin):
     list_display = ('id', 'property_att', 'value', 'description')
     list_select_related = ('property_att',)
     list_filter = (ClientAttributeFilter,)
-    ordering = ('property_att', 'value',)
+    ordering = (
+        'property_att',
+        'value',
+    )
     search_fields = ('value', 'description')
-    readonly_fields = ('property_att', 'value',)
+    readonly_fields = (
+        'property_att',
+        'value',
+    )
     resource_class = AttributeResource
 
     def get_queryset(self, request):
-        sql = Attribute.TOTAL_COMPUTER_QUERY
         user = request.user.userprofile
+        queryset = ClientAttribute.objects.scope(user)
+
+        # Build computer filter for counting
+        computer_filter = Q(computer__isnull=False)
         if user and not user.is_view_all():
             computers = user.get_computers()
             if computers:
-                sql += " AND client_computer_sync_attributes.computer_id IN " \
-                    + "(" + ",".join(str(x) for x in computers) + ")"
+                computer_filter &= Q(computer__id__in=computers)
 
-        return ClientAttribute.objects.scope(user).extra(
-            select={'total_computers': sql}
-        )
+        return queryset.annotate(total_computers=Count('computer', filter=computer_filter, distinct=True))
 
 
 class ServerAttributeFilter(SimpleListFilter):
@@ -222,30 +248,29 @@ class ServerAttributeAdmin(ImportExportActionModelAdmin):
     list_display = ('value', 'description', 'property_att')
     fields = ('property_att', 'value', 'description', 'inflicted_computers')
     list_filter = (ServerAttributeFilter,)
-    ordering = ('property_att', 'value',)
+    ordering = (
+        'property_att',
+        'value',
+    )
     search_fields = ('value', 'description')
     readonly_fields = ('inflicted_computers',)
     resource_class = AttributeResource
 
     def get_queryset(self, request):
-        sql = Attribute.TOTAL_COMPUTER_QUERY
         user = request.user.userprofile
+        queryset = ServerAttribute.objects.scope(user)
+
+        # Build computer filter for counting
+        computer_filter = Q(computer__isnull=False)
         if user and not user.is_view_all():
             computers = user.get_computers()
             if computers:
-                sql += " AND client_computer_sync_attributes.computer_id IN " \
-                    + "(" + ",".join(str(x) for x in computers) + ")"
+                computer_filter &= Q(computer__id__in=computers)
 
-        return ServerAttribute.objects.scope(user).extra(
-            select={'total_computers': sql}
-        )
+        return queryset.annotate(total_computers=Count('computer', filter=computer_filter, distinct=True))
 
     def inflicted_computers(self, obj):
-        ret = [
-            c.__str__() for c in Computer.productive.filter(
-                sync_attributes__in=[obj.pk]
-            ).exclude(tags__in=[obj.pk])
-        ]
+        ret = [c.__str__() for c in Computer.productive.filter(sync_attributes__in=[obj.pk]).exclude(tags__in=[obj.pk])]
 
         return format_html('<br />'.join(ret))
 
@@ -262,9 +287,7 @@ class AttributeSetAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return AttributeSet.objects.scope(
-            request.user.userprofile
-        ).prefetch_related(
+        return AttributeSet.objects.scope(request.user.userprofile).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
             Prefetch('excluded_attributes', queryset=qs),
             'included_attributes__property_att',
@@ -289,11 +312,8 @@ class ScheduleDelayLine(admin.TabularInline):
         self.request = request
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return ScheduleDelay.objects.scope(
-            request.user.userprofile
-        ).prefetch_related(
-            Prefetch('attributes', queryset=qs),
-            'attributes__property_att', 'schedule'
+        return ScheduleDelay.objects.scope(request.user.userprofile).prefetch_related(
+            Prefetch('attributes', queryset=qs), 'attributes__property_att', 'schedule'
         )
 
 
@@ -302,17 +322,12 @@ class ScheduleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'delays_count')
     search_fields = ('name', 'description')
     ordering = ('name',)
-    inlines = [ScheduleDelayLine, ]
+    inlines = [
+        ScheduleDelayLine,
+    ]
     extra = 0
 
-    fieldsets = (
-        ('', {
-            'fields': (
-                'name',
-                'description'
-            )
-        }),
-    )
+    fieldsets = (('', {'fields': ('name', 'description')}),)
 
 
 @admin.register(Package)
@@ -321,18 +336,19 @@ class PackageAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'version', 'architecture', 'project', 'store')
     list_filter = ('project__platform', 'project__name', 'store', 'deployment')
-    list_select_related = ('project', 'store',)
-    search_fields = ('name', 'store__name',)
+    list_select_related = (
+        'project',
+        'store',
+    )
+    search_fields = (
+        'name',
+        'store__name',
+    )
     ordering = ('name',)
 
     def get_queryset(self, request):
-        return Package.objects.scope(
-            request.user.userprofile
-        ).prefetch_related(
-            Prefetch(
-                'deployment_set',
-                queryset=Deployment.objects.scope(request.user.userprofile)
-            )
+        return Package.objects.scope(request.user.userprofile).prefetch_related(
+            Prefetch('deployment_set', queryset=Deployment.objects.scope(request.user.userprofile))
         )
 
     def save_model(self, request, obj, form, change):
@@ -340,17 +356,18 @@ class PackageAdmin(admin.ModelAdmin):
         if obj.id:
             if obj.store and package_file:
                 Package.handle_uploaded_file(
-                    package_file,
-                    os.path.join(Store.path(obj.project.slug, obj.store.slug), obj.fullname)
+                    package_file, os.path.join(Store.path(obj.project.slug, obj.store.slug), obj.fullname)
                 )
             super().save_model(request, obj, form, change)
         else:
             Package.objects.create(
-                fullname=obj.fullname, project=obj.project,
-                name=obj.name, version=obj.version,
+                fullname=obj.fullname,
+                project=obj.project,
+                name=obj.name,
+                version=obj.version,
                 architecture=obj.architecture,
                 store=obj.store,
-                file_=package_file
+                file_=package_file,
             )
 
 
@@ -365,9 +382,7 @@ class PackageSetAdmin(admin.ModelAdmin):
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == 'packages':
-            kwargs["queryset"] = Package.objects.filter(
-                store__isnull=False
-            )
+            kwargs['queryset'] = Package.objects.filter(store__isnull=False)
 
             return db_field.formfield(**kwargs)
 
@@ -386,40 +401,35 @@ class DeploymentAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
     fieldsets = (
-        (_('General'), {
-            'fields': ('name', 'slug', 'enabled', 'project', 'comment')
-        }),
-        (_('What (Packages)'), {
-            'classes': ('collapse',),
-            'fields': (
-                'available_packages',
-                'available_package_sets',
-                'packages_to_install',
-                'packages_to_remove',
-            )
-        }),
-        (_('To whom (Attributes)'), {
-            'classes': ('collapse',),
-            'fields': (
-                'domain',
-                'included_attributes',
-                'excluded_attributes'
-            )
-        }),
-        (_('When (Schedule)'), {
-            'fields': (
-                'start_date',
-                'schedule'
-            )
-        }),
-        (_('Packages by default'), {
-            'classes': ('collapse',),
-            'fields': (
-                'default_preincluded_packages',
-                'default_included_packages',
-                'default_excluded_packages',
-            )
-        }),
+        (_('General'), {'fields': ('name', 'slug', 'enabled', 'project', 'comment')}),
+        (
+            _('What (Packages)'),
+            {
+                'classes': ('collapse',),
+                'fields': (
+                    'available_packages',
+                    'available_package_sets',
+                    'packages_to_install',
+                    'packages_to_remove',
+                ),
+            },
+        ),
+        (
+            _('To whom (Attributes)'),
+            {'classes': ('collapse',), 'fields': ('domain', 'included_attributes', 'excluded_attributes')},
+        ),
+        (_('When (Schedule)'), {'fields': ('start_date', 'schedule')}),
+        (
+            _('Packages by default'),
+            {
+                'classes': ('collapse',),
+                'fields': (
+                    'default_preincluded_packages',
+                    'default_included_packages',
+                    'default_excluded_packages',
+                ),
+            },
+        ),
     )
 
     def computers(self, obj):
@@ -446,16 +456,16 @@ class DeploymentAdmin(admin.ModelAdmin):
         # create repository metadata when packages has been changed
         # or repository not have packages at first time
         # or name (slug) is changed (to avoid client errors)
-        if ((is_new and len(packages_after) == 0)
-                or cmp(
-                    sorted(
-                        obj.available_packages.values_list('id', flat=True)
-                    ),  # packages before
-                    sorted(packages_after)
-                ) != 0) or has_slug_changed:
+        if (
+            (is_new and len(packages_after) == 0)
+            or cmp(
+                sorted(obj.available_packages.values_list('id', flat=True)),  # packages before
+                sorted(packages_after),
+            )
+            != 0
+        ) or has_slug_changed:
             tasks.create_repository_metadata.apply_async(
-                queue=f'pms-{obj.pms().name}',
-                kwargs={'deployment_id': obj.id}
+                queue=f'pms-{obj.pms().name}', kwargs={'deployment_id': obj.id}
             )
 
             # delete old repository when name (slug) has changed
@@ -466,22 +476,24 @@ class DeploymentAdmin(admin.ModelAdmin):
         self.user = request.user
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return Deployment.objects.scope(
-            request.user.userprofile
-        ).prefetch_related(
-            Prefetch('included_attributes', queryset=qs),
-            'included_attributes__property_att',
-            Prefetch('excluded_attributes', queryset=qs),
-            'excluded_attributes__property_att',
-        ).extra(
-            select={
-                'schedule_begin': '(SELECT delay FROM core_scheduledelay '
-                                  'WHERE core_deployment.schedule_id = core_scheduledelay.schedule_id '
-                                  'ORDER BY core_scheduledelay.delay LIMIT 1)',
-                'schedule_end': '(SELECT delay+duration FROM core_scheduledelay '
-                                'WHERE core_deployment.schedule_id = core_scheduledelay.schedule_id '
-                                'ORDER BY core_scheduledelay.delay DESC LIMIT 1)'
-             }
+        return (
+            Deployment.objects.scope(request.user.userprofile)
+            .prefetch_related(
+                Prefetch('included_attributes', queryset=qs),
+                'included_attributes__property_att',
+                Prefetch('excluded_attributes', queryset=qs),
+                'excluded_attributes__property_att',
+            )
+            .extra(
+                select={
+                    'schedule_begin': '(SELECT delay FROM core_scheduledelay '
+                    'WHERE core_deployment.schedule_id = core_scheduledelay.schedule_id '
+                    'ORDER BY core_scheduledelay.delay LIMIT 1)',
+                    'schedule_end': '(SELECT delay+duration FROM core_scheduledelay '
+                    'WHERE core_deployment.schedule_id = core_scheduledelay.schedule_id '
+                    'ORDER BY core_scheduledelay.delay DESC LIMIT 1)',
+                }
+            )
         )
 
 
@@ -489,46 +501,62 @@ class DeploymentAdmin(admin.ModelAdmin):
 class ExternalSourceAdmin(DeploymentAdmin):
     form = ExternalSourceForm
     fieldsets = (
-        (_('General'), {
-            'fields': (
-                'name',
-                'slug',
-                'project',
-                'enabled',
-                'comment',
-            )
-        }),
-        (_('Source'), {
-            'fields': ('base_url', 'suite', 'components', 'options', 'frozen', 'expire',)
-        }),
-        (_('What (Packages)'), {
-            'classes': ('collapse',),
-            'fields': (
-                'packages_to_install',
-                'packages_to_remove',
-            )
-        }),
-        (_('Packages by default'), {
-            'classes': ('collapse',),
-            'fields': (
-                'default_preincluded_packages',
-                'default_included_packages',
-                'default_excluded_packages',
-            )
-        }),
-        (_('To whom (Attributes)'), {
-            'fields': (
-                'domain',
-                'included_attributes',
-                'excluded_attributes'
-            )
-        }),
-        (_('When (Schedule)'), {
-            'fields': (
-                'start_date',
-                'schedule',
-            )
-        }),
+        (
+            _('General'),
+            {
+                'fields': (
+                    'name',
+                    'slug',
+                    'project',
+                    'enabled',
+                    'comment',
+                )
+            },
+        ),
+        (
+            _('Source'),
+            {
+                'fields': (
+                    'base_url',
+                    'suite',
+                    'components',
+                    'options',
+                    'frozen',
+                    'expire',
+                )
+            },
+        ),
+        (
+            _('What (Packages)'),
+            {
+                'classes': ('collapse',),
+                'fields': (
+                    'packages_to_install',
+                    'packages_to_remove',
+                ),
+            },
+        ),
+        (
+            _('Packages by default'),
+            {
+                'classes': ('collapse',),
+                'fields': (
+                    'default_preincluded_packages',
+                    'default_included_packages',
+                    'default_excluded_packages',
+                ),
+            },
+        ),
+        (_('To whom (Attributes)'), {'fields': ('domain', 'included_attributes', 'excluded_attributes')}),
+        (
+            _('When (Schedule)'),
+            {
+                'fields': (
+                    'start_date',
+                    'schedule',
+                )
+            },
+        ),
     )
 
 
@@ -536,32 +564,43 @@ class ExternalSourceAdmin(DeploymentAdmin):
 class InternalSourceAdmin(DeploymentAdmin):
     form = InternalSourceForm
     fieldsets = (
-        (_('General'), {
-            'fields': ('name', 'slug', 'project', 'enabled', 'comment',)
-        }),
-        (_('What (Packages)'), {
-            'classes': ('collapse',),
-            'fields': (
-                'available_packages',
-                'available_package_sets',
-                'packages_to_install',
-                'packages_to_remove',
-            )
-        }),
-        (_('Packages by default'), {
-            'classes': ('collapse',),
-            'fields': (
-                'default_preincluded_packages',
-                'default_included_packages',
-                'default_excluded_packages',
-            )
-        }),
-        (_('To whom (Attributes)'), {
-            'fields': ('domain', 'included_attributes', 'excluded_attributes')
-        }),
-        (_('When (Schedule)'), {
-            'fields': ('start_date', 'schedule')
-        }),
+        (
+            _('General'),
+            {
+                'fields': (
+                    'name',
+                    'slug',
+                    'project',
+                    'enabled',
+                    'comment',
+                )
+            },
+        ),
+        (
+            _('What (Packages)'),
+            {
+                'classes': ('collapse',),
+                'fields': (
+                    'available_packages',
+                    'available_package_sets',
+                    'packages_to_install',
+                    'packages_to_remove',
+                ),
+            },
+        ),
+        (
+            _('Packages by default'),
+            {
+                'classes': ('collapse',),
+                'fields': (
+                    'default_preincluded_packages',
+                    'default_included_packages',
+                    'default_excluded_packages',
+                ),
+            },
+        ),
+        (_('To whom (Attributes)'), {'fields': ('domain', 'included_attributes', 'excluded_attributes')}),
+        (_('When (Schedule)'), {'fields': ('start_date', 'schedule')}),
     )
 
 
@@ -575,32 +614,41 @@ class UserProfileAdmin(admin.ModelAdmin):
     actions = ['activate_users']
 
     fieldsets = (
-         (_('General'), {
-             'fields': (
-                 'username',
-                 'first_name',
-                 'last_name',
-                 'email',
-                 'date_joined',
-                 'last_login',
-             ),
-         }),
-         (_('Authorizations'), {
-             'fields': (
-                 'is_active',
-                 'is_superuser',
-                 'is_staff',
-                 'groups',
-                 'user_permissions',
-                 'domains',
-             ),
-         }),
-         (_('Preferences'), {
-            'fields': (
-                'domain_preference',
-                'scope_preference',
-            ),
-         }),
+        (
+            _('General'),
+            {
+                'fields': (
+                    'username',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'date_joined',
+                    'last_login',
+                ),
+            },
+        ),
+        (
+            _('Authorizations'),
+            {
+                'fields': (
+                    'is_active',
+                    'is_superuser',
+                    'is_staff',
+                    'groups',
+                    'user_permissions',
+                    'domains',
+                ),
+            },
+        ),
+        (
+            _('Preferences'),
+            {
+                'fields': (
+                    'domain_preference',
+                    'scope_preference',
+                ),
+            },
+        ),
     )
 
     def activate_users(self, request, queryset):
@@ -629,11 +677,7 @@ class UserProfileAdmin(admin.ModelAdmin):
             }
 
         # Prevent non-superusers from editing their own permissions
-        if (
-            not is_superuser
-            and obj is not None
-            and obj == request.user
-        ):
+        if not is_superuser and obj is not None and obj == request.user:
             disabled_fields |= {
                 'is_staff',
                 'is_superuser',
@@ -655,34 +699,38 @@ class ScopeAdmin(admin.ModelAdmin):
     ordering = ('name',)
     search_fields = ('name',)
     fieldsets = (
-        (_('General'), {
-            'fields': (
-                'name',
-                'domain'
-            ),
-        }),
-        (_('Attributes'), {
-            'fields': (
-                'included_attributes',
-                'excluded_attributes',
-            ),
-        }),
-        ('', {
-            'fields': ('user',),
-            'classes': ['hidden'],
-        })
+        (
+            _('General'),
+            {
+                'fields': ('name', 'domain'),
+            },
+        ),
+        (
+            _('Attributes'),
+            {
+                'fields': (
+                    'included_attributes',
+                    'excluded_attributes',
+                ),
+            },
+        ),
+        (
+            '',
+            {
+                'fields': ('user',),
+                'classes': ['hidden'],
+            },
+        ),
     )
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return Scope.objects.scope(
-            request.user.userprofile
-        ).prefetch_related(
+        return Scope.objects.scope(request.user.userprofile).prefetch_related(
             Prefetch('included_attributes', queryset=qs),
             'included_attributes__property_att',
             Prefetch('excluded_attributes', queryset=qs),
-            'excluded_attributes__property_att'
+            'excluded_attributes__property_att',
         )
 
 
@@ -693,22 +741,31 @@ class DomainAdmin(admin.ModelAdmin):
     ordering = ('name',)
     search_fields = ('name',)
     fieldsets = (
-        (_('General'), {
-            'fields': (
-                'name', 'comment', 'users',
-            ),
-        }),
-        (_('Attributes'), {
-            'fields': (
-                'included_attributes',
-                'excluded_attributes',
-             ),
-        }),
-        (_('Available tags'), {
-            'fields': (
-                'tags',
-            ),
-        }),
+        (
+            _('General'),
+            {
+                'fields': (
+                    'name',
+                    'comment',
+                    'users',
+                ),
+            },
+        ),
+        (
+            _('Attributes'),
+            {
+                'fields': (
+                    'included_attributes',
+                    'excluded_attributes',
+                ),
+            },
+        ),
+        (
+            _('Available tags'),
+            {
+                'fields': ('tags',),
+            },
+        ),
     )
 
     def get_queryset(self, request):
