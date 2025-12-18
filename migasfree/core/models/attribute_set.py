@@ -122,7 +122,7 @@ class AttributeSet(models.Model, MigasLink):
                 raise ValidationError(_('Duplicated name'))
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        super().save(force_insert, force_update, using, update_fields)
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
         Attribute.objects.get_or_create(
             property_att=Property.objects.get(prefix='SET', sort='basic'),
