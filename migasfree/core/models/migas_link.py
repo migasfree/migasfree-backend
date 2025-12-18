@@ -239,6 +239,8 @@ class MigasLink:
 
     def _get_reverse_relations(self, user, server, related_objects):
         """Get reverse relations (one-to-many, one-to-one, m2m auto-created)."""
+        from ...client.models import Computer
+
         data = []
 
         for related_object, _ in related_objects:
@@ -295,7 +297,7 @@ class MigasLink:
                                         'model': self.model_to_route(
                                             related_model._meta.app_label, related_model._meta.model_name
                                         ),
-                                        'query': {_field: self.id, 'status__in': 'intended,reserved,unknown'},
+                                        'query': {_field: self.id, 'status__in': Computer.PRODUCTIVE_STATUS_CSV},
                                     },
                                     'text': f'{gettext(related_model._meta.verbose_name_plural)} [{gettext(related_object.field.verbose_name)}]',
                                     'count': count,
@@ -362,6 +364,8 @@ class MigasLink:
 
     def _get_special_relations(self, user, server, request):
         """Get special relations for models with custom related_objects method."""
+        from ...client.models import Computer
+
         data = []
         actions = []
 
@@ -436,7 +440,7 @@ class MigasLink:
                                                 ),
                                             )
                                         ),
-                                        'status__in': 'intended,reserved,unknown',
+                                        'status__in': Computer.PRODUCTIVE_STATUS_CSV,
                                     },
                                 },
                                 'text': gettext(self.related_title(rel_objects)),
