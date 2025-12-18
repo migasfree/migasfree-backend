@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -17,45 +15,46 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import json
-
+import logging
 from datetime import datetime
 from operator import gt, le
 
 from asgiref.sync import async_to_sync
-from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils.translation import gettext
 from celery import shared_task
 from channels.layers import get_channel_layer
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
+from django.utils.translation import gettext
 from django_redis import get_redis_connection
 
-from ..core.models import Package, PackageSet, Deployment
-from ..client.models import Notification, Fault, Error, Computer
-from ..utils import decode_set, decode_dict
+from ..client.models import Computer, Error, Fault, Notification
+from ..core.models import Deployment, Package, PackageSet
+from ..utils import decode_dict, decode_set
 from .utils import filter_computers_by_date
 
-
-import logging
 logger = logging.getLogger('celery')
 
 
 def add_orphan_packages():
     con = get_redis_connection()
     con.hset(
-        'migasfree:chk:orphan_packages', mapping={
+        'migasfree:chk:orphan_packages',
+        mapping={
             'msg': gettext('Orphan Packages'),
             'target': 'server',
             'level': 'warning',
             'result': Package.orphan_count(),
-            'api': json.dumps({
-                'model': 'packages',
-                'query': {
-                    'deployment': True,  # isnull = True
-                    'store': False,  # isnull = False
-                    'packageset': True  # isnull = True
+            'api': json.dumps(
+                {
+                    'model': 'packages',
+                    'query': {
+                        'deployment': True,  # isnull = True
+                        'store': False,  # isnull = False
+                        'packageset': True,  # isnull = True
+                    },
                 }
-            })
-        }
+            ),
+        },
     )
     con.sadd('migasfree:watch:chk', 'orphan_packages')
 
@@ -63,19 +62,22 @@ def add_orphan_packages():
 def add_orphan_package_sets():
     con = get_redis_connection()
     con.hset(
-        'migasfree:chk:orphan_package_sets', mapping={
+        'migasfree:chk:orphan_package_sets',
+        mapping={
             'msg': gettext('Orphan Package Sets'),
             'target': 'server',
             'level': 'warning',
             'result': PackageSet.orphan_count(),
-            'api': json.dumps({
-                'model': 'package_sets',
-                'query': {
-                    'deployment': True,  # isnull = True
-                    'packages': False  # isnull = False
+            'api': json.dumps(
+                {
+                    'model': 'package_sets',
+                    'query': {
+                        'deployment': True,  # isnull = True
+                        'packages': False,  # isnull = False
+                    },
                 }
-            })
-        }
+            ),
+        },
     )
     con.sadd('migasfree:watch:chk', 'orphan_package_sets')
 
@@ -83,18 +85,14 @@ def add_orphan_package_sets():
 def add_unchecked_notifications():
     con = get_redis_connection()
     con.hset(
-        'migasfree:chk:notifications', mapping={
+        'migasfree:chk:notifications',
+        mapping={
             'msg': gettext('Unchecked Notifications'),
             'target': 'server',
             'level': 'warning',
             'result': Notification.objects.unchecked().count(),
-            'api': json.dumps({
-                'model': 'notifications',
-                'query': {
-                    'checked': False
-                }
-            })
-        }
+            'api': json.dumps({'model': 'notifications', 'query': {'checked': False}}),
+        },
     )
     con.sadd('migasfree:watch:chk', 'notifications')
 
@@ -102,19 +100,22 @@ def add_unchecked_notifications():
 def add_unchecked_faults():
     con = get_redis_connection()
     con.hset(
-        'migasfree:chk:faults', mapping={
+        'migasfree:chk:faults',
+        mapping={
             'msg': gettext('Unchecked Faults'),
             'target': 'computer',
             'level': 'critical',
             'result': Fault.unchecked_count(),
-            'api': json.dumps({
-                'model': 'faults',
-                'query': {
-                    'checked': False,
-                    'user': 'me',
+            'api': json.dumps(
+                {
+                    'model': 'faults',
+                    'query': {
+                        'checked': False,
+                        'user': 'me',
+                    },
                 }
-            })
-        }
+            ),
+        },
     )
     con.sadd('migasfree:watch:chk', 'faults')
 
@@ -122,18 +123,14 @@ def add_unchecked_faults():
 def add_unchecked_errors():
     con = get_redis_connection()
     con.hset(
-        'migasfree:chk:errors', mapping={
+        'migasfree:chk:errors',
+        mapping={
             'msg': gettext('Unchecked Errors'),
             'target': 'computer',
             'level': 'critical',
             'result': Error.unchecked_count(),
-            'api': json.dumps({
-                'model': 'errors',
-                'query': {
-                    'checked': False
-                }
-            })
-        }
+            'api': json.dumps({'model': 'errors', 'query': {'checked': False}}),
+        },
     )
     con.sadd('migasfree:watch:chk', 'errors')
 
@@ -141,18 +138,19 @@ def add_unchecked_errors():
 def add_generating_repos():
     con = get_redis_connection()
     con.hset(
-        'migasfree:chk:repos', mapping={
+        'migasfree:chk:repos',
+        mapping={
             'msg': gettext('Generating Repositories'),
             'target': 'server',
             'level': 'info',
             'result': con.scard('migasfree:watch:repos'),
-            'api': json.dumps({
-                'model': 'deployments',
-                'query': {
-                    'id_in': ','.join(decode_set(con.smembers('migasfree:watch:repos')))
+            'api': json.dumps(
+                {
+                    'model': 'deployments',
+                    'query': {'id_in': ','.join(decode_set(con.smembers('migasfree:watch:repos')))},
                 }
-            })
-        }
+            ),
+        },
     )
     con.sadd('migasfree:watch:chk', 'repos')
 
@@ -162,18 +160,19 @@ def add_synchronizing_computers():
 
     con = get_redis_connection()
     con.hset(
-        'migasfree:chk:syncs', mapping={
+        'migasfree:chk:syncs',
+        mapping={
             'msg': gettext('Synchronizing Computers Now'),
             'target': 'computer',
             'level': 'info',
             'result': len(result),
-            'api': json.dumps({
-                'model': 'messages',
-                'query': {
-                    'created_at__gte': datetime.strftime(delayed_time, '%Y-%m-%dT%H:%M:%S')
+            'api': json.dumps(
+                {
+                    'model': 'messages',
+                    'query': {'created_at__gte': datetime.strftime(delayed_time, '%Y-%m-%dT%H:%M:%S')},
                 }
-            })
-        }
+            ),
+        },
     )
     con.sadd('migasfree:watch:chk', 'syncs')
 
@@ -183,18 +182,16 @@ def add_delayed_computers():
 
     con = get_redis_connection()
     con.hset(
-        'migasfree:chk:delayed', mapping={
+        'migasfree:chk:delayed',
+        mapping={
             'msg': gettext('Delayed Computers'),
             'target': 'computer',
             'level': 'warning',
             'result': len(result),
-            'api': json.dumps({
-                'model': 'messages',
-                'query': {
-                    'created_at__lt': datetime.strftime(delayed_time, '%Y-%m-%dT%H:%M:%S')
-                }
-            })
-        }
+            'api': json.dumps(
+                {'model': 'messages', 'query': {'created_at__lt': datetime.strftime(delayed_time, '%Y-%m-%dT%H:%M:%S')}}
+            ),
+        },
     )
     con.sadd('migasfree:watch:chk', 'delayed')
 
@@ -206,25 +203,33 @@ def add_active_schedule_deployments():
     con = get_redis_connection()
 
     result = 0
-    for item in Deployment.objects.filter(schedule__isnull=False, enabled=True):
-        if int(item.schedule_timeline()['percent']) < 100:
+    for item in (
+        Deployment.objects.select_related('schedule')
+        .prefetch_related('schedule__delays')
+        .filter(schedule__isnull=False, enabled=True)
+    ):
+        timeline = item.schedule_timeline()
+        if timeline and int(timeline['percent']) < 100:
             result += 1
 
     con.hset(
-        'migasfree:chk:active_deploys', mapping={
+        'migasfree:chk:active_deploys',
+        mapping={
             'msg': gettext('Active schedule deployments'),
             'target': 'server',
             'level': 'info',
             'result': result,
-            'api': json.dumps({
-                'model': 'deployments',
-                'query': {
-                    'enabled': True,
-                    'schedule': False,  # isnull = False
-                    'percent__lt': 100
+            'api': json.dumps(
+                {
+                    'model': 'deployments',
+                    'query': {
+                        'enabled': True,
+                        'schedule': False,  # isnull = False
+                        'percent__lt': 100,
+                    },
                 }
-            })
-        }
+            ),
+        },
     )
     con.sadd('migasfree:watch:chk', 'active_deploys')
 
@@ -241,20 +246,23 @@ def add_finished_schedule_deployments():
             result += 1
 
     con.hset(
-        'migasfree:chk:finished_deploys', mapping={
+        'migasfree:chk:finished_deploys',
+        mapping={
             'msg': gettext('Finished schedule deployments'),
             'target': 'server',
             'level': 'warning',
             'result': result,
-            'api': json.dumps({
-                'model': 'deployments',
-                'query': {
-                    'enabled': True,
-                    'schedule': False,  # isnull = False
-                    'percent__gte': 100
+            'api': json.dumps(
+                {
+                    'model': 'deployments',
+                    'query': {
+                        'enabled': True,
+                        'schedule': False,  # isnull = False
+                        'percent__gte': 100,
+                    },
                 }
-            })
-        }
+            ),
+        },
     )
     con.sadd('migasfree:watch:chk', 'finished_deploys')
 
@@ -305,10 +313,7 @@ def alerts():
     logger.debug(con.smembers('migasfree:watch:chk'))
 
     channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)('stats', {
-        'type': 'send_alerts',
-        'text': get_alerts()
-    })
+    async_to_sync(channel_layer.group_send)('stats', {'type': 'send_alerts', 'text': get_alerts()})
 
 
 def assigned_computers_to_deployment(deployment_id):
@@ -317,28 +322,38 @@ def assigned_computers_to_deployment(deployment_id):
     except ObjectDoesNotExist:
         return
 
-    computers = set(Computer.objects.filter(
-        Q(project=deploy.project) & (
-            Q(sync_attributes__id__in=deploy.included_attributes.all())
-            | Q(tags__id__in=deploy.included_attributes.all())
-        )
-    ).values_list('id', flat=True))
+    computers = set(
+        Computer.objects.filter(
+            Q(project=deploy.project)
+            & (
+                Q(sync_attributes__id__in=deploy.included_attributes.all())
+                | Q(tags__id__in=deploy.included_attributes.all())
+            )
+        ).values_list('id', flat=True)
+    )
 
     if deploy.schedule and deploy.schedule.delays:
         for delay in deploy.schedule.delays.all():
-            computers = computers.union(set(Computer.objects.filter(
-                Q(project=deploy.project) & (
-                    Q(sync_attributes__id__in=delay.attributes.all())
-                    | Q(tags__id__in=delay.attributes.all())
+            computers = computers.union(
+                set(
+                    Computer.objects.filter(
+                        Q(project=deploy.project)
+                        & (Q(sync_attributes__id__in=delay.attributes.all()) | Q(tags__id__in=delay.attributes.all()))
+                    ).values_list('id', flat=True)
                 )
-            ).values_list('id', flat=True)))
+            )
 
-    computers = computers.difference(set(Computer.objects.filter(
-        Q(project=deploy.project) & (
-            Q(sync_attributes__id__in=deploy.excluded_attributes.all())
-            | Q(tags__id__in=deploy.excluded_attributes.all())
+    computers = computers.difference(
+        set(
+            Computer.objects.filter(
+                Q(project=deploy.project)
+                & (
+                    Q(sync_attributes__id__in=deploy.excluded_attributes.all())
+                    | Q(tags__id__in=deploy.excluded_attributes.all())
+                )
+            ).values_list('id', flat=True)
         )
-    ).values_list('id', flat=True)))
+    )
 
     con = get_redis_connection()
     key = f'migasfree:deployments:{deployment_id}:computers'
