@@ -72,7 +72,7 @@ class Driver(models.Model, MigasLink):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.packages_to_install = normalize_line_breaks(self.packages_to_install)
 
-        super().save(force_insert, force_update, using, update_fields)
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
     def __str__(self):
         return self.name.split('/')[-1] if self.name else ''
