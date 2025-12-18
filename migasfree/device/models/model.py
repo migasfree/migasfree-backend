@@ -77,7 +77,7 @@ class Model(models.Model, MigasLink):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.name = self.name.replace(' ', '_')
-        super().save(force_insert, force_update, using, update_fields)
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
     class Meta:
         app_label = 'device'
