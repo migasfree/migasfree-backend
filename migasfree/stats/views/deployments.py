@@ -37,32 +37,24 @@ from ...utils import time_horizon
 class DeploymentStatsViewSet(viewsets.ViewSet):
     serializer_class = None
 
+    def _get_deployment_set(self, pk, key_suffix):
+        """Helper to get Redis set members for a deployment."""
+        deploy = get_object_or_404(Deployment, pk=pk)
+        con = get_redis_connection()
+        response = con.smembers(f'migasfree:deployments:{deploy.id}:{key_suffix}')
+        return list(map(int, response))
+
     @action(methods=['get'], detail=True, url_path='computers/assigned')
     def assigned_computers(self, request, pk=None):
-        deploy = get_object_or_404(Deployment, pk=pk)
-
-        con = get_redis_connection()
-        response = con.smembers(f'migasfree:deployments:{deploy.id}:computers')
-
-        return Response(list(map(int, response)), status=status.HTTP_200_OK)
+        return Response(self._get_deployment_set(pk, 'computers'), status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=True, url_path='computers/status/ok')
     def computers_with_ok_status(self, request, pk=None):
-        deploy = get_object_or_404(Deployment, pk=pk)
-
-        con = get_redis_connection()
-        response = con.smembers(f'migasfree:deployments:{deploy.id}:ok')
-
-        return Response(list(map(int, response)), status=status.HTTP_200_OK)
+        return Response(self._get_deployment_set(pk, 'ok'), status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=True, url_path='computers/status/error')
     def computers_with_error_status(self, request, pk=None):
-        deploy = get_object_or_404(Deployment, pk=pk)
-
-        con = get_redis_connection()
-        response = con.smembers(f'migasfree:deployments:{deploy.id}:error')
-
-        return Response(list(map(int, response)), status=status.HTTP_200_OK)
+        return Response(self._get_deployment_set(pk, 'error'), status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=True)
     def timeline(self, request, pk=None):
