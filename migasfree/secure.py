@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -16,17 +14,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import json
-import subprocess
 import logging
+import os
+import subprocess
 
-from jwcrypto import jwk, jwe, jws
-from jwcrypto.common import json_encode
 from django.conf import settings
 from django.utils.translation import gettext
+from jwcrypto import jwe, jwk, jws
+from jwcrypto.common import json_encode
 
 from migasfree import __contact__
+
 from .utils import read_file, write_file
 
 ALG_SIGN = 'RS256'
@@ -47,9 +46,7 @@ def load_jwk(filename):
     Returns:
         jwk.JWK: loaded JWK object
     """
-    return jwk.JWK.from_pem(
-        read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, filename))
-    )
+    return jwk.JWK.from_pem(read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, filename)))
 
 
 def sign(claims, priv_key):
@@ -63,13 +60,7 @@ def sign(claims, priv_key):
     payload_bytes = str(payload).encode('utf-8')
 
     jws_token = jws.JWS(payload_bytes)
-    jws_token.add_signature(
-        priv_jwk,
-        header=json_encode({
-            'alg': ALG_SIGN,
-            'kid': priv_jwk.thumbprint()
-        })
-    )
+    jws_token.add_signature(priv_jwk, header=json_encode({'alg': ALG_SIGN, 'kid': priv_jwk.thumbprint()}))
 
     return jws_token.serialize()
 
@@ -99,11 +90,7 @@ def encrypt(claims, pub_key):
         'typ': TYPE_JWE,
         'kid': pub_jwk.thumbprint(),
     }
-    jwe_token = jwe.JWE(
-        json.dumps(claims).encode('utf-8'),
-        recipient=pub_jwk,
-        protected=protected_header
-    )
+    jwe_token = jwe.JWE(json.dumps(claims).encode('utf-8'), recipient=pub_jwk, protected=protected_header)
 
     return jwe_token.serialize()
 
@@ -125,10 +112,7 @@ def wrap(data, sign_key, encrypt_key):
     """
     string wrap(dict data, string sign_key, string encrypt_key)
     """
-    claims = {
-        'data': data,
-        'sign': sign(data, sign_key)
-    }
+    claims = {'data': data, 'sign': sign(data, sign_key)}
 
     return encrypt(claims, encrypt_key)
 
@@ -196,10 +180,7 @@ def gpg_get_key(name):
     if not os.path.exists(gpg_home):
         os.makedirs(gpg_home, 0o700)
         # creates configuration file
-        write_file(
-            gpg_conf,
-            'cert-digest-algo SHA256\ndigest-algo SHA256\nuse-agent\npinentry-mode loopback'
-        )
+        write_file(gpg_conf, 'cert-digest-algo SHA256\ndigest-algo SHA256\nuse-agent\npinentry-mode loopback')
         os.chmod(gpg_conf, 0o600)
         write_file(gpg_agent_conf, 'allow-loopback-pinentry')
         os.chmod(gpg_agent_conf, 0o600)
@@ -215,10 +196,7 @@ Name-Email: {__contact__}
 Expire-Date: 0
 """
 
-        command = [
-            'gpg', '--batch', '--generate-key',
-            '--pinentry-mode', 'loopback', '--passphrase', ''
-        ]
+        command = ['gpg', '--batch', '--generate-key', '--pinentry-mode', 'loopback', '--passphrase', '']
         subprocess.run(command, input=key_params, text=True, capture_output=True, check=True)
 
         command = ['gpg', '--list-keys', name]
@@ -226,14 +204,21 @@ Expire-Date: 0
         fingerprint = output.split('\n')[1].split('/')[-1].strip()
 
         # sign the key's UserID with SHA256
-        subprocess.run([
-            'gpg',
-            '--batch',
-            '--cert-digest-algo', 'SHA256',
-            '--pinentry-mode', 'loopback',
-            '--passphrase', '',
-            '--sign-key', fingerprint
-        ], check=True)
+        subprocess.run(
+            [
+                'gpg',
+                '--batch',
+                '--cert-digest-algo',
+                'SHA256',
+                '--pinentry-mode',
+                'loopback',
+                '--passphrase',
+                '',
+                '--sign-key',
+                fingerprint,
+            ],
+            check=True,
+        )
 
         # export and save public key
         command = ['gpg', '--armor', '--export', fingerprint, '>', public_key]
