@@ -96,6 +96,35 @@ class MigasLink:
     def get_description(action):
         return action.get('description', '')
 
+    def _build_external_actions(self, element_name, rel_ids, server, count):
+        """Build external actions list for a given element."""
+        actions = []
+        if element_name not in settings.MIGASFREE_EXTERNAL_ACTIONS:
+            return actions
+
+        element = settings.MIGASFREE_EXTERNAL_ACTIONS[element_name]
+        for action in element:
+            action_cfg = element[action]
+            allows_many = action_cfg.get('many', True)
+            if (allows_many or count == 1) and self.is_related(action_cfg):
+                info_action = {
+                    'name': action,
+                    'model': self._meta.model_name,
+                    'id': self.id,
+                    'related_model': element_name,
+                    'related_ids': rel_ids,
+                    'server': server,
+                }
+                actions.append(
+                    {
+                        'url': self.custom_protocol(info_action),
+                        'title': action_cfg['title'],
+                        'description': self.get_description(action_cfg),
+                    }
+                )
+
+        return actions
+
     def is_related(self, action):
         model = self._meta.model_name.lower()
 
@@ -198,28 +227,8 @@ class MigasLink:
             count = rel_objects.count()
 
             if count:
-                actions = []
-                if _name in settings.MIGASFREE_EXTERNAL_ACTIONS:
-                    element = settings.MIGASFREE_EXTERNAL_ACTIONS[_name]
-                    for action in element:
-                        if 'many' not in element[action] or element[action]['many'] or count == 1:
-                            if self.is_related(element[action]):
-                                info_action = {
-                                    'name': action,
-                                    'model': self._meta.model_name,
-                                    'id': self.id,
-                                    'related_model': _name,
-                                    'related_ids': list(rel_objects.values_list('id', flat=True)),
-                                    'server': server,
-                                }
-
-                                actions.append(
-                                    {
-                                        'url': self.custom_protocol(info_action),
-                                        'title': element[action]['title'],
-                                        'description': self.get_description(element[action]),
-                                    }
-                                )
+                rel_ids = list(rel_objects.values_list('id', flat=True))
+                actions = self._build_external_actions(_name, rel_ids, server, count)
 
                 data.append(
                     {
@@ -237,90 +246,74 @@ class MigasLink:
 
         return data
 
-    def _get_reverse_relations(self, user, server, related_objects):
-        """Get reverse relations (one-to-many, one-to-one, m2m auto-created)."""
+    def _get_related_queryset(self, related_model, related_object, user):
+        """Get queryset for related objects based on model type."""
+        filter_kwargs = {related_object.field.name: self.id}
+
+        if not hasattr(related_model.objects, 'scope'):
+            return related_model.objects.filter(**filter_kwargs)
+
+        if related_model.__name__.lower() == 'computer':
+            return related_model.productive.scope(user).filter(**filter_kwargs)
+
+        return related_model.objects.scope(user).filter(**filter_kwargs)
+
+    def _should_exclude_relation(self, related_model, _field):
+        """Check if relation should be excluded."""
+        is_cid_computer = (
+            related_model.__name__.lower() == 'computer'
+            and self._meta.model_name == 'attribute'
+            and self.property_att.prefix == 'CID'
+        )
+        is_excluded_link = f'{related_model._meta.model_name} - {_field}' in self._exclude_links
+
+        return is_cid_computer or is_excluded_link
+
+    def _build_relation_entry(self, related_model, related_object, _field, count, actions):
+        """Build a single relation data entry."""
         from ...client.models import Computer
 
+        model_name = related_model.__name__.lower()
+        text = f'{gettext(related_model._meta.verbose_name_plural)} [{gettext(related_object.field.verbose_name)}]'
+        api_model = self.model_to_route(related_model._meta.app_label, related_model._meta.model_name)
+
+        if model_name == 'computer':
+            query = {_field: self.id, 'status__in': Computer.PRODUCTIVE_STATUS_CSV}
+        else:
+            if model_name == 'faultdefinition' and _field == 'users__user_ptr':
+                _field = 'users__id'
+            query = {_field: self.id}
+
+        return {
+            'api': {'model': api_model, 'query': query},
+            'text': text,
+            'count': count,
+            'actions': actions,
+        }
+
+    def _get_reverse_relations(self, user, server, related_objects):
+        """Get reverse relations (one-to-many, one-to-one, m2m auto-created)."""
         data = []
 
         for related_object, _ in related_objects:
             related_model, _field = self.transmodel(related_object)
-            if related_model:
-                # EXCLUDE CID
-                if (
-                    related_model.__name__.lower() != 'computer'
-                    or not (self._meta.model_name == 'attribute' and self.property_att.prefix == 'CID')
-                ) and f'{related_model._meta.model_name} - {_field}' not in self._exclude_links:
-                    if hasattr(related_model.objects, 'scope'):
-                        if related_model.__name__.lower() == 'computer':
-                            rel_objects = related_model.productive.scope(user).filter(
-                                **{related_object.field.name: self.id}
-                            )
-                        else:
-                            rel_objects = related_model.objects.scope(user).filter(
-                                **{related_object.field.name: self.id}
-                            )
-                    else:
-                        rel_objects = related_model.objects.filter(**{related_object.field.name: self.id})
 
-                    # Fetch IDs once and derive count from that
-                    rel_ids = list(rel_objects.values_list('id', flat=True))
-                    count = len(rel_ids)
-                    if count and related_model._meta.app_label != 'authtoken':
-                        actions = []
-                        if related_model.__name__.lower() in settings.MIGASFREE_EXTERNAL_ACTIONS:
-                            element = settings.MIGASFREE_EXTERNAL_ACTIONS[related_model.__name__.lower()]
-                            for action in element:
-                                if 'many' not in element[action] or element[action]['many'] or count == 1:
-                                    if self.is_related(element[action]):
-                                        info_action = {
-                                            'name': action,
-                                            'model': self._meta.model_name,
-                                            'id': self.id,
-                                            'related_model': related_model.__name__.lower(),
-                                            'related_ids': rel_ids,
-                                            'server': server,
-                                        }
+            if not related_model:
+                continue
 
-                                        actions.append(
-                                            {
-                                                'url': self.custom_protocol(info_action),
-                                                'title': element[action]['title'],
-                                                'description': self.get_description(element[action]),
-                                            }
-                                        )
+            if self._should_exclude_relation(related_model, _field):
+                continue
 
-                        if related_model.__name__.lower() == 'computer':
-                            data.append(
-                                {
-                                    'api': {
-                                        'model': self.model_to_route(
-                                            related_model._meta.app_label, related_model._meta.model_name
-                                        ),
-                                        'query': {_field: self.id, 'status__in': Computer.PRODUCTIVE_STATUS_CSV},
-                                    },
-                                    'text': f'{gettext(related_model._meta.verbose_name_plural)} [{gettext(related_object.field.verbose_name)}]',
-                                    'count': count,
-                                    'actions': actions,
-                                }
-                            )
-                        else:
-                            if related_model.__name__.lower() == 'faultdefinition' and _field == 'users__user_ptr':
-                                _field = 'users__id'
+            rel_objects = self._get_related_queryset(related_model, related_object, user)
+            rel_ids = list(rel_objects.values_list('id', flat=True))
+            count = len(rel_ids)
 
-                            data.append(
-                                {
-                                    'api': {
-                                        'model': self.model_to_route(
-                                            related_model._meta.app_label, related_model._meta.model_name
-                                        ),
-                                        'query': {_field: self.id},
-                                    },
-                                    'text': f'{gettext(related_model._meta.verbose_name_plural)} [{gettext(related_object.field.verbose_name)}]',
-                                    'count': count,
-                                    'actions': actions,
-                                }
-                            )
+            if not count or related_model._meta.app_label == 'authtoken':
+                continue
+
+            actions = self._build_external_actions(related_model.__name__.lower(), rel_ids, server, count)
+            entry = self._build_relation_entry(related_model, related_object, _field, count, actions)
+            data.append(entry)
 
         return data
 
@@ -383,27 +376,8 @@ class MigasLink:
                 # Fetch IDs once and derive count from that
                 rel_ids = list(rel_objects.values_list('id', flat=True))
                 count = len(rel_ids)
-                if count and 'computer' in settings.MIGASFREE_EXTERNAL_ACTIONS:
-                    element = settings.MIGASFREE_EXTERNAL_ACTIONS['computer']
-                    for action in element:
-                        if 'many' not in element[action] or element[action]['many'] or count == 1:
-                            if self.is_related(element[action]):
-                                info_action = {
-                                    'name': action,
-                                    'model': self._meta.model_name,
-                                    'id': self.id,
-                                    'related_model': 'computer',
-                                    'related_ids': rel_ids,
-                                    'server': server,
-                                }
-
-                                actions.append(
-                                    {
-                                        'url': self.custom_protocol(info_action),
-                                        'title': element[action]['title'],
-                                        'description': self.get_description(element[action]),
-                                    }
-                                )
+                if count:
+                    actions = self._build_external_actions('computer', rel_ids, server, count)
 
                     if self._meta.model_name.lower() == 'platform':
                         from ...client.models.computer import Computer
@@ -637,27 +611,24 @@ class MigasLink:
         return self.get_relations(request)
 
     def _get_related_object(self):
-        if self.property_att.prefix == 'CID':
-            from ...client.models import Computer
+        from ...client.models import Computer
+        from . import AttributeSet, Domain
 
-            try:
-                return Computer.objects.get(id=self.value)
-            except ObjectDoesNotExist:
-                pass
-        elif self.property_att.prefix == 'SET':
-            from . import AttributeSet
+        prefix_mapping = {
+            'CID': (Computer.objects, 'id', self.value),
+            'SET': (AttributeSet.objects, 'name', self.value),
+            'DMN': (Domain.objects, 'name', self.value),
+        }
 
+        mapping = prefix_mapping.get(self.property_att.prefix)
+        if mapping:
+            manager, field, value = mapping
             try:
-                return AttributeSet.objects.get(name=self.value)
+                return manager.get(**{field: value})
             except ObjectDoesNotExist:
-                pass
-        elif self.property_att.prefix == 'DMN':
-            from . import Domain
+                return None
 
-            try:
-                return Domain.objects.get(name=self.value)
-            except ObjectDoesNotExist:
-                pass
+        return None
 
     def badge(self):
         if self._meta.model_name in ['clientattribute', 'attribute']:
