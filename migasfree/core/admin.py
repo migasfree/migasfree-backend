@@ -444,31 +444,30 @@ class DeploymentAdmin(admin.ModelAdmin):
         packages_after = form.cleaned_data['available_packages']
 
         user = request.user.userprofile
-        if user:
+        if user and user.domain_preference:
             obj.domain = user.domain_preference
-
-        if user.domain_preference and user.domain_preference == obj.domain:
-            if not obj.name.startswith(user.domain_preference.name.lower()):
-                obj.name = f'{user.domain_preference.name.lower()}_{obj.name}'
+            prefix = user.domain_preference.name.lower()
+            if not obj.name.startswith(f'{prefix}_'):
+                obj.name = f'{prefix}_{obj.name}'
 
         super().save_model(request, obj, form, change)
 
-        # create repository metadata when packages has been changed
-        # or repository not have packages at first time
-        # or name (slug) is changed (to avoid client errors)
-        if (
-            (is_new and len(packages_after) == 0)
-            or cmp(
-                sorted(obj.available_packages.values_list('id', flat=True)),  # packages before
+        # Create repository metadata when needed
+        packages_changed = (
+            cmp(
+                sorted(obj.available_packages.values_list('id', flat=True)),
                 sorted(packages_after),
             )
             != 0
-        ) or has_slug_changed:
+        )
+
+        should_create_metadata = (is_new and not packages_after) or packages_changed or has_slug_changed
+
+        if should_create_metadata:
             tasks.create_repository_metadata.apply_async(
                 queue=f'pms-{obj.pms().name}', kwargs={'deployment_id': obj.id}
             )
 
-            # delete old repository when name (slug) has changed
             if has_slug_changed and not is_new:
                 tasks.remove_repository_metadata.delay(obj.id, form.initial.get('slug'))
 
