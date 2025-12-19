@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
+import logging
 import os
 import shutil
 
@@ -39,6 +40,8 @@ from .package import Package
 from .package_set import PackageSet
 from .project import Project
 from .schedule import Schedule
+
+logger = logging.getLogger('migasfree')
 
 
 class DeploymentManager(models.Manager):
@@ -335,8 +338,8 @@ class Deployment(models.Model, MigasLink):
             from ...stats import tasks
 
             tasks.assigned_computers_to_deployment(self.id)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning('Failed to run assigned_computers_to_deployment task: %s', e)
 
     @staticmethod
     def available_deployments(computer, attributes):
