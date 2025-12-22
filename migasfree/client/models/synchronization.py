@@ -134,78 +134,61 @@ class Synchronization(Event):
             con.sadd(f'migasfree:watch:stats:{self.project.id}:years:{self.created_at.year:04}', self.computer.id)
 
         if not con.sismember(
-            'migasfree:watch:stats:months:%04d%02d' % (self.created_at.year, self.created_at.month), self.computer.id
+            f'migasfree:watch:stats:months:{self.created_at.year:04}{self.created_at.month:02}', self.computer.id
         ):
-            con.incr('migasfree:stats:months:%04d%02d' % (self.created_at.year, self.created_at.month))
+            con.incr(f'migasfree:stats:months:{self.created_at.year:04}{self.created_at.month:02}')
             con.sadd(
-                'migasfree:watch:stats:months:%04d%02d' % (self.created_at.year, self.created_at.month),
+                f'migasfree:watch:stats:months:{self.created_at.year:04}{self.created_at.month:02}',
                 self.computer.id,
             )
-            con.incr(
-                'migasfree:stats:%d:months:%04d%02d' % (self.project.id, self.created_at.year, self.created_at.month)
-            )
+            con.incr(f'migasfree:stats:{self.project.id}:months:{self.created_at.year:04}{self.created_at.month:02}')
             con.sadd(
-                'migasfree:watch:stats:%d:months:%04d%02d'
-                % (self.project.id, self.created_at.year, self.created_at.month),
+                f'migasfree:watch:stats:{self.project.id}:months:{self.created_at.year:04}{self.created_at.month:02}',
                 self.computer.id,
             )
 
         if not con.sismember(
-            'migasfree:watch:stats:days:%04d%02d%02d'
-            % (self.created_at.year, self.created_at.month, self.created_at.day),
+            f'migasfree:watch:stats:days:{self.created_at.year:04}{self.created_at.month:02}{self.created_at.day:02}',
             self.computer.id,
         ):
             con.incr(
-                'migasfree:stats:days:%04d%02d%02d' % (self.created_at.year, self.created_at.month, self.created_at.day)
+                f'migasfree:stats:days:{self.created_at.year:04}{self.created_at.month:02}{self.created_at.day:02}'
             )
             con.sadd(
-                'migasfree:watch:stats:days:%04d%02d%02d'
-                % (self.created_at.year, self.created_at.month, self.created_at.day),
+                f'migasfree:watch:stats:days:{self.created_at.year:04}{self.created_at.month:02}{self.created_at.day:02}',
                 self.computer.id,
             )
             con.incr(
-                'migasfree:stats:%d:days:%04d%02d%02d'
-                % (self.project.id, self.created_at.year, self.created_at.month, self.created_at.day)
+                f'migasfree:stats:{self.project.id}:days:'
+                f'{self.created_at.year:04}{self.created_at.month:02}{self.created_at.day:02}'
             )
             con.sadd(
-                'migasfree:watch:stats:%d:days:%04d%02d%02d'
-                % (self.project.id, self.created_at.year, self.created_at.month, self.created_at.day),
+                f'migasfree:watch:stats:{self.project.id}:days:'
+                f'{self.created_at.year:04}{self.created_at.month:02}{self.created_at.day:02}',
                 self.computer.id,
             )
 
         if not con.sismember(
-            'migasfree:watch:stats:hours:%04d%02d%02d%02d'
-            % (self.created_at.year, self.created_at.month, self.created_at.day, self.created_at.hour),
+            f'migasfree:watch:stats:hours:'
+            f'{self.created_at.year:04}{self.created_at.month:02}{self.created_at.day:02}{self.created_at.hour:02}',
             self.computer.id,
         ):
             con.incr(
-                'migasfree:stats:hours:%04d%02d%02d%02d'
-                % (self.created_at.year, self.created_at.month, self.created_at.day, self.created_at.hour)
+                f'migasfree:stats:hours:'
+                f'{self.created_at.year:04}{self.created_at.month:02}{self.created_at.day:02}{self.created_at.hour:02}'
             )
             con.sadd(
-                'migasfree:watch:stats:hours:%04d%02d%02d%02d'
-                % (self.created_at.year, self.created_at.month, self.created_at.day, self.created_at.hour),
+                f'migasfree:watch:stats:hours:'
+                f'{self.created_at.year:04}{self.created_at.month:02}{self.created_at.day:02}{self.created_at.hour:02}',
                 self.computer.id,
             )
             con.incr(
-                'migasfree:stats:%d:hours:%04d%02d%02d%02d'
-                % (
-                    self.project.id,
-                    self.created_at.year,
-                    self.created_at.month,
-                    self.created_at.day,
-                    self.created_at.hour,
-                )
+                f'migasfree:stats:{self.project.id}:hours:'
+                f'{self.created_at.year:04}{self.created_at.month:02}{self.created_at.day:02}{self.created_at.hour:02}'
             )
             con.sadd(
-                'migasfree:watch:stats:%d:hours:%04d%02d%02d%02d'
-                % (
-                    self.project.id,
-                    self.created_at.year,
-                    self.created_at.month,
-                    self.created_at.day,
-                    self.created_at.hour,
-                ),
+                f'migasfree:watch:stats:{self.project.id}:hours:'
+                f'{self.created_at.year:04}{self.created_at.month:02}{self.created_at.day:02}{self.created_at.hour:02}',
                 self.computer.id,
             )
 
@@ -252,90 +235,82 @@ def post_save_sync(sender, instance, created, **kwargs):
 def pre_delete_sync(sender, instance, **kwargs):
     con = get_redis_connection()
 
-    if con.sismember('migasfree:watch:stats:years:%04d' % instance.created_at.year, instance.computer.id):
-        con.decr('migasfree:stats:years:%04d' % instance.created_at.year)
-        con.srem('migasfree:watch:stats:years:%04d' % instance.created_at.year, instance.computer.id)
-        con.decr('migasfree:stats:%d:years:%04d' % (instance.project.id, instance.created_at.year))
+    if con.sismember(f'migasfree:watch:stats:years:{instance.created_at.year:04}', instance.computer.id):
+        con.decr(f'migasfree:stats:years:{instance.created_at.year:04}')
+        con.srem(f'migasfree:watch:stats:years:{instance.created_at.year:04}', instance.computer.id)
+        con.decr(f'migasfree:stats:{instance.project.id}:years:{instance.created_at.year:04}')
         con.srem(
-            'migasfree:watch:stats:%d:years:%04d' % (instance.project.id, instance.created_at.year),
+            f'migasfree:watch:stats:{instance.project.id}:years:{instance.created_at.year:04}',
             instance.computer.id,
         )
 
     if con.sismember(
-        'migasfree:watch:stats:months:%04d%02d' % (instance.created_at.year, instance.created_at.month),
+        f'migasfree:watch:stats:months:{instance.created_at.year:04}{instance.created_at.month:02}',
         instance.computer.id,
     ):
-        con.decr('migasfree:stats:months:%04d%02d' % (instance.created_at.year, instance.created_at.month))
+        con.decr(f'migasfree:stats:months:{instance.created_at.year:04}{instance.created_at.month:02}')
         con.srem(
-            'migasfree:watch:stats:months:%04d%02d' % (instance.created_at.year, instance.created_at.month),
+            f'migasfree:watch:stats:months:{instance.created_at.year:04}{instance.created_at.month:02}',
             instance.computer.id,
         )
         con.decr(
-            'migasfree:stats:%d:months:%04d%02d'
-            % (instance.project.id, instance.created_at.year, instance.created_at.month)
+            f'migasfree:stats:{instance.project.id}:months:{instance.created_at.year:04}{instance.created_at.month:02}'
         )
         con.srem(
-            'migasfree:watch:stats:%d:months:%04d%02d'
-            % (instance.project.id, instance.created_at.year, instance.created_at.month),
+            f'migasfree:watch:stats:{instance.project.id}:months:'
+            f'{instance.created_at.year:04}{instance.created_at.month:02}',
             instance.computer.id,
         )
 
     if con.sismember(
-        'migasfree:watch:stats:days:%04d%02d%02d'
-        % (instance.created_at.year, instance.created_at.month, instance.created_at.day),
+        f'migasfree:watch:stats:days:'
+        f'{instance.created_at.year:04}{instance.created_at.month:02}{instance.created_at.day:02}',
         instance.computer.id,
     ):
         con.decr(
-            'migasfree:stats:days:%04d%02d%02d'
-            % (instance.created_at.year, instance.created_at.month, instance.created_at.day)
+            f'migasfree:stats:days:'
+            f'{instance.created_at.year:04}{instance.created_at.month:02}{instance.created_at.day:02}'
         )
         con.srem(
-            'migasfree:watch:stats:days:%04d%02d%02d'
-            % (instance.created_at.year, instance.created_at.month, instance.created_at.day),
+            f'migasfree:watch:stats:days:'
+            f'{instance.created_at.year:04}{instance.created_at.month:02}{instance.created_at.day:02}',
             instance.computer.id,
         )
         con.decr(
-            'migasfree:stats:%d:days:%04d%02d%02d'
-            % (instance.project.id, instance.created_at.year, instance.created_at.month, instance.created_at.day)
+            f'migasfree:stats:{instance.project.id}:days:'
+            f'{instance.created_at.year:04}{instance.created_at.month:02}{instance.created_at.day:02}'
         )
         con.srem(
-            'migasfree:watch:stats:%d:days:%04d%02d%02d'
-            % (instance.project.id, instance.created_at.year, instance.created_at.month, instance.created_at.day),
+            f'migasfree:watch:stats:{instance.project.id}:days:'
+            f'{instance.created_at.year:04}{instance.created_at.month:02}{instance.created_at.day:02}',
             instance.computer.id,
         )
 
     if con.sismember(
-        'migasfree:watch:stats:hours:%04d%02d%02d%02d'
-        % (instance.created_at.year, instance.created_at.month, instance.created_at.day, instance.created_at.hour),
+        f'migasfree:watch:stats:hours:'
+        f'{instance.created_at.year:04}{instance.created_at.month:02}'
+        f'{instance.created_at.day:02}{instance.created_at.hour:02}',
         instance.computer.id,
     ):
         con.decr(
-            'migasfree:stats:hours:%04d%02d%02d%02d'
-            % (instance.created_at.year, instance.created_at.month, instance.created_at.day, instance.created_at.hour)
+            f'migasfree:stats:hours:'
+            f'{instance.created_at.year:04}{instance.created_at.month:02}'
+            f'{instance.created_at.day:02}{instance.created_at.hour:02}'
         )
         con.srem(
-            'migasfree:watch:stats:hours:%04d%02d%02d%02d'
-            % (instance.created_at.year, instance.created_at.month, instance.created_at.day, instance.created_at.hour),
+            f'migasfree:watch:stats:hours:'
+            f'{instance.created_at.year:04}{instance.created_at.month:02}'
+            f'{instance.created_at.day:02}{instance.created_at.hour:02}',
             instance.computer.id,
         )
         con.decr(
-            'migasfree:stats:%d:hours:%04d%02d%02d%02d'
-            % (
-                instance.project.id,
-                instance.created_at.year,
-                instance.created_at.month,
-                instance.created_at.day,
-                instance.created_at.hour,
-            )
+            f'migasfree:stats:{instance.project.id}:hours:'
+            f'{instance.created_at.year:04}{instance.created_at.month:02}'
+            f'{instance.created_at.day:02}{instance.created_at.hour:02}'
         )
         con.srem(
-            'migasfree:watch:stats:%d:hours:%04d%02d%02d%02d'
-            % (
-                instance.project.id,
-                instance.created_at.year,
-                instance.created_at.month,
-                instance.created_at.day,
-                instance.created_at.hour,
-            ),
+            f'migasfree:watch:stats:{instance.project.id}:hours:'
+            f'{instance.created_at.year:04}{instance.created_at.month:02}'
+            f'{instance.created_at.day:02}{instance.created_at.hour:02}',
             instance.computer.id,
         )
