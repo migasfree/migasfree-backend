@@ -1,5 +1,3 @@
-# -*- coding: utf-8 *-*
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -18,30 +16,27 @@
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext
-from drf_spectacular.openapi import OpenApiParameter, OpenApiTypes, OpenApiResponse
+from drf_spectacular.openapi import OpenApiParameter, OpenApiResponse, OpenApiTypes
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets, status, mixins, permissions
+from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action, permission_classes, throttle_classes
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
-from ..core.mixins import SafeConnectionMixin
-from ..core.views import MigasViewSet
 from ..client.models import Computer
 from ..client.serializers import ComputerInfoSerializer
+from ..core.mixins import SafeConnectionMixin
+from ..core.views import MigasViewSet
 from ..mixins import DatabaseCheckMixin
-
-from .models import Node, Capability, LogicalName, Configuration
+from . import serializers, tasks
 from .filters import NodeFilter
-from . import tasks, serializers
+from .models import Capability, Configuration, LogicalName, Node
 
 
 @extend_schema(tags=['hardware'])
 @permission_classes((permissions.DjangoModelPermissions,))
 class HardwareViewSet(
-    DatabaseCheckMixin,
-    mixins.ListModelMixin, mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet, MigasViewSet
+    DatabaseCheckMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet, MigasViewSet
 ):
     queryset = Node.objects.all()
     serializer_class = serializers.NodeSerializer
@@ -82,13 +77,9 @@ class HardwareViewSet(
         node = self.get_object()
         request.user.userprofile.check_scope(node.computer.id)
 
-        capability = Capability.objects.filter(node=node.id).values(
-            'name', 'description'
-        )
+        capability = Capability.objects.filter(node=node.id).values('name', 'description')
         logical_name = LogicalName.objects.filter(node=node.id).values('name')
-        configuration = Configuration.objects.filter(node=node.id).values(
-            'name', 'value'
-        )
+        configuration = Configuration.objects.filter(node=node.id).values('name', 'value')
 
         name = node.__str__()
         if not name:
@@ -99,21 +90,12 @@ class HardwareViewSet(
         data = {
             'name': name,
             'computer': ComputerInfoSerializer(node.computer).data,
-            'capability': serializers.CapabilityInfoSerializer(
-                capability, many=True
-            ).data,
-            'logical_name': serializers.LogicalNameInfoSerializer(
-                logical_name, many=True
-            ).data,
-            'configuration': serializers.ConfigurationInfoSerializer(
-                configuration, many=True
-            ).data,
+            'capability': serializers.CapabilityInfoSerializer(capability, many=True).data,
+            'logical_name': serializers.LogicalNameInfoSerializer(logical_name, many=True).data,
+            'configuration': serializers.ConfigurationInfoSerializer(configuration, many=True).data,
         }
 
-        return Response(
-            data,
-            status=status.HTTP_200_OK
-        )
+        return Response(data, status=status.HTTP_200_OK)
 
 
 @extend_schema(tags=['safe'])
@@ -159,7 +141,7 @@ class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status.HTTP_200_OK: {'description': gettext('Data received')},
             status.HTTP_400_BAD_REQUEST: {'description': gettext('Malformed claims')},
             status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
-        }
+        },
     )
     @action(methods=['post'], detail=False)
     def hardware(self, request):
@@ -172,10 +154,7 @@ class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         claims = self.get_claims(request.data)
         if not claims or 'id' not in claims or 'hardware' not in claims:
-            return Response(
-                self.create_response(gettext('Malformed claims')),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(self.create_response(gettext('Malformed claims')), status=status.HTTP_400_BAD_REQUEST)
 
         computer = get_object_or_404(Computer, id=claims.get('id'))
 
@@ -188,7 +167,4 @@ class SafeHardwareViewSet(SafeConnectionMixin, viewsets.ViewSet):
         computer.update_last_hardware_capture()
         computer.update_hardware_resume()
 
-        return Response(
-            self.create_response(gettext('Data received')),
-            status=status.HTTP_200_OK
-        )
+        return Response(self.create_response(gettext('Data received')), status=status.HTTP_200_OK)

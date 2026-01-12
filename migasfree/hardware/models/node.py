@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -22,21 +20,17 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from ...core.models import MigasLink
 from ...client.models import Computer
+from ...core.models import MigasLink
 
 
 def validate_mac(mac):
-    return isinstance(mac, str) and \
-        len(mac) == 17 and \
-        len(re.findall(r':', mac)) == 5
+    return isinstance(mac, str) and len(mac) == 17 and len(re.findall(r':', mac)) == 5
 
 
 class DomainNodeManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().select_related(
-            'computer', 'computer__project', 'computer__sync_user'
-        )
+        return super().get_queryset().select_related('computer', 'computer__project', 'computer__sync_user')
 
     def scope(self, user):
         qs = self.get_queryset()
@@ -68,7 +62,7 @@ class NodeManager(DomainNodeManager):
             size=data.get('size'),
             capacity=data.get('capacity'),
             clock=data.get('clock'),
-            dev=data.get('dev')
+            dev=data.get('dev'),
         )
         obj.save()
 
@@ -99,10 +93,7 @@ class Node(models.Model, MigasLink):
     )
 
     computer = models.ForeignKey(
-        Computer,
-        on_delete=models.CASCADE,
-        verbose_name=_('computer'),
-        db_comment='related computer'
+        Computer, on_delete=models.CASCADE, verbose_name=_('computer'), db_comment='related computer'
     )
 
     level = models.IntegerField(
@@ -116,17 +107,9 @@ class Node(models.Model, MigasLink):
         db_comment='hardware node width',
     )
 
-    name = models.TextField(
-        verbose_name=_('id'),
-        blank=True,
-        db_comment='id field in lshw'
-    )
+    name = models.TextField(verbose_name=_('id'), blank=True, db_comment='id field in lshw')
 
-    class_name = models.TextField(
-        verbose_name=_('class'),
-        blank=True,
-        db_comment='class field in lshw'
-    )
+    class_name = models.TextField(verbose_name=_('class'), blank=True, db_comment='class field in lshw')
 
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
@@ -236,10 +219,7 @@ class Node(models.Model, MigasLink):
 
     @staticmethod
     def get_is_vm(computer_id):
-        query = Node.objects.filter(
-            computer=computer_id,
-            parent_id__isnull=True
-        )
+        query = Node.objects.filter(computer=computer_id, parent_id__isnull=True)
         if query.count() == 1:
             if query[0].vendor in list(Node.VIRTUAL_MACHINES.keys()):
                 return True
@@ -252,10 +232,7 @@ class Node(models.Model, MigasLink):
     @staticmethod
     def get_is_docker(computer_id):
         query = Node.objects.filter(
-            computer=computer_id,
-            name='network',
-            class_name='network',
-            description='Ethernet interface'
+            computer=computer_id, name='network', class_name='network', description='Ethernet interface'
         )
 
         if not query.exists():
@@ -266,8 +243,7 @@ class Node(models.Model, MigasLink):
             except ObjectDoesNotExist:
                 return False
 
-        return query.count() == 1 and \
-            query[0].serial.upper().startswith('02:42:AC')
+        return query.count() == 1 and query[0].serial.upper().startswith('02:42:AC')
 
     @staticmethod
     def get_is_laptop(computer_id):
@@ -275,18 +251,14 @@ class Node(models.Model, MigasLink):
             computer=computer_id,
             class_name='system',
             configuration__name='chassis',
-            configuration__value='notebook'  # TODO maybe others...
+            configuration__value='notebook',  # TODO maybe others...
         )
 
         return query.count() == 1
 
     @staticmethod
     def get_is_desktop(computer_id):
-        query = Node.objects.filter(
-            computer=computer_id,
-            class_name='system',
-            configuration__name='chassis'
-        ).exclude(
+        query = Node.objects.filter(computer=computer_id, class_name='system', configuration__name='chassis').exclude(
             configuration__value='notebook'  # TODO maybe others...
         )
 
@@ -310,19 +282,11 @@ class Node(models.Model, MigasLink):
 
     @staticmethod
     def get_ram(computer_id):
-        query = Node.objects.filter(
-            computer=computer_id,
-            name='memory',
-            class_name='memory'
-        )
+        query = Node.objects.filter(computer=computer_id, name='memory', class_name='memory')
         if query.count() == 1:
             size = query[0].size
         else:
-            size = Node.objects.filter(
-                computer=computer_id,
-                class_name='memory',
-                name__startswith='bank:'
-            ).aggregate(
+            size = Node.objects.filter(computer=computer_id, class_name='memory', name__startswith='bank:').aggregate(
                 models.Sum('size')
             )['size__sum']
 
@@ -330,10 +294,7 @@ class Node(models.Model, MigasLink):
 
     @staticmethod
     def get_cpu(computer_id):
-        query = Node.objects.filter(
-            computer=computer_id,
-            class_name='processor'
-        ).filter(
+        query = Node.objects.filter(computer=computer_id, class_name='processor').filter(
             models.Q(name='cpu') | models.Q(name='cpu:0')
         )
         if query.count() == 1:
@@ -353,24 +314,16 @@ class Node(models.Model, MigasLink):
 
     @staticmethod
     def get_mac_address(computer_id):
-        """ returns all addresses in only string without any separator """
-        query = Node.objects.filter(
-            computer=computer_id,
-            name__icontains='network',
-            class_name='network'
-        )
+        """returns all addresses in only string without any separator"""
+        query = Node.objects.filter(computer=computer_id, name__icontains='network', class_name='network')
 
-        return ''.join(
-            iface.serial.upper().replace(':', '') for iface in query if validate_mac(iface.serial)
-        )[:Computer.MAC_MAX_LEN]
+        return ''.join(iface.serial.upper().replace(':', '') for iface in query if validate_mac(iface.serial))[
+            : Computer.MAC_MAX_LEN
+        ]
 
     @staticmethod
     def get_storage(computer_id):
-        query = Node.objects.filter(
-            computer=computer_id,
-            class_name='disk',
-            size__gt=0
-        )
+        query = Node.objects.filter(computer=computer_id, class_name='disk', size__gt=0)
 
         capacity = [item.size for item in query]
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
@@ -24,11 +22,7 @@ from .node import Node
 
 class CapabilityManager(models.Manager):
     def create(self, node, name, description):
-        obj = Capability(
-            node=node,
-            name=name,
-            description=description
-        )
+        obj = Capability(node=node, name=name, description=description)
         obj.save()
 
         return obj
@@ -36,10 +30,7 @@ class CapabilityManager(models.Manager):
 
 class Capability(models.Model):
     node = models.ForeignKey(
-        Node,
-        on_delete=models.CASCADE,
-        verbose_name=_('hardware node'),
-        db_comment='related hardware node'
+        Node, on_delete=models.CASCADE, verbose_name=_('hardware node'), db_comment='related hardware node'
     )
 
     name = models.TextField(

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
@@ -24,11 +22,7 @@ from .node import Node
 
 class ConfigurationManager(models.Manager):
     def create(self, node, name, value):
-        obj = Configuration(
-            node=node,
-            name=name,
-            value=value
-        )
+        obj = Configuration(node=node, name=name, value=value)
         obj.save()
 
         return obj

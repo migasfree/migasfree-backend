@@ -1,9 +1,8 @@
-from django.db import migrations, models
 import django.db.models.deletion
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('client', '0002_alter_comments'),
         ('hardware', '0001_initial'),
@@ -29,7 +28,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='capability',
             name='description',
-            field=models.TextField(blank=True, db_comment='hardware capability description', null=True, verbose_name='description'),
+            field=models.TextField(
+                blank=True, db_comment='hardware capability description', null=True, verbose_name='description'
+            ),
         ),
         migrations.AlterField(
             model_name='capability',
@@ -39,7 +40,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='capability',
             name='node',
-            field=models.ForeignKey(db_comment='related hardware node', on_delete=django.db.models.deletion.CASCADE, to='hardware.node', verbose_name='hardware node'),
+            field=models.ForeignKey(
+                db_comment='related hardware node',
+                on_delete=django.db.models.deletion.CASCADE,
+                to='hardware.node',
+                verbose_name='hardware node',
+            ),
         ),
         migrations.AlterField(
             model_name='configuration',
@@ -49,12 +55,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='configuration',
             name='node',
-            field=models.ForeignKey(db_comment='related hardware node', on_delete=django.db.models.deletion.CASCADE, to='hardware.node', verbose_name='hardware node'),
+            field=models.ForeignKey(
+                db_comment='related hardware node',
+                on_delete=django.db.models.deletion.CASCADE,
+                to='hardware.node',
+                verbose_name='hardware node',
+            ),
         ),
         migrations.AlterField(
             model_name='configuration',
             name='value',
-            field=models.TextField(blank=True, db_comment='hardware configuration value', null=True, verbose_name='value'),
+            field=models.TextField(
+                blank=True, db_comment='hardware configuration value', null=True, verbose_name='value'
+            ),
         ),
         migrations.AlterField(
             model_name='logicalname',
@@ -64,7 +77,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='logicalname',
             name='node',
-            field=models.ForeignKey(db_comment='related hardware node', on_delete=django.db.models.deletion.CASCADE, to='hardware.node', verbose_name='hardware node'),
+            field=models.ForeignKey(
+                db_comment='related hardware node',
+                on_delete=django.db.models.deletion.CASCADE,
+                to='hardware.node',
+                verbose_name='hardware node',
+            ),
         ),
         migrations.AlterField(
             model_name='node',
@@ -79,7 +97,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='node',
             name='claimed',
-            field=models.BooleanField(db_comment='indicates whether the hardware node is claimed', default=False, verbose_name='claimed'),
+            field=models.BooleanField(
+                db_comment='indicates whether the hardware node is claimed', default=False, verbose_name='claimed'
+            ),
         ),
         migrations.AlterField(
             model_name='node',
@@ -94,12 +114,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='node',
             name='computer',
-            field=models.ForeignKey(db_comment='related computer', on_delete=django.db.models.deletion.CASCADE, to='client.computer', verbose_name='computer'),
+            field=models.ForeignKey(
+                db_comment='related computer',
+                on_delete=django.db.models.deletion.CASCADE,
+                to='client.computer',
+                verbose_name='computer',
+            ),
         ),
         migrations.AlterField(
             model_name='node',
             name='description',
-            field=models.TextField(blank=True, db_comment='hardware node description', null=True, verbose_name='description'),
+            field=models.TextField(
+                blank=True, db_comment='hardware node description', null=True, verbose_name='description'
+            ),
         ),
         migrations.AlterField(
             model_name='node',
@@ -109,7 +136,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='node',
             name='enabled',
-            field=models.BooleanField(db_comment='indicates whether the hardware node is enabled', default=False, verbose_name='enabled'),
+            field=models.BooleanField(
+                db_comment='indicates whether the hardware node is enabled', default=False, verbose_name='enabled'
+            ),
         ),
         migrations.AlterField(
             model_name='node',
@@ -124,22 +153,36 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='node',
             name='parent',
-            field=models.ForeignKey(blank=True, db_comment='hardware node parent', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='child', to='hardware.node', verbose_name='parent'),
+            field=models.ForeignKey(
+                blank=True,
+                db_comment='hardware node parent',
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='child',
+                to='hardware.node',
+                verbose_name='parent',
+            ),
         ),
         migrations.AlterField(
             model_name='node',
             name='physid',
-            field=models.TextField(blank=True, db_comment='hardware node physical identifier', null=True, verbose_name='physid'),
+            field=models.TextField(
+                blank=True, db_comment='hardware node physical identifier', null=True, verbose_name='physid'
+            ),
         ),
         migrations.AlterField(
             model_name='node',
             name='product',
-            field=models.TextField(blank=True, db_comment='hardware node product name', null=True, verbose_name='product'),
+            field=models.TextField(
+                blank=True, db_comment='hardware node product name', null=True, verbose_name='product'
+            ),
         ),
         migrations.AlterField(
             model_name='node',
             name='serial',
-            field=models.TextField(blank=True, db_comment='hardware node serial code', null=True, verbose_name='serial'),
+            field=models.TextField(
+                blank=True, db_comment='hardware node serial code', null=True, verbose_name='serial'
+            ),
         ),
         migrations.AlterField(
             model_name='node',

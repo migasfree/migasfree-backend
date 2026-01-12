@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
@@ -24,10 +22,7 @@ from .node import Node
 
 class LogicalNameManager(models.Manager):
     def create(self, node, name):
-        obj = LogicalName(
-            node=node,
-            name=name
-        )
+        obj = LogicalName(node=node, name=name)
         obj.save()
 
         return obj

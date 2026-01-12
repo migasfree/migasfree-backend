@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
 #
@@ -25,8 +23,24 @@ class NodeFilter(filters.FilterSet):
     class Meta:
         model = Node
         fields = [
-            'computer__id', 'id', 'parent', 'product', 'level',
-            'width', 'name', 'class_name', 'enabled', 'claimed',
-            'description', 'vendor', 'serial', 'bus_info', 'physid',
-            'slot', 'size', 'capacity', 'clock', 'dev'
+            'computer__id',
+            'id',
+            'parent',
+            'product',
+            'level',
+            'width',
+            'name',
+            'class_name',
+            'enabled',
+            'claimed',
+            'description',
+            'vendor',
+            'serial',
+            'bus_info',
+            'physid',
+            'slot',
+            'size',
+            'capacity',
+            'clock',
+            'dev',
         ]

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
@@ -19,7 +17,6 @@
 from rest_framework import serializers
 
 from ..client.serializers import ComputerInfoSerializer
-
 from . import models
 
 
@@ -33,13 +30,26 @@ class NodeOnlySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Node
         fields = (
-            'id', 'parent', 'level',
-            'width', 'name', 'class_name',
-            'enabled', 'claimed', 'description',
-            'vendor', 'product', 'version',
-            'serial', 'bus_info', 'physid',
-            'slot', 'size', 'capacity',
-            'clock', 'dev'
+            'id',
+            'parent',
+            'level',
+            'width',
+            'name',
+            'class_name',
+            'enabled',
+            'claimed',
+            'description',
+            'vendor',
+            'product',
+            'version',
+            'serial',
+            'bus_info',
+            'physid',
+            'slot',
+            'size',
+            'capacity',
+            'clock',
+            'dev',
         )
 
 

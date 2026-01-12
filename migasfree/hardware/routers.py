@@ -1,5 +1,3 @@
-# -*- coding: utf-8 *-*
-
 # Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
@@ -26,8 +24,4 @@ router.register(r'hardware', views.HardwareViewSet)
 
 safe_router = routers.DefaultRouter()
 
-safe_router.register(
-    r'computers',
-    views.SafeHardwareViewSet,
-    basename='safe_hardware'
-)
+safe_router.register(r'computers', views.SafeHardwareViewSet, basename='safe_hardware')
