@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
@@ -19,10 +17,10 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from ...core.models import Project, MigasLink
-from ...utils import to_list, normalize_line_breaks
-from .model import Model
+from ...core.models import MigasLink, Project
+from ...utils import normalize_line_breaks, to_list
 from .capability import Capability
+from .model import Model
 
 
 class Driver(models.Model, MigasLink):

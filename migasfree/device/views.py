@@ -1,5 +1,3 @@
-# -*- coding: utf-8 *-*
-
 # Copyright (c) 2016-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2016-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -16,43 +14,35 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.db.models import Q, Prefetch
+from django.db.models import Prefetch, Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.openapi import OpenApiParameter
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets, status, permissions
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
 from ..client.models import Computer
 from ..core.models import Attribute
-from ..core.views import MigasViewSet, ExportViewSet
+from ..core.views import ExportViewSet, MigasViewSet
 from ..mixins import DatabaseCheckMixin
-
-from .models import (
-    Connection, Device, Driver,
-    Capability, Logical, Manufacturer,
-    Model, Type
-)
-from .filters import (
-    DeviceFilter, DriverFilter,
-    ManufacturerFilter, CapabilityFilter,
-    TypeFilter, ConnectionFilter,
-    LogicalFilter, ModelFilter,
-)
 from . import serializers
+from .filters import (
+    CapabilityFilter,
+    ConnectionFilter,
+    DeviceFilter,
+    DriverFilter,
+    LogicalFilter,
+    ManufacturerFilter,
+    ModelFilter,
+    TypeFilter,
+)
+from .models import Capability, Connection, Device, Driver, Logical, Manufacturer, Model, Type
 
 
 @extend_schema(tags=['devices'])
 @extend_schema(
-    parameters=[
-        OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: name',
-            type=str
-        )
-    ],
+    parameters=[OpenApiParameter(name='search', location=OpenApiParameter.QUERY, description='Fields: name', type=str)],
     methods=['GET'],
 )
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -81,7 +71,7 @@ class ConnectionViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
             name='search',
             location=OpenApiParameter.QUERY,
             description='Fields: name, model__name, model__manufacturer__name, data',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -125,9 +115,11 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
         computer = get_object_or_404(Computer, pk=request.GET.get('cid', 0))
         query = request.GET.get('q', '')
 
-        results = Device.objects.filter(
-            available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True)
-        ).order_by('name', 'model__name').distinct()
+        results = (
+            Device.objects.filter(available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True))
+            .order_by('name', 'model__name')
+            .distinct()
+        )
         if query:
             results = results.filter(Q(name__icontains=query) | Q(data__icontains=query))
 
@@ -148,9 +140,7 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
         Exchanges computers from logical devices
         """
         source = self.get_object()
-        target = get_object_or_404(
-            Device, id=request.data.get('target')
-        )
+        target = get_object_or_404(Device, id=request.data.get('target'))
 
         Device.replacement(source, target)
 
@@ -161,10 +151,7 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
 @extend_schema(
     parameters=[
         OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: name, model__name',
-            type=str
+            name='search', location=OpenApiParameter.QUERY, description='Fields: name, model__name', type=str
         )
     ],
     methods=['GET'],
@@ -187,14 +174,7 @@ class DriverViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
 
 @extend_schema(tags=['devices'])
 @extend_schema(
-    parameters=[
-        OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: name',
-            type=str
-        )
-    ],
+    parameters=[OpenApiParameter(name='search', location=OpenApiParameter.QUERY, description='Fields: name', type=str)],
     methods=['GET'],
 )
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -215,7 +195,7 @@ class CapabilityViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
             location=OpenApiParameter.QUERY,
             description='Fields: device__name, device__model__name, '
             'device__model__manufacturer__name, capability__name',
-            type=str
+            type=str,
         )
     ],
     methods=['GET'],
@@ -226,8 +206,10 @@ class LogicalViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
     serializer_class = serializers.LogicalSerializer
     filterset_class = LogicalFilter
     search_fields = [
-        'device__name', 'device__model__name',
-        'device__model__manufacturer__name', 'capability__name',
+        'device__name',
+        'device__model__name',
+        'device__model__manufacturer__name',
+        'capability__name',
     ]
     ordering_fields = '__all__'
     ordering = ('device__name',)
@@ -244,9 +226,7 @@ class LogicalViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
 
         qs = Attribute.objects.scope(self.request.user.userprofile)
 
-        return Logical.objects.scope(
-            self.request.user.userprofile
-        ).prefetch_related(
+        return Logical.objects.scope(self.request.user.userprofile).prefetch_related(
             Prefetch('attributes', queryset=qs),
             'attributes__property_att',
         )
@@ -265,9 +245,13 @@ class LogicalViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         query = request.GET.get('q', '')
         device = request.GET.get('did', 0)
 
-        results = Logical.objects.filter(
-            device__available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True)
-        ).order_by('device__name', 'capability__name').distinct()
+        results = (
+            Logical.objects.filter(
+                device__available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True)
+            )
+            .order_by('device__name', 'capability__name')
+            .distinct()
+        )
         if query:
             results = results.filter(Q(device__name__icontains=query) | Q(device__data__icontains=query))
         if device:
@@ -284,14 +268,7 @@ class LogicalViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
 
 @extend_schema(tags=['devices'])
 @extend_schema(
-    parameters=[
-        OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: name',
-            type=str
-        )
-    ],
+    parameters=[OpenApiParameter(name='search', location=OpenApiParameter.QUERY, description='Fields: name', type=str)],
     methods=['GET'],
 )
 @permission_classes((permissions.DjangoModelPermissions,))
@@ -308,10 +285,7 @@ class ManufacturerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSe
 @extend_schema(
     parameters=[
         OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: name, manufacturer__name',
-            type=str
+            name='search', location=OpenApiParameter.QUERY, description='Fields: name, manufacturer__name', type=str
         )
     ],
     methods=['GET'],
@@ -335,23 +309,18 @@ class ModelViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Expo
         if self.request is None:
             return Model.objects.none()
 
-        return super().get_queryset().select_related(
-            'device_type', 'manufacturer'
-        ). prefetch_related(
-            'connections'
-        ).distinct()
+        return (
+            super()
+            .get_queryset()
+            .select_related('device_type', 'manufacturer')
+            .prefetch_related('connections')
+            .distinct()
+        )
 
 
 @extend_schema(tags=['devices'])
 @extend_schema(
-    parameters=[
-        OpenApiParameter(
-            name='search',
-            location=OpenApiParameter.QUERY,
-            description='Fields: name',
-            type=str
-        )
-    ],
+    parameters=[OpenApiParameter(name='search', location=OpenApiParameter.QUERY, description='Fields: name', type=str)],
     methods=['GET'],
 )
 @permission_classes((permissions.DjangoModelPermissions,))

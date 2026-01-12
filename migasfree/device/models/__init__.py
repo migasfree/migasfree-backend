@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
@@ -16,20 +14,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from .capability import Capability
 from .connection import Connection
 from .device import Device
 from .driver import Driver
-from .capability import Capability
 from .logical import Logical
 from .manufacturer import Manufacturer
 from .model import Model
 from .type import Type
 
 __all__ = [
+    'Capability',
     'Connection',
     'Device',
     'Driver',
-    'Capability',
     'Logical',
     'Manufacturer',
     'Model',

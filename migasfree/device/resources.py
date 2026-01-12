@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2022 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2022 Alberto Gacías <alberto@migasfree.org>
 #
@@ -16,13 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from import_export import resources, fields
+from import_export import fields, resources
 
-from .models import (
-    Connection, Device, Driver,
-    Capability, Logical, Manufacturer,
-    Model, Type
-)
+from .models import Capability, Connection, Device, Driver, Logical, Manufacturer, Model, Type
 
 
 class CapabilityResource(resources.ModelResource):
@@ -40,10 +34,7 @@ class DeviceResource(resources.ModelResource):
 
     class Meta:
         model = Device
-        export_order = (
-            'id', 'name', 'model', 'connection',
-            'available_for_attributes', 'data', 'computers'
-        )
+        export_order = ('id', 'name', 'model', 'connection', 'available_for_attributes', 'data', 'computers')
 
     def dehydrate_computers(self, obj):
         return obj.total_computers()
@@ -58,14 +49,22 @@ class LogicalResource(resources.ModelResource):
     class Meta:
         model = Logical
         fields = (
-            'id', 'device', 'device__name',
-            'capability', 'capability__name', 'alternative_capability_name',
-            'attributes'
+            'id',
+            'device',
+            'device__name',
+            'capability',
+            'capability__name',
+            'alternative_capability_name',
+            'attributes',
         )
         export_order = (
-            'id', 'device', 'device__name',
-            'capability', 'capability__name', 'alternative_capability_name',
-            'attributes'
+            'id',
+            'device',
+            'device__name',
+            'capability',
+            'capability__name',
+            'alternative_capability_name',
+            'attributes',
         )
 
 
@@ -77,13 +76,15 @@ class ManufacturerResource(resources.ModelResource):
 class ModelResource(resources.ModelResource):
     class Meta:
         model = Model
-        fields = (
-            'id', 'name', 'manufacturer', 'manufacturer__name',
-            'device_type', 'device_type__name', 'connections'
-        )
+        fields = ('id', 'name', 'manufacturer', 'manufacturer__name', 'device_type', 'device_type__name', 'connections')
         export_order = (
-            'id', 'name', 'manufacturer', 'manufacturer__name',
-            'device_type', 'device_type__name', 'connections'
+            'id',
+            'name',
+            'manufacturer',
+            'manufacturer__name',
+            'device_type',
+            'device_type__name',
+            'connections',
         )
 
 

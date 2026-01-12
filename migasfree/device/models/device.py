@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,17 +27,22 @@ from .model import Model
 
 class DeviceManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().select_related(
-            'connection', 'connection__device_type',
-            'model', 'model__manufacturer', 'model__device_type',
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                'connection',
+                'connection__device_type',
+                'model',
+                'model__manufacturer',
+                'model__device_type',
+            )
         )
 
     def scope(self, user):
         qs = self.get_queryset()
         if user and not user.is_view_all():
-            qs = qs.filter(
-                logical__attributes__in=user.get_attributes()
-            ).distinct()
+            qs = qs.filter(logical__attributes__in=user.get_attributes()).distinct()
 
         return qs
 
@@ -105,30 +108,36 @@ class Device(models.Model, MigasLink):
 
     @staticmethod
     def group_by_connection():
-        return Device.objects.values(
-            'connection__name',
-            'connection__id',
-        ).annotate(
-            count=models.aggregates.Count('id')
-        ).order_by('-count')
+        return (
+            Device.objects.values(
+                'connection__name',
+                'connection__id',
+            )
+            .annotate(count=models.aggregates.Count('id'))
+            .order_by('-count')
+        )
 
     @staticmethod
     def group_by_model():
-        return Device.objects.values(
-            'model__name',
-            'model__id',
-        ).annotate(
-            count=models.aggregates.Count('id')
-        ).order_by('-count')
+        return (
+            Device.objects.values(
+                'model__name',
+                'model__id',
+            )
+            .annotate(count=models.aggregates.Count('id'))
+            .order_by('-count')
+        )
 
     @staticmethod
     def group_by_manufacturer():
-        return Device.objects.values(
-            'model__manufacturer__name',
-            'model__manufacturer__id',
-        ).annotate(
-            count=models.aggregates.Count('id')
-        ).order_by('-count')
+        return (
+            Device.objects.values(
+                'model__manufacturer__name',
+                'model__manufacturer__id',
+            )
+            .annotate(count=models.aggregates.Count('id'))
+            .order_by('-count')
+        )
 
     def __str__(self):
         return self.name
@@ -141,9 +150,11 @@ class Device(models.Model, MigasLink):
             from ...client.models import Computer
 
             if user and not user.userprofile.is_view_all():
-                return Computer.productive.scope(user.userprofile).filter(
-                    sync_attributes__in=Attribute.objects.filter(logical__device__id=self.id)
-                ).distinct()
+                return (
+                    Computer.productive.scope(user.userprofile)
+                    .filter(sync_attributes__in=Attribute.objects.filter(logical__device__id=self.id))
+                    .distinct()
+                )
 
             return Computer.productive.filter(
                 sync_attributes__in=Attribute.objects.filter(logical__device__id=self.id)
@@ -173,9 +184,8 @@ class Device(models.Model, MigasLink):
                 capabilities.append(x.capability)
 
         for x in target.logical_devices_allocated():
-            if self.logical_set.filter(capability=x.capability).count() > 0:
-                if x.capability not in capabilities:
-                    capabilities.append(x.capability)
+            if self.logical_set.filter(capability=x.capability).count() > 0 and x.capability not in capabilities:
+                capabilities.append(x.capability)
 
         return capabilities
 
@@ -186,7 +196,7 @@ class Device(models.Model, MigasLink):
             swap_m2m(
                 source.logical_set.get(capability=capability),
                 target.logical_set.get(capability=capability),
-                'attributes'
+                'attributes',
             )
 
     def save(self, *args, **kwargs):

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
@@ -22,10 +20,8 @@ from django.db.models import Prefetch
 from django.utils.translation import gettext_lazy as _
 
 from migasfree.core.models import Attribute
-from .models import (
-    Type, Capability, Manufacturer, Connection,
-    Driver, Logical, Model, Device
-)
+
+from .models import Capability, Connection, Device, Driver, Logical, Manufacturer, Model, Type
 
 
 @admin.register(Type)
@@ -72,7 +68,10 @@ class LogicalForm(forms.ModelForm):
 class LogicalAdmin(admin.ModelAdmin):
     form = LogicalForm
     fields = ('device', 'capability', 'alternative_capability_name', 'attributes')
-    list_select_related = ('device', 'capability',)
+    list_select_related = (
+        'device',
+        'capability',
+    )
     list_display = ('device', 'capability')
     list_filter = ('device__model', 'capability')
     ordering = ('device__name', 'capability__name')
@@ -87,11 +86,13 @@ class LogicalAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return super().get_queryset(
-            request
-        ).prefetch_related(
-            Prefetch('attributes', queryset=qs),
-            'attributes__property_att',
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related(
+                Prefetch('attributes', queryset=qs),
+                'attributes__property_att',
+            )
         )
 
 
@@ -103,11 +104,13 @@ class LogicalInline(admin.TabularInline):
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
-        return super().get_queryset(
-            request
-        ).prefetch_related(
-            Prefetch('attributes', queryset=qs),
-            'attributes__property_att',
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related(
+                Prefetch('attributes', queryset=qs),
+                'attributes__property_att',
+            )
         )
 
 
@@ -134,30 +137,20 @@ class DeviceAdmin(admin.ModelAdmin):
         self.user = request.user
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return Device.objects.scope(
-            request.user.userprofile
-        ).prefetch_related(
+        return Device.objects.scope(request.user.userprofile).prefetch_related(
             Prefetch('logical_set__attributes', queryset=qs),
             'logical_set__attributes__property_att',
             Prefetch('available_for_attributes', queryset=qs),
-            'logical_set'
+            'logical_set',
         )
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
         device = form.instance
 
-        for capability in Capability.objects.filter(
-            driver__model__id=device.model.id
-        ).distinct():
-            if not Logical.objects.filter(
-                device__id=device.id,
-                capability=capability
-            ).exists():
-                device.logical_set.create(
-                    device=device,
-                    capability=capability
-                )
+        for capability in Capability.objects.filter(driver__model__id=device.model.id).distinct():
+            if not Logical.objects.filter(device__id=device.id, capability=capability).exists():
+                device.logical_set.create(device=device, capability=capability)
 
 
 class DriverInline(admin.TabularInline):
@@ -172,9 +165,5 @@ class ModelAdmin(admin.ModelAdmin):
     list_display = ('name', 'manufacturer', 'device_type')
     list_filter = ('device_type', 'manufacturer')
     ordering = ('device_type__name', 'manufacturer__name', 'name')
-    search_fields = (
-        'name',
-        'manufacturer__name',
-        'connections__devicetype__name'
-    )
+    search_fields = ('name', 'manufacturer__name', 'connections__devicetype__name')
     inlines = [DriverInline]

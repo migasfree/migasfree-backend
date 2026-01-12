@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
@@ -20,9 +18,9 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from ...core.models import MigasLink
-from .type import Type
-from .manufacturer import Manufacturer
 from .connection import Connection
+from .manufacturer import Manufacturer
+from .type import Type
 
 
 class Model(models.Model, MigasLink):
@@ -56,21 +54,22 @@ class Model(models.Model, MigasLink):
 
     @staticmethod
     def group_by_manufacturer():
-        return Model.objects.values(
-            'manufacturer__name',
-            'manufacturer__id',
-        ).annotate(
-            count=models.aggregates.Count('id')
-        ).order_by('-count')
+        return (
+            Model.objects.values(
+                'manufacturer__name',
+                'manufacturer__id',
+            )
+            .annotate(count=models.aggregates.Count('id'))
+            .order_by('-count')
+        )
 
     @staticmethod
     def group_by_project():
-        return Model.objects.values(
-            'drivers__project__name',
-            'drivers__project__id'
-        ).annotate(
-            count=models.aggregates.Count('id', distinct=True)
-        ).order_by('drivers__project__name')
+        return (
+            Model.objects.values('drivers__project__name', 'drivers__project__id')
+            .annotate(count=models.aggregates.Count('id', distinct=True))
+            .order_by('drivers__project__name')
+        )
 
     def __str__(self):
         return self.name

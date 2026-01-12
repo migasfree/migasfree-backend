@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2016-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2016-2022 Alberto Gacías <alberto@migasfree.org>
 #
@@ -19,9 +17,14 @@
 from django_filters import rest_framework as filters
 
 from .models import (
-    Device, Driver, Manufacturer,
-    Capability, Type, Connection,
-    Logical, Model,
+    Capability,
+    Connection,
+    Device,
+    Driver,
+    Logical,
+    Manufacturer,
+    Model,
+    Type,
 )
 
 

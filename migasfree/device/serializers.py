@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2016-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2016-2023 Alberto Gacías <alberto@migasfree.org>
 #
@@ -22,7 +20,6 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from ..core.serializers import AttributeInfoSerializer, ProjectInfoSerializer
-
 from ..utils import to_list
 from . import models
 
@@ -119,9 +116,7 @@ class DeviceSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.IntegerField)
     def get_total_computers(self, obj):
-        return obj.total_computers(
-            user=self.context['request'].user if self.context.get('request') else None
-        )
+        return obj.total_computers(user=self.context['request'].user if self.context.get('request') else None)
 
     @extend_schema_field(serializers.JSONField)
     def get_data(self, obj):
@@ -191,12 +186,7 @@ class LogicalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Logical
-        fields = (
-            'id', '__str__',
-            'device',
-            'capability', 'alternative_capability_name',
-            'attributes'
-        )
+        fields = ('id', '__str__', 'device', 'capability', 'alternative_capability_name', 'attributes')
 
 
 class LogicalWriteSerializer(serializers.ModelSerializer):
@@ -210,9 +200,7 @@ class LogicalWriteSerializer(serializers.ModelSerializer):
         if obj.capability:
             representation['capability'] = CapabilityInfoSerializer(obj.capability).data
 
-        representation['attributes'] = [
-            AttributeInfoSerializer(item).data for item in obj.attributes.all()
-        ]
+        representation['attributes'] = [AttributeInfoSerializer(item).data for item in obj.attributes.all()]
 
         return representation
 
@@ -237,9 +225,7 @@ class ModelWriteSerializer(serializers.ModelSerializer):
         if obj.manufacturer:
             representation['manufacturer'] = ManufacturerInfoSerializer(obj.manufacturer).data
 
-        representation['connections'] = [
-            ConnectionInfoSerializer(item).data for item in obj.connections.all()
-        ]
+        representation['connections'] = [ConnectionInfoSerializer(item).data for item in obj.connections.all()]
 
         return representation
 
