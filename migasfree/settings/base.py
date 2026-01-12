@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,20 +18,16 @@ import os
 import sys
 
 import django
-import django.conf.global_settings as DEFAULT_SETTINGS
-
 from corsheaders.defaults import default_headers
 
-from .migasfree import BASE_DIR, MIGASFREE_TMP_DIR
 from .. import __contact__
+from .migasfree import BASE_DIR, MIGASFREE_TMP_DIR
 
 if django.VERSION < (4, 2, 0, 'final'):
     print('Migasfree requires Django 4.2.0 at least. Please, update it.')
     sys.exit(1)
 
-ADMINS = (
-    ('Your name', 'your_name@example.com'),
-)
+ADMINS = (('Your name', 'your_name@example.com'),)
 
 MANAGERS = ADMINS
 
@@ -73,9 +67,7 @@ FILE_UPLOAD_TEMP_DIR = MIGASFREE_TMP_DIR
 
 LOGIN_REDIRECT_URL = '/'
 
-LOCALE_PATHS = (
-    os.path.join(BASE_DIR, 'i18n'),
-)
+LOCALE_PATHS = (os.path.join(BASE_DIR, 'i18n'),)
 
 ADMIN_SITE_ROOT_URL = '/admin/'
 
@@ -181,13 +173,9 @@ REST_AUTH = {
     'USER_DETAILS_SERIALIZER': 'migasfree.core.serializers.UserProfileSerializer',
 }
 
-GRAPHENE = {
-    'SCHEMA': 'migasfree.schema.schema'
-}
+GRAPHENE = {'SCHEMA': 'migasfree.schema.schema'}
 
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    'accept-language',
-]
+CORS_ALLOW_HEADERS = [*list(default_headers), 'accept-language', 'authorization']
 
 # http://docs.python.org/2/howto/logging-cookbook.html
 # http://docs.python.org/2/library/logging.html#logrecord-attributes
@@ -196,11 +184,9 @@ LOGGING = {
     'formatters': {
         'verbose': {
             'format': '%(asctime)s - %(levelname)s - %(process)d - %(module)s '
-                      '- %(lineno)d - %(funcName)s - %(message)s',
+            '- %(lineno)d - %(funcName)s - %(message)s',
         },
-        'simple': {
-            'format': '%(asctime)s - %(levelname)s - %(filename)s - %(message)s'
-        },
+        'simple': {'format': '%(asctime)s - %(levelname)s - %(filename)s - %(message)s'},
     },
     'handlers': {
         'console': {
@@ -264,7 +250,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
             'debug': False,
-        }
+        },
     }
 ]
 
@@ -283,10 +269,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-SWAGGER_SETTINGS = {
-    'LOGIN_URL': '/rest-auth/login/',
-    'LOGOUT_URL': '/rest-auth/logout/'
-}
+SWAGGER_SETTINGS = {'LOGIN_URL': '/rest-auth/login/', 'LOGOUT_URL': '/rest-auth/logout/'}
 
 SESSION_COOKIE_NAME = 'migasfree_backend'
 # CSRF_COOKIE_NAME = 'csrftoken_migasfree_backend'  # issue with markdownx component :_(

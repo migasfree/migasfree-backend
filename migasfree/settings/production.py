@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,14 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from .migasfree import *
-from .base import *
-from .celery import *
+from .base import *  # noqa: F403
+from .celery import *  # noqa: F403
 from .functions import secret_key
+from .migasfree import *  # noqa: F403
 
 # production environment
 DEBUG = False
-TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
+TEMPLATES[0]['OPTIONS']['debug'] = DEBUG  # noqa: F405
 
 ALLOWED_HOSTS = ['*']
 
@@ -47,7 +45,7 @@ DATABASES = {
 }
 
 try:
-    with open(MIGASFREE_SETTINGS_OVERRIDE, encoding='utf_8') as f:
+    with open(MIGASFREE_SETTINGS_OVERRIDE, encoding='utf_8') as f:  # noqa: F405
         exec(f.read(), globals(), locals())
-except IOError:
+except OSError:
     pass

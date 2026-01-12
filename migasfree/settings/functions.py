@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,11 +28,12 @@ def secret_key(path):
         with open(filename, encoding='utf-8') as _file:
             key = _file.read().strip()
     else:
-        key = ''.join([random.SystemRandom().choice("%s%s%s" % (
-            string.ascii_letters,
-            string.digits,
-            string.punctuation
-        )) for i in range(50)])
+        key = ''.join(
+            [
+                random.SystemRandom().choice(f'{string.ascii_letters}{string.digits}{string.punctuation}')
+                for i in range(50)
+            ]
+        )
 
         with open(filename, 'w', encoding='utf-8') as outfile:
             outfile.write(key)
