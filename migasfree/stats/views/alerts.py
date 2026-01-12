@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2020-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2020-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -16,13 +14,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from drf_spectacular.utils import extend_schema, OpenApiExample
-from rest_framework.response import Response
-from rest_framework import viewsets, status, permissions
+from drf_spectacular.utils import OpenApiExample, extend_schema
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import permission_classes
+from rest_framework.response import Response
 
-from ..tasks import get_alerts
 from ...mixins import DatabaseCheckMixin
+from ..tasks import get_alerts
 
 
 @extend_schema(tags=['stats'])
@@ -32,10 +30,7 @@ class AlertsViewSet(DatabaseCheckMixin, viewsets.ViewSet):
 
     @extend_schema(
         summary='Retrieves the list of alerts',
-        description=(
-            'Returns all current alerts for the authenticated user. '
-            'The response is a JSON arrays list.'
-        ),
+        description=('Returns all current alerts for the authenticated user. The response is a JSON arrays list.'),
         responses={
             status.HTTP_200_OK: {'description': 'Successful retrieval of alerts'},
         },
@@ -43,18 +38,18 @@ class AlertsViewSet(DatabaseCheckMixin, viewsets.ViewSet):
             OpenApiExample(
                 name='successfully response',
                 value={
-                    "result": "3",
-                    "api": {
-                        "model": "packages",
-                        "query": {
-                            "deployment": True,
-                            "store": False,
-                            "packageset": True,
+                    'result': '3',
+                    'api': {
+                        'model': 'packages',
+                        'query': {
+                            'deployment': True,
+                            'store': False,
+                            'packageset': True,
                         },
                     },
-                    "level": "warning",
-                    "target": "server",
-                    "msg": "Orphan packages",
+                    'level': 'warning',
+                    'target': 'server',
+                    'msg': 'Orphan packages',
                 },
                 response_only=True,
             )

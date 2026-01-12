@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2016-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2016-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -18,7 +16,7 @@
 
 from django.utils.translation import gettext as _
 from drf_spectacular.utils import extend_schema
-from rest_framework import status, permissions
+from rest_framework import permissions, status
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
@@ -35,25 +33,21 @@ class FaultStatsViewSet(EventProjectViewSet):
     @action(methods=['get'], detail=False)
     def unchecked(self, request):
         data = Fault.unchecked_by_project(request.user.userprofile)
-        inner_aliases = {
-            'project__platform__id': 'platform_id',
-            'project__platform__name': 'name',
-            'count': 'value'
-        }
+        inner_aliases = {'project__platform__id': 'platform_id', 'project__platform__name': 'name', 'count': 'value'}
         outer_aliases = {
             'project__name': 'name',
             'project__id': 'project_id',
             'project__platform__id': 'platform_id',
-            'count': 'value'
+            'count': 'value',
         }
 
         return Response(
             {
                 'total': data['total'],
                 'inner': replace_keys(data['inner'], inner_aliases),
-                'outer': replace_keys(data['outer'], outer_aliases)
+                'outer': replace_keys(data['outer'], outer_aliases),
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
     @action(methods=['get'], detail=False, url_path='definition')
@@ -66,12 +60,8 @@ class FaultStatsViewSet(EventProjectViewSet):
                 'total': Fault.objects.scope(user).count(),
                 'data': replace_keys(
                     list(Fault.group_by_definition(user)),
-                    {
-                        'fault_definition__name': 'name',
-                        'fault_definition__id': 'fault_definition_id',
-                        'count': 'value'
-                    }
+                    {'fault_definition__name': 'name', 'fault_definition__id': 'fault_definition_id', 'count': 'value'},
                 ),
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )

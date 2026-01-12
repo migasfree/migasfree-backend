@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -19,7 +17,7 @@
 from django.db.models import Count
 from django.utils.translation import gettext as _
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets, status, permissions
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
@@ -29,23 +27,22 @@ from ...core.models import ClientAttribute, ServerAttribute
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class ClientAttributeStatsViewSet(viewsets.ViewSet):
-
     @extend_schema(
         description='Returns client attribute statistics grouped by property',
         responses={
             status.HTTP_200_OK: {
-                "type": "object",
-                "properties": {
-                    "title": {"type": "string"},
-                    "total": {"type": "integer"},
-                    "data": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "name": {"type": "string"},
-                                "value": {"type": "integer"},
-                                "property_att_id": {"type": "integer"},
+                'type': 'object',
+                'properties': {
+                    'title': {'type': 'string'},
+                    'total': {'type': 'integer'},
+                    'data': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'name': {'type': 'string'},
+                                'value': {'type': 'integer'},
+                                'property_att_id': {'type': 'integer'},
                             },
                         },
                     },
@@ -63,11 +60,10 @@ class ClientAttributeStatsViewSet(viewsets.ViewSet):
                 'value': item.get('count'),
                 'property_att_id': item.get('property_att__id'),
             }
-            for item in ClientAttribute.objects.scope(request.user.userprofile).values(
-                'property_att__id', 'property_att__name'
-            ).annotate(
-                count=Count('property_att__id')
-            ).order_by('-count')
+            for item in ClientAttribute.objects.scope(request.user.userprofile)
+            .values('property_att__id', 'property_att__name')
+            .annotate(count=Count('property_att__id'))
+            .order_by('-count')
         ]
 
         return Response(
@@ -76,14 +72,13 @@ class ClientAttributeStatsViewSet(viewsets.ViewSet):
                 'total': total,
                 'data': data,
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
 
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class ServerAttributeStatsViewSet(viewsets.ViewSet):
-
     @extend_schema(
         description='Returns tags stats grouped by category',
         responses={
@@ -117,11 +112,10 @@ class ServerAttributeStatsViewSet(viewsets.ViewSet):
                 'value': item.get('count'),
                 'property_att_id': item.get('property_att__id'),
             }
-            for item in ServerAttribute.objects.scope(request.user.userprofile).values(
-                'property_att__id', 'property_att__name'
-            ).annotate(
-                count=Count('property_att__id')
-            ).order_by('-count')
+            for item in ServerAttribute.objects.scope(request.user.userprofile)
+            .values('property_att__id', 'property_att__name')
+            .annotate(count=Count('property_att__id'))
+            .order_by('-count')
         ]
 
         return Response(
@@ -130,5 +124,5 @@ class ServerAttributeStatsViewSet(viewsets.ViewSet):
                 'total': total,
                 'data': data,
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )

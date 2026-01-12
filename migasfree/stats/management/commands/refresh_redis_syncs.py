@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2021-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2021-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -17,7 +15,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import time
-
 from datetime import datetime
 
 from django.core.management.base import BaseCommand

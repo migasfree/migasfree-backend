@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -21,12 +19,12 @@ from collections import defaultdict
 from django.db.models.aggregates import Count
 from django.utils.translation import gettext as _
 from drf_spectacular.utils import extend_schema
-from rest_framework import status, permissions
+from rest_framework import permissions, status
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
-from ...core.models import Platform
 from ...client.models import Migration
+from ...core.models import Platform
 from .events_project import EventProjectViewSet
 
 
@@ -41,13 +39,12 @@ class MigrationStatsViewSet(EventProjectViewSet):
         total = Migration.objects.scope(user).count()
 
         values = defaultdict(list)
-        for item in Migration.objects.scope(user).values(
-            'project__name',
-            'project__id',
-            'project__platform__id'
-        ).annotate(
-            count=Count('id')
-        ).order_by('project__platform__id', '-count'):
+        for item in (
+            Migration.objects.scope(user)
+            .values('project__name', 'project__id', 'project__platform__id')
+            .annotate(count=Count('id'))
+            .order_by('project__platform__id', '-count')
+        ):
             values[item.get('project__platform__id')].append(
                 {
                     'name': item.get('project__name'),
@@ -62,12 +59,7 @@ class MigrationStatsViewSet(EventProjectViewSet):
             if platform.id in values:
                 count = sum(item['value'] for item in values[platform.id])
                 data.append(
-                    {
-                        'name': platform.name,
-                        'value': count,
-                        'platform_id': platform.id,
-                        'data': values[platform.id]
-                    }
+                    {'name': platform.name, 'value': count, 'platform_id': platform.id, 'data': values[platform.id]}
                 )
 
         return Response(
@@ -76,5 +68,5 @@ class MigrationStatsViewSet(EventProjectViewSet):
                 'total': total,
                 'data': data,
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )

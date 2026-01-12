@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -18,13 +16,12 @@
 
 from django.utils.translation import gettext as _
 from drf_spectacular.utils import extend_schema
-from rest_framework import status, permissions
+from rest_framework import permissions, status
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
 from ...client.models import StatusLog
-
-from .events import event_by_month, month_interval, EventViewSet
+from .events import EventViewSet, event_by_month, month_interval
 
 
 @extend_schema(tags=['stats'])
@@ -41,28 +38,22 @@ class StatusLogStatsViewSet(EventViewSet):
                 'title': _('Status Logs / Status'),
                 'total': data['total'],
                 'inner': data['inner'],
-                'outer': data['outer']
+                'outer': data['outer'],
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
     @action(methods=['get'], detail=False, url_path='month')
     def status_by_month(self, request):
         begin_date, end_date = month_interval(
-            begin_month=request.query_params.get('begin', ''),
-            end_month=request.query_params.get('end', '')
+            begin_month=request.query_params.get('begin', ''), end_month=request.query_params.get('end', '')
         )
 
         data = event_by_month(
-            StatusLog.stacked_by_month(
-                request.user.userprofile, begin_date, field='status'
-            ),
+            StatusLog.stacked_by_month(request.user.userprofile, begin_date, field='status'),
             begin_date,
             end_date,
             'statuslog',
-            field='status'
+            field='status',
         )
-        return Response(
-            data,
-            status=status.HTTP_200_OK
-        )
+        return Response(data, status=status.HTTP_200_OK)

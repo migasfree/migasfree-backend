@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2024 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2024 Alberto Gacías <alberto@migasfree.org>
 #
@@ -33,10 +31,13 @@ def filter_computers_by_date(comparison_operator=gt):
     computers = con.smembers('migasfree:watch:msg')
     for computer_id in computers:
         date = con.hget(f'migasfree:msg:{int(computer_id)}', 'date')
-        aware_date = timezone.make_aware(
-            datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f'),
-            timezone.get_default_timezone()
-        ) if date else None
+        aware_date = (
+            timezone.make_aware(
+                datetime.strptime(date.decode(), '%Y-%m-%dT%H:%M:%S.%f'), timezone.get_default_timezone()
+            )
+            if date
+            else None
+        )
         if aware_date and comparison_operator(aware_date, delayed_time):
             result.append(int(computer_id))
 

@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -16,25 +14,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import time
 import locale
+import time
+from datetime import datetime, timedelta
 
-from datetime import timedelta, datetime
 from dateutil.relativedelta import relativedelta
-
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
-from django.utils import timezone, translation, formats
+from django.utils import formats, timezone, translation
 from django.utils.translation import gettext as _
 from django_redis import get_redis_connection
 from drf_spectacular.utils import extend_schema
-from rest_framework import status, permissions
+from rest_framework import permissions, status
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
-from ...core.models import Project
 from ...client.models import Synchronization
+from ...core.models import Project
 from ...utils import replace_keys
 from .. import validators
 from .events import month_year_iter

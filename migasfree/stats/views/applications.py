@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -17,8 +15,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.utils.translation import gettext as _
-from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample
-from rest_framework import viewsets, status, permissions
+from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
@@ -33,35 +31,35 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
     @extend_schema(
         description='Returns the total number of applications grouped by category.',
         responses=OpenApiResponse(
-            description="Response containing a title, total count, and a list of categories.",
+            description='Response containing a title, total count, and a list of categories.',
             response={
-                "type": "object",
-                "properties": {
-                    "title": {"type": "string"},
-                    "total": {"type": "integer"},
-                    "data": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "name": {"type": "string"},
-                                "value": {"type": "integer"},
-                                "category": {"type": "integer"},
+                'type': 'object',
+                'properties': {
+                    'title': {'type': 'string'},
+                    'total': {'type': 'integer'},
+                    'data': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'name': {'type': 'string'},
+                                'value': {'type': 'integer'},
+                                'category': {'type': 'integer'},
                             },
                         },
                     },
                 },
-                "required": ["title", "total", "data"],
+                'required': ['title', 'total', 'data'],
             },
             examples=[
                 OpenApiExample(
-                    "successfully response",
+                    'successfully response',
                     value={
-                        "title": "Applications / Category",
-                        "total": 15,
-                        "data": [
-                            {"name": "Category A", "value": 10, "category": 1},
-                            {"name": "Category B", "value": 5, "category": 2},
+                        'title': 'Applications / Category',
+                        'total': 15,
+                        'data': [
+                            {'name': 'Category A', 'value': 10, 'category': 1},
+                            {'name': 'Category B', 'value': 5, 'category': 2},
                         ],
                     },
                     response_only=True,
@@ -75,11 +73,7 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
         total = Application.objects.count()
 
         data = [
-            {
-                'name': item.get('category__name'),
-                'value': item.get('count'),
-                'category': item.get('category__id')
-            }
+            {'name': item.get('category__name'), 'value': item.get('count'), 'category': item.get('category__id')}
             for item in Application.group_by_category()
         ]
 
@@ -89,41 +83,41 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
                 'total': total,
                 'data': data,
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
     @extend_schema(
         description='Returns the total number of applications grouped by level.',
         responses=OpenApiResponse(
-            description="Response containing a title, total count, and a list of levels.",
+            description='Response containing a title, total count, and a list of levels.',
             response={
-                "type": "object",
-                "properties": {
-                    "title": {"type": "string"},
-                    "total": {"type": "integer"},
-                    "data": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "name": {"type": "string"},
-                                "value": {"type": "integer"},
-                                "level": {"type": "integer"},
+                'type': 'object',
+                'properties': {
+                    'title': {'type': 'string'},
+                    'total': {'type': 'integer'},
+                    'data': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'name': {'type': 'string'},
+                                'value': {'type': 'integer'},
+                                'level': {'type': 'integer'},
                             },
                         },
                     },
                 },
-                "required": ["title", "total", "data"],
+                'required': ['title', 'total', 'data'],
             },
             examples=[
                 OpenApiExample(
-                    "Response example",
+                    'Response example',
                     value={
-                        "title": "Applications / Level",
-                        "total": 17,
-                        "data": [
-                            {"name": "User", "value": 5, "level": 1},
-                            {"name": "Admin", "value": 12, "level": 2},
+                        'title': 'Applications / Level',
+                        'total': 17,
+                        'data': [
+                            {'name': 'User', 'value': 5, 'level': 1},
+                            {'name': 'Admin', 'value': 12, 'level': 2},
                         ],
                     },
                     response_only=True,
@@ -140,7 +134,7 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
             {
                 'name': dict(Application.LEVELS)[item.get('level')],
                 'value': item.get('count'),
-                'level': item.get('level')
+                'level': item.get('level'),
             }
             for item in Application.group_by_level()
         ]
@@ -151,47 +145,47 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
                 'total': total,
                 'data': data,
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
     @extend_schema(
         description='Returns the total number of applications grouped by project.',
         responses=OpenApiResponse(
-            description="Response containing x-axis labels, data points and total count.",
+            description='Response containing x-axis labels, data points and total count.',
             response={
-                "type": "object",
-                "properties": {
-                    "x_labels": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "Project names (x-axis labels).",
+                'type': 'object',
+                'properties': {
+                    'x_labels': {
+                        'type': 'array',
+                        'items': {'type': 'string'},
+                        'description': 'Project names (x-axis labels).',
                     },
-                    "data": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "value": {"type": "integer"},
-                                "packages_by_project__project__id": {"type": "integer"},
+                    'data': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'value': {'type': 'integer'},
+                                'packages_by_project__project__id': {'type': 'integer'},
                             },
-                            "required": ["value", "packages_by_project__project__id"],
+                            'required': ['value', 'packages_by_project__project__id'],
                         },
                     },
-                    "total": {"type": "integer"},
+                    'total': {'type': 'integer'},
                 },
-                "required": ["x_labels", "data", "total"],
+                'required': ['x_labels', 'data', 'total'],
             },
             examples=[
                 OpenApiExample(
-                    "successfully response",
+                    'successfully response',
                     value={
-                        "x_labels": ["Project A", "Project B", "Project C"],
-                        "data": [
-                            {"value": 12, "packages_by_project__project__id": 1},
-                            {"value": 7,  "packages_by_project__project__id": 2},
-                            {"value": 3,  "packages_by_project__project__id": 3},
+                        'x_labels': ['Project A', 'Project B', 'Project C'],
+                        'data': [
+                            {'value': 12, 'packages_by_project__project__id': 1},
+                            {'value': 7, 'packages_by_project__project__id': 2},
+                            {'value': 3, 'packages_by_project__project__id': 3},
                         ],
-                        "total": 22,
+                        'total': 22,
                     },
                     response_only=True,
                     status_codes=[status.HTTP_200_OK],
@@ -207,12 +201,8 @@ class ApplicationStatsViewSet(viewsets.ViewSet):
         data = []
         for item in Application.group_by_project():
             x_axe.append(item['packages_by_project__project__name'])
-            data.append({
-                'value': item['count'],
-                'packages_by_project__project__id': item['packages_by_project__project__id']
-            })
+            data.append(
+                {'value': item['count'], 'packages_by_project__project__id': item['packages_by_project__project__id']}
+            )
 
-        return Response(
-            {'x_labels': x_axe, 'data': data, 'total': total},
-            status=status.HTTP_200_OK
-        )
+        return Response({'x_labels': x_axe, 'data': data, 'total': total}, status=status.HTTP_200_OK)

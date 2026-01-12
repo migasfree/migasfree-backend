@@ -1,5 +1,3 @@
-# -*- coding: utf-8 *-*
-
 # Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2021 Alberto Gacías <alberto@migasfree.org>
 #
@@ -22,84 +20,20 @@ from . import views
 
 router = routers.DefaultRouter()
 
-router.register(
-    r'stats/alerts',
-    views.AlertsViewSet,
-    basename='stats-alerts'
-)
+router.register(r'stats/alerts', views.AlertsViewSet, basename='stats-alerts')
 
-router.register(
-    r'stats/applications',
-    views.ApplicationStatsViewSet,
-    basename='stats-applications'
-)
-router.register(
-    r'stats/computers',
-    views.ComputerStatsViewSet,
-    basename='stats-computers'
-)
-router.register(
-    r'stats/deployments',
-    views.DeploymentStatsViewSet,
-    basename='stats-deployments'
-)
-router.register(
-    r'stats/devices',
-    views.DeviceStatsViewSet,
-    basename='stats-devices'
-)
-router.register(
-    r'stats/errors',
-    views.ErrorStatsViewSet,
-    basename='stats-errors'
-)
-router.register(
-    r'stats/faults',
-    views.FaultStatsViewSet,
-    basename='stats-faults'
-)
-router.register(
-    r'stats/features',
-    views.ClientAttributeStatsViewSet,
-    basename='stats-features'
-)
-router.register(
-    r'stats/migrations',
-    views.MigrationStatsViewSet,
-    basename='stats-migrations'
-)
-router.register(
-    r'stats/notifications',
-    views.NotificationStatsViewSet,
-    basename='stats-notifications'
-)
-router.register(
-    r'stats/packages-history',
-    views.PackageHistoryStatsViewSet,
-    basename='stats-packages-history'
-)
-router.register(
-    r'stats/packages',
-    views.PackageStatsViewSet,
-    basename='stats-packages'
-)
-router.register(
-    r'stats/status-logs',
-    views.StatusLogStatsViewSet,
-    basename='stats-status-logs'
-)
-router.register(
-    r'stats/stores',
-    views.StoreStatsViewSet,
-    basename='stats-stores'
-)
-router.register(
-    r'stats/syncs',
-    views.SyncStatsViewSet,
-    basename='stats-syncs'
-)
-router.register(
-    r'stats/tags',
-    views.ServerAttributeStatsViewSet,
-    basename='stats-tags'
-)
+router.register(r'stats/applications', views.ApplicationStatsViewSet, basename='stats-applications')
+router.register(r'stats/computers', views.ComputerStatsViewSet, basename='stats-computers')
+router.register(r'stats/deployments', views.DeploymentStatsViewSet, basename='stats-deployments')
+router.register(r'stats/devices', views.DeviceStatsViewSet, basename='stats-devices')
+router.register(r'stats/errors', views.ErrorStatsViewSet, basename='stats-errors')
+router.register(r'stats/faults', views.FaultStatsViewSet, basename='stats-faults')
+router.register(r'stats/features', views.ClientAttributeStatsViewSet, basename='stats-features')
+router.register(r'stats/migrations', views.MigrationStatsViewSet, basename='stats-migrations')
+router.register(r'stats/notifications', views.NotificationStatsViewSet, basename='stats-notifications')
+router.register(r'stats/packages-history', views.PackageHistoryStatsViewSet, basename='stats-packages-history')
+router.register(r'stats/packages', views.PackageStatsViewSet, basename='stats-packages')
+router.register(r'stats/status-logs', views.StatusLogStatsViewSet, basename='stats-status-logs')
+router.register(r'stats/stores', views.StoreStatsViewSet, basename='stats-stores')
+router.register(r'stats/syncs', views.SyncStatsViewSet, basename='stats-syncs')
+router.register(r'stats/tags', views.ServerAttributeStatsViewSet, basename='stats-tags')

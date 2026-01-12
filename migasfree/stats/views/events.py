@@ -1,7 +1,5 @@
-# -*- coding: UTF-8 -*-
-
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,38 +15,48 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import time
+from datetime import date, datetime, timedelta
 
-from datetime import timedelta, datetime, date
 from dateutil.relativedelta import relativedelta
-
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import viewsets, status, permissions
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
 from ...client.models import (
-    Computer, Error, Fault,
-    Synchronization, Migration, StatusLog,
+    Computer,
+    Error,
+    Fault,
+    Migration,
+    StatusLog,
+    Synchronization,
 )
 from ...core.models import Project
 from ...utils import to_heatmap
 
 computer_id = OpenApiParameter(
-    name='computer_id', location=OpenApiParameter.QUERY,
-    default=0, description='Computer ID', type=OpenApiTypes.INT
+    name='computer_id', location=OpenApiParameter.QUERY, default=0, description='Computer ID', type=OpenApiTypes.INT
 )
 start_date = OpenApiParameter(
-    name='start_date', location=OpenApiParameter.QUERY,
-    required=False, default='', description='String in YYYY-MM-DD format', type=OpenApiTypes.STR
+    name='start_date',
+    location=OpenApiParameter.QUERY,
+    required=False,
+    default='',
+    description='String in YYYY-MM-DD format',
+    type=OpenApiTypes.STR,
 )
 end_date = OpenApiParameter(
-    name='end_date', location=OpenApiParameter.QUERY,
-    required=False, default='', description='String in YYYY-MM-DD format', type=OpenApiTypes.STR
+    name='end_date',
+    location=OpenApiParameter.QUERY,
+    required=False,
+    default='',
+    description='String in YYYY-MM-DD format',
+    type=OpenApiTypes.STR,
 )
 
 
@@ -124,10 +132,7 @@ def event_by_month(data, begin_date, end_date, model, field='project_id'):
 
     # shuffle data series
     x_axe = []
-    for monthly in month_year_iter(
-        begin_date.month, begin_date.year,
-        end_date.month, end_date.year
-    ):
+    for monthly in month_year_iter(begin_date.month, begin_date.year, end_date.month, end_date.year):
         start_date = date(monthly[0], monthly[1], 1)
         final_date = start_date + relativedelta(months=+1)
 
@@ -138,47 +143,59 @@ def event_by_month(data, begin_date, end_date, model, field='project_id'):
             for project in projects:
                 if value:
                     count = list(filter(lambda item: item['project_id'] == project.id, value))
-                    new_data[project.id].append({
-                        'value': count[0]['count'] if count else 0,
-                        'model': model,
-                        'project__id__exact': project.id,
-                        'created_at__gte': start_date.strftime('%Y-%m-%d'),
-                        'created_at__lt': final_date.strftime('%Y-%m-%d'),
-                    })
+                    new_data[project.id].append(
+                        {
+                            'value': count[0]['count'] if count else 0,
+                            'model': model,
+                            'project__id__exact': project.id,
+                            'created_at__gte': start_date.strftime('%Y-%m-%d'),
+                            'created_at__lt': final_date.strftime('%Y-%m-%d'),
+                        }
+                    )
                 else:
-                    new_data[project.id].append({
-                        'value': 0,
-                    })
+                    new_data[project.id].append(
+                        {
+                            'value': 0,
+                        }
+                    )
         elif field == 'status':
             for item in Computer.STATUS_CHOICES:
                 if value:
                     count = list(filter(lambda row: row['status'] == item[0], value))
-                    new_data[item[0]].append({
-                        'value': count[0]['count'] if count else 0,
-                        'model': model,
-                        'status__in': item[0],
-                        'created_at__gte': start_date.strftime('%Y-%m-%d'),
-                        'created_at__lt': final_date.strftime('%Y-%m-%d'),
-                    })
+                    new_data[item[0]].append(
+                        {
+                            'value': count[0]['count'] if count else 0,
+                            'model': model,
+                            'status__in': item[0],
+                            'created_at__gte': start_date.strftime('%Y-%m-%d'),
+                            'created_at__lt': final_date.strftime('%Y-%m-%d'),
+                        }
+                    )
                 else:
-                    new_data[item[0]].append({
-                        'value': 0,
-                    })
+                    new_data[item[0]].append(
+                        {
+                            'value': 0,
+                        }
+                    )
         elif field == 'checked':
             for val in [True, False]:
                 if value:
                     count = list(filter(lambda item: item['checked'] == val, value))
-                    new_data[val].append({
-                        'value': count[0]['count'] if count else 0,
-                        'model': model,
-                        'checked__exact': 1 if val else 0,
-                        'created_at__gte': start_date.strftime('%Y-%m-%d'),
-                        'created_at__lt': final_date.strftime('%Y-%m-%d'),
-                    })
+                    new_data[val].append(
+                        {
+                            'value': count[0]['count'] if count else 0,
+                            'model': model,
+                            'checked__exact': 1 if val else 0,
+                            'created_at__gte': start_date.strftime('%Y-%m-%d'),
+                            'created_at__lt': final_date.strftime('%Y-%m-%d'),
+                        }
+                    )
                 else:
-                    new_data[val].append({
-                        'value': 0,
-                    })
+                    new_data[val].append(
+                        {
+                            'value': 0,
+                        }
+                    )
 
     for item in new_data:
         chart_data[labels[item]] = new_data[item]
@@ -220,58 +237,67 @@ def event_by_day(data, begin_date, end_date, model, field='project_id'):
 
         if field == 'project_id':
             for project in projects:
-                value = list(filter(
-                    lambda item:
-                        item['year'] == start_date.year and
-                        item['month'] == start_date.month and
-                        item['day'] == start_date.day,
-                    data
-                ))
+                value = list(
+                    filter(
+                        lambda item: item['year'] == start_date.year
+                        and item['month'] == start_date.month
+                        and item['day'] == start_date.day,
+                        data,
+                    )
+                )
 
                 count = list(filter(lambda item: item['project_id'] == project.id, value))
-                new_data[project.id].append({
-                    'value': count[0]['count'] if count else 0,
-                    'model': model,
-                    'project__id__exact': project.id,
-                    'created_at__gte': start_date.strftime('%Y-%m-%d'),
-                    'created_at__lt': end_of_day.strftime('%Y-%m-%d'),
-                })
+                new_data[project.id].append(
+                    {
+                        'value': count[0]['count'] if count else 0,
+                        'model': model,
+                        'project__id__exact': project.id,
+                        'created_at__gte': start_date.strftime('%Y-%m-%d'),
+                        'created_at__lt': end_of_day.strftime('%Y-%m-%d'),
+                    }
+                )
         elif field == 'status':
             for item in Computer.STATUS_CHOICES:
-                value = list(filter(
-                    lambda item:
-                        item['year'] == start_date.year and
-                        item['month'] == start_date.month and
-                        item['day'] == start_date.day,
-                    data
-                ))
+                value = list(
+                    filter(
+                        lambda item: item['year'] == start_date.year
+                        and item['month'] == start_date.month
+                        and item['day'] == start_date.day,
+                        data,
+                    )
+                )
 
                 count = list(filter(lambda row: row['status'] == item[0], value))
-                new_data[item[0]].append({
-                    'value': count[0]['count'] if count else 0,
-                    'model': model,
-                    'status__in': item[0],
-                    'created_at__gte': start_date.strftime('%Y-%m-%d'),
-                    'created_at__lt': end_of_day.strftime('%Y-%m-%d'),
-                })
+                new_data[item[0]].append(
+                    {
+                        'value': count[0]['count'] if count else 0,
+                        'model': model,
+                        'status__in': item[0],
+                        'created_at__gte': start_date.strftime('%Y-%m-%d'),
+                        'created_at__lt': end_of_day.strftime('%Y-%m-%d'),
+                    }
+                )
         elif field == 'checked':
             for val in [True, False]:
-                value = list(filter(
-                    lambda item:
-                        item['year'] == start_date.year and
-                        item['month'] == start_date.month and
-                        item['day'] == start_date.day,
-                    data
-                ))
+                value = list(
+                    filter(
+                        lambda item: item['year'] == start_date.year
+                        and item['month'] == start_date.month
+                        and item['day'] == start_date.day,
+                        data,
+                    )
+                )
 
                 count = list(filter(lambda item: item['checked'] == val, value))
-                new_data[val].append({
-                    'value': count[0]['count'] if count else 0,
-                    'model': model,
-                    'checked__exact': 1 if val else 0,
-                    'created_at__gte': start_date.strftime('%Y-%m-%d'),
-                    'created_at__lt': end_of_day.strftime('%Y-%m-%d'),
-                })
+                new_data[val].append(
+                    {
+                        'value': count[0]['count'] if count else 0,
+                        'model': model,
+                        'checked__exact': 1 if val else 0,
+                        'created_at__gte': start_date.strftime('%Y-%m-%d'),
+                        'created_at__lt': end_of_day.strftime('%Y-%m-%d'),
+                    }
+                )
 
     for item in new_data:
         chart_data[labels[item]] = new_data[item]
@@ -312,10 +338,7 @@ class EventViewSet(viewsets.ViewSet):
         event_class = self.get_event_class()
         data = event_class.by_day(computer_id, start_date, end_date, user)
 
-        return Response(
-            to_heatmap(data),
-            status=status.HTTP_200_OK
-        )
+        return Response(to_heatmap(data), status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False)
     def history(self, request):
@@ -344,10 +367,7 @@ class EventViewSet(viewsets.ViewSet):
             begin = end - timedelta(days=settings.HOURLY_RANGE)
 
         event_class = self.get_event_class()
-        events = {
-            i['hour'].strftime(human_fmt): i['count']
-            for i in event_class.by_hour(begin, end, user)
-        }
+        events = {i['hour'].strftime(human_fmt): i['count'] for i in event_class.by_hour(begin, end, user)}
 
         labels = []
         stats = []
@@ -355,17 +375,15 @@ class EventViewSet(viewsets.ViewSet):
         for item in datetime_iterator(begin, end - timedelta(hours=1), delta=timedelta(hours=1)):
             next_item = item + timedelta(hours=1)
             labels.append(time.strftime(human_fmt, item.timetuple()))
-            stats.append({
-                'model': event_class._meta.model_name,
-                'created_at__gte': time.strftime(value_fmt, item.timetuple()),
-                'created_at__lt': time.strftime(value_fmt, next_item.timetuple()),
-                'value': events[str(item)] if str(item) in events else 0
-            })
+            stats.append(
+                {
+                    'model': event_class._meta.model_name,
+                    'created_at__gte': time.strftime(value_fmt, item.timetuple()),
+                    'created_at__lt': time.strftime(value_fmt, next_item.timetuple()),
+                    'value': events.get(str(item), 0),
+                }
+            )
 
         return Response(
-            {
-                'x_labels': labels,
-                'data': {str(event_class._meta.verbose_name_plural): stats}
-            },
-            status=status.HTTP_200_OK
+            {'x_labels': labels, 'data': {str(event_class._meta.verbose_name_plural): stats}}, status=status.HTTP_200_OK
         )

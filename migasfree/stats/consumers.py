@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2021 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2021 Alberto Gacías <alberto@migasfree.org>
 #

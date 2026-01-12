@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -18,18 +16,16 @@
 
 import locale
 import time
-
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from drf_spectacular.utils import extend_schema
-from rest_framework import status, permissions
+from rest_framework import permissions, status
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
-from ...client.models import Error, Fault, Synchronization, Migration
-
-from .events import EventViewSet, month_interval, event_by_month, event_by_day
+from ...client.models import Error, Fault, Migration, Synchronization
+from .events import EventViewSet, event_by_day, event_by_month, month_interval
 
 
 @extend_schema(tags=['stats'])
@@ -52,22 +48,15 @@ class EventProjectViewSet(EventViewSet):
     @action(methods=['get'], detail=False, url_path='project/month')
     def project_by_month(self, request):
         begin_date, end_date = month_interval(
-            begin_month=request.query_params.get('begin', ''),
-            end_month=request.query_params.get('end', '')
+            begin_month=request.query_params.get('begin', ''), end_month=request.query_params.get('end', '')
         )
 
         event_class = self.get_event_class()
 
         data = event_by_month(
-            event_class.stacked_by_month(request.user.userprofile, begin_date),
-            begin_date,
-            end_date,
-            'error'
+            event_class.stacked_by_month(request.user.userprofile, begin_date), begin_date, end_date, 'error'
         )
-        return Response(
-            data,
-            status=status.HTTP_200_OK
-        )
+        return Response(data, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False, url_path='project/day')
     def project_by_day(self, request):
@@ -91,12 +80,6 @@ class EventProjectViewSet(EventViewSet):
         event_class = self.get_event_class()
 
         data = event_by_day(
-            event_class.stacked_by_day(request.user.userprofile, begin_date),
-            begin_date,
-            end_date,
-            'error'
+            event_class.stacked_by_day(request.user.userprofile, begin_date), begin_date, end_date, 'error'
         )
-        return Response(
-            data,
-            status=status.HTTP_200_OK
-        )
+        return Response(data, status=status.HTTP_200_OK)

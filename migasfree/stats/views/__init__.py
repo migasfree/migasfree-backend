@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2020-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2020-2024 Alberto Gacías <alberto@migasfree.org>
 #
@@ -26,8 +24,8 @@ from .errors import ErrorStatsViewSet
 from .faults import FaultStatsViewSet
 from .migrations import MigrationStatsViewSet
 from .notifications import NotificationStatsViewSet
-from .packages_history import PackageHistoryStatsViewSet
 from .packages import PackageStatsViewSet
+from .packages_history import PackageHistoryStatsViewSet
 from .status_logs import StatusLogStatsViewSet
 from .stores import StoreStatsViewSet
 from .syncs import SyncStatsViewSet
@@ -35,7 +33,7 @@ from .syncs import SyncStatsViewSet
 __all__ = [
     'AlertsViewSet',
     'ApplicationStatsViewSet',
-    'ClientAttributeStatsViewSet', 'ServerAttributeStatsViewSet',
+    'ClientAttributeStatsViewSet',
     'ComputerStatsViewSet',
     'DeploymentStatsViewSet',
     'DeviceStatsViewSet',
@@ -45,6 +43,7 @@ __all__ = [
     'NotificationStatsViewSet',
     'PackageHistoryStatsViewSet',
     'PackageStatsViewSet',
+    'ServerAttributeStatsViewSet',
     'StatusLogStatsViewSet',
     'StoreStatsViewSet',
     'SyncStatsViewSet',

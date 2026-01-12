@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2021 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2021 Alberto Gacías <alberto@migasfree.org>
 #
@@ -20,6 +18,4 @@ from django.urls import path
 
 from .consumers import StatsConsumer
 
-ws_urlpatterns = [
-    path('alerts/', StatsConsumer.as_asgi())
-]
+ws_urlpatterns = [path('alerts/', StatsConsumer.as_asgi())]

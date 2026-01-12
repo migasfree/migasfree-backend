@@ -1,7 +1,5 @@
-# -*- coding: UTF-8 -*-
-
-# Copyright (c) 2021-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2021-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2021-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +16,8 @@
 
 from django.db.models import Count
 from django.utils.translation import gettext as _
-from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiResponse, OpenApiExample
-from rest_framework import viewsets, status, permissions
+from drf_spectacular.utils import OpenApiExample, OpenApiResponse, OpenApiTypes, extend_schema
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
@@ -33,38 +31,30 @@ class PackageHistoryStatsViewSet(viewsets.ViewSet):
 
     @extend_schema(
         description=(
-            "Returns the amount of packages per project for the authenticated "
-            "user profile. The response contains a title, the overall total, "
-            "and a list of objects with the project name, the package count "
-            "(value), and the project’s internal ID."
+            'Returns the amount of packages per project for the authenticated '
+            'user profile. The response contains a title, the overall total, '
+            'and a list of objects with the project name, the package count '
+            "(value), and the project's internal ID."
         ),
         responses={
             status.HTTP_200_OK: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
                 description=(
-                    "Number of packages grouped by project for the current user "
-                    "profile. Includes a total count and a list of project-wise "
-                    "aggregations."
+                    'Number of packages grouped by project for the current user '
+                    'profile. Includes a total count and a list of project-wise '
+                    'aggregations.'
                 ),
                 examples=[
                     OpenApiExample(
-                        "successfully response",
+                        'successfully response',
                         value={
-                            "title": "Packages / Project",
-                            "total": 123,
-                            "data": [
-                                {
-                                    "name": "Project Alpha",
-                                    "value": 78,
-                                    "package_project_id": 10
-                                },
-                                {
-                                    "name": "Project Beta",
-                                    "value": 45,
-                                    "package_project_id": 12
-                                }
-                            ]
-                        }
+                            'title': 'Packages / Project',
+                            'total': 123,
+                            'data': [
+                                {'name': 'Project Alpha', 'value': 78, 'package_project_id': 10},
+                                {'name': 'Project Beta', 'value': 45, 'package_project_id': 12},
+                            ],
+                        },
                     )
                 ],
             )
@@ -80,11 +70,10 @@ class PackageHistoryStatsViewSet(viewsets.ViewSet):
                 'value': item.get('count'),
                 'package_project_id': item.get('package__project__id'),
             }
-            for item in PackageHistory.objects.scope(request.user.userprofile).values(
-                'package__project__id', 'package__project__name'
-            ).annotate(
-                count=Count('package__project__id')
-            ).order_by('-count')
+            for item in PackageHistory.objects.scope(request.user.userprofile)
+            .values('package__project__id', 'package__project__name')
+            .annotate(count=Count('package__project__id'))
+            .order_by('-count')
         ]
 
         return Response(
@@ -93,5 +82,5 @@ class PackageHistoryStatsViewSet(viewsets.ViewSet):
                 'total': total,
                 'data': data,
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
