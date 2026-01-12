@@ -3,7 +3,7 @@
 
 import operator
 
-from django.db.models.expressions import F, Expression
+from django.db.models.expressions import Expression, F
 
 EXPRESSION_NODE_CALLBACKS = {
     Expression.ADD: operator.add,
