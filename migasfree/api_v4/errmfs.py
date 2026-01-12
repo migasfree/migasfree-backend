@@ -1,14 +1,12 @@
-# -*- coding: UTF-8 -*-
-
+import contextlib
 import os
 import sys
-import traceback
 import tempfile
+import traceback
 
 from django.conf import settings
 from django.template import Context, Template
 from django.utils.translation import gettext as _
-
 
 ALL_OK = 0
 UNAUTHENTICATED = 1
@@ -24,18 +22,18 @@ UNSUBSCRIBED_COMPUTER = 10
 GENERIC = 100
 
 ERROR_INFO = {
-    ALL_OK: _("No errors"),
-    UNAUTHENTICATED: _("User unauthenticated"),
-    CAN_NOT_REGISTER_COMPUTER: _("User can not register computers"),
-    GET_METHOD_NOT_ALLOWED: _("Method GET not allowed"),
-    COMMAND_NOT_FOUND: _("Command not found"),
-    INVALID_SIGNATURE: _("Signature is not valid"),
-    COMPUTER_NOT_FOUND: _("Computer not found"),
-    DEVICE_NOT_FOUND: _("Device not found"),
-    PROJECT_NOT_FOUND: _("Project not found"),
-    USER_DOES_NOT_HAVE_PERMISSION: _("User does not have permission"),
-    UNSUBSCRIBED_COMPUTER: _("Unsubscribed computer"),
-    GENERIC: _("Generic error")
+    ALL_OK: _('No errors'),
+    UNAUTHENTICATED: _('User unauthenticated'),
+    CAN_NOT_REGISTER_COMPUTER: _('User can not register computers'),
+    GET_METHOD_NOT_ALLOWED: _('Method GET not allowed'),
+    COMMAND_NOT_FOUND: _('Command not found'),
+    INVALID_SIGNATURE: _('Signature is not valid'),
+    COMPUTER_NOT_FOUND: _('Computer not found'),
+    DEVICE_NOT_FOUND: _('Device not found'),
+    PROJECT_NOT_FOUND: _('Project not found'),
+    USER_DOES_NOT_HAVE_PERMISSION: _('User does not have permission'),
+    UNSUBSCRIBED_COMPUTER: _('Unsubscribed computer'),
+    GENERIC: _('Generic error'),
 }
 
 ERROR_TEMPLATE = """
@@ -83,16 +81,16 @@ def error(number):
         with tempfile.NamedTemporaryFile(
             mode='w+b',
             suffix='.html',
-            prefix=str(evalue).replace(" ", "_").replace("\n", "_"),
+            prefix=str(evalue).replace(' ', '_').replace('\n', '_'),
             dir=dir_errors,
-            delete=False
+            delete=False,
         ) as fp:
             fp.write(print_exc_plus(etype, evalue))
             fp_name = os.path.join(dir_errors, os.path.basename(fp.name))
 
         ret = f'{etype} {evalue} {_("Traceback")}: {fp_name}'
 
-    return {"errmfs": {"code": number, "info": ret}}
+    return {'errmfs': {'code': number, 'info': ret}}
 
 
 def ok():
@@ -121,30 +119,19 @@ def print_exc_plus(etype, evalue):
 
     ret = []
     for frame in stack:
-        fr = {
-            'filename': frame.f_code.co_filename,
-            'name': frame.f_code.co_name,
-            'line': frame.f_lineno
-        }
+        fr = {'filename': frame.f_code.co_filename, 'name': frame.f_code.co_name, 'line': frame.f_lineno}
 
         variables = []
         for key, value in frame.f_locals.items():
-            try:
-                variables.append({"key": key, "value": str(value)})
-            except Exception:
-                pass
+            with contextlib.suppress(Exception):
+                variables.append({'key': key, 'value': str(value)})
 
-        fr["locals"] = variables
+        fr['locals'] = variables
         ret.append(fr)
 
     template = Template(ERROR_TEMPLATE)
-    context = Context({
-        "description": '%s: %s %s' % (
-            _("Generic error in server"),
-            str(etype),
-            str(evalue)
-        ),
-        "traceback": ret
-    })
+    context = Context(
+        {'description': '{}: {} {}'.format(_('Generic error in server'), str(etype), str(evalue)), 'traceback': ret}
+    )
 
     return template.render(context)
