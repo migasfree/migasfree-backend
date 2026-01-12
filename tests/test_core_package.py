@@ -1,6 +1,6 @@
 import pytest
 
-from migasfree.core.models import Package, Project, Platform, Store, UserProfile
+from migasfree.core.models import Package, Platform, Project, Store, UserProfile
 
 
 @pytest.mark.django_db

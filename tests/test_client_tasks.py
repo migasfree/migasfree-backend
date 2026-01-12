@@ -1,13 +1,13 @@
 import uuid
-import pytest
 
+import pytest
+from celery import states
 from django.conf import settings
 from django.test import TestCase
-from celery import states
 
-from migasfree.core.models import Project, Platform
 from migasfree.client.models import Computer
 from migasfree.client.tasks import update_software_inventory
+from migasfree.core.models import Platform, Project
 
 
 @pytest.mark.celery(result_backend=settings.CELERY_BROKER_URL)

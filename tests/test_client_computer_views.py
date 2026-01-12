@@ -1,12 +1,12 @@
 import uuid
 
-from rest_framework import status
-from rest_framework.test import APITestCase
 from django.conf import settings
 from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase
 
 from migasfree.client.models import Computer, Fault, FaultDefinition
-from migasfree.core.models import UserProfile, Platform, Project
+from migasfree.core.models import Platform, Project, UserProfile
 from migasfree.hardware.models import Node
 
 

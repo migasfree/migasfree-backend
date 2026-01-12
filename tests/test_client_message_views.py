@@ -1,14 +1,14 @@
 import random
-import redis
+from unittest.mock import patch
 
+import redis
 from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from unittest.mock import patch
 
-from migasfree.core.models import UserProfile
 from migasfree.client.messages import add_computer_message
+from migasfree.core.models import UserProfile
 
 
 def generate_test_data():
@@ -53,9 +53,7 @@ class TestMessageViewSet(APITestCase):
         )
         self.client.force_authenticate(user=self.user)
 
-        self.redis_client = redis.Redis(
-            host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=(settings.REDIS_DB + 1)
-        )
+        self.redis_client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=(settings.REDIS_DB + 1))
 
         test_computer, test_message = generate_test_data()
         add_computer_message(test_computer, test_message)
@@ -123,11 +121,9 @@ class MessageViewSetPaginationTest(APITestCase):
         )
         self.client.force_authenticate(user=self.user)
 
-        self.redis_client = redis.Redis(
-            host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=(settings.REDIS_DB + 1)
-        )
+        self.redis_client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=(settings.REDIS_DB + 1))
 
-        for i in range(100):
+        for _ in range(100):
             test_computer, test_message = generate_test_data()
             add_computer_message(test_computer, test_message)
 

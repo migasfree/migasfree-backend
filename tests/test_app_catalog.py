@@ -3,8 +3,8 @@ import uuid
 from django.test import TestCase
 
 from migasfree.app_catalog.models import Application, Category, Policy, PolicyGroup
-from migasfree.core.models import Project, Platform, Property, Attribute, Package, Store
 from migasfree.client.models import Computer
+from migasfree.core.models import Attribute, Package, Platform, Project, Property, Store
 
 
 class TestApplicationModel(TestCase):

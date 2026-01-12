@@ -1,9 +1,9 @@
 from django.http import HttpRequest
 from django.test import TestCase
 
+from migasfree.api_v4.api import get_computer, register_computer, upload_computer_info
 from migasfree.client.models import Computer
-from migasfree.core.models import Platform, Project, Property, Attribute, UserProfile
-from migasfree.api_v4.api import get_computer, upload_computer_info, register_computer
+from migasfree.core.models import Attribute, Platform, Project, Property, UserProfile
 from migasfree.utils import uuid_change_format
 
 

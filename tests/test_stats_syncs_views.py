@@ -1,11 +1,10 @@
 import redis
-
 from django.conf import settings
 from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
+from rest_framework.test import APIClient, APITestCase
 
-from migasfree.core.models import Project, Platform, UserProfile
+from migasfree.core.models import Platform, Project, UserProfile
 
 
 class TestYearlySync(APITestCase):

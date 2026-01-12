@@ -1,5 +1,4 @@
 import pytest
-
 from django.core.exceptions import ValidationError
 
 from migasfree.core.models import AttributeSet, Property

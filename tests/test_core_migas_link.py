@@ -3,8 +3,13 @@ from django.test import TestCase
 
 from migasfree.client.models import Computer
 from migasfree.core.models import (
-    Platform, Project, UserProfile,
-    Property, Attribute, AttributeSet, Domain,
+    Attribute,
+    AttributeSet,
+    Domain,
+    Platform,
+    Project,
+    Property,
+    UserProfile,
 )
 
 

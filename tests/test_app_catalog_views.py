@@ -1,12 +1,12 @@
 import uuid
 
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django.urls import reverse
 
 from migasfree.app_catalog.models import Application, Category, PackagesByProject
 from migasfree.client.models import Computer
-from migasfree.core.models import UserProfile, Platform, Project, Attribute, Property
+from migasfree.core.models import Attribute, Platform, Project, Property, UserProfile
 
 
 class TestApplicationsViewSet(APITestCase):
@@ -17,16 +17,16 @@ class TestApplicationsViewSet(APITestCase):
         self.client.force_authenticate(user=self.user)
 
         self.platform = Platform.objects.create(name='Linux')
-        self.project = Project.objects.create(
-            name='Vitalinux', pms='apt', architecture='amd64', platform=self.platform
-        )
+        self.project = Project.objects.create(name='Vitalinux', pms='apt', architecture='amd64', platform=self.platform)
 
         property_att = Property.objects.create(name='some_property', prefix='SOM')
         att1 = Attribute.objects.create(property_att=property_att, value='one')
         att2 = Attribute.objects.create(property_att=property_att, value='two')
 
         self.computer = Computer.objects.create(
-            name='PCXXXXX', project=self.project, uuid=str(uuid.uuid4()),
+            name='PCXXXXX',
+            project=self.project,
+            uuid=str(uuid.uuid4()),
         )
         self.computer.sync_attributes.set([att1.id, att2.id])
 
@@ -38,8 +38,7 @@ class TestApplicationsViewSet(APITestCase):
         )
         self.application1.available_for_attributes.set([self.computer.sync_attributes.first()])
         PackagesByProject.objects.create(
-            application=self.application1, project=self.project,
-            packages_to_install='pkg1'
+            application=self.application1, project=self.project, packages_to_install='pkg1'
         )
 
         self.application2 = Application.objects.create(
@@ -47,8 +46,7 @@ class TestApplicationsViewSet(APITestCase):
         )
         self.application2.available_for_attributes.set([self.computer.sync_attributes.first()])
         PackagesByProject.objects.create(
-            application=self.application2, project=self.project,
-            packages_to_install='pkg2'
+            application=self.application2, project=self.project, packages_to_install='pkg2'
         )
 
         self.application3 = Application.objects.create(
@@ -56,8 +54,7 @@ class TestApplicationsViewSet(APITestCase):
         )
         self.application3.available_for_attributes.set([self.computer.sync_attributes.first()])
         PackagesByProject.objects.create(
-            application=self.application3, project=self.project,
-            packages_to_install='pkg3'
+            application=self.application3, project=self.project, packages_to_install='pkg3'
         )
 
     def test_available_applications(self):

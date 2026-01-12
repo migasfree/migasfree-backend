@@ -1,12 +1,20 @@
-import pytest
-
 from datetime import datetime, timedelta
 
+import pytest
+
 from migasfree.utils import (
-    time_horizon, replace_keys, merge_dicts, sort_depends,
-    get_client_ip, uuid_change_format, remove_empty_elements_from_dict,
-    remove_duplicates_preserving_order, to_list, cmp,
-    list_common, list_difference
+    cmp,
+    get_client_ip,
+    list_common,
+    list_difference,
+    merge_dicts,
+    remove_duplicates_preserving_order,
+    remove_empty_elements_from_dict,
+    replace_keys,
+    sort_depends,
+    time_horizon,
+    to_list,
+    uuid_change_format,
 )
 
 

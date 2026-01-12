@@ -1,12 +1,12 @@
-import pytest
 import uuid
-
 from datetime import datetime
+
+import pytest
 from django.test import TestCase
 from django.utils.timezone import make_aware
 
 from migasfree.client.models import Computer
-from migasfree.core.models import Project, Platform
+from migasfree.core.models import Platform, Project
 
 
 @pytest.mark.django_db

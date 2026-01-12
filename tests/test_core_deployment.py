@@ -1,11 +1,14 @@
-import pytest
+from datetime import datetime, timedelta
 
+import pytest
 from django.utils import timezone
-from datetime import timedelta, datetime
 
 from migasfree.core.models import (
-    Project, Platform, Deployment,
-    Schedule, ScheduleDelay,
+    Deployment,
+    Platform,
+    Project,
+    Schedule,
+    ScheduleDelay,
 )
 from migasfree.utils import time_horizon
 

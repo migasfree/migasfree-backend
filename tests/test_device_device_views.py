@@ -1,10 +1,10 @@
 from django.urls import reverse
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from migasfree.device.models import Device, Model, Type, Manufacturer, Connection
 from migasfree.client.models import Computer
-from migasfree.core.models import UserProfile, Platform, Project, Attribute, Property
+from migasfree.core.models import Attribute, Platform, Project, Property, UserProfile
+from migasfree.device.models import Connection, Device, Manufacturer, Model, Type
 
 
 class TestDeviceViewSet(APITestCase):
