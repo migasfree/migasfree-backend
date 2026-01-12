@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,29 +14,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.db.models import Q, Prefetch
+from django.conf import settings
 from django.contrib import admin
-from django.shortcuts import redirect
 from django.contrib.admin import SimpleListFilter
+from django.db.models import Prefetch, Q
+from django.shortcuts import redirect
 from django.urls import resolve
 from django.utils.translation import gettext_lazy as _
-from django.conf import settings
 
 from ..core.models import Attribute
 from ..device.models import Logical
 from ..hardware.models import Node
-
 from .models import (
     Computer,
-    PackageHistory,
     Error,
     Fault,
     FaultDefinition,
-    User,
     Migration,
-    Synchronization,
     Notification,
+    PackageHistory,
     StatusLog,
+    Synchronization,
+    User,
 )
 
 
@@ -62,7 +59,7 @@ class ComputerAdmin(admin.ModelAdmin):
     list_per_page = 25
     ordering = (settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0],)
     list_filter = ('project__platform', 'project__name', 'sync_start_date', 'status', 'machine')
-    search_fields = settings.MIGASFREE_COMPUTER_SEARCH_FIELDS + ('sync_user', 'sync_user__fullname')
+    search_fields = (*settings.MIGASFREE_COMPUTER_SEARCH_FIELDS, 'sync_user', 'sync_user__fullname')
 
     readonly_fields = (
         'name',
@@ -185,7 +182,7 @@ class ComputerAdmin(admin.ModelAdmin):
         ret = obj.get_software_history()
 
         return '\n\n'.join(
-            '# %s\n%s' % (key, '\n'.join(v for v in val)) for (key, val) in sorted(ret.items(), reverse=True)
+            '# {}\n{}'.format(key, '\n'.join(v for v in val)) for (key, val) in sorted(ret.items(), reverse=True)
         )
 
     my_get_software_history.short_description = _('Software History')

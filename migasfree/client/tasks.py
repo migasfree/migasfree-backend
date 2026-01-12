@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,11 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.db import connection
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
 from celery import shared_task
 from celery.exceptions import Reject
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import connection
+from django.utils import timezone
 
 from ..core.models import Package
 from .models import Computer
@@ -31,7 +29,7 @@ def update_software_inventory(computer_id, inventory):
     try:
         computer = Computer.objects.get(pk=computer_id)
     except ObjectDoesNotExist:
-        raise Reject(reason='Computer does not exist')
+        raise Reject(reason='Computer does not exist')  # noqa: B904
 
     if inventory and isinstance(inventory, list):
         pkgs = []
@@ -52,54 +50,43 @@ def update_software_inventory_raw(pkgs, computer_id, project_id):
     cursor = connection.cursor()
 
     # UPDATE UNINSTALL M2M
-    sql = """
+    sql = f"""
     SELECT P.package_id
-    FROM (VALUES %(pkgs)s) tmp(name, version, architecture, fullname)
+    FROM (VALUES {str(pkgs)[1:-1]}) tmp(name, version, architecture, fullname)
     RIGHT JOIN (
         SELECT core_package.id as package_id, core_package.name,
             core_package.version, core_package.architecture, core_package.fullname
         FROM core_package
             LEFT JOIN client_packagehistory ON core_package.id=client_packagehistory.package_id
-        WHERE client_packagehistory.computer_id=%(cid)s
-            AND core_package.project_id=%(project)s
+        WHERE client_packagehistory.computer_id={computer_id}
+            AND core_package.project_id={project_id}
     ) AS P ON tmp.name=P.name AND tmp.version=P.version AND tmp.architecture=P.architecture
     WHERE tmp.name IS NULL;
-    """ % {
-        'pkgs': str(pkgs)[1:-1],
-        'cid': computer_id,
-        'project': project_id
-    }
+    """
     cursor.execute(sql)
     to_remove = [x[0] for x in cursor.fetchall()]
     if to_remove:
-        sql = """
-        UPDATE client_packagehistory SET uninstall_date='%(date)s'
-        WHERE client_packagehistory.package_id IN (%(pkgs)s)
+        sql = f"""
+        UPDATE client_packagehistory SET uninstall_date='{now!s}'
+        WHERE client_packagehistory.package_id IN ({str(to_remove)[1:-1]})
             AND uninstall_date IS NULL
-            AND computer_id=%(cid)s;
-        """ % {
-            'date': str(now),
-            'pkgs': str(to_remove)[1:-1],
-            'cid': computer_id
-        }
+            AND computer_id={computer_id};
+        """
         cursor.execute(sql)
 
     # INSERT PKG
-    sql = """
+    sql = f"""
     SELECT tmp.name, tmp.version, tmp.architecture, tmp.fullname
-    FROM (VALUES %(pkgs)s) tmp(name, version, architecture, fullname)
+    FROM (VALUES {str(pkgs)[1:-1]}) tmp(name, version, architecture, fullname)
     LEFT JOIN (
         SELECT core_package.name, core_package.version,
             core_package.architecture, core_package.fullname
         FROM core_package
-        WHERE core_package.project_id=%(project)s
+        WHERE core_package.project_id={project_id}
     ) AS P ON tmp.name=P.name AND tmp.version=P.version
         AND tmp.architecture=P.architecture AND tmp.fullname=P.fullname
     WHERE P.name IS NULL;
-    """ % {
-        'pkgs': str(pkgs)[1:-1],
-        'project': project_id
-    }
+    """
     cursor.execute(sql)
     to_add = [
         (
@@ -107,41 +94,38 @@ def update_software_inventory_raw(pkgs, computer_id, project_id):
             x[1],  # version
             x[2],  # architecture
             x[3],  # fullname
-            project_id
-        ) for x in cursor.fetchall()
+            project_id,
+        )
+        for x in cursor.fetchall()
     ]
     if to_add:
-        sql = """
+        sql = f"""
         INSERT INTO core_package(name, version, architecture, fullname, project_id)
-        VALUES %s;
-        """ % str(to_add)[1:-1]
+        VALUES {str(to_add)[1:-1]};
+        """
         cursor.execute(sql)
 
     # INSERT M2M
-    sql = """
+    sql = f"""
     SELECT P.id
-    FROM (VALUES %(pkgs)s) tmp(name, version)
+    FROM (VALUES {str(pkgs)[1:-1]}) tmp(name, version)
     RIGHT JOIN (
         SELECT core_package.id AS id, core_package.name, core_package.version
         FROM core_package
         LEFT JOIN (
             SELECT package_id, computer_id
             FROM client_packagehistory
-            WHERE computer_id=%(cid)s AND uninstall_date IS NULL
+            WHERE computer_id={computer_id} AND uninstall_date IS NULL
         ) AS C ON core_package.id=C.package_id
-        WHERE core_package.project_id=%(project)s AND C.computer_id IS NULL
+        WHERE core_package.project_id={project_id} AND C.computer_id IS NULL
     ) AS P ON tmp.name=P.name AND tmp.version=P.version
     WHERE tmp.name IS NOT NULL;
-    """ % {
-        'pkgs': str(pkgs)[1:-1],
-        'cid': computer_id,
-        'project': project_id
-    }
+    """
     cursor.execute(sql)
     to_m2m_history = [(computer_id, x[0], str(now)) for x in cursor.fetchall()]
     if to_m2m_history:
-        sql = """
+        sql = f"""
         INSERT INTO client_packagehistory(computer_id, package_id, install_date)
-        VALUES %s;
-        """ % str(to_m2m_history)[1:-1]
+        VALUES {str(to_m2m_history)[1:-1]};
+        """
         cursor.execute(sql)

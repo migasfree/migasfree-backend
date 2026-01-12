@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2019-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2019-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2019-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2019-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,9 +17,16 @@
 from import_export import resources
 
 from .models import (
-    Computer, User, FaultDefinition,
-    Error, Fault, Migration, StatusLog, Synchronization,
-    Notification, PackageHistory,
+    Computer,
+    Error,
+    Fault,
+    FaultDefinition,
+    Migration,
+    Notification,
+    PackageHistory,
+    StatusLog,
+    Synchronization,
+    User,
 )
 
 
@@ -85,13 +90,13 @@ class NotificationResource(resources.ModelResource):
 class PackageHistoryResource(resources.ModelResource):
     class Meta:
         model = PackageHistory
-        fields = (
-            'id', 'computer', 'computer__name',
-            'package', 'package__fullname',
-            'install_date', 'uninstall_date'
-        )
+        fields = ('id', 'computer', 'computer__name', 'package', 'package__fullname', 'install_date', 'uninstall_date')
         export_order = (
-            'id', 'computer', 'computer__name',
-            'package', 'package__fullname',
-            'install_date', 'uninstall_date'
+            'id',
+            'computer',
+            'computer__name',
+            'package',
+            'package__fullname',
+            'install_date',
+            'uninstall_date',
         )

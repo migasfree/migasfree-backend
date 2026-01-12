@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -58,9 +56,7 @@ class Notification(models.Model, MigasLink):
     )
 
     checked = models.BooleanField(
-        verbose_name=_('checked'),
-        default=False,
-        db_comment='indicates whether the notification has been verified'
+        verbose_name=_('checked'), default=False, db_comment='indicates whether the notification has been verified'
     )
 
     objects = NotificationManager()
@@ -79,14 +75,13 @@ class Notification(models.Model, MigasLink):
 
     @classmethod
     def stacked_by_month(cls, start_date):
-        return list(cls.objects.filter(
-            created_at__gte=start_date
-        ).annotate(
-            year=ExtractYear('created_at'),
-            month=ExtractMonth('created_at')
-        ).order_by('year', 'month', 'checked').values('year', 'month', 'checked').annotate(
-            count=Count('id')
-        ))
+        return list(
+            cls.objects.filter(created_at__gte=start_date)
+            .annotate(year=ExtractYear('created_at'), month=ExtractMonth('created_at'))
+            .order_by('year', 'month', 'checked')
+            .values('year', 'month', 'checked')
+            .annotate(count=Count('id'))
+        )
 
     class Meta:
         app_label = 'client'

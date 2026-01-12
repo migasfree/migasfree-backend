@@ -1,7 +1,5 @@
-# -*- coding: utf-8 *-*
-
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,27 +18,25 @@ import os
 
 from django.conf import settings
 from django.contrib import auth
-from django.utils.translation import gettext, gettext_lazy as _
-from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiTypes
-from rest_framework import views, status, serializers
-from rest_framework.response import Response
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import OpenApiTypes, extend_schema, inline_serializer
+from rest_framework import serializers, status, views
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
 
 from ...core.models import Platform, Project
 from ...core.pms import get_available_pms
 from ...secure import create_server_keys, generate_rsa_keys, gpg_get_key
 from ...utils import get_client_ip, read_file
-
-from .. import permissions, models
+from .. import models, permissions
 
 
 def get_platform_or_create(platform_name, ip_address=None):
     platform, created = Platform.objects.get_or_create(name=platform_name)
 
     if created and ip_address:
-        msg = _('Platform [%s] registered by IP [%s].') % (
-            platform_name, ip_address
-        )
+        msg = _('Platform [%s] registered by IP [%s].') % (platform_name, ip_address)
         models.Notification.objects.create(message=msg)
 
     return platform
@@ -52,13 +48,11 @@ def add_project(project_name, pms, platform, architecture, ip_address=None):
         pms=pms,
         auto_register_computers=settings.MIGASFREE_AUTOREGISTER,
         platform=platform,
-        architecture=architecture
+        architecture=architecture,
     )
 
     if ip_address:
-        msg = _('Project [%s] with PMS [%s] registered by IP [%s].') % (
-            project_name, pms, ip_address
-        )
+        msg = _('Project [%s] with PMS [%s] registered by IP [%s].') % (project_name, pms, ip_address)
         models.Notification.objects.create(message=msg)
 
     return project
@@ -69,7 +63,7 @@ class PackagerKeysView(views.APIView):
 
     @extend_schema(
         description='Returns the public and private keys needed to configure the Migasfree Client'
-                    ' so it can upload packages.',
+        ' so it can upload packages.',
         request=inline_serializer(
             name='PackagerKeysRequest',
             fields={
@@ -83,27 +77,22 @@ class PackagerKeysView(views.APIView):
                 fields={
                     settings.MIGASFREE_PUBLIC_KEY: serializers.CharField(),
                     settings.MIGASFREE_PACKAGER_PRI_KEY: serializers.CharField(),
-                }
+                },
             )
         },
         tags=['public'],
     )
     def post(self, request):
-        pub_server_key_file = os.path.join(
-            settings.MIGASFREE_KEYS_DIR, settings.MIGASFREE_PUBLIC_KEY
-        )
+        pub_server_key_file = os.path.join(settings.MIGASFREE_KEYS_DIR, settings.MIGASFREE_PUBLIC_KEY)
         if not os.path.exists(pub_server_key_file):
             create_server_keys()
 
         pub_server_key = read_file(pub_server_key_file)
-        priv_packager_key = read_file(os.path.join(
-            settings.MIGASFREE_KEYS_DIR, settings.MIGASFREE_PACKAGER_PRI_KEY
-        ))
+        priv_packager_key = read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, settings.MIGASFREE_PACKAGER_PRI_KEY))
 
-        return Response({
-            settings.MIGASFREE_PUBLIC_KEY: pub_server_key,
-            settings.MIGASFREE_PACKAGER_PRI_KEY: priv_packager_key
-        })
+        return Response(
+            {settings.MIGASFREE_PUBLIC_KEY: pub_server_key, settings.MIGASFREE_PACKAGER_PRI_KEY: priv_packager_key}
+        )
 
 
 class ProjectKeysView(views.APIView):
@@ -113,19 +102,21 @@ class ProjectKeysView(views.APIView):
         try:
             return Project.objects.get(name=name)
         except Project.DoesNotExist:
-            if not settings.MIGASFREE_AUTOREGISTER:
-                if not self.user or not self.user.is_superuser \
-                        or not self.user.has_perm('core.add_project') \
-                        or not self.user.has_perm('core.add_platform'):
-                    raise PermissionDenied()
+            if not settings.MIGASFREE_AUTOREGISTER and (
+                not self.user
+                or not self.user.is_superuser
+                or not self.user.has_perm('core.add_project')
+                or not self.user.has_perm('core.add_platform')
+            ):
+                raise PermissionDenied()  # noqa: B904
 
             platform = get_platform_or_create(platform_name, ip_address)
             if not platform:
-                raise PermissionDenied()
+                raise PermissionDenied()  # noqa: B904
 
             project = add_project(name, pms, platform, architecture, ip_address)
             if not project:
-                raise PermissionDenied()
+                raise PermissionDenied()  # noqa: B904
 
             return project
 
@@ -148,16 +139,13 @@ class ProjectKeysView(views.APIView):
                 fields={
                     settings.MIGASFREE_PUBLIC_KEY: serializers.CharField(),
                     'migasfree-client.pri': serializers.CharField(),
-                }
+                },
             )
         },
         tags=['public'],
     )
     def post(self, request):
-        self.user = auth.authenticate(
-            username=request.data.get('username'),
-            password=request.data.get('password')
-        )
+        self.user = auth.authenticate(username=request.data.get('username'), password=request.data.get('password'))
         if self.user and not self.user.is_authenticated:
             raise PermissionDenied()
 
@@ -171,38 +159,30 @@ class ProjectKeysView(views.APIView):
         available_pms = dict(get_available_pms()).keys()
         if pms not in available_pms:
             return Response(
-                {'error': gettext(f'PMS must be one of {available_pms}')},
-                status=status.HTTP_400_BAD_REQUEST
+                {'error': gettext(f'PMS must be one of {available_pms}')}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        project = self.get_object(
-            project_name, pms, platform_name, architecture, ip_address
-        )
+        project = self.get_object(project_name, pms, platform_name, architecture, ip_address)
 
-        if not settings.MIGASFREE_AUTOREGISTER and not project.auto_register_computers \
-                and (self.user is None or
-                     (not self.user.is_superuser and not self.user.has_perm('client.add_computer'))):
+        if (
+            not settings.MIGASFREE_AUTOREGISTER
+            and not project.auto_register_computers
+            and (self.user is None or (not self.user.is_superuser and not self.user.has_perm('client.add_computer')))
+        ):
             raise PermissionDenied()
 
-        priv_project_key_file = os.path.join(
-            settings.MIGASFREE_KEYS_DIR, f'{project.slug}.pri'
-        )
+        priv_project_key_file = os.path.join(settings.MIGASFREE_KEYS_DIR, f'{project.slug}.pri')
         if not os.path.exists(priv_project_key_file):
             generate_rsa_keys(project.slug)
 
-        pub_server_key_file = os.path.join(
-            settings.MIGASFREE_KEYS_DIR, settings.MIGASFREE_PUBLIC_KEY
-        )
+        pub_server_key_file = os.path.join(settings.MIGASFREE_KEYS_DIR, settings.MIGASFREE_PUBLIC_KEY)
         if not os.path.exists(pub_server_key_file):
             create_server_keys()
 
         pub_server_key = read_file(pub_server_key_file)
         priv_project_key = read_file(priv_project_key_file)
 
-        return Response({
-            settings.MIGASFREE_PUBLIC_KEY: pub_server_key,
-            'migasfree-client.pri': priv_project_key
-        })
+        return Response({settings.MIGASFREE_PUBLIC_KEY: pub_server_key, 'migasfree-client.pri': priv_project_key})
 
 
 class RepositoriesKeysView(views.APIView):
@@ -210,13 +190,8 @@ class RepositoriesKeysView(views.APIView):
 
     @extend_schema(
         description='Returns the repositories public key',
-        responses={
-            status.HTTP_200_OK: OpenApiTypes.STR
-        },
+        responses={status.HTTP_200_OK: OpenApiTypes.STR},
         tags=['public'],
     )
     def post(self, request):
-        return Response(
-            gpg_get_key('migasfree-repository'),
-            content_type='text/plain'
-        )
+        return Response(gpg_get_key('migasfree-repository'), content_type='text/plain')

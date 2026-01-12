@@ -1,7 +1,5 @@
-# -*- coding: utf-8 *-*
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,26 +18,26 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from ...core.models import Project
-
 from .event import Event
 
 
 class DomainMigrationManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().select_related(
-            'project',
-            'computer',
-            'computer__project',
-            'computer__sync_user',
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                'project',
+                'computer',
+                'computer__project',
+                'computer__sync_user',
+            )
         )
 
     def scope(self, user):
         qs = self.get_queryset()
         if user and not user.is_view_all():
-            qs = qs.filter(
-                project_id__in=user.get_projects(),
-                computer_id__in=user.get_computers()
-            )
+            qs = qs.filter(project_id__in=user.get_projects(), computer_id__in=user.get_computers())
 
         return qs
 

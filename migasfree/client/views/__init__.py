@@ -1,7 +1,5 @@
-# -*- coding: UTF-8 -*-
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,26 +14,46 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from .safe import (
-    SafeComputerViewSet, SafeSynchronizationView, SafeEndOfTransmissionView,
-)
 from .public import (
-    PackagerKeysView, ProjectKeysView, RepositoriesKeysView,
+    PackagerKeysView,
+    ProjectKeysView,
+    RepositoriesKeysView,
+)
+from .safe import (
+    SafeComputerViewSet,
+    SafeEndOfTransmissionView,
+    SafeSynchronizationView,
 )
 from .token import (
-    ComputerViewSet, ErrorViewSet,
-    FaultDefinitionViewSet, FaultViewSet,
-    PackageHistoryViewSet, NotificationViewSet, MigrationViewSet,
-    StatusLogViewSet, SynchronizationViewSet, UserViewSet,
+    ComputerViewSet,
+    ErrorViewSet,
+    FaultDefinitionViewSet,
+    FaultViewSet,
     MessageViewSet,
+    MigrationViewSet,
+    NotificationViewSet,
+    PackageHistoryViewSet,
+    StatusLogViewSet,
+    SynchronizationViewSet,
+    UserViewSet,
 )
 
 __all__ = [
-    'SafeComputerViewSet', 'SafeSynchronizationView', 'SafeEndOfTransmissionView',
-    'PackagerKeysView', 'ProjectKeysView', 'RepositoriesKeysView',
-    'ComputerViewSet', 'ErrorViewSet',
-    'FaultDefinitionViewSet', 'FaultViewSet',
-    'PackageHistoryViewSet', 'NotificationViewSet', 'MigrationViewSet',
-    'StatusLogViewSet', 'SynchronizationViewSet', 'UserViewSet',
+    'ComputerViewSet',
+    'ErrorViewSet',
+    'FaultDefinitionViewSet',
+    'FaultViewSet',
     'MessageViewSet',
+    'MigrationViewSet',
+    'NotificationViewSet',
+    'PackageHistoryViewSet',
+    'PackagerKeysView',
+    'ProjectKeysView',
+    'RepositoriesKeysView',
+    'SafeComputerViewSet',
+    'SafeEndOfTransmissionView',
+    'SafeSynchronizationView',
+    'StatusLogViewSet',
+    'SynchronizationViewSet',
+    'UserViewSet',
 ]

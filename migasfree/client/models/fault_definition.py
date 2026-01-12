@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,12 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
-from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
-from ...core.models import Attribute, UserProfile, MigasLink
+from ...core.models import Attribute, MigasLink, UserProfile
 from ...utils import normalize_line_breaks
 
 
@@ -95,24 +93,22 @@ class FaultDefinition(models.Model, MigasLink):
     def list_included_attributes(self):
         return self.included_attributes.values_list('value', flat=True)
 
-    list_included_attributes.short_description = _("included attributes")
+    list_included_attributes.short_description = _('included attributes')
 
     def list_excluded_attributes(self):
         return self.excluded_attributes.values_list('value', flat=True)
 
-    list_excluded_attributes.short_description = _("excluded attributes")
+    list_excluded_attributes.short_description = _('excluded attributes')
 
     def list_users(self):
         return self.users.values_list('username', flat=True)
 
-    list_users.short_description = _("users")
+    list_users.short_description = _('users')
 
     @staticmethod
     def enabled_for_attributes(attributes):
         return FaultDefinition.objects.filter(
-            Q(enabled=True) &
-            Q(included_attributes__id__in=attributes) &
-            ~Q(excluded_attributes__id__in=attributes)
+            Q(enabled=True) & Q(included_attributes__id__in=attributes) & ~Q(excluded_attributes__id__in=attributes)
         ).distinct()
 
     def related_objects(self, model, user):
@@ -124,11 +120,12 @@ class FaultDefinition(models.Model, MigasLink):
 
         from .computer import Computer
 
-        return Computer.productive.scope(user).filter(
-            sync_attributes__in=self.included_attributes.all()
-        ).exclude(
-            sync_attributes__in=self.excluded_attributes.all()
-        ).distinct()
+        return (
+            Computer.productive.scope(user)
+            .filter(sync_attributes__in=self.included_attributes.all())
+            .exclude(sync_attributes__in=self.excluded_attributes.all())
+            .distinct()
+        )
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.code = normalize_line_breaks(self.code)

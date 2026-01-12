@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2017-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,17 +18,21 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from ...core.models import Package, MigasLink
+from ...core.models import MigasLink, Package
 from .computer import Computer
 
 
 class PackageHistoryManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().select_related(
-            'computer',
-            'package',
-            'computer__project',
-            'computer__sync_user',
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                'computer',
+                'package',
+                'computer__project',
+                'computer__sync_user',
+            )
         )
 
     def scope(self, user):
@@ -79,12 +81,11 @@ class PackageHistory(models.Model, MigasLink):
     @staticmethod
     def uninstall_computer_packages(computer_id):
         if computer_id is None:
-            raise ValueError("Invalid computer_id")
+            raise ValueError('Invalid computer_id')
 
-        PackageHistory.objects.filter(
-            computer__id=computer_id,
-            uninstall_date=None
-        ).update(uninstall_date=timezone.localtime(timezone.now()))
+        PackageHistory.objects.filter(computer__id=computer_id, uninstall_date=None).update(
+            uninstall_date=timezone.localtime(timezone.now())
+        )
 
     class Meta:
         app_label = 'client'

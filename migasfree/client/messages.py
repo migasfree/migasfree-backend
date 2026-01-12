@@ -1,7 +1,5 @@
-# -*- coding: utf-8 *-*
-
-# Copyright (c) 2022-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2022-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2022-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2022-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,14 +15,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.utils import timezone
-
 from django_redis import get_redis_connection
 
 
 def add_computer_message(computer, message):
     con = get_redis_connection()
     con.hset(
-        f'migasfree:msg:{computer.id}', mapping={
+        f'migasfree:msg:{computer.id}',
+        mapping={
             'date': timezone.localtime(timezone.now()).strftime('%Y-%m-%dT%H:%M:%S.%f'),
             'computer_id': computer.id,
             'computer_name': str(computer),
@@ -34,8 +32,8 @@ def add_computer_message(computer, message):
             'project_name': computer.project.name,
             'user_id': computer.sync_user.id if computer.sync_user else 0,
             'user_name': computer.sync_user.name if computer.sync_user else '',
-            'msg': message
-        }
+            'msg': message,
+        },
     )
     con.sadd('migasfree:watch:msg', computer.id)
 
