@@ -14,6 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import importlib.util
+from pathlib import Path
+
 from .base import *  # noqa: F403
 from .celery import *  # noqa: F403
 from .functions import secret_key
@@ -44,8 +47,18 @@ DATABASES = {
     }
 }
 
-try:
-    with open(MIGASFREE_SETTINGS_OVERRIDE, encoding='utf_8') as f:  # noqa: F405
-        exec(f.read(), globals(), locals())
-except OSError:
-    pass
+# Load settings overrides from external Python file
+_overrides_file = Path(MIGASFREE_SETTINGS_OVERRIDE)  # noqa: F405
+if _overrides_file.exists():
+    _spec = importlib.util.spec_from_file_location('settings_override', _overrides_file)
+    _mod = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_mod)
+
+    # Apply only uppercase settings from the override module
+    for _key in dir(_mod):
+        if _key.isupper():
+            globals()[_key] = getattr(_mod, _key)
+
+    del _spec, _mod, _key
+
+del _overrides_file
