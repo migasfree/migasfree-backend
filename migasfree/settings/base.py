@@ -23,8 +23,8 @@ from corsheaders.defaults import default_headers
 from .. import __contact__
 from .migasfree import BASE_DIR, MIGASFREE_TMP_DIR
 
-if django.VERSION < (4, 2, 0, 'final'):
-    print('Migasfree requires Django 4.2.0 at least. Please, update it.')
+if django.VERSION < (5, 2, 0, 'final'):
+    print('Migasfree requires Django 5.2.0 at least. Please, update it.')
     sys.exit(1)
 
 ADMINS = (('Your name', 'your_name@example.com'),)
