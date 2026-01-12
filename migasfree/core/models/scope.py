@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2018-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,14 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 
-from .migas_link import MigasLink
 from .attribute import Attribute
 from .domain import Domain
+from .migas_link import MigasLink
 from .user_profile import UserProfile
 
 
@@ -111,26 +109,20 @@ class Scope(models.Model, MigasLink):
         qs = Computer.productive.scope(user)
         if self.domain:
             qs = qs.filter(
-                sync_attributes__in=Attribute.objects.filter(
-                    id__in=self.domain.included_attributes.all()
-                ).exclude(
+                sync_attributes__in=Attribute.objects.filter(id__in=self.domain.included_attributes.all()).exclude(
                     id__in=self.domain.excluded_attributes.all()
                 )
             )
 
-        return qs.filter(
-            sync_attributes__in=self.included_attributes.all()
-        ).exclude(
-            sync_attributes__in=self.excluded_attributes.all()
-        ).distinct()
+        return (
+            qs.filter(sync_attributes__in=self.included_attributes.all())
+            .exclude(sync_attributes__in=self.excluded_attributes.all())
+            .distinct()
+        )
 
     def validate_unique(self, exclude=None):
-        if Scope.objects.exclude(id=self.id).filter(
-                name=self.name,
-                user=self.user,
-                domain__isnull=True
-        ).exists():
-            raise ValidationError(_("Duplicated name"))
+        if Scope.objects.exclude(id=self.id).filter(name=self.name, user=self.user, domain__isnull=True).exists():
+            raise ValidationError(_('Duplicated name'))
 
         super().validate_unique(exclude)
 

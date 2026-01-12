@@ -1,7 +1,5 @@
-# -*- coding: utf-8 *-*
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,32 +14,70 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from .token import (
-    PlatformViewSet, ProjectViewSet, StoreViewSet, SingularityViewSet,
-    PropertyViewSet, ServerPropertyViewSet, ClientPropertyViewSet,
-    AttributeViewSet, ServerAttributeViewSet, ClientAttributeViewSet,
-    AttributeSetViewSet, ScheduleViewSet, ScheduleDelayViewSet,
-    InternalSourceViewSet, ExternalSourceViewSet, DeploymentViewSet,
-    DomainViewSet, ScopeViewSet, UserProfileViewSet, GroupViewSet,
-    PermissionViewSet, PackageViewSet, PackageSetViewSet,
-    MigasViewSet, ExportViewSet,
-)
-
-from .safe import SafePackageViewSet
-
 from .public import (
-    GetSourceFileView, ServerInfoView, PmsView, ProgrammingLanguagesView,
+    GetSourceFileView,
+    PmsView,
+    ProgrammingLanguagesView,
+    ServerInfoView,
+)
+from .safe import SafePackageViewSet
+from .token import (
+    AttributeSetViewSet,
+    AttributeViewSet,
+    ClientAttributeViewSet,
+    ClientPropertyViewSet,
+    DeploymentViewSet,
+    DomainViewSet,
+    ExportViewSet,
+    ExternalSourceViewSet,
+    GroupViewSet,
+    InternalSourceViewSet,
+    MigasViewSet,
+    PackageSetViewSet,
+    PackageViewSet,
+    PermissionViewSet,
+    PlatformViewSet,
+    ProjectViewSet,
+    PropertyViewSet,
+    ScheduleDelayViewSet,
+    ScheduleViewSet,
+    ScopeViewSet,
+    ServerAttributeViewSet,
+    ServerPropertyViewSet,
+    SingularityViewSet,
+    StoreViewSet,
+    UserProfileViewSet,
 )
 
 __all__ = [
-    'PlatformViewSet', 'ProjectViewSet', 'StoreViewSet', 'SingularityViewSet',
-    'PropertyViewSet', 'ServerPropertyViewSet', 'ClientPropertyViewSet',
-    'AttributeViewSet', 'ServerAttributeViewSet', 'ClientAttributeViewSet',
-    'AttributeSetViewSet', 'ScheduleViewSet', 'ScheduleDelayViewSet',
-    'InternalSourceViewSet', 'ExternalSourceViewSet', 'DeploymentViewSet',
-    'DomainViewSet', 'ScopeViewSet', 'UserProfileViewSet', 'GroupViewSet',
-    'PermissionViewSet', 'PackageViewSet', 'PackageSetViewSet',
-    'MigasViewSet', 'ExportViewSet',
+    'AttributeSetViewSet',
+    'AttributeViewSet',
+    'ClientAttributeViewSet',
+    'ClientPropertyViewSet',
+    'DeploymentViewSet',
+    'DomainViewSet',
+    'ExportViewSet',
+    'ExternalSourceViewSet',
+    'GetSourceFileView',
+    'GroupViewSet',
+    'InternalSourceViewSet',
+    'MigasViewSet',
+    'PackageSetViewSet',
+    'PackageViewSet',
+    'PermissionViewSet',
+    'PlatformViewSet',
+    'PmsView',
+    'ProgrammingLanguagesView',
+    'ProjectViewSet',
+    'PropertyViewSet',
     'SafePackageViewSet',
-    'GetSourceFileView', 'ServerInfoView', 'PmsView', 'ProgrammingLanguagesView',
+    'ScheduleDelayViewSet',
+    'ScheduleViewSet',
+    'ScopeViewSet',
+    'ServerAttributeViewSet',
+    'ServerInfoView',
+    'ServerPropertyViewSet',
+    'SingularityViewSet',
+    'StoreViewSet',
+    'UserProfileViewSet',
 ]

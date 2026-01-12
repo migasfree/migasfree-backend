@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
 #
@@ -27,15 +25,23 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from ..client.models import Computer
-
 from .models import (
-    Package, Deployment, ClientProperty, Attribute,
-    UserProfile, Scope, Domain, Project, Store,
-    ExternalSource, InternalSource, AttributeSet,
+    Attribute,
+    AttributeSet,
+    ClientProperty,
+    Deployment,
+    Domain,
+    ExternalSource,
+    InternalSource,
+    Package,
+    Project,
+    Scope,
+    Store,
+    UserProfile,
     prevent_circular_dependencies,
 )
-from .validators import MimetypeValidator
 from .pms import get_available_mimetypes
+from .validators import MimetypeValidator
 
 # TODO https://github.com/blueimp/jQuery-File-Upload/wiki
 # TODO https://github.com/sigurdga/django-jquery-file-upload
@@ -52,7 +58,7 @@ class AttributeSetForm(forms.ModelForm):
                 action='pre_add',
                 reverse=False,
                 model=self.instance.included_attributes.model,
-                pk_set=included_attributes
+                pk_set=included_attributes,
             )
 
         return included_attributes
@@ -66,7 +72,7 @@ class AttributeSetForm(forms.ModelForm):
                 action='pre_add',
                 reverse=False,
                 model=self.instance.excluded_attributes.model,
-                pk_set=excluded_attributes
+                pk_set=excluded_attributes,
             )
 
         return excluded_attributes
@@ -85,7 +91,7 @@ class PackageForm(forms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request", None)
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
         self.fields['fullname'].required = False
@@ -146,7 +152,7 @@ class PackageForm(forms.ModelForm):
 
 class StoreForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request", None)
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
         user = None
@@ -169,7 +175,7 @@ class StoreForm(forms.ModelForm):
 
 class DeploymentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request", None)
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         user = self.request.user.userprofile if self.request else None
         self.fields['start_date'].initial = datetime.date.today()
@@ -199,8 +205,7 @@ class DeploymentForm(forms.ModelForm):
                 computer = Computer.objects.get(pk=int(attribute.value))
                 if computer.status not in Computer.ACTIVE_STATUS:
                     raise ValidationError(
-                        _('It is not possible to assign an inactive computer (%s) as an attribute')
-                        % computer
+                        _('It is not possible to assign an inactive computer (%s) as an attribute') % computer
                     )
 
     def clean(self):
@@ -212,11 +217,7 @@ class DeploymentForm(forms.ModelForm):
 
         for item in cleaned_data.get('available_packages', []):
             if item.project.id != cleaned_data['project'].id:
-                raise ValidationError(
-                    _('Package %s must belong to the project %s') % (
-                        item, cleaned_data['project']
-                    )
-                )
+                raise ValidationError(_('Package %s must belong to the project %s') % (item, cleaned_data['project']))
 
         self._validate_active_computers(cleaned_data.get('included_attributes', []))
         self._validate_active_computers(cleaned_data.get('excluded_attributes', []))
@@ -259,7 +260,7 @@ class ClientPropertyForm(forms.ModelForm):
 
 class ScopeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request", None)
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
         try:
@@ -279,9 +280,12 @@ class DomainForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['users'].choices = [(i.id, i.username) for i in UserProfile.objects.filter(
-            groups__in=[Group.objects.get(name="Domain Admin")]
-        ).order_by('username')]
+        self.fields['users'].choices = [
+            (i.id, i.username)
+            for i in UserProfile.objects.filter(groups__in=[Group.objects.get(name='Domain Admin')]).order_by(
+                'username'
+            )
+        ]
 
         if self.instance.id:
             self.fields['users'].initial = self.instance.domains.values_list('id', flat=True)
@@ -305,8 +309,7 @@ class UserProfileForm(forms.ModelForm):
         self.fields['groups'].help_text = ''
         if self.instance.id:
             self.fields['username'].help_text += '<p><a href="{}">{}</a></p>'.format(
-                reverse('admin:auth_user_password_change', args=(self.instance.id,)),
-                _('Change Password')
+                reverse('admin:auth_user_password_change', args=(self.instance.id,)), _('Change Password')
             )
 
     def clean(self):
@@ -319,8 +322,7 @@ class UserProfileForm(forms.ModelForm):
                 if domain_admin_group.id in list(cleaned_data['groups'].values_list('id', flat=True)):
                     raise ValidationError(_('This user must be one domain at least'))
 
-        if cleaned_data['domain_preference'] \
-                and cleaned_data['domain_preference'] not in list(cleaned_data['domains']):
+        if cleaned_data['domain_preference'] and cleaned_data['domain_preference'] not in list(cleaned_data['domains']):
             raise ValidationError(_('Domain preference not in selected Domains'))
 
         return cleaned_data
@@ -328,8 +330,16 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = (
-            'username', 'first_name', 'last_name',
-            'email', 'date_joined', 'last_login',
-            'is_active', 'is_superuser', 'is_staff',
-            'groups', 'user_permissions', 'domains',
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'date_joined',
+            'last_login',
+            'is_active',
+            'is_superuser',
+            'is_staff',
+            'groups',
+            'user_permissions',
+            'domains',
         )

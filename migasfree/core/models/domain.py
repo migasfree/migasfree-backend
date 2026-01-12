@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2018-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,13 +22,7 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 
 from ...utils import list_difference
-
-from . import (
-    Property,
-    Attribute,
-    ServerAttribute,
-    MigasLink
-)
+from . import Attribute, MigasLink, Property, ServerAttribute
 
 
 class Domain(models.Model, MigasLink):
@@ -75,19 +67,17 @@ class Domain(models.Model, MigasLink):
     @staticmethod
     def process(attributes):
         property_set, _ = Property.objects.get_or_create(
-            prefix='DMN', sort='server',
-            defaults={'name': 'DOMAIN', 'kind': 'L'}
+            prefix='DMN', sort='server', defaults={'name': 'DOMAIN', 'kind': 'L'}
         )
 
         att_id = []
         for item in Domain.objects.all():
-            for att_domain in Domain.objects.filter(
-                id=item.id
-            ).filter(
-                Q(included_attributes__id__in=attributes)
-            ).filter(
-                ~Q(excluded_attributes__id__in=attributes)
-            ).distinct():
+            for att_domain in (
+                Domain.objects.filter(id=item.id)
+                .filter(Q(included_attributes__id__in=attributes))
+                .filter(~Q(excluded_attributes__id__in=attributes))
+                .distinct()
+            ):
                 att = Attribute.objects.create(property_set, att_domain.name)
                 att_id.append(att.id)
 
@@ -95,10 +85,7 @@ class Domain(models.Model, MigasLink):
 
     def get_tags(self):
         tags = [Attribute.objects.get(property_att__prefix='DMN', value=self.name)]
-        for tag in Attribute.objects.filter(
-            property_att__prefix='DMN',
-            value__startswith=f'{self.name}.'
-        ):
+        for tag in Attribute.objects.filter(property_att__prefix='DMN', value__startswith=f'{self.name}.'):
             tags.append(tag)
 
         for tag in self.tags.all():
@@ -142,11 +129,12 @@ class Domain(models.Model, MigasLink):
 
         from ...client.models import Computer
 
-        return Computer.productive.scope(user).filter(
-            sync_attributes__in=self.included_attributes.all()
-        ).exclude(
-            sync_attributes__in=self.excluded_attributes.all()
-        ).distinct()
+        return (
+            Computer.productive.scope(user)
+            .filter(sync_attributes__in=self.included_attributes.all())
+            .exclude(sync_attributes__in=self.excluded_attributes.all())
+            .distinct()
+        )
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.name = slugify(self.name).upper()
@@ -162,17 +150,10 @@ class Domain(models.Model, MigasLink):
 @receiver(post_save, sender=Domain)
 def set_m2m_domain(sender, instance, created, **kwargs):
     property_att, _ = Property.objects.get_or_create(
-        prefix='DMN', sort='server',
-        defaults={'name': 'DOMAIN', 'kind': 'L'}
+        prefix='DMN', sort='server', defaults={'name': 'DOMAIN', 'kind': 'L'}
     )
 
-    att_dmn, _ = Attribute.objects.get_or_create(
-        value=instance.name,
-        description='',
-        property_att=property_att
-    )
+    att_dmn, _ = Attribute.objects.get_or_create(value=instance.name, description='', property_att=property_att)
 
     # Add the domain attribute
-    transaction.on_commit(
-        lambda: instance.included_attributes.add(att_dmn)
-    )
+    transaction.on_commit(lambda: instance.included_attributes.add(att_dmn))

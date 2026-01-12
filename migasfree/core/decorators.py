@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2024 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2024 Alberto Gacías <alberto@migasfree.org>
 #
@@ -26,6 +24,7 @@ def unique_task(app):
         """
         Decorator to ensure only one instance of the task is running at once.
         """
+
         @wraps(callback)
         def wrapper(celery_task, *args, **kwargs):
             active_queues = app.control.inspect().active()

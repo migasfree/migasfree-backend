@@ -1,7 +1,5 @@
-# -*- coding: UTF-8 -*-
-
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +15,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from ...utils import execute, get_setting
-
 from .pms import Pms
 
 
@@ -31,10 +28,7 @@ class Yum(Pms):
 
         self.name = 'yum'
         self.relative_path = get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH')
-        self.mimetype = [
-            'application/x-rpm',
-            'application/x-redhat-package-manager'
-        ]
+        self.mimetype = ['application/x-rpm', 'application/x-redhat-package-manager']
         self.extensions = ['rpm']
         self.architectures = ['aarch64', 'i386', 'i686', 'noarch', 'x86_64', '(none)']
 
@@ -45,16 +39,13 @@ class Yum(Pms):
         )
         """
 
-        _cmd = '''
-_DIR=%(path)s
+        _cmd = f"""
+_DIR={path}
 rm -rf $_DIR/repodata
 rm -rf $_DIR/checksum
 createrepo --cachedir checksum $_DIR
-gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg --detach-sign --armor $_DIR/repodata/repomd.xml
-        ''' % {
-            'path': path,
-            'keys_path': self.keys_path
-        }
+gpg -u migasfree-repository --homedir {self.keys_path}/.gnupg --detach-sign --armor $_DIR/repodata/repomd.xml
+        """
 
         return execute(_cmd)
 
@@ -63,42 +54,42 @@ gpg -u migasfree-repository --homedir %(keys_path)s/.gnupg --detach-sign --armor
         string package_info(string package)
         """
 
-        _cmd = '''
+        _cmd = f"""
 echo "## Info"
 echo "~~~"
-rpm -qp --info %(pkg)s
+rpm -qp --info {package}
 echo "~~~"
 echo
 echo "## Requires"
 echo "~~~"
-rpm -qp --requires %(pkg)s
+rpm -qp --requires {package}
 echo "~~~"
 echo
 echo "## Provides"
 echo "~~~"
-rpm -qp --provides %(pkg)s
+rpm -qp --provides {package}
 echo "~~~"
 echo
 echo "## Obsoletes"
 echo "~~~"
-rpm -qp --obsoletes %(pkg)s
+rpm -qp --obsoletes {package}
 echo "~~~"
 echo
 echo "## Scripts"
 echo "~~~"
-rpm -qp --scripts %(pkg)s
+rpm -qp --scripts {package}
 echo "~~~"
 echo
 echo "## Changelog"
 echo "~~~"
-rpm -qp --changelog %(pkg)s
+rpm -qp --changelog {package}
 echo "~~~"
 echo
 echo "## Files"
 echo "~~~"
-rpm -qp --list %(pkg)s
+rpm -qp --list {package}
 echo "~~~"
-        ''' % {'pkg': package}
+        """
 
         _ret, _output, _error = execute(_cmd)
 
@@ -109,18 +100,14 @@ echo "~~~"
         dict package_metadata(string package)
         """
 
-        _cmd = 'rpm -qp --queryformat "%%{NAME}___%%{VERSION}-%%{RELEASE}___%%{ARCH}" %s 2>/dev/null' % package
+        _cmd = f'rpm -qp --queryformat "%{{NAME}}___%{{VERSION}}-%{{RELEASE}}___%{{ARCH}}" {package} 2>/dev/null'
         _ret, _output, _error = execute(_cmd)
         if _ret == 0:
             name, version, architecture = _output.split('___', 2)
         else:
             name, version, architecture = [None, None, None]
 
-        return {
-            'name': name,
-            'version': version,
-            'architecture': architecture
-        }
+        return {'name': name, 'version': version, 'architecture': architecture}
 
     def source_template(self, deploy):
         """
@@ -142,7 +129,7 @@ gpgkey=file://{{keys_path}}/{{server}}/repositories.pub
                 media_url=self.media_url,
                 project=deploy.project.slug,
                 trailing_path=get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH'),
-                name=deploy.slug
+                name=deploy.slug,
             )
         elif deploy.source == Deployment.SOURCE_EXTERNAL:
             normal_template = """[EXTERNAL-{name}]
@@ -164,7 +151,7 @@ baseurl={{protocol}}://{{server}}/src/{project}/{trailing_path}/{name}/{suite}/{
                         trailing_path=get_setting('MIGASFREE_EXTERNAL_TRAILING_PATH'),
                         suite=deploy.suite,
                         options=deploy.options.replace(' ', '\n') if deploy.options else '',
-                        component=component
+                        component=component,
                     )
 
                 return template

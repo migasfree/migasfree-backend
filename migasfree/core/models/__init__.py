@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,43 +14,48 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from .migas_link import MigasLink
-
-from .platform import Platform
-from .project import Project
-from .store import Store
-
-from .property import Property, ServerProperty, ClientProperty, BasicProperty
-from .singularity import Singularity
-from .attribute import (
-    Attribute, ServerAttribute, ClientAttribute, BasicAttribute
-)
+from .attribute import Attribute, BasicAttribute, ClientAttribute, ServerAttribute
 from .attribute_set import AttributeSet, prevent_circular_dependencies
-
-from .schedule import Schedule
-from .schedule_delay import ScheduleDelay
-
+from .deployment import Deployment, ExternalSource, InternalSource
+from .domain import Domain
+from .migas_link import MigasLink
 from .package import Package, PackageManager
 from .package_set import PackageSet
-from .deployment import Deployment, InternalSource, ExternalSource
-
-from .domain import Domain
+from .platform import Platform
+from .project import Project
+from .property import BasicProperty, ClientProperty, Property, ServerProperty
+from .schedule import Schedule
+from .schedule_delay import ScheduleDelay
 from .scope import Scope
+from .singularity import Singularity
+from .store import Store
 from .user_profile import UserProfile
 
 __all__ = [
+    'Attribute',
+    'AttributeSet',
+    'BasicAttribute',
+    'BasicProperty',
+    'ClientAttribute',
+    'ClientProperty',
+    'Deployment',
+    'Domain',
+    'ExternalSource',
+    'InternalSource',
     'MigasLink',
-    'Platform', 'Project', 'Store',
-    'Property', 'ServerProperty', 'ClientProperty', 'BasicProperty',
-    'Singularity',
-    'Attribute', 'ServerAttribute', 'ClientAttribute', 'BasicAttribute',
-    'AttributeSet', 'prevent_circular_dependencies',
+    'Package',
+    'PackageManager',
+    'PackageSet',
+    'Platform',
+    'Project',
+    'Property',
     'Schedule',
     'ScheduleDelay',
-    'Package', 'PackageManager',
-    'PackageSet',
-    'Deployment', 'InternalSource', 'ExternalSource',
-    'Domain',
     'Scope',
+    'ServerAttribute',
+    'ServerProperty',
+    'Singularity',
+    'Store',
     'UserProfile',
+    'prevent_circular_dependencies',
 ]

@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,12 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.db import models
 from django.conf import settings
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from .migas_link import MigasLink
 from ...utils import normalize_line_breaks
+from .migas_link import MigasLink
 
 
 class ClientPropertyManager(models.Manager):
@@ -68,7 +66,7 @@ class Property(models.Model, MigasLink):
         verbose_name=_('enabled'),
         default=True,
         db_comment='indicates whether the property (formula) is enabled'
-                   ' (if false, it will not be executed on the clients)',
+        ' (if false, it will not be executed on the clients)',
     )
 
     kind = models.CharField(
@@ -105,12 +103,14 @@ class Property(models.Model, MigasLink):
         verbose_name=_('code'),
         null=True,
         blank=True,
-        help_text=_("This code will execute in the client computer, and it must"
-                    " put in the standard output the value of the attribute correspondent"
-                    " to this property.<br>The format of this value is 'name~description',"
-                    " where 'description' is optional.<br><b>Example of code:</b>"
-                    "<br>#Create an attribute with the name of computer from bash<br>"
-                    " echo $HOSTNAME"),
+        help_text=_(
+            'This code will execute in the client computer, and it must'
+            ' put in the standard output the value of the attribute correspondent'
+            " to this property.<br>The format of this value is 'name~description',"
+            " where 'description' is optional.<br><b>Example of code:</b>"
+            '<br>#Create an attribute with the name of computer from bash<br>'
+            ' echo $HOSTNAME'
+        ),
         db_comment='instructions to execute on clients to obtain attributes',
     )
 
@@ -128,25 +128,31 @@ class Property(models.Model, MigasLink):
 
         client_properties = []
         for item in Property.objects.filter(enabled=True, sort='client'):
-            singularities = Singularity.objects.filter(
-                property_att__id=item.id,
-                enabled=True,
-                included_attributes__id__in=attributes,
-            ).filter(
-                ~models.Q(excluded_attributes__id__in=attributes)
-            ).order_by('-priority')
+            singularities = (
+                Singularity.objects.filter(
+                    property_att__id=item.id,
+                    enabled=True,
+                    included_attributes__id__in=attributes,
+                )
+                .filter(~models.Q(excluded_attributes__id__in=attributes))
+                .order_by('-priority')
+            )
             if singularities.count():
-                client_properties.append({
-                    'prefix': item.prefix,
-                    'language': singularities.first().get_language_display(),
-                    'code': singularities.first().code,
-                })
+                client_properties.append(
+                    {
+                        'prefix': item.prefix,
+                        'language': singularities.first().get_language_display(),
+                        'code': singularities.first().code,
+                    }
+                )
             else:
-                client_properties.append({
-                    'prefix': item.prefix,
-                    'language': item.get_language_display(),
-                    'code': item.code,
-                })
+                client_properties.append(
+                    {
+                        'prefix': item.prefix,
+                        'language': item.get_language_display(),
+                        'code': item.code,
+                    }
+                )
 
         return client_properties
 

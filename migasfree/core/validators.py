@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,8 +15,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import magic
 
+import magic
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -58,28 +56,20 @@ class MimetypeValidator:
                     os.remove(tmp_file)
 
                     if mime not in self.mimetypes:
-                        raise ValidationError(
-                            _('%s is not an acceptable file type') % item
-                        )
+                        raise ValidationError(_('%s is not an acceptable file type') % item)
         except AttributeError:
-            raise ValidationError(
-                _('This value could not be validated for file type') % item
-            )
+            raise ValidationError(_('This value could not be validated for file type') % item)  # noqa: B904
 
 
 def validate_package_name(name, file_list):
     if name == '' and len(file_list) > 1:
-        raise serializers.ValidationError(
-            _('When more than one file is uploaded, name is required')
-        )
+        raise serializers.ValidationError(_('When more than one file is uploaded, name is required'))
 
 
 def validate_project_pms(pms):
     available_pms = dict(get_available_pms()).keys()
     if pms not in available_pms:
-        raise ValidationError(
-            _('PMS must be one of %s' % str(available_pms))
-        )
+        raise ValidationError(_('PMS must be one of %s' % str(available_pms)))  # noqa: UP031
 
 
 def validate_no_spaces(value):

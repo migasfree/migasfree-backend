@@ -1,7 +1,5 @@
-# -*- coding: UTF-8 -*-
-
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +17,6 @@
 import os
 
 from ...utils import execute, get_setting
-
 from .pms import Pms
 
 
@@ -32,24 +29,42 @@ class Apt(Pms):
         super().__init__()
 
         self.name = 'apt'
-        self.relative_path = os.path.join(
-            get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH'), 'dists'
-        )
+        self.relative_path = os.path.join(get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH'), 'dists')
         self.mimetype = [
             'application/x-debian-package',
             'application/vnd.debian.binary-package',
         ]
         self.extensions = ['deb']
         self.architectures = [
-            'alpha', 'all', 'amd64', 'arm', 'arm64', 'armel', 'armhf', 'avr32',
-            'hppa', 'hurd-i386',
-            'i386', 'ia64',
-            'kfreebsd-amd64', 'kfreebsd-i386',
+            'alpha',
+            'all',
+            'amd64',
+            'arm',
+            'arm64',
+            'armel',
+            'armhf',
+            'avr32',
+            'hppa',
+            'hurd-i386',
+            'i386',
+            'ia64',
+            'kfreebsd-amd64',
+            'kfreebsd-i386',
             'loong64',
-            'm68k', 'mips', 'mips64el', 'mipsel',
-            'powerpc', 'powerpcspe', 'ppc64', 'ppc64el',
+            'm68k',
+            'mips',
+            'mips64el',
+            'mipsel',
+            'powerpc',
+            'powerpcspe',
+            'ppc64',
+            'ppc64el',
             'riscv64',
-            's390', 's390x', 'sh4', 'sparc', 'sparc64',
+            's390',
+            's390x',
+            'sh4',
+            'sparc',
+            'sparc64',
             'x32',
         ]
 
@@ -60,40 +75,40 @@ class Apt(Pms):
         )
         """
 
-        cmd = r'''
-_NAME=%(name)s
-_ARCHS=("%(arch)s")
-for _ARCH in ${_ARCHS[@]}
+        cmd = r"""
+_NAME={name}
+_ARCHS=("{arch}")
+for _ARCH in ${{_ARCHS[@]}}
 do
-  mkdir -p "%(path)s/%(components)s/binary-$_ARCH/"
-  cd %(path)s/../..
+  mkdir -p "{path}/{components}/binary-$_ARCH/"
+  cd {path}/../..
 
-  ionice -c 3 apt-ftparchive --arch $_ARCH packages dists/$_NAME/%(components)s \
-    > dists/$_NAME/%(components)s/binary-$_ARCH/Packages 2> /tmp/$_NAME
+  ionice -c 3 apt-ftparchive --arch $_ARCH packages dists/$_NAME/{components} \
+    > dists/$_NAME/{components}/binary-$_ARCH/Packages 2> /tmp/$_NAME
   if [ $? -ne 0 ]
   then
     (>&2 cat /tmp/$_NAME)
   fi
-  sed -i "s/Filename: .*\/%(components)s\//Filename: dists\/$_NAME\/%(components)s\//" \
-    dists/$_NAME/%(components)s/binary-$_ARCH/Packages
-  sed -i "s/Filename: .*\/%(store_trailing_path)s\/[^/]*\//Filename: \
-    dists\/$_NAME\/%(components)s\//" dists/$_NAME/%(components)s/binary-$_ARCH/Packages
-  gzip -9c dists/$_NAME/%(components)s/binary-$_ARCH/Packages > dists/$_NAME/%(components)s/binary-$_ARCH/Packages.gz
+  sed -i "s/Filename: .*\/{components}\//Filename: dists\/$_NAME\/{components}\//" \
+    dists/$_NAME/{components}/binary-$_ARCH/Packages
+  sed -i "s/Filename: .*\/{store_trailing_path}\/[^/]*\//Filename: \
+    dists\/$_NAME\/{components}\//" dists/$_NAME/{components}/binary-$_ARCH/Packages
+  gzip -9c dists/$_NAME/{components}/binary-$_ARCH/Packages > dists/$_NAME/{components}/binary-$_ARCH/Packages.gz
 done
 
-function calculate_hash {
+function calculate_hash {{
   echo $1
   _FILES=$(find  -type f | sed 's/^.\///' | sort)
   for _FILE in $_FILES
   do
-    _SIZE=$(printf "%%16d\\n" $(ls -l $_FILE | cut -d ' ' -f5))
+    _SIZE=$(printf "%16d\\n" $(ls -l $_FILE | cut -d ' ' -f5))
     _HASH=$($2 $_FILE | cut -d ' ' -f1) $()
     echo " $_HASH" "$_SIZE" "$_FILE"
   done
-}
+}}
 
-function create_deploy {
-  cd %(path)s
+function create_deploy {{
+  cd {path}
   _F="$(mktemp /var/tmp/deploy-XXXXX)"
 
   rm Release 2>/dev/null || :
@@ -101,10 +116,10 @@ function create_deploy {
   touch Release
   rm $_F 2>/dev/null || :
 
-  echo "Architectures: ${_ARCHS[@]}" > $_F
+  echo "Architectures: ${{_ARCHS[@]}}" > $_F
   echo "Codename: $_NAME" >> $_F
-  echo "Components: %(components)s" >> $_F
-  echo "Date: $(LC_ALL=C date -u '+%%a, %%d %%b %%Y %%H:%%M:%%S UTC')" >> $_F
+  echo "Components: {components}" >> $_F
+  echo "Date: $(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S UTC')" >> $_F
   echo "Label: migasfree $_NAME repository" >> $_F
   echo "Origin: migasfree" >> $_F
   echo "Suite: $_NAME" >> $_F
@@ -116,19 +131,19 @@ function create_deploy {
 
   mv $_F Release
 
-  gpg --no-tty --local-user migasfree-repository --homedir %(keys_path)s/.gnupg --clear-sign --output InRelease Release
-  gpg --no-tty --local-user migasfree-repository --homedir %(keys_path)s/.gnupg -abs --output Release.gpg Release
-}
+  gpg --no-tty --local-user migasfree-repository --homedir {keys_path}/.gnupg --clear-sign --output InRelease Release
+  gpg --no-tty --local-user migasfree-repository --homedir {keys_path}/.gnupg -abs --output Release.gpg Release
+}}
 
 create_deploy
-''' % {
-            'path': path,
-            'name': os.path.basename(path),
-            'arch': arch,
-            'keys_path': self.keys_path,
-            'components': self.components,
-            'store_trailing_path': get_setting('MIGASFREE_STORE_TRAILING_PATH')
-        }
+""".format(
+            path=path,
+            name=os.path.basename(path),
+            arch=arch,
+            keys_path=self.keys_path,
+            components=self.components,
+            store_trailing_path=get_setting('MIGASFREE_STORE_TRAILING_PATH'),
+        )
 
         return execute(cmd)
 
@@ -137,59 +152,59 @@ create_deploy
         string package_info(string package)
         """
 
-        cmd = '''
+        cmd = f"""
 echo "## Info"
 echo "~~~"
-dpkg-deb --info %(pkg)s
+dpkg-deb --info {package}
 echo "~~~"
 echo
 echo "## Requires"
 echo "~~~"
-dpkg-deb --showformat='${Depends}\n' --show %(pkg)s
+dpkg-deb --showformat='${{Depends}}\n' --show {package}
 echo "~~~"
 echo
 echo "## Provides"
 echo "~~~"
-dpkg-deb --showformat='${Provides}\n' --show %(pkg)s
+dpkg-deb --showformat='${{Provides}}\n' --show {package}
 echo "~~~"
 echo
 echo "## Obsoletes"
 echo "~~~"
-dpkg-deb --showformat='${Replaces}\n' --show %(pkg)s
+dpkg-deb --showformat='${{Replaces}}\n' --show {package}
 echo "~~~"
 echo
 echo "## Script PreInst"
 echo "~~~"
-dpkg-deb --info %(pkg)s preinst
+dpkg-deb --info {package} preinst
 echo "~~~"
 echo
 echo "## Script PostInst"
 echo "~~~"
-dpkg-deb --info %(pkg)s postinst
+dpkg-deb --info {package} postinst
 echo "~~~"
 echo
 echo "## Script PreRm"
 echo "~~~"
-dpkg-deb --info %(pkg)s prerm
+dpkg-deb --info {package} prerm
 echo "~~~"
 echo
 echo "## Script PostRm"
 echo "~~~"
-dpkg-deb --info %(pkg)s postrm
+dpkg-deb --info {package} postrm
 echo "~~~"
 echo
 echo "## Changelog"
-_NAME=$(dpkg-deb --showformat='${Package}' --show %(pkg)s)
+_NAME=$(dpkg-deb --showformat='${{Package}}' --show {package})
 echo "~~~"
-dpkg-deb --fsys-tarfile %(pkg)s | tar -O -xvf - ./usr/share/doc/$_NAME/changelog.Debian.gz | gunzip
-dpkg-deb --fsys-tarfile %(pkg)s | tar -O -xvf - ./usr/share/doc/$_NAME/changelog.gz | gunzip
+dpkg-deb --fsys-tarfile {package} | tar -O -xvf - ./usr/share/doc/$_NAME/changelog.Debian.gz | gunzip
+dpkg-deb --fsys-tarfile {package} | tar -O -xvf - ./usr/share/doc/$_NAME/changelog.gz | gunzip
 echo "~~~"
 echo
 echo "## Files"
 echo "~~~"
-dpkg-deb -c %(pkg)s | awk '{print $6}'
+dpkg-deb -c {package} | awk '{{print $6}}'
 echo "~~~"
-        ''' % {'pkg': package}
+        """
 
         ret, output, error = execute(cmd)
 
@@ -201,18 +216,14 @@ echo "~~~"
         """
 
         cmd = f"dpkg-deb --showformat='${{Package}}_${{Version}}_${{Architecture}}' --show {package}"
-        ret, output, error = execute(cmd)
+        ret, output, _ = execute(cmd)
 
         if ret == 0:
             name, version, architecture = output.split('_')
         else:
             name, version, architecture = None, None, None
 
-        return {
-            'name': name,
-            'version': version,
-            'architecture': architecture
-        }
+        return {'name': name, 'version': version, 'architecture': architecture}
 
     def source_template(self, deploy):
         """
@@ -227,17 +238,19 @@ echo "~~~"
                 project=deploy.project.slug,
                 trailing_path=get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH'),
                 name=deploy.slug,
-                components=self.components
+                components=self.components,
             )
         elif deploy.source == Deployment.SOURCE_EXTERNAL:
-            return 'deb {options} {{protocol}}://{{server}}/src/{project}/{trailing_path}/{name} ' \
-                   '{suite} {components}\n'.format(
-                        options=deploy.options if deploy.options else '',
-                        project=deploy.project.slug,
-                        trailing_path=get_setting('MIGASFREE_EXTERNAL_TRAILING_PATH'),
-                        name=deploy.slug,
-                        suite=deploy.suite,
-                        components=deploy.components
-                    )
+            return (
+                'deb {options} {{protocol}}://{{server}}/src/{project}/{trailing_path}/{name} '
+                '{suite} {components}\n'.format(
+                    options=deploy.options if deploy.options else '',
+                    project=deploy.project.slug,
+                    trailing_path=get_setting('MIGASFREE_EXTERNAL_TRAILING_PATH'),
+                    name=deploy.slug,
+                    suite=deploy.suite,
+                    components=deploy.components,
+                )
+            )
 
         return ''

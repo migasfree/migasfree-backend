@@ -1,7 +1,5 @@
-# -*- coding: UTF-8 -*-
-
-# Copyright (c) 2021-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2021-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2021-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +17,6 @@
 import os
 
 from ...utils import execute, get_setting
-
 from .pms import Pms
 
 
@@ -49,20 +46,15 @@ class Pacman(Pms):
         FIXME
         """
 
-        _cmd = '''
-function create_deploy {
-  cd %(path)s/%(components)s
-  export GNUPGHOME=%(keys_path)s/.gnupg
-  repo-add --sign --key migasfree-repository ./%(name)s.db.tar.gz ./*
-}
+        _cmd = f"""
+function create_deploy {{
+  cd {path}/{self.components}
+  export GNUPGHOME={self.keys_path}/.gnupg
+  repo-add --sign --key migasfree-repository ./{os.path.basename(path)}.db.tar.gz ./*
+}}
 
 create_deploy
-''' % {
-            'path': path,
-            'name': os.path.basename(path),
-            'keys_path': self.keys_path,
-            'components': self.components
-        }
+"""
 
         return execute(_cmd)
 
@@ -71,25 +63,22 @@ create_deploy
         string package_info(string package)
         """
 
-        _cmd = '''
+        _cmd = f"""
 echo "## Info"
 echo "~~~"
-%(pms)s --query --info --file %(pkg)s
+{self.name} --query --info --file {package}
 echo "~~~"
 echo
 echo "## Changelog"
 echo "~~~"
-%(pms)s --query --changelog --file %(pkg)s
+{self.name} --query --changelog --file {package}
 echo "~~~"
 echo
 echo "## Files"
 echo "~~~"
-%(pms)s --query --list --quiet --file %(pkg)s
+{self.name} --query --list --quiet --file {package}
 echo "~~~"
-        ''' % {
-            'pms': self.name,
-            'pkg': package
-        }
+        """
 
         _ret, _output, _error = execute(_cmd)
 
@@ -116,11 +105,7 @@ echo "~~~"
         else:
             name, version, architecture = [None, None, None]
 
-        return {
-            'name': name,
-            'version': version,
-            'architecture': architecture
-        }
+        return {'name': name, 'version': version, 'architecture': architecture}
 
     def source_template(self, deploy):
         """
@@ -131,16 +116,16 @@ echo "~~~"
         from ..models import Deployment
 
         if deploy.source == Deployment.SOURCE_INTERNAL:
-            return '''[{name}]
+            return """[{name}]
 SigLevel = Optional TrustAll PackageTrustAll
 Server = {{protocol}}://{{server}}{media_url}{project}/{trailing_path}/{name}/{components}
 
-'''.format(
+""".format(
                 media_url=self.media_url,
                 trailing_path=get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH'),
                 project=deploy.project.slug,
                 name=deploy.slug,
-                components=self.components
+                components=self.components,
             )
         elif deploy.source == Deployment.SOURCE_EXTERNAL:
             return '[{name}]\nServer = {{protocol}}://{{server}}/src/{project}/{trailing_path}/{name}\n\n'.format(

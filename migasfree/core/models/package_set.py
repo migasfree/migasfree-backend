@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2017-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -96,7 +94,7 @@ class PackageSet(models.Model, MigasLink):
             if previous_store:
                 shutil.move(
                     self.path(self.project.slug, previous_store, self.name),
-                    self.path(self.project.slug, self.store, self.name)
+                    self.path(self.project.slug, self.store, self.name),
                 )
 
     def clean(self):
@@ -110,22 +108,16 @@ class PackageSet(models.Model, MigasLink):
 
         for pkg in self.packages:
             if pkg.store.id != self.store.id:
-                raise ValidationError(
-                    _('Package %s must be in the store %s') % (pkg.fullname, self.store.name)
-                )
+                raise ValidationError(_('Package %s must be in the store %s') % (pkg.fullname, self.store.name))
 
     @staticmethod
     def orphan_count(user=None):
         if not user:
-            return PackageSet.objects.filter(
-                deployment__isnull=True,
-                packages__isnull=False
-            ).distinct().count()
+            return PackageSet.objects.filter(deployment__isnull=True, packages__isnull=False).distinct().count()
 
-        return PackageSet.objects.scope(user).filter(
-            deployment__isnull=True,
-            packageset__isnull=False
-        ).distinct().count()
+        return (
+            PackageSet.objects.scope(user).filter(deployment__isnull=True, packageset__isnull=False).distinct().count()
+        )
 
     def __str__(self):
         return str(self.name)
@@ -144,8 +136,7 @@ def _update_repository_metadata(instance):
     queryset = Deployment.objects.filter(available_package_sets__in=[instance])
     for deploy in queryset:
         tasks.create_repository_metadata.apply_async(
-            queue=f'pms-{deploy.pms().name}',
-            kwargs={'deployment_id': deploy.id}
+            queue=f'pms-{deploy.pms().name}', kwargs={'deployment_id': deploy.id}
         )
 
 

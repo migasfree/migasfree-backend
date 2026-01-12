@@ -1,5 +1,3 @@
-# -*- coding: utf-8 *-*
-
 # Copyright (c) 2018-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2018-2021 Alberto Gacías <alberto@migasfree.org>
 #
@@ -19,7 +17,7 @@
 from django.conf.urls import include
 from django.urls import re_path
 
-from .views import ServerInfoView, PmsView, ProgrammingLanguagesView
+from .views import PmsView, ProgrammingLanguagesView, ServerInfoView
 
 public_patterns = [
     re_path(r'server/info/', ServerInfoView.as_view()),

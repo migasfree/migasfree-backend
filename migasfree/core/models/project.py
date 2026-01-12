@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,18 +17,17 @@
 import os
 import shutil
 
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
-from django.conf import settings
-from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 from ..pms import get_available_pms, get_pms
 from ..validators import validate_project_pms
-
-from . import Platform, MigasLink
+from . import MigasLink, Platform
 
 
 class DomainProjectManager(models.Manager):
@@ -85,7 +82,7 @@ class Project(models.Model, MigasLink):
         max_length=50,
         verbose_name=_('package management system'),
         validators=[validate_project_pms],
-        db_comment='package management system utilized in the project\'s operating system',
+        db_comment="package management system utilized in the project's operating system",
     )
 
     architecture = models.CharField(
@@ -97,8 +94,7 @@ class Project(models.Model, MigasLink):
     auto_register_computers = models.BooleanField(
         verbose_name=_('auto register computers'),
         default=False,
-        help_text=_('Is not needed a user for register computers in '
-                    'database and get the keys.'),
+        help_text=_('Is not needed a user for register computers in database and get the keys.'),
         db_comment='if true, it allows you to register the computer from a client automatically',
     )
 
@@ -107,7 +103,7 @@ class Project(models.Model, MigasLink):
         max_length=50,
         null=True,
         blank=True,
-        db_comment='specifies the base operating system your project is based on'
+        db_comment='specifies the base operating system your project is based on',
     )
 
     platform = models.ForeignKey(
@@ -134,17 +130,11 @@ class Project(models.Model, MigasLink):
 
     @staticmethod
     def repositories_path(name):
-        return os.path.join(
-            Project.path(name),
-            settings.MIGASFREE_REPOSITORY_TRAILING_PATH
-        )
+        return os.path.join(Project.path(name), settings.MIGASFREE_REPOSITORY_TRAILING_PATH)
 
     @staticmethod
     def stores_path(name):
-        return os.path.join(
-            Project.path(name),
-            settings.MIGASFREE_STORE_TRAILING_PATH
-        )
+        return os.path.join(Project.path(name), settings.MIGASFREE_STORE_TRAILING_PATH)
 
     def _create_dirs(self):
         repos = self.repositories_path(self.slug)

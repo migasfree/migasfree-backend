@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,14 +14,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import inspect
 import importlib
+import inspect
 import pkgutil
+import sys
+from importlib import import_module
 
 import migasfree.core.pms.plugins
-
-from importlib import import_module
 
 from .apt import Apt
 from .dnf import Dnf
@@ -38,11 +35,7 @@ def iter_namespace(ns_pkg):
 
 
 def get_discovered_plugins():
-    return {
-        name: importlib.import_module(name)
-        for finder, name, ispkg
-        in iter_namespace(migasfree.core.pms.plugins)
-    }
+    return {name: importlib.import_module(name) for finder, name, ispkg in iter_namespace(migasfree.core.pms.plugins)}
 
 
 def get_available_pms():
@@ -56,7 +49,7 @@ def get_available_pms():
     ]
 
     discovered_plugins = get_discovered_plugins()
-    for item in discovered_plugins.keys():
+    for item in discovered_plugins:
         pms = item.split('.')[-1]
         ret.append((pms, f'plugins.{pms}'))
 
@@ -64,11 +57,10 @@ def get_available_pms():
 
 
 def get_available_mimetypes():
-    ret = Apt().mimetype + Dnf().mimetype + Pacman().mimetype \
-        + Wpt().mimetype + Yum().mimetype + Zypper().mimetype
+    ret = Apt().mimetype + Dnf().mimetype + Pacman().mimetype + Wpt().mimetype + Yum().mimetype + Zypper().mimetype
 
     discovered_plugins = get_discovered_plugins()
-    for item in discovered_plugins.keys():
+    for item in discovered_plugins:
         for class_ in inspect.getmembers(sys.modules[item], inspect.isclass):
             if class_[0] != 'Pms':
                 ret += class_[1]().mimetype
@@ -77,35 +69,45 @@ def get_available_mimetypes():
 
 
 def get_available_extensions():
-    ret = Apt().extensions + Dnf().extensions + Pacman().extensions \
-        + Wpt().extensions + Yum().extensions + Zypper().extensions
+    ret = (
+        Apt().extensions
+        + Dnf().extensions
+        + Pacman().extensions
+        + Wpt().extensions
+        + Yum().extensions
+        + Zypper().extensions
+    )
 
     discovered_plugins = get_discovered_plugins()
-    for item in discovered_plugins.keys():
+    for item in discovered_plugins:
         for class_ in inspect.getmembers(sys.modules[item], inspect.isclass):
             if class_[0] != 'Pms':
                 ret += class_[1]().extensions
 
-    return sorted(list(set(ret)), key=lambda x: -len(x))
+    return sorted(set(ret), key=lambda x: -len(x))
 
 
 def get_available_architectures():
-    ret = Apt().architectures + Dnf().architectures + Pacman().architectures \
-        + Wpt().architectures + Yum().architectures + Zypper().architectures
+    ret = (
+        Apt().architectures
+        + Dnf().architectures
+        + Pacman().architectures
+        + Wpt().architectures
+        + Yum().architectures
+        + Zypper().architectures
+    )
 
     discovered_plugins = get_discovered_plugins()
-    for item in discovered_plugins.keys():
+    for item in discovered_plugins:
         for class_ in inspect.getmembers(sys.modules[item], inspect.isclass):
             if class_[0] != 'Pms':
                 ret += class_[1]().architectures
 
-    return sorted(list(set(ret)), key=lambda x: -len(x))
+    return sorted(set(ret), key=lambda x: -len(x))
 
 
 def get_pms(name):
     available_pms = dict(get_available_pms())
-    mod = import_module(
-        f'migasfree.core.pms.{available_pms.get(name)}'
-    )
+    mod = import_module(f'migasfree.core.pms.{available_pms.get(name)}')
 
     return getattr(mod, name.capitalize())()

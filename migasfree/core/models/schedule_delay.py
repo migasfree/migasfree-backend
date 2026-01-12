@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,24 +14,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Q
-from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
 
+from .attribute import Attribute
 from .migas_link import MigasLink
 from .schedule import Schedule
-from .attribute import Attribute
 
 
 class ScheduleDelayManager(models.Manager):
     def scope(self, user):
         qs = super().get_queryset()
         if user and not user.is_view_all():
-            qs = qs.filter(
-                Q(attributes__in=user.get_attributes()) |
-                Q(attributes__in=user.get_domain_tags())
-            )
+            qs = qs.filter(Q(attributes__in=user.get_attributes()) | Q(attributes__in=user.get_domain_tags()))
 
         return qs
 
@@ -42,7 +37,7 @@ class ScheduleDelay(models.Model, MigasLink):
     delay = models.IntegerField(
         verbose_name=_('delay'),
         db_comment='number of days from the deployment start date that the assigned attributes '
-                   'will be effective (Saturdays and Sundays are not taken into account)',
+        'will be effective (Saturdays and Sundays are not taken into account)',
     )
 
     schedule = models.ForeignKey(
@@ -62,7 +57,9 @@ class ScheduleDelay(models.Model, MigasLink):
     duration = models.IntegerField(
         verbose_name=_('duration'),
         default=1,
-        validators=[MinValueValidator(1), ],
+        validators=[
+            MinValueValidator(1),
+        ],
         db_comment='number of days to complete deployment to computers assigned to the delay',
     )
 
@@ -72,11 +69,9 @@ class ScheduleDelay(models.Model, MigasLink):
         return f'{self.schedule.name} ({self.delay})'
 
     def attribute_list(self):
-        return ', '.join(
-            self.attributes.values_list('value', flat=True).order_by('value')
-        )
+        return ', '.join(self.attributes.values_list('value', flat=True).order_by('value'))
 
-    attribute_list.short_description = _("attribute list")
+    attribute_list.short_description = _('attribute list')
 
     def related_objects(self, model, user):
         """
@@ -87,9 +82,7 @@ class ScheduleDelay(models.Model, MigasLink):
 
         from ...client.models import Computer
 
-        return Computer.productive.scope(user).filter(
-            sync_attributes__in=self.attributes.all()
-        ).distinct()
+        return Computer.productive.scope(user).filter(sync_attributes__in=self.attributes.all()).distinct()
 
     class Meta:
         app_label = 'core'

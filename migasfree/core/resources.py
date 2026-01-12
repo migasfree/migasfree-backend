@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2018-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2018-2022 Alberto Gacías <alberto@migasfree.org>
 #
@@ -17,13 +15,26 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.contrib.auth.models import Group
-from import_export import resources, fields, widgets
+from import_export import fields, resources, widgets
 
 from .models import (
-    Attribute, AttributeSet, ClientAttribute, ServerAttribute,
-    Property, ClientProperty, ServerProperty,
-    Project, Platform, UserProfile, Domain, Scope,
-    Deployment, Schedule, Store, Package, PackageSet,
+    Attribute,
+    AttributeSet,
+    ClientAttribute,
+    ClientProperty,
+    Deployment,
+    Domain,
+    Package,
+    PackageSet,
+    Platform,
+    Project,
+    Property,
+    Schedule,
+    Scope,
+    ServerAttribute,
+    ServerProperty,
+    Store,
+    UserProfile,
 )
 
 
@@ -33,11 +44,7 @@ class AttributeResource(resources.ModelResource):
 
     class Meta:
         model = Attribute
-        export_order = (
-            'id', 'property_att', 'prefix', 'value',
-            'description', 'computers',
-            'latitude', 'longitude'
-        )
+        export_order = ('id', 'property_att', 'prefix', 'value', 'description', 'computers', 'latitude', 'longitude')
 
     def dehydrate_computers(self, attribute):
         return attribute.total_computers()
@@ -47,25 +54,21 @@ class AttributeResource(resources.ModelResource):
 
 
 class AttributeSetResource(resources.ModelResource):
-    enabled = fields.Field(
-        attribute='enabled',
-        widget=widgets.BooleanWidget()
-    )
-    included_attributes = fields.Field(
-        attribute='included_attributes',
-        widget=widgets.ManyToManyWidget(Attribute)
-    )
-    excluded_attributes = fields.Field(
-        attribute='excluded_attributes',
-        widget=widgets.ManyToManyWidget(Attribute)
-    )
+    enabled = fields.Field(attribute='enabled', widget=widgets.BooleanWidget())
+    included_attributes = fields.Field(attribute='included_attributes', widget=widgets.ManyToManyWidget(Attribute))
+    excluded_attributes = fields.Field(attribute='excluded_attributes', widget=widgets.ManyToManyWidget(Attribute))
 
     class Meta:
         model = AttributeSet
         export_order = (
-            'id', 'name', 'enabled', 'description',
-            'included_attributes', 'excluded_attributes',
-            'longitude', 'latitude'
+            'id',
+            'name',
+            'enabled',
+            'description',
+            'included_attributes',
+            'excluded_attributes',
+            'longitude',
+            'latitude',
         )
 
 
@@ -82,11 +85,7 @@ class ServerAttributeResource(AttributeResource):
 class PropertyResource(resources.ModelResource):
     class Meta:
         model = Property
-        fields = (
-            'id', 'prefix', 'name',
-            'enabled', 'kind', 'sort', 'auto_add',
-            'language', 'code'
-        )
+        fields = ('id', 'prefix', 'name', 'enabled', 'kind', 'sort', 'auto_add', 'language', 'code')
 
 
 class ClientPropertyResource(PropertyResource):
@@ -101,10 +100,7 @@ class ServerPropertyResource(resources.ModelResource):
 
 
 class ProjectResource(resources.ModelResource):
-    auto_register_computers = fields.Field(
-        attribute='auto_register_computers',
-        widget=widgets.BooleanWidget()
-    )
+    auto_register_computers = fields.Field(attribute='auto_register_computers', widget=widgets.BooleanWidget())
 
     class Meta:
         model = Project

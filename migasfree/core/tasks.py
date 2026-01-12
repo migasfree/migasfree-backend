@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
 #
@@ -17,18 +15,17 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import requests
 import ssl
 import urllib.request
-
 from datetime import datetime, timedelta
 from urllib.parse import urljoin
+
+import requests
 from celery import Celery, shared_task
 
-from .models import Deployment, ScheduleDelay
-from .decorators import unique_task
 from ..utils import get_setting
-
+from .decorators import unique_task
+from .models import Deployment, ScheduleDelay
 
 CELERY_BROKER_URL = get_setting('CELERY_BROKER_URL')
 
@@ -65,7 +62,7 @@ def update_deployment_start_date():
                     new_start_date = last_duration_date + timedelta(days=1)
                     deployment.start_date = new_start_date
                     deployment.save()
-                    print(f"Updated the start date of deployment {deployment.name} to {new_start_date}")  # DEBUG
+                    print(f'Updated the start date of deployment {deployment.name} to {new_start_date}')  # DEBUG
 
 
 @shared_task
@@ -84,8 +81,7 @@ def remove_orphan_files_from_external_deployments():
 
                 try:
                     with urllib.request.urlopen(
-                        urllib.request.Request(url, method='HEAD'),
-                        context=ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+                        urllib.request.Request(url, method='HEAD'), context=ssl.SSLContext(ssl.PROTOCOL_SSLv23)
                     ) as response:
                         headers = response.getheaders()
 

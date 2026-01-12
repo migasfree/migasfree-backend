@@ -1,7 +1,5 @@
-# -*- coding: utf-8 *-*
-
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,18 +14,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import hashlib
+import logging
 import os
 import re
-import ssl
-import time
 import shutil
-import hashlib
+import ssl
 import tempfile
-
+import time
 from mimetypes import guess_type
-from urllib.error import URLError, HTTPError
-from urllib.request import urlopen, urlretrieve, urlcleanup
+from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin
+from urllib.request import urlcleanup, urlopen, urlretrieve
 from wsgiref.util import FileWrapper
 
 from django.conf import settings
@@ -35,38 +33,30 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, StreamingHttpResponse
 from django.utils.html import escape
 from django.utils.translation import gettext as _
-from drf_spectacular.utils import extend_schema, OpenApiExample
-from rest_framework import status, views, permissions
+from drf_spectacular.utils import OpenApiExample, extend_schema
+from rest_framework import permissions, status, views
 from rest_framework.decorators import action, permission_classes, throttle_classes
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
-from ..pms import get_available_pms, get_pms
-from ..models import Project, ExternalSource
 from ...client.models import Notification
 from ...utils import get_proxied_ip_address
+from ..models import ExternalSource, Project
+from ..pms import get_available_pms, get_pms
 
-import logging
 logger = logging.getLogger('migasfree')
 
 
 def add_notification_get_source_file(error, deployment, resource, remote, from_):
     Notification.objects.create(
-        _("Deployment (external source): [%s], resource: [%s], remote file: [%s], from [%s]. Error: %s") % (
-            f'{deployment.name}@{deployment.project.name}',
-            resource,
-            remote,
-            from_,
-            error
-        )
+        _('Deployment (external source): [%s], resource: [%s], remote file: [%s], from [%s]. Error: %s')
+        % (f'{deployment.name}@{deployment.project.name}', resource, remote, from_, error)
     )
 
 
 def external_downloads(url, local_file):
     temp_file = os.path.join(
-        settings.MIGASFREE_PUBLIC_DIR,
-        '.external_downloads',
-        hashlib.md5(local_file.encode('utf-8')).hexdigest()
+        settings.MIGASFREE_PUBLIC_DIR, '.external_downloads', hashlib.md5(local_file.encode('utf-8')).hexdigest()
     )
 
     if not os.path.exists(temp_file):
@@ -79,7 +69,6 @@ def external_downloads(url, local_file):
 @permission_classes((permissions.AllowAny,))
 @throttle_classes([UserRateThrottle])
 class PmsView(views.APIView):
-
     @extend_schema(
         description='Returns available PMS',
         responses={
@@ -93,9 +82,9 @@ class PmsView(views.APIView):
                             'mimetype': {'type': 'array', 'items': {'type': 'string'}},
                             'extensions': {'type': 'array', 'items': {'type': 'string'}},
                             'architectures': {'type': 'array', 'items': {'type': 'string'}},
-                        }
+                        },
                     }
-                }
+                },
             }
         },
         tags=['public'],
@@ -118,12 +107,9 @@ class PmsView(views.APIView):
 @permission_classes((permissions.AllowAny,))
 @throttle_classes([UserRateThrottle])
 class ProgrammingLanguagesView(views.APIView):
-
     @extend_schema(
         description='Returns available programming languages (to formulas and faults definitions)',
-        responses={
-            status.HTTP_200_OK: dict(settings.MIGASFREE_PROGRAMMING_LANGUAGES)
-        },
+        responses={status.HTTP_200_OK: dict(settings.MIGASFREE_PROGRAMMING_LANGUAGES)},
         examples=[
             OpenApiExample(
                 name='successfully response',
@@ -149,7 +135,7 @@ class ProgrammingLanguagesView(views.APIView):
                 'contact': {'type': 'string'},
                 'homepage': {'type': 'string'},
                 'organization': {'type': 'string'},
-            }
+            },
         }
     },
     tags=['public'],
@@ -160,7 +146,7 @@ class ServerInfoView(views.APIView):
     serializer_class = None
 
     def get(self, request):
-        from ... import __version__, __author__, __contact__, __homepage__
+        from ... import __author__, __contact__, __homepage__, __version__
 
         info = {
             'version': __version__,
@@ -273,10 +259,7 @@ class GetSourceFileView(views.APIView):
 
         if not re.match(r'^[a-zA-Z0-9_\-\+~/.]+$', resource):
             logger.error('Invalid resource path: %s', resource)
-            return HttpResponse(
-                f'Invalid resource path: {escape(resource)}',
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return HttpResponse(f'Invalid resource path: {escape(resource)}', status=status.HTTP_400_BAD_REQUEST)
 
         url = urljoin(f'{source.base_url}/', resource)
         logger.debug('get url %s', url)
@@ -286,30 +269,14 @@ class GetSourceFileView(views.APIView):
 
             remote_file_status = remote_file.getcode()
             if remote_file_status != status.HTTP_200_OK:
-                add_notification_get_source_file(
-                    f'HTTP Error: {remote_file_status}',
-                    source,
-                    path,
-                    url,
-                    client_ip
-                )
-                return HttpResponse(
-                    f'HTTP Error: {remote_file_status} {escape(url)}',
-                    status=remote_file_status
-                )
+                add_notification_get_source_file(f'HTTP Error: {remote_file_status}', source, path, url, client_ip)
+                return HttpResponse(f'HTTP Error: {remote_file_status} {escape(url)}', status=remote_file_status)
 
             remote_file_size = remote_file.info().get('Content-Length')
             if remote_file_size is None:
-                add_notification_get_source_file(
-                    'Error: Failed to get file size',
-                    source,
-                    path,
-                    url,
-                    client_ip
-                )
+                add_notification_get_source_file('Error: Failed to get file size', source, path, url, client_ip)
                 return HttpResponse(
-                    f'Error: Failed to get file size {escape(url)}',
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    f'Error: Failed to get file size {escape(url)}', status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
 
             remote_file_type = remote_file.info().get('Content-Type')
@@ -319,43 +286,16 @@ class GetSourceFileView(views.APIView):
 
             return response
         except HTTPError as e:
-            add_notification_get_source_file(
-                f'HTTP Error: {e.code}',
-                source,
-                path,
-                url,
-                client_ip
-            )
-            return HttpResponse(
-                f'HTTP Error: {e.code} {escape(url)}',
-                status=e.code
-            )
+            add_notification_get_source_file(f'HTTP Error: {e.code}', source, path, url, client_ip)
+            return HttpResponse(f'HTTP Error: {e.code} {escape(url)}', status=e.code)
         except URLError as e:
-            add_notification_get_source_file(
-                f'URL Error: {e.reason}',
-                source,
-                path,
-                url,
-                client_ip
-            )
-            return HttpResponse(
-                f'URL Error: {escape(e.reason)} {escape(url)}',
-                status=status.HTTP_502_BAD_GATEWAY
-            )
+            add_notification_get_source_file(f'URL Error: {e.reason}', source, path, url, client_ip)
+            return HttpResponse(f'URL Error: {escape(e.reason)} {escape(url)}', status=status.HTTP_502_BAD_GATEWAY)
         except Exception as e:
-            error_message = f'Error: {str(e)} {escape(url)}'
+            error_message = f'Error: {e!s} {escape(url)}'
             logger.error(error_message)
-            add_notification_get_source_file(
-                f'Error: {str(e)}',
-                source,
-                path,
-                url,
-                client_ip
-            )
-            return HttpResponse(
-                'An internal error has occurred',
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            add_notification_get_source_file(f'Error: {e!s}', source, path, url, client_ip)
+            return HttpResponse('An internal error has occurred', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def _handle_file_exists(self, file_local, request):
         if not os.path.isfile(file_local):
@@ -389,7 +329,7 @@ class GetSourceFileView(views.APIView):
                 response = StreamingHttpResponse(
                     RangeFileWrapper(f, offset=first_byte, length=length),
                     status=status.HTTP_206_PARTIAL_CONTENT,
-                    content_type=content_type
+                    content_type=content_type,
                 )
                 response['Content-Disposition'] = f'attachment; filename={os.path.basename(file_local)}'
                 response['Content-Length'] = str(length)
@@ -401,10 +341,7 @@ class GetSourceFileView(views.APIView):
         logger.debug('get local file wrapper %s', file_local)
 
         with open(file_local, 'rb') as f:
-            response = HttpResponse(
-                FileWrapper(f),
-                content_type='application/octet-stream'
-            )
+            response = HttpResponse(FileWrapper(f), content_type='application/octet-stream')
             response['Content-Disposition'] = f'attachment; filename={os.path.basename(file_local)}'
             response['Content-Length'] = size
             response['Accept-Ranges'] = 'bytes'
@@ -419,39 +356,26 @@ class GetSourceFileView(views.APIView):
         try:
             project = Project.objects.get(slug=project_slug)
         except ObjectDoesNotExist:
-            return HttpResponse(
-                f'Project not exists: {escape(project_slug)}',
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return HttpResponse(f'Project not exists: {escape(project_slug)}', status=status.HTTP_404_NOT_FOUND)
 
         try:
             source = ExternalSource.objects.get(project__slug=project_slug, slug=source_slug)
         except ObjectDoesNotExist:
-            return HttpResponse(
-                f'URL not exists: {escape(path)}',
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return HttpResponse(f'URL not exists: {escape(path)}', status=status.HTTP_404_NOT_FOUND)
 
         file_local = os.path.normpath(os.path.join(settings.MIGASFREE_PUBLIC_DIR, path.split('/src/')[1]))
         if not file_local.startswith(settings.MIGASFREE_PUBLIC_DIR):
-            return HttpResponse(
-                'Invalid file path',
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return HttpResponse('Invalid file path', status=status.HTTP_400_BAD_REQUEST)
 
-        if not file_local.endswith(tuple(project.get_pms().extensions)):  # is a metadata file
-            if not source.frozen:
-                # expired metadata
-                if os.path.exists(file_local) and (
-                    source.expire <= 0 or
-                    (time.time() - os.stat(file_local).st_mtime) / (60 * source.expire) > 1
-                ):
-                    os.remove(file_local)
+        if (
+            not file_local.endswith(tuple(project.get_pms().extensions))
+            and not source.frozen
+            and os.path.exists(file_local)
+            and (source.expire <= 0 or time.time() - os.path.getmtime(file_local) > source.expire * 60)
+        ):
+            os.remove(file_local)  # expired metadata
 
         if not os.path.exists(file_local) or os.path.getsize(file_local) == 0:
-            return self._handle_file_not_exists(
-                source, resource,
-                file_local, path, get_proxied_ip_address(request)
-            )
+            return self._handle_file_not_exists(source, resource, file_local, path, get_proxied_ip_address(request))
 
         return self._handle_file_exists(file_local, request)

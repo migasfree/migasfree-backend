@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
@@ -17,8 +15,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from django.urls import reverse
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
 from .models import Platform, UserProfile
 
@@ -26,8 +24,12 @@ from .models import Platform, UserProfile
 class PlatformTestCase(APITestCase):
     def setUp(self):
         self.superuser = UserProfile.objects.create(
-            username='admin', email='admin@localhost.com', password='admin',
-            is_superuser=True, is_staff=True, is_active=True,
+            username='admin',
+            email='admin@localhost.com',
+            password='admin',
+            is_superuser=True,
+            is_staff=True,
+            is_active=True,
         )
         self.client.login(username='admin', password='admin')
         self.platform = Platform.objects.create(name='Linux')

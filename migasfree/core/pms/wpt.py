@@ -1,7 +1,5 @@
-# -*- coding: UTF-8 -*-
-
-# Copyright (c) 2024-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2024-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2024-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2024-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,13 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import json
-import tarfile
 import hashlib
+import json
+import os
+import tarfile
 
 from ...utils import get_setting
-
 from .pms import Pms
 
 
@@ -52,21 +49,20 @@ class Wpt(Pms):
         for package_file in os.listdir(os.path.join(path, self.components)):
             package_path = os.path.join(path, self.components, package_file)
 
-            if os.path.isfile(package_path):
-                if tarfile.is_tarfile(package_path):
-                    with open(package_path, 'rb') as f:
-                        hash_ = hashlib.sha256(f.read()).hexdigest()
+            if os.path.isfile(package_path) and tarfile.is_tarfile(package_path):
+                with open(package_path, 'rb') as f:
+                    hash_ = hashlib.sha256(f.read()).hexdigest()
 
-                    metadata = self.package_metadata(package_path)
+                metadata = self.package_metadata(package_path)
 
-                    if metadata['name'] not in repository_info:
-                        repository_info[metadata['name']] = {}
+                if metadata['name'] not in repository_info:
+                    repository_info[metadata['name']] = {}
 
-                    repository_info[metadata['name']][metadata['version']] = {
-                        'metadata': metadata,
-                        'filename': f'{self.components}/{package_file}',
-                        'hash': hash_
-                    }
+                repository_info[metadata['name']][metadata['version']] = {
+                    'metadata': metadata,
+                    'filename': f'{self.components}/{package_file}',
+                    'hash': hash_,
+                }
 
         packages_file = os.path.join(path, 'packages.json')
         with open(packages_file, 'w') as f:
@@ -91,15 +87,15 @@ class Wpt(Pms):
 
                 output += '## Info (pms/metadata.json)\n'
                 output += '~~~\n'
-                output += f"Name: {metadata['name']}\n"
-                output += f"Version: {metadata['version']}\n"
-                output += f"Description: {metadata['description']}\n"
-                output += f"Maintainer: {metadata['maintainer']}\n"
-                output += f"Specification: {metadata['specification']}\n"
+                output += f'Name: {metadata["name"]}\n'
+                output += f'Version: {metadata["version"]}\n'
+                output += f'Description: {metadata["description"]}\n'
+                output += f'Maintainer: {metadata["maintainer"]}\n'
+                output += f'Specification: {metadata["specification"]}\n'
                 if 'homepage' in metadata:
-                    output += f"Homepage: {metadata['homepage']}\n"
+                    output += f'Homepage: {metadata["homepage"]}\n'
                 if 'dependencies' in metadata:
-                    output += f"Dependencies: {metadata['dependencies']}\n"
+                    output += f'Dependencies: {metadata["dependencies"]}\n'
                 output += '~~~\n'
 
             if 'pms/readme.md' in tar.getnames():
@@ -186,17 +182,16 @@ class Wpt(Pms):
                 project=deploy.project.slug,
                 trailing_path=get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH'),
                 name=deploy.slug,
-                components=self.components
+                components=self.components,
             )
 
         if deploy.source == Deployment.SOURCE_EXTERNAL:
-            return '{{protocol}}://{{server}}/src/{project}/{trailing_path}/{name} ' \
-                   '{suite} {components}\n'.format(
-                        project=deploy.project.slug,
-                        trailing_path=get_setting('MIGASFREE_EXTERNAL_TRAILING_PATH'),
-                        name=deploy.slug,
-                        suite=deploy.suite,
-                        components=deploy.components
-                    )
+            return '{{protocol}}://{{server}}/src/{project}/{trailing_path}/{name} {suite} {components}\n'.format(
+                project=deploy.project.slug,
+                trailing_path=get_setting('MIGASFREE_EXTERNAL_TRAILING_PATH'),
+                name=deploy.slug,
+                suite=deploy.suite,
+                components=deploy.components,
+            )
 
         return ''

@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,15 +14,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import contextlib
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import pre_delete, pre_save, m2m_changed
+from django.db.models.signals import m2m_changed, pre_delete, pre_save
 from django.dispatch import receiver
-from django.core.exceptions import ValidationError
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 
 from ...utils import sort_depends
-from . import Property, Attribute, MigasLink
+from . import Attribute, MigasLink, Property
 
 
 class AttributeSetManager(models.Manager):
@@ -76,14 +77,14 @@ class AttributeSet(models.Model, MigasLink):
         verbose_name=_('longitude'),
         null=True,
         blank=True,
-        db_comment='longitude of the attribute set\'s geoposition',
+        db_comment="longitude of the attribute set's geoposition",
     )
 
     latitude = models.FloatField(
         verbose_name=_('latitude'),
         null=True,
         blank=True,
-        db_comment='latitude of the attribute set\'s geoposition',
+        db_comment="latitude of the attribute set's geoposition",
     )
 
     objects = AttributeSetManager()
@@ -103,31 +104,31 @@ class AttributeSet(models.Model, MigasLink):
 
         from ...client.models import Computer
 
-        return Computer.productive.scope(user).filter(
-            sync_attributes__in=self.included_attributes.all()
-        ).exclude(
-            sync_attributes__in=self.excluded_attributes.all()
-        ).distinct()
+        return (
+            Computer.productive.scope(user)
+            .filter(sync_attributes__in=self.included_attributes.all())
+            .exclude(sync_attributes__in=self.excluded_attributes.all())
+            .distinct()
+        )
 
     def clean(self):
         super().clean()
 
         if self.id:
             att_set = AttributeSet.objects.get(pk=self.id)
-            if att_set.name != self.name and \
-                    Attribute.objects.filter(
-                        property_att=Property.objects.get(prefix='SET', sort='basic'),
-                        value=self.name
-                    ).exists():
+            if (
+                att_set.name != self.name
+                and Attribute.objects.filter(
+                    property_att=Property.objects.get(prefix='SET', sort='basic'), value=self.name
+                ).exists()
+            ):
                 raise ValidationError(_('Duplicated name'))
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
         Attribute.objects.get_or_create(
-            property_att=Property.objects.get(prefix='SET', sort='basic'),
-            value=self.name,
-            defaults={'description': ''}
+            property_att=Property.objects.get(prefix='SET', sort='basic'), value=self.name, defaults={'description': ''}
         )
 
     @staticmethod
@@ -136,21 +137,17 @@ class AttributeSet(models.Model, MigasLink):
         for item in AttributeSet.objects.filter(enabled=True):
             sets[item.id] = []
 
-            for subset in item.included_attributes.filter(
-                ~Q(value__iexact='All Systems')
-            ).filter(
-                property_att__prefix='SET'
-            ).filter(
-                ~Q(value=item.name)
+            for subset in (
+                item.included_attributes.filter(~Q(value__iexact='All Systems'))
+                .filter(property_att__prefix='SET')
+                .filter(~Q(value=item.name))
             ):
                 sets[item.id].append(AttributeSet.objects.get(name=subset.value).id)
 
-            for subset in item.excluded_attributes.filter(
-                ~Q(value__iexact='All Systems')
-            ).filter(
-                property_att__prefix='SET'
-            ).filter(
-                ~Q(value=item.name)
+            for subset in (
+                item.excluded_attributes.filter(~Q(value__iexact='All Systems'))
+                .filter(property_att__prefix='SET')
+                .filter(~Q(value=item.name))
             ):
                 sets[item.id].append(AttributeSet.objects.get(name=subset.value).id)
 
@@ -162,20 +159,17 @@ class AttributeSet(models.Model, MigasLink):
 
         depends = AttributeSet.sets_dependencies()
         sets = []
-        try:
+        with contextlib.suppress(ValueError):
             sets = sort_depends(depends)
-        except ValueError:
-            pass
 
         att_id = []
         for item in sets:
-            for att_set in AttributeSet.objects.filter(
-                id=item
-            ).filter(
-                Q(included_attributes__id__in=attributes)
-            ).filter(
-                ~Q(excluded_attributes__id__in=attributes)
-            ).distinct():
+            for att_set in (
+                AttributeSet.objects.filter(id=item)
+                .filter(Q(included_attributes__id__in=attributes))
+                .filter(~Q(excluded_attributes__id__in=attributes))
+                .distinct()
+            ):
                 att = Attribute.objects.create(property_set, att_set.name)
                 att_id.append(att.id)
                 # IMPORTANT: appends attribute to attribute list
@@ -196,8 +190,7 @@ def pre_save_attribute_set(sender, instance, **kwargs):
         att_set = AttributeSet.objects.get(pk=instance.id)
         if instance.name != att_set.name:
             att = Attribute.objects.get(
-                property_att=Property.objects.get(prefix='SET', sort='basic'),
-                value=att_set.name
+                property_att=Property.objects.get(prefix='SET', sort='basic'), value=att_set.name
             )
             att.update_value(instance.name)
 
@@ -205,8 +198,7 @@ def pre_save_attribute_set(sender, instance, **kwargs):
 @receiver(pre_delete, sender=AttributeSet)
 def pre_delete_attribute_set(sender, instance, **kwargs):
     Attribute.objects.filter(
-        property_att=Property.objects.get(prefix='SET', sort='basic'),
-        value=instance.name
+        property_att=Property.objects.get(prefix='SET', sort='basic'), value=instance.name
     ).delete()
 
 
@@ -219,12 +211,13 @@ def prevent_circular_dependencies(sender, instance, action, reverse, model, pk_s
     if not reverse:
         depends = AttributeSet.sets_dependencies()
         atts_id = [int(x) for x in pk_set]
-        depends[instance.id] = list(AttributeSet.objects.filter(
-            name__in=Attribute.objects.filter(
-                id__in=atts_id,
-                property_att__prefix='SET'
-            ).values_list('value', flat=True)
-        ).values_list('id', flat=True))
+        depends[instance.id] = list(
+            AttributeSet.objects.filter(
+                name__in=Attribute.objects.filter(id__in=atts_id, property_att__prefix='SET').values_list(
+                    'value', flat=True
+                )
+            ).values_list('id', flat=True)
+        )
 
         try:
             sort_depends(depends)
@@ -235,9 +228,5 @@ def prevent_circular_dependencies(sender, instance, action, reverse, model, pk_s
             if instance.id in depends:
                 del depends[instance.id]
 
-            review = list(AttributeSet.objects.filter(
-                id__in=list(depends.keys())
-            ).values_list('name', flat=True))
-            raise ValidationError(
-                _('Review circular dependencies: %s') % ', '.join(review)
-            )
+            review = list(AttributeSet.objects.filter(id__in=list(depends.keys())).values_list('name', flat=True))
+            raise ValidationError(_('Review circular dependencies: %s') % ', '.join(review))  # noqa: B904

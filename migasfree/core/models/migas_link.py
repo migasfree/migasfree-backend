@@ -1,5 +1,5 @@
-# Copyright (c) 2020-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2020-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2020-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2020-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -380,8 +380,6 @@ class MigasLink:
                     actions = self._build_external_actions('computer', rel_ids, server, count)
 
                     if self._meta.model_name.lower() == 'platform':
-                        from ...client.models.computer import Computer
-
                         data.append(
                             {
                                 'api': {

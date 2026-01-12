@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
 #
@@ -16,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.core.exceptions import ValidationError
 from django import forms
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from .widgets import MultiFileInput
@@ -28,9 +26,9 @@ class MultiFileField(forms.FileField):
 
     widget = MultiFileInput
     default_error_messages = {
-        'min_num': _("Ensure at least %(min_num)s files are uploaded (received %(num_files)s)."),
-        'max_num': _("Ensure at most %(max_num)s files are uploaded (received %(num_files)s)."),
-        'file_size': _("File: %(uploaded_file_name)s, exceeded maximum upload size.")
+        'min_num': _('Ensure at least %(min_num)s files are uploaded (received %(num_files)s).'),
+        'max_num': _('Ensure at most %(max_num)s files are uploaded (received %(num_files)s).'),
+        'file_size': _('File: %(uploaded_file_name)s, exceeded maximum upload size.'),
     }
 
     def __init__(self, *args, **kwargs):
@@ -50,24 +48,10 @@ class MultiFileField(forms.FileField):
             num_files = 0
 
         if num_files < self.min_num:
-            raise ValidationError(
-                self.error_messages['min_num'] % {
-                    'min_num': self.min_num,
-                    'num_files': num_files
-                }
-            )
+            raise ValidationError(self.error_messages['min_num'] % {'min_num': self.min_num, 'num_files': num_files})
         elif self.max_num and num_files > self.max_num:
-            raise ValidationError(
-                self.error_messages['max_num'] % {
-                    'max_num': self.max_num,
-                    'num_files': num_files
-                }
-            )
+            raise ValidationError(self.error_messages['max_num'] % {'max_num': self.max_num, 'num_files': num_files})
 
         for uploaded_file in data:
             if uploaded_file and uploaded_file.size > self.maximum_file_size:
-                raise ValidationError(
-                    self.error_messages['file_size'] % {
-                        'uploaded_file_name': uploaded_file.name
-                    }
-                )
+                raise ValidationError(self.error_messages['file_size'] % {'uploaded_file_name': uploaded_file.name})

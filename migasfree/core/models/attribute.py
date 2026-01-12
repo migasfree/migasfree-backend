@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +16,10 @@
 
 import json
 
-from django.db import models
-from django.db.models import Q
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db import models
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -37,19 +35,13 @@ class DomainAttributeManager(models.Manager):
     def scope(self, user):
         qs = self.get_queryset()
         if user and not user.is_view_all():
-            qs = qs.filter(
-                Q(id__in=user.get_attributes()) |
-                Q(id__in=user.get_domain_tags())
-            ).distinct()
+            qs = qs.filter(Q(id__in=user.get_attributes()) | Q(id__in=user.get_domain_tags())).distinct()
 
         return qs
 
 
 class AttributeManager(DomainAttributeManager):
-    def create(
-        self, property_att, value,
-        description=None, longitude=None, latitude=None
-    ):
+    def create(self, property_att, value, description=None, longitude=None, latitude=None):
         """
         if value = "text~other", description = "other"
         """
@@ -62,19 +54,14 @@ class AttributeManager(DomainAttributeManager):
         original_value = value
 
         if len(value) > Attribute.VALUE_LEN:
-            value = value[:Attribute.VALUE_LEN]
+            value = value[: Attribute.VALUE_LEN]
 
-        queryset = Attribute.objects.filter(
-            property_att=property_att, value=value
-        )
+        queryset = Attribute.objects.filter(property_att=property_att, value=value)
         if queryset.exists():
             return queryset[0]
 
         if property_att.auto_add is False:
-            raise ValidationError(
-                _('The attribute cannot be created because'
-                  ' property prevents it')
-            )
+            raise ValidationError(_('The attribute cannot be created because property prevents it'))
 
         obj = Attribute()
         obj.property_att = property_att
@@ -86,12 +73,8 @@ class AttributeManager(DomainAttributeManager):
 
         if original_value != obj.value:
             Notification.objects.create(
-                _('The value of the attribute [%s] has more than %d characters. '
-                  'The original value is truncated: %s') % (
-                    obj.value,
-                    Attribute.VALUE_LEN,
-                    original_value
-                )
+                _('The value of the attribute [%s] has more than %d characters. The original value is truncated: %s')
+                % (obj.value, Attribute.VALUE_LEN, original_value)
             )
 
         return obj
@@ -152,29 +135,28 @@ class Attribute(models.Model, MigasLink):
         verbose_name=_('longitude'),
         null=True,
         blank=True,
-        db_comment='longitude of the attribute set\'s geoposition',
+        db_comment="longitude of the attribute set's geoposition",
     )
 
     latitude = models.FloatField(
         verbose_name=_('latitude'),
         null=True,
         blank=True,
-        db_comment='latitude of the attribute set\'s geoposition',
+        db_comment="latitude of the attribute set's geoposition",
     )
 
     objects = AttributeManager()
 
-    TOTAL_COMPUTER_QUERY = "SELECT DISTINCT COUNT(client_computer.id) \
+    TOTAL_COMPUTER_QUERY = 'SELECT DISTINCT COUNT(client_computer.id) \
         FROM client_computer, client_computer_sync_attributes \
         WHERE core_attribute.id=client_computer_sync_attributes.attribute_id \
-        AND client_computer_sync_attributes.computer_id=client_computer.id"
+        AND client_computer_sync_attributes.computer_id=client_computer.id'
 
     def __str__(self):
         if self.id == 1:  # special case (SET-All Systems)
             return self.value
 
-        if self.property_att.prefix == 'CID' and \
-                settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] != 'id':
+        if self.property_att.prefix == 'CID' and settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0] != 'id':
             return f'{self.description} (CID-{self.value})'
 
         return f'{self.property_att.prefix}-{self.value}'
@@ -220,10 +202,7 @@ class Attribute(models.Model, MigasLink):
 
     @staticmethod
     def _kind_list(property_att, value):
-        return [
-            Attribute.objects.create(property_att, item.strip()).id
-            for item in value.split(',') if item.strip()
-        ]
+        return [Attribute.objects.create(property_att, item.strip()).id for item in value.split(',') if item.strip()]
 
     @staticmethod
     def _kind_by_side(property_att, value):
@@ -233,11 +212,11 @@ class Attribute(models.Model, MigasLink):
         if property_att.sort == 'server':
             attributes.append(Attribute.objects.create(property_att, '').id)
 
-        for i, item in enumerate(lst):
+        for i, _item in enumerate(lst):
             if property_att.kind == 'R':  # Adds right
                 obj = Attribute.objects.create(property_att, '.'.join(lst[i:]))
             elif property_att.kind == 'L':  # Adds left
-                obj = Attribute.objects.create(property_att, '.'.join(lst[:i+1]))
+                obj = Attribute.objects.create(property_att, '.'.join(lst[: i + 1]))
 
             attributes.append(obj.id)
 
@@ -272,7 +251,7 @@ class Attribute(models.Model, MigasLink):
 
     @staticmethod
     def process_kind_property(property_att, value):
-        if property_att.kind not in list(zip(*Property.KIND_CHOICES))[0]:
+        if property_att.kind not in next(zip(*Property.KIND_CHOICES, strict=False)):
             return []
 
         methods = {
@@ -280,7 +259,7 @@ class Attribute(models.Model, MigasLink):
             '-': Attribute._kind_list,
             'R': Attribute._kind_by_side,
             'L': Attribute._kind_by_side,
-            'J': Attribute._kind_json
+            'J': Attribute._kind_json,
         }
 
         return methods.get(property_att.kind, lambda x: [])(property_att, value)
@@ -317,10 +296,7 @@ class ServerAttribute(Attribute):  # tag
 
 class ClientAttributeManager(DomainAttributeManager):
     def scope(self, user):
-        return super().scope(user).filter(
-            Q(property_att__sort='client') |
-            Q(property_att__sort='basic')
-        )
+        return super().scope(user).filter(Q(property_att__sort='client') | Q(property_att__sort='basic'))
 
 
 class ClientAttribute(Attribute):
@@ -342,51 +318,45 @@ class BasicAttribute(Attribute):
 
     @staticmethod
     def process(**kwargs):
-        properties = dict(Property.objects.filter(
-            enabled=True, sort='basic'
-        ).values_list('prefix', 'id'))
+        properties = dict(Property.objects.filter(enabled=True, sort='basic').values_list('prefix', 'id'))
 
         basic_attributes = []
 
-        if 'SET' in properties.keys():
+        if 'SET' in properties:
             obj = Attribute.objects.get(pk=1)  # special case (SET-All Systems)
             basic_attributes.append(obj.id)
 
-        if 'CID' in properties.keys() and 'id' in kwargs:
+        if 'CID' in properties and 'id' in kwargs:
             description = f'{kwargs["description"]}'
             obj, _ = Attribute.objects.get_or_create(
                 property_att=Property.objects.get(pk=properties['CID']),
                 value=str(kwargs['id']),
-                defaults={'description': description}
+                defaults={'description': description},
             )
             obj.update_description(description)
             basic_attributes.append(obj.id)
 
-        if 'PLT' in properties.keys() and 'platform' in kwargs:
+        if 'PLT' in properties and 'platform' in kwargs:
             obj, _ = Attribute.objects.get_or_create(
-                property_att=Property.objects.get(pk=properties['PLT']),
-                value=kwargs['platform']
+                property_att=Property.objects.get(pk=properties['PLT']), value=kwargs['platform']
             )
             basic_attributes.append(obj.id)
 
-        if 'IP' in properties.keys() and 'ip_address' in kwargs:
+        if 'IP' in properties and 'ip_address' in kwargs:
             obj, _ = Attribute.objects.get_or_create(
-                property_att=Property.objects.get(pk=properties['IP']),
-                value=kwargs['ip_address']
+                property_att=Property.objects.get(pk=properties['IP']), value=kwargs['ip_address']
             )
             basic_attributes.append(obj.id)
 
-        if 'PRJ' in properties.keys() and 'project' in kwargs:
+        if 'PRJ' in properties and 'project' in kwargs:
             obj, _ = Attribute.objects.get_or_create(
-                property_att=Property.objects.get(pk=properties['PRJ']),
-                value=kwargs['project']
+                property_att=Property.objects.get(pk=properties['PRJ']), value=kwargs['project']
             )
             basic_attributes.append(obj.id)
 
-        if 'USR' in properties.keys() and 'user' in kwargs:
+        if 'USR' in properties and 'user' in kwargs:
             obj, _ = Attribute.objects.get_or_create(
-                property_att=Property.objects.get(pk=properties['USR']),
-                value=kwargs['user']
+                property_att=Property.objects.get(pk=properties['USR']), value=kwargs['user']
             )
             basic_attributes.append(obj.id)
 

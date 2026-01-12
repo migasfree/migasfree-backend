@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -83,21 +81,19 @@ class Store(models.Model, MigasLink):
 
     @staticmethod
     def path(project_name, name):
-        return os.path.join(
-            settings.MIGASFREE_PUBLIC_DIR,
-            project_name,
-            settings.MIGASFREE_STORE_TRAILING_PATH,
-            name
-        )
+        return os.path.join(settings.MIGASFREE_PUBLIC_DIR, project_name, settings.MIGASFREE_STORE_TRAILING_PATH, name)
 
     @staticmethod
     def group_by_project(user=None):
-        return Store.objects.scope(user).values(
-            'project__name',
-            'project__id',
-        ).annotate(
-            count=models.aggregates.Count('id')
-        ).order_by('-count')
+        return (
+            Store.objects.scope(user)
+            .values(
+                'project__name',
+                'project__id',
+            )
+            .annotate(count=models.aggregates.Count('id'))
+            .order_by('-count')
+        )
 
     def _create_dir(self):
         path = self.path(self.project.slug, self.slug)

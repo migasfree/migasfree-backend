@@ -1,7 +1,5 @@
-# -*- coding: utf-8 *-*
-
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -64,11 +62,9 @@ class Platform(models.Model, MigasLink):
         if model != 'computer':
             return None
 
-        from migasfree.client.models import Computer
+        from ...client.models import Computer
 
-        return Computer.productive.scope(user).filter(
-            project__platform__id=self.id
-        ).distinct()
+        return Computer.productive.scope(user).filter(project__platform__id=self.id).distinct()
 
     class Meta:
         app_label = 'core'

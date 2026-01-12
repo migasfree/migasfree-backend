@@ -1,5 +1,3 @@
-# -*- coding: utf-8 *-*
-
 # Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
 #
@@ -50,8 +48,4 @@ router.register(r'accounts/permissions', views.PermissionViewSet)
 
 safe_router = routers.DefaultRouter()
 
-safe_router.register(
-    r'packages',
-    views.SafePackageViewSet,
-    basename='safe_packages'
-)
+safe_router.register(r'packages', views.SafePackageViewSet, basename='safe_packages')

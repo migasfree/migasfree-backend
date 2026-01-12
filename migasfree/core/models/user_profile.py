@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2018-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2018-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2018-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,12 +16,14 @@
 
 from django.conf import settings
 from django.contrib.auth.models import (
-    User as UserSystem,
-    UserManager,
     Group,
+    UserManager,
+)
+from django.contrib.auth.models import (
+    User as UserSystem,
 )
 from django.core.exceptions import PermissionDenied
-from django.db import models, connection
+from django.db import connection, models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
@@ -72,7 +72,7 @@ class UserProfile(UserSystem, MigasLink):
         ctx = {
             'domain': self.domain_preference_id,
             'scope': self.scope_preference_id,
-            'status': "('intended', 'reserved', 'unknown')"
+            'status': "('intended', 'reserved', 'unknown')",
         }
 
         if self.domain_preference:
@@ -84,20 +84,20 @@ class UserProfile(UserSystem, MigasLink):
     WHERE attribute_id IN (
         SELECT attribute_id
         FROM core_domain_included_attributes
-        WHERE domain_id=%(domain)s
-    ) AND client_computer.status in %(status)s
+        WHERE domain_id={domain}
+    ) AND client_computer.status in {status}
     EXCEPT
     SELECT DISTINCT computer_id
     FROM client_computer_sync_attributes
     WHERE attribute_id IN (
         SELECT attribute_id
         FROM core_domain_excluded_attributes
-        WHERE domain_id=%(domain)s
+        WHERE domain_id={domain}
     )
 )
-""" % ctx
+""".format(**ctx)
         else:
-            sql_domain = ""
+            sql_domain = ''
 
         if self.scope_preference:
             sql_scope = """
@@ -108,35 +108,35 @@ class UserProfile(UserSystem, MigasLink):
     WHERE attribute_id IN (
         SELECT attribute_id
         FROM core_scope_included_attributes
-        WHERE scope_id=%(scope)s
-    ) AND client_computer.status in %(status)s
+        WHERE scope_id={scope}
+    ) AND client_computer.status in {status}
     EXCEPT
     SELECT DISTINCT computer_id
     FROM client_computer_sync_attributes
     WHERE attribute_id IN (
         SELECT attribute_id
         FROM core_scope_excluded_attributes
-        WHERE scope_id=%(scope)s
+        WHERE scope_id={scope}
     )
 )
-""" % ctx
+""".format(**ctx)
         else:
-            sql_scope = ""
+            sql_scope = ''
 
         if not sql_domain and not sql_scope:
             return []
 
         sql = """
 SELECT ARRAY(
-%(sql_domain)s
-%(operator)s
-%(sql_scope)s
+{sql_domain}
+{operator}
+{sql_scope}
 )
-""" % {
-            'sql_domain': sql_domain,
-            'sql_scope': sql_scope,
-            'operator': ' INTERSECT' if (self.domain_preference and self.scope_preference) else ''
-        }
+""".format(
+            sql_domain=sql_domain,
+            sql_scope=sql_scope,
+            operator=' INTERSECT' if (self.domain_preference and self.scope_preference) else '',
+        )
 
         cursor.execute(sql)
         computers = cursor.fetchall()[0][0]
@@ -149,12 +149,15 @@ SELECT ARRAY(
         computers = self.get_computers()
         if computers:
             cursor = connection.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT ARRAY(
                     SELECT DISTINCT attribute_id
                     FROM client_computer_sync_attributes
                     WHERE computer_id IN %s
-                ) AS attributes""" % ("(" + ",".join(str(e) for e in computers) + ")"))
+                ) AS attributes"""
+                % ('(' + ','.join(str(e) for e in computers) + ')')
+            )
             attributes = cursor.fetchall()[0][0]
             cursor.close()
 
@@ -186,7 +189,8 @@ SELECT ARRAY(
                     SELECT DISTINCT project_id
                     FROM client_computer
                     WHERE id IN %s
-                ) AS projects""" % ("(" + ",".join(str(e) for e in computers) + ")")
+                ) AS projects"""
+                % ('(' + ','.join(str(e) for e in computers) + ')')
             )
             projects = cursor.fetchall()[0][0]
             cursor.close()
@@ -235,10 +239,7 @@ SELECT ARRAY(
         self.save()
 
     def save(self, *args, **kwargs):
-        if not (
-            self.password.startswith('sha1$')
-            or self.password.startswith('pbkdf2')
-        ):
+        if not (self.password.startswith('sha1$') or self.password.startswith('pbkdf2')):
             super().set_password(self.password)
 
         super().save(*args, **kwargs)

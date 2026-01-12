@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2023-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2023-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2023-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2023-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.db import models
 from django.conf import settings
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from .attribute import Attribute
@@ -86,12 +84,14 @@ class Singularity(models.Model, MigasLink):
         verbose_name=_('code'),
         null=True,
         blank=True,
-        help_text=_("This code will execute in the client computer, and it must"
-                    " put in the standard output the value of the attribute correspondent"
-                    " to this property.<br>The format of this value is 'name~description',"
-                    " where 'description' is optional.<br><b>Example of code:</b>"
-                    "<br>#Create an attribute with the name of computer from bash<br>"
-                    " echo $HOSTNAME"),
+        help_text=_(
+            'This code will execute in the client computer, and it must'
+            ' put in the standard output the value of the attribute correspondent'
+            " to this property.<br>The format of this value is 'name~description',"
+            " where 'description' is optional.<br><b>Example of code:</b>"
+            '<br>#Create an attribute with the name of computer from bash<br>'
+            ' echo $HOSTNAME'
+        ),
         db_comment='instructions to execute on clients to obtain attributes',
     )
 
