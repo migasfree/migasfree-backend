@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2015-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2015-2023 Alberto Gacías <alberto@migasfree.org>
@@ -19,6 +18,7 @@
 import os
 
 from celery import Celery
+
 try:
     from django.conf import settings
 except ImportError:
