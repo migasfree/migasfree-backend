@@ -1,7 +1,5 @@
-# -*- coding: UTF-8 -*-
-
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,25 +19,19 @@
 import os
 import subprocess
 import tempfile
-
-import django.core.management
-
 from io import StringIO
 
-from django.contrib.auth.models import Group, Permission
-from django.contrib.auth.management import create_permissions
+import django.core.management
 from django.apps import apps
 from django.conf import settings
+from django.contrib.auth.management import create_permissions
+from django.contrib.auth.models import Group, Permission
 
 from .core.models import UserProfile
 
 
 def run(cmd):
-    with subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE,
-        shell=True
-    ) as process:
+    with subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True) as process:
         out, err = process.communicate()
 
         return out, err
@@ -74,10 +66,7 @@ def add_perms(group, tables=None, perms='all'):
         app, name = table.split('.')
         for item in perms:
             group.permissions.add(
-                Permission.objects.filter(
-                    codename=f'{item}_{name}',
-                    content_type__app_label=app
-                ).first().id
+                Permission.objects.filter(codename=f'{item}_{name}', content_type__app_label=app).first().id
             )
 
 
@@ -92,23 +81,46 @@ def configure_default_users():
     reader.save()
 
     tables = [
-        "client.computer", "client.user", "client.error",
-        "client.fault", "client.faultdefinition", "client.migration",
-        "client.notification", "client.statuslog",
-        "core.attribute", "core.attributeset",
-        "core.schedule", "core.scheduledelay",
-        "core.project", "core.package", "core.packageset", "client.packagehistory",
-        "core.deployment", "core.store", "core.userprofile",
-        "core.domain", "core.scope",
-        "app_catalog.policy", "app_catalog.policygroup",
-        "app_catalog.application", "app_catalog.packagesbyproject",
-        "client.synchronization",
-        "core.platform", "core.property",
-        "device.device", "device.connection", "device.driver",
-        "device.manufacturer", "device.capability", "device.logical",
-        "device.model", "device.type",
-        "hardware.node", "hardware.capability",
-        "hardware.configuration", "hardware.logicalname",
+        'client.computer',
+        'client.user',
+        'client.error',
+        'client.fault',
+        'client.faultdefinition',
+        'client.migration',
+        'client.notification',
+        'client.statuslog',
+        'core.attribute',
+        'core.attributeset',
+        'core.schedule',
+        'core.scheduledelay',
+        'core.project',
+        'core.package',
+        'core.packageset',
+        'client.packagehistory',
+        'core.deployment',
+        'core.store',
+        'core.userprofile',
+        'core.domain',
+        'core.scope',
+        'app_catalog.policy',
+        'app_catalog.policygroup',
+        'app_catalog.application',
+        'app_catalog.packagesbyproject',
+        'client.synchronization',
+        'core.platform',
+        'core.property',
+        'device.device',
+        'device.connection',
+        'device.driver',
+        'device.manufacturer',
+        'device.capability',
+        'device.logical',
+        'device.model',
+        'device.type',
+        'hardware.node',
+        'hardware.capability',
+        'hardware.configuration',
+        'hardware.logicalname',
     ]
     reader.permissions.clear()
     add_perms(reader, tables, perms=['view'])
@@ -120,9 +132,13 @@ def configure_default_users():
     liberator.save()
 
     tables = [
-        "core.deployment", "core.schedule", "core.scheduledelay",
-        "app_catalog.policy", "app_catalog.policygroup",
-        "app_catalog.application", "app_catalog.packagesbyproject",
+        'core.deployment',
+        'core.schedule',
+        'core.scheduledelay',
+        'app_catalog.policy',
+        'app_catalog.policygroup',
+        'app_catalog.application',
+        'app_catalog.packagesbyproject',
     ]
     liberator.permissions.clear()
     add_perms(liberator, tables)
@@ -153,9 +169,13 @@ def configure_default_users():
     device_installer.save()
 
     tables = [
-        "device.connection", "device.manufacturer",
-        "device.model", "device.type", "device.device",
-        "device.driver", "device.logical",
+        'device.connection',
+        'device.manufacturer',
+        'device.model',
+        'device.type',
+        'device.device',
+        'device.driver',
+        'device.logical',
     ]
     device_installer.permissions.clear()
     add_perms(device_installer, tables)
@@ -167,9 +187,14 @@ def configure_default_users():
     configurator.save()
 
     tables = [
-        "client.faultdefinition", "core.property", "core.project",
-        "client.synchronization", "core.platform", "core.attributeset",
-        "client.migration", "client.notification",
+        'client.faultdefinition',
+        'core.property',
+        'core.project',
+        'client.synchronization',
+        'core.platform',
+        'core.attributeset',
+        'client.migration',
+        'client.notification',
     ]
     configurator.permissions.clear()
     add_perms(configurator, tables)
@@ -186,25 +211,22 @@ def configure_default_users():
     domain_admin.save()
 
     # default users
-    configure_user("admin")
-    configure_user("domain-admin", [reader, domain_admin])
-    configure_user("packager", [reader, packager])
-    configure_user("configurator", [reader, configurator])
-    configure_user("installer", [reader, device_installer])
-    configure_user("liberator", [reader, liberator])
-    configure_user("checker", [reader, checker])
-    configure_user("reader", [reader])
-    configure_user("pms", [packager, liberator])
-    configure_user("migasfree-play")
+    configure_user('admin')
+    configure_user('domain-admin', [reader, domain_admin])
+    configure_user('packager', [reader, packager])
+    configure_user('configurator', [reader, configurator])
+    configure_user('installer', [reader, device_installer])
+    configure_user('liberator', [reader, liberator])
+    configure_user('checker', [reader, checker])
+    configure_user('reader', [reader])
+    configure_user('pms', [packager, liberator])
+    configure_user('migasfree-play')
 
     # default user permissions
-    user = UserProfile.objects.get(username="migasfree-play")
+    user = UserProfile.objects.get(username='migasfree-play')
     user.is_staff = False
     user.save()
-    permissions = Permission.objects.filter(
-        codename__in=['change_logical'],
-        content_type__app_label='device'
-    )
+    permissions = Permission.objects.filter(codename__in=['change_logical'], content_type__app_label='device')
     user.user_permissions.add(*permissions)
 
 
@@ -215,23 +237,15 @@ def sequence_reset():
 
     label_apps = ['core', 'client', 'device', 'hardware', 'stats', 'app_catalog']
     for label in label_apps:
-        django.core.management.call_command(
-            'sqlsequencereset',
-            label,
-            stdout=commands
-        )
+        django.core.management.call_command('sqlsequencereset', label, stdout=commands)
 
-    if settings.DATABASES.get('default').get('ENGINE') == \
-            'django.db.backends.postgresql_psycopg2':
+    if settings.DATABASES.get('default').get('ENGINE') == 'django.db.backends.postgresql_psycopg2':
         _filename = tempfile.mkstemp()[1]
         with open(_filename, 'w', encoding='utf-8') as _file:
             _file.write(commands.getvalue())
             _file.flush()
 
-        cmd = "su postgres -c 'psql {} -f {}' -".format(
-            settings.DATABASES.get('default').get('NAME'),
-            _filename
-        )
+        cmd = "su postgres -c 'psql {} -f {}' -".format(settings.DATABASES.get('default').get('NAME'), _filename)
         out, err = run(cmd)
         if out != 0:
             print(err)
@@ -261,12 +275,5 @@ def create_initial_data():
     for fixture in fixtures:
         app, name, ext = fixture.split('.')
         django.core.management.call_command(
-            'loaddata',
-            os.path.join(
-                settings.MIGASFREE_APP_DIR,
-                app,
-                'fixtures',
-                f'{name}.{ext}'
-            ),
-            verbosity=1
+            'loaddata', os.path.join(settings.MIGASFREE_APP_DIR, app, 'fixtures', f'{name}.{ext}'), verbosity=1
         )
