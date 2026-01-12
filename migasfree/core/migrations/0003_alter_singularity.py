@@ -9,14 +9,13 @@ CHARACTERS = string.ascii_letters + string.digits + string.punctuation
 
 
 def get_default_value(apps, schema_editor):
-    Model = apps.get_model('core', 'Singularity')
-    for obj in Model.objects.all():
+    model = apps.get_model('core', 'Singularity')
+    for obj in model.objects.all():
         obj.name = ''.join(random.choice(CHARACTERS) for _ in range(LEN))
         obj.save()
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('core', '0002_singularity'),
     ]
@@ -24,7 +23,11 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='singularity',
-            options={'ordering': ['property_att__name', '-priority'], 'verbose_name': 'Singularity', 'verbose_name_plural': 'Singularities'},
+            options={
+                'ordering': ['property_att__name', '-priority'],
+                'verbose_name': 'Singularity',
+                'verbose_name_plural': 'Singularities',
+            },
         ),
         migrations.AddField(
             model_name='singularity',
