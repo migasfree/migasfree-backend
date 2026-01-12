@@ -1,18 +1,17 @@
 import json
 
 from django.conf import settings
-from django.http import HttpResponse, JsonResponse, Http404
+from django.http import Http404, HttpResponse, JsonResponse
 from django.template import Context, Template
-from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes
+from drf_spectacular.utils import OpenApiExample, OpenApiTypes, extend_schema
+from rest_framework import permissions, status, views
 from rest_framework.decorators import permission_classes, throttle_classes
-from rest_framework import permissions, views, status
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
-from ...utils import uuid_validate
 from ...secure import gpg_get_key
+from ...utils import uuid_validate
 from .client_api import get_computer
-
 
 LABEL_TEMPLATE = """
 <html>
@@ -48,10 +47,7 @@ LABEL_TEMPLATE = """
 
 
 def get_computer_info(request, uuid=None):
-    if uuid:
-        _uuid = uuid_validate(uuid)
-    else:
-        _uuid = uuid_validate(request.GET.get('uuid', ''))
+    _uuid = uuid_validate(uuid) if uuid else uuid_validate(request.GET.get('uuid', ''))
     _name = request.GET.get('name', '')
     if _uuid == '':
         _uuid = _name
@@ -93,10 +89,7 @@ def get_key_repositories(request):
     """
     Returns the repositories public key
     """
-    return HttpResponse(
-        gpg_get_key('migasfree-repository'),
-        content_type='text/plain'
-    )
+    return HttpResponse(gpg_get_key('migasfree-repository'), content_type='text/plain')
 
 
 @permission_classes((permissions.AllowAny,))
@@ -104,11 +97,8 @@ class RepositoriesUrlTemplateView(views.APIView):
     serializer_class = None
 
     @extend_schema(
-        description='Returns the repositories URL template'
-                    ' (compatibility for migasfree-client <= 4.16)',
-        responses={
-            status.HTTP_200_OK: OpenApiTypes.STR
-        },
+        description='Returns the repositories URL template (compatibility for migasfree-client <= 4.16)',
+        responses={status.HTTP_200_OK: OpenApiTypes.STR},
         examples=[
             OpenApiExample(
                 name='successfully response',
@@ -122,12 +112,8 @@ class RepositoriesUrlTemplateView(views.APIView):
         protocol = 'https' if request.is_secure() else 'http'
 
         return Response(
-            '{}://{{server}}{}{{project}}/{}'.format(
-                protocol,
-                settings.MEDIA_URL,
-                settings.MIGASFREE_REPOSITORY_TRAILING_PATH
-            ),
-            content_type='text/plain'
+            f'{protocol}://{{server}}{settings.MEDIA_URL}{{project}}/{settings.MIGASFREE_REPOSITORY_TRAILING_PATH}',
+            content_type='text/plain',
         )
 
 
@@ -138,7 +124,7 @@ class ServerInfoView(views.APIView):
         """
         Returns server info
         """
-        from ... import __version__, __author__, __contact__, __homepage__
+        from ... import __author__, __contact__, __homepage__, __version__
 
         info = {
             'version': __version__,
