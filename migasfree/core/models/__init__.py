@@ -14,21 +14,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from .attribute import Attribute, BasicAttribute, ClientAttribute, ServerAttribute
-from .attribute_set import AttributeSet, prevent_circular_dependencies
-from .deployment import Deployment, ExternalSource, InternalSource
-from .domain import Domain
+from .attribute import Attribute, BasicAttribute, ClientAttribute, ServerAttribute  # noqa: I001
 from .migas_link import MigasLink
+from .platform import Platform
+from .property import BasicProperty, ClientProperty, Property, ServerProperty
+from .attribute_set import AttributeSet, prevent_circular_dependencies
+from .project import Project
+from .store import Store
 from .package import Package, PackageManager
 from .package_set import PackageSet
-from .platform import Platform
-from .project import Project
-from .property import BasicProperty, ClientProperty, Property, ServerProperty
+from .deployment import Deployment, ExternalSource, InternalSource
+from .domain import Domain
 from .schedule import Schedule
 from .schedule_delay import ScheduleDelay
 from .scope import Scope
 from .singularity import Singularity
-from .store import Store
 from .user_profile import UserProfile
 
 __all__ = [
