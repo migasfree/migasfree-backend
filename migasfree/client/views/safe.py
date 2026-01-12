@@ -41,7 +41,6 @@ from ...core.models import (
     Domain,
     Property,
 )
-from ...model_update import update
 from ...utils import (
     get_client_ip,
     remove_duplicates_preserving_order,
@@ -499,8 +498,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         # attribute sets
         computer.sync_attributes.add(*AttributeSet.process(computer.get_all_attributes()))
 
-        update(
-            computer,
+        models.Computer.objects.filter(pk=computer.pk).update(
             uuid=claims.get('uuid'),
             name=claims.get('name'),
             fqdn=claims.get('fqdn'),
@@ -509,6 +507,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             sync_user=user,
             sync_start_date=timezone.localtime(timezone.now()),
         )
+        computer.refresh_from_db()
 
         serializer = serializers.ComputerSerializer(computer, context={'request': request})
 
