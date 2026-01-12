@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2017-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,18 +19,18 @@ from django.db.models import Prefetch
 from django.utils.translation import gettext_lazy as _
 
 from ..core.models import Attribute
-
 from .models import (
-    Category, Application, PackagesByProject,
-    Policy, PolicyGroup,
+    Application,
+    Category,
+    PackagesByProject,
+    Policy,
+    PolicyGroup,
 )
 
 
 @admin.register(PackagesByProject)
 class PackagesByProjectAdmin(admin.ModelAdmin):
-    list_display = (
-        'id', 'application', 'project', 'packages_to_install'
-    )
+    list_display = ('id', 'application', 'project', 'packages_to_install')
     list_display_links = ('id',)
     list_filter = ('application__name',)
     search_fields = ('application__name', 'packages_to_install')
@@ -66,13 +64,15 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'score', 'level', 'category',)
+    list_display = (
+        'name',
+        'score',
+        'level',
+        'category',
+    )
     list_filter = ('level', 'category')
     ordering = ('name',)
-    fields = (
-        'name', 'category', 'level',
-        'score', 'icon', 'available_for_attributes', 'description'
-    )
+    fields = ('name', 'category', 'level', 'score', 'icon', 'available_for_attributes', 'description')
     search_fields = ('name', 'description')
 
     inlines = [PackagesByProjectLine]
@@ -81,11 +81,7 @@ class ApplicationAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return super().get_queryset(
-            request
-        ).prefetch_related(
-            Prefetch('available_for_attributes', queryset=qs)
-        )
+        return super().get_queryset(request).prefetch_related(Prefetch('available_for_attributes', queryset=qs))
 
     def __str__(self):
         return self.name
@@ -94,75 +90,81 @@ class ApplicationAdmin(admin.ModelAdmin):
 @admin.register(PolicyGroup)
 class PolicyGroupAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'policy', 'priority',
+        'id',
+        'policy',
+        'priority',
     )
     list_display_links = ('id',)
     list_filter = ('policy__name',)
-    search_fields = (
-        'policy__name', 'included_attributes__value',
-        'excluded_attributes__value'
-    )
+    search_fields = ('policy__name', 'included_attributes__value', 'excluded_attributes__value')
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return super().get_queryset(
-            request
-        ).prefetch_related(
-            Prefetch('included_attributes', queryset=qs),
-            'included_attributes__property_att',
-            Prefetch('excluded_attributes', queryset=qs),
-            'excluded_attributes__property_att'
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related(
+                Prefetch('included_attributes', queryset=qs),
+                'included_attributes__property_att',
+                Prefetch('excluded_attributes', queryset=qs),
+                'excluded_attributes__property_att',
+            )
         )
 
 
 class PolicyGroupLine(admin.TabularInline):
     model = PolicyGroup
-    fields = (
-        'priority', 'included_attributes',
-        'excluded_attributes', 'applications'
-    )
+    fields = ('priority', 'included_attributes', 'excluded_attributes', 'applications')
     ordering = ('priority',)
     extra = 0
 
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return super().get_queryset(
-            request
-        ).prefetch_related(
-            Prefetch('included_attributes', queryset=qs),
-            'included_attributes__property_att',
-            Prefetch('excluded_attributes', queryset=qs),
-            'excluded_attributes__property_att'
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related(
+                Prefetch('included_attributes', queryset=qs),
+                'included_attributes__property_att',
+                Prefetch('excluded_attributes', queryset=qs),
+                'excluded_attributes__property_att',
+            )
         )
 
 
 @admin.register(Policy)
 class PolicyAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'enabled', 'exclusive',
+        'name',
+        'enabled',
+        'exclusive',
     )
     list_filter = ('enabled', 'exclusive')
     list_display_links = ('name',)
-    search_fields = (
-        'name', 'included_attributes__value', 'excluded_attributes__value'
-    )
+    search_fields = ('name', 'included_attributes__value', 'excluded_attributes__value')
     fieldsets = (
-        (_('General'), {
-            'fields': (
-                'name',
-                'comment',
-                'enabled',
-                'exclusive',
-            )
-        }),
-        (_('Application Area'), {
-            'fields': (
-                'included_attributes',
-                'excluded_attributes',
-            )
-        }),
+        (
+            _('General'),
+            {
+                'fields': (
+                    'name',
+                    'comment',
+                    'enabled',
+                    'exclusive',
+                )
+            },
+        ),
+        (
+            _('Application Area'),
+            {
+                'fields': (
+                    'included_attributes',
+                    'excluded_attributes',
+                )
+            },
+        ),
     )
     inlines = [PolicyGroupLine]
     extra = 0
@@ -170,11 +172,13 @@ class PolicyAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = Attribute.objects.scope(request.user.userprofile)
 
-        return super().get_queryset(
-            request
-        ).prefetch_related(
-            Prefetch('included_attributes', queryset=qs),
-            'included_attributes__property_att',
-            Prefetch('excluded_attributes', queryset=qs),
-            'excluded_attributes__property_att'
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related(
+                Prefetch('included_attributes', queryset=qs),
+                'included_attributes__property_att',
+                Prefetch('excluded_attributes', queryset=qs),
+                'excluded_attributes__property_att',
+            )
         )

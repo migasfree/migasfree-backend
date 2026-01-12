@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2017-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 # Copyright (c) 2017-2023 Alberto Gacías <alberto@migasfree.org>
 #
@@ -19,19 +17,14 @@
 from django.http import QueryDict
 from rest_framework import serializers
 
-from ..core.serializers import (
-    AttributeInfoSerializer, ProjectInfoSerializer
-)
+from ..core.serializers import AttributeInfoSerializer, ProjectInfoSerializer
 from ..utils import to_list
 from . import models
 
 
 class LevelSerializer(serializers.Serializer):
     def to_representation(self, obj):
-        return {
-            'id': obj,
-            'name': dict(models.Application.LEVELS)[obj]
-        }
+        return {'id': obj, 'name': dict(models.Application.LEVELS)[obj]}
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -51,8 +44,7 @@ class PackagesByProjectWriteSerializer(serializers.ModelSerializer):
         :return: PackagesByProject object
         """
         data_copy = data.copy()
-        if 'packages_to_install' in data_copy \
-                and isinstance(data_copy['packages_to_install'], list):
+        if 'packages_to_install' in data_copy and isinstance(data_copy['packages_to_install'], list):
             data_copy['packages_to_install'] = '\n'.join(data.get('packages_to_install', []))
 
         return super().to_internal_value(data_copy)
@@ -68,14 +60,9 @@ class PackagesByProjectSerializer(serializers.ModelSerializer):
     def to_representation(self, obj):
         return {
             'id': obj.id,
-            'application': {
-                'id': obj.application.id
-            },
-            'project': {
-                'id': obj.project.id,
-                'name': obj.project.name
-            },
-            'packages_to_install': to_list(obj.packages_to_install)
+            'application': {'id': obj.application.id},
+            'project': {'id': obj.project.id, 'name': obj.project.name},
+            'packages_to_install': to_list(obj.packages_to_install),
         }
 
     class Meta:
@@ -199,9 +186,7 @@ class PolicyGroupWriteSerializer(serializers.ModelSerializer):
             AttributeInfoSerializer(item).data for item in obj.excluded_attributes.all()
         ]
 
-        representation['applications'] = [
-            ApplicationInfoSerializer(item).data for item in obj.applications.all()
-        ]
+        representation['applications'] = [ApplicationInfoSerializer(item).data for item in obj.applications.all()]
 
         return representation
 

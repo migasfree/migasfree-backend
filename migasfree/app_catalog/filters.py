@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2017-2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,8 +17,11 @@
 import django_filters
 
 from .models import (
-    Application, Category,
-    PackagesByProject, Policy, PolicyGroup,
+    Application,
+    Category,
+    PackagesByProject,
+    Policy,
+    PolicyGroup,
 )
 
 
@@ -49,9 +50,7 @@ class ApplicationFilter(django_filters.FilterSet):
 
 
 class PackagesByProjectFilter(django_filters.FilterSet):
-    packages_to_install = django_filters.CharFilter(
-        field_name='packages_to_install', lookup_expr='icontains'
-    )
+    packages_to_install = django_filters.CharFilter(field_name='packages_to_install', lookup_expr='icontains')
 
     class Meta:
         model = PackagesByProject

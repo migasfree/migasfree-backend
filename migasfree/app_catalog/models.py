@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2017-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,16 +17,15 @@
 import os
 
 from django.conf import settings
-from django.core.files.storage import FileSystemStorage
 from django.core.exceptions import ValidationError
+from django.core.files.storage import FileSystemStorage
 from django.db import models
-from django.db.models.signals import pre_save, post_save, post_delete
+from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
-
 from markdownx.models import MarkdownxField
 
-from ..core.models import Project, Attribute, MigasLink
+from ..core.models import Attribute, MigasLink, Project
 from ..utils import to_list
 
 _UNSAVED_IMAGEFIELD = 'unsaved_imagefield'
@@ -142,7 +139,7 @@ class Application(models.Model, MigasLink):
         default='U',
         choices=LEVELS,
         db_comment='single-character string: Use "U" for User level (no privileges required)'
-                   ' and "A" for Administrator level (requires elevated privileges)',
+        ' and "A" for Administrator level (requires elevated privileges)',
     )
 
     category = models.ForeignKey(
@@ -160,28 +157,29 @@ class Application(models.Model, MigasLink):
 
     @staticmethod
     def group_by_category():
-        return Application.objects.values(
-            'category__id', 'category__name'
-        ).annotate(
-            count=models.aggregates.Count('category__id')
-        ).order_by('-count')
+        return (
+            Application.objects.values('category__id', 'category__name')
+            .annotate(count=models.aggregates.Count('category__id'))
+            .order_by('-count')
+        )
 
     @staticmethod
     def group_by_level():
-        return Application.objects.values(
-            'level',
-        ).annotate(
-            count=models.aggregates.Count('level')
-        ).order_by('-count')
+        return (
+            Application.objects.values(
+                'level',
+            )
+            .annotate(count=models.aggregates.Count('level'))
+            .order_by('-count')
+        )
 
     @staticmethod
     def group_by_project():
-        return Application.objects.values(
-            'packages_by_project__project__name',
-            'packages_by_project__project__id'
-        ).annotate(
-            count=models.aggregates.Count('id', distinct=True)
-        ).order_by('packages_by_project__project__name')
+        return (
+            Application.objects.values('packages_by_project__project__name', 'packages_by_project__project__id')
+            .annotate(count=models.aggregates.Count('id', distinct=True))
+            .order_by('packages_by_project__project__name')
+        )
 
     def __str__(self):
         return self.name
@@ -239,8 +237,7 @@ class Policy(models.Model, MigasLink):
     enabled = models.BooleanField(
         verbose_name=_('enabled'),
         default=True,
-        help_text=_("if you uncheck this field, the policy is disabled for"
-                    " all computers."),
+        help_text=_('if you uncheck this field, the policy is disabled for all computers.'),
         db_comment='indicates whether or not the policy is enabled',
     )
 
@@ -276,37 +273,21 @@ class Policy(models.Model, MigasLink):
 
     @staticmethod
     def belongs(computer, attributes):
-        for attribute in attributes:
-            if attribute.id == 1 or \
-                    attribute in computer.sync_attributes.all():
-                return True
-
-        return False
+        return any(attribute.id == 1 or attribute in computer.sync_attributes.all() for attribute in attributes)
 
     @staticmethod
     def belongs_excluding(computer, included_attributes, excluded_attributes):
-        if Policy.belongs(computer, included_attributes) and \
-                not Policy.belongs(computer, excluded_attributes):
-            return True
-
-        return False
+        return bool(Policy.belongs(computer, included_attributes) and not Policy.belongs(computer, excluded_attributes))
 
     @staticmethod
     def get_packages_to_remove(group, project_id=0):
         _packages = []
         for item in PolicyGroup.objects.filter(policy=group.policy).exclude(id=group.id):
-            for pkgs in item.applications.filter(
-                packages_by_project__project__id=project_id
-            ).values_list(
-                'packages_by_project__packages_to_install',
-                flat=True
+            for pkgs in item.applications.filter(packages_by_project__project__id=project_id).values_list(
+                'packages_by_project__packages_to_install', flat=True
             ):
                 for pkg in to_list(pkgs):
-                    _packages.append({
-                        'package': pkg,
-                        'name': group.policy.name,
-                        'id': group.policy.id
-                    })
+                    _packages.append({'package': pkg, 'name': group.policy.name, 'id': group.policy.id})
 
         return _packages
 
@@ -316,36 +297,19 @@ class Policy(models.Model, MigasLink):
         to_remove = []
 
         for policy in Policy.objects.filter(enabled=True):
-            if policy.belongs_excluding(
-                    computer,
-                    policy.included_attributes.all(),
-                    policy.excluded_attributes.all()
-            ):
-                for group in PolicyGroup.objects.filter(
-                        policy=policy
-                ).order_by('priority'):
+            if policy.belongs_excluding(computer, policy.included_attributes.all(), policy.excluded_attributes.all()):
+                for group in PolicyGroup.objects.filter(policy=policy).order_by('priority'):
                     if policy.belongs_excluding(
-                            computer,
-                            group.included_attributes.all(),
-                            group.excluded_attributes.all()
+                        computer, group.included_attributes.all(), group.excluded_attributes.all()
                     ):
                         for pkgs in group.applications.filter(
-                                packages_by_project__project__id=computer.project.id
-                        ).values_list(
-                            'packages_by_project__packages_to_install',
-                            flat=True
-                        ):
+                            packages_by_project__project__id=computer.project.id
+                        ).values_list('packages_by_project__packages_to_install', flat=True):
                             for item in to_list(pkgs):
-                                to_install.append({
-                                    'package': item,
-                                    'name': policy.name,
-                                    'id': policy.id
-                                })
+                                to_install.append({'package': item, 'name': policy.name, 'id': policy.id})
 
                         if policy.exclusive:
-                            to_remove.extend(
-                                policy.get_packages_to_remove(group, computer.project.id)
-                            )
+                            to_remove.extend(policy.get_packages_to_remove(group, computer.project.id))
                         break
 
         return to_install, to_remove
