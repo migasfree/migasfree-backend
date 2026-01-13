@@ -247,22 +247,44 @@ class Node(models.Model, MigasLink):
 
     @staticmethod
     def get_is_laptop(computer_id):
-        query = Node.objects.filter(
-            computer=computer_id,
-            class_name='system',
-            configuration__name='chassis',
-            configuration__value='notebook',  # TODO maybe others...
+        return (
+            Node.objects.filter(
+                computer=computer_id,
+                class_name='system',
+                configuration__name='chassis',
+                configuration__value__in=[
+                    'portable',
+                    'laptop',
+                    'notebook',
+                    'sub-notebook',
+                    'convertible',
+                    'detachable',
+                ],
+            ).count()
+            == 1
         )
-
-        return query.count() == 1
 
     @staticmethod
     def get_is_desktop(computer_id):
-        query = Node.objects.filter(computer=computer_id, class_name='system', configuration__name='chassis').exclude(
-            configuration__value='notebook'  # TODO maybe others...
+        return (
+            Node.objects.filter(
+                computer=computer_id,
+                class_name='system',
+                configuration__name='chassis',
+            )
+            .exclude(
+                configuration__value__in=[
+                    'portable',
+                    'laptop',
+                    'notebook',
+                    'sub-notebook',
+                    'convertible',
+                    'detachable',
+                ]
+            )
+            .count()
+            == 1
         )
-
-        return query.count() == 1
 
     @staticmethod
     def get_product_system(computer_id):
