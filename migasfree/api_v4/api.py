@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.utils.translation import gettext as _
 
 from ..app_catalog.models import Policy
+from ..client.messages import add_computer_message, remove_computer_messages
 from ..client.models import (
     Computer,
     Error,
@@ -21,11 +22,7 @@ from ..client.models import (
     User,
 )
 from ..client.tasks import update_software_inventory
-from ..client.views.safe import (
-    add_computer_message,
-    is_computer_changed,
-    remove_computer_messages,
-)
+from ..client.views.safe import is_computer_changed
 from ..core.models import (
     Attribute,
     AttributeSet,
