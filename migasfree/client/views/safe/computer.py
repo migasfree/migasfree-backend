@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +14,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+"""
+SafeComputerViewSet - Main computer management ViewSet for safe endpoints.
+"""
+
 import logging
 
 from django.conf import settings
@@ -24,16 +28,15 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
-from drf_spectacular.utils import OpenApiExample, OpenApiTypes, extend_schema, inline_serializer
-from rest_framework import permissions, status, views, viewsets
-from rest_framework import serializers as drf_serializers
+from drf_spectacular.utils import OpenApiExample, OpenApiTypes, extend_schema
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, permission_classes, throttle_classes
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
-from ...app_catalog.models import Policy
-from ...core.mixins import SafeConnectionMixin
-from ...core.models import (
+from ....app_catalog.models import Policy
+from ....core.mixins import SafeConnectionMixin
+from ....core.models import (
     Attribute,
     AttributeSet,
     BasicAttribute,
@@ -41,190 +44,16 @@ from ...core.models import (
     Domain,
     Property,
 )
-from ...utils import (
+from ....utils import (
     get_client_ip,
     remove_duplicates_preserving_order,
     replace_keys,
-    uuid_change_format,
 )
-from .. import models, serializers, tasks
-from ..messages import add_computer_message, remove_computer_messages
+from ... import models, serializers, tasks
+from ...messages import add_computer_message
+from .helpers import get_computer, get_user_or_create, is_computer_changed
 
 logger = logging.getLogger('migasfree')
-
-
-def get_user_or_create(name, fullname, ip_address=None):
-    user, created = models.User.objects.get_or_create(name=name, fullname=fullname)
-
-    if created and ip_address:
-        msg = _('User [%s] registered by IP [%s].') % (name, ip_address)
-        models.Notification.objects.create(message=msg)
-
-    return user
-
-
-# TODO call when computer is updated
-def is_computer_changed(computer, name, project, ip_address, uuid):
-    # compatibility with client apiv4
-    if not computer:
-        computer = models.Computer.objects.create(name, project, uuid)
-        models.Migration.objects.create(computer, project)
-
-        if settings.MIGASFREE_NOTIFY_NEW_COMPUTER:
-            models.Notification.objects.create(
-                _('New Computer added id=[%s]: NAME=[%s] UUID=[%s]') % (computer.id, computer, computer.uuid)
-            )
-    # end compatibility with client apiv4
-
-    if computer.project != project:
-        models.PackageHistory.uninstall_computer_packages(computer.id)
-
-        models.Migration.objects.create(computer=computer, project=project)
-        computer.update_project(project)
-
-    if settings.MIGASFREE_NOTIFY_CHANGE_NAME and (computer.name != name):
-        msg = _('Computer id=[%s]: NAME [%s] changed by [%s]') % (computer.id, computer, name)
-        models.Notification.objects.create(message=msg)
-        computer.update_name(name)
-
-    if settings.MIGASFREE_NOTIFY_CHANGE_IP and (computer.ip_address != ip_address):
-        msg = _('Computer id=[%s]: IP [%s] changed by [%s]') % (computer.id, computer.ip_address, ip_address)
-        models.Notification.objects.create(message=msg)
-        computer.update_ip_address(ip_address)
-
-    if settings.MIGASFREE_NOTIFY_CHANGE_UUID and (computer.uuid != uuid):
-        msg = _('Computer id=[%s]: UUID [%s] changed by [%s]') % (computer.id, computer.uuid, uuid)
-        models.Notification.objects.create(message=msg)
-        computer.update_uuid(uuid)
-
-    return computer
-
-
-def get_computer(uuid, name):
-    logger.debug('uuid: %s, name: %s', uuid, name)
-
-    try:
-        computer = models.Computer.objects.get(uuid=uuid)
-        logger.debug('computer found by uuid')
-
-        return computer
-    except models.Computer.DoesNotExist:
-        pass
-
-    try:
-        computer = models.Computer.objects.get(uuid=uuid_change_format(uuid))
-        logger.debug('computer found by uuid (endian format changed)')
-
-        return computer
-    except models.Computer.DoesNotExist:
-        pass
-
-    computer = models.Computer.objects.filter(mac_address__icontains=uuid[-12:])
-    if computer.count() == 1 and uuid[0:8] == '0' * 8:
-        logger.debug('computer found by mac_address (in uuid format)')
-
-        return computer.first()
-
-    try:
-        computer = models.Computer.objects.get(name=name)
-        logger.debug('computer found by name')
-
-        return computer
-    except (models.Computer.DoesNotExist, models.Computer.MultipleObjectsReturned):
-        return None
-
-
-@extend_schema(tags=['safe'])
-@permission_classes((permissions.AllowAny,))
-@throttle_classes([UserRateThrottle])
-class SafeEndOfTransmissionView(SafeConnectionMixin, views.APIView):
-    @extend_schema(
-        description='Returns 200 if ok, 404 if computer not found (requires JWT auth)',
-        request={'id': OpenApiTypes.INT},
-        responses={
-            status.HTTP_200_OK: {'description': gettext('EOT OK')},
-            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
-        },
-        examples=[
-            OpenApiExample(
-                name='successfully response',
-                value=gettext('EOT OK'),
-                response_only=True,
-            ),
-        ],
-    )
-    def post(self, request):
-        """
-        claims = {"id": id}
-        """
-        claims = self.get_claims(request.data)
-        computer = get_object_or_404(models.Computer, id=claims.get('id'))
-
-        remove_computer_messages(computer.id)
-
-        if computer.status == 'available':
-            models.Notification.objects.create(
-                _('Computer [%s] with available status, has been synchronized') % computer
-            )
-
-        return Response(self.create_response(gettext('EOT OK')), status=status.HTTP_200_OK)
-
-
-@extend_schema(tags=['safe'])
-@permission_classes((permissions.AllowAny,))
-@throttle_classes([UserRateThrottle])
-class SafeSynchronizationView(SafeConnectionMixin, views.APIView):
-    @extend_schema(
-        description='Creates a computer synchronization (requires JWT auth)',
-        request=inline_serializer(
-            name='SafeSyncRequest',
-            fields={
-                'id': drf_serializers.IntegerField(),
-                'start_date': drf_serializers.DateTimeField(),
-                'consumer': drf_serializers.CharField(),
-                'pms_status_ok': drf_serializers.BooleanField(),
-            },
-        ),
-        responses={
-            status.HTTP_201_CREATED: serializers.SynchronizationWriteSerializer,
-            status.HTTP_400_BAD_REQUEST: {'description': 'Error in request'},
-            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
-        },
-    )
-    def post(self, request):
-        """
-        claims = {
-            "id": id,
-            "start_date": datetime,
-            "consumer": string,
-            "pms_status_ok": true|false
-        }
-        """
-
-        claims = self.get_claims(request.data)
-        computer = get_object_or_404(models.Computer, id=claims.get('id'))
-        self.verify_mtls_identity(request, computer.uuid)
-
-        add_computer_message(computer, gettext('Getting synchronization...'))
-
-        data = {
-            'computer': computer.id,
-            'user': computer.sync_user.id,
-            'project': self.project.id,
-            'start_date': claims.get('start_date'),
-            'consumer': claims.get('consumer'),
-            'pms_status_ok': claims.get('pms_status_ok', False),
-        }
-        serializer = serializers.SynchronizationWriteSerializer(data=data)
-
-        add_computer_message(computer, gettext('Sending synchronization...'))
-
-        if serializer.is_valid():
-            serializer.save()
-
-            return Response(self.create_response(serializer.data), status=status.HTTP_201_CREATED)
-
-        return Response(self.create_response(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema(tags=['safe'])
