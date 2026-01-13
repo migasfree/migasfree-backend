@@ -43,14 +43,29 @@ class Pacman(Pms):
         (int, string, string) create_repository(
             string path, string arch
         )
-        FIXME
         """
+        db_name = os.path.basename(path.rstrip('/'))
+        extensions_pattern = ' '.join([f'*.{ext}' for ext in self.extensions])
 
         _cmd = f"""
 function create_deploy {{
   cd {path}/{self.components}
   export GNUPGHOME={self.keys_path}/.gnupg
-  repo-add --sign --key migasfree-repository ./{os.path.basename(path)}.db.tar.gz ./*
+
+  # Collect valid package files
+  FILES=""
+  for f in {extensions_pattern}
+  do
+      if [ -f "$f" ]
+      then
+          FILES="$FILES $f"
+      fi
+  done
+
+  if [ -n "$FILES" ]
+  then
+      repo-add --sign --key migasfree-repository ./{db_name}.db.tar.gz $FILES
+  fi
 }}
 
 create_deploy
