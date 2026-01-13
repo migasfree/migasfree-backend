@@ -1,7 +1,5 @@
-# -*- coding: UTF-8 -*-
-
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +18,19 @@ import os
 
 django_settings = os.environ.get('DJANGO_SETTINGS_MODULE', '')
 
-if django_settings != '' and django_settings != 'migasfree.settings':
-    exec(f'from .{django_settings.split(".")[-1]} import *')
+# Map of allowed settings modules for security
+# Only these explicit modules can be loaded
+_ALLOWED_SETTINGS = {
+    'migasfree.settings.development': 'development',
+    'migasfree.settings.production': 'production',
+}
+
+_settings_name = _ALLOWED_SETTINGS.get(django_settings)
+
+if _settings_name == 'development':
+    from .development import *  # noqa: F403
 else:
-    from .production import *
+    # Default to production for safety (including empty or invalid values)
+    from .production import *  # noqa: F403
+
+del _settings_name, _ALLOWED_SETTINGS
