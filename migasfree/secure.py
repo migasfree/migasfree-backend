@@ -238,13 +238,21 @@ Expire-Date: 0
         )
 
         # export and save public key
-        command = ['gpg', '--armor', '--export', fingerprint, '>', public_key]
-        subprocess.check_call(' '.join(command), shell=True)
+        result = subprocess.run(
+            ['gpg', '--armor', '--export', fingerprint],
+            capture_output=True,
+            check=True,
+        )
+        write_file(public_key, result.stdout)
         os.chmod(public_key, 0o600)
 
         # export and save private key
-        command = ['gpg', '--armor', '--export-secret-key', fingerprint, '>', private_key]
-        subprocess.check_call(' '.join(command), shell=True)
+        result = subprocess.run(
+            ['gpg', '--armor', '--export-secret-key', fingerprint],
+            capture_output=True,
+            check=True,
+        )
+        write_file(private_key, result.stdout)
         os.chmod(private_key, 0o600)
 
     return read_file(public_key)
