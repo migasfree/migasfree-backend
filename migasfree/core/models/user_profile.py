@@ -61,10 +61,6 @@ class UserProfile(UserSystem, MigasLink):
     objects = UserManager()
 
     def is_view_all(self):
-        if str(self) == 'AnonymousUser':
-            # TODO: only view current computer
-            return True
-
         return not self.domain_preference and not self.scope_preference
 
     def get_computers(self):
