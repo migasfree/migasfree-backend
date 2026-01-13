@@ -360,14 +360,13 @@ def upload_computer_info(request, name, uuid, computer, data):
         ip_address = computer_info.get('ip', '')
         forwarded_ip_address = get_client_ip(request)
 
-        # IP registration, project and computer Migration
-        is_computer_changed(computer, name, Project.objects.get(name=project_name), ip_address, uuid)
-        if computer:
-            computer.update_identification(
-                name, fqdn, Project.objects.get(name=project_name), uuid, ip_address, forwarded_ip_address
-            )
+        # Cache project lookup (was queried 4 times before)
+        project = Project.objects.select_related('platform').get(name=project_name)
 
-        project = Project.objects.get(name=project_name)
+        # IP registration, project and computer Migration
+        is_computer_changed(computer, name, project, ip_address, uuid)
+        if computer:
+            computer.update_identification(name, fqdn, project, uuid, ip_address, forwarded_ip_address)
 
         if notify_platform:
             platform = Platform.objects.get(name=platform_name)
@@ -384,9 +383,12 @@ def upload_computer_info(request, name, uuid, computer, data):
         computer.update_sync_user(user)
         computer.sync_attributes.clear()
 
+        # Collect all attributes to add in batch (instead of multiple add() calls)
+        attributes_to_add = []
+
         # basic attributes
-        computer.sync_attributes.add(
-            *BasicAttribute.process(
+        attributes_to_add.extend(
+            BasicAttribute.process(
                 id=computer.id,
                 ip_address=ip_address,
                 project=computer.project.name,
@@ -396,59 +398,68 @@ def upload_computer_info(request, name, uuid, computer, data):
             )
         )
 
+        # Prefetch all client properties in one query (instead of N queries in loop)
+        client_property_map = {
+            prop.prefix: prop for prop in Property.objects.filter(prefix__in=client_attributes.keys(), sort='client')
+        }
+
         # client attributes
         for prefix, value in client_attributes.items():
-            client_property = Property.objects.get(prefix=prefix)
-            if client_property.sort == 'client':
-                computer.sync_attributes.add(*Attribute.process_kind_property(client_property, value))
+            client_property = client_property_map.get(prefix)
+            if client_property:
+                attributes_to_add.extend(Attribute.process_kind_property(client_property, value))
+
+        # Batch add basic and client attributes first
+        computer.sync_attributes.add(*attributes_to_add)
+
+        # Cache get_all_attributes (was called 6 times before)
+        all_attributes = computer.get_all_attributes()
 
         # Domain attribute
-        computer.sync_attributes.add(*Domain.process(computer.get_all_attributes()))
+        computer.sync_attributes.add(*Domain.process(all_attributes))
 
         # Tags (server attributes) (not running on clients!!!)
-        for tag in computer.tags.filter(property_att__enabled=True):
-            computer.sync_attributes.add(*Attribute.process_kind_property(tag.property_att, tag.value))
+        # Prefetch tags with their properties
+        tags_attrs = []
+        for tag in computer.tags.select_related('property_att').filter(property_att__enabled=True):
+            tags_attrs.extend(Attribute.process_kind_property(tag.property_att, tag.value))
+        if tags_attrs:
+            computer.sync_attributes.add(*tags_attrs)
 
         # AttributeSets
-        computer.sync_attributes.add(*AttributeSet.process(computer.get_all_attributes()))
+        computer.sync_attributes.add(*AttributeSet.process(all_attributes))
 
-        results = FaultDefinition.enabled_for_attributes(computer.get_all_attributes())
-        fault_definitions = []
-        for item in results:
-            fault_definitions.append({'language': item.get_language_display(), 'name': item.name, 'code': item.code})
+        # Refresh all_attributes after adding more
+        all_attributes = computer.get_all_attributes()
 
-        lst_deploys = []
+        # Fault definitions - use list comprehension
+        fault_definitions = [
+            {'language': item.get_language_display(), 'name': item.name, 'code': item.code}
+            for item in FaultDefinition.enabled_for_attributes(all_attributes)
+        ]
+
         lst_pkg_to_remove = []
         lst_pkg_to_install = []
 
-        # deployments
-        deploys = Deployment.available_deployments(computer, computer.get_all_attributes())
+        # deployments - use list comprehension for deploys
+        deploys = Deployment.available_deployments(computer, all_attributes)
+        lst_deploys = [{'name': dep.name, 'source_template': dep.source_template()} for dep in deploys]
+
         for dep in deploys:
-            lst_deploys.append({'name': dep.name, 'source_template': dep.source_template()})
-
             if dep.packages_to_remove:
-                for pkg in to_list(dep.packages_to_remove):
-                    if pkg != '':
-                        lst_pkg_to_remove.append(pkg)
-
+                lst_pkg_to_remove.extend(pkg for pkg in to_list(dep.packages_to_remove) if pkg)
             if dep.packages_to_install:
-                for pkg in to_list(dep.packages_to_install):
-                    if pkg != '':
-                        lst_pkg_to_install.append(pkg)
+                lst_pkg_to_install.extend(pkg for pkg in to_list(dep.packages_to_install) if pkg)
 
         # policies
         policy_pkg_to_install, policy_pkg_to_remove = Policy.get_packages(computer)
-        lst_pkg_to_install.extend([x['package'] for x in policy_pkg_to_install])
-        lst_pkg_to_remove.extend([x['package'] for x in policy_pkg_to_remove])
+        lst_pkg_to_install.extend(x['package'] for x in policy_pkg_to_install)
+        lst_pkg_to_remove.extend(x['package'] for x in policy_pkg_to_remove)
 
-        # devices
-        logical_devices = []
-        for device in computer.logical_devices(computer.get_all_attributes()):
-            logical_devices.append(device.as_dict(computer.project))
+        # devices - use list comprehension
+        logical_devices = [device.as_dict(computer.project) for device in computer.logical_devices(all_attributes)]
 
-        default_logical_device = 0
-        if computer.default_logical_device:
-            default_logical_device = computer.default_logical_device.id
+        default_logical_device = computer.default_logical_device.id if computer.default_logical_device else 0
 
         # Hardware
         capture_hardware = True
