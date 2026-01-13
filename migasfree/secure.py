@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import functools
 import json
 import logging
 import os
@@ -36,17 +37,30 @@ TYPE_JWE = 'JWE'
 logger = logging.getLogger('migasfree')
 
 
+@functools.lru_cache(maxsize=16)
 def load_jwk(filename):
     """
-    Loads a JWK from a PEM file
+    Loads a JWK from a PEM file with caching.
+
+    Results are cached in memory to avoid repeated file reads and PEM parsing.
+    Use clear_jwk_cache() to invalidate the cache when keys are regenerated.
 
     Args:
-        filename (str)
+        filename (str): Key filename (relative to MIGASFREE_KEYS_DIR)
 
     Returns:
         jwk.JWK: loaded JWK object
     """
     return jwk.JWK.from_pem(read_file(os.path.join(settings.MIGASFREE_KEYS_DIR, filename)))
+
+
+def clear_jwk_cache():
+    """
+    Clears the JWK cache.
+
+    Call this after regenerating keys to ensure fresh keys are loaded.
+    """
+    load_jwk.cache_clear()
 
 
 def sign(claims, priv_key):
@@ -158,6 +172,9 @@ def generate_rsa_keys(name='migasfree-server'):
     # read only keys
     os.chmod(private_pem, 0o400)
     os.chmod(public_pem, 0o400)
+
+    # Invalidate cache to ensure fresh keys are loaded
+    clear_jwk_cache()
 
 
 def create_server_keys():
