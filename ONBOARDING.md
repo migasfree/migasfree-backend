@@ -11,28 +11,28 @@ The architecture follows a modular design where each Django "app" encapsulates a
 
 ```mermaid
 graph TD
-    User((Admin / User)) -->|HTTPS| API[REST API & WebSockets]
-    Client((Clients / Agents)) -->|HTTPS / mTLS| API
+    User(("Admin / User")) -->|HTTPS| API[REST API & WebSockets]
+    Client(("Clients / Agents")) -->|HTTPS / mTLS| API
 
     subgraph "Backend Core (Django)"
-        API --> Auth[Authentication (JWT)]
+        API --> Auth["Authentication (JWT)"]
         Auth --> Core[Core Logic]
 
         Core --> Apps[Sub-Modules]
         subgraph Apps
-            ClientApp[Client (Computers)]
-            DeviceApp[Device (Drivers/Printers)]
-            HardwareApp[Hardware (Inventory)]
+            ClientApp["Client (Computers)"]
+            DeviceApp["Device (Drivers/Printers)"]
+            HardwareApp["Hardware (Inventory)"]
             AppCatalog[App Catalog]
-            StatsApp[Stats (Dashboard)]
+            StatsApp["Stats (Dashboard)"]
         end
     end
 
-    Apps --> DB[(PostgreSQL)]
-    Apps --> Redis[(Redis)]
+    Apps --> DB[("PostgreSQL")]
+    Apps --> Redis[("Redis")]
 
     Redis --> CeleryWorker[Celery Workers]
-    Redis --> Channels[Daphne (WebSockets)]
+    Redis --> Channels["Daphne (WebSockets)"]
 
     CeleryWorker --> AsyncTasks[Syncs, Repo Gen, Alerts]
 ```
