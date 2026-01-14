@@ -85,13 +85,13 @@ def month_interval(begin_month='', end_month=''):
     # begin_month, end_month format: YYYY-MM
     if end_month:
         try:
-            end_date = datetime.strptime(f'{end_month}-01', '%Y-%m-%d')
+            end_date = timezone.make_aware(datetime.strptime(f'{end_month}-01', '%Y-%m-%d'))
         except ValueError:
             end_date = date.today() + relativedelta(months=+1)
 
     if begin_month:
         try:
-            begin_date = datetime.strptime(f'{begin_month}-01', '%Y-%m-%d')
+            begin_date = timezone.make_aware(datetime.strptime(f'{begin_month}-01', '%Y-%m-%d'))
             if not end_month:
                 end_date = begin_date + relativedelta(months=+settings.MONTHLY_RANGE)
         except ValueError:
@@ -328,12 +328,16 @@ class EventViewSet(viewsets.ViewSet):
     def by_day(self, request):
         user = request.user.userprofile
         computer_id = request.GET.get('computer_id', 0)
-        start_date = request.GET.get('start_date', '')
-        end_date = request.GET.get('end_date', timezone.localtime().strftime('%Y-%m-%d'))
+        start_date_str = request.GET.get('start_date', '')
+        end_date_str = request.GET.get('end_date', timezone.localtime().strftime('%Y-%m-%d'))
+        fmt = '%Y-%m-%d'
 
         computer = get_object_or_404(Computer, pk=computer_id)
-        if not start_date:
-            start_date = timezone.localtime(computer.created_at).strftime('%Y-%m-%d')
+        if not start_date_str:
+            start_date_str = timezone.localtime(computer.created_at).strftime(fmt)
+
+        start_date = timezone.make_aware(datetime.strptime(start_date_str, fmt))
+        end_date = timezone.make_aware(datetime.strptime(end_date_str, fmt))
 
         event_class = self.get_event_class()
         data = event_class.by_day(computer_id, start_date, end_date, user)
@@ -356,13 +360,13 @@ class EventViewSet(viewsets.ViewSet):
 
         end = request.query_params.get('end', '')
         try:
-            end = datetime.strptime(end, fmt)
+            end = timezone.make_aware(datetime.strptime(end, fmt))
         except ValueError:
-            end = datetime(now.year, now.month, now.day, now.hour) + timedelta(hours=1)
+            end = timezone.make_aware(datetime(now.year, now.month, now.day, now.hour)) + timedelta(hours=1)
 
         begin = request.query_params.get('begin', '')
         try:
-            begin = datetime.strptime(begin, fmt)
+            begin = timezone.make_aware(datetime.strptime(begin, fmt))
         except ValueError:
             begin = end - timedelta(days=settings.HOURLY_RANGE)
 

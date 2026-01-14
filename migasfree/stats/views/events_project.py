@@ -19,6 +19,7 @@ import time
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import permissions, status
 from rest_framework.decorators import action, permission_classes
@@ -68,12 +69,12 @@ class EventProjectViewSet(EventViewSet):
         fmt = '%Y-%m-%d'
 
         try:
-            end_date = datetime.strptime(end_date, fmt)
+            end_date = timezone.make_aware(datetime.strptime(end_date, fmt))
         except ValueError:
-            end_date = datetime(now[0], now[1], now[2]) + timedelta(days=1)
+            end_date = timezone.make_aware(datetime(now[0], now[1], now[2])) + timedelta(days=1)
 
         try:
-            begin_date = datetime.strptime(begin_date, fmt)
+            begin_date = timezone.make_aware(datetime.strptime(begin_date, fmt))
         except ValueError:
             begin_date = end_date - timedelta(days=settings.DAILY_RANGE)
 
