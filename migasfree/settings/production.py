@@ -14,13 +14,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import importlib.util
+import importlib.util  # noqa: I001
 from pathlib import Path
 
 from .base import *  # noqa: F403
-from .celery import *  # noqa: F403
 from .functions import secret_key
 from .migasfree import *  # noqa: F403
+from .celery import *  # noqa: F403
 
 # production environment
 DEBUG = False

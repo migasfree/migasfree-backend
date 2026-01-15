@@ -17,7 +17,8 @@
 from datetime import timedelta
 
 from celery.schedules import crontab
-from django.conf import settings
+
+from .migasfree import MIGASFREE_SYNC_QUEUE_PROCESS_INTERVAL
 
 REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
@@ -62,7 +63,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     'process_sync_queue': {
         'task': 'migasfree.client.tasks.process_sync_queue',
-        'schedule': timedelta(seconds=settings.MIGASFREE_SYNC_QUEUE_PROCESS_INTERVAL),
+        'schedule': timedelta(seconds=MIGASFREE_SYNC_QUEUE_PROCESS_INTERVAL),
     },
 }
 
