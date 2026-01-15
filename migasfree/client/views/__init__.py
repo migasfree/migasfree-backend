@@ -24,6 +24,7 @@ from .safe import (
     SafeEndOfTransmissionView,
     SafeSynchronizationView,
 )
+from .sync import RequestSync
 from .token import (
     ComputerViewSet,
     ErrorViewSet,
@@ -50,6 +51,7 @@ __all__ = [
     'PackagerKeysView',
     'ProjectKeysView',
     'RepositoriesKeysView',
+    'RequestSync',
     'SafeComputerViewSet',
     'SafeEndOfTransmissionView',
     'SafeSynchronizationView',
