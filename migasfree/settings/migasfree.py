@@ -109,3 +109,9 @@ MIGASFREE_PACKAGER_PRI_KEY = 'migasfree-packager.pri'
 # Default Computer Status
 # Values: 'intended', 'reserved', 'unknown', 'in repair', 'available' or 'unsubscribed'
 MIGASFREE_DEFAULT_COMPUTER_STATUS = 'intended'
+
+# Sync Saturation Strategy Settings
+MIGASFREE_SYNC_MAX_DB_LATENCY = 0.1  # Max DB latency (seconds) to consider server saturated
+MIGASFREE_SYNC_MAX_CORE_LOAD = 90  # Max CPU load (%) to consider server saturated
+MIGASFREE_SYNC_QUEUE_PROCESS_INTERVAL = 30  # Interval (seconds) to process sync queue
+MIGASFREE_SYNC_MAX_CONCURRENCY = 50  # Max number of concurrent syncs processed from queue

@@ -17,6 +17,7 @@
 from datetime import timedelta
 
 from celery.schedules import crontab
+from django.conf import settings
 
 REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
@@ -58,6 +59,10 @@ CELERY_BEAT_SCHEDULE = {
     'remove_orphan_files_from_external_deployments': {
         'task': 'migasfree.core.tasks.remove_orphan_files_from_external_deployments',
         'schedule': crontab(hour=1, minute=0, day_of_week=6),  # at Sunday
+    },
+    'process_sync_queue': {
+        'task': 'migasfree.client.tasks.process_sync_queue',
+        'schedule': timedelta(seconds=settings.MIGASFREE_SYNC_QUEUE_PROCESS_INTERVAL),
     },
 }
 
