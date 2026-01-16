@@ -17,11 +17,18 @@ def is_safe_filename(filename):
     dangerous_patterns = ['..', '\\', '|', ';', '&', '$', '>', '<']
     reserved_filenames = [r'^/dev/', r'^/proc/', r'^/sys/', r'^lost\+found.*$', r'^\.trash-.*', r'^\.Trash-.*$']
 
+    # Normalize the path and ensure it is within the configured temporary directory
+    normalized = os.path.normpath(filename)
+    tmp_dir = os.path.normpath(settings.MIGASFREE_TMP_DIR)
+    # Require the normalized path to be inside (or equal to) the temp directory
+    if not (os.path.isabs(normalized) and (normalized == tmp_dir or normalized.startswith(tmp_dir + os.sep))):
+        return False
+
     for pattern in dangerous_patterns:
-        if pattern in filename:
+        if pattern in normalized:
             return False
 
-    return all(not re.match(reserved_filename, filename) for reserved_filename in reserved_filenames)
+    return all(not re.match(reserved_filename, normalized) for reserved_filename in reserved_filenames)
 
 
 def sign(filename):
