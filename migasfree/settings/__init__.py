@@ -28,9 +28,9 @@ _ALLOWED_SETTINGS = {
 _settings_name = _ALLOWED_SETTINGS.get(django_settings)
 
 if _settings_name == 'development':
-    from .development import *  # noqa: F403
+    from .development import *
 else:
     # Default to production for safety (including empty or invalid values)
-    from .production import *  # noqa: F403
+    from .production import *
 
 del _settings_name, _ALLOWED_SETTINGS
