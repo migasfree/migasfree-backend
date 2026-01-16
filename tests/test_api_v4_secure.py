@@ -1,6 +1,8 @@
+from unittest.mock import patch
+
 from django.test import TestCase
 
-from migasfree.api_v4.secure import is_safe_filename
+from migasfree.api_v4.secure import is_safe_filename, sign, verify
 
 
 class TestIsSafeFilename(TestCase):
@@ -74,3 +76,43 @@ class TestIsSafeFilename(TestCase):
     def test_safe_filename_with_unicode(self):
         """Filename with unicode characters should be safe."""
         self.assertTrue(is_safe_filename('/tmp/archivo_español.txt'))
+
+
+class TestSecureFunctions(TestCase):
+    @patch('migasfree.api_v4.secure.subprocess.run')
+    @patch('migasfree.api_v4.secure.os.path.join', return_value='/path/to/key')
+    def test_sign_command_structure(self, mock_path_join, mock_run):
+        """Test that sign function includes '--' separator in openssl command."""
+        filename = 'testfile'
+        sign(filename)
+
+        # Verify subprocess.run was called
+        self.assertTrue(mock_run.called)
+
+        # Get the arguments passed to subprocess.run
+        args, _ = mock_run.call_args
+        command = args[0]
+
+        # Verify '--' is present and immediately precedes the filename
+        self.assertIn('--', command)
+        self.assertEqual(command[-2], '--')
+        self.assertEqual(command[-1], filename)
+
+    @patch('migasfree.api_v4.secure.subprocess.run')
+    @patch('migasfree.api_v4.secure.os.path.join', return_value='/path/to/key')
+    def test_verify_command_structure(self, mock_path_join, mock_run):
+        """Test that verify function includes '--' separator in openssl command."""
+        filename = 'testfile'
+        verify(filename, 'key')
+
+        # Verify subprocess.run was called
+        self.assertTrue(mock_run.called)
+
+        # Get the arguments passed to subprocess.run
+        args, _ = mock_run.call_args
+        command = args[0]
+
+        # Verify '--' is present and immediately precedes the filename
+        self.assertIn('--', command)
+        self.assertEqual(command[-2], '--')
+        self.assertEqual(command[-1], filename)
