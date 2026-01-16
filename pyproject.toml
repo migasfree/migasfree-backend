@@ -64,6 +64,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "ruff==0.9.4",
     "django-debug-toolbar==6.0.0",
     "django-extensions==4.1",
     "django-silk==5.4.1",
@@ -118,6 +119,9 @@ ignore = [
     "E501",   # line too long (handled by formatter)
     "RUF012"
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"migasfree/settings/*.py" = ["F403", "F405"]  # Allow star imports in Django settings
 
 [tool.ruff.format]
 quote-style = "single"
