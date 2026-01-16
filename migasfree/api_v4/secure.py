@@ -37,6 +37,7 @@ def sign(filename):
         os.path.join(settings.MIGASFREE_KEYS_DIR, 'migasfree-server.pri'),
         '-out',
         f'{filename}.sign',
+        '--',
         filename,
     ]
 
@@ -61,6 +62,7 @@ def verify(filename, key):
         os.path.join(settings.MIGASFREE_KEYS_DIR, f'{key}.pub'),
         '-signature',
         f'{filename}.sign',
+        '--',
         filename,
     ]
 
