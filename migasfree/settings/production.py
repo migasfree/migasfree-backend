@@ -17,14 +17,14 @@
 import importlib.util  # noqa: I001
 from pathlib import Path
 
-from .base import *  # noqa: F403
+from .base import *
 from .functions import secret_key
-from .migasfree import *  # noqa: F403
-from .celery import *  # noqa: F403
+from .migasfree import *
+from .celery import *
 
 # production environment
 DEBUG = False
-TEMPLATES[0]['OPTIONS']['debug'] = DEBUG  # noqa: F405
+TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 
 ALLOWED_HOSTS = ['*']
 
@@ -48,7 +48,7 @@ DATABASES = {
 }
 
 # Load settings overrides from external Python file
-_overrides_file = Path(MIGASFREE_SETTINGS_OVERRIDE)  # noqa: F405
+_overrides_file = Path(MIGASFREE_SETTINGS_OVERRIDE)
 if _overrides_file.exists():
     _spec = importlib.util.spec_from_file_location('settings_override', _overrides_file)
     _mod = importlib.util.module_from_spec(_spec)
