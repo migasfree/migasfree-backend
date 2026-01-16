@@ -21,9 +21,9 @@ from .views import (
     PackagerKeysView,
     ProjectKeysView,
     RepositoriesKeysView,
-    RequestSync,
     SafeEndOfTransmissionView,
     SafeSynchronizationView,
+    SynchronizationAvailabilityView,
 )
 
 keys_patterns = [
@@ -39,7 +39,11 @@ public_patterns = [
 safe_patterns = [
     re_path(r'^eot/$', SafeEndOfTransmissionView.as_view()),
     re_path(r'^synchronizations/$', SafeSynchronizationView.as_view()),
-    re_path(r'^request_sync/$', RequestSync.as_view(), name='request_sync'),
+    re_path(
+        r'^synchronizations/availability/$',
+        SynchronizationAvailabilityView.as_view(),
+        name='synchronization_availability',
+    ),
 ]
 
 urlpatterns = [

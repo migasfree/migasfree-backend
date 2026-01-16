@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from migasfree.client.saturation import is_server_saturated
 
 
-class RequestSync(APIView):
+class SynchronizationAvailabilityView(APIView):
     """
     Endpoint to check server saturation before syncing.
 
