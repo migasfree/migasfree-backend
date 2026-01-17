@@ -1,15 +1,19 @@
+import os
+
+from django.conf import settings
+
 from migasfree.api_v4.secure import is_safe_filename
 
 
 class TestIsSafeFilename:
     def test_alphanumeric_filename(self):
-        assert is_safe_filename('example123')
+        assert is_safe_filename(os.path.join(settings.MIGASFREE_TMP_DIR, 'example123'))
 
     def test_filename_with_dashes_and_underscores(self):
-        assert is_safe_filename('example-123')
+        assert is_safe_filename(os.path.join(settings.MIGASFREE_TMP_DIR, 'example-123'))
 
     def test_filename_with_spaces(self):
-        assert is_safe_filename('example 123')
+        assert is_safe_filename(os.path.join(settings.MIGASFREE_TMP_DIR, 'example 123'))
 
     def test_filename_with_non_allowed_characters(self):
         assert not is_safe_filename('example!@#$%^&*()')
