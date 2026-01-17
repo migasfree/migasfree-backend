@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import re
 import subprocess
@@ -8,6 +9,8 @@ from django.conf import settings
 from ..secure import create_server_keys, generate_rsa_keys
 from ..utils import read_file, write_file
 from . import errmfs
+
+logger = logging.getLogger('migasfree')
 
 SIGN_LEN = 256
 
@@ -33,7 +36,7 @@ def is_safe_filename(filename):
 
 def sign(filename):
     if not is_safe_filename(filename):
-        print(f'Invalid filename: {filename}')
+        logger.warning('Invalid filename: %s', filename)
         return False
 
     command = [
@@ -51,14 +54,14 @@ def sign(filename):
     try:
         subprocess.run(command, check=True)
     except subprocess.CalledProcessError as e:
-        print(f'Error signing file: {e}')
+        logger.error('Error signing file: %s', e)
 
 
 def verify(filename, key):
     # returns True if OK, False otherwise
 
     if not is_safe_filename(filename):
-        print(f'Invalid filename: {filename}')
+        logger.warning('Invalid filename: %s', filename)
         return False
 
     command = [
@@ -77,7 +80,7 @@ def verify(filename, key):
         subprocess.run(command, capture_output=True, text=True, check=True)
         return True
     except subprocess.CalledProcessError as e:
-        print(f'Error during verification: {e.stderr}')
+        logger.error('Error during verification: %s', e.stderr)
         return False
 
 
@@ -87,7 +90,7 @@ def wrap(filename, data):
     """
 
     if not is_safe_filename(filename):
-        print(f'Invalid filename: {filename}')
+        logger.warning('Invalid filename: %s', filename)
         return False
 
     data = json.dumps(data)
@@ -109,7 +112,7 @@ def unwrap(filename, key):
     """
 
     if not is_safe_filename(filename):
-        print(f'Invalid filename: {filename}')
+        logger.warning('Invalid filename: %s', filename)
         return False
 
     with open(filename, 'rb') as fp:
