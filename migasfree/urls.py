@@ -14,15 +14,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import logging
-
 from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.core import management
-from django.db import connection
-from django.db.utils import OperationalError
 from django.urls import path, re_path, reverse_lazy
 from django.views.generic.base import RedirectView
 from drf_spectacular.views import (
@@ -46,12 +41,9 @@ from .core.routers import router as core_router
 from .core.routers import safe_router as core_safe_router
 from .core.views import GetSourceFileView
 from .device.routers import router as device_router
-from .fixtures import create_initial_data
 from .hardware.routers import router as hardware_router
 from .hardware.routers import safe_router as hardware_safe_router
 from .stats.routers import router as stats_router
-
-logger = logging.getLogger('migasfree')
 
 admin.autodiscover()
 
@@ -106,13 +98,3 @@ if settings.DEBUG:
 
     if settings.MEDIA_ROOT is not None:
         urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT, show_indexes=True)
-
-# initial database setup
-try:
-    if not connection.introspection.table_names():
-        management.call_command('migrate', 'auth', interactive=False, verbosity=1)
-
-        management.call_command('migrate', interactive=False, verbosity=1)
-        create_initial_data()
-except OperationalError as e:
-    logger.error('Database error during initial setup: %s', e)
