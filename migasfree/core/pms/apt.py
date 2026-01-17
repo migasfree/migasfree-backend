@@ -145,7 +145,7 @@ create_deploy
             store_trailing_path=get_setting('MIGASFREE_STORE_TRAILING_PATH'),
         )
 
-        return execute(cmd)
+        return execute(cmd, shell=True)
 
     def package_info(self, package):
         """
@@ -206,7 +206,7 @@ dpkg-deb -c {package} | awk '{{print $6}}'
 echo "~~~"
         """
 
-        ret, output, error = execute(cmd)
+        ret, output, error = execute(cmd, shell=True)
 
         return output if ret == 0 else error
 
@@ -216,7 +216,7 @@ echo "~~~"
         """
 
         cmd = f"dpkg-deb --showformat='${{Package}}_${{Version}}_${{Architecture}}' --show {package}"
-        ret, output, _ = execute(cmd)
+        ret, output, _ = execute(cmd, shell=True)
 
         if ret == 0:
             name, version, architecture = output.split('_')
