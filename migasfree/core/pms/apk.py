@@ -1,5 +1,5 @@
-# Copyright (c) 2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2025-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2025-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ do
 done
 """
 
-        return execute(cmd)
+        return execute(cmd, shell=True)
 
     def package_info(self, package):
         """
@@ -93,7 +93,7 @@ tar -tf {package} | grep -v '^\.PKGINFO$' | grep -v '^\.SIGN\.'
 echo "~~~"
         """
 
-        ret, output, error = execute(cmd)
+        ret, output, error = execute(cmd, shell=True)
 
         return output if ret == 0 else error
 
@@ -103,7 +103,7 @@ echo "~~~"
         """
 
         cmd = f'tar -zxf {package} .PKGINFO -O'
-        ret, output, _error = execute(cmd)
+        ret, output, _error = execute(cmd, shell=True)
 
         name, version, architecture = None, None, None
 
