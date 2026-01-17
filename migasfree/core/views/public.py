@@ -40,7 +40,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
 from ...client.models import Notification
-from ...utils import get_proxied_ip_address
+from ...utils import get_proxied_ip_address, is_safe_url
 from ..models import ExternalSource, Project
 from ..pms import get_available_pms, get_pms
 
@@ -263,6 +263,12 @@ class GetSourceFileView(views.APIView):
 
         url = urljoin(f'{source.base_url}/', resource)
         logger.debug('get url %s', url)
+
+        if not is_safe_url(url):
+            error_msg = f'Unsafe URL detected: {escape(url)}'
+            logger.error(error_msg)
+            add_notification_get_source_file(error_msg, source, path, url, client_ip)
+            return HttpResponse('Forbidden: Unsafe URL', status=status.HTTP_403_FORBIDDEN)
 
         try:
             remote_file = urlopen(url, context=ssl.SSLContext(ssl.PROTOCOL_SSLv23))
