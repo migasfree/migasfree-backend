@@ -3,6 +3,7 @@ import logging
 import os
 
 from django.conf import settings
+from django.core.cache import cache
 from django.http import HttpResponse
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
@@ -36,6 +37,25 @@ from ..api import (
 from ..secure import unwrap, wrap
 
 logger = logging.getLogger('migasfree')
+
+# Rate limiting settings for registration commands
+REGISTER_RATE_LIMIT_MAX = 5  # Max attempts
+REGISTER_RATE_LIMIT_WINDOW = 3600  # Time window in seconds (1 hour)
+
+
+def is_register_rate_limited(ip, command):
+    """
+    Check if IP has exceeded rate limit for registration commands.
+
+    Returns True if rate limited, False otherwise.
+    """
+    key = f'api_v4_register_{ip}_{command}'
+    attempts = cache.get(key, 0)
+    if attempts >= REGISTER_RATE_LIMIT_MAX:
+        return True
+    cache.set(key, attempts + 1, REGISTER_RATE_LIMIT_WINDOW)
+    return False
+
 
 # USING USERNAME AND PASSWORD ONLY (WITHOUT KEYS PAIR)
 API_REGISTER = {
@@ -170,19 +190,34 @@ def api_v4(request):
     # REGISTERS
     # COMMAND NOT USE KEYS PAIR, ONLY USERNAME AND PASSWORD
     elif command in API_REGISTER:
+        ip = get_client_ip(request)
+
+        # Rate limiting check
+        if is_register_rate_limited(ip, command):
+            logger.warning('Rate limited register attempt: ip=%s, command=%s', ip, command)
+            return HttpResponse(
+                json.dumps(return_message(command, errmfs.error(errmfs.GENERIC))), content_type='text/plain', status=429
+            )
+
         save_request_file(msg, filename)
 
         with open(filename, 'rb') as f:
             data = json.load(f)[command]
 
+        username = data.get('username', 'unknown')
+
         try:
             handler = API_REGISTER.get(command)
             if handler:
                 ret = handler(request, name, uuid, computer, data)
+                # Audit logging for successful registration
+                logger.info(
+                    'Register success: ip=%s, username=%s, command=%s, computer=%s', ip, username, command, name
+                )
             else:
                 ret = return_message(command, errmfs.error(errmfs.COMMAND_NOT_FOUND))
         except Exception as e:
-            logger.error('Error in register API command %s: %s', command, e)
+            logger.warning('Register failed: ip=%s, username=%s, command=%s, error=%s', ip, username, command, e)
             ret = return_message(command, errmfs.error(errmfs.GENERIC))
 
         os.remove(filename)
