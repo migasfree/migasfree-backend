@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import hashlib
 import json
 import os
 import select
+import shlex
 import subprocess
 import tempfile
 from datetime import timedelta
@@ -50,12 +51,13 @@ def cmp(a, b):
     return (a > b) - (a < b)
 
 
-def execute(cmd, verbose=False, interactive=False):
+def execute(cmd, verbose=False, interactive=False, shell=False):
     """
     (int, string, string) execute(
         string cmd,
         bool verbose=False,
-        bool interactive=True
+        bool interactive=True,
+        bool shell=False
     )
     """
 
@@ -64,11 +66,16 @@ def execute(cmd, verbose=False, interactive=False):
     if verbose:
         print(cmd)
 
+    executable = '/bin/bash' if shell else None
+
+    if not shell and isinstance(cmd, str):
+        cmd = shlex.split(cmd)
+
     if interactive:
-        _process = subprocess.Popen(cmd, shell=True, executable='/bin/bash')
+        _process = subprocess.Popen(cmd, shell=shell, executable=executable)
     else:
         _process = subprocess.Popen(
-            cmd, shell=True, executable='/bin/bash', stderr=subprocess.PIPE, stdout=subprocess.PIPE
+            cmd, shell=shell, executable=executable, stderr=subprocess.PIPE, stdout=subprocess.PIPE
         )
 
         if verbose:
