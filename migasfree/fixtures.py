@@ -16,6 +16,7 @@
 
 # TODO check code and test
 
+import logging
 import os
 import subprocess
 import tempfile
@@ -28,6 +29,8 @@ from django.contrib.auth.management import create_permissions
 from django.contrib.auth.models import Group, Permission
 
 from .core.models import UserProfile
+
+logger = logging.getLogger('migasfree')
 
 
 def run(cmd):
@@ -248,7 +251,7 @@ def sequence_reset():
         cmd = "su postgres -c 'psql {} -f {}' -".format(settings.DATABASES.get('default').get('NAME'), _filename)
         out, err = run(cmd)
         if out != 0:
-            print(err)
+            logger.error('Error resetting sequences: %s', err)
 
         os.remove(_filename)
 
