@@ -17,13 +17,46 @@
 import copy
 import fcntl
 import hashlib
+import ipaddress
 import json
 import os
 import select
 import shlex
+import socket
 import subprocess
 import tempfile
 from datetime import timedelta
+from urllib.parse import urlparse
+
+
+def is_safe_url(url):
+    """
+    Validates that a URL is safe to access (no internal IPs).
+    Returns True if safe, False otherwise.
+    """
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ('http', 'https'):
+            return False
+
+        hostname = parsed.hostname
+        if not hostname:
+            return False
+
+        try:
+            ip = socket.gethostbyname(hostname)
+        except OSError:
+            return False  # Failed to resolve
+
+        ip_addr = ipaddress.ip_address(ip)
+        if ip_addr.is_loopback or ip_addr.is_private or ip_addr.is_link_local:
+            return False
+
+        # Extra safety: Check against 0.0.0.0 as well
+        return str(ip_addr) != '0.0.0.0'
+
+    except Exception:
+        return False
 
 
 def get_setting(name):
