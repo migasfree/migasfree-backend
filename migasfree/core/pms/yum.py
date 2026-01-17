@@ -39,7 +39,7 @@ class Yum(Pms):
         )
         """
 
-        _cmd = f"""
+        cmd = f"""
 _DIR={path}
 rm -rf $_DIR/repodata
 rm -rf $_DIR/checksum
@@ -47,14 +47,14 @@ createrepo --cachedir checksum $_DIR
 gpg -u migasfree-repository --homedir {self.keys_path}/.gnupg --detach-sign --armor $_DIR/repodata/repomd.xml
         """
 
-        return execute(_cmd)
+        return execute(cmd, shell=True)
 
     def package_info(self, package):
         """
         string package_info(string package)
         """
 
-        _cmd = f"""
+        cmd = f"""
 echo "## Info"
 echo "~~~"
 rpm -qp --info {package}
@@ -91,19 +91,19 @@ rpm -qp --list {package}
 echo "~~~"
         """
 
-        _ret, _output, _error = execute(_cmd)
+        ret, output, error = execute(cmd, shell=True)
 
-        return _output if _ret == 0 else _error
+        return output if ret == 0 else error
 
     def package_metadata(self, package):
         """
         dict package_metadata(string package)
         """
 
-        _cmd = f'rpm -qp --queryformat "%{{NAME}}___%{{VERSION}}-%{{RELEASE}}___%{{ARCH}}" {package} 2>/dev/null'
-        _ret, _output, _error = execute(_cmd)
-        if _ret == 0:
-            name, version, architecture = _output.split('___', 2)
+        cmd = f'rpm -qp --queryformat "%{{NAME}}___%{{VERSION}}-%{{RELEASE}}___%{{ARCH}}" {package} 2>/dev/null'
+        ret, output, error = execute(cmd, shell=True)
+        if ret == 0:
+            name, version, architecture = output.split('___', 2)
         else:
             name, version, architecture = [None, None, None]
 
