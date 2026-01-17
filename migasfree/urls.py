@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+
 from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls.static import static
@@ -48,6 +50,8 @@ from .fixtures import create_initial_data
 from .hardware.routers import router as hardware_router
 from .hardware.routers import safe_router as hardware_safe_router
 from .stats.routers import router as stats_router
+
+logger = logging.getLogger('migasfree')
 
 admin.autodiscover()
 
@@ -111,4 +115,4 @@ try:
         management.call_command('migrate', interactive=False, verbosity=1)
         create_initial_data()
 except OperationalError as e:
-    print(e)
+    logger.error('Database error during initial setup: %s', e)
