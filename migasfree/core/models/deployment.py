@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_redis import get_redis_connection
 
-from ...utils import normalize_line_breaks, time_horizon
+from ...utils import is_safe_url, normalize_line_breaks, time_horizon
 from ..pms import get_pms
 from .attribute import Attribute
 from .domain import Domain
@@ -523,6 +523,11 @@ class ExternalSource(Deployment):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.source = Deployment.SOURCE_EXTERNAL
+
+    def clean(self):
+        super().clean()
+        if self.base_url and not is_safe_url(self.base_url):
+            raise ValidationError({'base_url': _('Invalid or unsafe URL')})
 
     class Meta:
         app_label = 'core'
