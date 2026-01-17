@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+
 from asgiref.sync import async_to_sync
 from celery import shared_task
 from celery.exceptions import Reject
@@ -27,6 +29,8 @@ from django_redis import get_redis_connection
 from ..core.models import Package
 from .models import Computer
 from .saturation import get_saturation_metrics
+
+logger = logging.getLogger('celery')
 
 
 @shared_task(queue='default')
@@ -63,9 +67,9 @@ def process_sync_queue():
         # Let's say min 1 unless capacity_factor is super low.
         batch_size = max(1, batch_size) if capacity_factor > 0.05 else 0
 
-        # Log for debugging (print for now, should be logger)
+        # Log for debugging
         if batch_size > 0:
-            print(f'Sync Queue: Load {current_load:.1f}%/{max_load}%. Processing {batch_size} clients.')
+            logger.info('Sync Queue: Load %.1f%%/%d%%. Processing %d clients.', current_load, max_load, batch_size)
 
         channel_layer = get_channel_layer()
 
@@ -86,8 +90,7 @@ def process_sync_queue():
             count += 1
 
     except Exception as e:
-        # Log error?
-        print(f'Error processing sync queue: {e}')
+        logger.error('Error processing sync queue: %s', e)
 
 
 @shared_task(queue='default')
