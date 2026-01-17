@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import os
 import ssl
 import urllib.request
@@ -26,6 +27,8 @@ from celery import Celery, shared_task
 from ..utils import get_setting
 from .decorators import unique_task
 from .models import Deployment, ScheduleDelay
+
+logger = logging.getLogger('celery')
 
 CELERY_BROKER_URL = get_setting('CELERY_BROKER_URL')
 
@@ -62,7 +65,7 @@ def update_deployment_start_date():
                     new_start_date = last_duration_date + timedelta(days=1)
                     deployment.start_date = new_start_date
                     deployment.save()
-                    print(f'Updated the start date of deployment {deployment.name} to {new_start_date}')  # DEBUG
+                    logger.info('Updated the start date of deployment %s to %s', deployment.name, new_start_date)
 
 
 @shared_task
@@ -86,7 +89,7 @@ def remove_orphan_files_from_external_deployments():
                         headers = response.getheaders()
 
                         if response.status == requests.codes.not_found:
-                            print(f'File {file_path} not found at server. Removed. (No catch)')
+                            logger.warning('File %s not found at server. Removed.', file_path)
                             os.remove(file_path)
                             continue
 
@@ -99,22 +102,24 @@ def remove_orphan_files_from_external_deployments():
                                 break
 
                         if content_length is not None and file_size != content_length:
-                            print(
-                                f'File size {file_path} ({file_size}) does not match '
-                                f'the size on the server ({content_length}). Removed.'
+                            logger.warning(
+                                'File size %s (%d) does not match the size on the server (%d). Removed.',
+                                file_path,
+                                file_size,
+                                content_length,
                             )
                             os.remove(file_path)
 
                 except urllib.error.HTTPError as e:
-                    print(f'HTTP error accessing {url}: {e.code} {e.reason}')
+                    logger.error('HTTP error accessing %s: %d %s', url, e.code, e.reason)
                     if e.code == requests.codes.not_found:
-                        print(f'File {file_path} not found at server. Removed.')
+                        logger.warning('File %s not found at server. Removed.', file_path)
                         os.remove(file_path)
                 except ConnectionResetError as e:
-                    print(f'Connection reset accessing {url}: {e}')
+                    logger.error('Connection reset accessing %s: %s', url, e)
                 except urllib.error.URLError as e:
                     if requests.codes.not_found in str(e.reason):
-                        print(f'File {file_path} not found at server. Removed.')
+                        logger.warning('File %s not found at server. Removed.', file_path)
                         os.remove(file_path)
                     else:
-                        print(f'Error accessing {url}: {e}')
+                        logger.error('Error accessing %s: %s', url, e)
