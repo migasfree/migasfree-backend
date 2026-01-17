@@ -47,7 +47,7 @@ class Pacman(Pms):
         db_name = os.path.basename(path.rstrip('/'))
         extensions_pattern = ' '.join([f'*.{ext}' for ext in self.extensions])
 
-        _cmd = f"""
+        cmd = f"""
 function create_deploy {{
   cd {path}/{self.components}
   export GNUPGHOME={self.keys_path}/.gnupg
@@ -71,14 +71,14 @@ function create_deploy {{
 create_deploy
 """
 
-        return execute(_cmd)
+        return execute(cmd, shell=True)
 
     def package_info(self, package):
         """
         string package_info(string package)
         """
 
-        _cmd = f"""
+        cmd = f"""
 echo "## Info"
 echo "~~~"
 {self.name} --query --info --file {package}
@@ -95,28 +95,28 @@ echo "~~~"
 echo "~~~"
         """
 
-        _ret, _output, _error = execute(_cmd)
+        ret, output, error = execute(cmd, shell=True)
 
-        return _output if _ret == 0 else _error
+        return output if ret == 0 else error
 
     def package_metadata(self, package):
         """
         dict package_metadata(string package)
         """
 
-        _cmd = f'{self.name} --query --info --file {package}'
-        _ret, _output, _error = execute(_cmd)
-        if _ret == 0:
-            _output = _output.splitlines()
-            _pkg_info = {}
-            for _item in _output:
-                if _item.startswith(('Name', 'Version', 'Architecture')):
-                    key, value = _item.strip().split(':', 1)
-                    _pkg_info[key.strip()] = value.strip()
+        cmd = f'{self.name} --query --info --file {package}'
+        ret, output, error = execute(cmd, shell=True)
+        if ret == 0:
+            output = output.splitlines()
+            pkg_info = {}
+            for item in output:
+                if item.startswith(('Name', 'Version', 'Architecture')):
+                    key, value = item.strip().split(':', 1)
+                    pkg_info[key.strip()] = value.strip()
 
-            name = _pkg_info['Name']
-            version = _pkg_info['Version']
-            architecture = _pkg_info['Architecture']
+            name = pkg_info['Name']
+            version = pkg_info['Version']
+            architecture = pkg_info['Architecture']
         else:
             name, version, architecture = [None, None, None]
 
