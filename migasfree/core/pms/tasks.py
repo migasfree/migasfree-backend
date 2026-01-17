@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import os
 import shutil
 
@@ -26,6 +27,8 @@ from celery.signals import task_postrun
 from ...utils import get_secret, get_setting
 from ..decorators import unique_task
 from . import get_pms
+
+logger = logging.getLogger('celery')
 
 MIGASFREE_FQDN = get_setting('MIGASFREE_FQDN')
 MIGASFREE_PUBLIC_DIR = get_setting('MIGASFREE_PUBLIC_DIR')
@@ -124,9 +127,9 @@ def create_repository_metadata(deployment_id):
             symlink(pkg_tmp_path, os.path.join(stores_path, req.json()['store']['name']), package['fullname'])
 
     # Metadata in TMP
-    print(
-        "Creating repository metadata for deployment: '{}' in project: '{}'".format(deployment['name'], project['name'])
-    )  # DEBUG
+    logger.info(
+        "Creating repository metadata for deployment: '%s' in project: '%s'", deployment['name'], project['name']
+    )
 
     ret, output, error = pms.create_repository(path=tmp_path, arch=project['architecture'])
 
