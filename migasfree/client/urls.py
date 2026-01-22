@@ -23,7 +23,6 @@ from .views import (
     RepositoriesKeysView,
     SafeEndOfTransmissionView,
     SafeSynchronizationView,
-    SynchronizationAvailabilityView,
 )
 
 keys_patterns = [
@@ -39,11 +38,6 @@ public_patterns = [
 safe_patterns = [
     re_path(r'^eot/$', SafeEndOfTransmissionView.as_view()),
     re_path(r'^synchronizations/$', SafeSynchronizationView.as_view()),
-    re_path(
-        r'^synchronizations/availability/$',
-        SynchronizationAvailabilityView.as_view(),
-        name='synchronization_availability',
-    ),
 ]
 
 urlpatterns = [

@@ -24,7 +24,6 @@ from .safe import (
     SafeEndOfTransmissionView,
     SafeSynchronizationView,
 )
-from .sync import SynchronizationAvailabilityView
 from .token import (
     ComputerViewSet,
     ErrorViewSet,
@@ -55,7 +54,6 @@ __all__ = [
     'SafeEndOfTransmissionView',
     'SafeSynchronizationView',
     'StatusLogViewSet',
-    'SynchronizationAvailabilityView',
     'SynchronizationViewSet',
     'UserViewSet',
 ]
