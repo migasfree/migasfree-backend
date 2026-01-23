@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import timedelta
-from celery.schedules import crontab
 
+from celery.schedules import crontab
 
 REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
