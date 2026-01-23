@@ -1,2 +1,7 @@
 migasfree/**/__pycache__/
-migasfree/keys/secret_key.txt
+migasfree/keys/*
+migasfree_backend.egg-info/*
+pub/*
+tests/__pycache__/*
+.coverage
+celerybeat-schedule.db
