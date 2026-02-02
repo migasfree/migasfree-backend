@@ -33,6 +33,7 @@ class Wpt(Pms):
 
         self.name = 'wpt'
         self.relative_path = get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH')
+        self.keys_path = get_setting('MIGASFREE_KEYS_DIR')
         self.mimetype = ['application/gzip', 'application/x-gzip']
         self.extensions = ['tar.gz']
         self.architectures = ['x64']
@@ -67,6 +68,35 @@ class Wpt(Pms):
         packages_file = os.path.join(path, 'packages.json')
         with open(packages_file, 'w') as f:
             json.dump(repository_info, f, indent=2)
+
+        # Sign packages.json with GPG
+        gpg_home = os.path.join(self.keys_path, '.gnupg')
+        sig_file = os.path.join(path, 'packages.json.sig')
+
+        try:
+            import subprocess
+
+            subprocess.run(
+                [
+                    'gpg',
+                    '--no-tty',
+                    '--local-user',
+                    'migasfree-repository',
+                    '--homedir',
+                    gpg_home,
+                    '--detach-sign',
+                    '--armor',
+                    '--output',
+                    sig_file,
+                    packages_file,
+                ],
+                check=True,
+                capture_output=True,
+            )
+        except subprocess.CalledProcessError as e:
+            return 1, repository_info, f'Failed to sign repository: {e.stderr.decode()}'
+        except FileNotFoundError:
+            return 1, repository_info, 'GPG not available'
 
         return 0, repository_info, ''
 
