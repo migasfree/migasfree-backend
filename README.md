@@ -7,16 +7,15 @@
 
 **migasfree-backend** is the server component of the [Migasfree](https://migasfree.org/) systems management platform. It provides a complete REST API for centralized software configuration management across large computer fleets.
 
-## 📋 Description
+## 📚 Documentation
 
-Migasfree is an Open Source systems management tool that enables:
+We have comprehensive documentation available in the `docs/` directory:
 
-- **Centralized package management**: Software distribution and updates across multiple computers.
-- **Hardware and software inventory**: Detailed tracking and queryable database of your entire computer fleet.
-- **Scheduled deployments**: Sophisticated update planning with execution windows, attribute control, and status tracking.
-- **Error and fault management**: Automated monitoring of sync processes and system faults.
-- **Multi-platform support**: Natively handles multiple package management systems (APT, DNF, Pacman, Zypper, etc.).
-- **Attribute-based logic**: Target software or configurations based on custom computer attributes (department, hardware type, location).
+- **[Getting Started](docs/tutorials/getting-started.md)**: Start here!
+- **[Installation](docs/how-to/install-production.md)**: Production setup.
+- **[Configuration](docs/reference/configuration.md)**: Settings reference.
+- **[Core Concepts](docs/explanation/core-concepts.md)**: How Migasfree works.
+- **[API](docs/reference/api.md)**: REST API details.
 
 ## ✨ Key Features
 
@@ -29,43 +28,17 @@ Migasfree is an Open Source systems management tool that enables:
 
 ## 🚀 Getting Started
 
-If you are a developer looking to set up the project locally, please read our **[Onboarding Guide](ONBOARDING.md)**.
+For a quick local setup, check the **[Getting Started Tutorial](docs/tutorials/getting-started.md)**.
 
-### Quick Install
+### Quick Install (Users)
 
 ```bash
-# For users
 pip3 install migasfree-backend
-
-# For developers
-git clone https://github.com/migasfree/migasfree-backend.git
-cd migasfree-backend
-pip3 install -e .[dev]
-```
-
-## ⚙️ Configuration (Environment Variables)
-
-The following environment variables can be used to customize the behavior of the server:
-
-| Variable                 | Description                             | Default                           |
-| ------------------------ | --------------------------------------- | --------------------------------- |
-| `DJANGO_SETTINGS_MODULE` | Active Django settings module           | `migasfree.settings.development`  |
-| `MIGASFREE_SECRET_DIR`   | Directory where secrets are stored      | `/etc/migasfree-server/`          |
-| `MIGASFREE_KEYS_DIR`     | Directory for JWK and RSA keys          | `/var/lib/migasfree-server/keys/` |
-| `MIGASFREE_TMP_DIR`      | Temporary files directory               | `/tmp/migasfree-server/`          |
-| `MIGASFREE_INVALID_UUID` | Comma-separated list of UUIDs to ignore | (Default list)                    |
-
-## 📊 Monitoring & Stats
-
-Migasfree uses Redis to track synchronization metrics in real-time.
-
-### Update Stats Manually
-
-```bash
-python3 manage.py refresh_redis_syncs --since 2024 --until 2025
 ```
 
 ## 🏗️ Architecture Modules
+
+For a detailed deep-dive, read our **[Architecture Explanation](docs/explanation/architecture.md)**.
 
 | Module         | Purpose                                                                                 |
 | -------------- | --------------------------------------------------------------------------------------- |

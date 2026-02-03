@@ -8,118 +8,14 @@ By participating in this project, you agree to maintain a respectful and inclusi
 
 ## 🚀 Getting Started
 
-### Prerequisites
+Please refer to the **[Development Environment Setup](docs/how-to/set-up-dev-env.md)** guide for instructions on:
 
-- Python 3.10 or higher
-- PostgreSQL 12+
-- Redis 6+
-- Git
-
-### Development Setup
-
-1. **Fork the repository** on GitHub
-
-2. **Clone your fork**:
-
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/migasfree-backend.git
-   cd migasfree-backend
-   ```
-
-3. **Install development dependencies**:
-
-   ```bash
-   pip3 install -e .[dev]
-   ```
-
-4. **Run tests** to verify your setup:
-   ```bash
-   python3 -m pytest
-   ```
+- Prerequisites
+- Installation & Setup
+- Running Tests
+- Code Style & Linting
 
 ## 🔄 Development Workflow
-
-### Creating a Branch
-
-```bash
-git checkout -b feature/your-feature-name
-# or
-git checkout -b fix/your-bug-fix
-```
-
-Use prefixes:
-
-- `feature/` for new features
-- `fix/` for bug fixes
-- `docs/` for documentation changes
-- `refactor/` for code refactoring
-
-### Making Changes
-
-1. Write your code following our style guide
-2. Add or update tests as needed
-3. Update documentation if applicable
-4. Run the test suite before committing
-
-### Commit Messages
-
-Use clear, descriptive commit messages:
-
-```
-type: short description
-
-Longer description if needed.
-```
-
-Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
-
-Example:
-
-```
-feat: add APK package management support
-
-Implements PMS backend for Alpine Linux APK packages.
-```
-
-## 🧪 Testing
-
-### Running Tests
-
-```bash
-# All tests
-python3 -m pytest
-
-# With coverage
-python3 -m pytest --cov=migasfree
-
-# Specific test file
-python3 -m pytest tests/test_utils.py -v
-```
-
-### Writing Tests
-
-- Place tests in the `tests/` directory
-- Name test files as `test_*.py`
-- Use descriptive test method names
-- Include both positive and negative test cases
-
-## 📝 Code Style
-
-We use [Ruff](https://docs.astral.sh/ruff/) for linting and formatting.
-
-### Style Guidelines
-
-- Line length: 120 characters max
-- Use single quotes for strings
-- Follow PEP 8 naming conventions
-- Add type hints where practical
-
-### Running Linter
-
-```bash
-ruff check .
-ruff format .
-```
 
 ## 📤 Submitting Changes
 
