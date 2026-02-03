@@ -5,3 +5,4 @@ pub/*
 tests/__pycache__/*
 .coverage
 celerybeat-schedule.db
+review/*
