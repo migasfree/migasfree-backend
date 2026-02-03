@@ -34,6 +34,9 @@ CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
+CELERY_TASK_SOFT_TIME_LIMIT = 120  # sigterm after 2 minutes
+CELERY_TASK_TIME_LIMIT = 300  # sigkill after 5 minutes
+
 CELERY_IMPORTS = (
     'migasfree.stats.tasks',
     'migasfree.core.tasks',
