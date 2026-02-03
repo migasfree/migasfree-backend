@@ -1,0 +1,60 @@
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=migasfree_backend
+      - POSTGRES_USER=migasfree_backend
+      - POSTGRES_PASSWORD=migasfree_backend
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  web:
+    build: .
+    command: daphne -b 0.0.0.0 -p 8000 migasfree.asgi:application
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DJANGO_SETTINGS_MODULE=migasfree.settings.development
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  celery_worker:
+    build: .
+    command: celery -A migasfree worker -l INFO
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DJANGO_SETTINGS_MODULE=migasfree.settings.development
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  celery_beat:
+    build: .
+    command: celery -A migasfree beat -l INFO
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DJANGO_SETTINGS_MODULE=migasfree.settings.development
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+volumes:
+  postgres_data:
