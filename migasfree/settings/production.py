@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import importlib.util
+import os
 from pathlib import Path
 
 from .base import *
@@ -77,7 +78,7 @@ from .migasfree import (  # noqa: F401
 DEBUG = False
 TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
 
 MIGASFREE_PUBLIC_DIR = '/var/lib/migasfree-backend/public'
 MIGASFREE_KEYS_DIR = '/var/lib/migasfree-backend/keys'
