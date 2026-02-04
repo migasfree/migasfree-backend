@@ -169,12 +169,10 @@ class Wpt(Pms):
                         output += '~~~\n'
 
             if 'data/' in tar.getnames():
-                print('Contents of data directory:')
                 output += '## Files\n'
                 output += '~~~\n'
                 for member in tar.getmembers():
                     if member.name.startswith('data/'):
-                        print(member.name)
                         output += f'{member.name}\n'
 
                 output += '~~~\n'
