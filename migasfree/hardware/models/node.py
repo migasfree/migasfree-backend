@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -218,7 +218,18 @@ class Node(models.Model, MigasLink):
         return self.get_product() or self.name
 
     @staticmethod
-    def get_is_vm(computer_id):
+    def get_is_vm(computer_id, nodes=None):
+        if nodes is not None:
+            # Optimized in-memory filtering
+            # Filter for nodes with parent=None (roots) for this computer
+            roots = [n for n in nodes if n.computer_id == computer_id and n.parent_id is None]
+            if len(roots) == 1:
+                if roots[0].vendor in list(Node.VIRTUAL_MACHINES.keys()):
+                    return True
+                if Node.get_is_docker(computer_id, nodes):
+                    return True
+            return False
+
         query = Node.objects.filter(computer=computer_id, parent_id__isnull=True)
         if query.count() == 1:
             if query[0].vendor in list(Node.VIRTUAL_MACHINES.keys()):
@@ -230,7 +241,29 @@ class Node(models.Model, MigasLink):
         return False
 
     @staticmethod
-    def get_is_docker(computer_id):
+    def get_is_docker(computer_id, nodes=None):
+        if nodes is not None:
+            # Optimized in-memory filtering
+            docker_nodes = [
+                n
+                for n in nodes
+                if (
+                    n.computer_id == computer_id
+                    and n.name == 'network'
+                    and n.class_name == 'network'
+                    and n.description == 'Ethernet interface'
+                )
+            ]
+            if not docker_nodes:
+                try:
+                    computer = Computer.objects.get(id=computer_id)
+                    return computer.uuid.upper().startswith('00000000-0000-0000-0000-0242AC')
+                except ObjectDoesNotExist:
+                    pass  # Continue to return False
+                return False
+
+            return len(docker_nodes) == 1 and str(docker_nodes[0].serial).upper().startswith('02:42:AC')
+
         query = Node.objects.filter(
             computer=computer_id, name='network', class_name='network', description='Ethernet interface'
         )
@@ -246,7 +279,32 @@ class Node(models.Model, MigasLink):
         return query.count() == 1 and query[0].serial.upper().startswith('02:42:AC')
 
     @staticmethod
-    def get_is_laptop(computer_id):
+    def get_is_laptop(computer_id, nodes=None):
+        if nodes is not None:
+            # Optimized in-memory filtering
+            # Check for system node with chassis configuration in list
+            count = 0
+            for n in nodes:
+                if n.computer_id == computer_id and n.class_name == 'system':
+                    # We expect 'configuration_set' to be prefetched on nodes if we are using this optimization
+                    # But accessing foreign key reverse relation on a model instance that is part of a list
+                    # might require that the prefetch was done deeper.
+                    # Let's assume 'configuration_set' is available or we iterate.
+                    # Actually, the 'nodes' passed here are Node instances.
+                    # If we want to check configuration, we need access to it.
+                    # Assuming 'configuration_set' is prefetched.
+                    for config in n.configuration_set.all():
+                        if config.name == 'chassis' and config.value in [
+                            'portable',
+                            'laptop',
+                            'notebook',
+                            'sub-notebook',
+                            'convertible',
+                            'detachable',
+                        ]:
+                            count += 1
+            return count == 1
+
         return (
             Node.objects.filter(
                 computer=computer_id,
@@ -265,7 +323,23 @@ class Node(models.Model, MigasLink):
         )
 
     @staticmethod
-    def get_is_desktop(computer_id):
+    def get_is_desktop(computer_id, nodes=None):
+        if nodes is not None:
+            count = 0
+            for n in nodes:
+                if n.computer_id == computer_id and n.class_name == 'system':
+                    for config in n.configuration_set.all():
+                        if config.name == 'chassis' and config.value not in [
+                            'portable',
+                            'laptop',
+                            'notebook',
+                            'sub-notebook',
+                            'convertible',
+                            'detachable',
+                        ]:
+                            count += 1
+            return count == 1
+
         return (
             Node.objects.filter(
                 computer=computer_id,
@@ -287,17 +361,17 @@ class Node(models.Model, MigasLink):
         )
 
     @staticmethod
-    def get_product_system(computer_id):
-        if Node.get_is_docker(computer_id):
+    def get_product_system(computer_id, nodes=None):
+        if Node.get_is_docker(computer_id, nodes):
             return 'docker'
 
-        if Node.get_is_vm(computer_id):
+        if Node.get_is_vm(computer_id, nodes):
             return 'virtual'
 
-        if Node.get_is_laptop(computer_id):
+        if Node.get_is_laptop(computer_id, nodes):
             return 'laptop'
 
-        if Node.get_is_desktop(computer_id):
+        if Node.get_is_desktop(computer_id, nodes):
             return 'desktop'
 
         return ''

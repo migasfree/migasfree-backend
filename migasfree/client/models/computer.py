@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -593,6 +593,17 @@ class Computer(models.Model, MigasLink):
     def get_architecture(self):
         from ...hardware.models.node import Node
 
+        if hasattr(self, '_prefetched_objects_cache') and 'node_set' in self._prefetched_objects_cache:
+            nodes = self.node_set.all()
+            # In-memory search for processor
+            node = next((n for n in nodes if n.class_name == 'processor' and (n.width or 0) > 0), None)
+            if node:
+                return node.width
+
+            # In-memory search for system
+            node = next((n for n in nodes if n.class_name == 'system' and (n.width or 0) > 0), None)
+            return node.width if node else None
+
         node = Node.objects.filter(computer=self.id, class_name='processor', width__gt=0).first()
 
         if node:
@@ -610,7 +621,11 @@ class Computer(models.Model, MigasLink):
     def product_system(self):
         from ...hardware.models.node import Node
 
-        return Node.get_product_system(self.id)
+        nodes = None
+        if hasattr(self, '_prefetched_objects_cache') and 'node_set' in self._prefetched_objects_cache:
+            nodes = self.node_set.all()
+
+        return Node.get_product_system(self.id, nodes)
 
     @staticmethod
     def replacement(source, target):

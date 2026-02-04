@@ -80,7 +80,8 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
 
         return models.Computer.objects.scope(self.request.user.userprofile).prefetch_related(
             'tags',
-            Prefetch('node_set', queryset=Node.objects.filter(parent=None)),
+            'node_set',
+            'node_set__configuration_set',
         )
 
     def partial_update(self, request, *args, **kwargs):

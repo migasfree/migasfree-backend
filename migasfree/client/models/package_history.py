@@ -30,6 +30,7 @@ class PackageHistoryManager(models.Manager):
             .select_related(
                 'computer',
                 'package',
+                'package__project',
                 'computer__project',
                 'computer__sync_user',
             )
