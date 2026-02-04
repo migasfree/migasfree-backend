@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -86,3 +87,10 @@ class Model(models.Model, MigasLink):
         unique_together = (('device_type', 'manufacturer', 'name'),)
         ordering = ['manufacturer', 'name']
         db_table_comment = 'device models'
+        indexes = [
+            GinIndex(
+                fields=['name'],
+                opclasses=['gin_trgm_ops'],
+                name='model_name_gin',
+            ),
+        ]
