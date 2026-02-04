@@ -1,5 +1,5 @@
-# Copyright (c) 2016-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,26 +28,6 @@ from .events_project import EventProjectViewSet
 @permission_classes((permissions.IsAuthenticated,))
 class ErrorStatsViewSet(EventProjectViewSet):
     serializer_class = None
-
-    @action(methods=['get'], detail=False)
-    def unchecked(self, request):
-        data = Error.unchecked_by_project(request.user.userprofile)
-        inner_aliases = {'project__platform__id': 'platform_id', 'project__platform__name': 'name', 'count': 'value'}
-        outer_aliases = {
-            'project__name': 'name',
-            'project__id': 'project_id',
-            'project__platform__id': 'platform_id',
-            'count': 'value',
-        }
-
-        return Response(
-            {
-                'total': data['total'],
-                'inner': replace_keys(data['inner'], inner_aliases),
-                'outer': replace_keys(data['outer'], outer_aliases),
-            },
-            status=status.HTTP_200_OK,
-        )
 
     @action(methods=['get'], detail=False, url_path='status/project')
     def status_by_project(self, request):

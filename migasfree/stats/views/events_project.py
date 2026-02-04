@@ -1,5 +1,5 @@
-# Copyright (c) 2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2025-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2025-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,12 +26,34 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 
 from ...client.models import Error, Fault, Migration, Synchronization
+from ...utils import replace_keys
 from .events import EventViewSet, event_by_day, event_by_month, month_interval
 
 
 @extend_schema(tags=['stats'])
 @permission_classes((permissions.IsAuthenticated,))
 class EventProjectViewSet(EventViewSet):
+    @action(methods=['get'], detail=False)
+    def unchecked(self, request):
+        event_class = self.get_event_class()
+        data = event_class.unchecked_by_project(request.user.userprofile)
+        inner_aliases = {'project__platform__id': 'platform_id', 'project__platform__name': 'name', 'count': 'value'}
+        outer_aliases = {
+            'project__name': 'name',
+            'project__id': 'project_id',
+            'project__platform__id': 'platform_id',
+            'count': 'value',
+        }
+
+        return Response(
+            {
+                'total': data['total'],
+                'inner': replace_keys(data['inner'], inner_aliases),
+                'outer': replace_keys(data['outer'], outer_aliases),
+            },
+            status=status.HTTP_200_OK,
+        )
+
     def get_event_class(self):
         patterns = {
             'error': Error,

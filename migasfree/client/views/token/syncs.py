@@ -16,13 +16,11 @@
 
 from drf_spectacular.openapi import OpenApiParameter
 from drf_spectacular.utils import extend_schema
-from rest_framework import mixins, permissions, viewsets
-from rest_framework.decorators import permission_classes
+from rest_framework import mixins
 
-from ....core.views import ExportViewSet, MigasViewSet
-from ....mixins import DatabaseCheckMixin
 from ... import models, serializers
 from ...filters import SynchronizationFilter
+from .base import BaseClientViewSet
 
 
 @extend_schema(tags=['syncs'])
@@ -34,21 +32,16 @@ from ...filters import SynchronizationFilter
     ],
     methods=['GET'],
 )
-@permission_classes((permissions.DjangoModelPermissions,))
 class SynchronizationViewSet(
-    DatabaseCheckMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-    MigasViewSet,
-    ExportViewSet,
+    BaseClientViewSet,
 ):
     queryset = models.Synchronization.objects.all()
     serializer_class = serializers.SynchronizationSerializer
     filterset_class = SynchronizationFilter
     search_fields = ('user__name', 'user__fullname', 'computer__name', 'consumer')
-    ordering_fields = '__all__'
     ordering = ('-created_at',)
 
     def get_serializer_class(self):
@@ -56,9 +49,3 @@ class SynchronizationViewSet(
             return serializers.SynchronizationWriteSerializer
 
         return serializers.SynchronizationSerializer
-
-    def get_queryset(self):
-        if self.request is None:
-            return models.Synchronization.objects.none()
-
-        return models.Synchronization.objects.scope(self.request.user.userprofile)
