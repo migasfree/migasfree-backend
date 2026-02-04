@@ -18,7 +18,7 @@
 from celery import shared_task
 from celery.exceptions import Reject
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import connection
+from django.db import connection, transaction
 from django.utils import timezone
 
 from ..core.models import Package
@@ -48,108 +48,110 @@ def update_software_inventory(computer_id, inventory):
 
 def update_software_inventory_raw(pkgs, computer_id, project_id):
     now = timezone.localtime(timezone.now())
-    cursor = connection.cursor()
 
-    if not pkgs:
-        return
+    with transaction.atomic():
+        cursor = connection.cursor()
 
-    # GENERATE PLACEHOLDERS AND PARAMS
-    # pkgs is list of (name, version, architecture, fullname)
-    # VALUES (%s, %s, %s, %s), (%s, %s, %s, %s), ...
-    placeholders = ','.join(['(%s, %s, %s, %s)'] * len(pkgs))
-    params = [item for sublist in pkgs for item in sublist]
+        if not pkgs:
+            return
 
-    # UPDATE UNINSTALL M2M
-    sql = f"""
-    SELECT P.package_id
-    FROM (VALUES {placeholders}) tmp(name, version, architecture, fullname)
-    RIGHT JOIN (
-        SELECT core_package.id as package_id, core_package.name,
-            core_package.version, core_package.architecture, core_package.fullname
-        FROM core_package
-            LEFT JOIN client_packagehistory ON core_package.id=client_packagehistory.package_id
-        WHERE client_packagehistory.computer_id={computer_id}
-            AND core_package.project_id={project_id}
-    ) AS P ON tmp.name=P.name AND tmp.version=P.version AND tmp.architecture=P.architecture
-    WHERE tmp.name IS NULL;
-    """
-    cursor.execute(sql, params)
-    to_remove = [x[0] for x in cursor.fetchall()]
+        # GENERATE PLACEHOLDERS AND PARAMS
+        # pkgs is list of (name, version, architecture, fullname)
+        # VALUES (%s, %s, %s, %s), (%s, %s, %s, %s), ...
+        placeholders = ','.join(['(%s, %s, %s, %s)'] * len(pkgs))
+        params = [item for sublist in pkgs for item in sublist]
 
-    if to_remove:
-        # Secure this IN clause too
-        placeholders_remove = ','.join(['%s'] * len(to_remove))
+        # UPDATE UNINSTALL M2M
         sql = f"""
-        UPDATE client_packagehistory SET uninstall_date=%s
-        WHERE client_packagehistory.package_id IN ({placeholders_remove})
-            AND uninstall_date IS NULL
-            AND computer_id=%s;
+        SELECT P.package_id
+        FROM (VALUES {placeholders}) tmp(name, version, architecture, fullname)
+        RIGHT JOIN (
+            SELECT core_package.id as package_id, core_package.name,
+                core_package.version, core_package.architecture, core_package.fullname
+            FROM core_package
+                LEFT JOIN client_packagehistory ON core_package.id=client_packagehistory.package_id
+            WHERE client_packagehistory.computer_id={computer_id}
+                AND core_package.project_id={project_id}
+        ) AS P ON tmp.name=P.name AND tmp.version=P.version AND tmp.architecture=P.architecture
+        WHERE tmp.name IS NULL;
         """
-        cursor.execute(sql, [str(now), *to_remove, computer_id])
+        cursor.execute(sql, params)
+        to_remove = [x[0] for x in cursor.fetchall()]
 
-    # INSERT PKG
-    sql = f"""
-    SELECT tmp.name, tmp.version, tmp.architecture, tmp.fullname
-    FROM (VALUES {placeholders}) tmp(name, version, architecture, fullname)
-    LEFT JOIN (
-        SELECT core_package.name, core_package.version,
-            core_package.architecture, core_package.fullname
-        FROM core_package
-        WHERE core_package.project_id={project_id}
-    ) AS P ON tmp.name=P.name AND tmp.version=P.version
-        AND tmp.architecture=P.architecture AND tmp.fullname=P.fullname
-    WHERE P.name IS NULL;
-    """
-    cursor.execute(sql, params)
-    to_add = [
-        (
-            x[0],  # name
-            x[1],  # version
-            x[2],  # architecture
-            x[3],  # fullname
-            project_id,
-        )
-        for x in cursor.fetchall()
-    ]
+        if to_remove:
+            # Secure this IN clause too
+            placeholders_remove = ','.join(['%s'] * len(to_remove))
+            sql = f"""
+            UPDATE client_packagehistory SET uninstall_date=%s
+            WHERE client_packagehistory.package_id IN ({placeholders_remove})
+                AND uninstall_date IS NULL
+                AND computer_id=%s;
+            """
+            cursor.execute(sql, [str(now), *to_remove, computer_id])
 
-    if to_add:
-        # Use executemany or bulk_create via ORM would be better, but sticking to SQL structure for now.
-        # Constructing VALUES for INSERT
-        placeholders_insert = ','.join(['(%s, %s, %s, %s, %s)'] * len(to_add))
-        params_insert = [item for sublist in to_add for item in sublist]
-
+        # INSERT PKG
         sql = f"""
-        INSERT INTO core_package(name, version, architecture, fullname, project_id)
-        VALUES {placeholders_insert};
-        """
-        cursor.execute(sql, params_insert)
-
-    # INSERT M2M
-    # Need placeholders for the VALUES inside the subquery
-    sql = f"""
-    SELECT P.id
-    FROM (VALUES {placeholders}) tmp(name, version, architecture, fullname)
-    RIGHT JOIN (
-        SELECT core_package.id AS id, core_package.name, core_package.version, core_package.architecture
-        FROM core_package
+        SELECT tmp.name, tmp.version, tmp.architecture, tmp.fullname
+        FROM (VALUES {placeholders}) tmp(name, version, architecture, fullname)
         LEFT JOIN (
-            SELECT package_id, computer_id
-            FROM client_packagehistory
-            WHERE computer_id={computer_id} AND uninstall_date IS NULL
-        ) AS C ON core_package.id=C.package_id
-        WHERE core_package.project_id={project_id} AND C.computer_id IS NULL
-    ) AS P ON tmp.name=P.name AND tmp.version=P.version AND tmp.architecture=P.architecture
-    WHERE tmp.name IS NOT NULL;
-    """
-    cursor.execute(sql, params)
-    to_m2m_history = [(computer_id, x[0], str(now)) for x in cursor.fetchall()]
-
-    if to_m2m_history:
-        placeholders_m2m = ','.join(['(%s, %s, %s)'] * len(to_m2m_history))
-        params_m2m = [item for sublist in to_m2m_history for item in sublist]
-
-        sql = f"""
-        INSERT INTO client_packagehistory(computer_id, package_id, install_date)
-        VALUES {placeholders_m2m};
+            SELECT core_package.name, core_package.version,
+                core_package.architecture, core_package.fullname
+            FROM core_package
+                WHERE core_package.project_id={project_id}
+        ) AS P ON tmp.name=P.name AND tmp.version=P.version
+            AND tmp.architecture=P.architecture AND tmp.fullname=P.fullname
+        WHERE P.name IS NULL;
         """
-        cursor.execute(sql, params_m2m)
+        cursor.execute(sql, params)
+        to_add = [
+            (
+                x[0],  # name
+                x[1],  # version
+                x[2],  # architecture
+                x[3],  # fullname
+                project_id,
+            )
+            for x in cursor.fetchall()
+        ]
+
+        if to_add:
+            # Use executemany or bulk_create via ORM would be better, but sticking to SQL structure for now.
+            # Constructing VALUES for INSERT
+            placeholders_insert = ','.join(['(%s, %s, %s, %s, %s)'] * len(to_add))
+            params_insert = [item for sublist in to_add for item in sublist]
+
+            sql = f"""
+            INSERT INTO core_package(name, version, architecture, fullname, project_id)
+            VALUES {placeholders_insert};
+            """
+            cursor.execute(sql, params_insert)
+
+        # INSERT M2M
+        # Need placeholders for the VALUES inside the subquery
+        sql = f"""
+        SELECT P.id
+        FROM (VALUES {placeholders}) tmp(name, version, architecture, fullname)
+        RIGHT JOIN (
+            SELECT core_package.id AS id, core_package.name, core_package.version, core_package.architecture
+            FROM core_package
+            LEFT JOIN (
+                SELECT package_id, computer_id
+                FROM client_packagehistory
+                WHERE computer_id={computer_id} AND uninstall_date IS NULL
+            ) AS C ON core_package.id=C.package_id
+            WHERE core_package.project_id={project_id} AND C.computer_id IS NULL
+        ) AS P ON tmp.name=P.name AND tmp.version=P.version AND tmp.architecture=P.architecture
+        WHERE tmp.name IS NOT NULL;
+        """
+        cursor.execute(sql, params)
+        to_m2m_history = [(computer_id, x[0], str(now)) for x in cursor.fetchall()]
+
+        if to_m2m_history:
+            placeholders_m2m = ','.join(['(%s, %s, %s)'] * len(to_m2m_history))
+            params_m2m = [item for sublist in to_m2m_history for item in sublist]
+
+            sql = f"""
+            INSERT INTO client_packagehistory(computer_id, package_id, install_date)
+            VALUES {placeholders_m2m};
+            """
+            cursor.execute(sql, params_m2m)
