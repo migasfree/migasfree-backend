@@ -9,7 +9,6 @@ Welcome to the **migasfree-backend** documentation. This project is the server c
 ## 🛠️ How-to Guides
 
 - **[Install in Production](how-to/install-production.md)**: Production setup on Linux (Debian/Ubuntu).
-- **[Set Up Development Environment](how-to/set-up-dev-env.md)**: Preparing your local machine for contributing.
 - **[Run Tests](how-to/run-tests.md)**: Executing the test suite and checking code quality.
 - **[Add a New PMS](how-to/add-new-pms.md)**: Extending the backend with new package managers.
 
@@ -17,7 +16,6 @@ Welcome to the **migasfree-backend** documentation. This project is the server c
 
 - **[Core Concepts](explanation/core-concepts.md)**: Understanding Projects, Deployments, and the Sync Cycle.
 - **[Architecture](explanation/architecture.md)**: Deep dive into Django apps and databases.
-- **[Project Structure](explanation/project-structure.md)**: Codebase organization and patterns.
 
 ## 📖 Reference
 

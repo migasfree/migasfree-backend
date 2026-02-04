@@ -8,7 +8,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 
 ## 🚀 Getting Started
 
-Please refer to the **[Development Environment Setup](docs/how-to/set-up-dev-env.md)** guide for instructions on:
+Please refer to the **[Getting Started Tutorial](docs/tutorials/getting-started.md)** for instructions on:
 
 - Prerequisites
 - Installation & Setup
