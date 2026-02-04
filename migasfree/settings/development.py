@@ -33,6 +33,9 @@ from .celery import (  # noqa: F401
     CELERY_TASK_TIME_LIMIT,
     CELERY_TIMEZONE,
     CHANNEL_LAYERS,
+    REDIS_DB,
+    REDIS_HOST,
+    REDIS_PORT,
     SESSION_CACHE_ALIAS,
     SESSION_ENGINE,
 )
