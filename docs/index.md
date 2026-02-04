@@ -21,6 +21,7 @@ Welcome to the **migasfree-backend** documentation. This project is the server c
 
 - **[Configuration](reference/configuration.md)**: Environment variables and settings.
 - **[API Reference](reference/api.md)**: Authentication and Endpoints.
+- **[Data Model](reference/data-model.md)**: Entity-Relationship diagram and schema details.
 
 ## 🔗 Useful Links
 
