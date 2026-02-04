@@ -16,13 +16,11 @@
 
 from drf_spectacular.openapi import OpenApiParameter
 from drf_spectacular.utils import extend_schema
-from rest_framework import mixins, permissions, viewsets
-from rest_framework.decorators import permission_classes
+from rest_framework import mixins
 
-from ....core.views import ExportViewSet, MigasViewSet
-from ....mixins import DatabaseCheckMixin
 from ... import models, serializers
 from ...filters import ErrorFilter
+from .base import BaseClientViewSet
 
 
 @extend_schema(tags=['errors'])
@@ -34,22 +32,17 @@ from ...filters import ErrorFilter
     ],
     methods=['GET'],
 )
-@permission_classes((permissions.DjangoModelPermissions,))
 class ErrorViewSet(
-    DatabaseCheckMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-    MigasViewSet,
-    ExportViewSet,
+    BaseClientViewSet,
 ):
     queryset = models.Error.objects.all()
     serializer_class = serializers.ErrorSerializer
     filterset_class = ErrorFilter
     search_fields = ('created_at', 'description')
-    ordering_fields = '__all__'
     ordering = ('-created_at',)
 
     def get_serializer_class(self):
@@ -57,9 +50,3 @@ class ErrorViewSet(
             return serializers.ErrorWriteSerializer
 
         return serializers.ErrorSerializer
-
-    def get_queryset(self):
-        if self.request is None:
-            return models.Error.objects.none()
-
-        return models.Error.objects.scope(self.request.user.userprofile)

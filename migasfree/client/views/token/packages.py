@@ -16,13 +16,11 @@
 
 from drf_spectacular.openapi import OpenApiParameter
 from drf_spectacular.utils import extend_schema
-from rest_framework import mixins, permissions, viewsets
-from rest_framework.decorators import permission_classes
+from rest_framework import mixins
 
-from ....core.views import ExportViewSet, MigasViewSet
-from ....mixins import DatabaseCheckMixin
 from ... import models, serializers
 from ...filters import PackageHistoryFilter
+from .base import BaseClientViewSet
 
 
 @extend_schema(tags=['packages-history'])
@@ -37,27 +35,16 @@ from ...filters import PackageHistoryFilter
     ],
     methods=['GET'],
 )
-@permission_classes((permissions.DjangoModelPermissions,))
 class PackageHistoryViewSet(
-    DatabaseCheckMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
-    MigasViewSet,
-    ExportViewSet,
+    BaseClientViewSet,
 ):
     queryset = models.PackageHistory.objects.all()
     serializer_class = serializers.PackageHistorySerializer
     filterset_class = PackageHistoryFilter
     search_fields = ('computer__name', 'package__fullname')
-    ordering_fields = '__all__'
     ordering = (
         'computer__name',
         'package__fullname',
     )
-
-    def get_queryset(self):
-        if self.request is None:
-            return models.PackageHistory.objects.none()
-
-        return models.PackageHistory.objects.scope(self.request.user.userprofile)

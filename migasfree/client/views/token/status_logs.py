@@ -16,13 +16,11 @@
 
 from drf_spectacular.openapi import OpenApiParameter
 from drf_spectacular.utils import extend_schema
-from rest_framework import mixins, permissions, viewsets
-from rest_framework.decorators import permission_classes
+from rest_framework import mixins
 
-from ....core.views import ExportViewSet, MigasViewSet
-from ....mixins import DatabaseCheckMixin
 from ... import models, serializers
 from ...filters import StatusLogFilter
+from .base import BaseClientViewSet
 
 
 @extend_schema(tags=['status-logs'])
@@ -34,25 +32,14 @@ from ...filters import StatusLogFilter
     ],
     methods=['GET'],
 )
-@permission_classes((permissions.DjangoModelPermissions,))
 class StatusLogViewSet(
-    DatabaseCheckMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-    MigasViewSet,
-    ExportViewSet,
+    BaseClientViewSet,
 ):
     queryset = models.StatusLog.objects.all()
     serializer_class = serializers.StatusLogSerializer
     filterset_class = StatusLogFilter
     search_fields = ('status', 'computer__name')
-    ordering_fields = '__all__'
     ordering = ('-created_at',)
-
-    def get_queryset(self):
-        if self.request is None:
-            return models.StatusLog.objects.none()
-
-        return models.StatusLog.objects.scope(self.request.user.userprofile)
