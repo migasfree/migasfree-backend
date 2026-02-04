@@ -19,7 +19,6 @@ from datetime import datetime
 from operator import gt, le
 
 from django.conf import settings
-from django.db.models import Prefetch
 from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
