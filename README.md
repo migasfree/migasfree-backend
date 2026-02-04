@@ -5,7 +5,7 @@
 [![Django 5.x](https://img.shields.io/badge/django-5.x-green.svg)](https://www.djangoproject.com/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
-**migasfree-backend** is the server component of the [Migasfree](https://migasfree.org/) systems management platform. It provides a complete REST API for centralized software configuration management across large computer fleets.
+**migasfree-backend** is the server component of the **Migasfree Server Suite 5**. It provides a complete REST API for centralized software configuration management across large computer fleets.
 
 ## 📚 Documentation
 
@@ -42,12 +42,12 @@ For a detailed deep-dive, read our **[Architecture Explanation](docs/explanation
 
 | Module         | Purpose                                                                                 |
 | -------------- | --------------------------------------------------------------------------------------- |
-| **`client`**   | Manages computers (`Computer`), synchronizations, and incident reports (errors/faults). |
+| **`client`**   | Manages computers (`Computer`), synchronizations (v5), and incident reports.            |
 | **`core`**     | The backbone: projects, deployments, package sets, and properties.                      |
 | **`device`**   | Management of peripheral hardware such as drivers and network printers.                 |
 | **`hardware`** | Highly detailed hardware inventory (CPUs, RAM, Disks, Motherboards).                    |
 | **`stats`**    | Logic for aggregating and serving historical data for the dashboard.                    |
-| **`api_v4`**   | The API layer optimized for communication with the Migasfree clients.                   |
+| **`api_v4`**   | Legacy API layer for backward compatibility with Migasfree Client v4.                   |
 
 ## 📄 License
 
