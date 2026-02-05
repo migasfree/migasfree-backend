@@ -134,13 +134,7 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
         computer = get_object_or_404(Computer, pk=request.GET.get('cid', 0))
         query = request.GET.get('q', '')
 
-        results = (
-            Device.objects.filter(available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True))
-            .order_by('name', 'model__name')
-            .distinct()
-        )
-        if query:
-            results = results.filter(Q(name__icontains=query) | Q(data__icontains=query))
+        results = Device.objects.available_for_computer(computer, query)
 
         page = self.paginate_queryset(results)
         if page is not None:
