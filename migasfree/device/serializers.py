@@ -1,5 +1,5 @@
-# Copyright (c) 2016-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -116,6 +116,9 @@ class DeviceSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.IntegerField)
     def get_total_computers(self, obj):
+        if hasattr(obj, 'total_computers_annotated'):
+            return obj.total_computers_annotated
+
         return obj.total_computers(user=self.context['request'].user if self.context.get('request') else None)
 
     @extend_schema_field(serializers.JSONField)

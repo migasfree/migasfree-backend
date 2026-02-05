@@ -1,5 +1,5 @@
-# Copyright (c) 2016-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.db.models import Prefetch, Q
+from django.db.models import Count, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.openapi import OpenApiParameter
 from drf_spectacular.utils import extend_schema
@@ -95,7 +95,26 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
         if self.request is None:
             return Device.objects.none()
 
-        return Device.objects.scope(self.request.user.userprofile)
+        qs = Device.objects.scope(self.request.user.userprofile)
+
+        filters = Q(logical__attributes__computer__status__in=Computer.PRODUCTIVE_STATUS)
+        if not self.request.user.userprofile.is_view_all():
+            filters &= Q(logical__attributes__computer__id__in=self.request.user.userprofile.get_computers())
+
+        return (
+            qs.select_related(
+                'connection',
+                'connection__device_type',
+                'model',
+                'model__manufacturer',
+                'model__device_type',
+            )
+            .prefetch_related(
+                'available_for_attributes',
+                'model__connections',
+            )
+            .annotate(total_computers_annotated=Count('logical__attributes__computer', filter=filters, distinct=True))
+        )
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
