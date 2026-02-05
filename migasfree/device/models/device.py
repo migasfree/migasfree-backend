@@ -16,6 +16,7 @@
 
 import json
 
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -226,3 +227,7 @@ class Device(models.Model, MigasLink):
         verbose_name_plural = _('Devices')
         unique_together = (('connection', 'name'),)
         db_table_comment = 'device inventory'
+        indexes = [
+            GinIndex(fields=['name'], opclasses=['gin_trgm_ops'], name='device_name_trgm_idx'),
+            GinIndex(fields=['data'], opclasses=['gin_trgm_ops'], name='device_data_trgm_idx'),
+        ]
