@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Prefetch, Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.openapi import OpenApiParameter
 from drf_spectacular.utils import extend_schema
@@ -95,26 +95,7 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
         if self.request is None:
             return Device.objects.none()
 
-        qs = Device.objects.scope(self.request.user.userprofile)
-
-        filters = Q(logical__attributes__computer__status__in=Computer.PRODUCTIVE_STATUS)
-        if not self.request.user.userprofile.is_view_all():
-            filters &= Q(logical__attributes__computer__id__in=self.request.user.userprofile.get_computers())
-
-        return (
-            qs.select_related(
-                'connection',
-                'connection__device_type',
-                'model',
-                'model__manufacturer',
-                'model__device_type',
-            )
-            .prefetch_related(
-                'available_for_attributes',
-                'model__connections',
-            )
-            .annotate(total_computers_annotated=Count('logical__attributes__computer', filter=filters, distinct=True))
-        )
+        return Device.objects.scope(self.request.user.userprofile).with_metadata(self.request.user.userprofile)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -134,7 +115,7 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
         computer = get_object_or_404(Computer, pk=request.GET.get('cid', 0))
         query = request.GET.get('q', '')
 
-        results = Device.objects.available_for_computer(computer, query)
+        results = Device.objects.available_for_computer(computer, query, request.user.userprofile)
 
         page = self.paginate_queryset(results)
         if page is not None:

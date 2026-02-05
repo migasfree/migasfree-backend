@@ -26,28 +26,45 @@ from .connection import Connection
 from .model import Model
 
 
+class DeviceQuerySet(models.QuerySet):
+    def with_metadata(self, userprofile=None):
+        from django.db.models import Count, Q
+
+        from ...client.models import Computer
+
+        filters = Q(logical__attributes__computer__status__in=Computer.PRODUCTIVE_STATUS)
+        if userprofile and not userprofile.is_view_all():
+            filters &= Q(logical__attributes__computer__id__in=userprofile.get_computers())
+
+        return self.prefetch_related(
+            'available_for_attributes',
+            'model__connections',
+        ).annotate(total_computers_annotated=Count('logical__attributes__computer', filter=filters, distinct=True))
+
+    def scope(self, userprofile):
+        if userprofile and not userprofile.is_view_all():
+            return self.filter(logical__attributes__in=userprofile.get_attributes()).distinct()
+
+        return self
+
+
 class DeviceManager(models.Manager):
     def get_queryset(self):
-        return (
-            super()
-            .get_queryset()
-            .select_related(
-                'connection',
-                'connection__device_type',
-                'model',
-                'model__manufacturer',
-                'model__device_type',
-            )
+        return DeviceQuerySet(self.model, using=self._db).select_related(
+            'connection',
+            'connection__device_type',
+            'model',
+            'model__manufacturer',
+            'model__device_type',
         )
 
-    def scope(self, user):
-        qs = self.get_queryset()
-        if user and not user.is_view_all():
-            qs = qs.filter(logical__attributes__in=user.get_attributes()).distinct()
+    def with_metadata(self, userprofile=None):
+        return self.get_queryset().with_metadata(userprofile)
 
-        return qs
+    def scope(self, userprofile):
+        return self.get_queryset().scope(userprofile)
 
-    def available_for_computer(self, computer, query=''):
+    def available_for_computer(self, computer, query='', userprofile=None):
         from django.db.models import Q
 
         results = (
@@ -58,7 +75,7 @@ class DeviceManager(models.Manager):
         if query:
             results = results.filter(Q(name__icontains=query) | Q(data__icontains=query))
 
-        return results
+        return results.with_metadata(userprofile)
 
 
 class Device(models.Model, MigasLink):
@@ -110,8 +127,13 @@ class Device(models.Model, MigasLink):
         }
 
     def total_computers(self, user=None):
-        if user and not user.userprofile.is_view_all():
-            queryset = self.related_objects('computer', user=user.userprofile)
+        userprofile = None
+        if user:
+            # Check if user is User or UserProfile
+            userprofile = getattr(user, 'userprofile', user)
+
+        if userprofile and not userprofile.is_view_all():
+            queryset = self.related_objects('computer', user=userprofile)
         else:
             queryset = self.related_objects('computer')
 
