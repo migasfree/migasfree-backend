@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -108,7 +108,7 @@ class InternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
     def metadata(self, request, pk=None):
         deploy = self.get_object()
         tasks.create_repository_metadata.apply_async(
-            queue=f'pms-{deploy.pms().name}', kwargs={'deployment_id': deploy.id}
+            queue=f'pms-{deploy.pms().name}', kwargs={'payload': deploy.get_repository_metadata_payload()}
         )
 
         return Response({'detail': gettext('Operation received')}, status=status.HTTP_200_OK)

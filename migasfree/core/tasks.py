@@ -131,3 +131,23 @@ def remove_orphan_files_from_external_deployments():
                         os.remove(file_path)
                     else:
                         logger.error('Error accessing %s: %s', url, e)
+
+
+@shared_task
+def process_notification_queue():
+    import redis
+
+    from ..client.models import Notification
+
+    con = redis.from_url(CELERY_BROKER_URL)
+    messages = []
+    while True:
+        msg = con.rpop('migasfree:notifications:queue')
+        if not msg:
+            break
+        messages.append(msg.decode('utf-8'))
+    con.close()
+
+    if messages:
+        Notification.objects.bulk_create([Notification(message=msg) for msg in messages])
+        logger.info('Processed %d notifications from Redis queue', len(messages))

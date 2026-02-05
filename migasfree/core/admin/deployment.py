@@ -104,11 +104,18 @@ class DeploymentAdmin(admin.ModelAdmin):
 
         if should_create_metadata:
             tasks.create_repository_metadata.apply_async(
-                queue=f'pms-{obj.pms().name}', kwargs={'deployment_id': obj.id}
+                queue=f'pms-{obj.pms().name}', kwargs={'payload': obj.get_repository_metadata_payload()}
             )
 
             if has_slug_changed and not is_new:
-                tasks.remove_repository_metadata.delay(obj.id, form.initial.get('slug'))
+                removal_payload = {
+                    'project': {
+                        'slug': obj.project.slug,
+                        'pms': obj.project.pms,
+                    },
+                    'slug': form.initial.get('slug'),
+                }
+                tasks.remove_repository_metadata.delay(removal_payload)
 
     def get_queryset(self, request):
         self.user = request.user

@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ class SafePackagerConnectionMixin(SafeConnectionMixin):
 def check_repository_metadata(package_id):
     for deploy in Deployment.objects.filter(available_packages__id=package_id):
         tasks.create_repository_metadata.apply_async(
-            queue=f'pms-{deploy.pms().name}', kwargs={'deployment_id': deploy.id}
+            queue=f'pms-{deploy.pms().name}', kwargs={'payload': deploy.get_repository_metadata_payload()}
         )
 
 

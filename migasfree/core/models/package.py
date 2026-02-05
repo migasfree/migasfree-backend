@@ -310,7 +310,7 @@ def _update_deployments(instance, delete=False):
             deploy.available_packages.remove(instance)
 
         tasks.create_repository_metadata.apply_async(
-            queue=f'pms-{deploy.pms().name}', kwargs={'deployment_id': deploy.id}
+            queue=f'pms-{deploy.pms().name}', kwargs={'payload': deploy.get_repository_metadata_payload()}
         )
 
 

@@ -472,6 +472,42 @@ class Deployment(models.Model, MigasLink):
             not user.userprofile.domains.count() or self.domain == user.userprofile.domain_preference
         )
 
+    def get_repository_metadata_payload(self):
+        """
+        Returns a dictionary with all the data needed by the create_repository_metadata task,
+        avoiding API calls from the worker.
+        """
+        # Collect all packages (direct + package sets)
+        packages = list(self.available_packages.select_related('store').all())
+
+        for package_set in self.available_package_sets.prefetch_related('packages__store'):
+            packages.extend(list(package_set.packages.all()))
+
+        # Serialize packages
+        packages_data = []
+        for pkg in packages:
+            if pkg.store:  # Only include packages with a store
+                packages_data.append(
+                    {
+                        'id': pkg.id,
+                        'fullname': pkg.fullname,
+                        'store': {'name': pkg.store.name},
+                    }
+                )
+
+        return {
+            'id': self.id,
+            'name': self.name,
+            'slug': self.slug,
+            'project': {
+                'name': self.project.name,
+                'slug': self.project.slug,
+                'pms': self.project.pms,
+                'architecture': self.project.architecture,
+            },
+            'available_packages': packages_data,
+        }
+
     class Meta:
         app_label = 'core'
         verbose_name = _('Deployment')

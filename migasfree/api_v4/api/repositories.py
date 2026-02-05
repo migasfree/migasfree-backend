@@ -43,7 +43,9 @@ def create_repositories_package(package_name, project_name):
 
         for deploy in deployments:
             pms_name = deploy.pms().name
-            create_repository_metadata.apply_async(queue=f'pms-{pms_name}', kwargs={'deployment_id': deploy.id})
+            create_repository_metadata.apply_async(
+                queue=f'pms-{pms_name}', kwargs={'payload': deploy.get_repository_metadata_payload()}
+            )
             logger.debug('Queued repository metadata creation for deployment %s', deploy.name)
     except ObjectDoesNotExist:
         logger.warning('Package %s not found in project %s', package_name, project_name)

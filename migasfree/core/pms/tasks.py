@@ -19,12 +19,10 @@ import os
 import shutil
 
 import redis
-import requests
 from celery import Celery
-from celery.exceptions import Reject
 from celery.signals import task_postrun
 
-from ...utils import get_secret, get_setting
+from ...utils import get_setting
 from ..decorators import unique_task
 from . import get_pms
 
@@ -37,18 +35,6 @@ MIGASFREE_TMP_TRAILING_PATH = get_setting('MIGASFREE_TMP_TRAILING_PATH')
 
 CELERY_BROKER_URL = get_setting('CELERY_BROKER_URL')
 
-AUTH_TOKEN = f'Token {get_secret("token_pms")}'
-
-API_URL = f'http://{MIGASFREE_FQDN}/api/v1/token'
-
-REQUESTS_OK_CODES = [
-    requests.codes.ok,
-    requests.codes.created,
-    requests.codes.moved,
-    requests.codes.found,
-    requests.codes.temporary_redirect,
-    requests.codes.resume,
-]
 
 app = Celery('migasfree', broker=CELERY_BROKER_URL, backend=CELERY_BROKER_URL, fixups=[])
 
@@ -78,14 +64,10 @@ def package_info(pms_name, package):
 
 @app.task(bind=True)
 @unique_task(app)
-def create_repository_metadata(deployment_id):
-    req = requests.get(f'{API_URL}/deployments/{deployment_id}/', headers={'Authorization': AUTH_TOKEN})
-
-    if req.status_code not in REQUESTS_OK_CODES:
-        raise Reject(reason='Invalid credentials. Review token.')
-
-    deployment = req.json()
+def create_repository_metadata(payload):
+    deployment = payload
     project = deployment['project']
+    deployment_id = deployment['id']
 
     pms = get_pms(project['pms'])
 
@@ -110,21 +92,9 @@ def create_repository_metadata(deployment_id):
     if not os.path.exists(pkg_tmp_path):
         os.makedirs(pkg_tmp_path)
 
-    # Packages
-    packages = deployment['available_packages']
-
-    # Package Sets
-    for package_set in deployment['available_package_sets']:
-        req = requests.get(f'{API_URL}/package-sets/{package_set["id"]}/', headers={'Authorization': AUTH_TOKEN})
-        if req.status_code in REQUESTS_OK_CODES:
-            # concatenates packages
-            packages = [*packages, *req.json()['packages']]
-
     # Symlinks for packages
-    for package in packages:
-        req = requests.get(f'{API_URL}/packages/{package["id"]}/', headers={'Authorization': AUTH_TOKEN})
-        if req.status_code in REQUESTS_OK_CODES:
-            symlink(pkg_tmp_path, os.path.join(stores_path, req.json()['store']['name']), package['fullname'])
+    for package in deployment['available_packages']:
+        symlink(pkg_tmp_path, os.path.join(stores_path, package['store']['name']), package['fullname'])
 
     # Metadata in TMP
     logger.info(
@@ -147,17 +117,15 @@ def create_repository_metadata(deployment_id):
 
 
 @app.task
-def remove_repository_metadata(deployment_id, old_slug=''):
-    req = requests.get(f'{API_URL}/deployments/{deployment_id}/', headers={'Authorization': AUTH_TOKEN})
-
-    if req.status_code not in REQUESTS_OK_CODES:
-        raise Reject(reason='Invalid credentials. Review token.')
-
-    deployment = req.json()
-    project = deployment['project']
+def remove_repository_metadata(payload):
+    """
+    Payload must contain:
+    - project: {slug: ..., pms: ...}
+    - slug: the deployment slug to remove
+    """
+    project = payload['project']
     pms = get_pms(project['pms'])
-
-    slug = old_slug or deployment['slug']
+    slug = payload['slug']
 
     deployment_path = os.path.join(MIGASFREE_PUBLIC_DIR, project['slug'], pms.relative_path, slug)
     if os.path.exists(deployment_path):
@@ -178,16 +146,24 @@ def handle_postrun(sender=None, **kwargs):
                     f' in project [{project_name}]: {output}'
                 )
         elif kwargs['state'] == 'REJECTED':
+            # Extract info from payload in kwargs
+            # kwargs['kwargs'] is {'payload': {...}}
+            payload = kwargs.get('kwargs', {}).get('payload', {})
+            deployment_id = payload.get('id', 'unknown')
+
             msg = (
                 'Repository metadata creation for deployment ID'
-                f' [{kwargs["kwargs"]["deployment_id"]}] could not be performed.'
+                f' [{deployment_id}] could not be performed.'
                 ' Review configuration.'
             )
         elif kwargs['state'] is None:  # REVOKED & TERMINATED
             return
 
-        req = requests.post(f'{API_URL}/notifications/', data={'message': msg}, headers={'Authorization': AUTH_TOKEN})
-        if req.status_code not in REQUESTS_OK_CODES:
-            raise PermissionError(
-                f'Error creating notification by task {sender.name}: [{req.status_code}] {req.text} Message: {msg}'
-            )
+        try:
+            # DIRECTLY to Redis - Total Decoupling Mode
+            con = redis.from_url(CELERY_BROKER_URL)
+            con.lpush('migasfree:notifications:queue', msg)
+            con.close()
+
+        except Exception as e_redis:
+            logger.error('CRITICAL: Could not push notification to Redis: %s', e_redis)

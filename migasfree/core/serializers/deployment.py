@@ -262,7 +262,7 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
         deploy = super().create(validated_data)
         if deploy.source == Deployment.SOURCE_INTERNAL:
             tasks.create_repository_metadata.apply_async(
-                queue=f'pms-{deploy.pms().name}', kwargs={'deployment_id': deploy.id}
+                queue=f'pms-{deploy.pms().name}', kwargs={'payload': deploy.get_repository_metadata_payload()}
             )
 
         return deploy
@@ -280,11 +280,19 @@ class DeploymentWriteSerializer(serializers.ModelSerializer):
 
             if cmp(old_pkgs, new_pkgs) != 0 or old_name != validated_data['name']:
                 tasks.create_repository_metadata.apply_async(
-                    queue=f'pms-{instance.pms().name}', kwargs={'deployment_id': instance.id}
+                    queue=f'pms-{instance.pms().name}',
+                    kwargs={'payload': instance.get_repository_metadata_payload()},
                 )
 
                 if old_name != validated_data['name']:
-                    tasks.remove_repository_metadata.delay(instance.id, old_obj.slug)
+                    removal_payload = {
+                        'project': {
+                            'slug': old_obj.project.slug,
+                            'pms': old_obj.project.pms,
+                        },
+                        'slug': old_obj.slug,
+                    }
+                    tasks.remove_repository_metadata.delay(removal_payload)
 
         return instance
 

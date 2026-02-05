@@ -27,3 +27,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'migasfree.settings.production')
 app = Celery('migasfree')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+
+app.conf.beat_schedule = {
+    'process-notification-queue': {
+        'task': 'migasfree.core.tasks.process_notification_queue',
+        'schedule': 60.0,
+    },
+}

@@ -136,7 +136,7 @@ def _update_repository_metadata(instance):
     queryset = Deployment.objects.filter(available_package_sets__in=[instance])
     for deploy in queryset:
         tasks.create_repository_metadata.apply_async(
-            queue=f'pms-{deploy.pms().name}', kwargs={'deployment_id': deploy.id}
+            queue=f'pms-{deploy.pms().name}', kwargs={'payload': deploy.get_repository_metadata_payload()}
         )
 
 
