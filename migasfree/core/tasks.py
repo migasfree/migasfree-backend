@@ -84,7 +84,7 @@ def remove_orphan_files_from_external_deployments():
 
                 try:
                     with urllib.request.urlopen(
-                        urllib.request.Request(url, method='HEAD'), context=ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+                        urllib.request.Request(url, method='HEAD'), context=ssl.create_default_context()
                     ) as response:
                         headers = response.getheaders()
 
