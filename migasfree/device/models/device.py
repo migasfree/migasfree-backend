@@ -38,6 +38,7 @@ class DeviceQuerySet(models.QuerySet):
 
         return self.prefetch_related(
             'available_for_attributes',
+            'available_for_attributes__property_att',
             'model__connections',
         ).annotate(total_computers_annotated=Count('logical__attributes__computer', filter=filters, distinct=True))
 
