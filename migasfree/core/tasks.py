@@ -23,6 +23,7 @@ from urllib.parse import urljoin
 
 import requests
 from celery import Celery, shared_task
+from django.db.models import OuterRef, Subquery
 
 from ..utils import get_setting
 from .decorators import unique_task
@@ -50,22 +51,29 @@ def update_deployment_start_date():
     Daily task that updates the start date of deployments
     that have auto_restart=True and have completed deployment.
     """
-    deployments = Deployment.objects.filter(auto_restart=True, schedule__isnull=False)
+    newest_delay_qs = ScheduleDelay.objects.filter(schedule=OuterRef('schedule')).order_by('-delay')
+
+    deployments = (
+        Deployment.objects.filter(auto_restart=True, schedule__isnull=False)
+        .annotate(
+            last_delay_days=Subquery(newest_delay_qs.values('delay')[:1]),
+            last_duration_days=Subquery(newest_delay_qs.values('duration')[:1]),
+        )
+        .filter(last_delay_days__isnull=False)
+    )
+
+    today = datetime.today().date()
 
     for deployment in deployments:
-        schedule_delays = ScheduleDelay.objects.filter(schedule=deployment.schedule)
-        if schedule_delays.exists():
-            last_delay = schedule_delays.order_by('delay').last()
-            if last_delay:
-                start_date = deployment.start_date
-                last_delay_date = start_date + timedelta(days=last_delay.delay)
-                last_duration_date = last_delay_date + timedelta(days=last_delay.duration)
+        start_date = deployment.start_date
+        last_delay_date = start_date + timedelta(days=deployment.last_delay_days)
+        last_duration_date = last_delay_date + timedelta(days=deployment.last_duration_days)
 
-                if datetime.today().date() >= last_duration_date:
-                    new_start_date = last_duration_date + timedelta(days=1)
-                    deployment.start_date = new_start_date
-                    deployment.save()
-                    logger.info('Updated the start date of deployment %s to %s', deployment.name, new_start_date)
+        if today >= last_duration_date:
+            new_start_date = last_duration_date + timedelta(days=1)
+            deployment.start_date = new_start_date
+            deployment.save()
+            logger.info('Updated the start date of deployment %s to %s', deployment.name, new_start_date)
 
 
 @shared_task
