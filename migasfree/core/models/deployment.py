@@ -44,19 +44,73 @@ from .schedule import Schedule
 logger = logging.getLogger('migasfree')
 
 
-class DeploymentManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().select_related('project', 'schedule', 'domain')
-
+class DeploymentQuerySet(models.QuerySet):
     def scope(self, user):
-        qs = self.get_queryset()
         if user and not user.is_view_all():
-            qs = qs.filter(project__in=user.get_projects())
+            qs = self.filter(project__in=user.get_projects())
             domain = user.domain_preference
             if domain:
                 qs = qs.filter(Q(domain_id=domain.id) | Q(domain_id=None))
+            return qs
 
-        return qs
+        return self
+
+    def available(self, computer, attributes):
+        """
+        Consolidates common filtering logic for available deployments.
+        """
+        return (
+            self.filter(project_id=computer.project_id, enabled=True)
+            .filter(
+                Q(domain__isnull=True)
+                | (
+                    Q(domain__included_attributes__id__in=attributes)
+                    & ~Q(domain__excluded_attributes__id__in=attributes)
+                )
+            )
+            .filter(~Q(excluded_attributes__id__in=attributes))
+        )
+
+
+class DeploymentManager(models.Manager):
+    def get_queryset(self):
+        return DeploymentQuerySet(self.model, using=self._db).select_related('project', 'schedule', 'domain')
+
+    def scope(self, user):
+        return self.get_queryset().scope(user)
+
+    def available_deployments(self, computer, attributes):
+        """
+        Return available deployments for a computer and attributes list
+        """
+        now = timezone.localtime(timezone.now()).date()
+        # Initial filtered queryset
+        qs = self.get_queryset().available(computer, attributes)
+
+        # 1. Directly available by included attributes
+        attributed_ids = list(
+            qs.filter(included_attributes__id__in=attributes, start_date__lte=now).values_list('id', flat=True)
+        )
+
+        # 2. Available by schedule
+        # Instead of looping, we use the monotonic property of time_horizon.
+        # time_horizon(start_date, delay + duration) <= now
+        # means delay + duration <= max_delta_allowed (where time_horizon(start_date, max_delta) <= now)
+        # However, since computer.id % duration is involved, we still need some logic.
+        # But we can at least filter by schedule attributes first.
+        scheduled = qs.filter(schedule__delays__attributes__id__in=attributes).annotate(
+            delay=F('schedule__delays__delay'), duration=F('schedule__delays__duration')
+        )
+
+        lst = attributed_ids
+        for deploy in scheduled:
+            # Since this is for a specific computer, there's no need to loop over duration.
+            # We just check the specific duration offset for this computer.
+            val = computer.id % deploy.duration
+            if time_horizon(deploy.start_date, deploy.delay + val) <= now:
+                lst.append(deploy.id)
+
+        return self.get_queryset().filter(id__in=lst).order_by('name')
 
 
 class Deployment(models.Model, MigasLink):
@@ -346,55 +400,11 @@ class Deployment(models.Model, MigasLink):
         """
         Return available deployments for a computer and attributes list
         """
-        # first: all deployments by attribute
-        attributed = (
-            Deployment.objects.filter(
-                project__id=computer.project.id,
-                enabled=True,
-                included_attributes__id__in=attributes,
-                start_date__lte=timezone.localtime(timezone.now()).date(),
-            )
-            .filter(
-                Q(domain__isnull=True)
-                | (
-                    Q(domain__included_attributes__id__in=attributes)
-                    & ~Q(domain__excluded_attributes__id__in=attributes)
-                )
-            )
-            .values_list('id', flat=True)
-        )
-        lst = list(attributed)
+        return Deployment.objects.available_deployments(computer, attributes)
 
-        # second: all deployments by schedule
-        scheduled = (
-            Deployment.objects.filter(
-                project__id=computer.project.id, enabled=True, schedule__delays__attributes__id__in=attributes
-            )
-            .filter(
-                Q(domain__isnull=True)
-                | (
-                    Q(domain__included_attributes__id__in=attributes)
-                    & ~Q(domain__excluded_attributes__id__in=attributes)
-                )
-            )
-            .annotate(delay=F('schedule__delays__delay'), duration=F('schedule__delays__duration'))
-        )
-
-        for deploy in scheduled:
-            for duration in range(0, deploy.duration):
-                if computer.id % deploy.duration == duration and (
-                    time_horizon(deploy.start_date, deploy.delay + duration)
-                    <= timezone.localtime(timezone.now()).date()
-                ):
-                    lst.append(deploy.id)
-                    break
-
-        # 3.- excluded attributes
-        deployments = (
-            Deployment.objects.filter(id__in=lst).filter(~Q(excluded_attributes__id__in=attributes)).order_by('name')
-        )
-
-        return deployments
+    def clear_cache(self):
+        con = get_redis_connection()
+        con.delete(f'migasfree:deployments:{self.id}:computers')
 
     def related_objects(self, model, user):
         """
@@ -405,37 +415,42 @@ class Deployment(models.Model, MigasLink):
 
         from ...client.models import Computer
 
-        # by assigned attributes
-        computers = (
-            Computer.productive.scope(user)
-            .filter(project_id=self.project_id)
-            .filter(Q(sync_attributes__in=self.included_attributes.all()))
-        )
+        # 1. Base computers by project and scope
+        computers = Computer.productive.scope(user).filter(project_id=self.project_id)
 
-        # by schedule
+        # 2. Build filter for attributes and schedule
+        # Initial filter: specifically included attributes
+        q_filter = Q(sync_attributes__id__in=self.included_attributes.values_list('id', flat=True))
+
+        # Add schedule filters
         if self.schedule:
+            now = timezone.localtime(timezone.now()).date()
             for delay in self.schedule.delays.all():
                 delay_attributes = list(delay.attributes.values_list('id', flat=True))
-                for duration in range(0, delay.duration):
-                    if (
-                        time_horizon(self.start_date, delay.delay + duration)
-                        <= timezone.localtime(timezone.now()).date()
-                    ):
-                        computers_schedule = (
-                            Computer.productive.scope(user)
-                            .filter(project_id=self.project_id)
-                            .filter(Q(sync_attributes__id__in=delay_attributes))
-                            .annotate(mod_duration=Mod('id', delay.duration))
-                            .filter(mod_duration=duration)
-                        )
-                        computers |= computers_schedule
+                # Monotonic optimization: find max duration k such that time_horizon(start+delay+k) <= now
+                max_k = -1
+                for k in range(delay.duration):
+                    if time_horizon(self.start_date, delay.delay + k) <= now:
+                        max_k = k
                     else:
                         break
 
-        # excluded attributes
-        computers = computers.exclude(Q(sync_attributes__in=self.excluded_attributes.all()))
+                if max_k != -1:
+                    if max_k == delay.duration - 1:
+                        # All computers with these attributes are allowed
+                        q_filter |= Q(sync_attributes__id__in=delay_attributes)
+                    else:
+                        # Only computers with id % duration <= max_k
+                        # We use annotate here, but since we have multiple delays, we name them uniquely
+                        computers = computers.annotate(**{f'mod_{delay.id}': Mod('id', delay.duration)})
+                        q_filter |= Q(sync_attributes__id__in=delay_attributes, **{f'mod_{delay.id}__lte': max_k})
 
-        return computers.distinct()
+        # Apply positive filters and negative (excluded attributes)
+        return (
+            computers.filter(q_filter)
+            .exclude(sync_attributes__id__in=self.excluded_attributes.values_list('id', flat=True))
+            .distinct()
+        )
 
     def pms(self):
         return get_pms(self.project.pms)
@@ -470,17 +485,27 @@ class Deployment(models.Model, MigasLink):
 @receiver(pre_save, sender=Deployment)
 def pre_save_deployment(sender, instance, **kwargs):
     if instance.id:
-        old_obj = Deployment.objects.get(pk=instance.id)
-        if old_obj.project_id != instance.project.id:
+        # Use .values() to limit database load when checking old state
+        old_data = (
+            Deployment.objects.filter(pk=instance.id)
+            .values('project_id', 'packages_to_install', 'packages_to_remove')
+            .first()
+        )
+
+        if not old_data:
+            return
+
+        if old_data['project_id'] != instance.project_id:
             raise ValidationError(_('Is not allowed change project'))
 
         if (
-            instance.available_packages != old_obj.available_packages
-            or instance.packages_to_install != old_obj.packages_to_install
-            or instance.packages_to_remove != old_obj.packages_to_remove
+            # NOTE: available_packages comparison is complex due to M2M,
+            # usually M2M changes don't trigger pre_save unless the model itself is saved.
+            # But the logic here was checking for field changes.
+            instance.packages_to_install != old_data['packages_to_install']
+            or instance.packages_to_remove != old_data['packages_to_remove']
         ):
-            con = get_redis_connection()
-            con.delete(f'migasfree:deployments:{instance.id}:computers')
+            instance.clear_cache()
 
 
 @receiver(pre_delete, sender=Deployment)
@@ -489,8 +514,7 @@ def pre_delete_deployment(sender, instance, **kwargs):
     if os.path.exists(path):
         shutil.rmtree(path)
 
-    con = get_redis_connection()
-    con.delete(f'migasfree:deployments:{instance.id}:computers')
+    instance.clear_cache()
 
 
 class InternalSourceManager(DeploymentManager):
