@@ -1,16 +1,14 @@
 import django.contrib.postgres.indexes
-from django.contrib.postgres.operations import TrigramExtension
 from django.db import migrations
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0010_alter_project_pms'),
+        ('core', '0009_alter_deployment_start_date_alter_project_pms'),
         ('device', '0005_manufacturer_manufacturer_name_gin_and_more'),
     ]
 
     operations = [
-        TrigramExtension(),
         migrations.AddIndex(
             model_name='device',
             index=django.contrib.postgres.indexes.GinIndex(
