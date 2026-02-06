@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -72,7 +72,11 @@ class ScheduleDelayViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewS
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class ScheduleViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = Schedule.objects.all()
+    queryset = Schedule.objects.prefetch_related(
+        'delays',
+        'delays__attributes',
+        'deployment_set',
+    )
     serializer_class = ScheduleSerializer
     filterset_class = ScheduleFilter
     search_fields = ('name',)

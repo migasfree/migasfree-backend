@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -64,7 +64,14 @@ from .base import ExportViewSet, MigasViewSet
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class UserProfileViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = UserProfile.objects.all()
+    queryset = UserProfile.objects.select_related(
+        'user',
+        'domain_preference',
+    ).prefetch_related(
+        'domains',
+        'groups',
+        'user_permissions',
+    )
     serializer_class = UserProfileSerializer
     filterset_class = UserProfileFilter
     search_fields = ('username', 'first_name', 'last_name')
@@ -141,7 +148,10 @@ class UserProfileViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class GroupViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, ExportViewSet):
-    queryset = Group.objects.all()
+    queryset = Group.objects.prefetch_related(
+        'user_set',
+        'permissions',
+    )
     serializer_class = GroupSerializer
     filterset_class = GroupFilter
     search_fields = ('name',)
@@ -188,7 +198,13 @@ class PermissionViewSet(DatabaseCheckMixin, mixins.ListModelMixin, viewsets.Gene
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class DomainViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = Domain.objects.all()
+    queryset = Domain.objects.prefetch_related(
+        'included_attributes',
+        'included_attributes__property_att',
+        'excluded_attributes',
+        'excluded_attributes__property_att',
+        'userprofile_set',
+    )
     serializer_class = DomainSerializer
     filterset_class = DomainFilter
     search_fields = ('name',)
@@ -234,7 +250,12 @@ class DomainViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class ScopeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = Scope.objects.all()
+    queryset = Scope.objects.prefetch_related(
+        'included_attributes',
+        'included_attributes__property_att',
+        'excluded_attributes',
+        'excluded_attributes__property_att',
+    )
     serializer_class = ScopeSerializer
     filterset_class = ScopeFilter
     search_fields = ('name',)

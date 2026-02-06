@@ -256,7 +256,10 @@ class LogicalViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         device = request.GET.get('did', 0)
 
         results = (
-            Logical.objects.filter(
+            Logical.objects
+            .select_related('device', 'device__model', 'capability')
+            .prefetch_related('device__available_for_attributes')
+            .filter(
                 device__available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True)
             )
             .order_by('device__name', 'capability__name')
@@ -283,7 +286,7 @@ class LogicalViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class ManufacturerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = Manufacturer.objects.all()
+    queryset = Manufacturer.objects.prefetch_related('model_set')
     serializer_class = serializers.ManufacturerSerializer
     filterset_class = ManufacturerFilter
     search_fields = ['name']
@@ -335,7 +338,11 @@ class ModelViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Expo
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class TypeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = Type.objects.all()
+    queryset = Type.objects.prefetch_related(
+        'model_set',
+        'model_set__manufacturer',
+        'connection_set',
+    )
     serializer_class = serializers.TypeSerializer
     filterset_class = TypeFilter
     search_fields = ['name']
