@@ -62,6 +62,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'migasfree.core.tasks.remove_orphan_files_from_external_deployments',
         'schedule': crontab(hour=1, minute=0, day_of_week=6),  # at Sunday
     },
+    'process_notification_queue': {
+        'task': 'migasfree.core.tasks.process_notification_queue',
+        'schedule': crontab(minute='*'),
+    },
 }
 
 CHANNEL_LAYERS = {
