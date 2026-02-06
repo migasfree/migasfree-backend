@@ -65,7 +65,6 @@ from .base import ExportViewSet, MigasViewSet
 @permission_classes((permissions.DjangoModelPermissions,))
 class UserProfileViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
     queryset = UserProfile.objects.select_related(
-        'user',
         'domain_preference',
     ).prefetch_related(
         'domains',
