@@ -85,8 +85,6 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
     ).prefetch_related(
         'available_for_attributes',
         'available_for_attributes__property_att',
-        'logical_set',
-        'logical_set__capability',
     )
     serializer_class = serializers.DeviceSerializer
     filterset_class = DeviceFilter
@@ -104,7 +102,7 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
         if self.request is None:
             return Device.objects.none()
 
-        return Device.objects.scope(self.request.user.userprofile).with_metadata(self.request.user.userprofile)
+        return self.queryset.scope(self.request.user.userprofile).with_metadata(self.request.user.userprofile)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -256,12 +254,9 @@ class LogicalViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         device = request.GET.get('did', 0)
 
         results = (
-            Logical.objects
-            .select_related('device', 'device__model', 'capability')
+            Logical.objects.select_related('device', 'device__model', 'capability')
             .prefetch_related('device__available_for_attributes')
-            .filter(
-                device__available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True)
-            )
+            .filter(device__available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True))
             .order_by('device__name', 'capability__name')
             .distinct()
         )
