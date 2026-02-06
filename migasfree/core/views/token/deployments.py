@@ -53,7 +53,21 @@ from .base import ExportViewSet, MigasViewSet
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class DeploymentViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = Deployment.objects.all()
+    queryset = Deployment.objects.select_related(
+        'project',
+        'project__platform',
+        'schedule',
+        'domain',
+    ).prefetch_related(
+        'included_attributes',
+        'included_attributes__property_att',
+        'excluded_attributes',
+        'excluded_attributes__property_att',
+        'available_packages',
+        'available_packages__store',
+        'available_package_sets',
+        'available_package_sets__packages',
+    )
     serializer_class = DeploymentSerializer
     filterset_class = DeploymentFilter
     search_fields = (
@@ -86,7 +100,17 @@ class DeploymentViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
 @extend_schema(tags=['deployments'])
 @permission_classes((permissions.DjangoModelPermissions,))
 class InternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
-    queryset = InternalSource.objects.all()
+    queryset = InternalSource.objects.select_related(
+        'project',
+        'project__platform',
+        'schedule',
+        'domain',
+    ).prefetch_related(
+        'included_attributes',
+        'excluded_attributes',
+        'available_packages',
+        'available_package_sets',
+    )
     serializer_class = InternalSourceSerializer
     filterset_class = DeploymentFilter
     ordering_fields = '__all__'
@@ -126,7 +150,15 @@ class InternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
 @extend_schema(tags=['deployments'])
 @permission_classes((permissions.DjangoModelPermissions,))
 class ExternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
-    queryset = ExternalSource.objects.all()
+    queryset = ExternalSource.objects.select_related(
+        'project',
+        'project__platform',
+        'schedule',
+        'domain',
+    ).prefetch_related(
+        'included_attributes',
+        'excluded_attributes',
+    )
     serializer_class = ExternalSourceSerializer
     filterset_class = DeploymentFilter
     ordering_fields = '__all__'

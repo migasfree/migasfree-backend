@@ -43,7 +43,9 @@ from .filters import (
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class CategoryViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = models.Category.objects.all()
+    queryset = models.Category.objects.prefetch_related(
+        'application_set',
+    )
     serializer_class = serializers.CategorySerializer
     filterset_class = CategoryFilter
     permission_classes = (PublicPermission,)
@@ -59,7 +61,14 @@ class CategoryViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class ApplicationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = models.Application.objects.all()
+    queryset = models.Application.objects.select_related(
+        'category',
+    ).prefetch_related(
+        'available_for_attributes',
+        'available_for_attributes__property_att',
+        'packages_by_project',
+        'packages_by_project__project',
+    )
     serializer_class = serializers.ApplicationSerializer
     filterset_class = ApplicationFilter
     parser_classes = (parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser)
@@ -95,7 +104,13 @@ class ApplicationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
         query = request.GET.get('q', '')
 
         results = (
-            models.Application.objects.filter(
+            models.Application.objects
+            .select_related('category')
+            .prefetch_related(
+                'available_for_attributes',
+                'packages_by_project__project',
+            )
+            .filter(
                 available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True),
                 packages_by_project__project=computer.project,
             )
@@ -121,7 +136,12 @@ class ApplicationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
 @extend_schema(tags=['catalog'])
 @permission_classes((permissions.DjangoModelPermissions,))
 class PackagesByProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
-    queryset = models.PackagesByProject.objects.all()
+    queryset = models.PackagesByProject.objects.select_related(
+        'application',
+        'application__category',
+        'project',
+        'project__platform',
+    )
     serializer_class = serializers.PackagesByProjectSerializer
     filterset_class = PackagesByProjectFilter
     permission_classes = (PublicPermission,)
@@ -141,7 +161,14 @@ class PackagesByProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasV
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class PolicyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = models.Policy.objects.all()
+    queryset = models.Policy.objects.prefetch_related(
+        'included_attributes',
+        'included_attributes__property_att',
+        'excluded_attributes',
+        'excluded_attributes__property_att',
+        'groups',
+        'groups__priority',
+    )
     serializer_class = serializers.PolicySerializer
     filterset_class = PolicyFilter
     search_fields = ('name',)
@@ -158,7 +185,13 @@ class PolicyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
 @extend_schema(tags=['catalog'])
 @permission_classes((permissions.DjangoModelPermissions,))
 class PolicyGroupViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet):
-    queryset = models.PolicyGroup.objects.all()
+    queryset = models.PolicyGroup.objects.select_related(
+        'policy',
+    ).prefetch_related(
+        'included_attributes',
+        'excluded_attributes',
+        'applications',
+    )
     serializer_class = serializers.PolicyGroupSerializer
     filterset_class = PolicyGroupFilter
     ordering = ('policy__id', 'priority')
