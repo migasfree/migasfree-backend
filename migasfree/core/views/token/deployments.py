@@ -59,6 +59,8 @@ class DeploymentViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
         'schedule',
         'domain',
     ).prefetch_related(
+        'schedule__delays',
+        'schedule__delays__attributes',
         'included_attributes',
         'included_attributes__property_att',
         'excluded_attributes',
