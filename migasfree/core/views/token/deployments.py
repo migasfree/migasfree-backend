@@ -94,7 +94,7 @@ class DeploymentViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
         if self.request is None:
             return Deployment.objects.none()
 
-        return Deployment.objects.scope(self.request.user.userprofile)
+        return self.queryset.scope(self.request.user.userprofile)
 
 
 @extend_schema(tags=['deployments'])
@@ -126,7 +126,7 @@ class InternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
         if self.request is None:
             return InternalSource.objects.none()
 
-        return InternalSource.objects.scope(self.request.user.userprofile)
+        return self.queryset.scope(self.request.user.userprofile)
 
     @action(methods=['get'], detail=True)
     def metadata(self, request, pk=None):
@@ -168,7 +168,7 @@ class ExternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
         if self.request is None:
             return ExternalSource.objects.none()
 
-        return ExternalSource.objects.scope(self.request.user.userprofile)
+        return self.queryset.scope(self.request.user.userprofile)
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update' or self.action == 'partial_update':
