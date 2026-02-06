@@ -78,7 +78,16 @@ class ConnectionViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = Device.objects.all()
+    queryset = Device.objects.select_related(
+        'model',
+        'model__manufacturer',
+        'model__device_type',
+    ).prefetch_related(
+        'available_for_attributes',
+        'available_for_attributes__property_att',
+        'logical_set',
+        'logical_set__capability',
+    )
     serializer_class = serializers.DeviceSerializer
     filterset_class = DeviceFilter
     search_fields = ['name', 'model__name', 'model__manufacturer__name', 'data']
@@ -152,7 +161,14 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class DriverViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = Driver.objects.all()
+    queryset = Driver.objects.select_related(
+        'model',
+        'model__manufacturer',
+        'model__device_type',
+        'project',
+        'project__platform',
+        'capability',
+    )
     serializer_class = serializers.DriverSerializer
     filterset_class = DriverFilter
     search_fields = ['name', 'model__name']

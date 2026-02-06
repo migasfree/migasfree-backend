@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -160,7 +160,7 @@ class AttributeSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSe
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class PropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = Property.objects.all()
+    queryset = Property.objects.prefetch_related('attribute_set')
     serializer_class = PropertySerializer
     filterset_class = PropertyFilter
     ordering_fields = '__all__'
@@ -236,7 +236,14 @@ class ClientPropertyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class AttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = Attribute.objects.all()
+    queryset = Attribute.objects.select_related(
+        'property_att',
+    ).prefetch_related(
+        'deployment_included',
+        'deployment_excluded',
+        'singularity_included',
+        'singularity_excluded',
+    )
     serializer_class = AttributeSerializer
     filterset_class = AttributeFilter
     search_fields = ('value', 'description', 'property_att__prefix')
@@ -262,7 +269,12 @@ class AttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, 
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class ServerAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = ServerAttribute.objects.filter(property_att__sort='server')
+    queryset = ServerAttribute.objects.filter(property_att__sort='server').select_related(
+        'property_att',
+    ).prefetch_related(
+        'computer_set',
+        'Tags',
+    )
     serializer_class = ServerAttributeSerializer
     filterset_class = ServerAttributeFilter
     search_fields = ('value', 'description', 'property_att__prefix')
@@ -323,7 +335,13 @@ class ServerAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasVie
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class ClientAttributeViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = ClientAttribute.objects.filter(property_att__sort__in=['client', 'basic'])
+    queryset = ClientAttribute.objects.filter(property_att__sort__in=['client', 'basic']).select_related(
+        'property_att',
+    ).prefetch_related(
+        'logical_set',
+        'logical_set__device',
+        'logical_set__capability',
+    )
     serializer_class = ClientAttributeSerializer
     filterset_class = ClientAttributeFilter
     search_fields = ('value', 'description', 'property_att__prefix')

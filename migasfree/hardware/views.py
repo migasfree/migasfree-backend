@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,7 +38,17 @@ from .models import Capability, Configuration, LogicalName, Node
 class HardwareViewSet(
     DatabaseCheckMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet, MigasViewSet
 ):
-    queryset = Node.objects.all()
+    queryset = Node.objects.select_related(
+        'computer',
+        'computer__project',
+        'computer__project__platform',
+        'computer__sync_user',
+        'parent',
+    ).prefetch_related(
+        'capability_set',
+        'logicalname_set',
+        'configuration_set',
+    )
     serializer_class = serializers.NodeSerializer
     filterset_class = NodeFilter
     ordering_fields = '__all__'

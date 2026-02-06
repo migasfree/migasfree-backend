@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ from .base import ExportViewSet, MigasViewSet
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class PlatformViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = Platform.objects.all()
+    queryset = Platform.objects.prefetch_related('project_set')
     serializer_class = PlatformSerializer
     filterset_class = PlatformFilter
     ordering_fields = '__all__'
@@ -77,7 +77,13 @@ class PlatformViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = Project.objects.all()
+    queryset = Project.objects.select_related(
+        'platform',
+    ).prefetch_related(
+        'deployment_set',
+        'package_set',
+        'store_set',
+    )
     serializer_class = ProjectSerializer
     filterset_class = ProjectFilter
     ordering_fields = '__all__'
@@ -123,7 +129,13 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
 )
 @permission_classes((permissions.DjangoModelPermissions,))
 class StoreViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, ExportViewSet):
-    queryset = Store.objects.all()
+    queryset = Store.objects.select_related(
+        'project',
+        'project__platform',
+    ).prefetch_related(
+        'package_set',
+        'packageset_set',
+    )
     serializer_class = StoreSerializer
     filterset_class = StoreFilter
     ordering_fields = '__all__'
