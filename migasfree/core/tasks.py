@@ -149,5 +149,8 @@ def process_notification_queue():
     con.close()
 
     if messages:
-        Notification.objects.bulk_create([Notification(message=msg) for msg in messages])
+        # We must normalize like save() method in Notification model
+        from ..utils import normalize_line_breaks
+
+        Notification.objects.bulk_create([Notification(message=normalize_line_breaks(msg)) for msg in messages])
         logger.info('Processed %d notifications from Redis queue', len(messages))
