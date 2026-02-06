@@ -18,6 +18,7 @@ from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models.aggregates import Count
@@ -729,6 +730,7 @@ class Computer(models.Model, MigasLink):
         verbose_name_plural = _('Computers')
         indexes = [
             models.Index(fields=['name']),
+            GinIndex(fields=['mac_address'], opclasses=['gin_trgm_ops'], name='computer_mac_trgm_idx'),
         ]
         db_table_comment = 'computers that have registered in the migasfree system'
 

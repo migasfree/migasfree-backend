@@ -16,6 +16,7 @@
 
 import re
 
+from django.contrib.postgres.indexes import GinIndex
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -429,6 +430,12 @@ class Node(models.Model, MigasLink):
         app_label = 'hardware'
         verbose_name = _('Hardware Node')
         verbose_name_plural = _('Hardware Nodes')
-        db_table_comment = 'hierarchical structure of the hardware in the system (it details the individual components'
-        ' and their relationships, indicating how they are organized and connected within the overall architecture'
-        ' of the system)'
+        db_table_comment = (
+            'hierarchical structure of the hardware in the system (it details the individual components'
+            ' and their relationships, indicating how they are organized and connected within the overall architecture'
+            ' of the system)'
+        )
+        indexes = [
+            GinIndex(fields=['name'], opclasses=['gin_trgm_ops'], name='node_name_trgm_idx'),
+            GinIndex(fields=['serial'], opclasses=['gin_trgm_ops'], name='node_serial_trgm_idx'),
+        ]

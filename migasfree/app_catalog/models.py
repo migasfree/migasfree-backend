@@ -17,6 +17,7 @@
 import os
 
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex
 from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.db import models
@@ -189,6 +190,10 @@ class Application(models.Model, MigasLink):
         verbose_name = _('Application')
         verbose_name_plural = _('Applications')
         db_table_comment = 'application catalog of the organization'
+        indexes = [
+            GinIndex(fields=['name'], opclasses=['gin_trgm_ops'], name='app_name_trgm_idx'),
+            GinIndex(fields=['description'], opclasses=['gin_trgm_ops'], name='app_desc_trgm_idx'),
+        ]
 
 
 class PackagesByProject(models.Model, MigasLink):
