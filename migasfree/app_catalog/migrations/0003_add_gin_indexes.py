@@ -5,6 +5,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
     dependencies = [
         ('app_catalog', '0002_alter_comments'),
+        ('device', '0004_install_trigram_extension'),
     ]
 
     operations = [
