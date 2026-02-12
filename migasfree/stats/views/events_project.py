@@ -77,7 +77,7 @@ class EventProjectViewSet(EventViewSet):
         event_class = self.get_event_class()
 
         data = event_by_month(
-            event_class.stacked_by_month(request.user.userprofile, begin_date), begin_date, end_date, 'error'
+            event_class.stacked_by_month(request.user.userprofile, begin_date), begin_date, end_date, event_class
         )
         return Response(data, status=status.HTTP_200_OK)
 
@@ -103,6 +103,6 @@ class EventProjectViewSet(EventViewSet):
         event_class = self.get_event_class()
 
         data = event_by_day(
-            event_class.stacked_by_day(request.user.userprofile, begin_date), begin_date, end_date, 'error'
+            event_class.stacked_by_day(request.user.userprofile, begin_date), begin_date, end_date, event_class
         )
         return Response(data, status=status.HTTP_200_OK)

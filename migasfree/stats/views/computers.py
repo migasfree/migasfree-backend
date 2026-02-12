@@ -485,7 +485,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
         )
 
         data = event_by_month(
-            Computer.stacked_by_month(request.user.userprofile, begin_date), begin_date, end_date, 'computer'
+            Computer.stacked_by_month(request.user.userprofile, begin_date), begin_date, end_date, Computer
         )
         return Response(data, status=status.HTTP_200_OK)
 

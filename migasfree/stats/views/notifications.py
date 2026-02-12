@@ -109,6 +109,6 @@ class NotificationStatsViewSet(viewsets.ViewSet):
         )
 
         data = event_by_month(
-            Notification.stacked_by_month(begin_date), begin_date, end_date, 'notification', field='checked'
+            Notification.stacked_by_month(begin_date), begin_date, end_date, Notification, field='checked'
         )
         return Response(data, status=status.HTTP_200_OK)

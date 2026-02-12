@@ -53,7 +53,7 @@ class StatusLogStatsViewSet(EventViewSet):
             StatusLog.stacked_by_month(request.user.userprofile, begin_date, field='status'),
             begin_date,
             end_date,
-            'statuslog',
+            StatusLog,
             field='status',
         )
         return Response(data, status=status.HTTP_200_OK)
