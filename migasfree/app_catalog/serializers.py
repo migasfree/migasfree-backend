@@ -1,5 +1,5 @@
-# Copyright (c) 2017-2023 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2017-2023 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2017-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2017-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from django.core.validators import FileExtensionValidator
 from django.http import QueryDict
 from rest_framework import serializers
 
@@ -77,7 +78,10 @@ class ApplicationInfoSerializer(serializers.ModelSerializer):
 
 
 class ApplicationWriteSerializer(serializers.ModelSerializer):
-    icon = serializers.ImageField(required=False)
+    icon = serializers.FileField(
+        required=False,
+        validators=[FileExtensionValidator(allowed_extensions=models.Application.ICON_EXTENSIONS)],
+    )
 
     def to_internal_value(self, data):
         if isinstance(data, QueryDict):

@@ -84,3 +84,86 @@ class TestApplicationsViewSet(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['count'], 3)
+
+
+class TestApplicationIcon(APITestCase):
+    def setUp(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        self.user = UserProfile.objects.create(
+            username='test_icon', email='test_icon@test.com', password='test', is_superuser=True
+        )
+        self.client.force_authenticate(user=self.user)
+        self.category = Category.objects.create(name='Test Category Icon')
+
+        self.SimpleUploadedFile = SimpleUploadedFile
+
+    def test_upload_svg_icon(self):
+        svg_content = b'<svg height="100" width="100"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" /></svg>'
+        svg_file = self.SimpleUploadedFile('icon.svg', svg_content, content_type='image/svg+xml')
+
+        data = {
+            'name': 'SVG App',
+            'category': self.category.pk,
+            'icon': svg_file,
+        }
+        response = self.client.post(reverse('application-list'), data, format='multipart')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Application.objects.get(name='SVG App').icon.name.endswith('.svg'))
+
+    def test_upload_png_icon(self):
+        png_content = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82'
+        png_file = self.SimpleUploadedFile('icon.png', png_content, content_type='image/png')
+
+        data = {
+            'name': 'PNG App',
+            'category': self.category.pk,
+            'icon': png_file,
+        }
+        response = self.client.post(reverse('application-list'), data, format='multipart')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Application.objects.get(name='PNG App').icon.name.endswith('.png'))
+
+    def test_upload_invalid_file(self):
+        txt_content = b'This is a text file.'
+        txt_file = self.SimpleUploadedFile('icon.txt', txt_content, content_type='text/plain')
+
+        data = {
+            'name': 'Invalid App',
+            'category': self.category.pk,
+            'icon': txt_file,
+        }
+        response = self.client.post(reverse('application-list'), data, format='multipart')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('icon', response.json())
+
+    def test_upload_webp_icon(self):
+        webp_content = b'RIFF\x14\x00\x00\x00WEBPVP8 \x08\x00\x00\x00\x00\x01\x00\x01\x00\x00'
+        webp_file = self.SimpleUploadedFile('icon.webp', webp_content, content_type='image/webp')
+
+        data = {
+            'name': 'WebP App',
+            'category': self.category.pk,
+            'icon': webp_file,
+        }
+        response = self.client.post(reverse('application-list'), data, format='multipart')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Application.objects.get(name='WebP App').icon.name.endswith('.webp'))
+
+    def test_upload_ico_icon(self):
+        ico_content = b'\x00\x00\x01\x00\x01\x00\x10\x10\x00\x00\x01\x00\x08\x00h\x00\x00\x00\x16\x00\x00\x00'
+        ico_file = self.SimpleUploadedFile('icon.ico', ico_content, content_type='image/x-icon')
+
+        data = {
+            'name': 'ICO App',
+            'category': self.category.pk,
+            'icon': ico_file,
+        }
+        response = self.client.post(reverse('application-list'), data, format='multipart')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Application.objects.get(name='ICO App').icon.name.endswith('.ico'))

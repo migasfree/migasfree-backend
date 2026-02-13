@@ -20,6 +20,7 @@ from django.conf import settings
 from django.contrib.postgres.indexes import GinIndex
 from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
@@ -98,6 +99,8 @@ class Application(models.Model, MigasLink):
         ('A', _('Admin')),
     )
 
+    ICON_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp', 'ico', 'tiff', 'tif']
+
     name = models.CharField(
         verbose_name=_('name'),
         max_length=50,
@@ -126,11 +129,12 @@ class Application(models.Model, MigasLink):
         db_comment='relevance of the application to the organization (1 = lowest, 5 = highest)',
     )
 
-    icon = models.ImageField(
+    icon = models.FileField(
         verbose_name=_('icon'),
         upload_to=upload_path_handler,
         storage=MediaFileSystemStorage(),
         null=True,
+        validators=[FileExtensionValidator(allowed_extensions=ICON_EXTENSIONS)],
         db_comment='application icon',
     )
 
