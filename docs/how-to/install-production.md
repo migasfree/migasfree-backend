@@ -107,7 +107,7 @@ Group=migasfree
 WorkingDirectory=/opt/migasfree-backend
 Environment="DJANGO_SETTINGS_MODULE=migasfree.settings.production"
 EnvironmentFile=/etc/default/migasfree
-ExecStart=/opt/migasfree-backend/venv/bin/celery --app=migasfree.celery.app worker --loglevel=INFO --concurrency=4 --without-gossip
+ExecStart=/opt/migasfree-backend/venv/bin/celery --app=migasfree.celery_app.app worker --loglevel=INFO --concurrency=4 --without-gossip
 Restart=always
 
 [Install]

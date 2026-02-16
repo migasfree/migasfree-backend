@@ -62,7 +62,7 @@ Migasfree relies on Celery for background tasks (e.g., generating package reposi
 # Activate virtualenv first
 source venv/bin/activate
 # Worker must listen to specific PMS queues for repository generation
-celery --app=migasfree.celery.app worker --without-gossip --loglevel=DEBUG --queues=default,pms-apt,pms-dnf,pms-pacman,pms-wpt,pms-yum,pms-zypper
+celery --app=migasfree.celery_app.app worker --without-gossip --loglevel=DEBUG --queues=default,pms-apt,pms-dnf,pms-pacman,pms-wpt,pms-yum,pms-zypper
 ```
 
 **Terminal 3 (Beat):**
@@ -70,7 +70,7 @@ celery --app=migasfree.celery.app worker --without-gossip --loglevel=DEBUG --que
 ```bash
 # Activate virtualenv first
 source venv/bin/activate
-celery --app=migasfree.celery.app beat --loglevel=DEBUG
+celery --app=migasfree.celery_app.app beat --loglevel=DEBUG
 ```
 
 > [!NOTE]
