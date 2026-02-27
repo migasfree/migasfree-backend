@@ -166,7 +166,7 @@ def register_computer(request, name, uuid, computer, data):
     if not Platform.objects.filter(name=platform_name).exists():
         if not _can_register_platform(user):
             return return_message(cmd, errmfs.error(errmfs.CAN_NOT_REGISTER_COMPUTER))
-        Platform.objects.create(platform_name)
+        Platform.objects.create(name=platform_name)
         platform_created = True
 
     # Auto-register project if needed

@@ -2,7 +2,7 @@ import contextlib
 import os
 
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from rest_framework import status
 
 from migasfree.client.views.public import ProjectKeysView
@@ -49,6 +49,7 @@ class TestProjectKeysView(TestCase):
         self.project = Project.objects.create(name='testproject', platform=platform, pms='apt', architecture='amd64')
         self.url = '/api/v1/public/keys/project/'
 
+    @override_settings(MIGASFREE_AUTOREGISTER=False)
     def test_post_request_with_invalid_credentials(self):
         data = {
             'username': 'wrongusername',
@@ -85,8 +86,8 @@ class TestProjectKeysView(TestCase):
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    @override_settings(MIGASFREE_AUTOREGISTER=True)
     def test_post_request_with_auto_register(self):
-        settings.MIGASFREE_AUTOREGISTER = True
         data = {
             'username': 'test',
             'password': 'test',
@@ -97,7 +98,6 @@ class TestProjectKeysView(TestCase):
         }
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        settings.MIGASFREE_AUTOREGISTER = False
 
     def test_get_object_method(self):
         view = ProjectKeysView()
@@ -105,13 +105,12 @@ class TestProjectKeysView(TestCase):
         project = view.get_object('testproject', 'testpms', 'testplatform', 'testarchitecture', '127.0.0.1')
         self.assertEqual(project, self.project)
 
+    @override_settings(MIGASFREE_AUTOREGISTER=True)
     def test_get_object_method_with_auto_register(self):
-        settings.MIGASFREE_AUTOREGISTER = True
         view = ProjectKeysView()
         view.user = self.user
         project = view.get_object('newproject', 'testpms', 'testplatform', 'testarchitecture', '127.0.0.1')
         self.assertIsNotNone(project)
-        settings.MIGASFREE_AUTOREGISTER = False
 
 
 class TestRepositoriesKeysView(TestCase):

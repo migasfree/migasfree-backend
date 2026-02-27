@@ -323,7 +323,8 @@ class BasicAttribute(Attribute):
         basic_attributes = []
 
         if 'SET' in properties:
-            obj = Attribute.objects.get(pk=1)  # special case (SET-All Systems)
+            obj = Attribute.objects.get(property_att__prefix='SET', value='All Systems')
+
             basic_attributes.append(obj.id)
 
         if 'CID' in properties and 'id' in kwargs:

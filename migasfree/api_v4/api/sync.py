@@ -69,7 +69,7 @@ def _auto_register_platform(platform_name, computer):
     if not settings.MIGASFREE_AUTOREGISTER:
         return errmfs.error(errmfs.CAN_NOT_REGISTER_COMPUTER)
 
-    platform = Platform.objects.create(platform_name)
+    platform = Platform.objects.create(name=platform_name)
     add_notification_platform(platform, computer)
     return None
 
