@@ -115,6 +115,17 @@ Manage repository deployments.
 GET /api/v1/token/deployments/
 ```
 
+### Devices & Peripherals
+
+Manage physical and logical devices.
+
+- **Physical Devices**: `GET /api/v1/token/devices/devices/`
+- **Logical Devices**: `GET /api/v1/token/devices/logical/`
+- **Drivers**: `GET /api/v1/token/devices/drivers/`
+
+> [!TIP]
+> Assigning logical devices to computers is done via a `PATCH` request to the computer endpoint, using the `assigned_logical_devices_to_cid` field with a list of logical device IDs.
+
 ## 📦 Client API
 
 ### Modern Client (v5+)
