@@ -41,6 +41,13 @@ COPY . .
 # Create necessary directories for local dev (if they match settings)
 RUN mkdir -p /var/lib/migasfree-backend/public /var/lib/migasfree-backend/keys /var/lib/migasfree-backend/static
 
+# Create a non-root user and set directory permissions
+RUN groupadd -r migasfree && useradd -r -g migasfree migasfree \
+    && chown -R migasfree:migasfree /app /var/lib/migasfree-backend
+
+# Switch to the non-root user for security
+USER migasfree
+
 # Expose port
 EXPOSE 8000
 
