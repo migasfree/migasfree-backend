@@ -52,17 +52,17 @@ def symlink(source_path, target_path, name):
         os.symlink(os.path.join(target_path, name), target)
 
 
-@app.task
+@app.task(time_limit=120, soft_time_limit=90)
 def package_metadata(pms_name, package):
     return get_pms(pms_name).package_metadata(package)
 
 
-@app.task
+@app.task(time_limit=120, soft_time_limit=90)
 def package_info(pms_name, package):
     return get_pms(pms_name).package_info(package)
 
 
-@app.task(bind=True)
+@app.task(bind=True, time_limit=7200, soft_time_limit=7140)
 @unique_task(app)
 def create_repository_metadata(payload):
     deployment = payload
@@ -116,7 +116,7 @@ def create_repository_metadata(payload):
     return ret, output if ret == 0 else error, deployment['name'], project['name']
 
 
-@app.task
+@app.task(time_limit=300, soft_time_limit=270)
 def remove_repository_metadata(payload):
     """
     Payload must contain:

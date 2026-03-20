@@ -104,7 +104,7 @@ def _collect_hardware_nodes(computer, node_data, parent_id=None, level=1, nodes=
     return nodes, related_data
 
 
-@shared_task(queue='default')
+@shared_task(queue='default', time_limit=300, soft_time_limit=270)
 def save_computer_hardware(computer_id, node_data, parent=None, level=1):
     """
     Save hardware data for a computer using bulk operations.

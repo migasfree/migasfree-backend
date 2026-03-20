@@ -25,7 +25,7 @@ from ..core.models import Package
 from .models import Computer
 
 
-@shared_task(queue='default')
+@shared_task(queue='default', time_limit=600, soft_time_limit=540)
 def update_software_inventory(computer_id, inventory):
     try:
         computer = Computer.objects.get(pk=computer_id)

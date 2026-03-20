@@ -290,7 +290,7 @@ def get_alerts():
     return [item for item in response if int(item['result']) != 0]
 
 
-@shared_task(queue='default')
+@shared_task(queue='default', time_limit=120)
 def alerts():
     con = get_redis_connection()
 
@@ -363,7 +363,7 @@ def assigned_computers_to_deployment(deployment_id):
             con.sadd(key, computer_id)
 
 
-@shared_task(queue='default')
+@shared_task(queue='default', time_limit=1800, soft_time_limit=1740)
 def computers_deployments():
     for deploy in Deployment.objects.all():
         assigned_computers_to_deployment(deploy.id)

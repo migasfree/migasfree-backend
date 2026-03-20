@@ -36,7 +36,7 @@ CELERY_BROKER_URL = get_setting('CELERY_BROKER_URL')
 app = Celery('migasfree', broker=CELERY_BROKER_URL, backend=CELERY_BROKER_URL, fixups=[])
 
 
-@app.task(bind=True)
+@app.task(bind=True, time_limit=3600)
 @unique_task(app)
 def migrate_db():
     # Please, don't move this import from here
@@ -45,7 +45,7 @@ def migrate_db():
     call_command('migrate', interactive=False)
 
 
-@shared_task
+@shared_task(time_limit=300)
 def update_deployment_start_date():
     """
     Daily task that updates the start date of deployments
@@ -76,7 +76,7 @@ def update_deployment_start_date():
             logger.info('Updated the start date of deployment %s to %s', deployment.name, new_start_date)
 
 
-@shared_task
+@shared_task(time_limit=3600, soft_time_limit=3540)
 def remove_orphan_files_from_external_deployments():
     deployments = Deployment.objects.filter(source=Deployment.SOURCE_EXTERNAL, frozen=False)
     for deploy in deployments:
@@ -133,7 +133,7 @@ def remove_orphan_files_from_external_deployments():
                         logger.error('Error accessing %s: %s', url, e)
 
 
-@shared_task
+@shared_task(time_limit=180)
 def process_notification_queue():
     import redis
 
