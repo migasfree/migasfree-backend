@@ -131,7 +131,7 @@ Manage physical and logical devices.
 > [!WARNING]
 > **Experimental Feature**: The GraphQL API is currently under active development. Its schema, types, and querying patterns might change in future minor releases without prior deprecation notices. Use it with caution in production environments.
 
-Migasfree provides a powerful **GraphQL API** designed to resolve complex hierarchical data efficiently, specifically optimizing N+1 query problems common in relational architectures. 
+Migasfree provides a powerful **GraphQL API** designed to resolve complex hierarchical data efficiently, specifically optimizing N+1 query problems common in relational architectures.
 
 - **Endpoint**: `/graphql`
 - **Method**: `POST` (or `GET` for debugging in GraphiQL)
