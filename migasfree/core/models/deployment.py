@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import datetime
 import logging
 import os
 import shutil
@@ -40,6 +39,7 @@ from .package import Package
 from .package_set import PackageSet
 from .project import Project
 from .schedule import Schedule
+from ..services.deployments import DeploymentTimelineService
 
 logger = logging.getLogger('migasfree')
 
@@ -316,61 +316,13 @@ class Deployment(models.Model, MigasLink):
 
     @staticmethod
     def get_percent(begin_date, end_date):
-        delta = end_date - begin_date
-        aware_date = timezone.make_aware(
-            datetime.datetime.combine(begin_date, datetime.datetime.min.time()), timezone.get_default_timezone()
-        )
-        progress = timezone.localtime(timezone.now()) - aware_date
-
-        if delta.days > 0:
-            percent = float(progress.days) / delta.days * 100
-            if percent > 100:
-                percent = 100
-            elif percent < 0:
-                percent = 0
-        else:
-            percent = 100
-
-        return int(percent)
+        return DeploymentTimelineService.get_percent(begin_date, end_date)
 
     def schedule_timeline(self):
-        if self.schedule is None:
-            return None
-
-        # Use related manager to benefit from prefetch_related if available
-        delays = sorted(self.schedule.delays.all(), key=lambda x: x.delay)
-
-        if not delays:
-            return None
-
-        begin_date = time_horizon(self.start_date, delays[0].delay)
-        end_date = time_horizon(self.start_date, delays[-1].delay + delays[-1].duration)
-
-        return {
-            'begin_date': str(begin_date),
-            'end_date': str(end_date),
-            'percent': self.get_percent(begin_date, end_date),
-        }
+        return DeploymentTimelineService.schedule_timeline(self)
 
     def timeline(self):
-        schedule_timeline = self.schedule_timeline()
-
-        if not schedule_timeline:
-            return None
-
-        date_format = '%Y-%m-%d'
-        begin_date = datetime.datetime.strptime(schedule_timeline['begin_date'], date_format)
-        end_date = datetime.datetime.strptime(schedule_timeline['end_date'], date_format)
-
-        days = (datetime.datetime.today() - begin_date).days + 1
-        total_days = (end_date - begin_date).days
-        return {
-            'deployment_id': self.pk,
-            'percent': schedule_timeline['percent'],
-            'schedule': self.schedule,
-            'info': _('%s/%s days (from %s to %s)')
-            % (days, total_days, schedule_timeline['begin_date'], schedule_timeline['end_date']),
-        }
+        return DeploymentTimelineService.timeline(self)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.name)
