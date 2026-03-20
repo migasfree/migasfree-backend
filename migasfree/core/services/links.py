@@ -302,6 +302,9 @@ class MigasLinkService:
             if not related_model:
                 continue
 
+            if related_model._meta.app_label == 'authtoken':
+                continue
+
             if self._should_exclude_relation(related_model, _field):
                 continue
 
@@ -309,7 +312,7 @@ class MigasLinkService:
             rel_ids = list(rel_objects.values_list('id', flat=True))
             count = len(rel_ids)
 
-            if not count or related_model._meta.app_label == 'authtoken':
+            if not count:
                 continue
 
             actions = self._build_external_actions(related_model.__name__.lower(), rel_ids, server, count)
@@ -458,7 +461,7 @@ class MigasLinkService:
 
         # Special case: computers with package installed
         if self.instance._meta.model_name.lower() == 'package':
-            computers_count = self.instance.packagehistory_set.filter(package=self, uninstall_date__isnull=True).count()
+            computers_count = self.instance.packagehistory_set.filter(package=self.instance, uninstall_date__isnull=True).count()
             if computers_count > 0:
                 data.append(
                     {
