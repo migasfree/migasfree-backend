@@ -77,14 +77,18 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         if self.request is None:
             return models.Computer.objects.none()
 
-        return models.Computer.objects.scope(self.request.user.userprofile).select_related(
-            'project',
-            'project__platform',
-            'sync_user',
-        ).prefetch_related(
-            'tags',
-            'node_set',
-            'node_set__configuration_set',
+        return (
+            models.Computer.objects.scope(self.request.user.userprofile)
+            .select_related(
+                'project',
+                'project__platform',
+                'sync_user',
+            )
+            .prefetch_related(
+                'tags',
+                'node_set',
+                'node_set__configuration_set',
+            )
         )
 
     def partial_update(self, request, *args, **kwargs):
