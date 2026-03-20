@@ -34,7 +34,7 @@ logger = logging.getLogger('migasfree')
 
 
 def run(cmd):
-    with subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True) as process:
+    with subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False) as process:
         out, err = process.communicate()
 
         return out, err
@@ -248,7 +248,7 @@ def sequence_reset():
             _file.write(commands.getvalue())
             _file.flush()
 
-        cmd = "su postgres -c 'psql {} -f {}' -".format(settings.DATABASES.get('default').get('NAME'), _filename)
+        cmd = ['su', 'postgres', '-c', f"psql {settings.DATABASES.get('default').get('NAME')} -f {_filename}", '-']
         out, err = run(cmd)
         if out != 0:
             logger.error('Error resetting sequences: %s', err)

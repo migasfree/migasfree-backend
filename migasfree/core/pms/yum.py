@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import shlex
+
 from ...utils import execute, get_setting
 from .pms import Pms
 
@@ -40,11 +42,11 @@ class Yum(Pms):
         """
 
         cmd = f"""
-_DIR={path}
+_DIR={shlex.quote(path)}
 rm -rf $_DIR/repodata
 rm -rf $_DIR/checksum
 createrepo --cachedir checksum $_DIR
-gpg -u migasfree-repository --homedir {self.keys_path}/.gnupg --detach-sign --armor $_DIR/repodata/repomd.xml
+gpg -u migasfree-repository --homedir {shlex.quote(self.keys_path)}/.gnupg --detach-sign --armor $_DIR/repodata/repomd.xml
         """
 
         return execute(cmd, shell=True)
@@ -54,40 +56,41 @@ gpg -u migasfree-repository --homedir {self.keys_path}/.gnupg --detach-sign --ar
         string package_info(string package)
         """
 
+        package_safe = shlex.quote(package)
         cmd = f"""
 echo "## Info"
 echo "~~~"
-rpm -qp --info {package}
+rpm -qp --info {package_safe}
 echo "~~~"
 echo
 echo "## Requires"
 echo "~~~"
-rpm -qp --requires {package}
+rpm -qp --requires {package_safe}
 echo "~~~"
 echo
 echo "## Provides"
 echo "~~~"
-rpm -qp --provides {package}
+rpm -qp --provides {package_safe}
 echo "~~~"
 echo
 echo "## Obsoletes"
 echo "~~~"
-rpm -qp --obsoletes {package}
+rpm -qp --obsoletes {package_safe}
 echo "~~~"
 echo
 echo "## Scripts"
 echo "~~~"
-rpm -qp --scripts {package}
+rpm -qp --scripts {package_safe}
 echo "~~~"
 echo
 echo "## Changelog"
 echo "~~~"
-rpm -qp --changelog {package}
+rpm -qp --changelog {package_safe}
 echo "~~~"
 echo
 echo "## Files"
 echo "~~~"
-rpm -qp --list {package}
+rpm -qp --list {package_safe}
 echo "~~~"
         """
 
@@ -100,8 +103,8 @@ echo "~~~"
         dict package_metadata(string package)
         """
 
-        cmd = f'rpm -qp --queryformat "%{{NAME}}___%{{VERSION}}-%{{RELEASE}}___%{{ARCH}}" {package} 2>/dev/null'
-        ret, output, error = execute(cmd, shell=True)
+        cmd = ['rpm', '-qp', '--queryformat', '%{NAME}___%{VERSION}-%{RELEASE}___%{ARCH}', package]
+        ret, output, error = execute(cmd, shell=False)
         if ret == 0:
             name, version, architecture = output.split('___', 2)
         else:

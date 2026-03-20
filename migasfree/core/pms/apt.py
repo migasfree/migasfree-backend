@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import shlex
 
 from ...utils import execute, get_setting
 from .pms import Pms
@@ -137,12 +138,12 @@ function create_deploy {{
 
 create_deploy
 """.format(
-            path=path,
-            name=os.path.basename(path),
-            arch=arch,
-            keys_path=self.keys_path,
-            components=self.components,
-            store_trailing_path=get_setting('MIGASFREE_STORE_TRAILING_PATH'),
+            path=shlex.quote(path),
+            name=shlex.quote(os.path.basename(path)),
+            arch=shlex.quote(arch),
+            keys_path=shlex.quote(self.keys_path),
+            components=shlex.quote(self.components),
+            store_trailing_path=shlex.quote(get_setting('MIGASFREE_STORE_TRAILING_PATH')),
         )
 
         return execute(cmd, shell=True)
@@ -152,57 +153,58 @@ create_deploy
         string package_info(string package)
         """
 
+        package_safe = shlex.quote(package)
         cmd = f"""
 echo "## Info"
 echo "~~~"
-dpkg-deb --info {package}
+dpkg-deb --info {package_safe}
 echo "~~~"
 echo
 echo "## Requires"
 echo "~~~"
-dpkg-deb --showformat='${{Depends}}\n' --show {package}
+dpkg-deb --showformat='${{Depends}}\n' --show {package_safe}
 echo "~~~"
 echo
 echo "## Provides"
 echo "~~~"
-dpkg-deb --showformat='${{Provides}}\n' --show {package}
+dpkg-deb --showformat='${{Provides}}\n' --show {package_safe}
 echo "~~~"
 echo
 echo "## Obsoletes"
 echo "~~~"
-dpkg-deb --showformat='${{Replaces}}\n' --show {package}
+dpkg-deb --showformat='${{Replaces}}\n' --show {package_safe}
 echo "~~~"
 echo
 echo "## Script PreInst"
 echo "~~~"
-dpkg-deb --info {package} preinst
+dpkg-deb --info {package_safe} preinst
 echo "~~~"
 echo
 echo "## Script PostInst"
 echo "~~~"
-dpkg-deb --info {package} postinst
+dpkg-deb --info {package_safe} postinst
 echo "~~~"
 echo
 echo "## Script PreRm"
 echo "~~~"
-dpkg-deb --info {package} prerm
+dpkg-deb --info {package_safe} prerm
 echo "~~~"
 echo
 echo "## Script PostRm"
 echo "~~~"
-dpkg-deb --info {package} postrm
+dpkg-deb --info {package_safe} postrm
 echo "~~~"
 echo
 echo "## Changelog"
-_NAME=$(dpkg-deb --showformat='${{Package}}' --show {package})
+_NAME=$(dpkg-deb --showformat='${{Package}}' --show {package_safe})
 echo "~~~"
-dpkg-deb --fsys-tarfile {package} | tar -O -xvf - ./usr/share/doc/$_NAME/changelog.Debian.gz | gunzip
-dpkg-deb --fsys-tarfile {package} | tar -O -xvf - ./usr/share/doc/$_NAME/changelog.gz | gunzip
+dpkg-deb --fsys-tarfile {package_safe} | tar -O -xvf - ./usr/share/doc/$_NAME/changelog.Debian.gz | gunzip
+dpkg-deb --fsys-tarfile {package_safe} | tar -O -xvf - ./usr/share/doc/$_NAME/changelog.gz | gunzip
 echo "~~~"
 echo
 echo "## Files"
 echo "~~~"
-dpkg-deb -c {package} | awk '{{print $6}}'
+dpkg-deb -c {package_safe} | awk '{{print $6}}'
 echo "~~~"
         """
 
@@ -215,8 +217,8 @@ echo "~~~"
         dict package_metadata(string package)
         """
 
-        cmd = f"dpkg-deb --showformat='${{Package}}_${{Version}}_${{Architecture}}' --show {package}"
-        ret, output, _ = execute(cmd, shell=True)
+        cmd = ['dpkg-deb', '--showformat=${Package}_${Version}_${Architecture}', '--show', package]
+        ret, output, _ = execute(cmd, shell=False)
 
         if ret == 0:
             name, version, architecture = output.split('_')

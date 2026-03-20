@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import shlex
 
 from ...utils import execute, get_setting
 from .pms import Pms
@@ -55,21 +56,21 @@ class Apk(Pms):
         )
         """
 
-        name = os.path.basename(path)
+        name = shlex.quote(os.path.basename(path))
         cmd = rf"""
 _NAME={name}
-_ARCHS=("{arch}")
+_ARCHS=("{shlex.quote(arch)}")
 for _ARCH in ${{_ARCHS[@]}}
 do
-  mkdir -p "{path}/{self.components}/$_ARCH/"
-  cd {path}/../..
+  mkdir -p "{shlex.quote(path)}/{shlex.quote(self.components)}/$_ARCH/"
+  cd {shlex.quote(path)}/../..
 
-  apk index -o dists/$_NAME/{self.components}/$_ARCH/APKINDEX.tar.gz \
-    dists/$_NAME/{self.components}/*.apk
+  apk index -o dists/$_NAME/{shlex.quote(self.components)}/$_ARCH/APKINDEX.tar.gz \
+    dists/$_NAME/{shlex.quote(self.components)}/*.apk
 
-  if [ -f "{self.keys_path}/migasfree.rsa" ]; then
-    abuild-sign -k "{self.keys_path}/migasfree.rsa" \
-      dists/$_NAME/{self.components}/$_ARCH/APKINDEX.tar.gz
+  if [ -f "{shlex.quote(self.keys_path)}/migasfree.rsa" ]; then
+    abuild-sign -k "{shlex.quote(self.keys_path)}/migasfree.rsa" \
+      dists/$_NAME/{shlex.quote(self.components)}/$_ARCH/APKINDEX.tar.gz
   fi
 done
 """
@@ -81,15 +82,16 @@ done
         string package_info(string package)
         """
 
+        package_safe = shlex.quote(package)
         cmd = rf"""
 echo "## Info"
 echo "~~~"
-tar -zxf {package} .PKGINFO -O
+tar -zxf {package_safe} .PKGINFO -O
 echo "~~~"
 echo
 echo "## Files"
 echo "~~~"
-tar -tf {package} | grep -v '^\.PKGINFO$' | grep -v '^\.SIGN\.'
+tar -tf {package_safe} | grep -v '^\.PKGINFO$' | grep -v '^\.SIGN\.'
 echo "~~~"
         """
 
@@ -102,8 +104,8 @@ echo "~~~"
         dict package_metadata(string package)
         """
 
-        cmd = f'tar -zxf {package} .PKGINFO -O'
-        ret, output, _error = execute(cmd, shell=True)
+        cmd = ['tar', '-zxf', package, '.PKGINFO', '-O']
+        ret, output, _error = execute(cmd, shell=False)
 
         name, version, architecture = None, None, None
 

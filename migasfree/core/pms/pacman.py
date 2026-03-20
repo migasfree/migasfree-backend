@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import shlex
 
 from ...utils import execute, get_setting
 from .pms import Pms
@@ -44,13 +45,13 @@ class Pacman(Pms):
             string path, string arch
         )
         """
-        db_name = os.path.basename(path.rstrip('/'))
+        db_name = shlex.quote(os.path.basename(path.rstrip('/')))
         extensions_pattern = ' '.join([f'*.{ext}' for ext in self.extensions])
 
         cmd = f"""
 function create_deploy {{
-  cd {path}/{self.components}
-  export GNUPGHOME={self.keys_path}/.gnupg
+  cd {shlex.quote(path)}/{shlex.quote(self.components)}
+  export GNUPGHOME={shlex.quote(self.keys_path)}/.gnupg
 
   # Collect valid package files
   FILES=""
@@ -78,20 +79,21 @@ create_deploy
         string package_info(string package)
         """
 
+        package_safe = shlex.quote(package)
         cmd = f"""
 echo "## Info"
 echo "~~~"
-{self.name} --query --info --file {package}
+{self.name} --query --info --file {package_safe}
 echo "~~~"
 echo
 echo "## Changelog"
 echo "~~~"
-{self.name} --query --changelog --file {package}
+{self.name} --query --changelog --file {package_safe}
 echo "~~~"
 echo
 echo "## Files"
 echo "~~~"
-{self.name} --query --list --quiet --file {package}
+{self.name} --query --list --quiet --file {package_safe}
 echo "~~~"
         """
 
@@ -104,8 +106,8 @@ echo "~~~"
         dict package_metadata(string package)
         """
 
-        cmd = f'{self.name} --query --info --file {package}'
-        ret, output, error = execute(cmd, shell=True)
+        cmd = [self.name, '--query', '--info', '--file', package]
+        ret, output, error = execute(cmd, shell=False)
         if ret == 0:
             output = output.splitlines()
             pkg_info = {}
