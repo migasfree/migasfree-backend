@@ -232,6 +232,7 @@ class DomainViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
             'excluded_attributes',
             'excluded_attributes__property_att',
             'tags',
+            'domains',
         )
 
 

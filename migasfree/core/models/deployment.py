@@ -338,7 +338,7 @@ class Deployment(models.Model, MigasLink):
             return None
 
         # Use related manager to benefit from prefetch_related if available
-        delays = list(self.schedule.delays.order_by('delay'))
+        delays = sorted(self.schedule.delays.all(), key=lambda x: x.delay)
 
         if not delays:
             return None

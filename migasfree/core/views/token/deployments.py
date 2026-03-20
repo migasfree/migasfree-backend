@@ -108,10 +108,16 @@ class InternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
         'schedule',
         'domain',
     ).prefetch_related(
+        'schedule__delays',
+        'schedule__delays__attributes',
         'included_attributes',
+        'included_attributes__property_att',
         'excluded_attributes',
+        'excluded_attributes__property_att',
         'available_packages',
+        'available_packages__store',
         'available_package_sets',
+        'available_package_sets__packages',
     )
     serializer_class = InternalSourceSerializer
     filterset_class = DeploymentFilter
@@ -158,8 +164,12 @@ class ExternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
         'schedule',
         'domain',
     ).prefetch_related(
+        'schedule__delays',
+        'schedule__delays__attributes',
         'included_attributes',
+        'included_attributes__property_att',
         'excluded_attributes',
+        'excluded_attributes__property_att',
     )
     serializer_class = ExternalSourceSerializer
     filterset_class = DeploymentFilter
