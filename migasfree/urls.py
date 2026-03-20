@@ -83,7 +83,7 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     re_path(r'^docs/$', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     # re_path(r'^redoc/$', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    path('graphql', GraphQLView.as_view(graphiql=True)),
+    path('graphql', GraphQLView.as_view(graphiql=settings.DEBUG)),
     path('', include('migasfree.api_v4.urls')),
     path('', RedirectView.as_view(url=reverse_lazy('admin:index'))),
 ]

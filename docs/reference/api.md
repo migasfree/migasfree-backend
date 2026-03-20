@@ -126,6 +126,26 @@ Manage physical and logical devices.
 > [!TIP]
 > Assigning logical devices to computers is done via a `PATCH` request to the computer endpoint, using the `assigned_logical_devices_to_cid` field with a list of logical device IDs.
 
+## 🕸️ GraphQL API
+
+> [!WARNING]
+> **Experimental Feature**: The GraphQL API is currently under active development. Its schema, types, and querying patterns might change in future minor releases without prior deprecation notices. Use it with caution in production environments.
+
+Migasfree provides a powerful **GraphQL API** designed to resolve complex hierarchical data efficiently, specifically optimizing N+1 query problems common in relational architectures. 
+
+- **Endpoint**: `/graphql`
+- **Method**: `POST` (or `GET` for debugging in GraphiQL)
+- **Explorer**: `/graphql` (GraphiQL is only available when `DEBUG=True` in development environments).
+
+It currently provides full type querying capabilities mimicking the REST architecture hierarchies for:
+
+- **App Catalog**: `allApplications`, `allCategories`, `allPolicies`, `allPackagesByProjects`, `allPolicyGroups`.
+- **Devices**: `allDevices`, `allDrivers`, `allLogicalDevices`, `allCapabilities`, `allConnections`, `allDeviceModels`, `allDeviceTypes`, `allManufacturers`.
+- **Client & Core**: `allComputers`, `allProjects`, `allDeployments`, `allSchedules`, `allDomains`.
+
+> [!TIP]
+> Use standard GraphQL syntax to heavily reduce the number of HTTP roundtrips needed to hydrate user interface tables and complex dashboards. For example, querying an application along with its category and attributes in a single request.
+
 ## 📦 Client API
 
 ### Modern Client (v5+)
