@@ -15,14 +15,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from .computer import ComputerType
-from .device import (
-    ConnectionType,
-    DeviceModelType,
-    DeviceType,
-    DeviceTypeType,
-    LogicalDeviceType,
-    ManufacturerType,
-)
 from .error import ErrorType
 from .fault import FaultType
 from .query import Query
@@ -30,14 +22,8 @@ from .software import PackageHistoryType, PackageType
 
 __all__ = [
     'ComputerType',
-    'ConnectionType',
-    'DeviceModelType',
-    'DeviceType',
-    'DeviceTypeType',
     'ErrorType',
     'FaultType',
-    'LogicalDeviceType',
-    'ManufacturerType',
     'PackageHistoryType',
     'PackageType',
     'Query',

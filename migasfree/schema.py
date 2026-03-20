@@ -19,12 +19,14 @@ import graphene
 import migasfree.app_catalog.schema
 import migasfree.client.schema
 import migasfree.core.schema
+import migasfree.device.schema
 
 
 class Query(
     migasfree.app_catalog.schema.Query,
     migasfree.core.schema.Query,
     migasfree.client.schema.Query,
+    migasfree.device.schema.Query,
     graphene.ObjectType,
 ):
     pass

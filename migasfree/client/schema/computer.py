@@ -19,10 +19,10 @@ from graphene_django import DjangoObjectType
 
 from migasfree.client.models import Computer
 from migasfree.core.schema import AttributeType
+from migasfree.device.schema import LogicalDeviceType
 from migasfree.hardware.models import Node
 from migasfree.hardware.schema import HardwareNodeType
 
-from .device import LogicalDeviceType
 from .error import ErrorType
 from .fault import FaultType
 from .software import PackageHistoryType

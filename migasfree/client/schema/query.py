@@ -18,20 +18,8 @@ import graphene
 
 from migasfree.client.models import Computer, Error, FaultDefinition
 from migasfree.core.models import Package
-from migasfree.device.models import (
-    Device,
-    Manufacturer,
-    Model,
-    Type,
-)
 
 from .computer import ComputerType
-from .device import (
-    DeviceModelType,
-    DeviceType,
-    DeviceTypeType,
-    ManufacturerType,
-)
 from .error import ErrorType
 from .fault import FaultDefinitionType
 from .software import PackageType
@@ -42,10 +30,6 @@ class Query:
     all_errors = graphene.List(ErrorType)
     computer = graphene.Field(ComputerType, id=graphene.ID())
 
-    all_manufacturers = graphene.List(ManufacturerType)
-    all_device_models = graphene.List(DeviceModelType)
-    all_device_types = graphene.List(DeviceTypeType)
-    all_devices = graphene.List(DeviceType)
     all_packages = graphene.List(PackageType)
     all_fault_definitions = graphene.List(FaultDefinitionType)
 
@@ -57,18 +41,6 @@ class Query:
 
     def resolve_computer(self, info, id):
         return Computer.objects.get(pk=id)
-
-    def resolve_all_manufacturers(self, info, **kwargs):
-        return Manufacturer.objects.all()
-
-    def resolve_all_device_models(self, info, **kwargs):
-        return Model.objects.select_related('manufacturer', 'device_type').all()
-
-    def resolve_all_device_types(self, info, **kwargs):
-        return Type.objects.all()
-
-    def resolve_all_devices(self, info, **kwargs):
-        return Device.objects.select_related('model__manufacturer', 'model__device_type', 'connection').all()
 
     def resolve_all_packages(self, info, **kwargs):
         return Package.objects.all()
