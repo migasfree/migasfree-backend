@@ -37,6 +37,17 @@ class PlatformManager(DomainPlatformManager):
 
         return obj
 
+    def get_or_create_from_client(self, name, ip_address=None):
+        platform, created = self.get_or_create(name=name)
+
+        if created and ip_address:
+            from django.utils.translation import gettext_lazy as _
+            from ...client.models import Notification
+            msg = _('Platform [%s] registered by IP [%s].') % (name, ip_address)
+            Notification.objects.create(message=msg)
+
+        return platform
+
 
 class Platform(models.Model, MigasLink):
     """

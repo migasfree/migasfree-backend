@@ -19,7 +19,6 @@ import os
 from django.conf import settings
 from django.contrib import auth
 from django.utils.translation import gettext
-from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import OpenApiTypes, extend_schema, inline_serializer
 from rest_framework import serializers, status, views
 from rest_framework.exceptions import PermissionDenied
@@ -29,33 +28,7 @@ from ...core.models import Platform, Project
 from ...core.pms import get_available_pms
 from ...secure import create_server_keys, generate_rsa_keys, gpg_get_key
 from ...utils import get_client_ip, read_file
-from .. import models, permissions
-
-
-def get_platform_or_create(platform_name, ip_address=None):
-    platform, created = Platform.objects.get_or_create(name=platform_name)
-
-    if created and ip_address:
-        msg = _('Platform [%s] registered by IP [%s].') % (platform_name, ip_address)
-        models.Notification.objects.create(message=msg)
-
-    return platform
-
-
-def add_project(project_name, pms, platform, architecture, ip_address=None):
-    project = Project.objects.create(
-        name=project_name,
-        pms=pms,
-        auto_register_computers=settings.MIGASFREE_AUTOREGISTER,
-        platform=platform,
-        architecture=architecture,
-    )
-
-    if ip_address:
-        msg = _('Project [%s] with PMS [%s] registered by IP [%s].') % (project_name, pms, ip_address)
-        models.Notification.objects.create(message=msg)
-
-    return project
+from .. import permissions
 
 
 class PackagerKeysView(views.APIView):
@@ -110,11 +83,11 @@ class ProjectKeysView(views.APIView):
             ):
                 raise PermissionDenied()  # noqa: B904
 
-            platform = get_platform_or_create(platform_name, ip_address)
+            platform = Platform.objects.get_or_create_from_client(platform_name, ip_address)
             if not platform:
                 raise PermissionDenied()  # noqa: B904
 
-            project = add_project(name, pms, platform, architecture, ip_address)
+            project = Project.objects.register_from_client(name, pms, architecture, platform, ip_address)
             if not project:
                 raise PermissionDenied()  # noqa: B904
 

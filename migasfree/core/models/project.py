@@ -55,6 +55,25 @@ class ProjectManager(DomainProjectManager):
 
         return obj
 
+    def register_from_client(self, name, pms, architecture, platform, ip_address=None):
+        from django.conf import settings
+        from django.utils.translation import gettext_lazy as _
+        from ...client.models import Notification
+        
+        obj = self.create(
+            name=name,
+            pms=pms,
+            architecture=architecture,
+            platform=platform,
+            auto_register_computers=settings.MIGASFREE_AUTOREGISTER,
+        )
+
+        if ip_address:
+            msg = _('Project [%s] with PMS [%s] registered by IP [%s].') % (name, pms, ip_address)
+            Notification.objects.create(message=msg)
+
+        return obj
+
 
 class Project(models.Model, MigasLink):
     """
