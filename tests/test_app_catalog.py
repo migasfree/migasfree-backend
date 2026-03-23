@@ -22,8 +22,8 @@ class TestApplicationModel(TestCase):
     def test_group_by_category(self):
         result = Application.group_by_category()
         expected = [
-            {'category__id': 1, 'category__name': 'Cat1', 'count': 2},
-            {'category__id': 2, 'category__name': 'Cat2', 'count': 1},
+            {'category__id': self.category1.id, 'category__name': 'Cat1', 'count': 2},
+            {'category__id': self.category2.id, 'category__name': 'Cat2', 'count': 1},
         ]
 
         self.assertEqual(list(result), expected)
