@@ -186,15 +186,16 @@ class MigasLinkService:
                         }
                     )
 
-        data.append(
-            {
-                'model': self.model_to_route(self.instance._meta.app_label, self.instance._meta.model_name),
-                'pk': self.instance.id,
-                'text': f'{self.instance._meta.verbose_name} {self.instance.__str__()}',
-                'count': 1,
-                'actions': actions,
-            }
-        )
+        if actions:
+            data.append(
+                {
+                    'model': self.model_to_route(self.instance._meta.app_label, self.instance._meta.model_name),
+                    'pk': self.instance.id,
+                    'text': f'{self.instance._meta.verbose_name} {self.instance.__str__()}',
+                    'count': 1,
+                    'actions': actions,
+                }
+            )
 
         return data
 
