@@ -22,34 +22,38 @@
             "name": "Python: Celery beat",
             "type": "debugpy",
             "request": "launch",
+            "cwd": "${workspaceFolder}",
             "module": "celery",
             "console": "integratedTerminal",
             "args": [
-                "--app=migasfree.celery.app",
+                "--app=migasfree.celery_app.app",
                 "beat",
-                "--loglevel=DEBUG",
+                "--loglevel=DEBUG"
             ],
             "env": {
-                "DJANGO_SETTINGS_MODULE": "migasfree.settings.development"
-            },
+                "DJANGO_SETTINGS_MODULE": "migasfree.settings.development",
+                "PYTHONPATH": "${workspaceFolder}"
+            }
         },
         {
             "name": "Python: Celery queues",
             "type": "debugpy",
             "request": "launch",
+            "cwd": "${workspaceFolder}",
             "module": "celery",
             "console": "integratedTerminal",
             "args": [
-                "--app=migasfree.celery.app",
+                "--app=migasfree.celery_app.app",
                 "worker",
                 "--without-gossip",
                 "--concurrency=10",
                 "--queues=default,pms-apt,pms-dnf,pms-pacman,pms-wpt,pms-yum,pms-zypper",
-                "--loglevel=DEBUG",
+                "--loglevel=DEBUG"
             ],
             "env": {
-                "DJANGO_SETTINGS_MODULE": "migasfree.settings.development"
-            },
+                "DJANGO_SETTINGS_MODULE": "migasfree.settings.development",
+                "PYTHONPATH": "${workspaceFolder}"
+            }
         }
     ]
 }
