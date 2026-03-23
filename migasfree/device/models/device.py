@@ -116,15 +116,27 @@ class Device(models.Model, MigasLink):
 
     objects = DeviceManager()
 
+    def _parse_data(self):
+        if not self.data:
+            return {}
+        try:
+            parsed = json.loads(self.data)
+            if isinstance(parsed, str):
+                parsed = json.loads(parsed)
+            if isinstance(parsed, dict):
+                return parsed
+        except (ValueError, TypeError):
+            pass
+        return {}
+
     def location(self):
-        data = json.loads(self.data)
-        return data.get('LOCATION', '')
+        return self._parse_data().get('LOCATION', '')
 
     def as_dict(self):
         return {
             'name': self.name,
             'model': self.model.name,
-            self.connection.name: json.loads(self.data),
+            self.connection.name: self._parse_data(),
         }
 
     def total_computers(self, user=None):
@@ -237,7 +249,7 @@ class Device(models.Model, MigasLink):
             )
 
     def save(self, *args, **kwargs):
-        data = json.loads(self.data)
+        data = self._parse_data()
         if 'NAME' in data:
             data['NAME'] = data['NAME'].replace(' ', '_')
             self.data = json.dumps(data)
