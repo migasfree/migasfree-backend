@@ -10,9 +10,7 @@ from migasfree.core.models import Attribute, Package, Platform, Project, Propert
 class TestApplicationModel(TestCase):
     def setUp(self):
         self.platform = Platform.objects.create('Linux')
-        self.project = Project.objects.create(
-            name='Vitalinux', platform=self.platform, pms='apt', architecture='amd64'
-        )
+        self.project = Project.objects.create(name='Vitalinux', platform=self.platform, pms='apt', architecture='amd64')
 
         self.category1 = Category.objects.create(name='Cat1')
         self.category2 = Category.objects.create(name='Cat2')
@@ -25,28 +23,21 @@ class TestApplicationModel(TestCase):
         result = Application.group_by_category()
         expected = [
             {'category__id': 1, 'category__name': 'Cat1', 'count': 2},
-            {'category__id': 2, 'category__name': 'Cat2', 'count': 1}
+            {'category__id': 2, 'category__name': 'Cat2', 'count': 1},
         ]
 
         self.assertEqual(list(result), expected)
 
     def test_group_by_level(self):
         result = Application.group_by_level()
-        expected = [
-            {'level': 'U', 'count': 2},
-            {'level': 'A', 'count': 1}
-        ]
+        expected = [{'level': 'U', 'count': 2}, {'level': 'A', 'count': 1}]
 
         self.assertEqual(list(result), expected)
 
     def test_group_by_project(self):
         result = Application.group_by_project()
         expected = [
-            {
-                'packages_by_project__project__name': None,
-                'packages_by_project__project__id': None,
-                'count': 3
-            },
+            {'packages_by_project__project__name': None, 'packages_by_project__project__id': None, 'count': 3},
         ]
 
         self.assertEqual(list(result), expected)
@@ -58,9 +49,7 @@ class TestPolicyModel(TestCase):
         self.policy_group = PolicyGroup.objects.create(policy=self.policy, priority=1)
 
         self.platform = Platform.objects.create('Linux')
-        self.project = Project.objects.create(
-            name='Vitalinux', platform=self.platform, pms='apt', architecture='amd64'
-        )
+        self.project = Project.objects.create(name='Vitalinux', platform=self.platform, pms='apt', architecture='amd64')
 
         self.property_att = Property.objects.create(name='Prop1', prefix='PRO')
 
@@ -100,15 +89,21 @@ class TestPolicyModel(TestCase):
         store = Store.objects.create(name='Store1', project=self.project)
 
         package1 = Package.objects.create(
-            project=self.project, store=store,
+            project=self.project,
+            store=store,
             fullname='migasfree-package_1.0_amd64.deb',
-            name='migasfree-package', version='1.0', architecture='amd64'
+            name='migasfree-package',
+            version='1.0',
+            architecture='amd64',
         )
 
         package2 = Package.objects.create(
-            project=self.project, store=store,
+            project=self.project,
+            store=store,
             fullname='migasfree-other-package_1.0_amd64.deb',
-            name='migasfree-other-package', version='1.0', architecture='amd64'
+            name='migasfree-other-package',
+            version='1.0',
+            architecture='amd64',
         )
 
         policy_group = PolicyGroup.objects.create(policy=policy, priority=1)
@@ -130,9 +125,12 @@ class TestPolicyModel(TestCase):
         store = Store.objects.create(name='Store1', project=self.project)
 
         package1 = Package.objects.create(
-            project=self.project, store=store,
+            project=self.project,
+            store=store,
             fullname='migasfree-package_1.0_amd64.deb',
-            name='migasfree-package', version='1.0', architecture='amd64'
+            name='migasfree-package',
+            version='1.0',
+            architecture='amd64',
         )
 
         category = Category.objects.create(name='Cat1')

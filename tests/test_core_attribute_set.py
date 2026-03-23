@@ -7,13 +7,7 @@ from migasfree.core.models import AttributeSet, Property
 @pytest.fixture
 def property_att():
     return Property.objects.create(
-        prefix='SET',
-        name='Attribute Set',
-        enabled=True,
-        kind='N',
-        sort='basic',
-        language=1,
-        code="print 'All Systems'"
+        prefix='SET', name='Attribute Set', enabled=True, kind='N', sort='basic', language=1, code="print 'All Systems'"
     )
 
 
@@ -42,7 +36,7 @@ def test_sets_dependencies_multiple_sets(property_att):
     expected_dependencies = {
         attribute_set1.id: [attribute_set2.id],
         attribute_set2.id: [attribute_set3.id],
-        attribute_set3.id: []
+        attribute_set3.id: [],
     }
     assert AttributeSet.sets_dependencies() == expected_dependencies
 

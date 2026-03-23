@@ -31,10 +31,7 @@ class TestConnectionViewSet(APITestCase):
         self.assertEqual(response.json()['id'], self.connection.id)
 
     def test_create_connection(self):
-        data = {
-            'name': 'SRL',
-            'device_type': self.device_type.id
-        }
+        data = {'name': 'SRL', 'device_type': self.device_type.id}
         response = self.client.post(reverse('connection-list'), data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -42,9 +39,7 @@ class TestConnectionViewSet(APITestCase):
         self.assertEqual(response.json()['name'], data['name'])
 
     def test_update_connection(self):
-        data = {
-            'name': 'LPT'
-        }
+        data = {'name': 'LPT'}
         response = self.client.patch(reverse('connection-detail', kwargs={'pk': self.connection.pk}), data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

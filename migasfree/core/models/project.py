@@ -58,8 +58,9 @@ class ProjectManager(DomainProjectManager):
     def register_from_client(self, name, pms, architecture, platform, ip_address=None):
         from django.conf import settings
         from django.utils.translation import gettext_lazy as _
+
         from ...client.models import Notification
-        
+
         obj = self.create(
             name=name,
             pms=pms,

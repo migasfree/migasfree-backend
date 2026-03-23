@@ -15,29 +15,21 @@ class TestDeviceViewSet(APITestCase):
         self.client.force_authenticate(user=self.user)
 
         platform = Platform.objects.create(name='Linux')
-        project = Project.objects.create(
-            platform=platform, name='Vitalinux', pms='apt', architecture='amd64'
-        )
+        project = Project.objects.create(platform=platform, name='Vitalinux', pms='apt', architecture='amd64')
         self.computer = Computer.objects.create(
             name='Test Computer', project=project, uuid='12345678-1234-1234-1234-123456789012'
         )
 
-        property_att = Property.objects.create(
-            prefix='CID', name='Computer ID', sort='basic'
-        )
+        property_att = Property.objects.create(prefix='CID', name='Computer ID', sort='basic')
         self.attribute = Attribute.objects.create(value=str(self.computer.id), property_att=property_att)
         self.computer.sync_attributes.set([self.attribute.id])
 
         device_type = Type.objects.create(name='PRINTER')
         manufacturer = Manufacturer.objects.create(name='HP')
         self.connection = Connection.objects.create(name='USB', device_type=device_type)
-        self.model = Model.objects.create(
-            name='Test Model', manufacturer=manufacturer, device_type=device_type
-        )
+        self.model = Model.objects.create(name='Test Model', manufacturer=manufacturer, device_type=device_type)
         self.model.connections.set([self.connection.id])
-        self.device = Device.objects.create(
-            name='Test Device', model=self.model, connection=self.connection
-        )
+        self.device = Device.objects.create(name='Test Device', model=self.model, connection=self.connection)
         self.device.available_for_attributes.set([])
 
     def test_device_viewset_list(self):
@@ -77,7 +69,7 @@ class TestDeviceViewSet(APITestCase):
 
     def test_device_viewset_available(self):
         self.device.available_for_attributes.add(self.computer.sync_attributes.first())
-        response = self.client.get(f"{reverse('device-list')}?cid={self.computer.pk}")
+        response = self.client.get(f'{reverse("device-list")}?cid={self.computer.pk}')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response.data, dict)
@@ -86,7 +78,7 @@ class TestDeviceViewSet(APITestCase):
 
     def test_device_viewset_available_with_query(self):
         self.device.available_for_attributes.add(self.computer.sync_attributes.first())
-        response = self.client.get(f"{reverse('device-list')}?cid={self.computer.pk}&q={self.device.name}")
+        response = self.client.get(f'{reverse("device-list")}?cid={self.computer.pk}&q={self.device.name}')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response.data, dict)

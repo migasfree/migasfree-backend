@@ -104,8 +104,7 @@ class ApplicationViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet
         query = request.GET.get('q', '')
 
         results = (
-            models.Application.objects
-            .select_related('category')
+            models.Application.objects.select_related('category')
             .prefetch_related(
                 'available_for_attributes',
                 'packages_by_project__project',

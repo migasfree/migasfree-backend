@@ -18,15 +18,9 @@ class TestHardwareComputerViewSet(APITestCase):
         self.client.force_authenticate(user=self.user)
 
         self.platform = Platform.objects.create(name='Linux')
-        self.project = Project.objects.create(
-            name='Vitalinux', pms='apt', architecture='amd64', platform=self.platform
-        )
-        self.computer = Computer.objects.create(
-            name='PCXXXXX', project=self.project, uuid=str(uuid.uuid4())
-        )
-        self.computer2 = Computer.objects.create(
-            name='PCXXXX1', project=self.project, uuid=str(uuid.uuid4())
-        )
+        self.project = Project.objects.create(name='Vitalinux', pms='apt', architecture='amd64', platform=self.platform)
+        self.computer = Computer.objects.create(name='PCXXXXX', project=self.project, uuid=str(uuid.uuid4()))
+        self.computer2 = Computer.objects.create(name='PCXXXX1', project=self.project, uuid=str(uuid.uuid4()))
         self.node1 = Node.objects.create(
             data={
                 'computer': self.computer,
@@ -45,12 +39,8 @@ class TestHardwareComputerViewSet(APITestCase):
             }
         )
         self.fault_definition = FaultDefinition.objects.create(name='One', enabled=True)
-        self.fault1 = Fault.objects.create(
-            computer=self.computer, definition=self.fault_definition, result='Fault 1'
-        )
-        self.fault2 = Fault.objects.create(
-            computer=self.computer, definition=self.fault_definition, result='Fault 2'
-        )
+        self.fault1 = Fault.objects.create(computer=self.computer, definition=self.fault_definition, result='Fault 1')
+        self.fault2 = Fault.objects.create(computer=self.computer, definition=self.fault_definition, result='Fault 2')
         self.fault2.checked_ok()
 
     def test_hardware_action(self):
@@ -78,7 +68,7 @@ class TestHardwareComputerViewSet(APITestCase):
             'uuid': self.computer.uuid,
             'name': self.computer.name,
             'search': str(self.computer),
-            'helpdesk': settings.MIGASFREE_HELP_DESK
+            'helpdesk': settings.MIGASFREE_HELP_DESK,
         }
         self.assertEqual(response.json(), expected_response)
 
@@ -124,9 +114,7 @@ class TestHardwareComputerViewSet(APITestCase):
         self.assertEqual(response.data['total'], 0)
 
     def test_get_faults_with_multiple_computers(self):
-        Fault.objects.create(
-            computer=self.computer2, result='Other fault 1', definition=self.fault_definition
-        )
+        Fault.objects.create(computer=self.computer2, result='Other fault 1', definition=self.fault_definition)
         url = reverse('computer-faults', kwargs={'pk': self.computer.pk})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

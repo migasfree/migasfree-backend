@@ -14,9 +14,7 @@ class TestComputerModel(TestCase):
     @classmethod
     def setUpTestData(cls):
         platform = Platform.objects.create(name='Linux')
-        cls.project = Project.objects.create(
-            platform=platform, name='Vitalinux', pms='apt', architecture='amd64'
-        )
+        cls.project = Project.objects.create(platform=platform, name='Vitalinux', pms='apt', architecture='amd64')
         cls.project_other = Project.objects.create(
             platform=platform, name='Vitalinux EDU', pms='apt', architecture='amd64'
         )
@@ -37,7 +35,7 @@ class TestComputerModel(TestCase):
         result = Computer.stacked_by_month(None, make_aware(datetime(2022, 1, 1)))
         assert result == [
             {'year': 2022, 'month': 1, 'project_id': self.project.id, 'count': 2},
-            {'year': 2022, 'month': 2, 'project_id': self.project_other.id, 'count': 1}
+            {'year': 2022, 'month': 2, 'project_id': self.project_other.id, 'count': 1},
         ]
 
     def test_stacked_by_month_filter(self):
@@ -51,7 +49,7 @@ class TestComputerModel(TestCase):
         result = Computer.stacked_by_month(None, make_aware(datetime(2022, 1, 1)), 'project_id')
         assert result == [
             {'year': 2022, 'month': 1, 'project_id': self.project.id, 'count': 2},
-            {'year': 2022, 'month': 2, 'project_id': self.project_other.id, 'count': 1}
+            {'year': 2022, 'month': 2, 'project_id': self.project_other.id, 'count': 1},
         ]
 
     def test_stacked_by_month_order(self):
@@ -65,7 +63,7 @@ class TestComputerModel(TestCase):
         result = Computer.stacked_by_month(None, make_aware(datetime(2022, 1, 1)))
         assert result == [
             {'year': 2022, 'month': 1, 'project_id': self.project.id, 'count': 2},
-            {'year': 2022, 'month': 2, 'project_id': self.project_other.id, 'count': 1}
+            {'year': 2022, 'month': 2, 'project_id': self.project_other.id, 'count': 1},
         ]
 
     def test_stacked_by_month_year(self):
@@ -77,5 +75,5 @@ class TestComputerModel(TestCase):
         result = Computer.stacked_by_month(None, make_aware(datetime(2022, 1, 1)))
         assert result == [
             {'year': 2022, 'month': 1, 'project_id': self.project.id, 'count': 1},
-            {'year': 2023, 'month': 1, 'project_id': self.project.id, 'count': 1}
+            {'year': 2023, 'month': 1, 'project_id': self.project.id, 'count': 1},
         ]

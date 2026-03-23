@@ -14,12 +14,9 @@ from migasfree.core.models import (
 
 
 class TestMigasLink(TestCase):
-
     def setUp(self):
         self.platform = Platform.objects.create(name='Linux')
-        self.project = Project.objects.create(
-            name='Vitalinux', platform=self.platform, pms='apt', architecture='amd64'
-        )
+        self.project = Project.objects.create(name='Vitalinux', platform=self.platform, pms='apt', architecture='amd64')
 
         self.property_att = Property.objects.create(prefix='CID', name='Computer ID', sort='basic')
 
@@ -53,7 +50,7 @@ class TestMigasLink(TestCase):
             kind='N',
             sort='basic',
             language=1,
-            code="print 'All Systems'"
+            code="print 'All Systems'",
         )
         attribute_set = AttributeSet.objects.create(name='Test Set')
         relations = attribute_set.get_relations(self.request)

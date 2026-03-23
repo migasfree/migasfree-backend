@@ -19,8 +19,8 @@ import logging
 import os
 import re
 import shutil
-import tempfile
 import ssl
+import tempfile
 from mimetypes import guess_type
 from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin

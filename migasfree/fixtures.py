@@ -248,7 +248,7 @@ def sequence_reset():
             _file.write(commands.getvalue())
             _file.flush()
 
-        cmd = ['su', 'postgres', '-c', f"psql {settings.DATABASES.get('default').get('NAME')} -f {_filename}", '-']
+        cmd = ['su', 'postgres', '-c', f'psql {settings.DATABASES.get("default").get("NAME")} -f {_filename}', '-']
         out, err = run(cmd)
         if out != 0:
             logger.error('Error resetting sequences: %s', err)

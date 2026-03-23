@@ -32,6 +32,7 @@ from django_redis import get_redis_connection
 
 from ...utils import is_safe_url, normalize_line_breaks, time_horizon
 from ..pms import get_pms
+from ..services.deployments import DeploymentTimelineService
 from .attribute import Attribute
 from .domain import Domain
 from .migas_link import MigasLink
@@ -39,7 +40,6 @@ from .package import Package
 from .package_set import PackageSet
 from .project import Project
 from .schedule import Schedule
-from ..services.deployments import DeploymentTimelineService
 
 logger = logging.getLogger('migasfree')
 

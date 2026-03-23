@@ -30,6 +30,7 @@ class MigasLinkService:
         self._exclude_links = instance._exclude_links if hasattr(instance, '_exclude_links') else []
         self._include_links = instance._include_links if hasattr(instance, '_include_links') else []
         self.instance = instance
+
     PROTOCOL = 'mea'
 
     ROUTES = {
@@ -76,7 +77,6 @@ class MigasLinkService:
         'device.model': 'devices/models',
         'device.type': 'devices/types',
     }
-
 
     def custom_protocol(self, info_action):
         return f'{self.PROTOCOL}://{base64.urlsafe_b64encode(json.dumps(info_action).encode()).decode()}'
@@ -132,19 +132,22 @@ class MigasLinkService:
         if 'related' in action:
             # COMPUTER === CID ATTRIBUTE
             if self.instance._meta.model_name == 'computer' or (
-                (self.instance._meta.model_name in ['attribute', 'clientattribute']) and self.instance.property_att.prefix == 'CID'
+                (self.instance._meta.model_name in ['attribute', 'clientattribute'])
+                and self.instance.property_att.prefix == 'CID'
             ):
                 model = 'computer'
 
             # ATTRIBUTE SET === ATTRIBUTE
             elif self.instance._meta.model_name == 'attributeset' or (
-                (self.instance._meta.model_name == 'attribute' and self.instance.pk > 1) and self.instance.property_att.prefix == 'SET'
+                (self.instance._meta.model_name == 'attribute' and self.instance.pk > 1)
+                and self.instance.property_att.prefix == 'SET'
             ):
                 model = 'attributeset'
 
             # DOMAIN === ATTRIBUTE
             elif self.instance._meta.model_name == 'domain' or (
-                self.instance._meta.model_name in ['attribute', 'serverattribute'] and self.instance.property_att.prefix == 'DMN'
+                self.instance._meta.model_name in ['attribute', 'serverattribute']
+                and self.instance.property_att.prefix == 'DMN'
             ):
                 model = 'domain'
 
@@ -223,7 +226,9 @@ class MigasLinkService:
                 break
 
             if hasattr(obj.remote_field.model.objects, 'scope'):
-                rel_objects = obj.remote_field.model.objects.scope(user).filter(**{obj.remote_field.name: self.instance.id})
+                rel_objects = obj.remote_field.model.objects.scope(user).filter(
+                    **{obj.remote_field.name: self.instance.id}
+                )
             else:
                 rel_objects = obj.remote_field.model.objects.filter(**{obj.remote_field.name: self.instance.id})
             count = rel_objects.count()
@@ -462,7 +467,9 @@ class MigasLinkService:
 
         # Special case: computers with package installed
         if self.instance._meta.model_name.lower() == 'package':
-            computers_count = self.instance.packagehistory_set.filter(package=self.instance, uninstall_date__isnull=True).count()
+            computers_count = self.instance.packagehistory_set.filter(
+                package=self.instance, uninstall_date__isnull=True
+            ).count()
             if computers_count > 0:
                 data.append(
                     {
@@ -591,7 +598,8 @@ class MigasLinkService:
 
         # ATTRIBUTE SET === ATTRIBUTE
         if self.instance._meta.model_name == 'attributeset' or (
-            (self.instance._meta.model_name == 'attribute' and self.instance.pk > 1) and self.instance.property_att.prefix == 'SET'
+            (self.instance._meta.model_name == 'attribute' and self.instance.pk > 1)
+            and self.instance.property_att.prefix == 'SET'
         ):
             attribute_set, att = self._get_attribute_set_and_att()
             set_data = attribute_set.get_relations(request) if attribute_set else []
@@ -602,7 +610,8 @@ class MigasLinkService:
 
         # COMPUTER === CID ATTRIBUTE
         if self.instance._meta.model_name == 'computer' or (
-            (self.instance._meta.model_name in ['attribute', 'clientattribute']) and self.instance.property_att.prefix == 'CID'
+            (self.instance._meta.model_name in ['attribute', 'clientattribute'])
+            and self.instance.property_att.prefix == 'CID'
         ):
             computer, cid = self._get_computer_and_cid()
             computer_data = computer.get_relations(request) if computer else []
@@ -660,7 +669,12 @@ class MigasLinkService:
         elif self.instance._meta.model_name == 'attributeset' or (
             self.instance._meta.model_name in ['clientattribute', 'attribute'] and self.instance.id == 1
         ):
-            badge_data.update({'status': 'set', 'summary': f'({gettext(self.instance._meta.verbose_name)}) {self.instance.description}'})
+            badge_data.update(
+                {
+                    'status': 'set',
+                    'summary': f'({gettext(self.instance._meta.verbose_name)}) {self.instance.description}',
+                }
+            )
         elif self.instance._meta.model_name == 'clientattribute' or (
             self.instance._meta.model_name == 'attribute' and self.instance.property_att.sort == 'client'
         ):

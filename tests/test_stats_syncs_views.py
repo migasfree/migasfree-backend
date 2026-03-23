@@ -16,13 +16,9 @@ class TestYearlySync(APITestCase):
         self.client.force_authenticate(user=self.user)
 
         self.platform = Platform.objects.create(name='Linux')
-        self.project = Project.objects.create(
-            name='Vitalinux', platform=self.platform, pms='apt', architecture='amd64'
-        )
+        self.project = Project.objects.create(name='Vitalinux', platform=self.platform, pms='apt', architecture='amd64')
 
-        self.con = redis.Redis(
-            host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB + 1
-        )
+        self.con = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB + 1)
         self.con.flushdb()
 
     def tearDown(self):
@@ -78,13 +74,9 @@ class TestMonthlySync(APITestCase):
         self.client.force_authenticate(user=self.user)
 
         self.platform = Platform.objects.create(name='Linux')
-        self.project = Project.objects.create(
-            name='Vitalinux', platform=self.platform, pms='apt', architecture='amd64'
-        )
+        self.project = Project.objects.create(name='Vitalinux', platform=self.platform, pms='apt', architecture='amd64')
 
-        self.con = redis.Redis(
-            host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB + 1
-        )
+        self.con = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB + 1)
         self.con.flushdb()
 
     def tearDown(self):

@@ -81,15 +81,20 @@ TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 LOGGING['loggers']['migasfree']['level'] = 'DEBUG'
 LOGGING['handlers']['console']['level'] = 'DEBUG'
 LOGGING['handlers']['file']['level'] = 'DEBUG'
+"""
 LOGGING['loggers']['django.db.backends'] = {
     'level': 'DEBUG',
     'handlers': ['console'],
 }
+"""
 LOGGING['loggers']['celery'] = {
     'level': 'DEBUG',
     'handlers': ['console'],
     # 'propagate': False,
 }
+
+REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {'anon': '100/hour', 'user': '1000/minute'}
+
 
 MIGASFREE_PUBLIC_DIR = os.path.join(MIGASFREE_PROJECT_DIR, 'pub')
 MIGASFREE_KEYS_DIR = os.path.join(MIGASFREE_APP_DIR, 'keys')
@@ -130,15 +135,52 @@ if os.environ.get('GITHUB_WORKFLOW'):
 INSTALLED_APPS += (
     'debug_toolbar',
     'django_extensions',
-    'silk',
+    # 'silk',
 )
 INTERNAL_IPS = ('127.0.0.1',)
 
 MIDDLEWARE += [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'silk.middleware.SilkyMiddleware',
+    # 'silk.middleware.SilkyMiddleware',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
 
 ALLOWED_HOSTS = ['*']
+
+# ----
+
+MIGASFREE_COMPUTER_SEARCH_FIELDS = ('name',)
+
+MIGASFREE_FQDN = 'localhost:2345'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        # 'NAME': 'migasfree-backend',
+        'NAME': 'ayto',
+        'USER': 'postgres',
+        'PASSWORD': 'psql',
+        'HOST': 'localhost',
+        'PORT': '5434',
+    }
+}
+
+# INSTALLED_APPS += ('sslserver',)
+
+MIGASFREE_EXTERNAL_ACTIONS = {  # noqa: F811
+    'computer': {
+        'ping': {'title': 'PING', 'description': 'check connectivity'},
+        'ssh': {'title': 'SSH', 'description': 'remote control via ssh'},
+        'vnc': {'title': 'VNC', 'description': 'remote control vnc', 'many': False},
+        'sync': {'title': 'SYNC', 'description': 'ssh -> run migasfree sync'},
+        'install': {
+            'title': 'INSTALL',
+            'description': 'ssh -> install a package',
+            'related': ['deployment', 'computer'],
+        },
+    },
+    'error': {
+        'clean': {'title': 'delete', 'description': 'delete errors'},
+    },
+}

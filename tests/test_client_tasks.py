@@ -14,11 +14,11 @@ from migasfree.core.models import Platform, Project
 class TestUpdateSoftwareInventoryTask(TestCase):
     def setUp(self):
         self.platform = Platform.objects.create(name='Linux')
-        self.project = Project.objects.create(
-            name='Vitalinux', platform=self.platform, pms='apt', architecture='amd64'
-        )
+        self.project = Project.objects.create(name='Vitalinux', platform=self.platform, pms='apt', architecture='amd64')
         self.computer = Computer.objects.create(
-            project=self.project, name='Computer1', uuid=str(uuid.uuid4()),
+            project=self.project,
+            name='Computer1',
+            uuid=str(uuid.uuid4()),
         )
 
     def test_update_software_inventory_task_existent_computer(self):

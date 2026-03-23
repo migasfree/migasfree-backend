@@ -22,7 +22,6 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.utils.html import escape
-from django.utils.translation import gettext as _
 from drf_spectacular.utils import OpenApiExample, extend_schema
 from rest_framework import permissions, status, views
 from rest_framework.decorators import action, permission_classes, throttle_classes

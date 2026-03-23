@@ -25,10 +25,7 @@ def platform():
 
 @pytest.fixture
 def project(platform):
-    return Project.objects.create(
-        name='Vitalinux', platform=platform,
-        pms='apt', architecture='amd64'
-    )
+    return Project.objects.create(name='Vitalinux', platform=platform, pms='apt', architecture='amd64')
 
 
 @pytest.fixture
@@ -38,9 +35,7 @@ def schedule():
 
 @pytest.fixture
 def deployment(project, schedule):
-    return Deployment.objects.create(
-        start_date=datetime.now(), project=project, schedule=schedule
-    )
+    return Deployment.objects.create(start_date=datetime.now(), project=project, schedule=schedule)
 
 
 @pytest.fixture

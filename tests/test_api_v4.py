@@ -17,13 +17,10 @@ class TestComputerAPI(TestCase):
             enabled=True,
             kind='N',
             language=1,
-            code="print 'All Systems'"
+            code="print 'All Systems'",
         )
-        Property.objects.create(
-            prefix='HST',
-            name='Hostname'
-        )
-        Attribute.objects.create(description='', value="All Systems", property_att=property_att)
+        Property.objects.create(prefix='HST', name='Hostname')
+        Attribute.objects.create(description='', value='All Systems', property_att=property_att)
 
         cls.user = UserProfile.objects.create(
             username='test', email='test@test.com', password='test', is_superuser=True
@@ -100,11 +97,9 @@ class TestComputerAPI(TestCase):
                     'platform': 'Windows',
                     'project': 'Windows 10',
                     'user': 'tux',
-                    'user_fullname': 'tux'
+                    'user_fullname': 'tux',
                 },
-                'attributes': {
-                    'HST': 'localhost'
-                }
+                'attributes': {'HST': 'localhost'},
             }
         }
 
