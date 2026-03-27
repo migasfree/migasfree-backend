@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,10 +42,6 @@ from .models import (
 )
 from .pms import get_available_mimetypes
 from .validators import MimetypeValidator
-
-# TODO https://github.com/blueimp/jQuery-File-Upload/wiki
-# TODO https://github.com/sigurdga/django-jquery-file-upload
-# TODO https://github.com/digi604/django-smart-selects (project -> store)
 
 
 class AttributeSetForm(forms.ModelForm):
