@@ -17,8 +17,9 @@
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
+from django.core.exceptions import PermissionDenied
 from django.db.models import Prefetch, Q
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.urls import resolve
 from django.utils.translation import gettext_lazy as _
 
@@ -135,7 +136,7 @@ class ComputerAdmin(admin.ModelAdmin):
                 'classes': ('grp-collapse grp-closed',),
                 'fields': (
                     'my_get_software_inventory',
-                    # 'my_get_software_history',  # FIXME dict instead of string
+                    'my_get_software_history',
                 ),
             },
         ),
@@ -151,7 +152,6 @@ class ComputerAdmin(admin.ModelAdmin):
         ),
     )
 
-    """
     actions = ['delete_selected']
 
     def delete_selected(self, request, objs):
@@ -161,17 +161,10 @@ class ComputerAdmin(admin.ModelAdmin):
         return render(
             request,
             'computer_confirm_delete_selected.html',
-            {
-                'object_list': ', '.join(
-                    objs.values_list(
-                        settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0], flat=True
-                    )
-                )
-            }
+            {'object_list': ', '.join(objs.values_list(settings.MIGASFREE_COMPUTER_SEARCH_FIELDS[0], flat=True))},
         )
 
-    delete_selected.short_description = _("Delete selected %(verbose_name_plural)s")
-    """
+    delete_selected.short_description = _('Delete selected %(verbose_name_plural)s')
 
     def my_get_software_inventory(self, obj):
         return '\n'.join(obj.get_software_inventory())
