@@ -37,7 +37,8 @@ class AttributeSetManager(models.Manager):
         return qs
 
 
-# FIXME https://docs.djangoproject.com/en/1.8/ref/contrib/gis/
+# FIXME: Consider migrating to GeoDjango (django.contrib.gis) and using PointField for better spatial support.
+# https://docs.djangoproject.com/en/5.2/ref/contrib/gis/
 class AttributeSet(models.Model, MigasLink):
     name = models.CharField(
         verbose_name=_('name'),
