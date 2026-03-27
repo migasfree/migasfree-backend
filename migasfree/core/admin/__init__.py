@@ -31,36 +31,34 @@ This package contains Django admin classes organized by model/feature:
 from django.contrib import admin
 
 from ..models import Attribute, Property
-
-# Register simple models
-admin.site.register(Attribute)
-admin.site.register(Property)
-
-# Import all admin classes to register them
-from .attribute import (  # noqa: E402
+from .attribute import (
     AttributeSetAdmin,
     ClientAttributeAdmin,
     ClientAttributeFilter,
     ServerAttributeAdmin,
     ServerAttributeFilter,
 )
-from .deployment import (  # noqa: E402
+from .deployment import (
     DeploymentAdmin,
     ExternalSourceAdmin,
     InternalSourceAdmin,
 )
-from .domain import DomainAdmin, ScopeAdmin  # noqa: E402
-from .package import PackageAdmin, PackageSetAdmin  # noqa: E402
-from .project import ProjectAdmin, StoreAdmin  # noqa: E402
-from .property import (  # noqa: E402
+from .domain import DomainAdmin, ScopeAdmin
+from .package import PackageAdmin, PackageSetAdmin
+from .project import ProjectAdmin, StoreAdmin
+from .property import (
     ClientPropertyAdmin,
     ClientPropertyFilter,
     ServerPropertyAdmin,
     ServerPropertyFilter,
     SingularityAdmin,
 )
-from .schedule import ScheduleAdmin, ScheduleDelayLine  # noqa: E402
-from .user import UserProfileAdmin  # noqa: E402
+from .schedule import ScheduleAdmin, ScheduleDelayLine
+from .user import UserProfileAdmin
+
+# Register simple models
+admin.site.register(Attribute)
+admin.site.register(Property)
 
 __all__ = [
     'AttributeSetAdmin',
