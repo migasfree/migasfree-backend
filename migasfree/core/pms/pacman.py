@@ -38,6 +38,7 @@ class Pacman(Pms):
         ]
         self.extensions = ['pkg', 'pkg.tar.zst', 'pkg.tar.gz', 'pkg.tar.xz']
         self.architectures = ['any', 'x86_64']
+        self.siglevel = 'Optional TrustAll PackageTrustAll'
 
     def create_repository(self, path, arch):
         """
@@ -107,7 +108,7 @@ echo "~~~"
         """
 
         cmd = [self.name, '--query', '--info', '--file', package]
-        ret, output, error = execute(cmd, shell=False)
+        ret, output, _error = execute(cmd, shell=False)
         if ret == 0:
             output = output.splitlines()
             pkg_info = {}
@@ -127,17 +128,17 @@ echo "~~~"
     def source_template(self, deploy):
         """
         string source_template(Deployment deploy)
-        FIXME SigLevel
         """
 
         from ..models import Deployment
 
         if deploy.source == Deployment.SOURCE_INTERNAL:
             return """[{name}]
-SigLevel = Optional TrustAll PackageTrustAll
+SigLevel = {siglevel}
 Server = {{protocol}}://{{server}}{media_url}{project}/{trailing_path}/{name}/{components}
 
 """.format(
+                siglevel=self.siglevel,
                 media_url=self.media_url,
                 trailing_path=get_setting('MIGASFREE_REPOSITORY_TRAILING_PATH'),
                 project=deploy.project.slug,
