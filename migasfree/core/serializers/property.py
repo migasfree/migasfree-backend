@@ -18,7 +18,6 @@
 Property and Attribute serializers.
 """
 
-from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from ..models import (
@@ -47,11 +46,7 @@ class PropertyWriteSerializer(serializers.ModelSerializer):
 
 
 class PropertySerializer(serializers.ModelSerializer):
-    language = serializers.SerializerMethodField()
-
-    @extend_schema_field(serializers.CharField)
-    def get_language(self, obj):
-        return obj.get_language_display()
+    language = serializers.CharField(source='get_language_display', read_only=True)
 
     class Meta:
         model = Property
@@ -125,13 +120,9 @@ class ClientPropertySerializer(serializers.ModelSerializer):
 
 class SingularitySerializer(serializers.ModelSerializer):
     property_att = ServerPropertyInfoSerializer(many=False, read_only=True)
-    language = serializers.SerializerMethodField()
+    language = serializers.CharField(source='get_language_display', read_only=True)
     included_attributes = AttributeInfoSerializer(many=True, read_only=True)
     excluded_attributes = AttributeInfoSerializer(many=True, read_only=True)
-
-    @extend_schema_field(serializers.CharField)
-    def get_language(self, obj):
-        return obj.get_language_display()
 
     class Meta:
         model = Singularity
