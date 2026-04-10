@@ -74,22 +74,22 @@ class ProjectKeysView(views.APIView):
     def get_object(self, name, pms, platform_name, architecture, ip_address):
         try:
             return Project.objects.get(name=name)
-        except Project.DoesNotExist:
+        except Project.DoesNotExist as exc:
             if not settings.MIGASFREE_AUTOREGISTER and (
                 not self.user
                 or not self.user.is_superuser
                 or not self.user.has_perm('core.add_project')
                 or not self.user.has_perm('core.add_platform')
             ):
-                raise PermissionDenied()  # noqa: B904
+                raise PermissionDenied() from exc
 
             platform = Platform.objects.get_or_create_from_client(platform_name, ip_address)
             if not platform:
-                raise PermissionDenied()  # noqa: B904
+                raise PermissionDenied() from exc
 
             project = Project.objects.register_from_client(name, pms, architecture, platform, ip_address)
             if not project:
-                raise PermissionDenied()  # noqa: B904
+                raise PermissionDenied() from exc
 
             return project
 

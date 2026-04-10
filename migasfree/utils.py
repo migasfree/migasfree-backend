@@ -325,8 +325,8 @@ def save_tempfile(file_):
         with open(tempfn, 'wb') as temp_file:
             for chunk in file_.chunks():
                 temp_file.write(chunk)
-    except OSError:
-        raise Exception(f'Problem with the input file {file_.name}')  # noqa: B904
+    except OSError as exc:
+        raise Exception(f'Problem with the input file {file_.name}') from exc
 
     return tempfn
 

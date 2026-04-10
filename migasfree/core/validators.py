@@ -57,8 +57,8 @@ class MimetypeValidator:
 
                     if mime not in self.mimetypes:
                         raise ValidationError(_('%s is not an acceptable file type') % item)
-        except AttributeError:
-            raise ValidationError(_('This value could not be validated for file type') % item)  # noqa: B904
+        except AttributeError as exc:
+            raise ValidationError(_('This value could not be validated for file type') % item) from exc
 
 
 def validate_package_name(name, file_list):

@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ class SafeConnectionMixin:
             cert_uuid, _cert_cid = parts
         except (ValueError, TypeError) as e:
             logger.warning('Invalid X-SSL-Client-CN format: %s (%s)', client_dn, e)
-            raise PermissionDenied(_('Invalid mTLS certificate CN format'))  # noqa: B904
+            raise PermissionDenied(_('Invalid mTLS certificate CN format')) from e
 
         if cert_uuid.upper() != computer_uuid.upper():
             logger.warning('mTLS certificate UUID mismatch: cert_uuid=%s, computer_uuid=%s', cert_uuid, computer_uuid)

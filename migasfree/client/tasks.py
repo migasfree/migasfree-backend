@@ -29,8 +29,8 @@ from .models import Computer
 def update_software_inventory(computer_id, inventory):
     try:
         computer = Computer.objects.get(pk=computer_id)
-    except ObjectDoesNotExist:
-        raise Reject(reason='Computer does not exist')  # noqa: B904
+    except ObjectDoesNotExist as exc:
+        raise Reject(reason='Computer does not exist') from exc
 
     if inventory and isinstance(inventory, list):
         pkgs = []

@@ -228,4 +228,4 @@ def prevent_circular_dependencies(sender, instance, action, reverse, model, pk_s
                 del depends[instance.id]
 
             review = list(AttributeSet.objects.filter(id__in=list(depends.keys())).values_list('name', flat=True))
-            raise ValidationError(_('Review circular dependencies: %s') % ', '.join(review))  # noqa: B904
+            raise ValidationError(_('Review circular dependencies: %s') % ', '.join(review)) from e
