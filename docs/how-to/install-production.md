@@ -21,8 +21,8 @@ If you cannot use Docker, follow these steps to replicate the production environ
 
 ### Prerequisites
 
-- **OS**: Debian 12+ / Ubuntu 22.04+
-- **Python**: 3.10+
+- **OS**: Debian 12+ / Ubuntu 24.04+
+- **Python**: 3.11+
 - **Database**: PostgreSQL 12+
 - **Broker/Cache**: Redis 6+
 

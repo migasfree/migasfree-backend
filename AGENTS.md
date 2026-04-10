@@ -10,7 +10,7 @@
 - **Framework**: Django 5.x + Django REST Framework (DRF)
 - **Database**: PostgreSQL
 - **Task Queue**: Celery + Redis
-- **Language**: Python 3.10+
+- **Language**: Python 3.11+
 - **API Standards**: REST (Token & JWT Auth), OpenAPI 3.0 (Swagger)
 - **Legacy Support**: `api_v4` module for backward compatibility with v4 clients.
 

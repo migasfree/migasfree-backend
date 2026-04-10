@@ -5,7 +5,7 @@ In this tutorial, you will learn how to set up a local development environment a
 ## Prerequisites
 
 - Basic command line knowledge.
-- Python 3.10+ installed.
+- Python 3.11+ installed.
 - Docker (optional, for dependencies) or local PostgreSQL/Redis.
 
 ## Step 1: Clone the Repository
