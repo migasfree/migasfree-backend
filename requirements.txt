@@ -21,9 +21,7 @@ attrs==26.1.0
     #   service-identity
     #   twisted
 autobahn==24.4.2
-    # via
-    #   daphne
-    #   migasfree-backend (pyproject.toml)
+    # via daphne
 automat==25.4.16
     # via twisted
 billiard==4.2.4
