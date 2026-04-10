@@ -38,7 +38,7 @@ app = Celery('migasfree', broker=CELERY_BROKER_URL, backend=CELERY_BROKER_URL, f
 
 @app.task(bind=True, time_limit=3600)
 @unique_task(app)
-def migrate_db():
+def migrate_db(self):
     # Please, don't move this import from here
     from django.core.management import call_command
 

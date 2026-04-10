@@ -64,7 +64,7 @@ def package_info(pms_name, package):
 
 @app.task(bind=True, time_limit=7200, soft_time_limit=7140)
 @unique_task(app)
-def create_repository_metadata(payload):
+def create_repository_metadata(self, payload):
     deployment = payload
     project = deployment['project']
     deployment_id = deployment['id']
