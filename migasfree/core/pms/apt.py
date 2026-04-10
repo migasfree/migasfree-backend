@@ -77,6 +77,7 @@ class Apt(Pms):
         """
 
         cmd = r"""
+set -e
 _NAME={name}
 _ARCHS=("{arch}")
 for _ARCH in ${{_ARCHS[@]}}
@@ -86,10 +87,7 @@ do
 
   ionice -c 3 apt-ftparchive --arch $_ARCH packages dists/$_NAME/{components} \
     > dists/$_NAME/{components}/binary-$_ARCH/Packages 2> /tmp/$_NAME
-  if [ $? -ne 0 ]
-  then
-    (>&2 cat /tmp/$_NAME)
-  fi
+
   sed -i "s/Filename: .*\/{components}\//Filename: dists\/$_NAME\/{components}\//" \
     dists/$_NAME/{components}/binary-$_ARCH/Packages
   sed -i "s/Filename: .*\/{store_trailing_path}\/[^/]*\//Filename: \
@@ -98,13 +96,12 @@ do
 done
 
 function calculate_hash {{
-  echo $1
-  _FILES=$(find  -type f | sed 's/^.\///' | sort)
-  for _FILE in $_FILES
+  echo "$1"
+  find . -type f ! -name "Release*" | sed 's/^.\///' | sort | while read -r _FILE
   do
-    _SIZE=$(printf "%16d\\n" $(ls -l $_FILE | cut -d ' ' -f5))
-    _HASH=$($2 $_FILE | cut -d ' ' -f1) $()
-    echo " $_HASH" "$_SIZE" "$_FILE"
+    _SIZE=$(printf "%16d" $(stat -c "%s" "$_FILE"))
+    _HASH=$($2 "$_FILE" | cut -d ' ' -f1)
+    echo " $_HASH $_SIZE $_FILE"
   done
 }}
 
@@ -112,28 +109,24 @@ function create_deploy {{
   cd {path}
   _F="$(mktemp /var/tmp/deploy-XXXXX)"
 
-  rm Release 2>/dev/null || :
-  rm Release.gpg 2>/dev/null || :
-  touch Release
-  rm $_F 2>/dev/null || :
+  echo "Architectures: ${{_ARCHS[@]}}" > "$_F"
+  echo "Codename: $_NAME" >> "$_F"
+  echo "Components: {components}" >> "$_F"
+  echo "Date: $(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S UTC')" >> "$_F"
+  echo "Label: migasfree $_NAME repository" >> "$_F"
+  echo "Origin: migasfree" >> "$_F"
+  echo "Suite: $_NAME" >> "$_F"
 
-  echo "Architectures: ${{_ARCHS[@]}}" > $_F
-  echo "Codename: $_NAME" >> $_F
-  echo "Components: {components}" >> $_F
-  echo "Date: $(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S UTC')" >> $_F
-  echo "Label: migasfree $_NAME repository" >> $_F
-  echo "Origin: migasfree" >> $_F
-  echo "Suite: $_NAME" >> $_F
+  calculate_hash "MD5Sum:" "md5sum" >> "$_F"
+  calculate_hash "SHA1:" "sha1sum" >> "$_F"
+  calculate_hash "SHA256:" "sha256sum" >> "$_F"
+  calculate_hash "SHA512:" "sha512sum" >> "$_F"
 
-  calculate_hash "MD5Sum:" "md5sum" >> $_F
-  calculate_hash "SHA1:" "sha1sum" >> $_F
-  calculate_hash "SHA256:" "sha256sum" >> $_F
-  calculate_hash "SHA512:" "sha512sum" >> $_F
+  mv "$_F" Release
+  chmod 644 Release
 
-  mv $_F Release
-
-  gpg --no-tty --local-user migasfree-repository --homedir {keys_path}/.gnupg --clear-sign --output InRelease Release
-  gpg --no-tty --local-user migasfree-repository --homedir {keys_path}/.gnupg -abs --output Release.gpg Release
+  gpg --batch --no-tty --local-user migasfree-repository --homedir {keys_path}/.gnupg --clear-sign --output InRelease Release
+  gpg --batch --no-tty --local-user migasfree-repository --homedir {keys_path}/.gnupg -abs --output Release.gpg Release
 }}
 
 create_deploy
@@ -154,59 +147,61 @@ create_deploy
         """
 
         package_safe = shlex.quote(package)
+
+        # Optimized field extraction using a single dpkg-deb --show call
+        format_str = (
+            '## Requires\\n~~~\\n${Depends}\\n~~~\\n\\n'
+            '## Provides\\n~~~\\n${Provides}\\n~~~\\n\\n'
+            '## Obsoletes\\n~~~\\n${Replaces}\\n~~~\\n\\n'
+            '## PackageName\\n${Package}'
+        )
+
         cmd = f"""
+set -e
 echo "## Info"
 echo "~~~"
 dpkg-deb --info {package_safe}
 echo "~~~"
 echo
-echo "## Requires"
-echo "~~~"
-dpkg-deb --showformat='${{Depends}}\n' --show {package_safe}
-echo "~~~"
-echo
-echo "## Provides"
-echo "~~~"
-dpkg-deb --showformat='${{Provides}}\n' --show {package_safe}
-echo "~~~"
-echo
-echo "## Obsoletes"
-echo "~~~"
-dpkg-deb --showformat='${{Replaces}}\n' --show {package_safe}
-echo "~~~"
-echo
+
+# Multi-field extraction
+_OUT=$(dpkg-deb --showformat='{format_str}' --show {package_safe})
+_NAME=$(echo "$_OUT" | tail -n 1)
+echo "$_OUT" | head -n -2
+
 echo "## Script PreInst"
 echo "~~~"
-dpkg-deb --info {package_safe} preinst
+dpkg-deb --info {package_safe} preinst 2>/dev/null || echo "[None]"
 echo "~~~"
 echo
 echo "## Script PostInst"
 echo "~~~"
-dpkg-deb --info {package_safe} postinst
+dpkg-deb --info {package_safe} postinst 2>/dev/null || echo "[None]"
 echo "~~~"
 echo
 echo "## Script PreRm"
 echo "~~~"
-dpkg-deb --info {package_safe} prerm
+dpkg-deb --info {package_safe} prerm 2>/dev/null || echo "[None]"
 echo "~~~"
 echo
 echo "## Script PostRm"
 echo "~~~"
-dpkg-deb --info {package_safe} postrm
+dpkg-deb --info {package_safe} postrm 2>/dev/null || echo "[None]"
 echo "~~~"
 echo
 echo "## Changelog"
-_NAME=$(dpkg-deb --showformat='${{Package}}' --show {package_safe})
 echo "~~~"
-dpkg-deb --fsys-tarfile {package_safe} | tar -O -xvf - ./usr/share/doc/$_NAME/changelog.Debian.gz | gunzip
-dpkg-deb --fsys-tarfile {package_safe} | tar -O -xvf - ./usr/share/doc/$_NAME/changelog.gz | gunzip
+# Try to extract changelog more efficiently
+dpkg-deb --fsys-tarfile {package_safe} | tar -O -xf - ./usr/share/doc/$_NAME/changelog.Debian.gz 2>/dev/null | gunzip 2>/dev/null || \\
+dpkg-deb --fsys-tarfile {package_safe} | tar -O -xf - ./usr/share/doc/$_NAME/changelog.gz 2>/dev/null | gunzip 2>/dev/null || \\
+echo "[Changelog not found or empty]"
 echo "~~~"
 echo
 echo "## Files"
 echo "~~~"
-dpkg-deb -c {package_safe} | awk '{{print $6}}'
+dpkg-deb -c {package_safe} | awk '{{{{print $6}}}}'
 echo "~~~"
-        """
+"""
 
         ret, output, error = execute(cmd, shell=True)
 
