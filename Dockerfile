@@ -1,6 +1,6 @@
 # Dockerfile
 # Pinned version for determinism across environments
-FROM python:3.10.14-slim-bookworm
+FROM python:3.11-slim-bookworm
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
