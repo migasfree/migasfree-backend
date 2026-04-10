@@ -5,7 +5,7 @@ class TestExecute:
     def test_execute_simple_command_no_shell(self):
         # Expecting shell=False default behavior
         # Simple command should work without shell
-        ret, out, err = execute('echo "hello world"')
+        ret, out, _err = execute('echo "hello world"')
         assert ret == 0
         assert out.strip() == 'hello world'
 
@@ -17,13 +17,13 @@ class TestExecute:
         # Actually without shell=True, piping | is just an argument.
 
         cmd = 'echo "hello" | grep "hello"'
-        ret, out, err = execute(cmd, shell=True)
+        ret, out, _err = execute(cmd, shell=True)
         assert ret == 0
         assert out.strip() == 'hello'
 
     def test_execute_list_command(self):
         # List command should work with shell=False
         cmd = ['echo', 'hello world']
-        ret, out, err = execute(cmd)
+        ret, out, _err = execute(cmd)
         assert ret == 0
         assert out.strip() == 'hello world'

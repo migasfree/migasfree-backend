@@ -104,7 +104,7 @@ echo "~~~"
         """
 
         cmd = ['rpm', '-qp', '--queryformat', '%{NAME}___%{VERSION}-%{RELEASE}___%{ARCH}', package]
-        ret, output, error = execute(cmd, shell=False)
+        ret, output, _error = execute(cmd, shell=False)
         if ret == 0:
             name, version, architecture = output.split('___', 2)
         else:
