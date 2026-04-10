@@ -6,3 +6,5 @@ tests/__pycache__/*
 .coverage
 celerybeat-schedule.db
 review/*
+.env
+.env.local

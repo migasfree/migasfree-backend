@@ -1,5 +1,6 @@
 # Dockerfile
-FROM python:3.10-slim
+# Pinned version for determinism across environments
+FROM python:3.10.14-slim-bookworm
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -29,14 +30,15 @@ RUN apt-get update && apt-get install -y \
     gettext \
     && rm -rf /var/lib/apt/lists/*
 
-# Install python dependencies from pyproject.toml
-COPY pyproject.toml .
-# No requirements.txt available, so we install the package in editable mode or build strictly from pyproject
-# Using pip install . to install dependencies defined in pyproject.toml
-RUN pip install --no-cache-dir .[dev]
+# Install python dependencies from lockfile for determinism
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
 COPY . .
+
+# Install the migasfree-backend package itself
+RUN pip install --no-cache-dir --no-deps .
 
 # Create necessary directories for local dev (if they match settings)
 RUN mkdir -p /var/lib/migasfree-backend/public /var/lib/migasfree-backend/keys /var/lib/migasfree-backend/static
