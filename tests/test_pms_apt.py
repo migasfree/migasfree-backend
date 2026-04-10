@@ -22,7 +22,7 @@ class TestApt:
 
     def test_package_metadata_failure(self):
         apt = Apt()
-        with patch('migasfree.core.pms.apt.execute', return_value=(1, '', 'Error')) as mock_execute:
+        with patch('migasfree.core.pms.apt.execute', return_value=(1, '', 'Error')):
             metadata = apt.package_metadata('/path/to/pkg.deb')
             assert metadata == {'name': None, 'version': None, 'architecture': None}
 
@@ -35,7 +35,7 @@ class TestApt:
 
     def test_package_info_failure(self):
         apt = Apt()
-        with patch('migasfree.core.pms.apt.execute', return_value=(1, '', 'Error message')) as mock_execute:
+        with patch('migasfree.core.pms.apt.execute', return_value=(1, '', 'Error message')):
             info = apt.package_info('/path/to/pkg.deb')
             assert info == 'Error message'
 
