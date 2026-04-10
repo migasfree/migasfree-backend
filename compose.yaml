@@ -1,17 +1,17 @@
 services:
   db:
-    image: postgres:15
+    image: postgres:15-bookworm
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=migasfree_backend
-      - POSTGRES_USER=migasfree_backend
-      - POSTGRES_PASSWORD=migasfree_backend
+      - POSTGRES_DB=${POSTGRES_DB:-migasfree_backend}
+      - POSTGRES_USER=${POSTGRES_USER:-migasfree_backend}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-migasfree_backend}
     ports:
       - "5432:5432"
 
   redis:
-    image: redis:7
+    image: redis:7-bookworm
     ports:
       - "6379:6379"
 
@@ -25,10 +25,12 @@ services:
     depends_on:
       - db
       - redis
+    env_file:
+      - .env
     environment:
-      - DJANGO_SETTINGS_MODULE=migasfree.settings.development
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-migasfree.settings.development}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
 
   celery_worker:
     build: .
@@ -38,10 +40,12 @@ services:
     depends_on:
       - db
       - redis
+    env_file:
+      - .env
     environment:
-      - DJANGO_SETTINGS_MODULE=migasfree.settings.development
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-migasfree.settings.development}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
 
   celery_beat:
     build: .
@@ -51,10 +55,12 @@ services:
     depends_on:
       - db
       - redis
+    env_file:
+      - .env
     environment:
-      - DJANGO_SETTINGS_MODULE=migasfree.settings.development
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-migasfree.settings.development}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
 
 volumes:
   postgres_data:
