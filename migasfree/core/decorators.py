@@ -42,7 +42,7 @@ def unique_task(app):
                                 except Exception as e:
                                     return f'Error cancelling task "{callback.__name__}()": {e}'
 
-            return callback(*args, **kwargs)
+            return callback(celery_task, *args, **kwargs)
 
         return wrapper
 
