@@ -87,10 +87,9 @@ class Command(BaseCommand):
 
             pipeline = con.pipeline(transaction=False)
             op_count = 0
-            total_slots = 0
 
             self.stdout.write('Populating Redis sets...')
-            for sync in syncs:
+            for total_slots, sync in enumerate(syncs, 1):
                 h = sync['hour']
                 c_id = sync['computer_id']
                 p_id = sync['project_id']
@@ -112,7 +111,6 @@ class Command(BaseCommand):
                 pipeline.sadd(f'migasfree:watch:stats:{p_id}:hours:{h_s}', c_id)
 
                 op_count += 8
-                total_slots += 1
 
                 if op_count >= 10000:
                     pipeline.execute()
