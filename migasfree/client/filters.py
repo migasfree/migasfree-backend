@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,6 +35,8 @@ from .models import (
 
 class ComputerFilter(filters.FilterSet):
     platform = filters.CharFilter(field_name='project__platform__id')
+    status_in = filters.CharFilter(method='filter_status_in')
+    status__in = filters.CharFilter(method='filter_status_in')
     created_at__gte = filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
     created_at__lt = filters.DateTimeFilter(field_name='created_at', lookup_expr='lt')
     sync_attributes = filters.CharFilter(field_name='sync_attributes__value', lookup_expr='contains')
@@ -97,12 +99,15 @@ class ComputerFilter(filters.FilterSet):
     def filter_serial(self, qs, name, value):
         return qs.filter(node__serial__icontains=value)
 
+    def filter_status_in(self, qs, name, value):
+        return qs.filter(status__in=value.split(','))
+
     class Meta:
         model = Computer
         fields = {
             'id': ['exact', 'in'],
             'project__id': ['exact'],
-            'status': ['exact', 'in'],
+            'status': ['exact'],
             'name': ['exact', 'icontains'],
             'uuid': ['exact', 'icontains'],
             'sync_attributes__id': ['exact', 'in'],
