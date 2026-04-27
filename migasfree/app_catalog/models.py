@@ -341,6 +341,7 @@ class PolicyGroup(models.Model, MigasLink):
     policy = models.ForeignKey(
         Policy,
         on_delete=models.CASCADE,
+        related_name='groups',
         verbose_name=_('policy'),
         db_comment='related policy',
     )

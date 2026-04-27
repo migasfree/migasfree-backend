@@ -166,7 +166,9 @@ class PolicyViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
         'excluded_attributes',
         'excluded_attributes__property_att',
         'groups',
-        'groups__priority',
+        'groups__included_attributes',
+        'groups__excluded_attributes',
+        'groups__applications',
     )
     serializer_class = serializers.PolicySerializer
     filterset_class = PolicyFilter
