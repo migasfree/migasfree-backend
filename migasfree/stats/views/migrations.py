@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,35 +38,42 @@ class MigrationStatsViewSet(EventProjectViewSet):
         user = request.user.userprofile
         total = Migration.objects.scope(user).count()
 
-        values = defaultdict(list)
+        platform_counts = defaultdict(int)
+        outer = []
         for item in (
             Migration.objects.scope(user)
             .values('project__name', 'project__id', 'project__platform__id')
             .annotate(count=Count('id'))
             .order_by('project__platform__id', '-count')
         ):
-            values[item.get('project__platform__id')].append(
+            platform_id = item.get('project__platform__id')
+            platform_counts[platform_id] += item.get('count')
+            outer.append(
                 {
                     'name': item.get('project__name'),
                     'value': item.get('count'),
                     'project_id': item.get('project__id'),
-                    'platform_id': item.get('project__platform__id'),
+                    'platform_id': platform_id,
                 }
             )
 
-        data = []
+        inner = []
         for platform in Platform.objects.scope(user).all():
-            if platform.id in values:
-                count = sum(item['value'] for item in values[platform.id])
-                data.append(
-                    {'name': platform.name, 'value': count, 'platform_id': platform.id, 'data': values[platform.id]}
+            if platform.id in platform_counts:
+                inner.append(
+                    {
+                        'name': platform.name,
+                        'value': platform_counts[platform.id],
+                        'platform_id': platform.id,
+                    }
                 )
 
         return Response(
             {
                 'title': _('Migrations / Project'),
                 'total': total,
-                'data': data,
+                'inner': inner,
+                'outer': outer,
             },
             status=status.HTTP_200_OK,
         )
