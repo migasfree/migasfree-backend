@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2025 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -359,8 +359,7 @@ def assigned_computers_to_deployment(deployment_id):
     key = f'migasfree:deployments:{deployment_id}:computers'
     con.delete(key)
     if computers:
-        for computer_id in list(computers):
-            con.sadd(key, computer_id)
+        con.sadd(key, *list(computers))
 
 
 @shared_task(queue='default', time_limit=1800, soft_time_limit=1740)

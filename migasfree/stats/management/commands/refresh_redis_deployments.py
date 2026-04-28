@@ -19,8 +19,9 @@ import time
 from django.core.management.base import BaseCommand
 from django_redis import get_redis_connection
 
-from migasfree.client.models import Computer, Synchronization
+from migasfree.client.models import Synchronization
 from migasfree.core.models import Deployment
+from migasfree.core.pms import get_available_pms
 from migasfree.stats.tasks import assigned_computers_to_deployment
 
 
@@ -37,19 +38,20 @@ class Command(BaseCommand):
         deployments = Deployment.objects.filter(enabled=True, schedule__isnull=False)
         total_deploys = deployments.count()
 
-        # Clear assigned keys first to be sure
-        for key in con.scan_iter(match='migasfree:deployments:*:computers'):
-            con.delete(key)
+        # Clear assigned keys in bulk
+        self.stdout.write('  Cleaning up old assigned keys...')
+        assigned_keys = list(con.scan_iter(match='migasfree:deployments:*:computers'))
+        if assigned_keys:
+            con.delete(*assigned_keys)
 
-        from migasfree.core.pms import get_available_pms
-        available_pms_names = [name for name, _ in get_available_pms()]
+        available_pms_names = {name for name, _ in get_available_pms()}
 
         for i, deploy in enumerate(deployments, 1):
             if deploy.project.pms not in available_pms_names:
                 continue
 
             assigned_computers_to_deployment(deploy.id)
-            if i % 10 == 0 or i == total_deploys:
+            if i % 50 == 0 or i == total_deploys:
                 self.stdout.write(f'  Processed {i}/{total_deploys} deployments...')
 
         self.stdout.write(
@@ -60,46 +62,52 @@ class Command(BaseCommand):
         self.stdout.write('Step 2/2: Recalculating OK/Error status from latest synchronizations...')
         start_status = time.perf_counter()
 
-        # Clear old status keys
-        for key in con.scan_iter(match='migasfree:deployments:*:ok'):
-            con.delete(key)
-        for key in con.scan_iter(match='migasfree:deployments:*:error'):
-            con.delete(key)
+        # Clear old status keys in bulk
+        self.stdout.write('  Cleaning up old status keys...')
+        status_keys = list(con.scan_iter(match='migasfree:deployments:*:ok')) + list(
+            con.scan_iter(match='migasfree:deployments:*:error')
+        )
+        if status_keys:
+            con.delete(*status_keys)
 
-        # Process productive computers with sync history
-        computers = Computer.productive.filter(synchronization__isnull=False).distinct()
-        total_computers = computers.count()
+        # Efficiently get the latest synchronization for each productive computer
+        # using PostgreSQL's DISTINCT ON feature.
+        latest_syncs = (
+            Synchronization.objects.filter(computer__productive=True)
+            .order_by('computer_id', '-created_at')
+            .distinct('computer_id')
+            .select_related('computer')
+            .iterator()
+        )
 
         pipeline = con.pipeline(transaction=False)
         op_count = 0
+        processed_count = 0
 
-        for i, computer in enumerate(computers, 1):
+        for sync in latest_syncs:
+            processed_count += 1
             try:
-                latest_sync = Synchronization.objects.filter(computer=computer).order_by('-created_at').first()
+                computer = sync.computer
+                # Approximation: use current available deployments
+                available_deploys = Deployment.available_deployments(
+                    computer, computer.get_all_attributes()
+                ).values_list('id', flat=True)
 
-                if latest_sync:
-                    # Approximation: use current available deployments
-                    available_deploys = Deployment.available_deployments(
-                        computer, computer.get_all_attributes()
-                    ).values_list('id', flat=True)
+                status_suffix = 'ok' if sync.pms_status_ok else 'error'
+                for deploy_id in available_deploys:
+                    pipeline.sadd(f'migasfree:deployments:{deploy_id}:{status_suffix}', computer.id)
+                    op_count += 1
 
-                    for deploy_id in available_deploys:
-                        status_key = (
-                            f'migasfree:deployments:{deploy_id}:{"ok" if latest_sync.pms_status_ok else "error"}'
-                        )
-                        pipeline.sadd(status_key, computer.id)
-                        op_count += 1
-
-                if op_count >= 5000:
+                if op_count >= 10000:
                     pipeline.execute()
                     op_count = 0
             except Exception:
-                # Silent failure as requested
                 pass
 
-            if i % 500 == 0 or i == total_computers:
-                self.stdout.write(f'  Processed {i}/{total_computers} computers...')
+            if processed_count % 1000 == 0:
+                self.stdout.write(f'  Processed {processed_count} computers...')
 
         pipeline.execute()
+        self.stdout.write(f'  Final computer count: {processed_count}')
         self.stdout.write(self.style.NOTICE(f'Status recalculated in {time.perf_counter() - start_status:.2f} s'))
         self.stdout.write(self.style.SUCCESS('Redis deployment stats refreshed successfully!'))
