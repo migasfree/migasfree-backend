@@ -80,7 +80,6 @@ DEBUG = True
 TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 LOGGING['loggers']['migasfree']['level'] = 'DEBUG'
 LOGGING['handlers']['console']['level'] = 'DEBUG'
-LOGGING['handlers']['file']['level'] = 'DEBUG'
 LOGGING['loggers']['django.db.backends'] = {
     'level': 'DEBUG',
     'handlers': ['console'],

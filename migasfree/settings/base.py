@@ -191,32 +191,18 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'ERROR',
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
-        },
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'formatter': 'verbose',
-            'filename': os.path.join(MIGASFREE_TMP_DIR, 'migasfree-backend.log'),
-            'maxBytes': 1024 * 1024 * 10,  # 10 MB
-        },
-        'celery': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(MIGASFREE_TMP_DIR, 'migasfree-celery.log'),
-            'formatter': 'simple',
-            'maxBytes': 1024 * 1024 * 100,  # 100 MB
         },
     },
     'loggers': {
         'migasfree': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
             'level': 'ERROR',
         },
         'celery': {
-            'handlers': ['celery', 'console'],
+            'handlers': ['console'],
             'level': 'DEBUG',
         },
         'daphne': {
