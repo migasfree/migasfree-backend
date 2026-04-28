@@ -139,8 +139,15 @@ class InternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
     @action(methods=['get'], detail=True)
     def metadata(self, request, pk=None):
         deploy = self.get_object()
+        pms = deploy.pms()
+        if not pms:
+            return Response(
+                {'detail': gettext('Unsupported PMS for this deployment')},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         tasks.create_repository_metadata.apply_async(
-            queue=f'pms-{deploy.pms().name}', kwargs={'payload': deploy.get_repository_metadata_payload()}
+            queue=f'pms-{pms.name}', kwargs={'payload': deploy.get_repository_metadata_payload()}
         )
 
         return Response({'detail': gettext('Operation received')}, status=status.HTTP_200_OK)

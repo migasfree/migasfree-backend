@@ -19,9 +19,9 @@ import time
 from django.core.management.base import BaseCommand
 from django_redis import get_redis_connection
 
-from ...client.models import Computer, Synchronization
-from ...core.models import Deployment
-from ..tasks import assigned_computers_to_deployment
+from migasfree.client.models import Computer, Synchronization
+from migasfree.core.models import Deployment
+from migasfree.stats.tasks import assigned_computers_to_deployment
 
 
 class Command(BaseCommand):
@@ -32,16 +32,22 @@ class Command(BaseCommand):
         con = get_redis_connection()
 
         # 1. Recalculate Assigned Computers
-        self.stdout.write('Step 1/2: Recalculating assigned computers for all deployments...')
+        self.stdout.write('Step 1/2: Recalculating assigned computers for deployments with schedules...')
         start_assigned = time.perf_counter()
-        deployments = Deployment.objects.filter(enabled=True)
+        deployments = Deployment.objects.filter(enabled=True, schedule__isnull=False)
         total_deploys = deployments.count()
 
         # Clear assigned keys first to be sure
         for key in con.scan_iter(match='migasfree:deployments:*:computers'):
             con.delete(key)
 
+        from migasfree.core.pms import get_available_pms
+        available_pms_names = [name for name, _ in get_available_pms()]
+
         for i, deploy in enumerate(deployments, 1):
+            if deploy.project.pms not in available_pms_names:
+                continue
+
             assigned_computers_to_deployment(deploy.id)
             if i % 10 == 0 or i == total_deploys:
                 self.stdout.write(f'  Processed {i}/{total_deploys} deployments...')

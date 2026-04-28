@@ -107,7 +107,14 @@ def get_available_architectures():
 
 
 def get_pms(name):
+    if not name:
+        return None
+
     available_pms = dict(get_available_pms())
-    mod = import_module(f'migasfree.core.pms.{available_pms.get(name)}')
+    pms_module = available_pms.get(name)
+    if not pms_module:
+        return None
+
+    mod = import_module(f'migasfree.core.pms.{pms_module}')
 
     return getattr(mod, name.capitalize())()

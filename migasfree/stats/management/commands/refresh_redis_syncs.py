@@ -21,11 +21,11 @@ from django.core.management.base import BaseCommand
 from django.db.models.functions import TruncHour
 from django_redis import get_redis_connection
 
-from ....client.models import Synchronization
+from migasfree.client.models import Synchronization
 
 
 class Command(BaseCommand):
-    help = 'Refresh redis syncs stats (Optimized version)'
+    help = 'Refresh redis syncs stats (Parallel version)'
 
     INITIAL_YEAR = 2010
     CURRENT_YEAR = datetime.today().year
