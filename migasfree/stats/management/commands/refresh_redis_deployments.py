@@ -19,7 +19,7 @@ import time
 from django.core.management.base import BaseCommand
 from django_redis import get_redis_connection
 
-from migasfree.client.models import Synchronization
+from migasfree.client.models import Computer, Synchronization
 from migasfree.core.models import Deployment
 from migasfree.core.pms import get_available_pms
 from migasfree.stats.tasks import assigned_computers_to_deployment
@@ -73,7 +73,7 @@ class Command(BaseCommand):
         # Efficiently get the latest synchronization for each productive computer
         # using PostgreSQL's DISTINCT ON feature.
         latest_syncs = (
-            Synchronization.objects.filter(computer__productive=True)
+            Synchronization.objects.filter(computer__status__in=Computer.PRODUCTIVE_STATUS)
             .order_by('computer_id', '-created_at')
             .distinct('computer_id')
             .select_related('computer')
