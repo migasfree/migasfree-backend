@@ -324,12 +324,14 @@ def assigned_computers_to_deployment(deployment_id):
 
     computers = set(
         Computer.objects.filter(
-            Q(project=deploy.project)
-            & (
-                Q(sync_attributes__id__in=deploy.included_attributes.all())
-                | Q(tags__id__in=deploy.included_attributes.all())
-            )
-        ).values_list('id', flat=True)
+            project=deploy.project,
+            status__in=Computer.PRODUCTIVE_STATUS,
+        )
+        .filter(
+            Q(sync_attributes__in=deploy.included_attributes.all())
+            | Q(tags__in=deploy.included_attributes.all())
+        )
+        .values_list('id', flat=True)
     )
 
     if deploy.schedule and deploy.schedule.delays:
@@ -337,23 +339,31 @@ def assigned_computers_to_deployment(deployment_id):
             computers = computers.union(
                 set(
                     Computer.objects.filter(
-                        Q(project=deploy.project)
-                        & (Q(sync_attributes__id__in=delay.attributes.all()) | Q(tags__id__in=delay.attributes.all()))
-                    ).values_list('id', flat=True)
+                        project=deploy.project,
+                        status__in=Computer.PRODUCTIVE_STATUS,
+                    )
+                    .filter(
+                        Q(sync_attributes__in=delay.attributes.all())
+                        | Q(tags__in=delay.attributes.all())
+                    )
+                    .values_list('id', flat=True)
                 )
             )
 
     computers = computers.difference(
         set(
             Computer.objects.filter(
-                Q(project=deploy.project)
-                & (
-                    Q(sync_attributes__id__in=deploy.excluded_attributes.all())
-                    | Q(tags__id__in=deploy.excluded_attributes.all())
-                )
-            ).values_list('id', flat=True)
+                project=deploy.project,
+                status__in=Computer.PRODUCTIVE_STATUS,
+            )
+            .filter(
+                Q(sync_attributes__in=deploy.excluded_attributes.all())
+                | Q(tags__in=deploy.excluded_attributes.all())
+            )
+            .values_list('id', flat=True)
         )
     )
+
 
     con = get_redis_connection()
     key = f'migasfree:deployments:{deployment_id}:computers'
