@@ -32,9 +32,9 @@ class Command(BaseCommand):
         con = get_redis_connection()
 
         # 1. Recalculate Assigned Computers
-        self.stdout.write('Recalculating assigned computers for enabled deployments with schedules...')
+        self.stdout.write('Recalculating assigned computers for enabled deployments...')
         start_assigned = time.perf_counter()
-        deployments = Deployment.objects.filter(enabled=True, schedule__isnull=False)
+        deployments = Deployment.objects.filter(enabled=True)
         total_deploys = deployments.count()
 
         # Clear assigned keys in bulk
