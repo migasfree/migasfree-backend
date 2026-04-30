@@ -134,9 +134,13 @@ def remove_repository_metadata(payload):
 
 @task_postrun.connect
 def handle_postrun(sender=None, **kwargs):
-    if sender == create_repository_metadata:
-        if kwargs['state'] == 'SUCCESS':
-            ret, output, deployment_name, project_name = kwargs['retval']
+    if getattr(sender, 'name', None) == 'migasfree.core.pms.tasks.create_repository_metadata':
+        state = kwargs.get('state')
+        retval = kwargs.get('retval')
+        msg = None
+
+        if state == 'SUCCESS' and retval:
+            ret, output, deployment_name, project_name = retval
             if ret == 0:
                 msg = f'Repository metadata for deployment [{deployment_name}] in project [{project_name}] created'
             else:
@@ -145,7 +149,7 @@ def handle_postrun(sender=None, **kwargs):
                     f' for deployment [{deployment_name}]'
                     f' in project [{project_name}]: {output}'
                 )
-        elif kwargs['state'] == 'REJECTED':
+        elif state == 'REJECTED':
             # Extract info from payload in kwargs
             # kwargs['kwargs'] is {'payload': {...}}
             payload = kwargs.get('kwargs', {}).get('payload', {})
@@ -156,7 +160,10 @@ def handle_postrun(sender=None, **kwargs):
                 f' [{deployment_id}] could not be performed.'
                 ' Review configuration.'
             )
-        elif kwargs['state'] is None:  # REVOKED & TERMINATED
+        elif state == 'FAILURE':
+            msg = f'CRITICAL: Repository metadata creation task failed: {kwargs.get("exception")}'
+
+        if not msg:
             return
 
         try:
