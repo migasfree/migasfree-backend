@@ -79,8 +79,8 @@ class Apt(Pms):
         cmd = r"""
 set -e
 _NAME={name}
-_ARCHS=("{arch}")
-for _ARCH in ${{_ARCHS[@]}}
+_ARCHS=({arch})
+for _ARCH in "${{_ARCHS[@]}}"
 do
   mkdir -p "{path}/{components}/binary-$_ARCH/"
   cd {path}/../..
@@ -133,7 +133,7 @@ create_deploy
 """.format(
             path=shlex.quote(path),
             name=shlex.quote(os.path.basename(path)),
-            arch=shlex.quote(arch),
+            arch=' '.join([shlex.quote(a) for a in arch.split()]),
             keys_path=shlex.quote(self.keys_path),
             components=shlex.quote(self.components),
             store_trailing_path=shlex.quote(get_setting('MIGASFREE_STORE_TRAILING_PATH')),
