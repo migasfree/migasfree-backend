@@ -2,7 +2,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from migasfree.core.models import Platform, Project, Store, UserProfile
+from migasfree.client.models import Computer, PackageHistory
+from migasfree.core.models import Package, Platform, Project, Store, UserProfile
 
 
 class TestPlatformViewSet(APITestCase):
@@ -175,3 +176,52 @@ class TestStoreViewSet(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(response.json()['count'], 1)
+
+
+class TestPackageViewSet(APITestCase):
+    def setUp(self):
+        self.user = UserProfile.objects.create(
+            username='test_pkg_user', email='test_pkg@test.com', password='test', is_superuser=True
+        )
+        self.client.force_authenticate(user=self.user)
+
+        self.platform = Platform.objects.create(name='Linux')
+        self.project = Project.objects.create(
+            name='Vitalinux-Pkg', pms='apt', architecture='amd64', platform=self.platform
+        )
+        self.store = Store.objects.create(name='Store-Pkg', project=self.project)
+
+    def test_delete_package_without_history(self):
+        pkg = Package.objects.create(
+            fullname='test-package_1.0_amd64.deb',
+            name='test-package',
+            version='1.0',
+            architecture='amd64',
+            project=self.project,
+            store=self.store,
+        )
+        response = self.client.delete(reverse('package-detail', kwargs={'pk': pkg.pk}))
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Package.objects.filter(pk=pkg.pk).exists())
+
+    def test_delete_package_with_history_soft_deletes(self):
+        pkg = Package.objects.create(
+            fullname='test-package-hist_1.0_amd64.deb',
+            name='test-package-hist',
+            version='1.0',
+            architecture='amd64',
+            project=self.project,
+            store=self.store,
+        )
+        computer = Computer.objects.create(
+            name='test-computer-pkg', project=self.project, uuid='11111111-2222-3333-4444-555555555555'
+        )
+        PackageHistory.objects.create(computer=computer, package=pkg)
+
+        response = self.client.delete(reverse('package-detail', kwargs={'pk': pkg.pk}))
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        pkg.refresh_from_db()
+        self.assertIsNone(pkg.store)

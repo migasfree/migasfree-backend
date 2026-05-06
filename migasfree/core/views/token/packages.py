@@ -130,7 +130,7 @@ class PackageViewSet(
         self.perform_destroy(instance)
 
         queryset = self.filter_queryset(self.get_queryset())
-        if queryset.filter(pk=instance.pk).exists():
+        if queryset.filter(pk=instance.pk).exists() and instance.store is not None:
             return Response(
                 {'detail': gettext('The element has relations and cannot be removed')},
                 status=status.HTTP_403_FORBIDDEN,
