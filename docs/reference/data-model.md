@@ -39,6 +39,14 @@ erDiagram
     COMPUTER ||--|{ LOGICAL_DEVICE : "connected devices"
     LOGICAL_DEVICE }|--|| DEVICE : "identifies as"
 
+    %% APP CATALOG MODULE
+    APPLICATION }|--|| CATEGORY : "classified in"
+    APPLICATION }|--|{ PACKAGES_BY_PROJECT : "has packages"
+    PROJECT ||--|{ PACKAGES_BY_PROJECT : "defines packages"
+    POLICY ||--|{ POLICY_GROUP : "defines groups"
+    POLICY_GROUP }|--|{ APPLICATION : "prioritizes"
+    POLICY_GROUP }|--|{ ATTRIBUTE : "targets"
+
     %% ENTITY DEFINITIONS
     PROJECT {
         string name
@@ -70,6 +78,17 @@ erDiagram
         string name
         string value
     }
+
+    APPLICATION {
+        string name
+        int score
+        string level "User, Admin"
+    }
+
+    POLICY {
+        string name
+        boolean exclusive
+    }
 ```
 
 ## 📚 Entity Descriptions
@@ -95,3 +114,10 @@ erDiagram
 
 * **`Device`**: Abstract definition of a physical peripheral (e.g., "Generic USB Printer").
 * **`LogicalDevice`**: A concrete instance of a device connected to a specific `Computer`.
+
+### App Catalog Module
+
+* **`Application`**: Software application made available in the organization's catalog.
+* **`Category`**: Classification for catalog applications (e.g., "Office", "Graphics").
+* **`Policy`**: Complex rules for installing/uninstalling applications based on priorities.
+* **`PolicyGroup`**: Groups that define priority levels for installing applications on targeted attributes.
