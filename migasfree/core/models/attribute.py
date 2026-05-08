@@ -271,10 +271,12 @@ class Attribute(models.Model, MigasLink):
         verbose_name_plural = _('Attributes')
         unique_together = (('property_att', 'value'),)
         ordering = ['property_att__prefix', 'value']
-        db_table_comment = 'stores system attributes collected from computers via small scripts,'
-        ' referred to as "formulas" (each attribute represents a specific characteristic'
-        ' of the computer, such as the number of hard drives, RAM size,'
-        ' or any other detail that can be retrieved through these automated formulas)'
+        db_table_comment = (
+            'stores system attributes collected from computers via small scripts,'
+            ' referred to as "formulas" (each attribute represents a specific characteristic'
+            ' of the computer, such as the number of hard drives, RAM size,'
+            ' or any other detail that can be retrieved through these automated formulas)'
+        )
 
 
 class ServerAttributeManager(DomainAttributeManager):

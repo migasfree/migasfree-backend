@@ -116,5 +116,7 @@ class Singularity(models.Model, MigasLink):
         verbose_name_plural = _('Singularities')
         unique_together = (('name', 'property_att', 'priority'),)
         ordering = ['property_att__name', '-priority']
-        db_table_comment = 'exceptions to standard formulas used for gathering attributes from computers,'
-        ' allowing different formulas to be specified based on unique computer attributes'
+        db_table_comment = (
+            'exceptions to standard formulas used for gathering attributes from computers,'
+            ' allowing different formulas to be specified based on unique computer attributes'
+        )

@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -59,6 +59,8 @@ class Configuration(models.Model):
         verbose_name = _('Hardware Configuration')
         verbose_name_plural = _('Hardware Configurations')
         unique_together = (('name', 'node'),)
-        db_table_comment = 'settings and parameters of the hardware components (it outlines how each component'
-        ' is configured, including resource allocation, operational modes, and any specific options'
-        ' that affect performance)'
+        db_table_comment = (
+            'settings and parameters of the hardware components (it outlines how each component'
+            ' is configured, including resource allocation, operational modes, and any specific options'
+            ' that affect performance)'
+        )

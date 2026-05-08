@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,6 +51,8 @@ class LogicalName(models.Model):
         app_label = 'hardware'
         verbose_name = _('Hardware Logical Name')
         verbose_name_plural = _('Hardware Logical Names')
-        db_table_comment = 'logical identifiers assigned to each hardware component (these names serve as references'
-        ' for easier identification and management of the components within the system, facilitating tasks'
-        ' such as configuration and troubleshooting)'
+        db_table_comment = (
+            'logical identifiers assigned to each hardware component (these names serve as references'
+            ' for easier identification and management of the components within the system, facilitating tasks'
+            ' such as configuration and troubleshooting)'
+        )

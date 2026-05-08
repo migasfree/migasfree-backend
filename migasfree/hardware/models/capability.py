@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -60,6 +60,8 @@ class Capability(models.Model):
         verbose_name = _('Hardware Capability')
         verbose_name_plural = _('Hardware Capabilities')
         unique_together = (('name', 'node'),)
-        db_table_comment = 'features and functionalities supported by the hardware components of the system'
-        ' (each entry describes a specific capability, such as support for certain protocols, standards,'
-        ' or performance metrics)'
+        db_table_comment = (
+            'features and functionalities supported by the hardware components of the system'
+            ' (each entry describes a specific capability, such as support for certain protocols, standards,'
+            ' or performance metrics)'
+        )

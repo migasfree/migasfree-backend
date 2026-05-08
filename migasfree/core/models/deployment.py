@@ -466,8 +466,10 @@ class Deployment(models.Model, MigasLink):
         verbose_name_plural = _('Deployments')
         unique_together = (('name', 'project'), ('project', 'slug'))
         ordering = ['project__name', 'name']
-        db_table_comment = 'repositories of packages and associated actions to be executed on computers'
-        ' that meet the required attributes'
+        db_table_comment = (
+            'repositories of packages and associated actions to be executed on computers'
+            ' that meet the required attributes'
+        )
 
 
 @receiver(pre_save, sender=Deployment)
