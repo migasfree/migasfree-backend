@@ -6,6 +6,49 @@ This document describes the architecture and organization of the **migasfree-bac
 
 Migasfree-backend is a Django REST Framework application that provides the backend API for the migasfree computer management system. It manages software deployment, device configuration, and computer inventory across organizations.
 
+## 🏗️ System Architecture
+
+The following diagram illustrates the high-level architecture of the Migasfree Backend, highlighting the interaction between the Client Layer, API Layer, Async Engine, and Data Storage.
+
+```mermaid
+graph TB
+    subgraph Clients [Client Layer]
+        MF_C[migasfree-client]
+        MF_P[migasfree-play]
+        MF_F[migasfree-frontend]
+    end
+
+    subgraph API_Layer [API & Logic]
+        Django[Django 5.x / DRF]
+        API_v4[Legacy API v4]
+        Channels[Django Channels]
+        PMS[PMS Handlers: apt, dnf, wpt...]
+    end
+
+    subgraph Async_Engine [Background Processing]
+        Celery[Celery Workers]
+        Redis[(Redis: Broker/Cache)]
+        Beat[Celery Beat: Schedules]
+    end
+
+    subgraph Data_Storage [Persistence]
+        Postgres[(PostgreSQL)]
+    end
+
+    %% Interactions
+    MF_C <-->|Legacy Protocol| API_v4
+    MF_C <-->|REST API| Django
+    MF_P <-->|REST API| Django
+    MF_F <-->|REST API| Django
+    MF_F ---|WebSocket| Channels
+    
+    Django <--> Postgres
+    Django <--> Redis
+    Celery <--> Redis
+    Celery <--> Postgres
+    Channels <--> Redis
+```
+
 ## Technology Stack
 
 - **Python**: 3.10+
