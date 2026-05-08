@@ -33,12 +33,40 @@ A **Deployment** is a dynamic **package repository** managed by the server.
 
 Migasfree uses a **pull-based** architecture for scalability and security.
 
-1. **Wakeup**: Client agent starts (usually scheduled).
+1. **Wakeup**: Client starts (usually scheduled).
 2. **Handshake**: Client authenticates with the server.
-3. **Context**: Client uploads **Attributes** and **Faults** to define its current context (tags, user, etc.).
+3. **Context**: Client uploads **Attributes** and **Faults** to define its current context.
 4. **Instruction**: Server calculates the "Desired State" based on the context and sends:
     - **Repositories**: Package sources.
     - **Mandatory Packages**: Software to install or remove.
 5. **Convergence**: Client applies changes (installs/removes packages) to match the desired state.
 6. **Report**: Client uploads the **new** Software and Hardware inventory to the server.
 7. **Result**: Client reports the final status of the synchronization.
+
+### Visual Flow
+
+```mermaid
+sequenceDiagram
+    participant Client as migasfree-client
+    participant API as migasfree-backend
+    participant Workers as Celery Workers
+    participant DB as PostgreSQL
+ 
+    Client->>API: 1. Identification (UUID, Project)
+    API->>DB: Check Computer Identity
+    DB-->>API: Identity Confirmed
+    API-->>Client: 2. Auth OK (Token)
+
+    Client->>API: 3. Post Attributes (HW, User, etc.)
+    API->>DB: Update Computer Attributes
+    
+    Client->>API: 4. Get Deployments
+    API->>API: Calculate Match (Attributes vs Deployments)
+    API-->>Client: 5. Return Packages & Actions
+
+    Client->>Client: 6. Execution (Install/Remove)
+    
+    Client->>API: 7. Post Sync Results
+    API->>Workers: Trigger Post-Sync Tasks (Software, Hardware)
+    Workers->>DB: Finalize Status Logs
+```
