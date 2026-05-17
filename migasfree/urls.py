@@ -19,6 +19,7 @@ from django.conf.urls import include
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, re_path, reverse_lazy
+from django.utils import translation
 from django.views.generic.base import RedirectView
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -44,6 +45,12 @@ from .device.routers import router as device_router
 from .hardware.routers import router as hardware_router
 from .hardware.routers import safe_router as hardware_safe_router
 from .stats.routers import router as stats_router
+
+
+class EnglishSpectacularAPIView(SpectacularAPIView):
+    def get(self, request, *args, **kwargs):
+        with translation.override('en'):
+            return super().get(request, *args, **kwargs)
 
 admin.autodiscover()
 
@@ -72,6 +79,7 @@ urlpatterns = [
     re_path(r'^api/v1/safe/', include(safe_router.urls)),
     re_path(r'^api/v1/', include('migasfree.core.urls')),
     re_path(r'^api/v1/', include('migasfree.client.urls')),
+    re_path(r'^api/v1/token/mci/', include('migasfree.mci.urls')),
     re_path(r'^src/', GetSourceFileView.as_view()),
     re_path(r'^token-auth/$', views.obtain_auth_token),
     path('token-auth-jwt/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -80,7 +88,7 @@ urlpatterns = [
     re_path(r'^rest-auth/', include('dj_rest_auth.urls')),
     re_path(r'^', include('django.contrib.auth.urls')),
     # re_path(r'^auth/', include('djoser.urls')),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/', EnglishSpectacularAPIView.as_view(), name='schema'),
     re_path(r'^docs/$', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     # re_path(r'^redoc/$', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     path('graphql', GraphQLView.as_view(graphiql=settings.DEBUG)),
