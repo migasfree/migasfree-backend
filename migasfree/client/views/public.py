@@ -32,6 +32,7 @@ from .. import permissions
 
 
 class PackagerKeysView(views.APIView):
+    authentication_classes = ()
     permission_classes = (permissions.IsPackager,)
 
     @extend_schema(
@@ -69,6 +70,7 @@ class PackagerKeysView(views.APIView):
 
 
 class ProjectKeysView(views.APIView):
+    authentication_classes = ()
     user = None
 
     def get_object(self, name, pms, platform_name, architecture, ip_address):
@@ -159,6 +161,7 @@ class ProjectKeysView(views.APIView):
 
 
 class RepositoriesKeysView(views.APIView):
+    authentication_classes = ()
     serializer_class = None
 
     @extend_schema(

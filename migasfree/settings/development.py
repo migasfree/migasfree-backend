@@ -105,11 +105,11 @@ MEDIA_ROOT = MIGASFREE_PUBLIC_DIR
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'migasfree_backend',
-        'USER': 'migasfree_backend',
-        'PASSWORD': 'migasfree_backend',
-        'HOST': 'localhost',
-        'PORT': '',
+        'NAME': os.environ.get('POSTGRES_DB', 'migasfree_backend'),
+        'USER': os.environ.get('POSTGRES_USER', 'migasfree_backend'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'migasfree_backend'),
+        'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
+        'PORT': os.environ.get('POSTGRES_PORT', ''),
     }
 }
 
