@@ -125,13 +125,13 @@ INSTALLED_APPS = (
     'migasfree.hardware',
     'migasfree.device',
     'migasfree.api_v4',
+    'migasfree.mci',
 )
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 100  # 100 MB
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
@@ -153,7 +153,7 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Migasfree REST API',
+    'TITLE': 'Migasfree Backend API',
     'VERSION': 'v1',
     'SERVE_INCLUDE_SCHEMA': False,
     'SERVE_PUBLIC': True,
