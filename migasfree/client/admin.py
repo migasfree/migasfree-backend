@@ -175,7 +175,8 @@ class ComputerAdmin(admin.ModelAdmin):
         ret = obj.get_software_history()
 
         return '\n\n'.join(
-            '# {}\n{}'.format(key, '\n'.join(v for v in val)) for (key, val) in sorted(ret.items(), reverse=True)
+            '# {}\n{}'.format(key, '\n'.join(f'{v["mode"]}{v["name"]}' for v in val))
+            for (key, val) in sorted(ret.items(), reverse=True)
         )
 
     my_get_software_history.short_description = _('Software History')
