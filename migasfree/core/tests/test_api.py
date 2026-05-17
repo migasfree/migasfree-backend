@@ -31,7 +31,7 @@ class PlatformTestCase(APITestCase):
             is_staff=True,
             is_active=True,
         )
-        self.client.login(username='admin', password='admin')
+        self.client.force_authenticate(user=self.superuser)
         self.platform = Platform.objects.create(name='Linux')
 
     def test_get_platforms(self):
