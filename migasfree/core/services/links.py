@@ -216,14 +216,20 @@ class MigasLinkService:
                 _name = 'tag'
 
             if _name == 'permission':
-                break
+                continue
 
             if (
                 _name == 'property'
                 and self.instance._meta.model_name in ['serverattribute', 'attribute']
                 and obj.attname == 'property_att_id'
             ):
-                break
+                continue
+
+            api_model = self.model_to_route(
+                obj.remote_field.model._meta.app_label, obj.remote_field.model._meta.model_name
+            )
+            if not api_model:
+                continue
 
             if hasattr(obj.remote_field.model.objects, 'scope'):
                 rel_objects = obj.remote_field.model.objects.scope(user).filter(
@@ -240,9 +246,7 @@ class MigasLinkService:
                 data.append(
                     {
                         'api': {
-                            'model': self.model_to_route(
-                                obj.remote_field.model._meta.app_label, obj.remote_field.model._meta.model_name
-                            ),
+                            'model': api_model,
                             'query': {f'{obj.remote_field.name}__id': self.instance.pk},
                         },
                         'text': gettext(obj.remote_field.field.verbose_name),
@@ -312,6 +316,10 @@ class MigasLinkService:
                 continue
 
             if self._should_exclude_relation(related_model, _field):
+                continue
+
+            api_model = self.model_to_route(related_model._meta.app_label, related_model._meta.model_name)
+            if not api_model:
                 continue
 
             rel_objects = self._get_related_queryset(related_model, related_object, user)
