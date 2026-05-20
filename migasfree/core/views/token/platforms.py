@@ -14,12 +14,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import requests
+
+from django.http import HttpResponse
 from django.utils.text import slugify
 from django.utils.translation import gettext
 from drf_spectacular.openapi import OpenApiParameter
-from drf_spectacular.utils import extend_schema
-from rest_framework import permissions, status, viewsets
-from rest_framework.decorators import permission_classes
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import permissions, serializers, status, viewsets
+from rest_framework.decorators import action, permission_classes
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from ....mixins import DatabaseCheckMixin
@@ -113,6 +117,106 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             )
 
         return super().create(request, *args, **kwargs)
+
+    @extend_schema(
+        request=inline_serializer(
+            name='MciImportRequest',
+            fields={
+                'template_id': serializers.CharField(help_text='The MCI template ID to import (e.g. debian-13)'),
+            },
+        )
+    )
+    @action(detail=True, methods=['post'], url_path='template-import')
+    def template_import(self, request, pk=None):
+        project_id = pk
+        template_id = request.data.get('template_id')
+
+        if not template_id:
+            return Response({'error': 'template_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 1. Fetch template data from manager
+        headers = {}
+        if request.auth:
+            headers['Authorization'] = f'Bearer {request.auth}'
+
+        try:
+            manager_url = f'http://manager:8080/manager/v1/internal/mci/templates/{template_id}'
+            response = requests.get(manager_url, headers=headers, timeout=10.0)
+            response.raise_for_status()
+            template_data = response.json()
+        except Exception as e:
+            raise ValidationError(f'Failed to fetch template {template_id} from manager: {e!s}')
+
+        # 2. Create or update Config
+        from migasfree.mci.models import Config, Flavour  # noqa: avoid circular import
+        from migasfree.mci.serializers import ConfigSerializer  # noqa: avoid circular import
+        config, created = Config.objects.update_or_create(
+            project_id=project_id,
+            defaults={
+                'template_id': template_id,
+                'base_os': template_data.get('base_os', ''),
+                'dockerfile': template_data.get('dockerfile', ''),
+                'partition': template_data.get('partition', ''),
+            },
+        )
+
+        # 3. Create default Flavour
+        _, f_created = Flavour.objects.get_or_create(
+            config=config,
+            name='Default',
+            defaults={
+                'user': 'migasfree',
+                'password': 'migasfree-password',
+                'hostname': config.project.name.lower().replace(' ', '-'),
+            },
+        )
+
+        # 4. Automatically trigger the Manager to import deployments, applications, stores and packages
+        manager_import_result = None
+        try:
+            manager_url = f'http://manager:8080/manager/v1/internal/mci/projects/{project_id}/import?template_id={template_id}'
+            response = requests.post(manager_url, headers=headers, timeout=120.0)
+            if response.ok:
+                manager_import_result = response.json()
+            else:
+                manager_import_result = {
+                    'error': f'Manager responded with HTTP {response.status_code}',
+                    'details': response.text
+                }
+        except Exception as e:
+            manager_import_result = {'error': f'Could not connect to manager: {e!s}'}
+
+        return Response(
+            {
+                'config': ConfigSerializer(config, context={'request': request}).data,
+                'config_created': created,
+                'flavour_created': f_created,
+                'manager_import': manager_import_result
+            },
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+    @action(detail=True, methods=['get'], url_path='template-export')
+    def template_export(self, request, pk=None):
+        project_id = pk
+
+        try:
+            headers = {}
+            if request.auth:
+                headers['Authorization'] = f'Bearer {request.auth}'
+
+            manager_url = f'http://manager:8080/manager/v1/internal/mci/projects/{project_id}/export'
+            headers['Accept'] = 'application/json'
+            response = requests.get(manager_url, headers=headers, timeout=60.0)
+            if response.ok:
+                return HttpResponse(response.content, content_type='application/json')
+            else:
+                return Response(
+                    {'error': f'Manager responded with HTTP {response.status_code}', 'details': response.text},
+                    status=response.status_code
+                )
+        except Exception as e:
+            return Response({'error': f'Could not connect to manager: {e!s}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @extend_schema(tags=['stores'])
