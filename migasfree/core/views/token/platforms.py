@@ -144,11 +144,11 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             response.raise_for_status()
             template_data = response.json()
         except Exception as e:
-            raise ValidationError(f'Failed to fetch template {template_id} from manager: {e!s}')
+            raise ValidationError(f'Failed to fetch template {template_id} from manager: {e!s}') from e
 
         # 2. Create or update Config
-        from migasfree.mci.models import Config, Flavour  # noqa: avoid circular import
-        from migasfree.mci.serializers import ConfigSerializer  # noqa: avoid circular import
+        from migasfree.mci.models import Config, Flavour  # avoid circular import
+        from migasfree.mci.serializers import ConfigSerializer  # avoid circular import
 
         config, created = Config.objects.update_or_create(
             project_id=project_id,
