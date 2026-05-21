@@ -175,3 +175,29 @@ erDiagram
 * **`Flavour`**: A system variant or edition of the configuration (e.g., "Desktop", "Minimal", "Server") specifying credentials, keyboard layout, timezone, and targeting attributes.
 * **`Release`**: A versioned snapshot of an MCI configuration ready for building.
 * **`Build`**: Tracks individual asynchronous tasks (run via Celery/Redis) that construct the system images, capturing compilation logs, build state, and output file size/URLs.
+
+---
+
+### 🧬 Polymorphic `config` JSONB Schema Examples
+
+The `config` field of the `Config` table adapts its structure dynamically based on the selected `build_type` parameter:
+
+#### 1. Linux Docker Builder (`build_type = "docker"`)
+For Linux container-based construction, the JSON object maps a single required `dockerfile` key to house the full Jinja2 template structure:
+```json
+{
+  "dockerfile": "FROM debian:12-slim\nRUN apt-get update && apt-get install -y migasfree-client\nCOPY defaults/ /usr/share/mcs/"
+}
+```
+
+#### 2. Windows QEMU Builder (`build_type = "qemu_win"`)
+For Windows VM-based builds, the JSON contains hardware provisioning parameters alongside unattended installation templates:
+```json
+{
+  "disk_size_gb": 40,
+  "vm_ram_mb": 4096,
+  "vm_cpus": 4,
+  "autounattend_template": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<unattend xmlns=\"urn:schemas-microsoft-com:unattend\">\n  <settings pass=\"oobeSystem\">\n    <component name=\"Microsoft-Windows-Shell-Setup\" processorArchitecture=\"amd64\" ...>\n      <OOBE>\n        <HideEULAPage>true</HideEULAPage>\n      </OOBE>\n    </component>\n  </settings>\n</unattend>",
+  "setupcomplete_template": "@echo off\ncmd.exe /c powershell -ExecutionPolicy Bypass -File C:\\Windows\\Setup\\Scripts\\provision-migasfree.ps1"
+}
+```
