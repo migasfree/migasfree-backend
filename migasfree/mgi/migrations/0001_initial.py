@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 (
                     'template_id',
                     models.CharField(
-                        db_comment='identifier of the MCI template used (e.g. debian-12-desktop)',
+                        db_comment='identifier of the MGI template used (e.g. debian-12-desktop)',
                         max_length=100,
                         verbose_name='Template ID',
                     ),
@@ -85,18 +85,18 @@ class Migration(migrations.Migration):
                 (
                     'project',
                     models.OneToOneField(
-                        db_comment='related project for this MCI configuration',
+                        db_comment='related project for this MGI configuration',
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='mci_config',
+                        related_name='mgi_config',
                         to='core.project',
                         verbose_name='Project',
                     ),
                 ),
             ],
             options={
-                'verbose_name': 'MCI Config',
-                'verbose_name_plural': 'MCI Configs',
-                'db_table_comment': 'stores the general MCI configuration template, base operating system and partition schema for a project',
+                'verbose_name': 'Config',
+                'verbose_name_plural': 'Configs',
+                'db_table_comment': 'stores the general MGI configuration template, base operating system and partition schema for a project',
             },
         ),
         migrations.CreateModel(
@@ -195,11 +195,11 @@ class Migration(migrations.Migration):
                 (
                     'config',
                     models.ForeignKey(
-                        db_comment='related MCI configuration',
+                        db_comment='related MGI configuration',
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name='flavours',
-                        to='mci.config',
-                        verbose_name='MCI Config',
+                        to='mgi.config',
+                        verbose_name='Config',
                     ),
                 ),
                 (
@@ -210,8 +210,8 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                'verbose_name': 'MCI Flavour',
-                'verbose_name_plural': 'MCI Flavours',
+                'verbose_name': 'Flavour',
+                'verbose_name_plural': 'Flavours',
                 'db_table_comment': 'defines specific system environments or variants (flavours) with customized hostnames, credentials, timezones, and packages',
             },
         ),
@@ -242,18 +242,18 @@ class Migration(migrations.Migration):
                 (
                     'config',
                     models.ForeignKey(
-                        db_comment='related MCI configuration',
+                        db_comment='related MGI configuration',
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name='releases',
-                        to='mci.config',
-                        verbose_name='MCI Config',
+                        to='mgi.config',
+                        verbose_name='Config',
                     ),
                 ),
             ],
             options={
-                'verbose_name': 'MCI Release',
-                'verbose_name_plural': 'MCI Releases',
-                'db_table_comment': 'represents a versioned build release of a specific MCI configuration',
+                'verbose_name': 'Release',
+                'verbose_name_plural': 'Releases',
+                'db_table_comment': 'represents a versioned build release of a specific MGI configuration',
             },
         ),
         migrations.CreateModel(
@@ -331,7 +331,7 @@ class Migration(migrations.Migration):
                         db_comment='related flavour built in this task',
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name='builds',
-                        to='mci.flavour',
+                        to='mgi.flavour',
                         verbose_name='Flavour',
                     ),
                 ),
@@ -341,14 +341,14 @@ class Migration(migrations.Migration):
                         db_comment='related release associated with this build',
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name='builds',
-                        to='mci.release',
+                        to='mgi.release',
                         verbose_name='Release',
                     ),
                 ),
             ],
             options={
-                'verbose_name': 'MCI Build',
-                'verbose_name_plural': 'MCI Builds',
+                'verbose_name': 'Build',
+                'verbose_name_plural': 'Builds',
                 'db_table_comment': 'tracks individual build tasks of a release and flavour, including status, compilation logs, image size and download URL',
             },
         ),

@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from migasfree.mci.views import BuildViewSet, ConfigViewSet, FlavourViewSet, ReleaseViewSet
+from migasfree.mgi.views import BuildViewSet, ConfigViewSet, FlavourViewSet, ReleaseViewSet
 
 router = routers.DefaultRouter()
 router.register(r'config', ConfigViewSet)

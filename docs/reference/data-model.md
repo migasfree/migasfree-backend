@@ -47,7 +47,7 @@ erDiagram
     POLICY_GROUP }|--|{ APPLICATION : "prioritizes"
     POLICY_GROUP }|--|{ ATTRIBUTE : "targets"
 
-    %% MCI (MANAGED CONFIGURATION INFRASTRUCTURE) MODULE
+    %% MGI (MIGASFREE GOLDEN IMAGE) MODULE
     PROJECT ||--|| CONFIG : "configures"
     CONFIG ||--|{ FLAVOUR : "defines"
     CONFIG ||--|{ RELEASE : "has"
@@ -169,11 +169,11 @@ erDiagram
 * **`Policy`**: Complex rules for installing/uninstalling applications based on priorities.
 * **`PolicyGroup`**: Groups that define priority levels for installing applications on targeted attributes.
 
-### MCI (Managed Configuration Infrastructure) Module
+### MGI (Migasfree Golden Image) Module
 
 * **`Config`**: Defines the builder configuration template for a project. Supports polymorphic engines (Docker for Linux, QEMU Unattended for Windows) and dynamic parameters inside a JSONB field.
 * **`Flavour`**: A system variant or edition of the configuration (e.g., "Desktop", "Minimal", "Server") specifying credentials, keyboard layout, timezone, and targeting attributes.
-* **`Release`**: A versioned snapshot of an MCI configuration ready for building.
+* **`Release`**: A versioned snapshot of an MGI configuration ready for building.
 * **`Build`**: Tracks individual asynchronous tasks (run via Celery/Redis) that construct the system images, capturing compilation logs, build state, and output file size/URLs.
 
 ---

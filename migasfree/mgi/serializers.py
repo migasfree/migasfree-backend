@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from migasfree.core.models import ServerAttribute
-from migasfree.mci.models import Build, Config, Flavour, Release
+from migasfree.mgi.models import Build, Config, Flavour, Release
 
 
 class ConfigSerializer(serializers.ModelSerializer):

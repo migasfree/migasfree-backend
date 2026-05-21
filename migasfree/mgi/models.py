@@ -21,14 +21,14 @@ class Config(models.Model):
     project = models.OneToOneField(
         Project,
         on_delete=models.CASCADE,
-        related_name='mci_config',
+        related_name='mgi_config',
         verbose_name=_('Project'),
-        db_comment='related project for this MCI configuration',
+        db_comment='related project for this MGI configuration',
     )
     template_id = models.CharField(
         max_length=100,
         verbose_name=_('Template ID'),
-        db_comment='identifier of the MCI template used (e.g. debian-12-desktop)',
+        db_comment='identifier of the MGI template used (e.g. debian-12-desktop)',
     )
     build_type = models.CharField(
         max_length=20,
@@ -68,11 +68,11 @@ class Config(models.Model):
     )
 
     class Meta:
-        app_label = 'mci'
-        verbose_name = _('MCI Config')
-        verbose_name_plural = _('MCI Configs')
+        app_label = 'mgi'
+        verbose_name = _('Config')
+        verbose_name_plural = _('Configs')
         db_table_comment = (
-            'stores the general MCI configuration template, base operating system and partition schema for a project'
+            'stores the general MGI configuration template, base operating system and partition schema for a project'
         )
 
     @property
@@ -109,7 +109,7 @@ class Config(models.Model):
                 raise ValidationError({'config': _('disk_size_gb must be a number and at least 20 GB.')})
 
     def __str__(self):
-        return f'MCI Config for {self.project.name}'
+        return f'MGI Config for {self.project.name}'
 
 
 class Flavour(models.Model):
@@ -117,8 +117,8 @@ class Flavour(models.Model):
         Config,
         on_delete=models.CASCADE,
         related_name='flavours',
-        verbose_name=_('MCI Config'),
-        db_comment='related MCI configuration',
+        verbose_name=_('MGI Config'),
+        db_comment='related MGI configuration',
     )
     name = models.CharField(
         max_length=255,
@@ -188,9 +188,9 @@ class Flavour(models.Model):
     )
 
     class Meta:
-        app_label = 'mci'
-        verbose_name = _('MCI Flavour')
-        verbose_name_plural = _('MCI Flavours')
+        app_label = 'mgi'
+        verbose_name = _('Flavour')
+        verbose_name_plural = _('Flavours')
         db_table_comment = 'defines specific system environments or variants (flavours) with customized hostnames, credentials, timezones, and packages'
 
     def __str__(self):
@@ -202,8 +202,8 @@ class Release(models.Model):
         Config,
         on_delete=models.CASCADE,
         related_name='releases',
-        verbose_name=_('MCI Config'),
-        db_comment='related MCI configuration',
+        verbose_name=_('MGI Config'),
+        db_comment='related MGI configuration',
     )
     name = models.CharField(
         max_length=255,
@@ -222,10 +222,10 @@ class Release(models.Model):
     )
 
     class Meta:
-        app_label = 'mci'
-        verbose_name = _('MCI Release')
-        verbose_name_plural = _('MCI Releases')
-        db_table_comment = 'represents a versioned build release of a specific MCI configuration'
+        app_label = 'mgi'
+        verbose_name = _('Release')
+        verbose_name_plural = _('Releases')
+        db_table_comment = 'represents a versioned build release of a specific MGI configuration'
 
     def __str__(self):
         return f'{self.config.project.name} - {self.name}'
@@ -296,9 +296,9 @@ class Build(models.Model):
     )
 
     class Meta:
-        app_label = 'mci'
-        verbose_name = _('MCI Build')
-        verbose_name_plural = _('MCI Builds')
+        app_label = 'mgi'
+        verbose_name = _('Build')
+        verbose_name_plural = _('Builds')
         db_table_comment = 'tracks individual build tasks of a release and flavour, including status, compilation logs, image size and download URL'
 
     def __str__(self):

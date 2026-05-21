@@ -1,1 +1,0 @@
-# Initialize the mci app

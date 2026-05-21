@@ -125,7 +125,7 @@ INSTALLED_APPS = (
     'migasfree.hardware',
     'migasfree.device',
     'migasfree.api_v4',
-    'migasfree.mci',
+    'migasfree.mgi',
 )
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 100  # 100 MB

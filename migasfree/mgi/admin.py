@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models
 
 from migasfree.core.models import ServerAttribute
-from migasfree.mci.models import Build, Config, Flavour, Release
+from migasfree.mgi.models import Build, Config, Flavour, Release
 
 
 @admin.register(Config)

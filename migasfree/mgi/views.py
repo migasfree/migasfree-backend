@@ -5,18 +5,18 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from migasfree.mci.models import Build, Config, Flavour, Release
-from migasfree.mci.serializers import BuildSerializer, ConfigSerializer, FlavourSerializer, ReleaseSerializer
+from migasfree.mgi.models import Build, Config, Flavour, Release
+from migasfree.mgi.serializers import BuildSerializer, ConfigSerializer, FlavourSerializer, ReleaseSerializer
 
 
-@extend_schema(tags=['mci'])
+@extend_schema(tags=['mgi'])
 class ConfigViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Config.objects.all()
     serializer_class = ConfigSerializer
 
 
-@extend_schema(tags=['mci'])
+@extend_schema(tags=['mgi'])
 class FlavourViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Flavour.objects.all()
@@ -25,7 +25,7 @@ class FlavourViewSet(viewsets.ModelViewSet):
     search_fields = ('name', 'description')
 
 
-@extend_schema(tags=['mci'])
+@extend_schema(tags=['mgi'])
 class ReleaseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Release.objects.all()
@@ -35,7 +35,7 @@ class ReleaseViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], url_path='build')
     def build(self, request, pk=None):
-        """Trigger an MCI golden image build for this release through the manager."""
+        """Trigger an MGI golden image build for this release through the manager."""
         release = self.get_object()
 
         headers = {}
@@ -43,7 +43,7 @@ class ReleaseViewSet(viewsets.ModelViewSet):
             headers['Authorization'] = f'Bearer {request.auth}'
 
         try:
-            manager_url = 'http://manager:8080/manager/v1/internal/mci/build'
+            manager_url = 'http://manager:8080/manager/v1/internal/mgi/build'
             response = requests.post(manager_url, json={'release_id': release.id}, headers=headers, timeout=15.0)
 
             if response.ok:
@@ -59,7 +59,7 @@ class ReleaseViewSet(viewsets.ModelViewSet):
             )
 
 
-@extend_schema(tags=['mci'])
+@extend_schema(tags=['mgi'])
 class BuildViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Build.objects.all()

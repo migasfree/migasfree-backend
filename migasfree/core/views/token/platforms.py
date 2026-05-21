@@ -119,9 +119,9 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
 
     @extend_schema(
         request=inline_serializer(
-            name='MciImportRequest',
+            name='MgiImportRequest',
             fields={
-                'template_id': serializers.CharField(help_text='The MCI template ID to import (e.g. debian-13)'),
+                'template_id': serializers.CharField(help_text='The MGI template ID to import (e.g. debian-13)'),
             },
         )
     )
@@ -139,7 +139,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             headers['Authorization'] = f'Bearer {request.auth}'
 
         try:
-            manager_url = f'http://manager:8080/manager/v1/internal/mci/templates/{template_id}'
+            manager_url = f'http://manager:8080/manager/v1/internal/mgi/templates/{template_id}'
             response = requests.get(manager_url, headers=headers, timeout=10.0)
             response.raise_for_status()
             template_data = response.json()
@@ -147,8 +147,8 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             raise ValidationError(f'Failed to fetch template {template_id} from manager: {e!s}') from e
 
         # 2. Create or update Config
-        from migasfree.mci.models import Config, Flavour  # avoid circular import
-        from migasfree.mci.serializers import ConfigSerializer  # avoid circular import
+        from migasfree.mgi.models import Config, Flavour  # avoid circular import
+        from migasfree.mgi.serializers import ConfigSerializer  # avoid circular import
 
         config, created = Config.objects.update_or_create(
             project_id=project_id,
@@ -175,7 +175,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         manager_import_result = None
         try:
             manager_url = (
-                f'http://manager:8080/manager/v1/internal/mci/projects/{project_id}/import?template_id={template_id}'
+                f'http://manager:8080/manager/v1/internal/mgi/projects/{project_id}/import?template_id={template_id}'
             )
             response = requests.post(manager_url, headers=headers, timeout=120.0)
             if response.ok:
@@ -207,7 +207,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             if request.auth:
                 headers['Authorization'] = f'Bearer {request.auth}'
 
-            manager_url = f'http://manager:8080/manager/v1/internal/mci/projects/{project_id}/export'
+            manager_url = f'http://manager:8080/manager/v1/internal/mgi/projects/{project_id}/export'
             headers['Accept'] = 'application/json'
             response = requests.get(manager_url, headers=headers, timeout=60.0)
             if response.ok:

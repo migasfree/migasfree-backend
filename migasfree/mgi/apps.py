@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 
 
-class MciConfig(AppConfig):
+class MgiConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'migasfree.mci'
-    verbose_name = 'MCI'
+    name = 'migasfree.mgi'
+    verbose_name = 'Golden Image'
