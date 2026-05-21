@@ -15,7 +15,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import requests
-
 from django.http import HttpResponse
 from django.utils.text import slugify
 from django.utils.translation import gettext
@@ -150,6 +149,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         # 2. Create or update Config
         from migasfree.mci.models import Config, Flavour  # noqa: avoid circular import
         from migasfree.mci.serializers import ConfigSerializer  # noqa: avoid circular import
+
         config, created = Config.objects.update_or_create(
             project_id=project_id,
             defaults={
@@ -174,14 +174,16 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         # 4. Automatically trigger the Manager to import deployments, applications, stores and packages
         manager_import_result = None
         try:
-            manager_url = f'http://manager:8080/manager/v1/internal/mci/projects/{project_id}/import?template_id={template_id}'
+            manager_url = (
+                f'http://manager:8080/manager/v1/internal/mci/projects/{project_id}/import?template_id={template_id}'
+            )
             response = requests.post(manager_url, headers=headers, timeout=120.0)
             if response.ok:
                 manager_import_result = response.json()
             else:
                 manager_import_result = {
                     'error': f'Manager responded with HTTP {response.status_code}',
-                    'details': response.text
+                    'details': response.text,
                 }
         except Exception as e:
             manager_import_result = {'error': f'Could not connect to manager: {e!s}'}
@@ -191,7 +193,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
                 'config': ConfigSerializer(config, context={'request': request}).data,
                 'config_created': created,
                 'flavour_created': f_created,
-                'manager_import': manager_import_result
+                'manager_import': manager_import_result,
             },
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
         )
@@ -213,10 +215,12 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             else:
                 return Response(
                     {'error': f'Manager responded with HTTP {response.status_code}', 'details': response.text},
-                    status=response.status_code
+                    status=response.status_code,
                 )
         except Exception as e:
-            return Response({'error': f'Could not connect to manager: {e!s}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {'error': f'Could not connect to manager: {e!s}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 @extend_schema(tags=['stores'])

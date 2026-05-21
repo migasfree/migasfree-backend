@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -5,6 +6,18 @@ from migasfree.core.models import Project, ServerAttribute
 
 
 class Config(models.Model):
+    BUILD_TYPE_CHOICES = [
+        ('docker', _('Docker (Linux)')),
+        ('qemu_win', _('QEMU Unattended (Windows)')),
+        ('qemu_lnx', _('QEMU Preseed/Kickstart (Linux)')),
+    ]
+
+    IMAGE_FORMAT_CHOICES = [
+        ('raw', _('RAW (.raw)')),
+        ('wim', _('WIM (.wim)')),
+        ('squashfs', _('SquashFS (.squashfs)')),
+    ]
+
     project = models.OneToOneField(
         Project,
         on_delete=models.CASCADE,
@@ -17,21 +30,41 @@ class Config(models.Model):
         verbose_name=_('Template ID'),
         db_comment='identifier of the MCI template used (e.g. debian-12-desktop)',
     )
+    build_type = models.CharField(
+        max_length=20,
+        choices=BUILD_TYPE_CHOICES,
+        default='docker',
+        verbose_name=_('Build Type'),
+        db_comment='engine used to build the Golden Image',
+    )
     base_os = models.CharField(
         max_length=255,
         verbose_name=_('Base OS'),
         blank=True,
         db_comment='base operating system name (e.g. debian, ubuntu)',
     )
-    dockerfile = models.TextField(
-        verbose_name=_('Dockerfile'),
-        blank=True,
-        db_comment='jinja2 template for the dockerfile used to build the image',
-    )
     partition = models.TextField(
         verbose_name=_('Partition'),
         blank=True,
         db_comment='yaml partition schema definition for the image creation',
+    )
+    provision_script = models.TextField(
+        blank=True,
+        verbose_name=_('Provision Script'),
+        db_comment='jinja2 provisioning script (Bash for Linux / PowerShell for Windows)',
+    )
+    image_format = models.CharField(
+        max_length=10,
+        choices=IMAGE_FORMAT_CHOICES,
+        default='raw',
+        verbose_name=_('Image Format'),
+        db_comment='output compression or image format (raw, wim, squashfs)',
+    )
+    config = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_('Extended Configuration'),
+        db_comment='polymorphic storage for build-engine specific parameters',
     )
 
     class Meta:
@@ -41,6 +74,39 @@ class Config(models.Model):
         db_table_comment = (
             'stores the general MCI configuration template, base operating system and partition schema for a project'
         )
+
+    @property
+    def dockerfile(self):
+        if isinstance(self.config, dict):
+            return self.config.get('dockerfile', '')
+        return ''
+
+    @dockerfile.setter
+    def dockerfile(self, value):
+        if not isinstance(self.config, dict):
+            self.config = {}
+        self.config['dockerfile'] = value
+
+    def clean(self):
+        super().clean()
+        if not isinstance(self.config, dict):
+            raise ValidationError({'config': _('Extended Configuration must be a dictionary.')})
+
+        if self.build_type == 'docker':
+            df = self.config.get('dockerfile', '').strip()
+            if not df:
+                raise ValidationError(
+                    {'config': _('Extended Configuration must contain a "dockerfile" key for Docker build type.')}
+                )
+        elif self.build_type == 'qemu_win':
+            required_keys = ['autounattend_template', 'setupcomplete_template']
+            missing = [k for k in required_keys if k not in self.config]
+            if missing:
+                raise ValidationError({'config': _(f'Missing required keys for Windows build: {", ".join(missing)}')})
+
+            disk_size = self.config.get('disk_size_gb', 40)
+            if not isinstance(disk_size, (int, float)) or disk_size < 20:
+                raise ValidationError({'config': _('disk_size_gb must be a number and at least 20 GB.')})
 
     def __str__(self):
         return f'MCI Config for {self.project.name}'

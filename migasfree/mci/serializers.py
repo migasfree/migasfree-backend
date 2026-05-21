@@ -5,10 +5,23 @@ from migasfree.mci.models import Build, Config, Flavour, Release
 
 
 class ConfigSerializer(serializers.ModelSerializer):
+    dockerfile = serializers.CharField(required=False, allow_blank=True)
+
     class Meta:
         model = Config
-        fields = ('id', 'project', 'template_id', 'base_os', 'dockerfile', 'partition')
-        read_only_fields = ('id', 'base_os', 'dockerfile', 'partition')
+        fields = (
+            'id',
+            'project',
+            'template_id',
+            'build_type',
+            'base_os',
+            'partition',
+            'provision_script',
+            'image_format',
+            'config',
+            'dockerfile',
+        )
+        read_only_fields = ('id',)
 
 
 class FlavourSerializer(serializers.ModelSerializer):

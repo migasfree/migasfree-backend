@@ -52,6 +52,7 @@ class EnglishSpectacularAPIView(SpectacularAPIView):
         with translation.override('en'):
             return super().get(request, *args, **kwargs)
 
+
 admin.autodiscover()
 
 admin.site.site_header = 'Migasfree Backend Admin'

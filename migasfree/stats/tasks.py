@@ -327,10 +327,7 @@ def assigned_computers_to_deployment(deployment_id):
             project=deploy.project,
             status__in=Computer.PRODUCTIVE_STATUS,
         )
-        .filter(
-            Q(sync_attributes__in=deploy.included_attributes.all())
-            | Q(tags__in=deploy.included_attributes.all())
-        )
+        .filter(Q(sync_attributes__in=deploy.included_attributes.all()) | Q(tags__in=deploy.included_attributes.all()))
         .values_list('id', flat=True)
     )
 
@@ -342,10 +339,7 @@ def assigned_computers_to_deployment(deployment_id):
                         project=deploy.project,
                         status__in=Computer.PRODUCTIVE_STATUS,
                     )
-                    .filter(
-                        Q(sync_attributes__in=delay.attributes.all())
-                        | Q(tags__in=delay.attributes.all())
-                    )
+                    .filter(Q(sync_attributes__in=delay.attributes.all()) | Q(tags__in=delay.attributes.all()))
                     .values_list('id', flat=True)
                 )
             )
@@ -357,13 +351,11 @@ def assigned_computers_to_deployment(deployment_id):
                 status__in=Computer.PRODUCTIVE_STATUS,
             )
             .filter(
-                Q(sync_attributes__in=deploy.excluded_attributes.all())
-                | Q(tags__in=deploy.excluded_attributes.all())
+                Q(sync_attributes__in=deploy.excluded_attributes.all()) | Q(tags__in=deploy.excluded_attributes.all())
             )
             .values_list('id', flat=True)
         )
     )
-
 
     con = get_redis_connection()
     key = f'migasfree:deployments:{deployment_id}:computers'
