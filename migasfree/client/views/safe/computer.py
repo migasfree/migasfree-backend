@@ -1005,6 +1005,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             'disks': computer.disks,
             'product': computer.product,
             'product_system': computer.product_system(),
+            'helpdesk': settings.MIGASFREE_HELP_DESK,
         }
 
         add_computer_message(computer, gettext('Sending info...'))
