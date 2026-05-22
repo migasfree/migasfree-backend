@@ -946,6 +946,66 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         return Response(self.create_response(ret), status=status.HTTP_200_OK)
 
     @extend_schema(
+        description='Returns comprehensive computer information (requires JWT auth).',
+        request={
+            'id': OpenApiTypes.INT,
+        },
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'object',
+                'description': 'Hardware, network and status information',
+            },
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
+    )
+    @action(methods=['post'], detail=False)
+    def info(self, request):
+        """
+        claims = {
+            'id': 1,
+        }
+
+        Returns: {
+            "status": string,
+            "sync_end_date": string,
+            "fqdn": string,
+            "mac_address": string,
+            "ip_address": string,
+            "cpu": string,
+            "architecture": string,
+            "ram": integer,
+            "storage": integer,
+            "disks": integer,
+            "product": string,
+            "product_system": string
+        }
+        """
+
+        claims = self.get_claims(request.data)
+        computer = get_object_or_404(models.Computer, id=claims.get('id'))
+
+        add_computer_message(computer, gettext('Getting info...'))
+
+        ret = {
+            'status': computer.status,
+            'sync_end_date': computer.sync_end_date.isoformat() if computer.sync_end_date else None,
+            'fqdn': computer.fqdn,
+            'mac_address': computer.mac_address,
+            'ip_address': computer.ip_address,
+            'cpu': computer.cpu,
+            'architecture': computer.get_architecture(),
+            'ram': computer.ram,
+            'storage': computer.storage,
+            'disks': computer.disks,
+            'product': computer.product,
+            'product_system': computer.product_system,
+        }
+
+        add_computer_message(computer, gettext('Sending info...'))
+
+        return Response(self.create_response(ret), status=status.HTTP_200_OK)
+
+    @extend_schema(
         description='Indicates whether a hardware capture is required for the given computer (requires JWT auth).',
         request={
             'id': OpenApiTypes.INT,
