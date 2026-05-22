@@ -122,6 +122,11 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             name='MgiImportRequest',
             fields={
                 'template_id': serializers.CharField(help_text='The MGI template ID to import (e.g. debian-13)'),
+                'origin': serializers.CharField(
+                    required=False,
+                    allow_null=True,
+                    help_text='The origin of the template (local or remote)',
+                ),
             },
         )
     )
@@ -129,6 +134,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
     def template_import(self, request, pk=None):
         project_id = pk
         template_id = request.data.get('template_id')
+        origin = request.data.get('origin')
 
         if not template_id:
             return Response({'error': 'template_id is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -140,25 +146,44 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
 
         try:
             manager_url = f'http://manager:8080/manager/v1/internal/mgi/templates/{template_id}'
-            response = requests.get(manager_url, headers=headers, timeout=10.0)
+            params = {}
+            if origin:
+                params['origin'] = origin
+            response = requests.get(manager_url, headers=headers, params=params, timeout=10.0)
             response.raise_for_status()
             template_data = response.json()
         except Exception as e:
             raise ValidationError(f'Failed to fetch template {template_id} from manager: {e!s}') from e
 
+        # Check if the template was not found in the manager catalog
+        if not template_data or template_data.get('base_os') is None:
+            origin_str = f" in origin '{origin}'" if origin else ''
+            raise ValidationError(
+                f"Template '{template_id}' was not found{origin_str}. Please verify that the template exists and is published."
+            )
+
         # 2. Create or update Config
         from migasfree.mgi.models import Config, Flavour  # avoid circular import
         from migasfree.mgi.serializers import ConfigSerializer  # avoid circular import
 
-        config, created = Config.objects.update_or_create(
+        config, created = Config.objects.get_or_create(
             project_id=project_id,
             defaults={
                 'template_id': template_id,
-                'base_os': template_data.get('base_os', ''),
-                'dockerfile': template_data.get('dockerfile', ''),
-                'partition': template_data.get('partition', ''),
+                'base_os': template_data.get('base_os') or '',
+                'partition': template_data.get('partition') or '',
+                'config': {'dockerfile': template_data.get('dockerfile') or ''},
             },
         )
+        if not created:
+            config.template_id = template_id
+            config.base_os = template_data.get('base_os') or ''
+            config.partition = template_data.get('partition') or ''
+            if not isinstance(config.config, dict):
+                config.config = {}
+            config.config['dockerfile'] = template_data.get('dockerfile') or ''
+            config.config = dict(config.config)
+            config.save()
 
         # 3. Create default Flavour
         _, f_created = Flavour.objects.get_or_create(
@@ -177,6 +202,8 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             manager_url = (
                 f'http://manager:8080/manager/v1/internal/mgi/projects/{project_id}/import?template_id={template_id}'
             )
+            if origin:
+                manager_url += f'&origin={origin}'
             response = requests.post(manager_url, headers=headers, timeout=120.0)
             if response.ok:
                 manager_import_result = response.json()
