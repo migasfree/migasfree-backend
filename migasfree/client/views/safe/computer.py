@@ -36,6 +36,7 @@ from rest_framework.throttling import UserRateThrottle
 
 from ....app_catalog.models import Policy
 from ....core.mixins import SafeConnectionMixin
+from ....core.serializers import AttributeSerializer
 from ....core.models import (
     Attribute,
     AttributeSet,
@@ -756,6 +757,59 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         add_computer_message(computer, gettext('Sending available tags...'))
 
         return Response(self.create_response(available), status=status.HTTP_200_OK)
+
+    @extend_schema(
+        description='Returns CID attribute for the computer (requires JWT auth)',
+        request={'id': OpenApiTypes.INT},
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'object',
+                'properties': {
+                    'count': {'type': 'integer'},
+                    'results': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'id': {'type': 'integer'},
+                                'value': {'type': 'string'},
+                                'description': {'type': 'string'},
+                                'latitude': {'type': 'number'},
+                                'longitude': {'type': 'number'},
+                            },
+                        },
+                    },
+                },
+            },
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
+    )
+    @action(methods=['post'], detail=False, url_path='attributes/assigned')
+    def attribute_assigned(self, request):
+        """
+        claims = {'id': 1}
+        """
+        claims = self.get_claims(request.data)
+        computer = get_object_or_404(models.Computer, id=claims.get('id'))
+        self.verify_mtls_identity(request, computer.uuid)
+
+        add_computer_message(computer, gettext('Getting assigned attributes...'))
+
+        attribute = Attribute.objects.filter(property_att__prefix='CID', value=str(computer.id)).first()
+
+        if attribute:
+            serializer = AttributeSerializer(attribute, context={'request': request})
+            results = [serializer.data]
+            count = 1
+        else:
+            results = []
+            count = 0
+
+        response_data = {'count': count, 'next': None, 'previous': None, 'results': results}
+
+        add_computer_message(computer, gettext('Sending assigned attributes...'))
+
+        return Response(self.create_response(response_data), status=status.HTTP_200_OK)
 
     @extend_schema(
         description='Assigns a list of tags to a computer and returns the packages that must be '
