@@ -1004,7 +1004,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             'storage': computer.storage,
             'disks': computer.disks,
             'product': computer.product,
-            'product_system': computer.product_system,
+            'product_system': computer.product_system(),
         }
 
         add_computer_message(computer, gettext('Sending info...'))

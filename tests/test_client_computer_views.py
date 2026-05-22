@@ -1,3 +1,4 @@
+import unittest
 import uuid
 
 from django.conf import settings
@@ -120,3 +121,21 @@ class TestHardwareComputerViewSet(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['unchecked'], 1)
         self.assertEqual(response.data['total'], 2)
+
+    @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.get_claims')
+    @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.create_response')
+    def test_safe_info_endpoint(self, mock_create_response, mock_get_claims):
+        mock_get_claims.return_value = {'id': self.computer.pk}
+        mock_create_response.side_effect = lambda x: {'msg': x}
+
+        # Safe router has basename 'computers', so info action route name is 'computers-info'
+        url = reverse('computers-info')
+        data = {'msg': 'encrypted_jwt', 'project': self.project.name}
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        res_data = response.json()
+        self.assertEqual(res_data['msg']['uuid'], self.computer.uuid)
+        self.assertEqual(res_data['msg']['name'], self.computer.name)
+        self.assertIn('product_system', res_data['msg'])
+
