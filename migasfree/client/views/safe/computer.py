@@ -966,6 +966,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         }
 
         Returns: {
+            "uuid": string,
+            "name": string,
+            "search": string,
             "status": string,
             "sync_end_date": string,
             "fqdn": string,
@@ -987,6 +990,9 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         add_computer_message(computer, gettext('Getting info...'))
 
         ret = {
+            'uuid': computer.uuid,
+            'name': computer.name,
+            'search': computer.__str__(),
             'status': computer.status,
             'sync_end_date': computer.sync_end_date.isoformat() if computer.sync_end_date else None,
             'fqdn': computer.fqdn,
