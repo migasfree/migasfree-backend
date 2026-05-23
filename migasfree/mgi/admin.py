@@ -1,12 +1,40 @@
+from django import forms
 from django.contrib import admin
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from migasfree.core.models import ServerAttribute
 from migasfree.mgi.models import Build, Config, Flavour, Release
 
 
+class ConfigForm(forms.ModelForm):
+    dockerfile = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 25, 'cols': 100, 'style': 'font-family: monospace;'}),
+        required=False,
+        label=_('Dockerfile'),
+        help_text=_('Edit the Dockerfile template naturally here. It will be synchronized with the Extended Configuration JSON.')
+    )
+
+    class Meta:
+        model = Config
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.initial['dockerfile'] = self.instance.dockerfile
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.dockerfile = self.cleaned_data.get('dockerfile', '')
+        if commit:
+            instance.save()
+        return instance
+
+
 @admin.register(Config)
 class ConfigAdmin(admin.ModelAdmin):
+    form = ConfigForm
     list_display = ('project', 'template_id', 'build_type', 'image_format', 'base_os')
     list_filter = ('build_type', 'image_format')
     search_fields = ('project__name', 'template_id')
@@ -15,7 +43,7 @@ class ConfigAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.JSONField: {
             'widget': admin.widgets.AdminTextareaWidget(
-                attrs={'rows': 15, 'cols': 80, 'style': 'font-family: monospace;'}
+                attrs={'rows': 5, 'cols': 80, 'style': 'font-family: monospace;'}
             )
         },
     }
