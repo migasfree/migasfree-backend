@@ -118,8 +118,8 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         return super().create(request, *args, **kwargs)
 
     @extend_schema(
-        summary="Fetch the MGI templates catalog from the manager service",
-        description="Retrieve a list of all MGI templates available in the catalog.",
+        summary='Fetch the MGI templates catalog from the manager service',
+        description='Retrieve a list of all MGI templates available in the catalog.',
     )
     @action(detail=False, methods=['get'], url_path='templates')
     def templates(self, request):
@@ -143,7 +143,6 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             return Response(
                 {'error': f'Could not connect to manager: {e!s}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
 
     def _perform_template_import(self, request, project, template_id, origin=None):
         # 1. Fetch template data from manager
@@ -169,7 +168,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
                 f"Template '{template_id}' was not found{origin_str}. Please verify that the template exists and is published."
             )
 
-        # Update Project fields from template metadata (platform, pms, architecture)
+        # Update Project fields from template metadata (platform, pms, architecture, auto_register_computers)
         modified_fields = []
         platform_name = template_data.get('platform')
         if platform_name:
@@ -187,6 +186,11 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         if arch_val and project.architecture != arch_val:
             project.architecture = arch_val
             modified_fields.append('architecture')
+
+        auto_register_computers_val = template_data.get('auto_register_computers')
+        if auto_register_computers_val is not None and project.auto_register_computers != auto_register_computers_val:
+            project.auto_register_computers = auto_register_computers_val
+            modified_fields.append('auto_register_computers')
 
         if modified_fields:
             project.save(update_fields=modified_fields)
@@ -256,12 +260,12 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
 
     @extend_schema(
         description=(
-            "Import an MGI template to either create a new project or update an existing one.\n\n"
-            "To create a new project:\n"
-            "- Pass `project_name` (string)\n\n"
-            "To update an existing project:\n"
-            "- Pass `project_id` (integer)\n\n"
-            "Optional parameter:\n"
+            'Import an MGI template to either create a new project or update an existing one.\n\n'
+            'To create a new project:\n'
+            '- Pass `project_name` (string)\n\n'
+            'To update an existing project:\n'
+            '- Pass `project_id` (integer)\n\n'
+            'Optional parameter:\n'
             "- Pass `origin` (string: 'local' or 'remote') to specify the template source catalog."
         ),
         request=inline_serializer(
@@ -284,7 +288,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
                     help_text='The origin of the template (local or remote)',
                 ),
             },
-        )
+        ),
     )
     @action(detail=False, methods=['post'], url_path='templates/import')
     def template_import(self, request):
@@ -306,7 +310,9 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             try:
                 project = Project.objects.get(id=project_id)
             except Project.DoesNotExist:
-                return Response({'error': f'Project with ID {project_id} does not exist'}, status=status.HTTP_404_NOT_FOUND)
+                return Response(
+                    {'error': f'Project with ID {project_id} does not exist'}, status=status.HTTP_404_NOT_FOUND
+                )
         else:
             # Check if project name already exists
             if Project.objects.filter(name=project_name).exists():
@@ -343,13 +349,14 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
 
             pms_val = template_data.get('pms') or 'apt'  # default fallback
             arch_val = template_data.get('architecture') or 'amd64'  # default fallback
+            auto_register_computers_val = template_data.get('auto_register_computers', False)
 
             project = Project.objects.create(
                 name=project_name,
                 pms=pms_val,
                 architecture=arch_val,
                 platform=platform_obj,
-                auto_register_computers=False,
+                auto_register_computers=auto_register_computers_val,
             )
 
         # Now perform the rest of the template import!
@@ -359,11 +366,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         description="Export a project's deployments, stores, and packages to the template catalog.",
         request=inline_serializer(
             name='MgiExportListRequest',
-            fields={
-                'project_id': serializers.IntegerField(
-                    help_text='The ID of the project to export'
-                )
-            },
+            fields={'project_id': serializers.IntegerField(help_text='The ID of the project to export')},
         ),
     )
     @action(detail=False, methods=['post'], url_path='templates/export')

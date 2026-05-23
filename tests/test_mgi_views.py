@@ -226,3 +226,86 @@ class TestProjectTemplateImportList(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.json()['error'], 'Project with ID 99999 does not exist')
+
+    @patch('requests.post')
+    @patch('requests.get')
+    def test_import_create_new_project_with_autoregister_success(self, mock_get, mock_post):
+        # 1. Mock get response for template details with auto_register_computers = True
+        mock_get_resp = mock_get.return_value
+        mock_get_resp.status_code = status.HTTP_200_OK
+        mock_get_resp.json.return_value = {
+            'id': 'debian-13-autoreg',
+            'base_os': 'debian',
+            'platform': 'debian',
+            'pms': 'apt',
+            'architecture': 'amd64',
+            'auto_register_computers': True,
+            'dockerfile': 'FROM debian:13',
+        }
+
+        # 2. Mock post response for manager import trigger
+        mock_post_resp = mock_post.return_value
+        mock_post_resp.ok = True
+        mock_post_resp.status_code = status.HTTP_200_OK
+        mock_post_resp.json.return_value = {'status': 'imported'}
+
+        self.assertFalse(Project.objects.filter(name='Autoreg Project').exists())
+
+        url = '/api/v1/token/projects/templates/import/'
+        payload = {
+            'template_id': 'debian-13-autoreg',
+            'project_name': 'Autoreg Project',
+        }
+        response = self.client.post(url, payload, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Project.objects.filter(name='Autoreg Project').exists())
+        project = Project.objects.get(name='Autoreg Project')
+        self.assertEqual(project.platform.name, 'debian')
+        self.assertEqual(project.pms, 'apt')
+        self.assertEqual(project.architecture, 'amd64')
+        self.assertTrue(project.auto_register_computers)
+
+    @patch('requests.post')
+    @patch('requests.get')
+    def test_import_existing_project_with_autoregister_success(self, mock_get, mock_post):
+        project = Project.objects.create(
+            name='Existing Target Project',
+            pms='yum',
+            architecture='i386',
+            platform=self.platform,
+            auto_register_computers=False,
+        )
+
+        # 1. Mock get response for template details with auto_register_computers = True
+        mock_get_resp = mock_get.return_value
+        mock_get_resp.status_code = status.HTTP_200_OK
+        mock_get_resp.json.return_value = {
+            'id': 'debian-13-autoreg',
+            'base_os': 'debian',
+            'platform': 'debian',
+            'pms': 'apt',
+            'architecture': 'amd64',
+            'auto_register_computers': True,
+            'dockerfile': 'FROM debian:13',
+        }
+
+        # 2. Mock post response for manager import trigger
+        mock_post_resp = mock_post.return_value
+        mock_post_resp.ok = True
+        mock_post_resp.status_code = status.HTTP_200_OK
+        mock_post_resp.json.return_value = {'status': 'imported'}
+
+        url = '/api/v1/token/projects/templates/import/'
+        payload = {
+            'template_id': 'debian-13-autoreg',
+            'project_id': project.id,
+        }
+        response = self.client.post(url, payload, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        project.refresh_from_db()
+        self.assertEqual(project.pms, 'apt')
+        self.assertEqual(project.architecture, 'amd64')
+        self.assertTrue(project.auto_register_computers)
