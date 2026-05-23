@@ -4,7 +4,6 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from migasfree.mgi.models import Build, Config, Flavour, Release
 from migasfree.mgi.serializers import BuildSerializer, ConfigSerializer, FlavourSerializer, ReleaseSerializer
@@ -66,5 +65,3 @@ class BuildViewSet(viewsets.ModelViewSet):
     queryset = Build.objects.all()
     serializer_class = BuildSerializer
     filterset_fields = ('release', 'flavour', 'status')
-
-

@@ -1,4 +1,3 @@
-from django.urls import path
 from rest_framework import routers
 
 from migasfree.mgi.views import BuildViewSet, ConfigViewSet, FlavourViewSet, ReleaseViewSet
