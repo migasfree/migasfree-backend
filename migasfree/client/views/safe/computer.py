@@ -36,7 +36,6 @@ from rest_framework.throttling import UserRateThrottle
 
 from ....app_catalog.models import Policy
 from ....core.mixins import SafeConnectionMixin
-from ....core.serializers import AttributeSerializer
 from ....core.models import (
     Attribute,
     AttributeSet,
@@ -45,6 +44,7 @@ from ....core.models import (
     Domain,
     Property,
 )
+from ....core.serializers import AttributeSerializer
 from ....utils import (
     get_client_ip,
     remove_duplicates_preserving_order,

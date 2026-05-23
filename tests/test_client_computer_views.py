@@ -142,7 +142,7 @@ class TestHardwareComputerViewSet(APITestCase):
     @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.get_claims')
     @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.create_response')
     def test_safe_cid_attribute_endpoint(self, mock_create_response, mock_get_claims):
-        from migasfree.core.models import Property, Attribute
+        from migasfree.core.models import Attribute, Property
 
         cid_prop = Property.objects.create(prefix='CID', name='COMPUTER ID', enabled=True, kind='N', sort='client')
         cid_attr = Attribute.objects.create(
@@ -168,7 +168,7 @@ class TestHardwareComputerViewSet(APITestCase):
     @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.get_claims')
     @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.create_response')
     def test_safe_assigned_attributes_endpoint(self, mock_create_response, mock_get_claims):
-        from migasfree.core.models import Property, Attribute
+        from migasfree.core.models import Attribute, Property
 
         org_prop = Property.objects.create(prefix='ORG', name='ORGANIZATION', enabled=True, kind='N', sort='client')
         org_attr = Attribute.objects.create(property_att=org_prop, value='HEADQUARTERS')

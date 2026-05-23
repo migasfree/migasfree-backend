@@ -12,7 +12,9 @@ class ConfigForm(forms.ModelForm):
         widget=forms.Textarea(attrs={'rows': 25, 'cols': 100, 'style': 'font-family: monospace;'}),
         required=False,
         label=_('Dockerfile'),
-        help_text=_('Edit the Dockerfile template naturally here. It will be synchronized with the Extended Configuration JSON.')
+        help_text=_(
+            'Edit the Dockerfile template naturally here. It will be synchronized with the Extended Configuration JSON.'
+        ),
     )
 
     class Meta:
