@@ -106,8 +106,8 @@ Manage software projects (Operating System scopes), templates, and imports/expor
 GET  /api/v1/token/projects/
 POST /api/v1/token/projects/
 GET  /api/v1/token/projects/templates/            # Get templates catalog from manager
-POST /api/v1/token/projects/template-import/      # Import project from template
-POST /api/v1/token/projects/template-export/      # Export project as template
+POST /api/v1/token/projects/templates/import/      # Import project from template
+POST /api/v1/token/projects/templates/export/      # Export project as template
 ```
 
 ### Deployments

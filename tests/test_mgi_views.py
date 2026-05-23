@@ -110,7 +110,7 @@ class TestProjectTemplateImportList(APITestCase):
         # Ensure project does not exist
         self.assertFalse(Project.objects.filter(name='New Brand Project').exists())
 
-        url = '/api/v1/token/projects/template-import/'
+        url = '/api/v1/token/projects/templates/import/'
         payload = {
             'template_id': 'debian-13',
             'project_name': 'New Brand Project',
@@ -138,7 +138,7 @@ class TestProjectTemplateImportList(APITestCase):
             auto_register_computers=False,
         )
 
-        url = '/api/v1/token/projects/template-import/'
+        url = '/api/v1/token/projects/templates/import/'
         payload = {
             'template_id': 'debian-13',
             'project_name': 'Existing Project',
@@ -178,7 +178,7 @@ class TestProjectTemplateImportList(APITestCase):
         mock_post_resp.status_code = status.HTTP_200_OK
         mock_post_resp.json.return_value = {'status': 'imported'}
 
-        url = '/api/v1/token/projects/template-import/'
+        url = '/api/v1/token/projects/templates/import/'
         payload = {
             'template_id': 'debian-13',
             'project_id': project.id,
@@ -207,7 +207,7 @@ class TestProjectTemplateImportList(APITestCase):
         mock_resp.status_code = status.HTTP_200_OK
         mock_resp.content = b'{"status": "exported"}'
 
-        url = '/api/v1/token/projects/template-export/'
+        url = '/api/v1/token/projects/templates/export/'
         payload = {'project_id': project.id}
         response = self.client.post(url, payload, format='json')
 
@@ -215,12 +215,12 @@ class TestProjectTemplateImportList(APITestCase):
         self.assertEqual(response.json(), {'status': 'exported'})
 
     def test_export_via_get_disallowed(self):
-        url = '/api/v1/token/projects/template-export/'
+        url = '/api/v1/token/projects/templates/export/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_export_project_does_not_exist(self):
-        url = '/api/v1/token/projects/template-export/'
+        url = '/api/v1/token/projects/templates/export/'
         payload = {'project_id': 99999}
         response = self.client.post(url, payload, format='json')
 

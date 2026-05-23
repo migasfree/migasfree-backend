@@ -286,7 +286,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             },
         )
     )
-    @action(detail=False, methods=['post'], url_path='template-import')
+    @action(detail=False, methods=['post'], url_path='templates/import')
     def template_import(self, request):
         template_id = request.data.get('template_id')
         project_name = request.data.get('project_name')
@@ -366,7 +366,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             },
         ),
     )
-    @action(detail=False, methods=['post'], url_path='template-export')
+    @action(detail=False, methods=['post'], url_path='templates/export')
     def template_export(self, request):
         project_id = request.data.get('project_id')
 
