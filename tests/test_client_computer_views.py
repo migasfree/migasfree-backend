@@ -141,16 +141,18 @@ class TestHardwareComputerViewSet(APITestCase):
 
     @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.get_claims')
     @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.create_response')
-    def test_safe_attribute_assigned_endpoint(self, mock_create_response, mock_get_claims):
+    def test_safe_cid_attribute_endpoint(self, mock_create_response, mock_get_claims):
         from migasfree.core.models import Property, Attribute
 
         cid_prop = Property.objects.create(prefix='CID', name='COMPUTER ID', enabled=True, kind='N', sort='client')
-        cid_attr = Attribute.objects.create(property_att=cid_prop, value=str(self.computer.pk), description=self.computer.name)
+        cid_attr = Attribute.objects.create(
+            property_att=cid_prop, value=str(self.computer.pk), description=self.computer.name
+        )
 
         mock_get_claims.return_value = {'id': self.computer.pk}
         mock_create_response.side_effect = lambda x: {'msg': x}
 
-        url = reverse('computers-attribute-assigned')
+        url = reverse('computers-cid-attribute')
         data = {'msg': 'encrypted_jwt', 'project': self.project.name}
         response = self.client.post(url, data, format='json')
 
@@ -163,4 +165,27 @@ class TestHardwareComputerViewSet(APITestCase):
         self.assertEqual(res_data['msg']['results'][0]['value'], str(self.computer.pk))
         self.assertEqual(res_data['msg']['results'][0]['description'], self.computer.name)
 
+    @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.get_claims')
+    @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.create_response')
+    def test_safe_assigned_attributes_endpoint(self, mock_create_response, mock_get_claims):
+        from migasfree.core.models import Property, Attribute
 
+        org_prop = Property.objects.create(prefix='ORG', name='ORGANIZATION', enabled=True, kind='N', sort='client')
+        org_attr = Attribute.objects.create(property_att=org_prop, value='HEADQUARTERS')
+
+        self.computer.sync_attributes.add(org_attr)
+
+        mock_get_claims.return_value = {'id': self.computer.pk}
+        mock_create_response.side_effect = lambda x: {'msg': x}
+
+        url = reverse('computers-assigned-attributes')
+        data = {'msg': 'encrypted_jwt', 'project': self.project.name}
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        res_data = response.json()
+
+        self.assertEqual(res_data['msg']['count'], 1)
+        self.assertEqual(len(res_data['msg']['results']), 1)
+        self.assertEqual(res_data['msg']['results'][0]['id'], org_attr.pk)
+        self.assertEqual(res_data['msg']['results'][0]['value'], 'HEADQUARTERS')

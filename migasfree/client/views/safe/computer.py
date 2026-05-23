@@ -784,8 +784,26 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
             status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
         },
     )
-    @action(methods=['post'], detail=False, url_path='attributes/assigned')
-    def attribute_assigned(self, request):
+    @extend_schema(
+        description='Retrieves the unique CID attribute used to assign elements to this computer.',
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'object',
+                'properties': {
+                    'count': {'type': 'integer'},
+                    'next': {'type': 'string', 'nullable': True},
+                    'previous': {'type': 'string', 'nullable': True},
+                    'results': {
+                        'type': 'array',
+                        'items': {'type': 'object'},
+                    },
+                },
+            },
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
+    )
+    @action(methods=['post'], detail=False, url_path='attributes/cid')
+    def cid_attribute(self, request):
         """
         claims = {'id': 1}
         """
@@ -793,7 +811,7 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         computer = get_object_or_404(models.Computer, id=claims.get('id'))
         self.verify_mtls_identity(request, computer.uuid)
 
-        add_computer_message(computer, gettext('Getting assigned attributes...'))
+        add_computer_message(computer, gettext('Getting CID attribute...'))
 
         attribute = Attribute.objects.filter(property_att__prefix='CID', value=str(computer.id)).first()
 
@@ -804,6 +822,46 @@ class SafeComputerViewSet(SafeConnectionMixin, viewsets.ViewSet):
         else:
             results = []
             count = 0
+
+        response_data = {'count': count, 'next': None, 'previous': None, 'results': results}
+
+        add_computer_message(computer, gettext('Sending CID attribute...'))
+
+        return Response(self.create_response(response_data), status=status.HTTP_200_OK)
+
+    @extend_schema(
+        description='Retrieves all organizational attributes assigned to this computer.',
+        responses={
+            status.HTTP_200_OK: {
+                'type': 'object',
+                'properties': {
+                    'count': {'type': 'integer'},
+                    'next': {'type': 'string', 'nullable': True},
+                    'previous': {'type': 'string', 'nullable': True},
+                    'results': {
+                        'type': 'array',
+                        'items': {'type': 'object'},
+                    },
+                },
+            },
+            status.HTTP_404_NOT_FOUND: {'description': 'Computer not found'},
+        },
+    )
+    @action(methods=['post'], detail=False, url_path='attributes/assigned')
+    def assigned_attributes(self, request):
+        """
+        claims = {'id': 1}
+        """
+        claims = self.get_claims(request.data)
+        computer = get_object_or_404(models.Computer, id=claims.get('id'))
+        self.verify_mtls_identity(request, computer.uuid)
+
+        add_computer_message(computer, gettext('Getting assigned attributes...'))
+
+        attributes = computer.sync_attributes.all()
+        serializer = AttributeSerializer(attributes, many=True, context={'request': request})
+        results = serializer.data
+        count = attributes.count()
 
         response_data = {'count': count, 'next': None, 'previous': None, 'results': results}
 
