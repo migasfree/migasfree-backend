@@ -16,6 +16,7 @@ Welcome to the **migasfree-backend** documentation. This project is the server c
 
 - **[Core Concepts](explanation/core-concepts.md)**: Understanding Projects, Deployments, and the Sync Cycle.
 - **[Architecture](explanation/architecture.md)**: Deep dive into Django apps and databases.
+- **[MGI Golden Images](explanation/mgi-golden-images.md)**: Build pipeline, registration security, and roadmap.
 
 ## 📖 Reference
 

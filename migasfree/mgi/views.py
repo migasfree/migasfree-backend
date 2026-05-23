@@ -68,28 +68,3 @@ class BuildViewSet(viewsets.ModelViewSet):
     filterset_fields = ('release', 'flavour', 'status')
 
 
-@extend_schema(tags=['mgi'])
-class CatalogView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        """Fetch the MGI templates catalog from the manager service."""
-        headers = {}
-        if request.auth:
-            headers['Authorization'] = f'Bearer {request.auth}'
-
-        try:
-            manager_url = 'http://manager:8080/manager/v1/internal/mgi/catalog'
-            response = requests.get(manager_url, headers=headers, timeout=15.0)
-
-            if response.ok:
-                return Response(response.json(), status=status.HTTP_200_OK)
-            else:
-                return Response(
-                    {'error': f'Manager responded with HTTP {response.status_code}', 'details': response.text},
-                    status=response.status_code,
-                )
-        except Exception as e:
-            return Response(
-                {'error': f'Could not connect to manager: {e!s}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )

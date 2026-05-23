@@ -118,34 +118,41 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         return super().create(request, *args, **kwargs)
 
     @extend_schema(
-        request=inline_serializer(
-            name='MgiImportRequest',
-            fields={
-                'template_id': serializers.CharField(help_text='The MGI template ID to import (e.g. debian-13)'),
-                'origin': serializers.CharField(
-                    required=False,
-                    allow_null=True,
-                    help_text='The origin of the template (local or remote)',
-                ),
-            },
-        )
+        summary="Fetch the MGI templates catalog from the manager service",
+        description="Retrieve a list of all MGI templates available in the catalog.",
     )
-    @action(detail=True, methods=['post'], url_path='template-import')
-    def template_import(self, request, pk=None):
-        project_id = pk
-        template_id = request.data.get('template_id')
-        origin = request.data.get('origin')
+    @action(detail=False, methods=['get'], url_path='templates')
+    def templates(self, request):
+        """Fetch the MGI templates catalog from the manager service."""
+        headers = {}
+        if request.auth:
+            headers['Authorization'] = f'Bearer {request.auth}'
 
-        if not template_id:
-            return Response({'error': 'template_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            manager_url = 'http://manager:8080/manager/v1/internal/mgi/projects/templates'
+            response = requests.get(manager_url, headers=headers, timeout=15.0)
 
+            if response.ok:
+                return Response(response.json(), status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {'error': f'Manager responded with HTTP {response.status_code}', 'details': response.text},
+                    status=response.status_code,
+                )
+        except Exception as e:
+            return Response(
+                {'error': f'Could not connect to manager: {e!s}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+    def _perform_template_import(self, request, project, template_id, origin=None):
         # 1. Fetch template data from manager
         headers = {}
         if request.auth:
             headers['Authorization'] = f'Bearer {request.auth}'
 
         try:
-            manager_url = f'http://manager:8080/manager/v1/internal/mgi/templates/{template_id}'
+            manager_url = f'http://manager:8080/manager/v1/internal/mgi/projects/templates/{template_id}'
             params = {}
             if origin:
                 params['origin'] = origin
@@ -162,12 +169,34 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
                 f"Template '{template_id}' was not found{origin_str}. Please verify that the template exists and is published."
             )
 
+        # Update Project fields from template metadata (platform, pms, architecture)
+        modified_fields = []
+        platform_name = template_data.get('platform')
+        if platform_name:
+            platform_obj, _ = Platform.objects.get_or_create(name=platform_name)
+            if project.platform != platform_obj:
+                project.platform = platform_obj
+                modified_fields.append('platform')
+
+        pms_val = template_data.get('pms')
+        if pms_val and project.pms != pms_val:
+            project.pms = pms_val
+            modified_fields.append('pms')
+
+        arch_val = template_data.get('architecture')
+        if arch_val and project.architecture != arch_val:
+            project.architecture = arch_val
+            modified_fields.append('architecture')
+
+        if modified_fields:
+            project.save(update_fields=modified_fields)
+
         # 2. Create or update Config
         from migasfree.mgi.models import Config, Flavour  # avoid circular import
         from migasfree.mgi.serializers import ConfigSerializer  # avoid circular import
 
         config, created = Config.objects.get_or_create(
-            project_id=project_id,
+            project_id=project.id,
             defaults={
                 'template_id': template_id,
                 'base_os': template_data.get('base_os') or '',
@@ -200,7 +229,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         manager_import_result = None
         try:
             manager_url = (
-                f'http://manager:8080/manager/v1/internal/mgi/projects/{project_id}/import?template_id={template_id}'
+                f'http://manager:8080/manager/v1/internal/mgi/projects/{project.id}/import?template_id={template_id}'
             )
             if origin:
                 manager_url += f'&origin={origin}'
@@ -225,9 +254,136 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
         )
 
-    @action(detail=True, methods=['get'], url_path='template-export')
-    def template_export(self, request, pk=None):
-        project_id = pk
+    @extend_schema(
+        description=(
+            "Import an MGI template to either create a new project or update an existing one.\n\n"
+            "To create a new project:\n"
+            "- Pass `project_name` (string)\n\n"
+            "To update an existing project:\n"
+            "- Pass `project_id` (integer)\n\n"
+            "Optional parameter:\n"
+            "- Pass `origin` (string: 'local' or 'remote') to specify the template source catalog."
+        ),
+        request=inline_serializer(
+            name='MgiImportListRequest',
+            fields={
+                'template_id': serializers.CharField(help_text='The MGI template ID to import (e.g. debian-13)'),
+                'project_name': serializers.CharField(
+                    required=False,
+                    allow_null=True,
+                    help_text='The name of the new project to create',
+                ),
+                'project_id': serializers.IntegerField(
+                    required=False,
+                    allow_null=True,
+                    help_text='The ID of an existing project to import into',
+                ),
+                'origin': serializers.CharField(
+                    required=False,
+                    allow_null=True,
+                    help_text='The origin of the template (local or remote)',
+                ),
+            },
+        )
+    )
+    @action(detail=False, methods=['post'], url_path='template-import')
+    def template_import(self, request):
+        template_id = request.data.get('template_id')
+        project_name = request.data.get('project_name')
+        project_id = request.data.get('project_id')
+        origin = request.data.get('origin')
+
+        if not template_id:
+            return Response({'error': 'template_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not project_name and not project_id:
+            return Response(
+                {'error': 'Either project_name (to create a new project) or project_id is required'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if project_id:
+            try:
+                project = Project.objects.get(id=project_id)
+            except Project.DoesNotExist:
+                return Response({'error': f'Project with ID {project_id} does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            # Check if project name already exists
+            if Project.objects.filter(name=project_name).exists():
+                return Response(
+                    {'error': f"A project with name '{project_name}' already exists"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Create new project with temporary default values (they will be updated from template)
+            try:
+                headers = {}
+                if request.auth:
+                    headers['Authorization'] = f'Bearer {request.auth}'
+
+                manager_url = f'http://manager:8080/manager/v1/internal/mgi/projects/templates/{template_id}'
+                params = {}
+                if origin:
+                    params['origin'] = origin
+                response = requests.get(manager_url, headers=headers, params=params, timeout=10.0)
+                response.raise_for_status()
+                template_data = response.json()
+            except Exception as e:
+                raise ValidationError(f'Failed to fetch template {template_id} from manager: {e!s}') from e
+
+            if not template_data or template_data.get('base_os') is None:
+                origin_str = f" in origin '{origin}'" if origin else ''
+                raise ValidationError(
+                    f"Template '{template_id}' was not found{origin_str}. Please verify that the template exists and is published."
+                )
+
+            # Get or create platform
+            platform_name = template_data.get('platform') or 'debian'  # default fallback
+            platform_obj, _ = Platform.objects.get_or_create(name=platform_name)
+
+            pms_val = template_data.get('pms') or 'apt'  # default fallback
+            arch_val = template_data.get('architecture') or 'amd64'  # default fallback
+
+            project = Project.objects.create(
+                name=project_name,
+                pms=pms_val,
+                architecture=arch_val,
+                platform=platform_obj,
+                auto_register_computers=False,
+            )
+
+        # Now perform the rest of the template import!
+        return self._perform_template_import(request, project, template_id, origin)
+
+    @extend_schema(
+        description="Export a project's deployments, stores, and packages to the template catalog.",
+        request=inline_serializer(
+            name='MgiExportListRequest',
+            fields={
+                'project_id': serializers.IntegerField(
+                    help_text='The ID of the project to export'
+                )
+            },
+        ),
+    )
+    @action(detail=False, methods=['post'], url_path='template-export')
+    def template_export(self, request):
+        project_id = request.data.get('project_id')
+
+        if not project_id:
+            return Response(
+                {'error': 'project_id is required'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Check if project exists
+            Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return Response(
+                {'error': f'Project with ID {project_id} does not exist'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         try:
             headers = {}

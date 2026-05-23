@@ -100,11 +100,14 @@ GET /api/v1/token/computers/{id}/
 
 ### Projects
 
-Manage software projects (Operating System scopes).
+Manage software projects (Operating System scopes), templates, and imports/exports.
 
 ```url
-GET /api/v1/token/projects/
+GET  /api/v1/token/projects/
 POST /api/v1/token/projects/
+GET  /api/v1/token/projects/templates/            # Get templates catalog from manager
+POST /api/v1/token/projects/template-import/      # Import project from template
+POST /api/v1/token/projects/template-export/      # Export project as template
 ```
 
 ### Deployments
@@ -113,6 +116,18 @@ Manage repository deployments.
 
 ```url
 GET /api/v1/token/deployments/
+```
+
+### 📀 MGI Golden Images
+
+Manage Golden Image builds, configurations, and releases.
+
+```url
+GET/POST/PATCH/DELETE /api/v1/token/mgi/configs/      # Manage MGI configuration templates
+GET/POST/PATCH/DELETE /api/v1/token/mgi/flavours/     # Manage configuration flavours (tags, names)
+GET/POST/PATCH/DELETE /api/v1/token/mgi/releases/     # Manage versioned releases
+POST                  /api/v1/token/mgi/releases/{id}/build/  # Trigger Golden Image build
+GET/POST/PATCH/DELETE /api/v1/token/mgi/builds/       # Track build history and logs
 ```
 
 ### Devices & Peripherals
