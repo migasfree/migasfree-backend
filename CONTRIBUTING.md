@@ -17,6 +17,25 @@ Please refer to the **[Getting Started Tutorial](docs/tutorials/getting-started.
 
 ## 🔄 Development Workflow
 
+### Managing Dependencies
+
+This project uses `pyproject.toml` as the source of truth for dependencies and `pip-tools` (`pip-compile`) to generate pinned `requirements.txt` files to ensure reproducible builds.
+
+When you need to add or update a dependency:
+
+1. Update the relevant section (`dependencies` or `project.optional-dependencies.dev`) in `pyproject.toml`.
+2. Re-generate the requirements files by running:
+
+   ```bash
+   # Update production dependencies
+   pip-compile --output-file=requirements.txt pyproject.toml
+
+   # Update development dependencies
+   pip-compile --extra dev --output-file=requirements-dev.txt pyproject.toml
+   ```
+
+3. Commit both `pyproject.toml` and the updated `requirements*.txt` files.
+
 ## 📤 Submitting Changes
 
 ### Pull Request Process
