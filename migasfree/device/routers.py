@@ -1,5 +1,5 @@
-# Copyright (c) 2016-2020 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2016-2020 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2016-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 
 from rest_framework import routers
 
-from . import views
+from . import safe, views
 
 router = routers.DefaultRouter()
 
@@ -28,3 +28,8 @@ router.register(r'logical', views.LogicalViewSet)
 router.register(r'manufacturers', views.ManufacturerViewSet)
 router.register(r'models', views.ModelViewSet)
 router.register(r'types', views.TypeViewSet)
+
+safe_router = routers.DefaultRouter()
+safe_router.register(r'devices', safe.SafeDeviceViewSet, basename='safe-device')
+safe_router.register(r'logical', safe.SafeLogicalViewSet, basename='safe-logical')
+safe_router.register(r'capabilities', safe.SafeCapabilityViewSet, basename='safe-capability')

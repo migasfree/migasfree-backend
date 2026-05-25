@@ -16,7 +16,7 @@
 
 from rest_framework import routers
 
-from . import views
+from . import safe, views
 
 router = routers.DefaultRouter()
 router.register(r'apps', views.ApplicationViewSet)
@@ -24,3 +24,7 @@ router.register(r'categories', views.CategoryViewSet)
 router.register(r'project-packages', views.PackagesByProjectViewSet)
 router.register(r'policies', views.PolicyViewSet)
 router.register(r'policy-groups', views.PolicyGroupViewSet)
+
+safe_router = routers.DefaultRouter()
+safe_router.register(r'apps', safe.SafeApplicationViewSet, basename='safe-application')
+safe_router.register(r'categories', safe.SafeCategoryViewSet, basename='safe-category')
