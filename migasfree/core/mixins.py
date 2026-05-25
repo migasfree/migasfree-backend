@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import json
 import logging
 import re
 
@@ -21,6 +22,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
+from rest_framework.utils.encoders import JSONEncoder
 
 from .. import secure
 from .models import Project
@@ -117,6 +119,10 @@ class SafeConnectionMixin:
         if not self.encrypt_key:
             self.encrypt_key = f'{self.project.slug}.pub'
 
-        msg = secure.wrap(data, sign_key=self.sign_key, encrypt_key=self.encrypt_key)
+        # Force serialization of any lazy objects (like translations) using DRF's JSONEncoder
+        # before passing them to the JWE wrapping library which uses the standard JSON encoder.
+        clean_data = json.loads(json.dumps(data, cls=JSONEncoder))
+
+        msg = secure.wrap(clean_data, sign_key=self.sign_key, encrypt_key=self.encrypt_key)
 
         return {'msg': msg}
