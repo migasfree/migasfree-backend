@@ -36,12 +36,14 @@ from rest_framework_simplejwt.views import (
 )
 
 from .app_catalog.routers import router as catalog_router
+from .app_catalog.routers import safe_router as catalog_safe_router
 from .client.routers import router as client_router
 from .client.routers import safe_router as client_safe_router
 from .core.routers import router as core_router
 from .core.routers import safe_router as core_safe_router
 from .core.views import GetSourceFileView
 from .device.routers import router as device_router
+from .device.routers import safe_router as device_safe_router
 from .hardware.routers import router as hardware_router
 from .hardware.routers import safe_router as hardware_safe_router
 from .stats.routers import router as stats_router
@@ -78,8 +80,8 @@ urlpatterns = [
     re_path(r'^api/v1/token/devices/', include(device_router.urls)),
     re_path(r'^api/v1/token/catalog/', include(catalog_router.urls)),
     re_path(r'^api/v1/safe/', include(safe_router.urls)),
-    re_path(r'^api/v1/safe/devices/', include(device_router.urls)),
-    re_path(r'^api/v1/safe/catalog/', include(catalog_router.urls)),
+    re_path(r'^api/v1/safe/devices/', include(device_safe_router.urls)),
+    re_path(r'^api/v1/safe/catalog/', include(catalog_safe_router.urls)),
     re_path(r'^api/v1/', include('migasfree.core.urls')),
     re_path(r'^api/v1/', include('migasfree.client.urls')),
     re_path(r'^api/v1/token/mgi/', include('migasfree.mgi.urls')),
