@@ -78,6 +78,8 @@ urlpatterns = [
     re_path(r'^api/v1/token/devices/', include(device_router.urls)),
     re_path(r'^api/v1/token/catalog/', include(catalog_router.urls)),
     re_path(r'^api/v1/safe/', include(safe_router.urls)),
+    re_path(r'^api/v1/safe/devices/', include(device_router.urls)),
+    re_path(r'^api/v1/safe/catalog/', include(catalog_router.urls)),
     re_path(r'^api/v1/', include('migasfree.core.urls')),
     re_path(r'^api/v1/', include('migasfree.client.urls')),
     re_path(r'^api/v1/token/mgi/', include('migasfree.mgi.urls')),
