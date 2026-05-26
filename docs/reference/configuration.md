@@ -76,6 +76,16 @@ And set `SECURE_PROXY_SSL_HEADER` in Django (already set in `production.py`):
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 ```
 
+#### 🔒 Strict SSL Verification for Remote Repositories
+
+When downloading external packages or files from remote sources, **migasfree-backend** strictly validates the SSL/TLS certificates of remote servers using Python's default secure context (`ssl.create_default_context()`). This mitigates **Man-in-the-Middle (MitM)** attacks during remote resource retrieval.
+
+This enforces the following rules for any remote server defined in external package deployments:
+1. **Trusted CA**: The remote server's SSL certificate must be signed by a trusted Authority of Certification. If using a **self-signed certificate** or a **private corporate CA**, you must add that CA certificate to the backend's system trust store (e.g. adding it to `/usr/local/share/ca-certificates/` and running `update-ca-certificates` on Debian-based host/container).
+2. **Hostname Matching**: The domain in the `base_url` must match the Common Name (CN) or Subject Alternative Name (SAN) of the certificate. Using raw IP addresses in `base_url` is highly discouraged and will fail if the certificate does not explicitly list the IP.
+3. **Modern TLS Protocol**: The remote server must support TLS 1.2 or TLS 1.3. Connections using legacy TLS 1.0 or TLS 1.1 will be rejected during negotiation.
+
+
 ### 3. Key Management
 
 Migasfree uses cryptographic keys for client communication.

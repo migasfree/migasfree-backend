@@ -145,7 +145,7 @@ class SourceFileService:
             return HttpResponse('Forbidden: Unsafe URL', status=status.HTTP_403_FORBIDDEN)
 
         try:
-            remote_file = urlopen(url, context=ssl.SSLContext(ssl.PROTOCOL_SSLv23))
+            remote_file = urlopen(url, context=ssl.create_default_context())
 
             remote_file_status = remote_file.getcode()
             if remote_file_status != status.HTTP_200_OK:
