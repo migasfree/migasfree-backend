@@ -16,8 +16,10 @@
 
 import json
 
-from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.db import models
+from django.db.models import TextField
+from django.db.models.functions import Cast
 from django.utils.translation import gettext_lazy as _
 
 from ...core.models import Attribute, MigasLink
@@ -74,7 +76,9 @@ class DeviceManager(models.Manager):
             .distinct()
         )
         if query:
-            results = results.filter(Q(name__icontains=query) | Q(data__icontains=query))
+            results = results.annotate(data_as_text=Cast('data', TextField())).filter(
+                Q(name__icontains=query) | Q(data_as_text__icontains=query)
+            )
 
         return results.with_metadata(userprofile)
 
@@ -107,26 +111,28 @@ class Device(models.Model, MigasLink):
         verbose_name=_('available for attributes'),
     )
 
-    data = models.TextField(
+    data = models.JSONField(
         verbose_name=_('data'),
+        default=dict,
+        blank=True,
         null=True,
-        default='{}',
         db_comment='list of fields and values for device connection',
     )
 
     objects = DeviceManager()
 
     def _parse_data(self):
+        if isinstance(self.data, dict):
+            return self.data
         if not self.data:
             return {}
-        try:
-            parsed = json.loads(self.data)
-            if isinstance(parsed, str):
-                parsed = json.loads(parsed)
-            if isinstance(parsed, dict):
-                return parsed
-        except (ValueError, TypeError):
-            pass
+        if isinstance(self.data, str):
+            try:
+                parsed = json.loads(self.data)
+                if isinstance(parsed, dict):
+                    return parsed
+            except (ValueError, TypeError):
+                pass
         return {}
 
     def location(self):
@@ -252,7 +258,7 @@ class Device(models.Model, MigasLink):
         data = self._parse_data()
         if 'NAME' in data:
             data['NAME'] = data['NAME'].replace(' ', '_')
-            self.data = json.dumps(data)
+            self.data = data
 
         super().save(*args, **kwargs)
 
@@ -264,5 +270,8 @@ class Device(models.Model, MigasLink):
         db_table_comment = 'device inventory'
         indexes = [
             GinIndex(fields=['name'], opclasses=['gin_trgm_ops'], name='device_name_trgm_idx'),
-            GinIndex(fields=['data'], opclasses=['gin_trgm_ops'], name='device_data_trgm_idx'),
+            GinIndex(
+                OpClass(Cast('data', output_field=TextField()), name='gin_trgm_ops'),
+                name='device_data_trgm_idx',
+            ),
         ]

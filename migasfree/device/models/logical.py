@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -112,7 +112,7 @@ class Logical(models.Model, MigasLink):
 
     @extend_schema_field(serializers.CharField)
     def __str__(self):
-        data = json.loads(self.device.data)
+        data = self.device._parse_data()
         if 'NAME' in data and not (data['NAME'] == 'undefined' or data['NAME'] == ''):
             return f'{data["NAME"]}__{self.get_name()}__{self.device.name}'
 

@@ -88,7 +88,7 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
     )
     serializer_class = serializers.DeviceSerializer
     filterset_class = DeviceFilter
-    search_fields = ['name', 'model__name', 'model__manufacturer__name', 'data']
+    search_fields = ['name', 'model__name', 'model__manufacturer__name', 'data_as_text']
     ordering_fields = '__all__'
     ordering = ('name',)
 
@@ -102,7 +102,14 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
         if self.request is None:
             return Device.objects.none()
 
-        return self.queryset.scope(self.request.user.userprofile).with_metadata(self.request.user.userprofile)
+        from django.db.models import TextField
+        from django.db.models.functions import Cast
+
+        return (
+            self.queryset.scope(self.request.user.userprofile)
+            .with_metadata(self.request.user.userprofile)
+            .annotate(data_as_text=Cast('data', TextField()))
+        )
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -261,7 +268,11 @@ class LogicalViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             .distinct()
         )
         if query:
-            results = results.filter(Q(device__name__icontains=query) | Q(device__data__icontains=query))
+            from django.db.models import TextField
+            from django.db.models.functions import Cast
+            results = results.annotate(device_data_as_text=Cast('device__data', TextField())).filter(
+                Q(device__name__icontains=query) | Q(device_data_as_text__icontains=query)
+            )
         if device:
             results = results.filter(device__id=device)
 

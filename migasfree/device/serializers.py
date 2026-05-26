@@ -82,8 +82,12 @@ class DeviceInfoSerializer(serializers.ModelSerializer):
 class DeviceWriteSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         if 'data' in data:
-            data['data'] = json.dumps(data.get('data', {}))
-
+            val = data.get('data')
+            if isinstance(val, str):
+                try:
+                    data['data'] = json.loads(val)
+                except (ValueError, TypeError):
+                    pass
         return super().to_internal_value(data)
 
     def to_representation(self, obj):
@@ -93,7 +97,7 @@ class DeviceWriteSerializer(serializers.ModelSerializer):
         representation['model'] = ModelInfoSerializer(obj.model).data
 
         if obj.data:
-            representation['data'] = json.loads(obj.data)
+            representation['data'] = obj._parse_data()
 
         representation['available_for_attributes'] = [
             AttributeInfoSerializer(item).data for item in obj.available_for_attributes.all()
@@ -123,7 +127,7 @@ class DeviceSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.JSONField)
     def get_data(self, obj):
-        return json.loads(obj.data)
+        return obj._parse_data()
 
     @extend_schema_field(serializers.CharField)
     def get_location(self, obj):
