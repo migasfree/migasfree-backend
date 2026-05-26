@@ -36,7 +36,7 @@ class TestSafeLogicalViewSet(APITestCase):
 
     @unittest.mock.patch('migasfree.device.safe.SafeLogicalViewSet.get_claims')
     @unittest.mock.patch('migasfree.device.safe.SafeLogicalViewSet.create_response')
-    def test_update_logical_assign(self, mock_create_response, mock_get_claims):
+    def test_assign_logical(self, mock_create_response, mock_get_claims):
         mock_get_claims.return_value = {
             'cid': self.computer.pk,
             'id': self.logical.pk,
@@ -44,7 +44,7 @@ class TestSafeLogicalViewSet(APITestCase):
         }
         mock_create_response.side_effect = lambda x: {'msg': x}
 
-        url = reverse('safe-logical-update-logical')
+        url = reverse('safe-logical-assign')
         response = self.client.post(url, {'msg': 'jwt'}, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -52,7 +52,7 @@ class TestSafeLogicalViewSet(APITestCase):
 
     @unittest.mock.patch('migasfree.device.safe.SafeLogicalViewSet.get_claims')
     @unittest.mock.patch('migasfree.device.safe.SafeLogicalViewSet.create_response')
-    def test_update_logical_unassign(self, mock_create_response, mock_get_claims):
+    def test_unassign_logical(self, mock_create_response, mock_get_claims):
         # First assign it
         self.logical.attributes.add(self.attribute)
 
@@ -63,7 +63,7 @@ class TestSafeLogicalViewSet(APITestCase):
         }
         mock_create_response.side_effect = lambda x: {'msg': x}
 
-        url = reverse('safe-logical-update-logical')
+        url = reverse('safe-logical-assign')
         response = self.client.post(url, {'msg': 'jwt'}, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -71,7 +71,7 @@ class TestSafeLogicalViewSet(APITestCase):
 
     @unittest.mock.patch('migasfree.device.safe.SafeLogicalViewSet.get_claims')
     @unittest.mock.patch('migasfree.device.safe.SafeLogicalViewSet.create_response')
-    def test_update_logical_attributes_list(self, mock_create_response, mock_get_claims):
+    def test_assign_attributes_list(self, mock_create_response, mock_get_claims):
         mock_get_claims.return_value = {
             'cid': self.computer.pk,
             'id': self.logical.pk,
@@ -79,7 +79,7 @@ class TestSafeLogicalViewSet(APITestCase):
         }
         mock_create_response.side_effect = lambda x: {'msg': x}
 
-        url = reverse('safe-logical-update-logical')
+        url = reverse('safe-logical-assign')
         response = self.client.post(url, {'msg': 'jwt'}, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

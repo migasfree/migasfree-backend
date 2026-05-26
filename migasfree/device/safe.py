@@ -134,14 +134,14 @@ class SafeLogicalViewSet(SafeConnectionMixin, viewsets.ViewSet):
             return Response(self.create_response({}), status=status.HTTP_200_OK)
 
     @extend_schema(
-        description='Updates a logical device and its driver (requires mTLS)',
+        description='Assigns or unassigns a logical device to/from the computer (requires mTLS)',
         responses={
             status.HTTP_200_OK: serializers.LogicalSerializer(),
             status.HTTP_400_BAD_REQUEST: {'description': 'Error in request'},
         },
     )
-    @action(methods=['post'], detail=False, url_path='update-logical')
-    def update_logical(self, request):
+    @action(methods=['post'], detail=False, url_path='assign')
+    def assign(self, request):
         claims = self.get_claims(request.data)
         if isinstance(claims, str):
             return Response(self.create_response(claims), status=status.HTTP_400_BAD_REQUEST)
