@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0011_alter_project_pms'),
+        ('core', '0010_alter_attribute_table_comment_and_more'),
         ('device', '0006_device_device_name_trgm_idx_and_more'),
     ]
 

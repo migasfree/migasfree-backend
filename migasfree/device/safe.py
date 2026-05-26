@@ -98,6 +98,86 @@ class SafeLogicalViewSet(SafeConnectionMixin, viewsets.ViewSet):
         serializer = serializers.LogicalSerializer(results, many=True)
         return Response(self.create_response(serializer.data), status=status.HTTP_200_OK)
 
+    @extend_schema(
+        description='Sets the default logical device for the computer (requires mTLS)',
+        responses={
+            status.HTTP_200_OK: serializers.LogicalSerializer(),
+            status.HTTP_400_BAD_REQUEST: {'description': 'Error in request'},
+        },
+    )
+    @action(methods=['post'], detail=False, url_path='set-default')
+    def set_default(self, request):
+        claims = self.get_claims(request.data)
+        if isinstance(claims, str):
+            return Response(self.create_response(claims), status=status.HTTP_400_BAD_REQUEST)
+
+        if not claims or 'cid' not in claims:
+            return Response(self.create_response(_('Malformed claims')), status=status.HTTP_400_BAD_REQUEST)
+
+        computer = get_object_or_404(Computer, pk=claims.get('cid'))
+        logical_id = claims.get('logical_id') or claims.get('id')
+
+        if logical_id:
+            logical = get_object_or_404(models.Logical, pk=logical_id)
+            if not computer.sync_attributes.filter(id__in=logical.device.available_for_attributes.all()).exists():
+                return Response(
+                    self.create_response(_('Logical device not allowed')), status=status.HTTP_400_BAD_REQUEST
+                )
+
+            computer.default_logical_device = logical
+            computer.save(update_fields=['default_logical_device'])
+            serializer = serializers.LogicalSerializer(logical)
+            return Response(self.create_response(serializer.data), status=status.HTTP_200_OK)
+        else:
+            computer.default_logical_device = None
+            computer.save(update_fields=['default_logical_device'])
+            return Response(self.create_response({}), status=status.HTTP_200_OK)
+
+    @extend_schema(
+        description='Updates a logical device and its driver (requires mTLS)',
+        responses={
+            status.HTTP_200_OK: serializers.LogicalSerializer(),
+            status.HTTP_400_BAD_REQUEST: {'description': 'Error in request'},
+        },
+    )
+    @action(methods=['post'], detail=False, url_path='update-logical')
+    def update_logical(self, request):
+        claims = self.get_claims(request.data)
+        if isinstance(claims, str):
+            return Response(self.create_response(claims), status=status.HTTP_400_BAD_REQUEST)
+
+        if not claims or 'cid' not in claims:
+            return Response(self.create_response(_('Malformed claims')), status=status.HTTP_400_BAD_REQUEST)
+
+        computer = get_object_or_404(Computer, pk=claims.get('cid'))
+        logical_id = claims.get('id')
+
+        if not logical_id:
+            return Response(self.create_response(_('Missing id')), status=status.HTTP_400_BAD_REQUEST)
+
+        logical = get_object_or_404(models.Logical, pk=logical_id)
+
+        if not computer.sync_attributes.filter(id__in=logical.device.available_for_attributes.all()).exists():
+            return Response(self.create_response(_('Logical device not allowed')), status=status.HTTP_400_BAD_REQUEST)
+
+        cid_attribute = computer.get_cid_attribute()
+
+        assigned = claims.get('assigned')
+        if assigned is not None:
+            if assigned:
+                logical.attributes.add(cid_attribute)
+            else:
+                logical.attributes.remove(cid_attribute)
+        elif 'attributes' in claims:
+            attrs = claims.get('attributes') or []
+            if cid_attribute.id in attrs:
+                logical.attributes.add(cid_attribute)
+            else:
+                logical.attributes.remove(cid_attribute)
+
+        serializer = serializers.LogicalSerializer(logical)
+        return Response(self.create_response(serializer.data), status=status.HTTP_200_OK)
+
 
 @extend_schema(tags=['safe'])
 @permission_classes((permissions.AllowAny,))
