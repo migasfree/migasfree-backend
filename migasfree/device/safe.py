@@ -55,8 +55,6 @@ class SafeDeviceViewSet(SafeConnectionMixin, viewsets.ViewSet):
 
         # Filter by computer project to mimic UserProfile scoping in safe mode
         results = models.Device.objects.available_for_computer(computer, query, None)
-        # Filter strictly to the computer project as the client does not have a user profile
-        results = results.filter(project=computer.project)
 
         serializer = serializers.DeviceSerializer(results, many=True)
         return Response(self.create_response(serializer.data), status=status.HTTP_200_OK)
@@ -89,7 +87,6 @@ class SafeLogicalViewSet(SafeConnectionMixin, viewsets.ViewSet):
             models.Logical.objects.select_related('device', 'device__model', 'capability')
             .prefetch_related('device__available_for_attributes')
             .filter(device__available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True))
-            .filter(project=computer.project)
             .order_by('device__name', 'capability__name')
             .distinct()
         )
