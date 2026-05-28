@@ -109,3 +109,6 @@ MIGASFREE_PACKAGER_PRI_KEY = 'migasfree-packager.pri'
 # Default Computer Status
 # Values: 'intended', 'reserved', 'unknown', 'in repair', 'available' or 'unsubscribed'
 MIGASFREE_DEFAULT_COMPUTER_STATUS = 'intended'
+
+# Remote Access Tunnel settings
+MIGASFREE_MANAGER_URL = os.getenv('MIGASFREE_MANAGER_URL', 'http://manager:8080')

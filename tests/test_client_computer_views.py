@@ -189,3 +189,59 @@ class TestHardwareComputerViewSet(APITestCase):
         self.assertEqual(len(res_data['msg']['results']), 1)
         self.assertEqual(res_data['msg']['results'][0]['id'], org_attr.pk)
         self.assertEqual(res_data['msg']['results'][0]['value'], 'HEADQUARTERS')
+
+    @unittest.mock.patch('requests.get')
+    def test_remote_access_agent_online(self, mock_get):
+        """Test remote-access endpoint when agent is online in the Manager."""
+        mock_response = unittest.mock.MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            'id': self.computer.pk,
+            'name': 'PC-TEST',
+            'services': ['ssh', 'vnc'],
+            'relay': 'wss://relay.example.com/tunnel',
+        }
+        mock_get.return_value = mock_response
+
+        url = reverse('computer-remote-access', kwargs={'pk': self.computer.pk})
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        res_data = response.json()
+        self.assertEqual(res_data['status'], 'online')
+        self.assertEqual(res_data['id'], self.computer.pk)
+        self.assertEqual(res_data['services'], ['ssh', 'vnc'])
+        self.assertEqual(res_data['relay'], 'wss://relay.example.com/tunnel')
+        mock_get.assert_called_once()
+
+    @unittest.mock.patch('requests.get')
+    def test_remote_access_agent_offline(self, mock_get):
+        """Test remote-access endpoint when agent is offline in the Manager (404)."""
+        mock_response = unittest.mock.MagicMock()
+        mock_response.status_code = 404
+        mock_get.return_value = mock_response
+
+        url = reverse('computer-remote-access', kwargs={'pk': self.computer.pk})
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        res_data = response.json()
+        self.assertEqual(res_data['status'], 'offline')
+        self.assertNotIn('services', res_data)
+        mock_get.assert_called_once()
+
+    @unittest.mock.patch('requests.get')
+    def test_remote_access_manager_error(self, mock_get):
+        """Test remote-access endpoint when Manager is down or returns error."""
+        import requests
+
+        mock_get.side_effect = requests.RequestException('Connection refused')
+
+        url = reverse('computer-remote-access', kwargs={'pk': self.computer.pk})
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
+        res_data = response.json()
+        self.assertEqual(res_data['status'], 'unknown')
+        self.assertIn('error', res_data)
+        mock_get.assert_called_once()

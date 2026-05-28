@@ -18,6 +18,7 @@ import json
 from datetime import datetime
 from operator import gt, le
 
+import requests
 from django.conf import settings
 from django.http import QueryDict
 from django.shortcuts import get_object_or_404
@@ -409,3 +410,29 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         results = Node.objects.filter(computer=computer).order_by('id', 'parent_id', 'level')
 
         return Response(NodeOnlySerializer(results, many=True).data, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], detail=True, url_path='remote-access', url_name='remote-access')
+    def remote_access(self, request, pk=None):
+        computer = self.get_object()
+
+        manager_url = getattr(settings, 'MIGASFREE_MANAGER_URL', 'http://manager:8080')
+        url = f'{manager_url.rstrip("/")}/manager/v1/private/tunnel/agents/{computer.id}'
+
+        try:
+            resp = requests.get(url, timeout=3)
+            if resp.status_code == status.HTTP_200_OK:
+                data = resp.json()
+                data['status'] = 'online'
+                return Response(data, status=status.HTTP_200_OK)
+            elif resp.status_code == status.HTTP_404_NOT_FOUND:
+                return Response({'status': 'offline'}, status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {'status': 'unknown', 'error': f'Manager returned status {resp.status_code}'},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
+        except requests.RequestException as e:
+            return Response(
+                {'status': 'unknown', 'error': str(e)},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )

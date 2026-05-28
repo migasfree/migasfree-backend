@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import requests
+from django.conf import settings
 from django.http import HttpResponse
 from django.utils.text import slugify
 from django.utils.translation import gettext
@@ -129,8 +130,9 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             headers['Authorization'] = f'Bearer {request.auth}'
 
         try:
-            manager_url = 'http://manager:8080/manager/v1/internal/mgi/projects/templates'
-            response = requests.get(manager_url, headers=headers, timeout=15.0)
+            base_url = getattr(settings, 'MIGASFREE_MANAGER_URL', 'http://manager:8080')
+            url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/projects/templates'
+            response = requests.get(url, headers=headers, timeout=15.0)
 
             if response.ok:
                 return Response(response.json(), status=status.HTTP_200_OK)
@@ -151,11 +153,12 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             headers['Authorization'] = f'Bearer {request.auth}'
 
         try:
-            manager_url = f'http://manager:8080/manager/v1/internal/mgi/projects/templates/{template_id}'
+            base_url = getattr(settings, 'MIGASFREE_MANAGER_URL', 'http://manager:8080')
+            url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/projects/templates/{template_id}'
             params = {}
             if origin:
                 params['origin'] = origin
-            response = requests.get(manager_url, headers=headers, params=params, timeout=10.0)
+            response = requests.get(url, headers=headers, params=params, timeout=10.0)
             response.raise_for_status()
             template_data = response.json()
         except Exception as e:
@@ -232,12 +235,11 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         # 4. Automatically trigger the Manager to import deployments, applications, stores and packages
         manager_import_result = None
         try:
-            manager_url = (
-                f'http://manager:8080/manager/v1/internal/mgi/projects/{project.id}/import?template_id={template_id}'
-            )
+            base_url = getattr(settings, 'MIGASFREE_MANAGER_URL', 'http://manager:8080')
+            url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/projects/{project.id}/import?template_id={template_id}'
             if origin:
-                manager_url += f'&origin={origin}'
-            response = requests.post(manager_url, headers=headers, timeout=120.0)
+                url += f'&origin={origin}'
+            response = requests.post(url, headers=headers, timeout=120.0)
             if response.ok:
                 manager_import_result = response.json()
             else:
@@ -327,11 +329,12 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
                 if request.auth:
                     headers['Authorization'] = f'Bearer {request.auth}'
 
-                manager_url = f'http://manager:8080/manager/v1/internal/mgi/projects/templates/{template_id}'
+                base_url = getattr(settings, 'MIGASFREE_MANAGER_URL', 'http://manager:8080')
+                url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/projects/templates/{template_id}'
                 params = {}
                 if origin:
                     params['origin'] = origin
-                response = requests.get(manager_url, headers=headers, params=params, timeout=10.0)
+                response = requests.get(url, headers=headers, params=params, timeout=10.0)
                 response.raise_for_status()
                 template_data = response.json()
             except Exception as e:
@@ -393,9 +396,10 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             if request.auth:
                 headers['Authorization'] = f'Bearer {request.auth}'
 
-            manager_url = f'http://manager:8080/manager/v1/internal/mgi/projects/{project_id}/export'
+            base_url = getattr(settings, 'MIGASFREE_MANAGER_URL', 'http://manager:8080')
+            url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/projects/{project_id}/export'
             headers['Accept'] = 'application/json'
-            response = requests.get(manager_url, headers=headers, timeout=60.0)
+            response = requests.get(url, headers=headers, timeout=60.0)
             if response.ok:
                 return HttpResponse(response.content, content_type='application/json')
             else:

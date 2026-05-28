@@ -1,4 +1,5 @@
 import requests
+from django.conf import settings
 from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -43,8 +44,9 @@ class ReleaseViewSet(viewsets.ModelViewSet):
             headers['Authorization'] = f'Bearer {request.auth}'
 
         try:
-            manager_url = 'http://manager:8080/manager/v1/internal/mgi/build'
-            response = requests.post(manager_url, json={'release_id': release.id}, headers=headers, timeout=15.0)
+            base_url = getattr(settings, 'MIGASFREE_MANAGER_URL', 'http://manager:8080')
+            url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/build'
+            response = requests.post(url, json={'release_id': release.id}, headers=headers, timeout=15.0)
 
             if response.ok:
                 return Response(response.json(), status=status.HTTP_202_ACCEPTED)
