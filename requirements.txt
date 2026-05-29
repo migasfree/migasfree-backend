@@ -273,6 +273,8 @@ vine==5.1.0
     #   kombu
 wcwidth==0.6.0
     # via prompt-toolkit
+websockets==16.0
+    # via migasfree-backend (pyproject.toml)
 xlrd==2.0.2
     # via migasfree-backend (pyproject.toml)
 xlwt==1.3.0
