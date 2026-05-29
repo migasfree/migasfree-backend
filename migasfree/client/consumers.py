@@ -64,7 +64,7 @@ class TunnelConsumer(AsyncWebsocketConsumer):
         ws_base = manager_url.replace('http://', 'ws://').replace('https://', 'wss://').rstrip('/')
         upstream_url = f'{ws_base}/manager/v1/private/tunnel/ws/agents/{self.computer_id}?service={service}'
         if username:
-            upstream_url += f'&user={urllib.parse.quote(username)}'
+            upstream_url += f'&username={urllib.parse.quote(username)}'
 
         headers = {
             'X-SSL-Client-CN': f'CN=manager,OU=ADMINS,O={settings.MIGASFREE_FQDN}'
