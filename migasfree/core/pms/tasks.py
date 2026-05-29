@@ -22,7 +22,6 @@ import redis
 from celery import Celery
 from celery.signals import task_postrun
 
-from ...secure import gpg_get_key
 from ...utils import get_setting
 from ..decorators import unique_task
 from . import get_pms
@@ -66,13 +65,6 @@ def package_info(pms_name, package):
 @app.task(bind=True, time_limit=7200, soft_time_limit=7140)
 @unique_task(app)
 def create_repository_metadata(self, payload):
-
-    # Ensure repository GPG key exists and is loaded in the keyring
-    try:
-        gpg_get_key('migasfree-repository')
-    except Exception as e:
-        logger.error('Failed to ensure migasfree-repository GPG key: %s', e)
-
     deployment = payload
     project = deployment['project']
     deployment_id = deployment['id']
