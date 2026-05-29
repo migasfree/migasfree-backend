@@ -66,9 +66,8 @@ class TunnelConsumer(AsyncWebsocketConsumer):
         if username:
             upstream_url += f'&user={urllib.parse.quote(username)}'
 
-        fqdn = getattr(settings, 'MIGASFREE_FQDN', 'localhost')
         headers = {
-            'X-SSL-Client-CN': f'CN=manager,OU=ADMINS,O={fqdn}'
+            'X-SSL-Client-CN': f'CN=manager,OU=ADMINS,O={settings.MIGASFREE_FQDN}'
         }
         try:
             self.upstream = await websockets.connect(upstream_url, additional_headers=headers)
