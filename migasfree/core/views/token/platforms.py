@@ -130,7 +130,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             headers['Authorization'] = f'Bearer {request.auth}'
 
         try:
-            base_url = getattr(settings, 'MIGASFREE_MANAGER_URL', 'http://manager:8080')
+            base_url = settings.MIGASFREE_MANAGER_URL
             url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/projects/templates'
             response = requests.get(url, headers=headers, timeout=15.0)
 
@@ -153,7 +153,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             headers['Authorization'] = f'Bearer {request.auth}'
 
         try:
-            base_url = getattr(settings, 'MIGASFREE_MANAGER_URL', 'http://manager:8080')
+            base_url = settings.MIGASFREE_MANAGER_URL
             url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/projects/templates/{template_id}'
             params = {}
             if origin:
@@ -235,7 +235,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         # 4. Automatically trigger the Manager to import deployments, applications, stores and packages
         manager_import_result = None
         try:
-            base_url = getattr(settings, 'MIGASFREE_MANAGER_URL', 'http://manager:8080')
+            base_url = settings.MIGASFREE_MANAGER_URL
             url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/projects/{project.id}/import?template_id={template_id}'
             if origin:
                 url += f'&origin={origin}'
@@ -329,7 +329,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
                 if request.auth:
                     headers['Authorization'] = f'Bearer {request.auth}'
 
-                base_url = getattr(settings, 'MIGASFREE_MANAGER_URL', 'http://manager:8080')
+                base_url = settings.MIGASFREE_MANAGER_URL
                 url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/projects/templates/{template_id}'
                 params = {}
                 if origin:
@@ -396,7 +396,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             if request.auth:
                 headers['Authorization'] = f'Bearer {request.auth}'
 
-            base_url = getattr(settings, 'MIGASFREE_MANAGER_URL', 'http://manager:8080')
+            base_url = settings.MIGASFREE_MANAGER_URL
             url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/projects/{project_id}/export'
             headers['Accept'] = 'application/json'
             response = requests.get(url, headers=headers, timeout=60.0)

@@ -415,7 +415,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
     def remote_access(self, request, pk=None):
         computer = self.get_object()
 
-        manager_url = getattr(settings, 'MIGASFREE_MANAGER_URL', 'http://manager:8080')
+        manager_url = settings.MIGASFREE_MANAGER_URL
         url = f'{manager_url.rstrip("/")}/manager/v1/private/tunnel/agents/{computer.id}'
 
         try:

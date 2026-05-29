@@ -44,7 +44,7 @@ class ReleaseViewSet(viewsets.ModelViewSet):
             headers['Authorization'] = f'Bearer {request.auth}'
 
         try:
-            base_url = getattr(settings, 'MIGASFREE_MANAGER_URL', 'http://manager:8080')
+            base_url = settings.MIGASFREE_MANAGER_URL
             url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/build'
             response = requests.post(url, json={'release_id': release.id}, headers=headers, timeout=15.0)
 
