@@ -114,15 +114,13 @@ if _overrides_file.exists():
     _mode = _file_stat.st_mode
     _uid = _file_stat.st_uid
 
-    # 1. Verify that the file is not writable by group or others (security gate)
+    # Verify that the file is not writable by group or others (security gate)
     _is_writable_by_others = bool(_mode & (stat.S_IWGRP | stat.S_IWOTH))
-    # 2. Verify that the file is owned by root (uid 0) or the current process user
-    _is_trusted_owner = _uid in (0, os.getuid())
 
-    if _is_writable_by_others or not _is_trusted_owner:
+    if _is_writable_by_others:
         sys.stderr.write(
-            f"ERROR: Insecure permissions or untrusted owner on settings override file: {_overrides_file}\n"
-            f"Owner UID: {_uid}, Mode: {oct(_mode)}\n"
+            f"ERROR: Insecure permissions on settings override file: {_overrides_file}\n"
+            f"Mode: {oct(_mode)}\n"
             f"The settings override has NOT been loaded.\n"
         )
     else:
