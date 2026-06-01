@@ -103,18 +103,38 @@ DATABASES = {
     }
 }
 
-# Load settings overrides from external Python file
+# Load settings overrides from external Python file with strict permission verification
 _overrides_file = Path(MIGASFREE_SETTINGS_OVERRIDE)
 if _overrides_file.exists():
-    _spec = importlib.util.spec_from_file_location('settings_override', _overrides_file)
-    _mod = importlib.util.module_from_spec(_spec)
-    _spec.loader.exec_module(_mod)
+    import stat
+    import sys
 
-    # Apply only uppercase settings from the override module
-    for _key in dir(_mod):
-        if _key.isupper():
-            globals()[_key] = getattr(_mod, _key)
+    # Get file stats
+    _file_stat = _overrides_file.stat()
+    _mode = _file_stat.st_mode
+    _uid = _file_stat.st_uid
 
-    del _spec, _mod, _key
+    # 1. Verify that the file is not writable by group or others (security gate)
+    _is_writable_by_others = bool(_mode & (stat.S_IWGRP | stat.S_IWOTH))
+    # 2. Verify that the file is owned by root (uid 0) or the current process user
+    _is_trusted_owner = _uid in (0, os.getuid())
+
+    if _is_writable_by_others or not _is_trusted_owner:
+        sys.stderr.write(
+            f"ERROR: Insecure permissions or untrusted owner on settings override file: {_overrides_file}\n"
+            f"Owner UID: {_uid}, Mode: {oct(_mode)}\n"
+            f"The settings override has NOT been loaded.\n"
+        )
+    else:
+        _spec = importlib.util.spec_from_file_location('settings_override', _overrides_file)
+        _mod = importlib.util.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)
+
+        # Apply only uppercase settings from the override module
+        for _key in dir(_mod):
+            if _key.isupper():
+                globals()[_key] = getattr(_mod, _key)
+
+        del _spec, _mod, _key
 
 del _overrides_file
