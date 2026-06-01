@@ -89,3 +89,17 @@ class TestLogicalViewSet(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response.json(), dict)
+
+    def test_available_action_assigned_but_not_available_attributes(self):
+        # Create a device not available for the computer's attributes
+        device2 = Device.objects.create(name='Printer 2', model=self.model, connection=self.connection)
+        # Create a logical device and assign it to the computer
+        logical2 = Logical.objects.create(device=device2, capability=self.capability)
+        logical2.attributes.set([self.attribute])
+
+        response = self.client.get(reverse('logical-available'), {'cid': self.computer.pk, 'did': device2.id})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.json()['results']
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], logical2.id)

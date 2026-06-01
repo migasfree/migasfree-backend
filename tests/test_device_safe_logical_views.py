@@ -85,3 +85,41 @@ class TestSafeLogicalViewSet(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(self.logical.attributes.filter(id=self.attribute.id).exists())
+
+    @unittest.mock.patch('migasfree.device.safe.SafeLogicalViewSet.get_claims')
+    @unittest.mock.patch('migasfree.device.safe.SafeLogicalViewSet.create_response')
+    def test_available(self, mock_create_response, mock_get_claims):
+        mock_get_claims.return_value = {
+            'cid': self.computer.pk,
+            'did': self.device.id
+        }
+        mock_create_response.side_effect = lambda x: x
+
+        url = reverse('safe-logical-available')
+        response = self.client.post(url, {'msg': 'jwt'}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(response.json()[0]['id'], self.logical.id)
+
+    @unittest.mock.patch('migasfree.device.safe.SafeLogicalViewSet.get_claims')
+    @unittest.mock.patch('migasfree.device.safe.SafeLogicalViewSet.create_response')
+    def test_available_assigned_but_not_available_attributes(self, mock_create_response, mock_get_claims):
+        # Create a device not available for the computer's attributes
+        device2 = Device.objects.create(name='Printer 2', model=self.model, connection=self.connection)
+        # Create a logical device and assign it to the computer
+        logical2 = Logical.objects.create(device=device2, capability=self.capability)
+        logical2.attributes.set([self.attribute])
+
+        mock_get_claims.return_value = {
+            'cid': self.computer.pk,
+            'did': device2.id
+        }
+        mock_create_response.side_effect = lambda x: x
+
+        url = reverse('safe-logical-available')
+        response = self.client.post(url, {'msg': 'jwt'}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(response.json()[0]['id'], logical2.id)

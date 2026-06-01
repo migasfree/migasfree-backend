@@ -86,7 +86,10 @@ class SafeLogicalViewSet(SafeConnectionMixin, viewsets.ViewSet):
         results = (
             models.Logical.objects.select_related('device', 'device__model', 'capability')
             .prefetch_related('device__available_for_attributes')
-            .filter(device__available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True))
+            .filter(
+                Q(device__available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True))
+                | Q(attributes__in=computer.sync_attributes.values_list('id', flat=True))
+            )
             .order_by('device__name', 'capability__name')
             .distinct()
         )

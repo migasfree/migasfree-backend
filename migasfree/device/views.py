@@ -14,7 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch, Q, TextField
+from django.db.models.functions import Cast
 from django.shortcuts import get_object_or_404
 from drf_spectacular.openapi import OpenApiParameter
 from drf_spectacular.utils import extend_schema
@@ -101,9 +102,6 @@ class DeviceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Exp
     def get_queryset(self):
         if self.request is None:
             return Device.objects.none()
-
-        from django.db.models import TextField
-        from django.db.models.functions import Cast
 
         return (
             self.queryset.scope(self.request.user.userprofile)
@@ -263,13 +261,14 @@ class LogicalViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
         results = (
             Logical.objects.select_related('device', 'device__model', 'capability')
             .prefetch_related('device__available_for_attributes')
-            .filter(device__available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True))
+            .filter(
+                Q(device__available_for_attributes__in=computer.sync_attributes.values_list('id', flat=True))
+                | Q(attributes__in=computer.sync_attributes.values_list('id', flat=True))
+            )
             .order_by('device__name', 'capability__name')
             .distinct()
         )
         if query:
-            from django.db.models import TextField
-            from django.db.models.functions import Cast
             results = results.annotate(device_data_as_text=Cast('device__data', TextField())).filter(
                 Q(device__name__icontains=query) | Q(device_data_as_text__icontains=query)
             )
