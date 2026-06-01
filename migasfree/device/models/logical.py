@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import json
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _

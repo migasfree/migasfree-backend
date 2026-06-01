@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import contextlib
 import json
 
 from drf_spectacular.utils import extend_schema_field
@@ -84,10 +85,8 @@ class DeviceWriteSerializer(serializers.ModelSerializer):
         if 'data' in data:
             val = data.get('data')
             if isinstance(val, str):
-                try:
+                with contextlib.suppress(ValueError, TypeError):
                     data['data'] = json.loads(val)
-                except (ValueError, TypeError):
-                    pass
         return super().to_internal_value(data)
 
     def to_representation(self, obj):
