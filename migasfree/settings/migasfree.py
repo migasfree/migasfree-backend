@@ -112,3 +112,7 @@ MIGASFREE_DEFAULT_COMPUTER_STATUS = 'intended'
 
 # Remote Access Tunnel settings
 MIGASFREE_MANAGER_URL = os.getenv('MIGASFREE_MANAGER_URL', 'http://manager:8080')
+
+# Rate limiting settings for registration commands (API v4)
+API_V4_REGISTER_RATE_LIMIT_MAX = 5
+API_V4_REGISTER_RATE_LIMIT_WINDOW = 3600

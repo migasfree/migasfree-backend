@@ -43,6 +43,8 @@ from .celery import (  # noqa: F401
 )
 from .functions import secret_key
 from .migasfree import (  # noqa: F401
+    API_V4_REGISTER_RATE_LIMIT_MAX,
+    API_V4_REGISTER_RATE_LIMIT_WINDOW,
     DAILY_RANGE,
     HOURLY_RANGE,
     MAX_FILE_SIZE,
@@ -119,9 +121,9 @@ if _overrides_file.exists():
 
     if _is_writable_by_others:
         sys.stderr.write(
-            f"ERROR: Insecure permissions on settings override file: {_overrides_file}\n"
-            f"Mode: {oct(_mode)}\n"
-            f"The settings override has NOT been loaded.\n"
+            f'ERROR: Insecure permissions on settings override file: {_overrides_file}\n'
+            f'Mode: {oct(_mode)}\n'
+            f'The settings override has NOT been loaded.\n'
         )
     else:
         _spec = importlib.util.spec_from_file_location('settings_override', _overrides_file)

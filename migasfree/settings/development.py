@@ -41,6 +41,8 @@ from .celery import (  # noqa: F401
 )
 from .functions import secret_key
 from .migasfree import (  # noqa: F401
+    API_V4_REGISTER_RATE_LIMIT_MAX,
+    API_V4_REGISTER_RATE_LIMIT_WINDOW,
     DAILY_RANGE,
     HOURLY_RANGE,
     MAX_FILE_SIZE,

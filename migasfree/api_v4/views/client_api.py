@@ -38,10 +38,6 @@ from ..secure import unwrap, wrap
 
 logger = logging.getLogger('migasfree')
 
-# Rate limiting settings for registration commands
-REGISTER_RATE_LIMIT_MAX = 5  # Max attempts
-REGISTER_RATE_LIMIT_WINDOW = 3600  # Time window in seconds (1 hour)
-
 
 def is_register_rate_limited(ip, command):
     """
@@ -51,9 +47,9 @@ def is_register_rate_limited(ip, command):
     """
     key = f'api_v4_register_{ip}_{command}'
     attempts = cache.get(key, 0)
-    if attempts >= REGISTER_RATE_LIMIT_MAX:
+    if attempts >= settings.API_V4_REGISTER_RATE_LIMIT_MAX:
         return True
-    cache.set(key, attempts + 1, REGISTER_RATE_LIMIT_WINDOW)
+    cache.set(key, attempts + 1, settings.API_V4_REGISTER_RATE_LIMIT_WINDOW)
     return False
 
 
