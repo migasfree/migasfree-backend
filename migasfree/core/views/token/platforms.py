@@ -208,6 +208,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
                 'template_id': template_id,
                 'base_os': template_data.get('base_os') or '',
                 'partition': template_data.get('partition') or '',
+                'provision_script': template_data.get('provision_script') or '',
                 'config': {'dockerfile': template_data.get('dockerfile') or ''},
             },
         )
@@ -215,6 +216,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             config.template_id = template_id
             config.base_os = template_data.get('base_os') or ''
             config.partition = template_data.get('partition') or ''
+            config.provision_script = template_data.get('provision_script') or ''
             if not isinstance(config.config, dict):
                 config.config = {}
             config.config['dockerfile'] = template_data.get('dockerfile') or ''
