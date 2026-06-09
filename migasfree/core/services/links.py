@@ -76,6 +76,10 @@ class MigasLinkService:
         'device.manufacturer': 'devices/manufacturers',
         'device.model': 'devices/models',
         'device.type': 'devices/types',
+        'mgi.config': 'mgi/config',
+        'mgi.flavour': 'mgi/flavour',
+        'mgi.release': 'mgi/release',
+        'mgi.build': 'mgi/build',
     }
 
     def custom_protocol(self, info_action):

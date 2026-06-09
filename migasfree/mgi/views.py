@@ -6,19 +6,20 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from migasfree.mgi.models import Build, Config, Flavour, Release
-from migasfree.mgi.serializers import BuildSerializer, ConfigSerializer, FlavourSerializer, ReleaseSerializer
+from ..core.views import MigasViewSet
+from .models import Build, Config, Flavour, Release
+from .serializers import BuildSerializer, ConfigSerializer, FlavourSerializer, ReleaseSerializer
 
 
 @extend_schema(tags=['mgi'])
-class ConfigViewSet(viewsets.ModelViewSet):
+class ConfigViewSet(viewsets.ModelViewSet, MigasViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Config.objects.all()
     serializer_class = ConfigSerializer
 
 
 @extend_schema(tags=['mgi'])
-class FlavourViewSet(viewsets.ModelViewSet):
+class FlavourViewSet(viewsets.ModelViewSet, MigasViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Flavour.objects.all()
     serializer_class = FlavourSerializer
@@ -27,7 +28,7 @@ class FlavourViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema(tags=['mgi'])
-class ReleaseViewSet(viewsets.ModelViewSet):
+class ReleaseViewSet(viewsets.ModelViewSet, MigasViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Release.objects.all()
     serializer_class = ReleaseSerializer
@@ -62,7 +63,7 @@ class ReleaseViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema(tags=['mgi'])
-class BuildViewSet(viewsets.ModelViewSet):
+class BuildViewSet(viewsets.ModelViewSet, MigasViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Build.objects.all()
     serializer_class = BuildSerializer

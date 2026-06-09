@@ -2,10 +2,10 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from migasfree.core.models import Project, ServerAttribute
+from ..core.models import MigasLink, Project, ServerAttribute
 
 
-class Config(models.Model):
+class Config(models.Model, MigasLink):
     BUILD_TYPE_CHOICES = [
         ('docker', _('Docker (Linux)')),
         ('qemu_win', _('QEMU Unattended (Windows)')),
@@ -112,7 +112,7 @@ class Config(models.Model):
         return f'MGI Config for {self.project.name}'
 
 
-class Flavour(models.Model):
+class Flavour(models.Model, MigasLink):
     config = models.ForeignKey(
         Config,
         on_delete=models.CASCADE,
@@ -197,7 +197,7 @@ class Flavour(models.Model):
         return f'{self.config.project.name} - {self.name}'
 
 
-class Release(models.Model):
+class Release(models.Model, MigasLink):
     config = models.ForeignKey(
         Config,
         on_delete=models.CASCADE,
@@ -231,7 +231,7 @@ class Release(models.Model):
         return f'{self.config.project.name} - {self.name}'
 
 
-class Build(models.Model):
+class Build(models.Model, MigasLink):
     STATUS_CHOICES = [
         ('queued', _('Queued')),
         ('running', _('Running')),
