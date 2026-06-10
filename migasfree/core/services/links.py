@@ -354,7 +354,7 @@ class MigasLinkService:
         objs = [
             (f, f.model if f.model != self.instance.__class__ else None)
             for f in self.instance._meta.get_fields()
-            if (f.many_to_many or f.many_to_one) and not f.auto_created
+            if (f.many_to_many or f.many_to_one or f.one_to_one) and not f.auto_created
         ]
 
         return related_objects, objs

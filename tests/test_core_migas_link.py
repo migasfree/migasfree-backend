@@ -11,6 +11,7 @@ from migasfree.core.models import (
     Property,
     UserProfile,
 )
+from migasfree.mgi.models import Config
 
 
 class TestMigasLink(TestCase):
@@ -93,3 +94,18 @@ class TestMigasLink(TestCase):
         assert isinstance(badge, dict)
         assert 'status' in badge
         assert 'summary' in badge
+
+    def test_get_relations_config(self):
+        config = Config.objects.create(
+            project=self.project,
+            template_id='ubuntu-24.04',
+            build_type='docker',
+            base_os='ubuntu',
+            image_format='raw',
+        )
+        relations = config.get_relations(self.request)
+        self.assertIsNotNone(relations)
+        assert isinstance(relations, list)
+        # Check that 'projects' api model is in the relations
+        api_models = [r.get('api', {}).get('model') for r in relations if 'api' in r]
+        self.assertIn('projects', api_models)
