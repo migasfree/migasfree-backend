@@ -19,7 +19,7 @@ import os
 from django.conf import settings
 from django.contrib import auth
 from django.utils.translation import gettext
-from drf_spectacular.utils import OpenApiTypes, extend_schema, inline_serializer
+from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status, views
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -166,8 +166,15 @@ class RepositoriesKeysView(views.APIView):
 
     @extend_schema(
         description='Returns the repositories public key',
-        responses={status.HTTP_200_OK: OpenApiTypes.STR},
+        responses={
+            status.HTTP_200_OK: inline_serializer(
+                name='RepositoriesKeysResponse',
+                fields={
+                    'public_key': serializers.CharField(),
+                },
+            )
+        },
         tags=['public'],
     )
-    def post(self, request):
-        return Response(gpg_get_key('migasfree-repository'), content_type='text/plain')
+    def get(self, request):
+        return Response({'public_key': gpg_get_key('migasfree-repository')})

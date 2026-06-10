@@ -118,12 +118,13 @@ class TestRepositoriesKeysView(TestCase):
         self.url = '/api/v1/public/keys/repositories/'
 
     def test_get_repository_key(self):
-        response = self.client.post(self.url)
+        response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response['Content-Type'], 'text/plain')
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertIn('public_key', response.data)
 
     def test_invalid_request_method(self):
-        response = self.client.get(self.url)
+        response = self.client.post(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
