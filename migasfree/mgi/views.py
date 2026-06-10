@@ -68,3 +68,81 @@ class BuildViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = Build.objects.all()
     serializer_class = BuildSerializer
     filterset_fields = ('release', 'flavour', 'status')
+
+    @action(detail=True, methods=['get'], url_path='status')
+    def status(self, request, pk=None):
+        """Get the real-time build task status from the manager."""
+        build = self.get_object()
+
+        if not build.task_id:
+            return Response(
+                {'error': 'Build record has no associated task_id'},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        try:
+            base_url = settings.MIGASFREE_MANAGER_URL
+            url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/build/{build.task_id}/status'
+            response = requests.get(url, timeout=15.0)
+
+            if response.ok:
+                return Response(response.json(), status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {'error': f'Manager responded with HTTP {response.status_code}', 'details': response.text},
+                    status=response.status_code,
+                )
+        except Exception as e:
+            return Response(
+                {'error': f'Could not connect to manager: {e!s}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=True, methods=['post'], url_path='promote')
+    def promote(self, request, pk=None):
+        """Promote an MGI build image, enabling it in the catalog."""
+        build = self.get_object()
+
+        try:
+            base_url = settings.MIGASFREE_MANAGER_URL
+            url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/builds/{build.id}/promote'
+            headers = {}
+            if request.auth:
+                headers['Authorization'] = f'Bearer {request.auth}'
+            response = requests.post(url, headers=headers, timeout=15.0)
+
+            if response.ok:
+                return Response(response.json(), status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {'error': f'Manager responded with HTTP {response.status_code}', 'details': response.text},
+                    status=response.status_code,
+                )
+        except Exception as e:
+            return Response(
+                {'error': f'Could not connect to manager: {e!s}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=True, methods=['post'], url_path='demote')
+    def demote(self, request, pk=None):
+        """Demote an MGI build image, disabling it in the catalog."""
+        build = self.get_object()
+
+        try:
+            base_url = settings.MIGASFREE_MANAGER_URL
+            url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/builds/{build.id}/demote'
+            headers = {}
+            if request.auth:
+                headers['Authorization'] = f'Bearer {request.auth}'
+            response = requests.post(url, headers=headers, timeout=15.0)
+
+            if response.ok:
+                return Response(response.json(), status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {'error': f'Manager responded with HTTP {response.status_code}', 'details': response.text},
+                    status=response.status_code,
+                )
+        except Exception as e:
+            return Response(
+                {'error': f'Could not connect to manager: {e!s}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
