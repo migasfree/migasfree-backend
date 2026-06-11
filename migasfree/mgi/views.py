@@ -97,6 +97,36 @@ class BuildViewSet(viewsets.ModelViewSet, MigasViewSet):
                 {'error': f'Could not connect to manager: {e!s}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+    @action(detail=True, methods=['get'], url_path='logs')
+    def logs(self, request, pk=None):
+        """Get the real-time build task logs from the manager."""
+        build = self.get_object()
+
+        if not build.task_id:
+            return Response(
+                {'error': 'Build record has no associated task_id'},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        start = request.query_params.get('start', '0')
+
+        try:
+            base_url = settings.MIGASFREE_MANAGER_URL
+            url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/build/{build.task_id}/logs'
+            response = requests.get(url, params={'start': start}, timeout=15.0)
+
+            if response.ok:
+                return Response(response.json(), status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {'error': f'Manager responded with HTTP {response.status_code}', 'details': response.text},
+                    status=response.status_code,
+                )
+        except Exception as e:
+            return Response(
+                {'error': f'Could not connect to manager: {e!s}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
     @action(detail=True, methods=['post'], url_path='promote')
     def promote(self, request, pk=None):
         """Promote an MGI build image, enabling it in the catalog."""
