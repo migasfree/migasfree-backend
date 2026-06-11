@@ -1,13 +1,11 @@
 from rest_framework import serializers
 
 from ..core.models import ServerAttribute
-from ..core.serializers import ProjectInfoSerializer
 from .models import Build, Config, Flavour, Release
 
 
 class ConfigSerializer(serializers.ModelSerializer):
     dockerfile = serializers.CharField(required=False, allow_blank=True)
-    project = ProjectInfoSerializer(many=False, read_only=True)
 
     class Meta:
         model = Config
