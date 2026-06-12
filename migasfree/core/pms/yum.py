@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import shlex
 
 from ...utils import execute, get_setting
 from .pms import Pms
@@ -40,63 +39,52 @@ class Yum(Pms):
             string path, string arch
         )
         """
+        import os
+        import shutil
 
-        cmd = f"""
-_DIR={shlex.quote(path)}
-rm -rf $_DIR/repodata
-rm -rf $_DIR/checksum
-createrepo --cachedir checksum $_DIR
-gpg -u migasfree-repository --homedir {shlex.quote(self.keys_path)}/.gnupg --detach-sign --armor $_DIR/repodata/repomd.xml
-        """
+        repodata_dir = os.path.join(path, 'repodata')
+        checksum_dir = os.path.join(path, 'checksum')
 
-        return execute(cmd, shell=True)
+        shutil.rmtree(repodata_dir, ignore_errors=True)
+        shutil.rmtree(checksum_dir, ignore_errors=True)
+
+        ret_create, out_create, err_create = execute(['createrepo', '--cachedir', 'checksum', path], shell=False)
+        if ret_create != 0:
+            return ret_create, out_create, err_create
+
+        gpg_homedir = os.path.join(self.keys_path, '.gnupg')
+        repomd_xml = os.path.join(repodata_dir, 'repomd.xml')
+
+        return execute(
+            ['gpg', '-u', 'migasfree-repository', '--homedir', gpg_homedir, '--detach-sign', '--armor', repomd_xml],
+            shell=False,
+        )
 
     def package_info(self, package):
         """
         string package_info(string package)
         """
+        sections = [
+            ('Info', ['--info']),
+            ('Requires', ['--requires']),
+            ('Provides', ['--provides']),
+            ('Obsoletes', ['--obsoletes']),
+            ('Scripts', ['--scripts']),
+            ('Changelog', ['--changelog']),
+            ('Files', ['--list']),
+        ]
 
-        package_safe = shlex.quote(package)
-        cmd = f"""
-echo "## Info"
-echo "~~~"
-rpm -qp --info {package_safe}
-echo "~~~"
-echo
-echo "## Requires"
-echo "~~~"
-rpm -qp --requires {package_safe}
-echo "~~~"
-echo
-echo "## Provides"
-echo "~~~"
-rpm -qp --provides {package_safe}
-echo "~~~"
-echo
-echo "## Obsoletes"
-echo "~~~"
-rpm -qp --obsoletes {package_safe}
-echo "~~~"
-echo
-echo "## Scripts"
-echo "~~~"
-rpm -qp --scripts {package_safe}
-echo "~~~"
-echo
-echo "## Changelog"
-echo "~~~"
-rpm -qp --changelog {package_safe}
-echo "~~~"
-echo
-echo "## Files"
-echo "~~~"
-rpm -qp --list {package_safe}
-echo "~~~"
-        """
+        output_parts = []
+        for section_name, rpm_args in sections:
+            ret, out, err = execute(['rpm', '-qp', *rpm_args, package], shell=False)
+            if ret != 0:
+                if section_name == 'Info':
+                    return err or out
+                out = err or out
 
-        ret, output, error = execute(cmd, shell=True)
+            output_parts.append(f'## {section_name}\n~~~\n{out}~~~\n')
 
-        return output if ret == 0 else error
+        return '\n'.join(output_parts)
 
     def package_metadata(self, package):
         """

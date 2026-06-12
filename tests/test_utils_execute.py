@@ -27,3 +27,16 @@ class TestExecute:
         ret, out, _err = execute(cmd)
         assert ret == 0
         assert out.strip() == 'hello world'
+
+    def test_execute_cwd_and_env(self):
+        import os
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            ret, out, _err = execute(['pwd'], shell=False, cwd=tmpdir)
+            assert ret == 0
+            assert os.path.realpath(out.strip()) == os.path.realpath(tmpdir)
+
+            ret, out, _err = execute(['env'], shell=False, env={'MY_TEST_VAR': 'my_value'})
+            assert ret == 0
+            assert 'MY_TEST_VAR=my_value' in out.strip()

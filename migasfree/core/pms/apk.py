@@ -15,7 +15,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import shlex
 
 from ...utils import execute, get_setting
 from .pms import Pms
@@ -55,49 +54,57 @@ class Apk(Pms):
             string path, string arch
         )
         """
+        import glob
 
-        name = shlex.quote(os.path.basename(path))
-        cmd = rf"""
-_NAME={name}
-_ARCHS=("{shlex.quote(arch)}")
-for _ARCH in ${{_ARCHS[@]}}
-do
-  mkdir -p "{shlex.quote(path)}/{shlex.quote(self.components)}/$_ARCH/"
-  cd {shlex.quote(path)}/../..
+        repo_name = os.path.basename(path)
+        cwd = os.path.abspath(os.path.join(path, '..', '..'))
 
-  apk index -o dists/$_NAME/{shlex.quote(self.components)}/$_ARCH/APKINDEX.tar.gz \
-    dists/$_NAME/{shlex.quote(self.components)}/*.apk
+        for arch_name in arch.split():
+            binary_dir = os.path.join(path, self.components, arch_name)
+            os.makedirs(binary_dir, exist_ok=True)
 
-  if [ -f "{shlex.quote(self.keys_path)}/migasfree.rsa" ]; then
-    abuild-sign -k "{shlex.quote(self.keys_path)}/migasfree.rsa" \
-      dists/$_NAME/{shlex.quote(self.components)}/$_ARCH/APKINDEX.tar.gz
-  fi
-done
-"""
+            apk_pattern = f'dists/{repo_name}/{self.components}/*.apk'
+            apk_files = glob.glob(os.path.join(cwd, apk_pattern))
+            apk_files_rel = [os.path.relpath(f, cwd) for f in apk_files]
 
-        return execute(cmd, shell=True)
+            output_index = f'dists/{repo_name}/{self.components}/{arch_name}/APKINDEX.tar.gz'
+            cmd_index = ['apk', 'index', '-o', output_index, *apk_files_rel]
+            ret_idx, out_idx, err_idx = execute(cmd_index, shell=False, cwd=cwd)
+            if ret_idx != 0:
+                return ret_idx, out_idx, err_idx
+
+            rsa_key = os.path.join(self.keys_path, 'migasfree.rsa')
+            if os.path.isfile(rsa_key):
+                cmd_sign = ['abuild-sign', '-k', rsa_key, output_index]
+                ret_sign, out_sign, err_sign = execute(cmd_sign, shell=False, cwd=cwd)
+                if ret_sign != 0:
+                    return ret_sign, out_sign, err_sign
+
+        return 0, '', ''
 
     def package_info(self, package):
         """
         string package_info(string package)
         """
+        ret1, out_info, err_info = execute(['tar', '-zxf', package, '.PKGINFO', '-O'], shell=False)
+        if ret1 != 0:
+            return err_info or out_info
 
-        package_safe = shlex.quote(package)
-        cmd = rf"""
-echo "## Info"
-echo "~~~"
-tar -zxf {package_safe} .PKGINFO -O
-echo "~~~"
-echo
-echo "## Files"
-echo "~~~"
-tar -tf {package_safe} | grep -v '^\.PKGINFO$' | grep -v '^\.SIGN\.'
-echo "~~~"
-        """
+        ret2, out_files, err_files = execute(['tar', '-tf', package], shell=False)
+        if ret2 != 0:
+            return err_files or out_files
 
-        ret, output, error = execute(cmd, shell=True)
+        filtered_files = []
+        for line in out_files.splitlines():
+            line = line.strip()
+            if line == '.PKGINFO' or line.startswith('.SIGN.'):
+                continue
+            filtered_files.append(line)
 
-        return output if ret == 0 else error
+        files_str = '\n'.join(filtered_files)
+
+        output = f'## Info\n~~~\n{out_info}~~~\n\n## Files\n~~~\n{files_str}\n~~~\n'
+        return output
 
     def package_metadata(self, package):
         """

@@ -19,6 +19,7 @@ import fcntl
 import hashlib
 import ipaddress
 import json
+import logging
 import os
 import select
 import shlex
@@ -27,6 +28,8 @@ import subprocess
 import tempfile
 from datetime import timedelta
 from urllib.parse import urlparse
+
+logger = logging.getLogger('migasfree')
 
 
 def is_safe_url(url):
@@ -84,20 +87,22 @@ def cmp(a, b):
     return (a > b) - (a < b)
 
 
-def execute(cmd, verbose=False, interactive=False, shell=False):
+def execute(cmd, verbose=False, interactive=False, shell=False, cwd=None, env=None):
     """
     (int, string, string) execute(
         string cmd,
         bool verbose=False,
         bool interactive=True,
-        bool shell=False
+        bool shell=False,
+        string cwd=None,
+        dict env=None
     )
     """
 
     _output_buffer = ''
 
     if verbose:
-        print(cmd)
+        logger.debug('Executing command: %s', cmd)
 
     executable = '/bin/bash' if shell else None
 
@@ -105,10 +110,10 @@ def execute(cmd, verbose=False, interactive=False, shell=False):
         cmd = shlex.split(cmd)
 
     if interactive:
-        _process = subprocess.Popen(cmd, shell=shell, executable=executable)
+        _process = subprocess.Popen(cmd, shell=shell, executable=executable, cwd=cwd, env=env)
     else:
         _process = subprocess.Popen(
-            cmd, shell=shell, executable=executable, stderr=subprocess.PIPE, stdout=subprocess.PIPE
+            cmd, shell=shell, executable=executable, stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwd, env=env
         )
 
         if verbose:
@@ -123,7 +128,7 @@ def execute(cmd, verbose=False, interactive=False, shell=False):
                 if readx:
                     chunk = _process.stdout.read()
                     if chunk and chunk != '\n':
-                        print(chunk)
+                        logger.debug('%s', chunk)
                     _output_buffer = f'{_output_buffer}{chunk}'
 
     _output, _error = _process.communicate()

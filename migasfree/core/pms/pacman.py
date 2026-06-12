@@ -15,7 +15,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import shlex
 
 from ...utils import execute, get_setting
 from .pms import Pms
@@ -46,61 +45,45 @@ class Pacman(Pms):
             string path, string arch
         )
         """
-        db_name = shlex.quote(os.path.basename(path.rstrip('/')))
-        extensions_pattern = ' '.join([f'*.{ext}' for ext in self.extensions])
+        db_name = os.path.basename(path.rstrip('/'))
+        component_dir = os.path.join(path, self.components)
 
-        cmd = f"""
-function create_deploy {{
-  cd {shlex.quote(path)}/{shlex.quote(self.components)}
-  export GNUPGHOME={shlex.quote(self.keys_path)}/.gnupg
+        import glob
 
-  # Collect valid package files
-  FILES=""
-  for f in {extensions_pattern}
-  do
-      if [ -f "$f" ]
-      then
-          FILES="$FILES $f"
-      fi
-  done
+        files = []
+        if os.path.isdir(component_dir):
+            for ext in self.extensions:
+                matched = glob.glob(os.path.join(component_dir, f'*.{ext}'))
+                files.extend([os.path.basename(f) for f in matched])
 
-  if [ -n "$FILES" ]
-  then
-      repo-add --sign --key migasfree-repository ./{db_name}.db.tar.gz $FILES
-  fi
-}}
+        if not files:
+            return 0, '', ''
 
-create_deploy
-"""
+        import os as python_os
 
-        return execute(cmd, shell=True)
+        env = python_os.environ.copy()
+        env['GNUPGHOME'] = os.path.join(self.keys_path, '.gnupg')
+
+        cmd = ['repo-add', '--sign', '--key', 'migasfree-repository', f'./{db_name}.db.tar.gz', *files]
+
+        return execute(cmd, shell=False, cwd=component_dir, env=env)
 
     def package_info(self, package):
         """
         string package_info(string package)
         """
+        ret1, out1, err1 = execute([self.name, '--query', '--info', '--file', package], shell=False)
+        if ret1 != 0:
+            return err1 or out1
 
-        package_safe = shlex.quote(package)
-        cmd = f"""
-echo "## Info"
-echo "~~~"
-{self.name} --query --info --file {package_safe}
-echo "~~~"
-echo
-echo "## Changelog"
-echo "~~~"
-{self.name} --query --changelog --file {package_safe}
-echo "~~~"
-echo
-echo "## Files"
-echo "~~~"
-{self.name} --query --list --quiet --file {package_safe}
-echo "~~~"
-        """
+        _ret2, out2, _ = execute([self.name, '--query', '--changelog', '--file', package], shell=False)
 
-        ret, output, error = execute(cmd, shell=True)
+        ret3, out3, err3 = execute([self.name, '--query', '--list', '--quiet', '--file', package], shell=False)
+        if ret3 != 0:
+            return err3 or out3
 
-        return output if ret == 0 else error
+        output = f'## Info\n~~~\n{out1}~~~\n\n## Changelog\n~~~\n{out2}~~~\n\n## Files\n~~~\n{out3}~~~\n'
+        return output
 
     def package_metadata(self, package):
         """

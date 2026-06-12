@@ -14,8 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import gzip
+import hashlib
 import os
-import shlex
+import re
+import subprocess
+from datetime import UTC, datetime
 
 from ...utils import execute, get_setting
 from .pms import Pms
@@ -76,136 +80,237 @@ class Apt(Pms):
         )
         """
 
-        cmd = r"""
-set -e
-_NAME={name}
-_ARCHS=({arch})
-for _ARCH in "${{_ARCHS[@]}}"
-do
-  mkdir -p "{path}/{components}/binary-$_ARCH/"
-  cd {path}/../..
+        repo_name = os.path.basename(path)
+        cwd = os.path.abspath(os.path.join(path, '..', '..'))
 
-  ionice -c 3 apt-ftparchive --arch $_ARCH packages dists/$_NAME/{components} \
-    > dists/$_NAME/{components}/binary-$_ARCH/Packages 2> /tmp/$_NAME
+        def calculate_hash(base_dir, hash_algo):
+            files = []
+            for root, _, filenames in os.walk(base_dir):
+                for filename in filenames:
+                    if filename.startswith('Release'):
+                        continue
+                    abs_path = os.path.join(root, filename)
+                    rel_path = os.path.relpath(abs_path, base_dir)
+                    files.append((rel_path, abs_path))
 
-  sed -i "s/Filename: .*\/{components}\//Filename: dists\/$_NAME\/{components}\//" \
-    dists/$_NAME/{components}/binary-$_ARCH/Packages
-  sed -i "s/Filename: .*\/{store_trailing_path}\/[^/]*\//Filename: \
-    dists\/$_NAME\/{components}\//" dists/$_NAME/{components}/binary-$_ARCH/Packages
-  gzip -9c dists/$_NAME/{components}/binary-$_ARCH/Packages > dists/$_NAME/{components}/binary-$_ARCH/Packages.gz
-done
+            files.sort(key=lambda x: x[0])
 
-function calculate_hash {{
-  echo "$1"
-  find . -type f ! -name "Release*" | sed 's/^.\///' | sort | while read -r _FILE
-  do
-    _SIZE=$(printf "%16d" $(stat -c "%s" "$_FILE"))
-    _HASH=$($2 "$_FILE" | cut -d ' ' -f1)
-    echo " $_HASH $_SIZE $_FILE"
-  done
-}}
+            lines = []
+            for rel_path, abs_path in files:
+                h = hashlib.new(hash_algo)
+                try:
+                    size = os.path.getsize(abs_path)
+                    with open(abs_path, 'rb') as f:
+                        for chunk in iter(lambda: f.read(65536), b''):
+                            h.update(chunk)
+                    digest = h.hexdigest()
+                    lines.append(f' {digest} {size:16d} {rel_path}')
+                except OSError:
+                    pass
+            return lines
 
-function create_deploy {{
-  cd {path}
-  _F="$(mktemp /var/tmp/deploy-XXXXX)"
+        for arch_name in arch.split():
+            binary_dir = os.path.join(path, self.components, f'binary-{arch_name}')
+            os.makedirs(binary_dir, exist_ok=True)
 
-  echo "Architectures: ${{_ARCHS[@]}}" > "$_F"
-  echo "Codename: $_NAME" >> "$_F"
-  echo "Components: {components}" >> "$_F"
-  echo "Date: $(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S UTC')" >> "$_F"
-  echo "Label: migasfree $_NAME repository" >> "$_F"
-  echo "Origin: migasfree" >> "$_F"
-  echo "Suite: $_NAME" >> "$_F"
+            cmd = [
+                'ionice',
+                '-c',
+                '3',
+                'apt-ftparchive',
+                '--arch',
+                arch_name,
+                'packages',
+                f'dists/{repo_name}/{self.components}',
+            ]
+            ret, out, err = execute(cmd, shell=False, cwd=cwd)
+            if ret != 0:
+                return ret, out, err
 
-  calculate_hash "MD5Sum:" "md5sum" >> "$_F"
-  calculate_hash "SHA1:" "sha1sum" >> "$_F"
-  calculate_hash "SHA256:" "sha256sum" >> "$_F"
-  calculate_hash "SHA512:" "sha512sum" >> "$_F"
+            store_trailing_path = get_setting('MIGASFREE_STORE_TRAILING_PATH')
+            out = re.sub(
+                r'Filename: .*/' + re.escape(self.components) + r'/',
+                f'Filename: dists/{repo_name}/{self.components}/',
+                out,
+            )
+            out = re.sub(
+                r'Filename: .*/' + re.escape(store_trailing_path) + r'/[^/]*/',
+                f'Filename: dists/{repo_name}/{self.components}/',
+                out,
+            )
 
-  mv "$_F" Release
-  chmod 644 Release
+            packages_file = os.path.join(binary_dir, 'Packages')
+            with open(packages_file, 'w', encoding='utf-8') as f:
+                f.write(out)
 
-  gpg --batch --no-tty --local-user migasfree-repository --homedir {keys_path}/.gnupg --clear-sign --output InRelease Release
-  gpg --batch --no-tty --local-user migasfree-repository --homedir {keys_path}/.gnupg -abs --output Release.gpg Release
-}}
+            with open(packages_file, 'rb') as f_in, gzip.open(packages_file + '.gz', 'wb', compresslevel=9) as f_out:
+                f_out.writelines(f_in)
 
-create_deploy
-""".format(
-            path=shlex.quote(path),
-            name=shlex.quote(os.path.basename(path)),
-            arch=' '.join([shlex.quote(a) for a in arch.split()]),
-            keys_path=shlex.quote(self.keys_path),
-            components=shlex.quote(self.components),
-            store_trailing_path=shlex.quote(get_setting('MIGASFREE_STORE_TRAILING_PATH')),
+        release_path = os.path.join(path, 'Release')
+        md5_lines = calculate_hash(path, 'md5')
+        sha1_lines = calculate_hash(path, 'sha1')
+        sha256_lines = calculate_hash(path, 'sha256')
+        sha512_lines = calculate_hash(path, 'sha512')
+
+        date_str = datetime.now(UTC).strftime('%a, %d %b %Y %H:%M:%S UTC')
+
+        release_content = (
+            f'Architectures: {arch}\n'
+            f'Codename: {repo_name}\n'
+            f'Components: {self.components}\n'
+            f'Date: {date_str}\n'
+            f'Label: migasfree {repo_name} repository\n'
+            f'Origin: migasfree\n'
+            f'Suite: {repo_name}\n'
+            'MD5Sum:\n'
+            + ('\n'.join(md5_lines) + '\n' if md5_lines else '')
+            + 'SHA1:\n'
+            + ('\n'.join(sha1_lines) + '\n' if sha1_lines else '')
+            + 'SHA256:\n'
+            + ('\n'.join(sha256_lines) + '\n' if sha256_lines else '')
+            + 'SHA512:\n'
+            + ('\n'.join(sha512_lines) + '\n' if sha512_lines else '')
         )
 
-        return execute(cmd, shell=True)
+        with open(release_path, 'w', encoding='utf-8') as f:
+            f.write(release_content)
+        os.chmod(release_path, 0o644)
+
+        gpg_homedir = os.path.join(self.keys_path, '.gnupg')
+        ret_in, out_in, err_in = execute(
+            [
+                'gpg',
+                '--batch',
+                '--no-tty',
+                '--local-user',
+                'migasfree-repository',
+                '--homedir',
+                gpg_homedir,
+                '--clear-sign',
+                '--output',
+                'InRelease',
+                'Release',
+            ],
+            shell=False,
+            cwd=path,
+        )
+        if ret_in != 0:
+            return ret_in, out_in, err_in
+
+        ret_gpg, out_gpg, err_gpg = execute(
+            [
+                'gpg',
+                '--batch',
+                '--no-tty',
+                '--local-user',
+                'migasfree-repository',
+                '--homedir',
+                gpg_homedir,
+                '-abs',
+                '--output',
+                'Release.gpg',
+                'Release',
+            ],
+            shell=False,
+            cwd=path,
+        )
+        if ret_gpg != 0:
+            return ret_gpg, out_gpg, err_gpg
+
+        return 0, '', ''
 
     def package_info(self, package):
         """
         string package_info(string package)
         """
 
-        package_safe = shlex.quote(package)
+        def get_changelog(pkg_path, pkg_name):
+            for path_in_tar in [
+                f'./usr/share/doc/{pkg_name}/changelog.Debian.gz',
+                f'./usr/share/doc/{pkg_name}/changelog.gz',
+            ]:
+                try:
+                    p1 = subprocess.Popen(['dpkg-deb', '--fsys-tarfile', pkg_path], stdout=subprocess.PIPE)
+                    p2 = subprocess.Popen(
+                        ['tar', '-O', '-xf', '-', path_in_tar],
+                        stdin=p1.stdout,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.DEVNULL,
+                    )
+                    p1.stdout.close()
+                    out_bytes, _ = p2.communicate()
+                    if p2.returncode == 0 and out_bytes:
+                        return gzip.decompress(out_bytes).decode('utf-8', errors='replace')
+                except Exception:
+                    pass
+            return '[Changelog not found or empty]'
 
-        # Optimized field extraction using a single dpkg-deb --show call
+        ret1, out_info, err_info = execute(['dpkg-deb', '--info', package], shell=False)
+        if ret1 != 0:
+            return err_info or out_info
+
         format_str = (
-            '## Requires\\n~~~\\n${Depends}\\n~~~\\n\\n'
-            '## Provides\\n~~~\\n${Provides}\\n~~~\\n\\n'
-            '## Obsoletes\\n~~~\\n${Replaces}\\n~~~\\n\\n'
-            '## PackageName\\n${Package}'
+            '## Requires\n~~~\n${Depends}\n~~~\n\n'
+            '## Provides\n~~~\n${Provides}\n~~~\n\n'
+            '## Obsoletes\n~~~\n${Replaces}\n~~~\n\n'
+            '${Package}'
         )
+        ret2, out_show, err_show = execute(['dpkg-deb', f'--showformat={format_str}', '--show', package], shell=False)
+        if ret2 != 0:
+            return err_show or out_show
 
-        cmd = f"""
-set -e
-echo "## Info"
-echo "~~~"
-dpkg-deb --info {package_safe}
-echo "~~~"
-echo
+        lines_show = out_show.splitlines()
+        pkg_name = lines_show[-1].strip() if lines_show else ''
+        deps_show = '\n'.join(lines_show[:-1]) if lines_show else ''
 
-# Multi-field extraction
-_OUT=$(dpkg-deb --showformat='{format_str}' --show {package_safe})
-_NAME=$(echo "$_OUT" | tail -n 1)
-echo "$_OUT" | head -n -2
+        scripts = {}
+        for script_name in ['preinst', 'postinst', 'prerm', 'postrm']:
+            ret_s, out_s, _ = execute(['dpkg-deb', '--info', package, script_name], shell=False)
+            scripts[script_name] = out_s if ret_s == 0 else '[None]'
 
-echo "## Script PreInst"
-echo "~~~"
-dpkg-deb --info {package_safe} preinst 2>/dev/null || echo "[None]"
-echo "~~~"
-echo
-echo "## Script PostInst"
-echo "~~~"
-dpkg-deb --info {package_safe} postinst 2>/dev/null || echo "[None]"
-echo "~~~"
-echo
-echo "## Script PreRm"
-echo "~~~"
-dpkg-deb --info {package_safe} prerm 2>/dev/null || echo "[None]"
-echo "~~~"
-echo
-echo "## Script PostRm"
-echo "~~~"
-dpkg-deb --info {package_safe} postrm 2>/dev/null || echo "[None]"
-echo "~~~"
-echo
-echo "## Changelog"
-echo "~~~"
-# Try to extract changelog more efficiently
-dpkg-deb --fsys-tarfile {package_safe} | tar -O -xf - ./usr/share/doc/$_NAME/changelog.Debian.gz 2>/dev/null | gunzip 2>/dev/null || \\
-dpkg-deb --fsys-tarfile {package_safe} | tar -O -xf - ./usr/share/doc/$_NAME/changelog.gz 2>/dev/null | gunzip 2>/dev/null || \\
-echo "[Changelog not found or empty]"
-echo "~~~"
-echo
-echo "## Files"
-echo "~~~"
-dpkg-deb -c {package_safe} | awk '{{{{print $6}}}}'
-echo "~~~"
-"""
+        changelog = get_changelog(package, pkg_name)
 
-        ret, output, error = execute(cmd, shell=True)
+        ret_files, out_files, _ = execute(['dpkg-deb', '-c', package], shell=False)
+        file_list = []
+        if ret_files == 0:
+            for line in out_files.splitlines():
+                parts = line.strip().split(None, 5)
+                if len(parts) >= 6:
+                    file_list.append(parts[5])
+        files_str = '\n'.join(file_list)
 
-        return output if ret == 0 else error
+        output = (
+            '## Info\n'
+            '~~~\n'
+            f'{out_info}'
+            '~~~\n\n'
+            f'{deps_show}\n\n'
+            '## Script PreInst\n'
+            '~~~\n'
+            f'{scripts["preinst"]}\n'
+            '~~~\n\n'
+            '## Script PostInst\n'
+            '~~~\n'
+            f'{scripts["postinst"]}\n'
+            '~~~\n\n'
+            '## Script PreRm\n'
+            '~~~\n'
+            f'{scripts["prerm"]}\n'
+            '~~~\n\n'
+            '## Script PostRm\n'
+            '~~~\n'
+            f'{scripts["postrm"]}\n'
+            '~~~\n\n'
+            '## Changelog\n'
+            '~~~\n'
+            f'{changelog}\n'
+            '~~~\n\n'
+            '## Files\n'
+            '~~~\n'
+            f'{files_str}\n'
+            '~~~\n'
+        )
+        return output
 
     def package_metadata(self, package):
         """
