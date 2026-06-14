@@ -199,7 +199,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             project.save(update_fields=modified_fields)
 
         # 2. Create or update Config
-        from migasfree.mgi.models import Config, Flavour  # avoid circular import
+        from migasfree.mgi.models import Config  # avoid circular import
         from migasfree.mgi.serializers import ConfigSerializer  # avoid circular import
 
         config, created = Config.objects.get_or_create(
@@ -223,18 +223,7 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             config.config = dict(config.config)
             config.save()
 
-        # 3. Create default Flavour
-        _, f_created = Flavour.objects.get_or_create(
-            config=config,
-            name='Default',
-            defaults={
-                'user': 'migasfree',
-                'password': 'migasfree-password',
-                'hostname': config.project.name.lower().replace(' ', '-'),
-            },
-        )
-
-        # 4. Automatically trigger the Manager to import deployments, applications, stores and packages
+        # 3. Automatically trigger the Manager to import deployments, applications, stores and packages
         manager_import_result = None
         try:
             base_url = settings.MIGASFREE_MANAGER_URL
@@ -256,7 +245,6 @@ class ProjectViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, Ex
             {
                 'config': ConfigSerializer(config, context={'request': request}).data,
                 'config_created': created,
-                'flavour_created': f_created,
                 'manager_import': manager_import_result,
             },
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
