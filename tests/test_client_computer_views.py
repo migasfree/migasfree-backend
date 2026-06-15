@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from migasfree.client.models import Computer, Fault, FaultDefinition
-from migasfree.core.models import Platform, Project, UserProfile
+from migasfree.core.models import Attribute, Platform, Project, Property, ServerAttribute, UserProfile
 from migasfree.hardware.models import Node
 
 
@@ -142,8 +142,6 @@ class TestHardwareComputerViewSet(APITestCase):
     @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.get_claims')
     @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.create_response')
     def test_safe_cid_attribute_endpoint(self, mock_create_response, mock_get_claims):
-        from migasfree.core.models import Attribute, Property
-
         cid_prop = Property.objects.create(prefix='CID', name='COMPUTER ID', enabled=True, kind='N', sort='client')
         cid_attr = Attribute.objects.create(
             property_att=cid_prop, value=str(self.computer.pk), description=self.computer.name
@@ -168,8 +166,6 @@ class TestHardwareComputerViewSet(APITestCase):
     @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.get_claims')
     @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.create_response')
     def test_safe_assigned_attributes_endpoint(self, mock_create_response, mock_get_claims):
-        from migasfree.core.models import Attribute, Property
-
         org_prop = Property.objects.create(prefix='ORG', name='ORGANIZATION', enabled=True, kind='N', sort='client')
         org_attr = Attribute.objects.create(property_att=org_prop, value='HEADQUARTERS')
 
@@ -245,3 +241,50 @@ class TestHardwareComputerViewSet(APITestCase):
         self.assertEqual(res_data['status'], 'unknown')
         self.assertIn('error', res_data)
         mock_get.assert_called_once()
+
+    @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.get_claims')
+    @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.create_response')
+    def test_safe_tags_valid_list(self, mock_create_response, mock_get_claims):
+        tag_prop = Property.objects.create(prefix='LOC', name='Location', enabled=True, kind='N', sort='server')
+        ServerAttribute.objects.create(property_att=tag_prop, value='office1')
+        Attribute.objects.get_or_create(pk=1, defaults={'property_att': tag_prop, 'value': 'All Systems'})
+
+        mock_get_claims.return_value = {'id': self.computer.pk, 'tags': ['LOC-office1']}
+        mock_create_response.side_effect = lambda x: {'msg': x}
+
+        url = reverse('computers-tags')
+        data = {'msg': 'encrypted_jwt', 'project': self.project.name}
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('LOC-office1', [str(t) for t in self.computer.tags.all()])
+
+    @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.get_claims')
+    @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.create_response')
+    def test_safe_tags_empty_list(self, mock_create_response, mock_get_claims):
+        tag_prop = Property.objects.create(prefix='LOC', name='Location', enabled=True, kind='N', sort='server')
+        tag_attr = ServerAttribute.objects.create(property_att=tag_prop, value='office1')
+        self.computer.tags.add(tag_attr)
+        self.assertEqual(self.computer.tags.count(), 1)
+
+        mock_get_claims.return_value = {'id': self.computer.pk, 'tags': []}
+        mock_create_response.side_effect = lambda x: {'msg': x}
+
+        url = reverse('computers-tags')
+        data = {'msg': 'encrypted_jwt', 'project': self.project.name}
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.computer.tags.count(), 0)
+
+    @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.get_claims')
+    @unittest.mock.patch('migasfree.client.views.safe.computer.SafeComputerViewSet.create_response')
+    def test_safe_tags_invalid_list(self, mock_create_response, mock_get_claims):
+        mock_get_claims.return_value = {'id': self.computer.pk, 'tags': ['INVALID-tag']}
+        mock_create_response.side_effect = lambda x: {'msg': x}
+
+        url = reverse('computers-tags')
+        data = {'msg': 'encrypted_jwt', 'project': self.project.name}
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
