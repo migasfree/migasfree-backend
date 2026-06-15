@@ -23,6 +23,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from ..core.views import MigasViewSet
+from .filters import BuildFilter, ConfigFilter, FlavourFilter, ReleaseFilter
 from .models import Build, Config, Flavour, Release
 from .serializers import BuildSerializer, ConfigSerializer, FlavourSerializer, ReleaseSerializer
 
@@ -32,6 +33,10 @@ class ConfigViewSet(viewsets.ModelViewSet, MigasViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Config.objects.all()
     serializer_class = ConfigSerializer
+    filterset_class = ConfigFilter
+    search_fields = ('template_id', 'base_os')
+    ordering_fields = '__all__'
+    ordering = ('id',)
 
     def get_queryset(self):
         if self.request is None:
@@ -45,8 +50,10 @@ class FlavourViewSet(viewsets.ModelViewSet, MigasViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Flavour.objects.all()
     serializer_class = FlavourSerializer
-    filterset_fields = ('config', 'enabled', 'name')
-    search_fields = ('name', 'description')
+    filterset_class = FlavourFilter
+    search_fields = ('name', 'description', 'hostname')
+    ordering_fields = '__all__'
+    ordering = ('name',)
 
     def get_queryset(self):
         if self.request is None:
@@ -60,8 +67,10 @@ class ReleaseViewSet(viewsets.ModelViewSet, MigasViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Release.objects.all()
     serializer_class = ReleaseSerializer
-    filterset_fields = ('config', 'name')
+    filterset_class = ReleaseFilter
     search_fields = ('name', 'description')
+    ordering_fields = '__all__'
+    ordering = ('-created_at',)
 
     def get_queryset(self):
         if self.request is None:
@@ -101,7 +110,10 @@ class BuildViewSet(viewsets.ModelViewSet, MigasViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Build.objects.all()
     serializer_class = BuildSerializer
-    filterset_fields = ('release', 'flavour', 'status')
+    filterset_class = BuildFilter
+    search_fields = ('task_id',)
+    ordering_fields = '__all__'
+    ordering = ('-id',)
 
     def get_queryset(self):
         if self.request is None:

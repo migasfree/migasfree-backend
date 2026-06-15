@@ -390,3 +390,118 @@ class TestMgiViewsScoping(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json().get('results', response.json())
         self.assertEqual(len(results), 2)
+
+
+class TestMgiViewsFilters(APITestCase):
+    def setUp(self):
+        self.user = UserProfile.objects.create(
+            username='filter_user', email='filter@test.com', password='test', is_superuser=True
+        )
+        self.client.force_authenticate(user=self.user)
+
+        self.platform = Platform.objects.create(name='debian')
+        self.project_1 = Project.objects.create(
+            name='Project 1',
+            pms='apt',
+            architecture='amd64',
+            platform=self.platform,
+        )
+        self.project_2 = Project.objects.create(
+            name='Project 2',
+            pms='apt',
+            architecture='amd64',
+            platform=self.platform,
+        )
+
+        self.config_1 = Config.objects.create(
+            project=self.project_1,
+            template_id='debian-12-desktop',
+            build_type='docker',
+            base_os='debian',
+            image_format='raw',
+        )
+        self.config_2 = Config.objects.create(
+            project=self.project_2,
+            template_id='ubuntu-24.04-server',
+            build_type='qemu_lnx',
+            base_os='ubuntu',
+            image_format='squashfs',
+        )
+
+        self.flavour_1 = Flavour.objects.create(
+            config=self.config_1,
+            name='Minimal',
+            description='Minimal installation',
+            hostname='minimal-host',
+            enabled=True,
+        )
+        self.flavour_2 = Flavour.objects.create(
+            config=self.config_2,
+            name='Desktop',
+            description='Desktop installation',
+            hostname='desktop-host',
+            enabled=False,
+        )
+
+        self.release_1 = Release.objects.create(config=self.config_1, name='v1.0', description='First release')
+        self.release_2 = Release.objects.create(config=self.config_2, name='v2.0', description='Second release')
+
+        self.build_1 = Build.objects.create(
+            release=self.release_1, flavour=self.flavour_1, status='queued', task_id='task-123'
+        )
+        self.build_2 = Build.objects.create(
+            release=self.release_2, flavour=self.flavour_2, status='completed', task_id='task-456'
+        )
+
+    def test_config_filters(self):
+        # Filter by build_type
+        response = self.client.get('/api/v1/token/mgi/config/', {'build_type': 'docker'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.json().get('results', response.json())
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], self.config_1.id)
+
+        # Filter by image_format
+        response = self.client.get('/api/v1/token/mgi/config/', {'image_format': 'squashfs'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.json().get('results', response.json())
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], self.config_2.id)
+
+        # Search by template_id
+        response = self.client.get('/api/v1/token/mgi/config/', {'search': 'ubuntu'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.json().get('results', response.json())
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], self.config_2.id)
+
+    def test_flavour_filters(self):
+        # Filter by enabled
+        response = self.client.get('/api/v1/token/mgi/flavour/', {'enabled': 'true'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.json().get('results', response.json())
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], self.flavour_1.id)
+
+        # Search by description
+        response = self.client.get('/api/v1/token/mgi/flavour/', {'search': 'Desktop'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.json().get('results', response.json())
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], self.flavour_2.id)
+
+    def test_release_filters(self):
+        # Filter by name
+        response = self.client.get('/api/v1/token/mgi/release/', {'name': 'v1.0'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.json().get('results', response.json())
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], self.release_1.id)
+
+    def test_build_filters(self):
+        # Filter by status
+        response = self.client.get('/api/v1/token/mgi/build/', {'status': 'completed'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.json().get('results', response.json())
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], self.build_2.id)
