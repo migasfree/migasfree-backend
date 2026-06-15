@@ -1,8 +1,79 @@
+# Copyright (c) 2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2026 Alberto Gacías <alberto@migasfree.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from ..core.models import MigasLink, Project, ServerAttribute
+
+
+class ConfigManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related('project')
+
+    def scope(self, user):
+        qs = self.get_queryset()
+        if user and not user.is_view_all():
+            qs = qs.filter(project__in=user.get_projects())
+        return qs
+
+
+class FlavourManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related('config', 'config__project')
+
+    def scope(self, user):
+        qs = self.get_queryset()
+        if user and not user.is_view_all():
+            qs = qs.filter(config__project__in=user.get_projects())
+        return qs
+
+
+class ReleaseManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related('config', 'config__project')
+
+    def scope(self, user):
+        qs = self.get_queryset()
+        if user and not user.is_view_all():
+            qs = qs.filter(config__project__in=user.get_projects())
+        return qs
+
+
+class BuildManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                'release',
+                'release__config',
+                'release__config__project',
+                'flavour',
+                'flavour__config',
+                'flavour__config__project',
+            )
+        )
+
+    def scope(self, user):
+        qs = self.get_queryset()
+        if user and not user.is_view_all():
+            qs = qs.filter(release__config__project__in=user.get_projects())
+        return qs
 
 
 class Config(models.Model, MigasLink):
@@ -66,6 +137,8 @@ class Config(models.Model, MigasLink):
         verbose_name=_('Extended Configuration'),
         db_comment='polymorphic storage for build-engine specific parameters',
     )
+
+    objects = ConfigManager()
 
     class Meta:
         app_label = 'mgi'
@@ -187,6 +260,8 @@ class Flavour(models.Model, MigasLink):
         db_comment='hostname assigned to the built system',
     )
 
+    objects = FlavourManager()
+
     class Meta:
         app_label = 'mgi'
         verbose_name = _('Flavour')
@@ -220,6 +295,8 @@ class Release(models.Model, MigasLink):
         verbose_name=_('Created At'),
         db_comment='timestamp when the release was registered',
     )
+
+    objects = ReleaseManager()
 
     class Meta:
         app_label = 'mgi'
@@ -294,6 +371,8 @@ class Build(models.Model, MigasLink):
         verbose_name=_('Log'),
         db_comment='stdout and stderr compilation logs from the build task',
     )
+
+    objects = BuildManager()
 
     class Meta:
         app_label = 'mgi'

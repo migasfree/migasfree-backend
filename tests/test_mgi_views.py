@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from migasfree.core.models import Platform, Project, UserProfile
+from migasfree.mgi.models import Build, Config, Flavour, Release
 
 
 @override_settings(
@@ -309,3 +310,83 @@ class TestProjectTemplateImportList(APITestCase):
         self.assertEqual(project.pms, 'apt')
         self.assertEqual(project.architecture, 'amd64')
         self.assertTrue(project.auto_register_computers)
+
+
+class TestMgiViewsScoping(APITestCase):
+    def setUp(self):
+        self.scoped_user = UserProfile.objects.create(
+            username='scoped_user', email='scoped@test.com', password='test', is_superuser=False
+        )
+        self.client.force_authenticate(user=self.scoped_user)
+
+        self.platform = Platform.objects.create(name='debian')
+
+        # Create two projects
+        self.project_1 = Project.objects.create(
+            name='Project 1',
+            pms='apt',
+            architecture='amd64',
+            platform=self.platform,
+        )
+        self.project_2 = Project.objects.create(
+            name='Project 2',
+            pms='apt',
+            architecture='amd64',
+            platform=self.platform,
+        )
+
+        # Create Configs
+        self.config_1 = Config.objects.create(project=self.project_1, build_type='docker', image_format='raw')
+        self.config_2 = Config.objects.create(project=self.project_2, build_type='docker', image_format='raw')
+
+        # Create Flavours
+        self.flavour_1 = Flavour.objects.create(config=self.config_1, name='flavour_1')
+        self.flavour_2 = Flavour.objects.create(config=self.config_2, name='flavour_2')
+
+        # Create Releases
+        self.release_1 = Release.objects.create(config=self.config_1, name='release_1')
+        self.release_2 = Release.objects.create(config=self.config_2, name='release_2')
+
+        # Create Builds
+        self.build_1 = Build.objects.create(release=self.release_1, flavour=self.flavour_1, status='success')
+        self.build_2 = Build.objects.create(release=self.release_2, flavour=self.flavour_2, status='success')
+
+    @patch.object(UserProfile, 'is_view_all', return_value=False)
+    def test_mgi_views_scoping(self, mock_is_view_all):
+        # We mock get_projects to only return project_1.id
+        with patch.object(UserProfile, 'get_projects', return_value=[self.project_1.id]):
+            # Test Config viewset
+            response = self.client.get('/api/v1/token/mgi/config/')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            results = response.json().get('results', response.json())
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0]['id'], self.config_1.id)
+
+            # Test Flavour viewset
+            response = self.client.get('/api/v1/token/mgi/flavour/')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            results = response.json().get('results', response.json())
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0]['id'], self.flavour_1.id)
+
+            # Test Release viewset
+            response = self.client.get('/api/v1/token/mgi/release/')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            results = response.json().get('results', response.json())
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0]['id'], self.release_1.id)
+
+            # Test Build viewset
+            response = self.client.get('/api/v1/token/mgi/build/')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            results = response.json().get('results', response.json())
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0]['id'], self.build_1.id)
+
+    @patch.object(UserProfile, 'is_view_all', return_value=True)
+    def test_mgi_views_view_all(self, mock_is_view_all):
+        # When user has is_view_all = True, they should see all records
+        response = self.client.get('/api/v1/token/mgi/config/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.json().get('results', response.json())
+        self.assertEqual(len(results), 2)

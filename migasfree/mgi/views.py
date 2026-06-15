@@ -1,3 +1,19 @@
+# Copyright (c) 2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2026 Alberto Gacías <alberto@migasfree.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 import requests
 from django.conf import settings
 from drf_spectacular.utils import extend_schema
@@ -17,6 +33,12 @@ class ConfigViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = Config.objects.all()
     serializer_class = ConfigSerializer
 
+    def get_queryset(self):
+        if self.request is None:
+            return Config.objects.none()
+
+        return Config.objects.scope(self.request.user.userprofile)
+
 
 @extend_schema(tags=['mgi'])
 class FlavourViewSet(viewsets.ModelViewSet, MigasViewSet):
@@ -26,6 +48,12 @@ class FlavourViewSet(viewsets.ModelViewSet, MigasViewSet):
     filterset_fields = ('config', 'enabled', 'name')
     search_fields = ('name', 'description')
 
+    def get_queryset(self):
+        if self.request is None:
+            return Flavour.objects.none()
+
+        return Flavour.objects.scope(self.request.user.userprofile)
+
 
 @extend_schema(tags=['mgi'])
 class ReleaseViewSet(viewsets.ModelViewSet, MigasViewSet):
@@ -34,6 +62,12 @@ class ReleaseViewSet(viewsets.ModelViewSet, MigasViewSet):
     serializer_class = ReleaseSerializer
     filterset_fields = ('config', 'name')
     search_fields = ('name', 'description')
+
+    def get_queryset(self):
+        if self.request is None:
+            return Release.objects.none()
+
+        return Release.objects.scope(self.request.user.userprofile)
 
     @action(detail=True, methods=['post'], url_path='build')
     def build(self, request, pk=None):
@@ -68,6 +102,12 @@ class BuildViewSet(viewsets.ModelViewSet, MigasViewSet):
     queryset = Build.objects.all()
     serializer_class = BuildSerializer
     filterset_fields = ('release', 'flavour', 'status')
+
+    def get_queryset(self):
+        if self.request is None:
+            return Build.objects.none()
+
+        return Build.objects.scope(self.request.user.userprofile)
 
     @action(detail=True, methods=['get'], url_path='status')
     def status(self, request, pk=None):
