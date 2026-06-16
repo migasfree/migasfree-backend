@@ -193,7 +193,7 @@ class ComputerViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet, E
         """
         Input: {
             'status': 'available' | 'reserved' | 'unsubscribed'
-                | 'unknown' | 'intended'
+                | 'unknown' | 'assigned'
         }
         Changes computer status
         """

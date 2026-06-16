@@ -352,7 +352,7 @@ class ComputerStatsViewSet(viewsets.ViewSet):
                             {'name': 'Unproductive', 'value': 90, 'status_in': 'in repair,available'},
                         ],
                         'outer': [
-                            {'name': 'Intended', 'value': 120, 'status_in': 'intended'},
+                            {'name': 'Assigned', 'value': 120, 'status_in': 'assigned'},
                             {'name': 'Reserved', 'value': 60, 'status_in': 'reserved'},
                             {'name': 'Unknown', 'value': 30, 'status_in': 'unknown'},
                             {'name': 'Available', 'value': 70, 'status_in': 'available'},
@@ -390,12 +390,12 @@ class ComputerStatsViewSet(viewsets.ViewSet):
             }
 
         count_productive = (
-            values.get('intended', {}).get('value', 0)
+            values.get('assigned', {}).get('value', 0)
             + values.get('reserved', {}).get('value', 0)
             + values.get('unknown', {}).get('value', 0)
         )
-        if 'intended' in values:
-            data['outer'].append(values['intended'])
+        if 'assigned' in values:
+            data['outer'].append(values['assigned'])
         if 'reserved' in values:
             data['outer'].append(values['reserved'])
         if 'unknown' in values:

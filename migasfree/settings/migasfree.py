@@ -1,5 +1,5 @@
-# Copyright (c) 2015-2024 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2015-2024 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -107,8 +107,8 @@ MIGASFREE_PACKAGER_PUB_KEY = 'migasfree-packager.pub'
 MIGASFREE_PACKAGER_PRI_KEY = 'migasfree-packager.pri'
 
 # Default Computer Status
-# Values: 'intended', 'reserved', 'unknown', 'in repair', 'available' or 'unsubscribed'
-MIGASFREE_DEFAULT_COMPUTER_STATUS = 'intended'
+# Values: 'assigned', 'reserved', 'unknown', 'in repair', 'available' or 'unsubscribed'
+MIGASFREE_DEFAULT_COMPUTER_STATUS = 'assigned'
 
 # Remote Access Tunnel settings
 MIGASFREE_MANAGER_URL = os.getenv('MIGASFREE_MANAGER_URL', 'http://manager:8080')

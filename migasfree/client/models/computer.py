@@ -134,7 +134,7 @@ class ComputerManager(DomainComputerManager):
 
 class Computer(models.Model, MigasLink):
     STATUS_CHOICES = (
-        ('intended', _('Intended')),
+        ('assigned', _('Assigned')),
         ('reserved', _('Reserved')),
         ('unknown', _('Unknown')),
         ('in repair', _('In repair')),
@@ -142,7 +142,7 @@ class Computer(models.Model, MigasLink):
         ('unsubscribed', _('Unsubscribed')),
     )
 
-    PRODUCTIVE_STATUS = ['intended', 'reserved', 'unknown']
+    PRODUCTIVE_STATUS = ['assigned', 'reserved', 'unknown']
     UNPRODUCTIVE_STATUS = ['in repair', 'available']
     ACTIVE_STATUS = [*PRODUCTIVE_STATUS, 'in repair']
     SUBSCRIBED_STATUS = PRODUCTIVE_STATUS + UNPRODUCTIVE_STATUS
@@ -175,7 +175,7 @@ class Computer(models.Model, MigasLink):
         null=False,
         choices=STATUS_CHOICES,
         default=settings.MIGASFREE_DEFAULT_COMPUTER_STATUS,
-        db_comment='computer status: intended, reserved, unknown, in repair, available or unsubscribed',
+        db_comment='computer status: assigned, reserved, unknown, in repair, available or unsubscribed',
     )
 
     name = models.CharField(

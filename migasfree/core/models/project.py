@@ -43,14 +43,13 @@ class DomainProjectManager(models.Manager):
 
 
 class ProjectManager(DomainProjectManager):
-    def create(self, name, pms, architecture, platform, auto_register_computers=False, base_os=None):
+    def create(self, name, pms, architecture, platform, auto_register_computers=False):
         obj = Project()
         obj.name = name
         obj.pms = pms
         obj.architecture = architecture
         obj.platform = platform
         obj.auto_register_computers = auto_register_computers
-        obj.base_os = base_os
         obj.save()
 
         return obj
@@ -116,14 +115,6 @@ class Project(models.Model, MigasLink):
         default=False,
         help_text=_('Is not needed a user for register computers in database and get the keys.'),
         db_comment='if true, it allows you to register the computer from a client automatically',
-    )
-
-    base_os = models.CharField(
-        verbose_name=_('base operating system'),
-        max_length=50,
-        null=True,
-        blank=True,
-        db_comment='specifies the base operating system your project is based on',
     )
 
     platform = models.ForeignKey(

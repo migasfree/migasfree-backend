@@ -68,7 +68,7 @@ class UserProfile(UserSystem, MigasLink):
         ctx = {
             'domain': self.domain_preference_id,
             'scope': self.scope_preference_id,
-            'status': "('intended', 'reserved', 'unknown')",
+            'status': "('assigned', 'reserved', 'unknown')",
         }
 
         if self.domain_preference:

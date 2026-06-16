@@ -49,7 +49,7 @@ class TestDeviceOptimization(APITestCase):
         self.platform = Platform.objects.create(name='Linux')
         self.project = Project(name='PROJ-TEST', pms='apt', architecture='x86_64', platform=self.platform)
         self.project.save()
-        self.computer = Computer(name='PC-TEST', project=self.project, uuid='test-uuid', status='intended')
+        self.computer = Computer(name='PC-TEST', project=self.project, uuid='test-uuid', status='assigned')
         self.computer.save()
         self.prop = Property(name='PROP-TEST', prefix='999')
         self.prop.save()

@@ -18,7 +18,7 @@ def generate_test_data():
     test_sync_user_id = random.randint(1, 100)
     test_sync_user_name = f'User {random.randint(1, 100)}'
     test_computer_name = f'Computer {random.randint(1, 100)}'
-    test_computer_status = 'intended'
+    test_computer_status = 'assigned'
     test_computer_summary = f'Summary {random.randint(1, 100)}'
     test_msg = f'Proof message {random.randint(1, 100)}'
 
@@ -70,7 +70,7 @@ class TestMessageViewSet(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('results', response.json())
 
-        response = self.client.get(url, {'computer__status__in': 'intended'})
+        response = self.client.get(url, {'computer__status__in': 'assigned'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         print(response.data)
         self.assertIn('results', response.json())

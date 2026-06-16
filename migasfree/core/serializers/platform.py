@@ -49,7 +49,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ('id', 'name', 'slug', 'pms', 'architecture', 'auto_register_computers', 'base_os', 'platform')
+        fields = ('id', 'name', 'slug', 'pms', 'architecture', 'auto_register_computers', 'platform')
 
 
 class ProjectWriteSerializer(serializers.ModelSerializer):
@@ -66,4 +66,4 @@ class ProjectWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ('id', 'name', 'pms', 'architecture', 'auto_register_computers', 'base_os', 'platform')
+        fields = ('id', 'name', 'pms', 'architecture', 'auto_register_computers', 'platform')
