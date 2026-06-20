@@ -65,7 +65,7 @@ cryptography==46.0.7
     #   pyjwt
     #   pyopenssl
     #   service-identity
-daphne==4.2.1
+daphne==4.2.2
     # via migasfree-backend (pyproject.toml)
 debugpy==1.8.20
     # via pytest-celery
@@ -101,7 +101,7 @@ django==5.2.14
     #   social-auth-app-django
 django-cors-headers==4.9.0
     # via migasfree-backend (pyproject.toml)
-django-debug-toolbar==6.3.0
+django-debug-toolbar==7.0.0
     # via migasfree-backend (pyproject.toml)
 django-extensions==4.1
     # via migasfree-backend (pyproject.toml)
@@ -113,7 +113,7 @@ django-markdownx==4.0.11
     # via migasfree-backend (pyproject.toml)
 django-partial-content==0.9.4
     # via migasfree-backend (pyproject.toml)
-django-redis==6.0.0
+django-redis==7.0.0
     # via migasfree-backend (pyproject.toml)
 django-silk==5.5.0
     # via migasfree-backend (pyproject.toml)
@@ -134,11 +134,11 @@ docker==7.1.0
     # via
     #   pytest-celery
     #   pytest-docker-tools
-docutils==0.22.4
+docutils==0.23
     # via migasfree-backend (pyproject.toml)
 drf-spectacular==0.29.0
     # via migasfree-backend (pyproject.toml)
-drf-spectacular-sidecar==2026.5.1
+drf-spectacular-sidecar==2026.6.1
     # via migasfree-backend (pyproject.toml)
 et-xmlfile==2.0.0
     # via openpyxl
@@ -240,7 +240,7 @@ pyparsing==3.3.2
     # via
     #   migasfree-backend (pyproject.toml)
     #   pydot
-pytest==9.0.3
+pytest==9.1.1
     # via
     #   migasfree-backend (pyproject.toml)
     #   pytest-cov
@@ -288,7 +288,7 @@ rpds-py==0.30.0
     # via
     #   jsonschema
     #   referencing
-ruff==0.15.14
+ruff==0.15.18
     # via migasfree-backend (pyproject.toml)
 service-identity==24.2.0
     # via twisted
@@ -338,6 +338,8 @@ vine==5.1.0
     #   kombu
 wcwidth==0.6.0
     # via prompt-toolkit
+websockets==16.0
+    # via migasfree-backend (pyproject.toml)
 xlrd==2.0.2
     # via migasfree-backend (pyproject.toml)
 xlwt==1.3.0

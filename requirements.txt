@@ -61,7 +61,7 @@ cryptography==46.0.7
     #   pyjwt
     #   pyopenssl
     #   service-identity
-daphne==4.2.1
+daphne==4.2.2
     # via migasfree-backend (pyproject.toml)
 defusedxml==0.7.1
     # via
@@ -100,7 +100,7 @@ django-markdownx==4.0.11
     # via migasfree-backend (pyproject.toml)
 django-partial-content==0.9.4
     # via migasfree-backend (pyproject.toml)
-django-redis==6.0.0
+django-redis==7.0.0
     # via migasfree-backend (pyproject.toml)
 djangorestframework==3.17.1
     # via
@@ -115,11 +115,11 @@ djangorestframework-simplejwt==5.5.1
     #   migasfree-backend (pyproject.toml)
 djoser==2.3.3
     # via migasfree-backend (pyproject.toml)
-docutils==0.22.4
+docutils==0.23
     # via migasfree-backend (pyproject.toml)
 drf-spectacular==0.29.0
     # via migasfree-backend (pyproject.toml)
-drf-spectacular-sidecar==2026.5.1
+drf-spectacular-sidecar==2026.6.1
     # via migasfree-backend (pyproject.toml)
 et-xmlfile==2.0.0
     # via openpyxl
