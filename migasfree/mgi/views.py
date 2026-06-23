@@ -14,8 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import requests
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -179,20 +182,22 @@ class BuildViewSet(viewsets.ModelViewSet, MigasViewSet):
                 {'error': f'Could not connect to manager: {e!s}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    @action(detail=True, methods=['post'], url_path='promote')
-    def promote(self, request, pk=None):
-        """Promote an MGI build image, enabling it in the catalog."""
+    @action(detail=True, methods=['post'], url_path='publish')
+    def publish(self, request, pk=None):
+        """Publish an MGI build image, enabling it in the catalog."""
         build = self.get_object()
 
         try:
             base_url = settings.MIGASFREE_MANAGER_URL
-            url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/builds/{build.id}/promote'
+            url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/builds/{build.id}/publish'
             headers = {}
             if request.auth:
                 headers['Authorization'] = f'Bearer {request.auth}'
             response = requests.post(url, headers=headers, timeout=15.0)
 
             if response.ok:
+                build.published = True
+                build.save(update_fields=['published'])
                 return Response(response.json(), status=status.HTTP_200_OK)
             else:
                 return Response(
@@ -204,20 +209,22 @@ class BuildViewSet(viewsets.ModelViewSet, MigasViewSet):
                 {'error': f'Could not connect to manager: {e!s}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    @action(detail=True, methods=['post'], url_path='demote')
-    def demote(self, request, pk=None):
-        """Demote an MGI build image, disabling it in the catalog."""
+    @action(detail=True, methods=['post'], url_path='unpublish')
+    def unpublish(self, request, pk=None):
+        """Unpublish an MGI build image, disabling it in the catalog."""
         build = self.get_object()
 
         try:
             base_url = settings.MIGASFREE_MANAGER_URL
-            url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/builds/{build.id}/demote'
+            url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/builds/{build.id}/unpublish'
             headers = {}
             if request.auth:
                 headers['Authorization'] = f'Bearer {request.auth}'
             response = requests.post(url, headers=headers, timeout=15.0)
 
             if response.ok:
+                build.published = False
+                build.save(update_fields=['published'])
                 return Response(response.json(), status=status.HTTP_200_OK)
             else:
                 return Response(
@@ -228,3 +235,25 @@ class BuildViewSet(viewsets.ModelViewSet, MigasViewSet):
             return Response(
                 {'error': f'Could not connect to manager: {e!s}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+    def destroy(self, request, *args, **kwargs):
+        """Delete MGI build, triggering cleanup of directories and catalogs in the manager."""
+        build = self.get_object()
+
+        try:
+            base_url = settings.MIGASFREE_MANAGER_URL
+            url = f'{base_url.rstrip("/")}/manager/v1/internal/mgi/builds/{build.id}'
+            headers = {}
+            if request.auth:
+                headers['Authorization'] = f'Bearer {request.auth}'
+
+            response = requests.delete(url, headers=headers, timeout=15.0)
+            if not response.ok:
+                logger.warning(
+                    f'Manager deletion failed for build {build.id}. '
+                    f'Status: {response.status_code}, Detail: {response.text}'
+                )
+        except Exception as e:
+            logger.warning(f'Could not connect to manager for build deletion: {e}')
+
+        return super().destroy(request, *args, **kwargs)

@@ -505,3 +505,71 @@ class TestMgiViewsFilters(APITestCase):
         results = response.json().get('results', response.json())
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['id'], self.build_2.id)
+
+
+@override_settings(
+    CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}},
+    SESSION_ENGINE='django.contrib.sessions.backends.db',
+)
+class TestMgiViewsPublish(APITestCase):
+    def setUp(self):
+        self.user = UserProfile.objects.create(
+            username='publish_user', email='pub@test.com', password='test', is_superuser=True
+        )
+        self.client.force_authenticate(user=self.user)
+        self.platform = Platform.objects.create(name='debian')
+        self.project = Project.objects.create(
+            name='Project 1',
+            pms='apt',
+            architecture='amd64',
+            platform=self.platform,
+        )
+        self.config = Config.objects.create(project=self.project, build_type='docker', image_format='raw')
+        self.flavour = Flavour.objects.create(config=self.config, name='Minimal')
+        self.release = Release.objects.create(config=self.config, name='v1.0')
+        self.build = Build.objects.create(
+            release=self.release, flavour=self.flavour, status='completed', task_id='task-123'
+        )
+
+    @patch('requests.post')
+    def test_publish_success(self, mock_post):
+        mock_response = mock_post.return_value
+        mock_response.ok = True
+        mock_response.status_code = status.HTTP_200_OK
+        mock_response.json.return_value = {'status': 'success'}
+
+        url = f'/api/v1/token/mgi/build/{self.build.id}/publish/'
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.build.refresh_from_db()
+        self.assertTrue(self.build.published)
+
+    @patch('requests.post')
+    def test_unpublish_success(self, mock_post):
+        self.build.published = True
+        self.build.save()
+
+        mock_response = mock_post.return_value
+        mock_response.ok = True
+        mock_response.status_code = status.HTTP_200_OK
+        mock_response.json.return_value = {'status': 'success'}
+
+        url = f'/api/v1/token/mgi/build/{self.build.id}/unpublish/'
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.build.refresh_from_db()
+        self.assertFalse(self.build.published)
+
+    @patch('requests.delete')
+    def test_destroy_success(self, mock_delete):
+        mock_response = mock_delete.return_value
+        mock_response.ok = True
+        mock_response.status_code = status.HTTP_200_OK
+
+        url = f'/api/v1/token/mgi/build/{self.build.id}/'
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Build.objects.filter(id=self.build.id).exists())
