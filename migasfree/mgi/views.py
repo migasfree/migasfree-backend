@@ -15,10 +15,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+
 import requests
 from django.conf import settings
-
-logger = logging.getLogger(__name__)
 from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -29,6 +28,8 @@ from ..core.views import MigasViewSet
 from .filters import BuildFilter, ConfigFilter, FlavourFilter, ReleaseFilter
 from .models import Build, Config, Flavour, Release
 from .serializers import BuildSerializer, ConfigSerializer, FlavourSerializer, ReleaseSerializer
+
+logger = logging.getLogger(__name__)
 
 
 @extend_schema(tags=['mgi'])
