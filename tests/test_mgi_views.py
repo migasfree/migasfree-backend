@@ -573,3 +573,41 @@ class TestMgiViewsPublish(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Build.objects.filter(id=self.build.id).exists())
+
+
+class TestMgiSerializersStrField(APITestCase):
+    def setUp(self):
+        self.user = UserProfile.objects.create(
+            username='str_user', email='str@test.com', password='test', is_superuser=True
+        )
+        self.client.force_authenticate(user=self.user)
+        self.platform = Platform.objects.create(name='debian')
+        self.project = Project.objects.create(
+            name='Project Str',
+            pms='apt',
+            architecture='amd64',
+            platform=self.platform,
+        )
+        self.config = Config.objects.create(
+            project=self.project, template_id='debian-12-desktop', build_type='docker', image_format='raw'
+        )
+        self.flavour = Flavour.objects.create(config=self.config, name='Minimal')
+        self.release = Release.objects.create(config=self.config, name='v1.0')
+        self.build = Build.objects.create(
+            release=self.release, flavour=self.flavour, status='completed', task_id='task-123'
+        )
+
+    def test_flavour_serializer_includes_str(self):
+        response = self.client.get(f'/api/v1/token/mgi/flavour/{self.flavour.id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['__str__'], str(self.flavour))
+
+    def test_release_serializer_includes_str(self):
+        response = self.client.get(f'/api/v1/token/mgi/release/{self.release.id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['__str__'], str(self.release))
+
+    def test_build_serializer_includes_str(self):
+        response = self.client.get(f'/api/v1/token/mgi/build/{self.build.id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['__str__'], str(self.build))

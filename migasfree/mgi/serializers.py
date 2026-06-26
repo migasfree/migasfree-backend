@@ -27,6 +27,7 @@ class ConfigSerializer(serializers.ModelSerializer):
         model = Config
         fields = (
             'id',
+            '__str__',
             'project',
             'template_id',
             'build_type',
@@ -37,7 +38,7 @@ class ConfigSerializer(serializers.ModelSerializer):
             'config',
             'dockerfile',
         )
-        read_only_fields = ('id',)
+        read_only_fields = ('id', '__str__')
 
 
 class FlavourSerializer(serializers.ModelSerializer):
@@ -52,18 +53,55 @@ class FlavourSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Flavour
-        fields = '__all__'
+        fields = (
+            'id',
+            '__str__',
+            'config',
+            'name',
+            'description',
+            'tags',
+            'enabled',
+            'user',
+            'password',
+            'keymap',
+            'keyboard_model',
+            'charmap',
+            'codeset',
+            'timezone',
+            'hostname',
+        )
+        read_only_fields = ('id', '__str__')
 
 
 class ReleaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Release
-        fields = '__all__'
-        read_only_fields = ('created_at',)
+        fields = (
+            'id',
+            '__str__',
+            'config',
+            'name',
+            'description',
+            'created_at',
+        )
+        read_only_fields = ('id', '__str__', 'created_at')
 
 
 class BuildSerializer(serializers.ModelSerializer):
     class Meta:
         model = Build
-        fields = '__all__'
-        read_only_fields = ('published',)
+        fields = (
+            'id',
+            '__str__',
+            'release',
+            'flavour',
+            'task_id',
+            'status',
+            'started_at',
+            'finished_at',
+            'uri',
+            'size',
+            'log',
+            'published',
+        )
+        read_only_fields = ('id', '__str__', 'published')

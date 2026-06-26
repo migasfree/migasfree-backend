@@ -182,7 +182,7 @@ class Config(models.Model, MigasLink):
                 raise ValidationError({'config': _('disk_size_gb must be a number and at least 20 GB.')})
 
     def __str__(self):
-        return f'MGI Config for {self.project.name}'
+        return f'{self.project.name} ({self.template_id})'
 
 
 class Flavour(models.Model, MigasLink):
@@ -269,7 +269,7 @@ class Flavour(models.Model, MigasLink):
         db_table_comment = 'defines specific system environments or variants (flavours) with customized hostnames, credentials, timezones, and packages'
 
     def __str__(self):
-        return f'{self.config.project.name} - {self.name}'
+        return f'{self.config.project.name} {self.name}'
 
 
 class Release(models.Model, MigasLink):
@@ -305,7 +305,7 @@ class Release(models.Model, MigasLink):
         db_table_comment = 'represents a versioned build release of a specific MGI configuration'
 
     def __str__(self):
-        return f'{self.config.project.name} - {self.name}'
+        return f'{self.config.project.name} {self.name}'
 
 
 class Build(models.Model, MigasLink):
@@ -386,4 +386,4 @@ class Build(models.Model, MigasLink):
         db_table_comment = 'tracks individual build tasks of a release and flavour, including status, compilation logs, image size and download URL'
 
     def __str__(self):
-        return f'Build {self.release.name} ({self.flavour.name}) - {self.status}'
+        return f'{self.release.config.project.name} {self.release.name} {self.flavour.name}'
