@@ -81,7 +81,7 @@ class MgiStatsViewSet(viewsets.ViewSet):
 
         return Response(
             {
-                'title': _('MGI Configurations / Build Type'),
+                'title': _('Configurations / Build Type'),
                 'total': total,
                 'inner': inner,
                 'outer': outer,
@@ -134,7 +134,7 @@ class MgiStatsViewSet(viewsets.ViewSet):
 
         return Response(
             {
-                'title': _('MGI Builds / Status'),
+                'title': _('Builds / Status'),
                 'total': total,
                 'inner': inner,
                 'outer': outer,
@@ -313,7 +313,7 @@ class MgiStatsViewSet(viewsets.ViewSet):
 
         return Response(
             {
-                'title': _('MGI Flavours / Enabled'),
+                'title': _('Flavours / Enabled'),
                 'total': total,
                 'inner': inner,
                 'outer': outer,
