@@ -24,7 +24,7 @@ from rest_framework.response import Response
 
 from ....mixins import DatabaseCheckMixin
 from ...filters import DeploymentFilter
-from ...models import Deployment, ExternalSource, InternalSource
+from ...models import Deployment, ExternalSource, InternalSource, Project
 from ...pms import tasks
 from ...serializers import (
     DeploymentListSerializer,
@@ -35,6 +35,7 @@ from ...serializers import (
     InternalSourceSerializer,
     InternalSourceWriteSerializer,
 )
+from ...services.deployment_copy import DeploymentCopyService
 from .base import ExportViewSet, MigasViewSet
 
 
@@ -160,6 +161,59 @@ class InternalSourceViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasView
         serializer = DeploymentSerializer(Deployment.objects.filter(pk__in=result), many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['post'], detail=True, url_path='copy')
+    def copy(self, request, pk=None):
+        """
+        Copy an internal deployment to another project.
+
+        Request body:
+            { "project": <int: target_project_id> }
+
+        Response (200) when created::
+
+            {
+              "created": true,
+              "deployment_id": 42,
+              "deployment_name": "my-deployment",
+              "copied_packages": 5,
+              "copied_package_sets": 2
+            }
+
+        Response (200) when name collision::
+
+            {
+              "created": false,
+              "skipped_name": "my-deployment",
+              "copied_packages": 0,
+              "copied_package_sets": 0
+            }
+        """
+        deploy = self.get_object()
+
+        project_id = request.data.get('project')
+        if not project_id:
+            return Response(
+                {'detail': gettext('Target project is required')},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            target_project = Project.objects.get(pk=project_id)
+        except Project.DoesNotExist:
+            return Response(
+                {'detail': gettext('Target project not found')},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if target_project.id == deploy.project_id:
+            return Response(
+                {'detail': gettext('Source and target project must be different')},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        result = DeploymentCopyService(deploy, target_project).copy()
+        return Response(result, status=status.HTTP_200_OK)
 
 
 @extend_schema(tags=['deployments'])
