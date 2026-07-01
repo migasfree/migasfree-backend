@@ -35,6 +35,7 @@ from ...serializers import (
     PackageSetSerializer,
     PackageSetWriteSerializer,
 )
+from ...services.package_set_copy import PackageSetCopyService
 from .base import ExportViewSet, MigasViewSet
 
 
@@ -281,3 +282,37 @@ class PackageSetViewSet(DatabaseCheckMixin, viewsets.ModelViewSet, MigasViewSet,
             request.data.setlist('packages', packages)
 
         return super().partial_update(request, *args, **kwargs)
+
+    @action(methods=['post'], detail=True)
+    def copy(self, request, pk=None):
+        """
+        Copies this PackageSet (and its packages) to a target project.
+
+        Request body: { "project": <project_id> }
+        Returns: operation result dict with created/skipped information.
+        """
+        pset = self.get_object()
+        project_id = request.data.get('project')
+
+        if not project_id:
+            return Response(
+                {'detail': gettext('"project" field is required.')},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if pset.project_id == int(project_id):
+            return Response(
+                {'detail': gettext('Source and destination project must be different.')},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            target = Project.objects.get(pk=project_id)
+        except Project.DoesNotExist:
+            return Response(
+                {'detail': gettext('Target project not found.')},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        result = PackageSetCopyService(pset, target).copy()
+        return Response(result, status=status.HTTP_200_OK)
